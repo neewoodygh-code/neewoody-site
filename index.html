@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- ═══ SEO META ═══ -->
-  <title>Neewoody Custom Woodwork | Custom Wardrobes, Beds & Kitchens in Accra, Ghana</title>
-  <meta name="description" content="Neewoody Custom Woodwork builds made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana. Quality craftsmanship, built to fit your space perfectly." />
-  <meta name="keywords" content="custom wardrobes Accra, custom furniture Ghana, kitchen cabinets Accra, custom beds Accra, bespoke furniture Accra, wardrobes Ghana" />
+  <title>Custom Wardrobes, Beds &amp; Kitchens in Accra | Neewoody Custom Woodwork</title>
+  <meta name="description" content="Neewoody Custom Woodwork designs and builds custom wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra. Made-to-measure furniture crafted for your space." />
+  <meta name="keywords" content="custom wardrobes Accra, built-in wardrobes Ghana, custom beds Accra, kitchen cabinets Accra, bespoke furniture Accra, made-to-measure furniture Ghana, carpentry services Accra" />
   <link rel="canonical" href="https://neewoodygh.com/" />
 
   <!-- ═══ Open Graph ═══ -->
@@ -66,6 +66,17 @@
     ]
   }
   </script>
+
+  <!-- ═══ Google Analytics 4 ═══ -->
+  <!-- Replace G-XXXXXXXXXX with your real GA4 Measurement ID from analytics.google.com -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
 </head>
 
 <body>
@@ -127,17 +138,15 @@
     ═══════════════════════════════════════ -->
     <section class="hero" aria-labelledby="hero-heading">
 
-      <!-- REPLACE: swap the div below for a real <img> once you have photos -->
-      <div class="hero-bg">
-        <!-- 
-          REPLACE THIS COMMENT with:
-          <img src="images/hero-wardrobe.jpg"
-               alt="Custom built-in wardrobe with sliding doors in an Accra bedroom"
-               fetchpriority="high" />
-          
-          Ideal image: A beautifully lit, wide shot of your best wardrobe build,
-          ideally floor-to-ceiling with clean lines. Warm lighting. 1920×1080px minimum.
-        -->
+      <!-- Hero background image: upload images/hero-project.jpg (1920×1080, your best project shot) -->
+      <div class="hero-bg" id="hero-bg">
+        <img
+          src="images/hero-project.jpg"
+          alt="Custom built-in furniture project by Neewoody in Accra"
+          fetchpriority="high"
+          id="hero-img"
+          onerror="this.style.display='none';document.getElementById('hero-bg').classList.add('hero-bg--fallback')"
+        />
       </div>
       <div class="hero-overlay" aria-hidden="true"></div>
 
@@ -555,6 +564,120 @@
     </section>
 
     <!-- ═══════════════════════════════════════
+         LATEST WORK — Instagram grid placeholder
+         Future: populate from /api/instagram
+    ═══════════════════════════════════════ -->
+    <section class="section section-alt" aria-labelledby="instagram-heading">
+      <div class="container">
+        <div class="reveal text-center">
+          <p class="section-label">Fresh from the Workshop</p>
+          <h2 id="instagram-heading">Latest Work</h2>
+          <p style="max-width:520px;margin:0 auto .75rem">Follow our builds on Instagram — new projects posted weekly.</p>
+          <a href="https://www.instagram.com/neewoodygh" class="btn btn-outline btn-sm" target="_blank" rel="noopener" style="margin-bottom:2.5rem">@neewoodygh</a>
+        </div>
+
+        <!--
+          INSTAGRAM GRID
+          ─────────────────────────────────────────────────────
+          To connect live Instagram data in the future:
+          1. Create an endpoint at /api/instagram that returns JSON:
+             [{ "image": "url", "link": "postUrl", "caption": "text" }, ...]
+          2. Replace the static cards below by calling:
+             fetch('/api/instagram').then(r => r.json()).then(renderInstagramGrid)
+          3. The renderInstagramGrid function is ready in js/main.js — search for
+             "INSTAGRAM HOOK" to find the placeholder.
+          ─────────────────────────────────────────────────────
+        -->
+        <div class="insta-grid" id="insta-grid">
+          <!-- Static placeholder cards — replace with real project photos -->
+          <!-- Ideal: 6 square images, 600×600px, your best recent builds -->
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-wardrobe-1.jpg" alt="Custom wardrobe project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-kitchen-1.jpg" alt="Custom kitchen project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-bed-1.jpg" alt="Custom bed project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-wardrobe-2.jpg" alt="Custom wardrobe project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-kitchen-2.jpg" alt="Custom kitchen project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+          <a href="https://www.instagram.com/neewoodygh" class="insta-card" target="_blank" rel="noopener" aria-label="View on Instagram">
+            <img src="images/project-shelving-1.jpg" alt="Custom shelving project" loading="lazy" onerror="this.parentNode.classList.add('insta-card--empty')" />
+            <div class="insta-card-overlay"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         SEO TEXT SECTION — "Custom Furniture in Accra"
+    ═══════════════════════════════════════ -->
+    <section class="section seo-section" aria-labelledby="seo-heading">
+      <div class="container">
+        <div class="seo-content reveal">
+          <h2 id="seo-heading">Custom Furniture in Accra</h2>
+          <div class="seo-body">
+            <p>Neewoody Custom Woodwork specialises in made-to-measure furniture designed and built for homes and properties across Accra, Ghana. Whether you're looking for <strong>custom wardrobes in Accra</strong>, a new kitchen fit-out, or a bespoke bed frame, every piece we make is designed specifically for your space — not for a showroom floor. We don't sell off-the-shelf; we measure your room, design around it, and build to fit.</p>
+            <p>Our carpentry services in Accra cover the full range of home furniture: <strong>built-in wardrobes</strong> that use every centimetre of wall space, <strong>custom beds</strong> with integrated storage, <strong>kitchen cabinets</strong> designed for your exact layout, shelving, TV units, and more. We work in all kinds of finishes — natural hardwood, painted MDF, high-gloss lacquer, and textured laminate — so the final result matches your existing décor or creates a look that's entirely new. Every build is handled in-house, from design through to installation.</p>
+            <p>If you're a homeowner, developer, or interior designer in Accra looking for reliable, high-quality <strong>bespoke furniture</strong> — the kind that looks like it was always there — Neewoody is built for that brief. We serve clients in East Legon, Cantonments, Airport Residential, Spintex, Tema, Adenta, Labone, and throughout Greater Accra. Get in touch via WhatsApp and we'll arrange a site visit at no charge.</p>
+          </div>
+          <div class="seo-services-grid">
+            <div class="seo-service-item">
+              <span class="seo-service-icon" aria-hidden="true">🚪</span>
+              <span>Built-in Wardrobes</span>
+            </div>
+            <div class="seo-service-item">
+              <span class="seo-service-icon" aria-hidden="true">🛏️</span>
+              <span>Custom Beds</span>
+            </div>
+            <div class="seo-service-item">
+              <span class="seo-service-icon" aria-hidden="true">🍳</span>
+              <span>Kitchen Cabinets</span>
+            </div>
+            <div class="seo-service-item">
+              <span class="seo-service-icon" aria-hidden="true">📺</span>
+              <span>TV Units</span>
+            </div>
+            <div class="seo-service-item">
+              <span class="seo-service-icon" aria-hidden="true">📚</span>
+              <span>Shelving &amp; Storage</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
+         ESTIMATOR TEASER
+    ═══════════════════════════════════════ -->
+    <section class="section section-alt estimator-teaser" aria-labelledby="estimator-teaser-heading">
+      <div class="container">
+        <div class="estimator-teaser-inner reveal">
+          <div class="estimator-teaser-text">
+            <span class="eyebrow">New Tool</span>
+            <h2 id="estimator-teaser-heading">Wardrobe Price Estimator</h2>
+            <p>Get a rough price range for a custom wardrobe in under 2 minutes. Enter your dimensions, choose your style, and we'll show you a realistic estimate based on current Accra carpentry rates.</p>
+            <p style="font-size:.85rem;color:var(--clr-muted)">Note: estimates are indicative only — a site visit gives the most accurate quote.</p>
+          </div>
+          <div class="estimator-teaser-cta">
+            <a href="wardrobe-estimator.html" class="btn btn-primary btn-lg">Try the Estimator →</a>
+            <p style="font-size:.8rem;color:var(--clr-muted);margin-top:.75rem;text-align:center">Free · No sign-up required</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════
          CTA BAND
     ═══════════════════════════════════════ -->
     <section class="cta-band" aria-labelledby="cta-heading">
@@ -620,6 +743,7 @@
             <li><a href="portfolio.html">Portfolio</a></li>
             <li><a href="contact.html">Contact Us</a></li>
             <li><a href="contact.html">Request a Quote</a></li>
+            <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
             <li><a href="privacy.html">Privacy Policy</a></li>
           </ul>
         </div>
