@@ -179,14 +179,17 @@ h4 { font-size: 1.05rem; }
 }
 .hero-bg {
   position: absolute; inset: 0; z-index: 0;
-  /* REPLACE: background-image: url('/images/hero-wardrobe.jpg'); */
   background: linear-gradient(135deg, #2A2520 0%, #1C1A17 55%, #32291F 100%);
   background-size: cover; background-position: center right;
+}
+/* When hero image fails to load, show pure gradient fallback */
+.hero-bg--fallback {
+  background: linear-gradient(135deg, #2A2520 0%, #1C1A17 55%, #32291F 100%);
 }
 .hero-bg img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
-  opacity: .38;
+  opacity: .45;
 }
 .hero-overlay {
   position: absolute; inset: 0; z-index: 1;
@@ -571,3 +574,89 @@ details[open] .faq-question::after { transform: rotate(45deg); }
 
 /* ═══ HERO CTAS on page heroes ═══ */
 .page-hero .hero-ctas { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+
+/* ═══ INSTAGRAM GRID ═══ */
+.insta-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .5rem;
+  margin-top: 1rem;
+}
+.insta-card {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--clr-bg-alt);
+  display: block;
+}
+.insta-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform .4s ease;
+  display: block;
+}
+.insta-card:hover img { transform: scale(1.07); }
+.insta-card-overlay {
+  position: absolute; inset: 0;
+  background: rgba(28,26,23,.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .3s ease;
+  color: #fff;
+}
+.insta-card:hover .insta-card-overlay { opacity: 1; }
+.insta-card--empty {
+  background: var(--clr-bg-alt);
+  min-height: 100px;
+}
+@media (max-width: 768px) {
+  .insta-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 480px) {
+  .insta-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ═══ SEO TEXT SECTION ═══ */
+.seo-section { background: var(--clr-bg); }
+.seo-content { max-width: 840px; }
+.seo-content h2 { margin-bottom: 1.5rem; }
+.seo-body p { font-size: .97rem; color: var(--clr-muted); line-height: 1.85; margin-bottom: 1.1rem; }
+.seo-body strong { color: var(--clr-text); font-weight: 600; }
+.seo-services-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--clr-border);
+}
+.seo-service-item {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: 100px;
+  padding: .45rem 1.1rem;
+  font-size: .87rem;
+  font-weight: 500;
+  color: var(--clr-text);
+}
+.seo-service-icon { font-size: 1rem; }
+
+/* ═══ ESTIMATOR TEASER ═══ */
+.estimator-teaser-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3rem;
+  align-items: center;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem 3rem;
+}
+.estimator-teaser-text h2 { margin-bottom: .75rem; }
+.estimator-teaser-text p { font-size: .92rem; color: var(--clr-muted); line-height: 1.7; margin-bottom: .5rem; }
+.estimator-teaser-cta { text-align: center; flex-shrink: 0; }
+@media (max-width: 768px) {
+  .estimator-teaser-inner { grid-template-columns: 1fr; gap: 1.5rem; padding: 2rem 1.5rem; }
+  .estimator-teaser-cta { text-align: left; }
+}
