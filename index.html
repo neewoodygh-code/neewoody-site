@@ -800,7 +800,7 @@ async function loadInstagram() {
     const response = await fetch('/api/instagram');
     const data = await response.json();
 
-    const grid = document.querySelector('.instagram-grid');
+    const grid = document.querySelector('.insta-grid');
     if (!grid) return;
 
     grid.innerHTML = '';
