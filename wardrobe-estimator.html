@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wardrobe Price Estimator Accra | Neewoody Custom Woodwork</title>
+  <meta name="description" content="Estimate the cost of a custom wardrobe in Accra with Neewoody's free calculator. Enter your dimensions and style — get a realistic price range in seconds." />
+  <link rel="canonical" href="https://neewoodygh.com/wardrobe-estimator.html" />
+  <meta property="og:title" content="Wardrobe Price Estimator — Neewoody Custom Woodwork" />
+  <meta property="og:description" content="Get a rough price estimate for a custom wardrobe in Accra. Free tool — no sign-up required." />
+  <meta property="og:image" content="https://neewoodygh.com/images/og-image.jpg" />
+
+  <!-- ═══ Google Analytics 4 ═══ -->
+  <!-- Replace G-XXXXXXXXXX with your real GA4 Measurement ID from analytics.google.com -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* ── Estimator-specific styles (scoped to this page) ── */
+    .estimator-wrap {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .est-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .est-card h3 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--clr-accent);
+      margin-bottom: 1.25rem;
+      padding-bottom: .6rem;
+      border-bottom: 1px solid var(--clr-border);
+    }
+    .est-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+    .est-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .est-field {
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+    }
+    .est-field label {
+      font-size: .8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--clr-mid, #6B6259);
+    }
+    .est-field input,
+    .est-field select {
+      padding: .7rem 1rem;
+      border: 1.5px solid var(--clr-border);
+      border-radius: var(--radius);
+      background: var(--clr-bg);
+      color: var(--clr-text);
+      font-family: var(--font-body);
+      font-size: .95rem;
+      transition: border-color .2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    .est-field input:focus,
+    .est-field select:focus {
+      outline: none;
+      border-color: var(--clr-accent);
+      box-shadow: 0 0 0 3px rgba(160,120,74,.15);
+    }
+    .est-field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+    .est-field small {
+      font-size: .75rem;
+      color: var(--clr-muted);
+    }
+    .est-btn {
+      width: 100%;
+      padding: 1rem;
+      font-size: 1.05rem;
+      justify-content: center;
+      margin-top: .5rem;
+    }
+    /* Result box */
+    .est-result {
+      display: none;
+      background: var(--clr-dark);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 2rem 2.5rem;
+      margin-top: 1.5rem;
+      text-align: center;
+    }
+    .est-result.visible { display: block; }
+    .est-result-label {
+      font-size: .78rem;
+      text-transform: uppercase;
+      letter-spacing: .15em;
+      color: rgba(255,255,255,.55);
+      margin-bottom: .5rem;
+    }
+    .est-result-range {
+      font-family: var(--font-display);
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--clr-accent);
+      margin: .25rem 0 .75rem;
+      line-height: 1.1;
+    }
+    .est-result-note {
+      font-size: .83rem;
+      color: rgba(255,255,255,.6);
+      max-width: 460px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+    .est-result-summary {
+      background: rgba(255,255,255,.07);
+      border-radius: var(--radius);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: .83rem;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 1.5rem;
+      line-height: 1.8;
+    }
+    .est-wa-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: .6rem;
+      background: #25D366;
+      color: #fff;
+      padding: .9rem 1.8rem;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: .97rem;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .est-wa-btn:hover { background: #20b857; }
+    .est-disclaimer {
+      font-size: .8rem;
+      color: var(--clr-muted);
+      margin-top: 1.5rem;
+      line-height: 1.6;
+      border-top: 1px solid var(--clr-border);
+      padding-top: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      .est-card { padding: 1.5rem; }
+      .est-grid { grid-template-columns: 1fr 1fr; }
+      .est-grid-2 { grid-template-columns: 1fr; }
+      .est-result-range { font-size: 1.9rem; }
+    }
+    @media (max-width: 420px) {
+      .est-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="index.html">Home</a>
+          <a href="wardrobes.html">Wardrobes</a>
+          <a href="beds.html">Beds</a>
+          <a href="kitchens.html">Kitchens</a>
+          <a href="portfolio.html">Portfolio</a>
+          <a href="contact.html">Contact</a>
+          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20get%20a%20quote." class="btn btn-wa btn-sm" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </a>
+        </nav>
+        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="index.html">Home</a><a href="wardrobes.html">Wardrobes</a><a href="beds.html">Beds</a>
+    <a href="kitchens.html">Kitchens</a><a href="portfolio.html">Portfolio</a><a href="contact.html">Contact</a>
+    <div class="mobile-nav-ctas">
+      <a href="https://wa.me/233244633464" class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+      <a href="contact.html" class="btn btn-outline">Request a Quote</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <div class="page-hero">
+      <div class="page-hero-accent" aria-hidden="true"></div>
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a>
+          <span class="breadcrumb-sep" aria-hidden="true">›</span>
+          <a href="wardrobes.html">Wardrobes</a>
+          <span class="breadcrumb-sep" aria-hidden="true">›</span>
+          <span aria-current="page">Price Estimator</span>
+        </nav>
+        <h1>Wardrobe Price Estimator</h1>
+        <p>Enter your wardrobe details and get an instant price range based on current Accra carpentry costs. No sign-up, no obligation.</p>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="container">
+        <div class="estimator-wrap">
+
+          <!-- DIMENSIONS -->
+          <div class="est-card">
+            <h3>Dimensions</h3>
+            <div class="est-grid">
+              <div class="est-field">
+                <label for="est-width">Width (mm)</label>
+                <input type="number" id="est-width" placeholder="e.g. 2400" min="600" max="6000" value="" />
+                <small>Total wall width the wardrobe will span</small>
+              </div>
+              <div class="est-field">
+                <label for="est-height">Height (mm)</label>
+                <input type="number" id="est-height" placeholder="e.g. 2400" min="1200" max="3200" value="" />
+                <small>Floor to ceiling or desired height</small>
+              </div>
+              <div class="est-field">
+                <label for="est-depth">Depth (mm)</label>
+                <input type="number" id="est-depth" placeholder="e.g. 600" min="300" max="900" value="600" />
+                <small>Standard is 600mm; 450mm for tight spaces</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- TYPE & DOORS -->
+          <div class="est-card">
+            <h3>Type &amp; Doors</h3>
+            <div class="est-grid-2">
+              <div class="est-field">
+                <label for="est-type">Wardrobe Type</label>
+                <select id="est-type">
+                  <option value="hinged">Hinged doors (standard)</option>
+                  <option value="sliding">Sliding doors (+15%)</option>
+                  <option value="open">Open / no doors</option>
+                </select>
+              </div>
+              <div class="est-field">
+                <label for="est-doors">Number of Doors</label>
+                <select id="est-doors">
+                  <option value="2">2 doors</option>
+                  <option value="3">3 doors</option>
+                  <option value="4">4 doors</option>
+                  <option value="5">5 doors (+5%)</option>
+                  <option value="6">6 doors (+10%)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- INTERIOR & FINISH -->
+          <div class="est-card">
+            <h3>Interior &amp; Finish</h3>
+            <div class="est-grid-2">
+              <div class="est-field">
+                <label for="est-interior">Internal Layout</label>
+                <select id="est-interior">
+                  <option value="basic">Basic (rail + shelves)</option>
+                  <option value="standard" selected>Standard (rail, shelves, small drawers)</option>
+                  <option value="premium">Premium (full drawers, shoe rack, tie rails +20%)</option>
+                </select>
+              </div>
+              <div class="est-field">
+                <label for="est-finish">Finish</label>
+                <select id="est-finish">
+                  <option value="laminate">Laminate (standard)</option>
+                  <option value="painted">Painted MDF (+10%)</option>
+                  <option value="veneer">Wood veneer (+20%)</option>
+                  <option value="gloss">High-gloss (+25%)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- LOCATION -->
+          <div class="est-card">
+            <h3>Installation Area</h3>
+            <div class="est-field">
+              <label for="est-location">Where in Accra?</label>
+              <select id="est-location">
+                <option value="central">Central Accra (East Legon, Cantonments, Airport, Labone, Spintex, Adenta)</option>
+                <option value="outer">Outer Accra / Tema / Kasoa (+8%)</option>
+                <option value="outside">Outside Greater Accra — contact us for quote</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="btn btn-primary est-btn" id="est-calculate-btn" type="button">
+            Calculate Estimate →
+          </button>
+
+          <!-- RESULT BOX -->
+          <div class="est-result" id="est-result" role="region" aria-live="polite" aria-label="Estimate result">
+            <div class="est-result-label">Estimated Price Range</div>
+            <div class="est-result-range" id="est-range-display">GH₵ — – GH₵ —</div>
+            <div class="est-result-note">
+              This is an indicative estimate only. Final pricing depends on exact specifications,
+              site conditions, and current material costs. A site visit gives the most accurate quote.
+            </div>
+            <div class="est-result-summary" id="est-summary"></div>
+            <a href="#" class="est-wa-btn" id="est-wa-link" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Send This to Neewoody on WhatsApp
+            </a>
+          </div>
+
+          <p class="est-disclaimer">
+            <strong>How are estimates calculated?</strong> This tool uses size-band pricing based on Ghana carpentry realities:
+            laminate panels at approximately GH₵&nbsp;500 each, edge banding at GH₵&nbsp;7/m, with allowances for
+            labour, hardware (hinges, rails, handles), installation, transport, and material waste.
+            Prices shown are conservative ranges — actual quotes may vary based on current material
+            availability and your specific requirements.
+            <br><br>
+            <strong>To edit the pricing logic:</strong> open <code>wardrobe-estimator.html</code> and find the
+            section labelled <code>/* ── PRICING ENGINE ── */</code> in the JavaScript below.
+          </p>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="footer-logo">Neewoody</div>
+          <p>Custom furniture crafted in Accra, Ghana. Wardrobes, beds, kitchens, and shelving built to your exact specifications.</p>
+          <div class="footer-social">
+            <a href="https://instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
+            <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
+          </div>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="wardrobes.html">Custom Wardrobes</a></li>
+            <li><a href="beds.html">Custom Beds</a></li>
+            <li><a href="kitchens.html">Kitchen Cabinets</a></li>
+            <li><a href="portfolio.html">Portfolio</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Tools</h4>
+          <ul>
+            <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
+            <li><a href="contact.html">Request a Quote</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="tel:+233244633464">0244 633 464</a></li>
+            <li><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></li>
+            <li><a href="https://instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></li>
+            <li>Accra, Ghana</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</p>
+        <p><a href="privacy.html">Privacy Policy</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/233244633464" class="wa-float" target="_blank" rel="noopener" aria-label="Chat with Neewoody on WhatsApp">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <span class="wa-tooltip">Chat with us</span>
+  </a>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+    /* ══════════════════════════════════════════════════════════════
+       PRICING ENGINE — Neewoody Wardrobe Estimator v1
+       ══════════════════════════════════════════════════════════════
+
+       HOW TO EDIT PRICING:
+       ─────────────────────
+       All adjustable values are in the CONSTANTS block below.
+       Each constant has a comment explaining what it controls.
+
+       SIZE BANDS (by total cabinet volume in litres):
+         Small  : W < 1500mm
+         Medium : W 1500–2500mm
+         Large  : W 2500–3500mm
+         XL     : W > 3500mm
+
+       BASE PRICE includes: carcass material, basic hardware, labour,
+       standard installation in central Accra, and a waste allowance.
+
+       MULTIPLIERS stack multiplicatively on the base price.
+       ══════════════════════════════════════════════════════════════ */
+
+    (function () {
+
+      /* ── PRICING CONSTANTS ── edit these to adjust estimates ── */
+      const PANEL_COST_GHS = 500;    // GHS per standard laminate panel (approx 2440×1220mm)
+      const EDGEBAND_PER_M = 7;      // GHS per metre of edge banding
+
+      // Base price by width band (GHS) — before any multipliers
+      // These represent a conservative midpoint for a standard 2400mm tall wardrobe
+      const BASE = {
+        small:  7500,   // width < 1500mm
+        medium: 12000,  // width 1500–2500mm
+        large:  18500,  // width 2500–3500mm
+        xlarge: 26000   // width > 3500mm
+      };
+
+      // Spread applied to produce a low–high range (fraction of base)
+      // e.g. 0.12 means range = base ± 12%  →  [base*0.88, base*1.12]
+      const RANGE_SPREAD = 0.12;
+
+      // Height adjustment: base assumes 2400mm; scale linearly outside this
+      const BASE_HEIGHT_MM = 2400;
+
+      // Depth adjustment: base assumes 600mm depth
+      const BASE_DEPTH_MM = 600;
+
+      /* ── TYPE MULTIPLIERS ── */
+      const TYPE_MULT = {
+        hinged:  1.00,
+        sliding: 1.15,  // sliding doors add ~15% (track system, panels)
+        open:    0.82   // no doors saves material & hardware
+      };
+
+      /* ── DOOR COUNT SURCHARGE ── (applied on top of type) */
+      const DOOR_MULT = {
+        2: 1.00,
+        3: 1.00,
+        4: 1.00,
+        5: 1.05,  // 5 doors: +5%
+        6: 1.10   // 6 doors: +10%
+      };
+
+      /* ── INTERIOR LAYOUT MULTIPLIERS ── */
+      const INTERIOR_MULT = {
+        basic:    0.90,  // just a rail and fixed shelves
+        standard: 1.00,  // rail + shelves + small drawer unit
+        premium:  1.20   // full drawer stacks, shoe rack, tie rails, etc.
+      };
+
+      /* ── FINISH MULTIPLIERS ── */
+      const FINISH_MULT = {
+        laminate: 1.00,
+        painted:  1.10,  // extra prep, primer, paint coats
+        veneer:   1.20,  // real wood veneer material cost
+        gloss:    1.25   // high-gloss lacquer — specialist finish
+      };
+
+      /* ── LOCATION SURCHARGE ── */
+      const LOCATION_MULT = {
+        central: 1.00,
+        outer:   1.08,  // Tema, Kasoa, outer areas: +8% transport/time
+        outside: null   // outside Greater Accra: no estimate shown
+      };
+
+      /* ── CALCULATION FUNCTION ── */
+      function estimate(inputs) {
+        const { widthMm, heightMm, depthMm, type, doors, interior, finish, location } = inputs;
+
+        // Outside Greater Accra: cannot estimate
+        if (location === 'outside') return null;
+
+        // Size band from width
+        let base;
+        if (widthMm < 1500)       base = BASE.small;
+        else if (widthMm < 2500)  base = BASE.medium;
+        else if (widthMm < 3500)  base = BASE.large;
+        else                       base = BASE.xlarge;
+
+        // Scale base linearly for height deviation from 2400mm
+        const heightScale = heightMm / BASE_HEIGHT_MM;
+        base *= heightScale;
+
+        // Scale base for depth deviation from 600mm
+        const depthScale = depthMm / BASE_DEPTH_MM;
+        base *= depthScale;
+
+        // Apply all multipliers
+        const mult = TYPE_MULT[type]
+          * (DOOR_MULT[doors] || 1.00)
+          * INTERIOR_MULT[interior]
+          * FINISH_MULT[finish]
+          * LOCATION_MULT[location];
+
+        const midpoint = base * mult;
+
+        // Apply spread to get a range
+        const low  = Math.round(midpoint * (1 - RANGE_SPREAD) / 500) * 500;
+        const high = Math.round(midpoint * (1 + RANGE_SPREAD) / 500) * 500;
+
+        return { low, high, midpoint };
+      }
+
+      /* ── UI HELPERS ── */
+      function formatGHS(n) {
+        return 'GH₵\u00a0' + n.toLocaleString('en-GH');
+      }
+
+      function getLabel(selectEl) {
+        return selectEl.options[selectEl.selectedIndex].text;
+      }
+
+      /* ── CALCULATE BUTTON HANDLER ── */
+      document.getElementById('est-calculate-btn').addEventListener('click', function () {
+
+        const widthMm  = parseInt(document.getElementById('est-width').value) || 0;
+        const heightMm = parseInt(document.getElementById('est-height').value) || 0;
+        const depthMm  = parseInt(document.getElementById('est-depth').value) || 600;
+        const type     = document.getElementById('est-type').value;
+        const doors    = parseInt(document.getElementById('est-doors').value);
+        const interior = document.getElementById('est-interior').value;
+        const finish   = document.getElementById('est-finish').value;
+        const location = document.getElementById('est-location').value;
+
+        // Validation
+        if (!widthMm || widthMm < 600 || widthMm > 6000) {
+          alert('Please enter a valid width between 600mm and 6000mm.');
+          document.getElementById('est-width').focus();
+          return;
+        }
+        if (!heightMm || heightMm < 1200 || heightMm > 3200) {
+          alert('Please enter a valid height between 1200mm and 3200mm.');
+          document.getElementById('est-height').focus();
+          return;
+        }
+
+        const result = estimate({ widthMm, heightMm, depthMm, type, doors, interior, finish, location });
+
+        const resultEl = document.getElementById('est-result');
+        const rangeEl  = document.getElementById('est-range-display');
+        const summaryEl = document.getElementById('est-summary');
+        const waLinkEl  = document.getElementById('est-wa-link');
+
+        if (!result) {
+          // Outside Greater Accra
+          rangeEl.textContent = 'Please contact us directly';
+          summaryEl.innerHTML = 'We serve clients outside Greater Accra — reach out on WhatsApp and we\'ll discuss your project personally.';
+          resultEl.classList.add('visible');
+          resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          return;
+        }
+
+        rangeEl.textContent = formatGHS(result.low) + ' – ' + formatGHS(result.high);
+
+        // Build summary text
+        const typeLabel     = getLabel(document.getElementById('est-type'));
+        const interiorLabel = getLabel(document.getElementById('est-interior'));
+        const finishLabel   = getLabel(document.getElementById('est-finish'));
+        const locationLabel = getLabel(document.getElementById('est-location'));
+
+        summaryEl.innerHTML =
+          `<strong>Your inputs:</strong><br>` +
+          `Size: ${widthMm}mm W × ${heightMm}mm H × ${depthMm}mm D<br>` +
+          `Type: ${typeLabel} &nbsp;·&nbsp; Doors: ${doors}<br>` +
+          `Interior: ${interiorLabel}<br>` +
+          `Finish: ${finishLabel}<br>` +
+          `Area: ${locationLabel}`;
+
+        // Pre-fill WhatsApp message with user's inputs and range
+        const waText = encodeURIComponent(
+          `Hi Neewoody, I used your wardrobe estimator and got this result:\n\n` +
+          `Size: ${widthMm}mm W × ${heightMm}mm H × ${depthMm}mm D\n` +
+          `Type: ${typeLabel}\n` +
+          `Doors: ${doors}\n` +
+          `Interior: ${interiorLabel}\n` +
+          `Finish: ${finishLabel}\n` +
+          `Estimated range: ${formatGHS(result.low)} – ${formatGHS(result.high)}\n\n` +
+          `Can you confirm pricing for a site visit?`
+        );
+        waLinkEl.href = `https://wa.me/233244633464?text=${waText}`;
+
+        resultEl.classList.add('visible');
+        resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      /* Allow Enter key on inputs to trigger calculation */
+      document.querySelectorAll('.est-field input').forEach(function (el) {
+        el.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') document.getElementById('est-calculate-btn').click();
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>
