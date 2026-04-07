@@ -219,3 +219,11 @@ function renderInstagramGrid(posts) {
 //   .then(renderInstagramGrid)
 //   .catch(() => {}); // silently keep static cards on error
 */
+/* ── Instagram scroll buttons ── */
+const instaGrid = document.getElementById('insta-grid');
+document.querySelector('.insta-scroll-btn--left')?.addEventListener('click', () => {
+  instaGrid.scrollBy({ left: -300, behavior: 'smooth' });
+});
+document.querySelector('.insta-scroll-btn--right')?.addEventListener('click', () => {
+  instaGrid.scrollBy({ left: 300, behavior: 'smooth' });
+});
