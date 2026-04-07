@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wardrobe Cutlist Calculator | Neewoody Carpenter Tools</title>
+<meta name="description" content="Free wardrobe cutlist calculator for carpenters in Accra. Generate a full parts list, cut list, and material summary for any wardrobe build. By Neewoody Custom Woodwork." />
+<link rel="canonical" href="https://neewoodygh.com/cutlist.html" />
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ZP77WR6BNH');
+</script>
+
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   CUTLIST PAGE — mapped to site palette
+   ══════════════════════════════════════════ */
+:root {
+  --mono: 'Roboto Mono', monospace;
+  /* Remap calculator vars to site palette */
+  --bg:   var(--clr-bg);
+  --sf:   var(--clr-surface);
+  --s2:   var(--clr-bg-alt);
+  --s3:   #e8e1d6;
+  --bd:   var(--clr-border);
+  --bd2:  #c8bfb2;
+  --ink:  var(--clr-dark);
+  --mt:   var(--clr-muted);
+  --mt2:  var(--clr-mid);
+  --ac:   var(--clr-accent);
+  --acd:  var(--clr-accent-lt);
+  --gn:   #5a8a5a;
+  --gnd:  rgba(90,138,90,.12);
+  --bl:   #5a7a9a;
+  --bld:  rgba(90,122,154,.12);
+  --rd:   #b04030;
+  --rdd:  rgba(176,64,48,.12);
+  --pu:   #7a6040;
+  --r:    4px;
+  --ff:   var(--font-body);
+  --serif: var(--font-display);
+}
+
+/* ── ALPHA BANNER ── */
+.alpha-banner {
+  background: var(--clr-accent);
+  color: #fff;
+  text-align: center;
+  padding: .5rem 1rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+}
+.alpha-banner a { color: #fff; text-decoration: underline; }
+
+/* ── CARPENTER HERO ── */
+.carpenter-hero {
+  background: var(--clr-dark);
+  color: #fff;
+  padding: 4rem 0 3rem;
+  position: relative;
+  overflow: hidden;
+}
+.carpenter-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #2A2520, #1C1A17);
+}
+.carpenter-hero-accent {
+  position: absolute; top: 0; right: 0;
+  width: 40%; height: 100%;
+  background: linear-gradient(180deg, rgba(160,120,74,.08) 0%, transparent 100%);
+}
+.carpenter-hero .container { position: relative; z-index: 1; }
+.carpenter-hero h1 { color: #fff; margin-bottom: .75rem; }
+.carpenter-hero p { color: rgba(255,255,255,.7); max-width: 56ch; font-size: 1.02rem; }
+.carpenter-badge {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-size: .7rem; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--clr-accent);
+  background: rgba(160,120,74,.14); border: 1px solid rgba(160,120,74,.35);
+  padding: .32rem .9rem; border-radius: 2px; margin-bottom: 1.25rem;
+}
+.alpha-pill {
+  display: inline-block;
+  background: rgba(176,64,48,.2); border: 1px solid rgba(176,64,48,.5);
+  color: #e88070; font-size: .65rem; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase;
+  padding: .2rem .6rem; border-radius: 2px; margin-left: .6rem;
+  font-family: var(--mono);
+}
+
+/* ── CALCULATOR WRAP ── */
+.calc-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ── TABS ── */
+.calc-tabs {
+  display: flex;
+  background: var(--clr-surface);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+.calc-tab {
+  flex: 1; padding: .75rem .5rem;
+  text-align: center;
+  font-size: .72rem; font-weight: 600; color: var(--clr-muted);
+  cursor: pointer; border-bottom: 2.5px solid transparent;
+  transition: all .15s; letter-spacing: .06em; text-transform: uppercase;
+  font-family: var(--mono);
+}
+.calc-tab.active { color: var(--clr-accent); border-bottom-color: var(--clr-accent); background: var(--clr-accent-lt); }
+.calc-tab:hover:not(.active) { color: var(--clr-dark); background: var(--clr-bg-alt); }
+
+.calc-page { display: none; }
+.calc-page.active { display: block; }
+
+/* ── SECTION HEADING ── */
+.sh { padding: .75rem 0 .35rem; display: flex; align-items: center; gap: 10px; margin-bottom: .25rem; }
+.sh-line { flex: 1; height: 1px; background: var(--clr-border); }
+.sh-txt {
+  font-family: var(--mono); font-size: .65rem; font-weight: 600;
+  letter-spacing: .2em; color: var(--clr-accent); text-transform: uppercase; white-space: nowrap;
+}
+
+/* ── CALLOUT ── */
+.callout {
+  margin-bottom: 1rem;
+  background: var(--clr-accent-lt);
+  border-left: 3px solid var(--clr-accent);
+  border-radius: var(--radius); padding: .7rem 1rem;
+}
+.callout p { font-size: .82rem; color: var(--clr-mid); line-height: 1.5; }
+.callout strong { color: var(--clr-accent); font-family: var(--mono); font-size: .72rem; }
+
+/* ── INPUT GRID ── */
+.igrid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .5rem; }
+.igrid.c3 { grid-template-columns: 1fr 1fr 1fr; }
+.ig { display: flex; flex-direction: column; gap: .25rem; }
+.ig label {
+  font-family: var(--mono); font-size: .65rem; font-weight: 600;
+  letter-spacing: .12em; color: var(--clr-muted); text-transform: uppercase;
+}
+.ig input, .ig select {
+  background: var(--clr-surface);
+  border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius);
+  padding: .6rem .8rem;
+  font-family: var(--mono); font-size: .95rem; font-weight: 600;
+  color: var(--clr-dark); width: 100%;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.ig input:focus, .ig select:focus {
+  outline: none; border-color: var(--clr-accent);
+  box-shadow: 0 0 0 3px rgba(160,120,74,.15);
+}
+.ig .hint { font-size: .68rem; color: var(--clr-muted); font-family: var(--mono); }
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238A8178'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right .8rem center; padding-right: 2rem; cursor: pointer;
+}
+
+/* ── TOGGLE ── */
+.tog-row { display: flex; align-items: center; gap: .6rem; }
+.tog-lbl { font-family: var(--mono); font-size: .68rem; color: var(--clr-muted); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.toggle { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.tslide { position: absolute; cursor: pointer; inset: 0; background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); border-radius: 12px; transition: .2s; }
+.tslide:before { content: ''; position: absolute; width: 16px; height: 16px; left: 3px; top: 2px; background: var(--clr-muted); border-radius: 50%; transition: .2s; }
+.toggle input:checked + .tslide { background: var(--clr-accent-lt); border-color: var(--clr-accent); }
+.toggle input:checked + .tslide:before { transform: translateX(18px); background: var(--clr-accent); }
+
+/* ── COUNTER ── */
+.counter { display: flex; align-items: center; border: 1.5px solid var(--clr-border); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
+.counter button { background: var(--clr-bg-alt); border: none; width: 34px; height: 34px; color: var(--clr-dark); font-size: 18px; font-weight: 700; cursor: pointer; line-height: 1; transition: background .1s; }
+.counter button:active { background: var(--clr-border); }
+.counter .cv { min-width: 38px; text-align: center; font-family: var(--mono); font-size: .95rem; font-weight: 700; background: var(--clr-surface); color: var(--clr-accent); padding: 0 .25rem; border-left: 1.5px solid var(--clr-border); border-right: 1.5px solid var(--clr-border); }
+
+/* ── PILLS ── */
+.pill-row { display: flex; gap: .35rem; flex-wrap: wrap; }
+.pill { padding: .38rem .85rem; border: 1.5px solid var(--clr-border); border-radius: 20px; background: transparent; font-family: var(--ff); font-size: .8rem; font-weight: 600; color: var(--clr-muted); cursor: pointer; transition: all .15s; }
+.pill.ac { border-color: var(--clr-accent); color: var(--clr-accent); background: var(--clr-accent-lt); }
+.pill.gn { border-color: var(--gn); color: var(--gn); background: var(--gnd); }
+
+/* ── DIAGRAM ── */
+.diag-card { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 1rem; }
+.diag-bar { padding: .5rem .85rem; background: var(--clr-bg-alt); border-bottom: 1px solid var(--clr-border); display: flex; align-items: center; justify-content: space-between; }
+.diag-bar .dtitle { font-family: var(--mono); font-size: .65rem; font-weight: 600; letter-spacing: .15em; color: var(--clr-muted); text-transform: uppercase; }
+.diag-bar .ddims { font-family: var(--mono); font-size: .78rem; color: var(--clr-accent); font-weight: 600; }
+.diag-tabs { display: flex; border-bottom: 1px solid var(--clr-border); }
+.dtab { flex: 1; padding: .4rem; text-align: center; font-family: var(--mono); font-size: .65rem; font-weight: 600; letter-spacing: .08em; color: var(--clr-muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; }
+.dtab.active { color: var(--clr-accent); border-bottom-color: var(--clr-accent); }
+#wsvg { display: block; width: 100%; }
+
+/* ── GENERATE BUTTON ── */
+.gen-btn {
+  width: 100%;
+  background: var(--clr-dark); color: #fff;
+  border: none; border-radius: var(--radius-lg); padding: 1.1rem;
+  font-family: var(--font-display); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all .2s; letter-spacing: .02em;
+  margin-top: 1rem;
+}
+.gen-btn:hover { background: var(--clr-accent); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.gen-btn:active { transform: scale(.98); }
+
+/* ── SECTION CARDS ── */
+.sec-card { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: .75rem; }
+.sc-hdr { padding: .65rem 1rem; background: var(--clr-bg-alt); border-bottom: 1px solid var(--clr-border); display: flex; align-items: center; gap: .75rem; }
+.sc-num { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; color: var(--clr-accent); line-height: 1; width: 24px; }
+.sc-title { font-size: .88rem; font-weight: 600; color: var(--clr-dark); flex: 1; }
+.sc-body { padding: .85rem 1rem; display: flex; flex-direction: column; gap: .85rem; }
+
+/* ── ZONES ── */
+.zone-list { display: flex; flex-direction: column; gap: .4rem; }
+.zone-row { background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); border-radius: var(--radius); padding: .7rem .85rem; display: flex; flex-direction: column; gap: .6rem; }
+.zone-hdr { display: flex; align-items: center; gap: .6rem; }
+.zone-badge { font-family: var(--mono); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: .18rem .55rem; border-radius: 3px; }
+.zone-badge.hanging { background: rgba(160,120,74,.2); color: var(--clr-accent); }
+.zone-badge.shelves { background: rgba(122,96,64,.2); color: var(--pu); }
+.zone-badge.drawers { background: rgba(176,64,48,.15); color: var(--rd); }
+.zone-flex { flex: 1; }
+.zone-del { background: transparent; border: none; color: var(--clr-muted); font-size: 1.1rem; cursor: pointer; padding: 0 .25rem; line-height: 1; }
+.zone-del:hover { color: var(--rd); }
+.zone-dims { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .4rem; }
+.zone-dims .ig input { font-size: .85rem; padding: .4rem .55rem; }
+.move-btn { background: var(--clr-bg-alt); border: 1px solid var(--clr-border); color: var(--clr-mid); border-radius: var(--radius); width: 28px; height: 28px; cursor: pointer; font-size: .875rem; display: inline-flex; align-items: center; justify-content: center; }
+.add-zone-btn { background: transparent; border: 1.5px dashed var(--clr-border); border-radius: var(--radius); padding: .6rem; font-family: var(--ff); font-size: .82rem; font-weight: 600; color: var(--clr-muted); cursor: pointer; text-align: center; width: 100%; margin-top: .25rem; transition: all .15s; }
+.add-zone-btn:hover { border-color: var(--clr-accent); color: var(--clr-accent); }
+.zone-menu { background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); border-radius: var(--radius); padding: .6rem; display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .25rem; }
+.zm-btn { padding: .45rem .9rem; border: 1.5px solid var(--clr-border); border-radius: 20px; background: transparent; font-family: var(--ff); font-size: .8rem; font-weight: 600; color: var(--clr-mid); cursor: pointer; transition: all .15s; }
+.zm-btn:hover { border-color: var(--clr-accent); color: var(--clr-accent); }
+
+/* ── DOOR BLOCK ── */
+.door-block { display: flex; flex-direction: column; gap: .6rem; padding: .7rem .85rem; background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); border-radius: var(--radius); }
+.db-title { font-family: var(--mono); font-size: .65rem; font-weight: 600; letter-spacing: .12em; color: var(--clr-muted); text-transform: uppercase; margin-bottom: .1rem; }
+
+/* ── SIDE PANEL SELECTOR ── */
+.sp-opts { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: .6rem; }
+.sp-opt { padding: .7rem; border: 1.5px solid var(--clr-border); border-radius: var(--radius); cursor: pointer; transition: all .15s; text-align: center; background: var(--clr-surface); }
+.sp-opt:hover { border-color: var(--clr-accent-dk); }
+.sp-opt.active { border-color: var(--clr-accent); background: var(--clr-accent-lt); }
+.sp-lbl { font-size: .85rem; font-weight: 600; color: var(--clr-dark); }
+.sp-sub { font-size: .7rem; color: var(--clr-muted); margin-top: 2px; font-family: var(--mono); }
+.sp-extra { margin-top: .5rem; display: none; }
+.sp-extra.show { display: block; }
+
+/* ── ADV GRID CARD ── */
+.adv-grid { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); padding: 1rem; display: flex; flex-direction: column; gap: .75rem; margin-bottom: .75rem; }
+
+/* ── RESULTS PAGE ── */
+#rpage { display: none; position: fixed; inset: 0; background: var(--clr-bg); z-index: 200; overflow-y: auto; }
+#rpage.show { display: block; }
+.rhdr { background: var(--clr-surface); border-bottom: 1px solid var(--clr-border); padding: .8rem 1rem; display: flex; align-items: center; gap: .75rem; position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow-sm); }
+.rbtn { background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); color: var(--clr-dark); border-radius: var(--radius); padding: .45rem .9rem; font-family: var(--ff); font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s; }
+.rbtn:hover { background: var(--clr-border); }
+.rhdr-title { flex: 1; font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--clr-dark); }
+.rbody { padding: 1rem; display: flex; flex-direction: column; gap: .9rem; padding-bottom: 3rem; max-width: 780px; margin: 0 auto; }
+.rcard { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); overflow: hidden; }
+.rcard-hdr { padding: .65rem 1rem; background: var(--clr-bg-alt); border-bottom: 1px solid var(--clr-border); display: flex; align-items: center; justify-content: space-between; }
+.rcard-title { font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--clr-dark); }
+.rcard-badge { font-family: var(--mono); font-size: .78rem; color: var(--clr-muted); }
+
+/* Results: table */
+.ptable { width: 100%; border-collapse: collapse; }
+.ptable th { padding: .45rem .85rem; text-align: left; font-family: var(--mono); font-size: .62rem; letter-spacing: .1em; text-transform: uppercase; color: var(--clr-muted); border-bottom: 1px solid var(--clr-border); background: var(--clr-bg-alt); }
+.ptable td { padding: .6rem .85rem; border-bottom: 1px solid var(--clr-border); font-size: .85rem; vertical-align: middle; }
+.ptable tr:last-child td { border-bottom: none; }
+.ptable tr:hover td { background: var(--clr-accent-lt); }
+.pname { font-weight: 600; color: var(--clr-dark); }
+.pnote { font-size: .68rem; color: var(--clr-muted); font-family: var(--mono); margin-top: 2px; line-height: 1.4; }
+.pdim { font-family: var(--mono); font-size: .85rem; font-weight: 600; color: var(--clr-accent); }
+.pqty { font-family: var(--mono); font-size: .78rem; color: var(--clr-mid); text-align: center; }
+
+/* Results: cut list */
+.cut-row { display: flex; align-items: center; gap: .75rem; padding: .65rem .85rem; border-bottom: 1px solid var(--clr-border); }
+.cut-row:last-child { border-bottom: none; }
+.cut-badge { background: var(--clr-accent); color: #fff; font-family: var(--mono); font-size: .78rem; font-weight: 700; width: 28px; height: 28px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cut-info { flex: 1; }
+.cut-dims { font-family: var(--mono); font-size: .88rem; font-weight: 600; color: var(--clr-dark); }
+.cut-names { font-size: .72rem; color: var(--clr-muted); margin-top: 1px; font-family: var(--mono); }
+.cut-cat { font-family: var(--mono); font-size: .62rem; color: var(--clr-muted); text-transform: uppercase; letter-spacing: .08em; text-align: right; }
+
+/* Results: stat grid */
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); }
+.stat-cell { padding: 1rem .75rem; text-align: center; border-right: 1px solid var(--clr-border); }
+.stat-cell:last-child { border-right: none; }
+.stat-val { font-family: var(--mono); font-size: 1.35rem; font-weight: 700; color: var(--clr-accent); line-height: 1; }
+.stat-lbl { font-size: .7rem; color: var(--clr-dark); font-weight: 600; margin-top: .3rem; line-height: 1.3; }
+.stat-sub { font-size: .62rem; color: var(--clr-muted); font-family: var(--mono); margin-top: .15rem; }
+
+/* Results: info block */
+.info-block { padding: .5rem .85rem 1rem; }
+.info-row { display: flex; justify-content: space-between; align-items: baseline; padding: .35rem 0; border-bottom: 1px solid var(--clr-border); font-size: .82rem; }
+.info-row:last-child { border-bottom: none; }
+.ik { color: var(--clr-muted); font-size: .78rem; }
+.iv { font-family: var(--mono); font-size: .78rem; font-weight: 600; color: var(--clr-dark); text-align: right; }
+
+/* Results: notes */
+.notes-card { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); overflow: hidden; }
+.notes-hdr { padding: .65rem 1rem; background: var(--clr-bg-alt); border-bottom: 1px solid var(--clr-border); font-family: var(--mono); font-size: .72rem; font-weight: 600; letter-spacing: .15em; text-transform: uppercase; color: var(--clr-dark); }
+.note-item { display: flex; gap: .75rem; padding: .8rem 1rem; border-bottom: 1px solid var(--clr-border); font-size: .83rem; color: var(--clr-mid); line-height: 1.6; }
+.note-item:last-child { border-bottom: none; }
+.nbullet { font-family: var(--mono); font-size: .78rem; font-weight: 700; color: var(--clr-accent); flex-shrink: 0; width: 20px; }
+.ntext strong { color: var(--clr-dark); }
+
+/* Results: alpha warning */
+.alpha-warn {
+  background: rgba(176,64,48,.08); border: 1.5px solid rgba(176,64,48,.35);
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem;
+  font-size: .82rem; color: var(--clr-mid); line-height: 1.6;
+}
+.alpha-warn strong { color: var(--rd); }
+
+/* Results: brand footer */
+.brand-footer {
+  display: flex; align-items: center; gap: 1rem;
+  padding: 1.25rem; background: var(--clr-dark);
+  border-radius: var(--radius-lg); color: #fff;
+}
+.bf-logo { height: 40px; width: auto; mix-blend-mode: screen; opacity: .9; }
+.bf-info { flex: 1; }
+.bf-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; }
+.bf-details { font-size: .75rem; color: rgba(255,255,255,.55); margin-top: .25rem; line-height: 1.7; font-family: var(--mono); }
+.bf-details a { color: rgba(255,255,255,.7); }
+
+/* Results: CTA */
+.result-cta {
+  background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border);
+  border-radius: var(--radius-lg); padding: 1.5rem; text-align: center;
+}
+.result-cta h3 { font-size: 1rem; margin-bottom: .5rem; }
+.result-cta p { font-size: .83rem; color: var(--clr-muted); margin-bottom: 1rem; }
+.social-btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
+.btn-ig {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: #fff; padding: .65rem 1.25rem; border-radius: var(--radius);
+  font-weight: 600; font-size: .88rem; text-decoration: none; transition: opacity .2s;
+}
+.btn-ig:hover { opacity: .88; }
+.btn-tk {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: #000; color: #fff; padding: .65rem 1.25rem; border-radius: var(--radius);
+  font-weight: 600; font-size: .88rem; text-decoration: none; transition: opacity .2s;
+}
+.btn-tk:hover { opacity: .8; }
+
+/* ── PAGE CTA SECTION ── */
+.carpenter-cta { background: var(--clr-dark); color: #fff; padding: 4rem 0; text-align: center; }
+.carpenter-cta h2 { color: #fff; margin-bottom: 1rem; }
+.carpenter-cta p { color: rgba(255,255,255,.7); max-width: 50ch; margin: 0 auto 2rem; }
+
+/* ── NAV TOOLS DROPDOWN ── */
+.nav-tools-wrap { position: relative; display: flex; align-items: center; }
+.nav-tools-trigger {
+  font-size: .82rem; font-weight: 600; color: var(--clr-accent);
+  padding: .3rem .75rem; border: 1.5px solid rgba(160,120,74,.4);
+  border-radius: 2px; cursor: pointer; letter-spacing: .05em;
+  display: flex; align-items: center; gap: .3rem;
+  transition: background var(--ease), color var(--ease);
+  white-space: nowrap; background: rgba(160,120,74,.06);
+  margin-left: .5rem;
+}
+.nav-tools-trigger:hover { background: var(--clr-accent-lt); }
+.nav-tools-dropdown {
+  display: none; position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--clr-surface); border: 1px solid var(--clr-border);
+  border-radius: var(--radius-lg); min-width: 220px;
+  box-shadow: var(--shadow-lg); padding: .5rem; z-index: 500;
+}
+.nav-tools-wrap:hover .nav-tools-dropdown { display: block; }
+.nav-tools-dropdown a {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .65rem .9rem; border-radius: var(--radius);
+  font-size: .85rem; font-weight: 500; color: var(--clr-mid);
+  transition: background var(--ease), color var(--ease);
+}
+.nav-tools-dropdown a:hover { background: var(--clr-bg-alt); color: var(--clr-accent); }
+.nav-tools-dropdown a:hover::after { display: none; }
+.tool-tag { font-size: .6rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; background: rgba(160,120,74,.15); color: var(--clr-accent); padding: .1rem .4rem; border-radius: 2px; font-family: var(--mono); }
+.nav-tools-dropdown-label {
+  padding: .35rem .9rem .2rem; font-size: .62rem; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--clr-muted);
+  font-family: var(--mono);
+}
+
+@media (max-width: 900px) {
+  .nav-tools-wrap { display: none; }
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+  .stat-cell { border-right: none; border-bottom: 1px solid var(--clr-border); }
+  .stat-cell:nth-child(2n) { border-bottom: none; }
+}
+@media (max-width: 600px) {
+  .igrid { grid-template-columns: 1fr 1fr; }
+  .igrid.c3 { grid-template-columns: 1fr 1fr; }
+  .zone-dims { grid-template-columns: 1fr 1fr; }
+  .calc-tab { font-size: .6rem; letter-spacing: .04em; padding: .6rem .25rem; }
+  .social-btns { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ════ ALPHA BANNER ════ -->
+<div class="alpha-banner">
+  ⚠ Alpha — Verify all figures before cutting. <a href="https://wa.me/233244633464?text=Hi Neewoody, I found an issue with the cutlist calculator.">Report an issue</a>
+</div>
+
+<!-- ════ HEADER ════ -->
+<header class="site-header" role="banner">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
+        Neewoody
+        <span class="logo-sub">Custom Woodwork · Accra</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="wardrobes.html">Wardrobes</a>
+        <a href="beds.html">Beds</a>
+        <a href="kitchens.html">Kitchens</a>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="contact.html">Contact</a>
+        <div class="nav-tools-wrap">
+          <span class="nav-tools-trigger">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            Tools ▾
+          </span>
+          <div class="nav-tools-dropdown">
+            <div class="nav-tools-dropdown-label">Carpenter Tools</div>
+            <a href="cutlist.html">
+              Wardrobe Cutlist
+              <span class="tool-tag">Alpha</span>
+            </a>
+          </div>
+        </div>
+        <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project."
+           class="btn btn-wa btn-sm" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+      </nav>
+      <button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <a href="index.html">Home</a>
+  <a href="wardrobes.html">Wardrobes</a>
+  <a href="beds.html">Beds</a>
+  <a href="kitchens.html">Kitchens</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+  <a href="cutlist.html" style="color:var(--clr-accent)">⚒ Wardrobe Cutlist (Alpha)</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464" class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+    <a href="contact.html" class="btn btn-outline">Request a Quote</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ════ HERO ════ -->
+<div class="carpenter-hero">
+  <div class="carpenter-hero-accent" aria-hidden="true"></div>
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Home</a>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">Carpenter Tools</span>
+    </nav>
+    <div class="carpenter-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+      Carpenter Tools by Neewoody
+      <span class="alpha-pill">Alpha</span>
+    </div>
+    <h1>Wardrobe Cutlist Calculator</h1>
+    <p>Enter your wardrobe dimensions and configuration. Get a full parts list, optimised cut list, and material summary — ready to take to the workshop.</p>
+  </div>
+</div>
+
+<!-- ════ CALCULATOR ════ -->
+<div class="calc-wrap">
+
+  <!-- TABS -->
+  <div class="calc-tabs" role="tablist">
+    <div class="calc-tab active" role="tab" onclick="swTab('dims',this)">Dimensions</div>
+    <div class="calc-tab" role="tab" onclick="swTab('doors',this)">Doors &amp; Back</div>
+    <div class="calc-tab" role="tab" onclick="swTab('sections',this)">Sections</div>
+    <div class="calc-tab" role="tab" onclick="swTab('panels',this)">Frame &amp; Panels</div>
+  </div>
+
+  <!-- ════ DIMS ════ -->
+  <div class="calc-page active" id="tab-dims">
+
+    <div class="sh"><div class="sh-txt">Wardrobe Dimensions</div><div class="sh-line"></div></div>
+    <div class="igrid c3">
+      <div class="ig"><label>Width (mm)</label><input type="number" id="i-w" value="2400" inputmode="numeric" oninput="live()"><div class="hint">Total outer width</div></div>
+      <div class="ig"><label>Height (mm)</label><input type="number" id="i-h" value="2100" inputmode="numeric" oninput="live()"><div class="hint">Floor to ceiling</div></div>
+      <div class="ig"><label>Depth (mm)</label><input type="number" id="i-d" value="580" inputmode="numeric" oninput="live()"><div class="hint">Front to back</div></div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Board Thickness</div><div class="sh-line"></div></div>
+    <div class="igrid">
+      <div class="ig"><label>Carcass Board (mm)</label><input type="number" id="i-thick" value="18" inputmode="numeric" oninput="live()"><div class="hint">Sides, top, bottom, dividers</div></div>
+      <div class="ig"><label>Sections</label><select id="i-secs" onchange="onSecsChange()">
+        <option value="1">1 section</option><option value="2">2 sections</option>
+        <option value="3" selected>3 sections</option><option value="4">4 sections</option>
+        <option value="5">5 sections</option><option value="6">6 sections</option>
+      </select><div class="hint">Vertical internal dividers</div></div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Internal Clearance</div><div class="sh-line"></div></div>
+    <div class="igrid">
+      <div class="ig"><label>Shelf clearance (mm)</label><input type="number" id="i-clear" value="2" inputmode="numeric" oninput="live()"><div class="hint">Each side of shelf</div></div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Visual Diagram</div><div class="sh-line"></div></div>
+    <div class="diag-card">
+      <div class="diag-bar">
+        <div class="dtitle" id="diag-lbl">Front elevation</div>
+        <div class="ddims" id="diag-dims">—</div>
+      </div>
+      <div class="diag-tabs">
+        <div class="dtab active" onclick="swDiag('front',this)">Front</div>
+        <div class="dtab" onclick="swDiag('side',this)">Side</div>
+      </div>
+      <svg id="wsvg" viewBox="0 0 340 280" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
+  </div>
+
+  <!-- ════ DOORS ════ -->
+  <div class="calc-page" id="tab-doors">
+    <div class="sh"><div class="sh-txt">Door Overlay</div><div class="sh-line"></div></div>
+    <div class="callout"><p><strong>OVERLAY:</strong> How far the door covers the carcass frame on each side. Standard is 11mm. Gap values control clearance between door edges.</p></div>
+    <div class="adv-grid">
+      <div class="igrid c3" style="padding:0">
+        <div class="ig"><label>Overlay (mm)</label><input type="number" id="i-overlay" value="11" inputmode="numeric" oninput="live()"></div>
+        <div class="ig"><label>Door Gap (mm)</label><input type="number" id="i-dgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Between adj. doors</div></div>
+        <div class="ig"><label>Hinge Gap (mm)</label><input type="number" id="i-hinge" value="2" inputmode="numeric" oninput="live()"><div class="hint">Side panel clearance</div></div>
+      </div>
+      <div class="igrid" style="padding:0">
+        <div class="ig"><label>Top Gap (mm)</label><input type="number" id="i-topgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to top panel</div></div>
+        <div class="ig"><label>Bottom Gap (mm)</label><input type="number" id="i-botgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to floor (full height)</div></div>
+      </div>
+      <div class="igrid" style="padding:0">
+        <div class="ig"><label>Door Thickness (mm)</label><input type="number" id="i-doorthick" value="18" inputmode="numeric" oninput="live()"></div>
+      </div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Back Panel</div><div class="sh-line"></div></div>
+    <div class="adv-grid">
+      <div class="ig"><label>Back Type</label>
+        <select id="i-back" onchange="live()"><option value="inset">Inset (grooved in)</option><option value="nailon">Nail-on (flush back)</option></select>
+      </div>
+      <div class="ig"><label>Back Thickness (mm)</label><input type="number" id="i-backthick" value="3" inputmode="numeric" oninput="live()"><div class="hint">Usually 3mm hardboard</div></div>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
+  </div>
+
+  <!-- ════ SECTIONS ════ -->
+  <div class="calc-page" id="tab-sections">
+    <div class="sh"><div class="sh-txt">Section Layout</div><div class="sh-line"></div></div>
+    <div class="callout"><p>Each section has <strong>stacked zones</strong> (hanging, shelves, drawers). Set each zone height in mm. The counter shows total vs available inner height.</p></div>
+    <div id="sec-list"></div>
+    <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
+  </div>
+
+  <!-- ════ FRAME & PANELS ════ -->
+  <div class="calc-page" id="tab-panels">
+    <div class="sh"><div class="sh-txt">Subframe / Toe Kick</div><div class="sh-line"></div></div>
+    <div class="callout"><p><strong>FRAME STRUCTURE:</strong> Front and back rails span the full unit width, sandwiching the mid-rails. Mid-rail count is auto-calculated from unit width.</p></div>
+    <div class="adv-grid">
+      <div class="igrid" style="padding:0">
+        <div class="ig"><label>Frame Height (mm)</label><input type="number" id="tk-h" value="100" inputmode="numeric" oninput="live()"><div class="hint">Toe kick height</div></div>
+        <div class="ig"><label>Frame Style</label>
+          <select id="tk-style" onchange="live()"><option value="setback">Setback (recessed)</option><option value="flush">Flush with front</option></select>
+        </div>
+      </div>
+      <div class="igrid" style="padding:0" id="tk-sb-wrap">
+        <div class="ig"><label>Setback Depth (mm)</label><input type="number" id="tk-setback" value="60" inputmode="numeric" oninput="live()"><div class="hint">From front face</div></div>
+        <div class="ig"><label>Frame Board Thick. (mm)</label><input type="number" id="tk-thick" value="18" inputmode="numeric" oninput="live()"></div>
+      </div>
+      <div class="ig"><label>Face Panel Gap (mm)</label><input type="number" id="tk-gap" value="3" inputmode="numeric" oninput="live()"><div class="hint">Door to face panel clearance</div></div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Mid-Rail Count</div><div class="sh-line"></div></div>
+    <div class="adv-grid">
+      <div class="igrid" style="padding:0">
+        <div class="ig">
+          <label>Mode</label>
+          <select id="tk-mr-mode" onchange="live()"><option value="auto">Auto (by width)</option><option value="manual">Manual override</option></select>
+          <div class="hint" id="tk-auto-note">—</div>
+        </div>
+        <div class="ig" id="tk-mr-manual" style="display:none">
+          <label>Mid-Rail Qty</label>
+          <input type="number" id="tk-mr-qty" value="3" min="2" max="12" inputmode="numeric" oninput="live()">
+          <div class="hint">incl. 2 end rails</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Modular Units</div><div class="sh-line"></div></div>
+    <div class="callout"><p><strong>MODULAR BUILD:</strong> Split wide wardrobes into independent carcass units. Each unit gets its own subframe, sides, top, bottom and back.</p></div>
+    <div class="adv-grid">
+      <div class="igrid" style="padding:0">
+        <div class="ig">
+          <label>Number of Units</label>
+          <select id="mod-units" onchange="live()">
+            <option value="1" selected>1 — single carcass</option>
+            <option value="2">2 units</option><option value="3">3 units</option><option value="4">4 units</option>
+          </select>
+          <div class="hint" id="mod-note">—</div>
+        </div>
+        <div class="ig">
+          <label>Unit Join</label>
+          <select id="mod-join" onchange="live()"><option value="butt">Butt join (2 panels)</option><option value="shared">Shared divider (1 panel)</option></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Applied Side Panels</div><div class="sh-line"></div></div>
+    <div class="callout"><p><strong>DEPTH AUTO-CALC:</strong> Panels extend past carcass face by door thickness + hinge clearance, hiding the door edge from the side.</p></div>
+    <div class="adv-grid">
+      <div class="sp-opts">
+        <div class="sp-opt" id="spo-none" onclick="setSP('none')"><div class="sp-lbl">None</div><div class="sp-sub">No panels</div></div>
+        <div class="sp-opt active" id="spo-flush" onclick="setSP('flush')"><div class="sp-lbl">Flush Face</div><div class="sp-sub">Hides door edge</div></div>
+        <div class="sp-opt" id="spo-extended" onclick="setSP('extended')"><div class="sp-lbl">Extended</div><div class="sp-sub">Taller / deeper</div></div>
+        <div class="sp-opt" id="spo-scribing" onclick="setSP('scribing')"><div class="sp-lbl">Scribing</div><div class="sp-sub">Extra for wall</div></div>
+      </div>
+      <div class="sp-extra show" id="sp-extra">
+        <div class="igrid c3" style="margin-bottom:.5rem">
+          <div class="ig"><label>Left Panel</label><select id="sp-l" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
+          <div class="ig"><label>Right Panel</label><select id="sp-r" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
+          <div class="ig"><label>Thickness (mm)</label><input type="number" id="sp-thick" value="18" inputmode="numeric" oninput="live()"></div>
+        </div>
+        <div id="sp-ext-row" style="display:none">
+          <div class="igrid" style="margin-bottom:.5rem">
+            <div class="ig"><label>Extra Height (mm)</label><input type="number" id="sp-eh" value="50" inputmode="numeric" oninput="live()"><div class="hint">Above wardrobe</div></div>
+            <div class="ig"><label>Extra Depth (mm)</label><input type="number" id="sp-ed" value="0" inputmode="numeric" oninput="live()"><div class="hint">Beyond door face</div></div>
+          </div>
+        </div>
+        <div id="sp-scrib-row" style="display:none">
+          <div class="igrid" style="margin-bottom:.5rem">
+            <div class="ig"><label>Scribe Width (mm)</label><input type="number" id="sp-sw" value="30" inputmode="numeric" oninput="live()"><div class="hint">Extra mm into wall</div></div>
+          </div>
+        </div>
+        <div style="background:var(--clr-bg-alt);border:1px solid var(--clr-border);border-radius:var(--radius);padding:.6rem .85rem">
+          <div style="font-family:var(--mono);font-size:.65rem;color:var(--clr-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.2rem">Panel Depth Calc</div>
+          <div id="sp-depth-note" style="font-family:var(--mono);font-size:.88rem;color:var(--clr-accent);font-weight:600">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh"><div class="sh-txt">Top Pelmet</div><div class="sh-line"></div></div>
+    <div class="adv-grid">
+      <div class="tog-row">
+        <label class="toggle"><input type="checkbox" id="pel-en" onchange="live()"><span class="tslide"></span></label>
+        <span class="tog-lbl">Include Top Pelmet</span>
+      </div>
+      <div class="ig"><label>Pelmet Height (mm)</label><input type="number" id="pel-h" value="80" inputmode="numeric" oninput="live()"></div>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
+  </div>
+
+</div><!-- end calc-wrap -->
+
+<!-- ════ RESULTS PAGE ════ -->
+<div id="rpage">
+  <div class="rhdr">
+    <button class="rbtn" onclick="closeR()">← Edit</button>
+    <div class="rhdr-title">Parts &amp; Cut List</div>
+    <button class="rbtn" onclick="window.print()">⎙ Print</button>
+  </div>
+  <div class="rbody" id="rbody"></div>
+</div>
+
+<!-- ════ PAGE CTA ════ -->
+<section class="carpenter-cta">
+  <div class="container">
+    <p class="section-label" style="color:rgba(160,120,74,.85)">Built by carpenters, for carpenters</p>
+    <h2>Help Us Improve This Tool</h2>
+    <p>This is an alpha release. Follow us on Instagram and TikTok — we'll announce updates, fixes, and new tools as we build them.</p>
+    <div class="social-btns" style="justify-content:center">
+      <a href="https://www.instagram.com/neewoodygh" class="btn-ig" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+        @neewoodygh on Instagram
+      </a>
+      <a href="https://www.tiktok.com/@neewoodygh" class="btn-tk" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>
+        @neewoodygh on TikTok
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ════ FOOTER ════ -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
+        <p>Custom wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          </a>
+          <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Services</h5>
+        <ul>
+          <li><a href="wardrobes.html">Custom Wardrobes</a></li>
+          <li><a href="beds.html">Custom Beds</a></li>
+          <li><a href="kitchens.html">Kitchen Cabinets</a></li>
+          <li><a href="portfolio.html">Shelving &amp; Storage</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
+          <li><a href="cutlist.html">Cutlist Calculator</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
+        <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
+        <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
+        <div class="footer-contact-item">Accra, Ghana</div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
+      <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script src="js/main.js"></script>
+<script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════
+var S = {
+  w:2400, h:2100, d:580,
+  thick:18, backType:'inset', backThick:3, clear:2,
+  overlay:11, doorThick:18, dgap:2, hinge:2, topgap:2, botgap:2,
+  sections:3,
+  secs:[
+    {zones:[{type:'hanging',h:1200,shelves:0,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}},
+    {zones:[{type:'shelves',h:900,shelves:4,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}},
+    {zones:[{type:'drawers',h:400,shelves:0,drawers:4},{type:'shelves',h:500,shelves:2,drawers:0}],door:{on:true,count:2,type:'hinged',bottom:'full'}}
+  ],
+  tkH:100, tkStyle:'setback', tkSetback:60, tkThick:18, tkGap:3,
+  tkMrMode:'auto', tkMrQty:3,
+  modUnits:1, modJoin:'butt',
+  spType:'flush', spL:1, spR:1, spThick:18, spEH:50, spED:0, spSW:30,
+  pelEn:false, pelH:80,
+  diagView:'front'
+};
+
+function gv(id){var e=document.getElementById(id);return e?e.value:'';}
+function gi(id,def){var v=parseFloat(gv(id));return isNaN(v)?(def||0):v;}
+function R(n){return Math.round(n);}
+
+function autoMrCount(uw){
+  if(uw<=700)return 2;if(uw<=900)return 3;if(uw<=1200)return 4;
+  if(uw<=1600)return 5;if(uw<=2000)return 6;if(uw<=2400)return 7;
+  return Math.ceil(uw/350)+1;
+}
+// Inner height available for zones (between top and bottom carcass panels, above subframe)
+function carcassInnerH(){return S.h - S.tkH - 2*S.thick;}
+
+// ══════════════════════════════════════════════════════
+//  SYNC
+// ══════════════════════════════════════════════════════
+function sync(){
+  S.w=gi('i-w',2400);S.h=gi('i-h',2100);S.d=gi('i-d',580);
+  S.thick=gi('i-thick',18);S.backType=gv('i-back')||'inset';S.backThick=gi('i-backthick',3);
+  S.clear=gi('i-clear',2);S.overlay=gi('i-overlay',11);S.doorThick=gi('i-doorthick',18);
+  S.dgap=gi('i-dgap',2);S.hinge=gi('i-hinge',2);S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
+  S.tkH=gi('tk-h',100);S.tkStyle=gv('tk-style')||'setback';S.tkSetback=gi('tk-setback',60);
+  S.tkThick=gi('tk-thick',18);S.tkGap=gi('tk-gap',3);
+  S.tkMrMode=gv('tk-mr-mode')||'auto';S.tkMrQty=gi('tk-mr-qty',3);
+  S.modUnits=parseInt(gv('mod-units'))||1;S.modJoin=gv('mod-join')||'butt';
+  S.spL=parseInt(gv('sp-l'))||0;S.spR=parseInt(gv('sp-r'))||0;S.spThick=gi('sp-thick',18);
+  S.spEH=gi('sp-eh',50);S.spED=gi('sp-ed',0);S.spSW=gi('sp-sw',30);
+  var pe=document.getElementById('pel-en');S.pelEn=pe?pe.checked:false;S.pelH=gi('pel-h',80);
+
+  S.secs.forEach(function(sec,si){
+    sec.zones.forEach(function(z,zi){
+      var hE=document.getElementById('zh-'+si+'-'+zi);
+      var sE=document.getElementById('zsh-'+si+'-'+zi);
+      var dE=document.getElementById('zdr-'+si+'-'+zi);
+      if(hE&&hE.value!='')z.h=parseFloat(hE.value)||z.h;
+      if(sE&&sE.value!='')z.shelves=parseInt(sE.value)||z.shelves;
+      if(dE&&dE.value!='')z.drawers=parseInt(dE.value)||z.drawers;
+    });
+    var dc=document.getElementById('dc-'+si);
+    if(dc)sec.door.count=parseInt(dc.textContent)||1;
+  });
+
+  var unitW=S.w/S.modUnits;
+  var mrc=S.tkMrMode==='manual'?S.tkMrQty:autoMrCount(unitW);
+  var an=document.getElementById('tk-auto-note');
+  if(an)an.textContent=S.tkMrMode==='auto'?'Auto: '+mrc+' mid-rails for '+R(unitW)+'mm unit':'Manual override active';
+  var mm=document.getElementById('tk-mr-manual');
+  if(mm)mm.style.display=S.tkMrMode==='manual'?'flex':'none';
+  var mn=document.getElementById('mod-note');
+  if(mn)mn.textContent=S.modUnits>1?'Each unit ≈ '+R(unitW)+'mm wide':'Single carcass — full width';
+  var sdn=document.getElementById('sp-depth-note');
+  if(sdn&&S.spType!=='none'){
+    var spD=S.d+S.doorThick+S.hinge+(S.spType==='extended'?S.spED:0)+(S.spType==='scribing'?S.spSW:0);
+    sdn.textContent=S.d+' + '+S.doorThick+' + '+S.hinge+' = '+spD+'mm';
+  }
+  var sb=document.getElementById('tk-sb-wrap');
+  if(sb)sb.style.display=S.tkStyle==='setback'?'grid':'none';
+}
+
+// ══════════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════════
+function swTab(name,el){
+  document.querySelectorAll('.calc-tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.calc-page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');
+  el.classList.add('active');
+}
+function swDiag(name,el){
+  S.diagView=name;
+  document.querySelectorAll('.dtab').forEach(function(t){t.classList.remove('active');});
+  el.classList.add('active');
+  drawDiagram();
+}
+
+// ══════════════════════════════════════════════════════
+//  SECTIONS UI
+// ══════════════════════════════════════════════════════
+function onSecsChange(){
+  var n=parseInt(gv('i-secs'))||3;
+  while(S.secs.length<n)S.secs.push({zones:[{type:'shelves',h:900,shelves:3,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}});
+  S.secs.length=n;S.sections=n;renderSecs();live();
+}
+
+function buildZoneRow(z,si,zi,total){
+  var bc={'hanging':'hanging','shelves':'shelves','drawers':'drawers'};
+  var up=zi>0?'<button class="move-btn" onclick="moveZone('+si+','+zi+',-1)" title="Move up">↑</button>':'';
+  var dn=zi<total-1?'<button class="move-btn" onclick="moveZone('+si+','+zi+',1)" title="Move down">↓</button>':'';
+  var extra='';
+  if(z.type==='shelves')extra='<div class="ig"><label>Shelves</label><input type="number" id="zsh-'+si+'-'+zi+'" value="'+z.shelves+'" min="0" max="12" inputmode="numeric" oninput="live()"></div>';
+  if(z.type==='drawers')extra='<div class="ig"><label>Drawers</label><input type="number" id="zdr-'+si+'-'+zi+'" value="'+z.drawers+'" min="1" max="12" inputmode="numeric" oninput="live()"></div>';
+  return '<div class="zone-row"><div class="zone-hdr"><span class="zone-badge '+bc[z.type]+'">'+z.type+'</span><div class="zone-flex"></div>'+up+dn+'<button class="zone-del" onclick="delZone('+si+','+zi+')" title="Remove zone">×</button></div><div class="zone-dims"><div class="ig"><label>Height (mm)</label><input type="number" id="zh-'+si+'-'+zi+'" value="'+z.h+'" inputmode="numeric" oninput="live()"></div>'+extra+'</div></div>';
+}
+
+function renderSecs(){
+  var c=document.getElementById('sec-list');c.innerHTML='';
+  S.secs.forEach(function(sec,si){
+    var totH=sec.zones.reduce(function(s,z){return s+z.h;},0);
+    var avail=carcassInnerH();var diff=totH-avail;
+    var hcol=Math.abs(diff)>10?'var(--rd)':'var(--gn)';
+    var zonesHTML=sec.zones.map(function(z,zi){return buildZoneRow(z,si,zi,sec.zones.length);}).join('');
+    var showAdd=sec.showZoneMenu?'':'none';
+    var card=document.createElement('div');card.className='sec-card';
+    card.innerHTML=
+      '<div class="sc-hdr"><div class="sc-num">'+(si+1)+'</div><div class="sc-title">Section '+(si+1)+'</div>'+
+      '<div style="font-family:var(--mono);font-size:.72rem;color:'+hcol+'">'+totH+'/'+avail+'mm</div></div>'+
+      '<div class="sc-body">'+
+      '<div class="zone-list" id="zones-'+si+'">'+zonesHTML+'</div>'+
+      '<button class="add-zone-btn" onclick="toggleZoneMenu('+si+')">+ Add Zone</button>'+
+      '<div class="zone-menu" id="zmenu-'+si+'" style="display:'+showAdd+'">'+
+        '<button class="zm-btn" onclick="addZone('+si+','hanging')">Hanging Rail</button>'+
+        '<button class="zm-btn" onclick="addZone('+si+','shelves')">Shelves</button>'+
+        '<button class="zm-btn" onclick="addZone('+si+','drawers')">Drawers</button>'+
+      '</div>'+
+      '<div class="door-block">'+
+        '<div class="db-title">Door</div>'+
+        '<div class="tog-row"><label class="toggle"><input type="checkbox" id="don-'+si+'"'+(sec.door.on?' checked':'')+' onchange="toggleDoor('+si+')"><span class="tslide"></span></label><span class="tog-lbl">Include door</span></div>'+
+        '<div id="door-opts-'+si+'" style="display:'+(sec.door.on?'flex':'none')+';flex-direction:column;gap:.5rem;margin-top:.35rem">'+
+          '<div class="pill-row">'+
+            '<button class="pill'+(sec.door.type==='hinged'?' ac':'')+'" onclick="setDoorProp('+si+','type','hinged')">Hinged</button>'+
+            '<button class="pill'+(sec.door.type==='sliding'?' ac':'')+'" onclick="setDoorProp('+si+','type','sliding')">Sliding</button>'+
+          '</div>'+
+          '<div class="pill-row">'+
+            '<button class="pill'+(sec.door.bottom==='panel'?' gn':'')+'" onclick="setDoorProp('+si+','bottom','panel')">To panel</button>'+
+            '<button class="pill'+(sec.door.bottom==='full'?' gn':'')+'" onclick="setDoorProp('+si+','bottom','full')">Full height</button>'+
+          '</div>'+
+          '<div class="tog-row"><span class="tog-lbl" style="margin-right:.5rem">Door count:</span>'+
+            '<div class="counter"><button onclick="adjDoor('+si+',-1)">−</button><div class="cv" id="dc-'+si+'">'+sec.door.count+'</div><button onclick="adjDoor('+si+',1)">+</button></div>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '</div>';
+    c.appendChild(card);
+  });
+}
+
+function toggleZoneMenu(si){
+  S.secs[si].showZoneMenu=!S.secs[si].showZoneMenu;
+  var m=document.getElementById('zmenu-'+si);
+  if(m)m.style.display=S.secs[si].showZoneMenu?'flex':'none';
+}
+function addZone(si,type){
+  S.secs[si].showZoneMenu=false;
+  S.secs[si].zones.push({type:type,h:type==='drawers'?400:600,shelves:type==='shelves'?3:0,drawers:type==='drawers'?3:0});
+  renderSecs();live();
+}
+function delZone(si,zi){
+  if(S.secs[si].zones.length<=1)return;
+  S.secs[si].zones.splice(zi,1);renderSecs();live();
+}
+function moveZone(si,zi,dir){
+  var arr=S.secs[si].zones,ni=zi+dir;
+  if(ni<0||ni>=arr.length)return;
+  var tmp=arr[zi];arr[zi]=arr[ni];arr[ni]=tmp;renderSecs();live();
+}
+function toggleDoor(si){
+  S.secs[si].door.on=document.getElementById('don-'+si).checked;
+  var o=document.getElementById('door-opts-'+si);if(o)o.style.display=S.secs[si].door.on?'flex':'none';
+}
+function setDoorProp(si,prop,val){
+  S.secs[si].door[prop]=val;renderSecs();
+}
+function adjDoor(si,d){
+  var el=document.getElementById('dc-'+si);if(!el)return;
+  var v=Math.max(1,Math.min(6,(parseInt(el.textContent)||1)+d));
+  el.textContent=v;S.secs[si].door.count=v;
+}
+function setSP(type){
+  S.spType=type;
+  ['none','flush','extended','scribing'].forEach(function(t){
+    var el=document.getElementById('spo-'+t);
+    if(el)el.classList.toggle('active',t===type);
+  });
+  var ex=document.getElementById('sp-extra');
+  if(ex)ex.classList.toggle('show',type!=='none');
+  var er=document.getElementById('sp-ext-row');
+  if(er)er.style.display=type==='extended'?'block':'none';
+  var sr=document.getElementById('sp-scrib-row');
+  if(sr)sr.style.display=type==='scribing'?'block':'none';
+  live();
+}
+
+// ══════════════════════════════════════════════════════
+//  LIVE UPDATE + DIAGRAM
+// ══════════════════════════════════════════════════════
+function live(){sync();drawDiagram();}
+
+function drawDiagram(){
+  if(S.diagView==='side'){drawSide();}else{drawFront();}
+  var dd=document.getElementById('diag-dims');
+  if(dd)dd.textContent=S.w+'W × '+S.h+'H × '+S.d+'D mm';
+  var dl=document.getElementById('diag-lbl');
+  if(dl)dl.textContent=S.diagView==='side'?S.d+'mm depth (side)':'Front elevation';
+}
+
+function drawFront(){
+  var VW=340,VH=240,PAD=28;
+  var sc=Math.min((VH-PAD*2)/S.h,(VW-PAD*2.5)/S.w);
+  var dW=S.w*sc,dH=S.h*sc,ox=(VW-dW)/2,oy=(VH-dH)/2;
+  var t=S.thick*sc,tkPx=S.tkH*sc,n=S.secs.length;
+  var ac='#A0784A', dark='#1C1A17', mid='#4A4540', light='#DDD5C8';
+  var e=[];
+  // shadow
+  e.push('<rect x="'+(ox+3)+'" y="'+(oy+3)+'" width="'+dW+'" height="'+dH+'" fill="rgba(28,26,23,.12)" rx="2"/>');
+  // main carcass bg
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+dW+'" height="'+dH+'" fill="#EFEBE3" rx="2" stroke="'+light+'" stroke-width="1"/>');
+  // subframe
+  e.push('<rect x="'+ox+'" y="'+(oy+dH-tkPx)+'" width="'+dW+'" height="'+tkPx+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
+  // sides
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+t+'" height="'+dH+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  e.push('<rect x="'+(ox+dW-t)+'" y="'+oy+'" width="'+t+'" height="'+dH+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  // top panel
+  e.push('<rect x="'+(ox+t)+'" y="'+oy+'" width="'+(dW-2*t)+'" height="'+t+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  // bottom panel
+  e.push('<rect x="'+(ox+t)+'" y="'+(oy+dH-tkPx-t)+'" width="'+(dW-2*t)+'" height="'+t+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  // dividers
+  var innerW=dW-2*t;
+  var secW=innerW/n;
+  for(var i=1;i<n;i++){
+    var dx=ox+t+secW*i;
+    e.push('<rect x="'+dx+'" y="'+(oy+t)+'" width="'+t+'" height="'+(dH-tkPx-2*t)+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  }
+  // sections — zones
+  S.secs.forEach(function(sec,si){
+    var secX=ox+t+secW*si;
+    var secInnerW=secW-(si<n-1?t:0);
+    var innerH=dH-tkPx-2*t;
+    var innerTop=oy+t;
+    var totZH=sec.zones.reduce(function(s,z){return s+z.h;},0);
+    var scaleZ=innerH/totZH;
+    var curY=innerTop;
+    sec.zones.forEach(function(z){
+      var zh=z.h*scaleZ;
+      var col=z.type==='hanging'?'rgba(160,120,74,.12)':z.type==='shelves'?'rgba(122,96,64,.1)':'rgba(176,64,48,.08)';
+      e.push('<rect x="'+(secX+1)+'" y="'+(curY+1)+'" width="'+(secInnerW-2)+'" height="'+(zh-2)+'" fill="'+col+'" rx="1"/>');
+      var lbl=z.type.charAt(0).toUpperCase();
+      e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(curY+zh/2+3)+'" text-anchor="middle" font-family="'DM Sans'" font-size="7" font-weight="700" fill="'+ac+'" opacity=".7">'+lbl+'</text>');
+      curY+=zh;
+    });
+    // door outline
+    if(sec.door.on){
+      var doorY=sec.door.bottom==='panel'?(oy+t):(oy);
+      var doorH2=sec.door.bottom==='panel'?(dH-tkPx-2*t):(dH);
+      var doorInset=2;
+      e.push('<rect x="'+(secX+doorInset)+'" y="'+(doorY+doorInset)+'" width="'+(secInnerW-doorInset*2)+'" height="'+(doorH2-doorInset*2)+'" fill="none" stroke="'+ac+'" stroke-width="1.2" rx="1" opacity=".6"/>');
+    }
+  });
+  // unit dividers
+  if(S.modUnits>1){
+    var uWpx=dW/S.modUnits;
+    for(var u=1;u<S.modUnits;u++){
+      var ux=ox+u*uWpx;
+      e.push('<line x1="'+ux+'" y1="'+oy+'" x2="'+ux+'" y2="'+(oy+dH)+'" stroke="'+ac+'" stroke-width="1.5" stroke-dasharray="5,3" opacity=".5"/>');
+    }
+  }
+  // dim arrows
+  var awY=oy+dH+14;
+  e.push('<line x1="'+ox+'" y1="'+awY+'" x2="'+(ox+dW)+'" y2="'+awY+'" stroke="'+ac+'" stroke-width="1"/>');
+  e.push('<polygon points="'+ox+','+(awY-3)+' '+(ox+6)+','+awY+' '+ox+','+(awY+3)+'" fill="'+ac+'"/>');
+  e.push('<polygon points="'+(ox+dW)+','+(awY-3)+' '+(ox+dW-6)+','+awY+' '+(ox+dW)+','+(awY+3)+'" fill="'+ac+'"/>');
+  e.push('<text x="'+(ox+dW/2)+'" y="'+(awY+9)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac+'">'+S.w+'mm</text>');
+  var ahX=ox-14;
+  e.push('<line x1="'+ahX+'" y1="'+oy+'" x2="'+ahX+'" y2="'+(oy+dH)+'" stroke="'+ac+'" stroke-width="1"/>');
+  e.push('<polygon points="'+(ahX-3)+','+oy+' '+ahX+','+(oy+5)+' '+(ahX+3)+','+oy+'" fill="'+ac+'"/>');
+  e.push('<polygon points="'+(ahX-3)+','+(oy+dH)+' '+ahX+','+(oy+dH-5)+' '+(ahX+3)+','+(oy+dH)+'" fill="'+ac+'"/>');
+  e.push('<text x="'+ahX+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac+'" transform="rotate(-90 '+ahX+' '+(oy+dH/2)+')">'+S.h+'mm</text>');
+  document.getElementById('wsvg').innerHTML=e.join('');
+}
+
+function drawSide(){
+  var VW=340,VH=240,PAD=32;
+  var sc=Math.min((VH-PAD*2)/S.h,(VW-PAD*3)/S.d);
+  var dW=S.d*sc,dH=S.h*sc,ox=(VW-dW)/2,oy=(VH-dH)/2;
+  var t=S.thick*sc,tkPx=S.tkH*sc,doorPx=S.doorThick*sc;
+  var ac='#A0784A',light='#DDD5C8';
+  var e=[];
+  e.push('<rect x="'+(ox+3)+'" y="'+(oy+3)+'" width="'+dW+'" height="'+dH+'" fill="rgba(28,26,23,.12)" rx="2"/>');
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+dW+'" height="'+dH+'" fill="#EFEBE3" rx="2" stroke="'+light+'" stroke-width="1"/>');
+  var fY=oy+dH-tkPx;
+  e.push('<rect x="'+ox+'" y="'+fY+'" width="'+(S.tkThick*sc)+'" height="'+tkPx+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
+  if(S.tkStyle==='flush'){
+    e.push('<rect x="'+(ox+dW-S.tkThick*sc)+'" y="'+fY+'" width="'+(S.tkThick*sc)+'" height="'+tkPx+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
+  } else {
+    var sb2=S.tkSetback*sc;
+    e.push('<rect x="'+(ox+dW-sb2-S.tkThick*sc)+'" y="'+fY+'" width="'+(S.tkThick*sc)+'" height="'+tkPx+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
+    var fpH2=tkPx-S.tkGap*sc;
+    e.push('<rect x="'+(ox+dW-S.tkThick*sc*.7)+'" y="'+fY+'" width="'+(S.tkThick*sc*.7)+'" height="'+fpH2+'" fill="#E8E1D6" stroke="'+light+'" stroke-width="1"/>');
+  }
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+t+'" height="'+dH+'" fill="#E8E1D6" stroke="'+light+'" stroke-width=".5"/>');
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+dW+'" height="'+t+'" fill="#E8E1D6" opacity=".8" stroke="'+light+'" stroke-width=".5"/>');
+  e.push('<rect x="'+ox+'" y="'+(fY-t)+'" width="'+dW+'" height="'+t+'" fill="#E8E1D6" opacity=".8" stroke="'+light+'" stroke-width=".5"/>');
+  var bX=S.backType==='inset'?ox+t+S.backThick*sc:ox;
+  e.push('<rect x="'+bX+'" y="'+(oy+t)+'" width="'+(S.backThick*sc)+'" height="'+(dH-2*t-tkPx)+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
+  var dX=ox+dW+3;
+  e.push('<rect x="'+dX+'" y="'+(oy+S.topgap*sc)+'" width="'+doorPx+'" height="'+(dH-S.topgap*sc-S.botgap*sc)+'" rx="1" fill="#E8E1D6" stroke="'+ac+'" stroke-width="1.5" opacity=".85"/>');
+  e.push('<text x="'+(dX+doorPx/2)+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="'DM Sans'" font-size="7" fill="'+ac+'" transform="rotate(-90 '+(dX+doorPx/2)+' '+(oy+dH/2)+')">DOOR '+S.doorThick+'mm</text>');
+  if(S.spType!=='none'){
+    var spT3=S.spThick*sc,spEH4=S.spType==='extended'?S.spEH*sc:0;
+    e.push('<rect x="'+(ox-spT3-2)+'" y="'+(oy-spEH4)+'" width="'+spT3+'" height="'+(dH+spEH4)+'" fill="#F0EAE0" stroke="'+ac+'" stroke-width="1.5" rx="1"/>');
+    var anY=oy+dH+18;
+    e.push('<line x1="'+ox+'" y1="'+anY+'" x2="'+(ox+dW+doorPx+S.hinge*sc)+'" y2="'+anY+'" stroke="'+ac+'" stroke-width="1"/>');
+    e.push('<text x="'+((ox+ox+dW+doorPx+S.hinge*sc)/2)+'" y="'+(anY+9)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" fill="'+ac+'">Panel depth: '+(S.d+S.doorThick+S.hinge)+'mm</text>');
+  }
+  e.push('<rect x="'+ox+'" y="'+oy+'" width="'+dW+'" height="'+dH+'" fill="none" stroke="'+light+'" stroke-width="2" rx="2"/>');
+  var ac4='#A0784A';
+  e.push('<line x1="'+ox+'" y1="'+(oy-12)+'" x2="'+(ox+dW)+'" y2="'+(oy-12)+'" stroke="'+ac4+'" stroke-width="1"/>');
+  e.push('<text x="'+(ox+dW/2)+'" y="'+(oy-16)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac4+'">'+S.d+'mm depth</text>');
+  document.getElementById('wsvg').innerHTML=e.join('');
+}
+
+// ══════════════════════════════════════════════════════
+//  CALCULATION ENGINE (fixed)
+// ══════════════════════════════════════════════════════
+function calculate(){
+  var w=S.w,h=S.h,d=S.d,t=S.thick;
+  var backType=S.backType,backThick=S.backThick,clear=S.clear;
+  var overlay=S.overlay,doorThick=S.doorThick,dgap=S.dgap,hinge=S.hinge;
+  var topgap=S.topgap,botgap=S.botgap;
+  var tkH=S.tkH,tkStyle=S.tkStyle,tkSetback=S.tkSetback,tkThick=S.tkThick,tkGap=S.tkGap;
+  var modUnits=S.modUnits,modJoin=S.modJoin;
+  var spType=S.spType,spL=S.spL,spR=S.spR;
+  var n=S.secs.length,parts=[];
+
+  // Core dimensions
+  var carcH=h-tkH;  // full carcass height (includes top/bottom panels)
+  var innerH=carcH-2*t;  // usable inner height between top and bottom panels
+
+  // Depth calculations — side panels run full depth d
+  // For inset back: back panel sits in groove, side depth is still d
+  // Top/bottom/divider depth = d minus back panel thickness (for inset) or d (for nailon)
+  var panelD = backType==='inset' ? d-backThick : d;
+
+  // Per modular unit
+  var unitW=w/modUnits;
+  var secsPerUnit=Math.ceil(n/modUnits);
+  var divsPerUnit=secsPerUnit-1;
+
+  // Opening width per section within a unit
+  var unitOpenW=(unitW-2*t-divsPerUnit*t)/secsPerUnit;
+
+  var topBotW=R(unitW-2*t);
+  var divH=R(innerH);
+  var divD=R(panelD);
+
+  // Back panel
+  // Inset: spans between sides, height between top and bottom panel, +groove overlap
+  var backW = backType==='inset' ? R(topBotW + backThick*2) : R(unitW);
+  var backH = backType==='inset' ? R(innerH + backThick*2) : R(carcH);
+
+  var mrCount=S.tkMrMode==='manual'?S.tkMrQty:autoMrCount(unitW);
+  var mrLen=R(d-2*tkThick);
+
+  // ── CARCASS ──
+  var joinP=modUnits>1?(modJoin==='butt'?(modUnits-1)*2:(modUnits-1)):0;
+  parts.push({
+    name:'Side Panel', qty:2+joinP,
+    w:R(h), d:R(d),
+    tag:'carcass',
+    note:'H×D: '+R(h)+' × '+R(d)+' — full height, covers subframe'+(modUnits>1?' (incl. '+joinP+' join panels)':'')
+  });
+  parts.push({
+    name:'Top Panel', qty:modUnits,
+    w:topBotW, d:R(panelD),
+    tag:'carcass',
+    note:'W×D: '+topBotW+' × '+R(panelD)+' per unit'
+  });
+  parts.push({
+    name:'Bottom Panel', qty:modUnits,
+    w:topBotW, d:R(panelD),
+    tag:'carcass',
+    note:'W×D: '+topBotW+' × '+R(panelD)+' — rests on top of subframe'
+  });
+  if(divsPerUnit>0){
+    parts.push({
+      name:'Internal Divider', qty:modUnits*divsPerUnit,
+      w:divH, d:divD,
+      tag:'carcass',
+      note:'H×D: '+divH+' × '+divD+' — sits between top & bottom panels only'
+    });
+  }
+  parts.push({
+    name:'Back Panel ('+(backType==='inset'?'Inset groove '+backThick+'mm':'Nail-on '+backThick+'mm')+')',
+    qty:modUnits, w:backW, d:backH,
+    tag:'carcass',
+    note:'W×H: '+backW+' × '+backH+' per unit'
+  });
+
+  // ── SUBFRAME ──
+  parts.push({name:'Subframe Front Rail',qty:modUnits,w:R(unitW),d:tkH,tag:'frame',note:'W×H: '+R(unitW)+' × '+tkH+' — full unit width'});
+  parts.push({name:'Subframe Back Rail',qty:modUnits,w:R(unitW),d:tkH,tag:'frame',note:'W×H: '+R(unitW)+' × '+tkH+' — sandwiches mid-rails'});
+  parts.push({name:'Subframe Mid-Rail',qty:modUnits*mrCount,w:mrLen,d:tkH,tag:'frame',note:'L×H: '+mrLen+' × '+tkH+' — '+mrCount+'/unit'});
+  var fpH=R(tkH-tkGap);
+  parts.push({name:'Subframe Face Panel (Toe Kick)',qty:modUnits,w:topBotW,d:fpH,tag:'frame',note:'W×H: '+topBotW+' × '+fpH+' — '+tkGap+'mm gap to door'});
+  if(tkStyle==='setback'){
+    parts.push({name:'Subframe Face Mounting Rail',qty:modUnits,w:R(unitW-2*tkThick),d:tkThick,tag:'frame',note:'W×D: '+R(unitW-2*tkThick)+' × '+tkThick+' — '+tkSetback+'mm setback'});
+  }
+
+  // ── SECTIONS ──
+  S.secs.forEach(function(sec,si){
+    var sn='Sec '+(si+1);
+    // Shelf and drawer width uses section opening minus clearance each side
+    var shelfW=R(unitOpenW-clear*2);
+    var shelfD=R(d-50);  // 50mm clearance from front
+
+    sec.zones.forEach(function(z){
+      if(z.type==='shelves'&&z.shelves>0){
+        parts.push({name:'Shelf ('+sn+')',qty:z.shelves,w:shelfW,d:shelfD,tag:'shelf',
+          note:'W×D: '+shelfW+' × '+shelfD+' ('+clear+'mm clearance each side)'});
+      }
+      if(z.type==='drawers'&&z.drawers>0){
+        var ndr=z.drawers;
+        var drOpenH=R(z.h/ndr);
+        var drBoxH=R(drOpenH-24);  // 24mm for drawer slides + clearance
+        var drBoxD=R(d-100);       // 100mm from front face
+        var drBoxW=R(unitOpenW-26); // 26mm for drawer runners each side
+
+        // Drawer false front: same width as section opening + overlay on each side, minus gap if multiple per section
+        // (drawers stack vertically in one section, so each front spans full opening width)
+        var dfW=R(unitOpenW+overlay*2-dgap);
+        var dfH=R(drOpenH-dgap);  // height of each drawer front minus gap
+
+        parts.push({name:'Drawer False Front ('+sn+')',qty:ndr,w:dfW,d:dfH,tag:'drawer',
+          note:'W×H: '+dfW+' × '+dfH+' — overlay '+overlay+'mm'});
+        parts.push({name:'Drawer Box Side ('+sn+')',qty:ndr*2,w:drBoxD,d:drBoxH,tag:'drawer',
+          note:'D×H: '+drBoxD+' × '+drBoxH});
+        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndr*2,w:drBoxW,d:drBoxH,tag:'drawer',
+          note:'W×H: '+drBoxW+' × '+drBoxH});
+        parts.push({name:'Drawer Base ('+sn+')',qty:ndr,w:drBoxW,d:drBoxD,tag:'drawer',
+          note:'W×D: '+drBoxW+' × '+drBoxD});
+      }
+    });
+
+    // Doors
+    if(sec.door.on){
+      var nd=sec.door.count||1;
+      if(sec.door.type==='hinged'){
+        // Full height: floor to top of carcass minus gaps. To panel: carcass panel to panel
+        var doorH=sec.door.bottom==='panel'?R(carcH-topgap-botgap):R(h-topgap-botgap);
+        // Width: section opening + overlay each side, divided by door count, minus gap between doors
+        var doorW=R((unitOpenW+overlay*2)/nd - (nd>1?dgap:0));
+        var mNote=sec.door.bottom==='panel'
+          ?'To bottom panel — toe kick visible.'
+          :'Full height — covers subframe, '+botgap+'mm floor gap.';
+        parts.push({name:'Door ('+sn+')',qty:nd,w:doorW,d:doorH,tag:'door',
+          note:'W×H: '+doorW+' × '+doorH+' | overlay '+overlay+'mm. '+mNote});
+      } else {
+        // Sliding: panels overlap ~10%, height slightly less for track
+        var slideH=sec.door.bottom==='panel'?R(carcH-20):R(h-20);
+        var slideW=R(unitOpenW*0.55);
+        parts.push({name:'Sliding Door Leaf ('+sn+')',qty:Math.max(2,nd),w:slideW,d:slideH,tag:'door',
+          note:'W×H: '+slideW+' × '+slideH+' — 55% of opening (10% overlap)'});
+      }
+    }
+  });
+
+  // ── SIDE PANELS ──
+  if(spType!=='none'){
+    var spBaseD=d+doorThick+hinge;
+    var spHh=R(h+(spType==='extended'?S.spEH:0));
+    var spDd=R(spBaseD+(spType==='extended'?S.spED:0)+(spType==='scribing'?S.spSW:0));
+    var spNote='Extends '+doorThick+'mm door + '+hinge+'mm hinge gap past carcass face';
+    if(spL>0)parts.push({name:'Left Applied End Panel',qty:1,w:spHh,d:spDd,tag:'panel',note:'H×D: '+spHh+' × '+spDd+' — '+spNote});
+    if(spR>0)parts.push({name:'Right Applied End Panel',qty:1,w:spHh,d:spDd,tag:'panel',note:'H×D: '+spHh+' × '+spDd+' — '+spNote});
+  }
+  if(S.pelEn){
+    parts.push({name:'Top Pelmet',qty:1,w:R(w),d:R(S.pelH),tag:'carcass',note:'W×H: '+R(w)+' × '+R(S.pelH)});
+  }
+
+  // ── CONSOLIDATE CUT LIST ──
+  var cm={};
+  parts.forEach(function(p){
+    var k=p.w+'x'+p.d;
+    if(!cm[k])cm[k]={w:p.w,d:p.d,qty:0,names:[],tag:p.tag};
+    cm[k].qty+=p.qty;
+    if(cm[k].names.indexOf(p.name)===-1)cm[k].names.push(p.name);
+  });
+  var cutList=Object.values(cm).sort(function(a,b){return b.w*b.d-a.w*a.d;});
+
+  // ── MATERIAL ESTIMATE ──
+  var SHEET=2440*1220,area=0;
+  parts.forEach(function(p){area+=p.w*p.d*p.qty;});
+  var sheets=Math.ceil(area/SHEET*1.15),sqm=(area/1e6).toFixed(2);
+  var eb=0;
+  parts.forEach(function(p){eb+=(p.w*2+p.d*2)*p.qty;});
+
+  return{
+    parts:parts,cutList:cutList,sheets:sheets,sqm:sqm,
+    eb:R(eb/1000),openW:R(unitOpenW),carcH:carcH,innerH:innerH,
+    mrCount:mrCount,mrLen:mrLen,unitW:R(unitW),
+    spDepth:spType!=='none'?d+doorThick+hinge:0,
+    topBotW:topBotW,divH:divH,panelD:R(panelD)
+  };
+}
+
+// ══════════════════════════════════════════════════════
+//  GENERATE RESULTS
+// ══════════════════════════════════════════════════════
+function generate(){
+  sync();
+  var r=calculate();
+  var parts=r.parts,cutList=r.cutList;
+  var TL={carcass:'CARCASS',frame:'SUBFRAME',door:'DOOR',drawer:'DRAWER',shelf:'SHELF',panel:'END PANEL'};
+  var totalPcs=parts.reduce(function(s,p){return s+p.qty;},0);
+  var totalCuts=cutList.reduce(function(s,c){return s+c.qty;},0);
+  var tagOrder=['carcass','frame','shelf','drawer','door','panel'];
+  var sorted=parts.slice().sort(function(a,b){return tagOrder.indexOf(a.tag)-tagOrder.indexOf(b.tag);});
+
+  // Alpha warning
+  var aw='<div class="alpha-warn"><strong>⚠ Alpha Version:</strong> This calculator is in active development. Always verify all dimensions against your actual measurements before cutting. If you find an error, <a href="https://wa.me/233244633464?text=Hi Neewoody, I found a cutlist issue: " style="color:var(--rd);font-weight:600">let us know</a>.</div>';
+
+  // Parts table
+  var ph='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Parts List</div><div class="rcard-badge">'+totalPcs+' pieces</div></div>';
+  ph+='<table class="ptable"><thead><tr><th>Part</th><th style="text-align:center">Qty</th><th style="text-align:right">W × D (mm)</th></tr></thead><tbody>';
+  var lastTag='';
+  sorted.forEach(function(p){
+    if(p.tag!==lastTag){
+      ph+='<tr><td colspan="3" style="padding:.3rem .85rem .2rem;background:var(--clr-accent-lt);font-family:var(--mono);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-accent)">'+(TL[p.tag]||p.tag.toUpperCase())+'</td></tr>';
+      lastTag=p.tag;
+    }
+    ph+='<tr><td><div class="pname">'+p.name+'</div>'+(p.note?'<div class="pnote">'+p.note+'</div>':'')+'</td><td class="pqty">'+p.qty+'</td><td style="text-align:right"><span class="pdim">'+p.w+' × '+p.d+'</span></td></tr>';
+  });
+  ph+='</tbody></table></div>';
+
+  // Cut list
+  var ch='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Cut List</div><div class="rcard-badge">'+totalCuts+' cuts · '+cutList.length+' unique sizes</div></div>';
+  cutList.forEach(function(c){
+    ch+='<div class="cut-row"><div class="cut-badge">'+c.qty+'</div><div class="cut-info"><div class="cut-dims">'+c.w+' × '+c.d+'</div><div class="cut-names">'+c.names.slice(0,3).join(' · ')+'</div></div><div class="cut-cat">'+(TL[c.tag]||c.tag)+'</div></div>';
+  });
+  ch+='</div>';
+
+  // Zone summary
+  var zs='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Zone Summary</div></div>';
+  S.secs.forEach(function(sec,si){
+    var totZH=sec.zones.reduce(function(s,z){return s+z.h;},0);
+    var avail=carcassInnerH(),diff=totZH-avail;
+    var col=Math.abs(diff)>10?'var(--rd)':'var(--gn)';
+    zs+='<div style="padding:.6rem .85rem;border-bottom:1px solid var(--clr-border)"><div style="font-family:var(--mono);font-size:.72rem;font-weight:600;color:var(--clr-accent);margin-bottom:.25rem">Section '+(si+1)+'</div>';
+    sec.zones.forEach(function(z){
+      zs+='<div style="display:flex;justify-content:space-between;padding:.15rem 0;font-size:.82rem"><span>'+z.type.charAt(0).toUpperCase()+z.type.slice(1)+'</span><span style="font-family:var(--mono);color:var(--clr-mid)">'+z.h+'mm'+(z.type==='shelves'?' · '+z.shelves+' shelves':z.type==='drawers'?' · '+z.drawers+' drawers':'')+'</span></div>';
+    });
+    zs+='<div style="display:flex;justify-content:space-between;padding-top:.3rem;border-top:1px solid var(--clr-border);margin-top:.25rem;font-family:var(--mono);font-size:.72rem"><span style="color:var(--clr-muted)">Total / Available</span><span style="color:'+col+'">'+totZH+' / '+avail+'mm '+(diff>0?'(+'+diff+' OVER)':diff<0?'('+((-diff))+'mm short)':'✓ OK')+'</span></div></div>';
+  });
+  zs+='</div>';
+
+  // Material summary
+  var mh='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Material Summary</div></div>';
+  mh+='<div class="stat-grid">';
+  mh+='<div class="stat-cell"><div class="stat-val">'+r.sqm+'</div><div class="stat-lbl">m² Net Area</div><div class="stat-sub">excl. waste</div></div>';
+  mh+='<div class="stat-cell"><div class="stat-val">'+r.sheets+'</div><div class="stat-lbl">Sheets 2440×1220</div><div class="stat-sub">+15% waste</div></div>';
+  mh+='<div class="stat-cell"><div class="stat-val">'+r.eb+'m</div><div class="stat-lbl">Edgebanding</div><div class="stat-sub">linear metres</div></div>';
+  mh+='<div class="stat-cell"><div class="stat-val">'+r.openW+'</div><div class="stat-lbl">Opening Width</div><div class="stat-sub">mm per section</div></div>';
+  mh+='</div>';
+  mh+='<div class="info-block">';
+  mh+='<div class="info-row"><span class="ik">Carcass Height</span><span class="iv">'+r.carcH+'mm ('+S.h+'−'+S.tkH+')</span></div>';
+  mh+='<div class="info-row"><span class="ik">Inner Height (zones)</span><span class="iv">'+r.innerH+'mm (carcH − 2×'+S.thick+')</span></div>';
+  mh+='<div class="info-row"><span class="ik">Top / Bottom Panel</span><span class="iv">'+r.topBotW+' × '+r.panelD+'mm</span></div>';
+  mh+='<div class="info-row"><span class="ik">Divider</span><span class="iv">'+r.divH+' × '+r.panelD+'mm</span></div>';
+  mh+='<div class="info-row"><span class="ik">Back Panel</span><span class="iv">'+(S.backType==='inset'?'Inset '+S.backThick+'mm':'Nail-on '+S.backThick+'mm')+'</span></div>';
+  mh+='<div class="info-row"><span class="ik">Board Thickness</span><span class="iv">'+S.thick+'mm</span></div>';
+  mh+='<div class="info-row"><span class="ik">Door Overlay</span><span class="iv">'+S.overlay+'mm — T'+S.topgap+'/B'+S.botgap+'/G'+S.dgap+'mm</span></div>';
+  if(S.modUnits>1)mh+='<div class="info-row"><span class="ik">Modular Units</span><span class="iv">'+S.modUnits+'× '+r.unitW+'mm — '+(S.modJoin==='butt'?'Butt join':'Shared divider')+'</span></div>';
+  if(r.spDepth)mh+='<div class="info-row"><span class="ik">Side Panel Depth</span><span class="iv">'+r.spDepth+'mm ('+S.d+'+'+S.doorThick+'+'+S.hinge+')</span></div>';
+  mh+='</div></div>';
+
+  // Notes
+  var nh='<div class="notes-card"><div class="notes-hdr">Construction Notes</div>';
+  nh+='<div class="note-item"><div class="nbullet">1.</div><div class="ntext"><strong>SUBFRAME:</strong> Front rail ('+r.unitW+'×'+S.tkH+'mm) and back rail (same). '+r.mrCount+' mid-rails at '+r.mrLen+'×'+S.tkH+'mm. Place 2 end mid-rails flush with sides; space '+Math.max(0,r.mrCount-2)+' intermediates evenly.</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">2.</div><div class="ntext"><strong>SIDE PANELS:</strong> '+R(S.h)+'mm tall — full height, cover outside of subframe. Bottom panel ('+r.topBotW+'mm wide) screws onto top of subframe, between sides.</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">3.</div><div class="ntext"><strong>DIVIDERS:</strong> '+r.divH+'mm — sit between top and bottom carcass panels only. Do not enter the subframe zone.</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">4.</div><div class="ntext"><strong>BACK PANEL:</strong> '+(S.backType==='inset'?'Inset '+S.backThick+'mm — route a groove '+S.backThick+'mm wide into side panels and top/bottom panels before assembly.':'Nail-on '+S.backThick+'mm — screw to back face of assembled carcass.')+'</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">5.</div><div class="ntext"><strong>FACE PANEL / TOE KICK:</strong> '+r.topBotW+'×'+R(S.tkH-S.tkGap)+'mm. '+S.tkGap+'mm gap prevents door binding on close. '+(S.tkStyle==='setback'?'Frame set back '+S.tkSetback+'mm — creates the toe kick recess.':'Flush with front.')+'</div></div>';
+  if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> '+(S.modJoin==='butt'?'Butt join — two side panels face-to-face at each join. Screw through to connect.':'Shared divider — one panel serves both adjacent units.')+'</div></div>';
+  if(S.spType!=='none')nh+='<div class="note-item"><div class="nbullet">'+(S.modUnits>1?'7.':'6.')+'</div><div class="ntext"><strong>APPLIED SIDE PANELS:</strong> '+r.spDepth+'mm deep. Full height — covers carcass sides and subframe, extends past door face.</div></div>';
+  nh+='</div>';
+
+  // CTA card
+  var ctaCard='<div class="result-cta"><h3>Found this useful?</h3><p>Follow us to get updates when we add new features, fix bugs, and release new carpenter tools.</p><div class="social-btns"><a href="https://www.instagram.com/neewoodygh" class="btn-ig" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>@neewoodygh Instagram</a><a href="https://www.tiktok.com/@neewoodygh" class="btn-tk" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>@neewoodygh TikTok</a></div></div>';
+
+  // Brand footer with logo
+  var bf='<div class="brand-footer"><img src="images/Neewoody_PNG_1.png" class="bf-logo" alt="Neewoody logo"><div class="bf-info"><div class="bf-name">Neewoody Custom Woodwork</div><div class="bf-details">Accra, Ghana &nbsp;·&nbsp; <a href="tel:+233244633464">+233 24 463 3464</a> &nbsp;·&nbsp; <a href="https://instagram.com/neewoodygh">@neewoodygh</a> &nbsp;·&nbsp; neewoodygh.com</div></div></div>';
+
+  document.getElementById('rbody').innerHTML=aw+ph+ch+zs+mh+nh+ctaCard+bf;
+  document.getElementById('rpage').classList.add('show');
+  document.getElementById('rpage').scrollTop=0;
+}
+
+function closeR(){document.getElementById('rpage').classList.remove('show');}
+
+// INIT
+renderSecs();
+setSP('flush');
+live();
+</script>
+</body>
+</html>
