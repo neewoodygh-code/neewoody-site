@@ -220,10 +220,20 @@ function renderInstagramGrid(posts) {
 //   .catch(() => {}); // silently keep static cards on error
 */
 /* ── Instagram scroll buttons ── */
-const instaGrid = document.getElementById('insta-grid');
-document.querySelector('.insta-scroll-btn--left')?.addEventListener('click', () => {
-  instaGrid.scrollBy({ left: -300, behavior: 'smooth' });
-});
-document.querySelector('.insta-scroll-btn--right')?.addEventListener('click', () => {
-  instaGrid.scrollBy({ left: 300, behavior: 'smooth' });
+document.addEventListener('DOMContentLoaded', function () {
+  const instaGrid = document.getElementById('insta-grid');
+  const btnLeft = document.querySelector('.insta-scroll-btn--left');
+  const btnRight = document.querySelector('.insta-scroll-btn--right');
+
+  if (btnLeft && instaGrid) {
+    btnLeft.addEventListener('click', function () {
+      instaGrid.scrollBy({ left: -300, behavior: 'smooth' });
+    });
+  }
+
+  if (btnRight && instaGrid) {
+    btnRight.addEventListener('click', function () {
+      instaGrid.scrollBy({ left: 300, behavior: 'smooth' });
+    });
+  }
 });
