@@ -902,21 +902,21 @@ function renderSecs(){
       '<div class="zone-list" id="zones-'+si+'">'+zonesHTML+'</div>'+
       '<button class="add-zone-btn" onclick="toggleZoneMenu('+si+')">+ Add Zone</button>'+
       '<div class="zone-menu" id="zmenu-'+si+'" style="display:'+showAdd+'">'+
-        '<button class="zm-btn" onclick="addZone('+si+','hanging')">Hanging Rail</button>'+
-        '<button class="zm-btn" onclick="addZone('+si+','shelves')">Shelves</button>'+
-        '<button class="zm-btn" onclick="addZone('+si+','drawers')">Drawers</button>'+
+        '<button class="zm-btn" onclick="addZone('+si+',\"hanging\")">Hanging Rail</button>'+
+        '<button class="zm-btn" onclick="addZone('+si+',\"shelves\")">Shelves</button>'+
+        '<button class="zm-btn" onclick="addZone('+si+',\"drawers\")">Drawers</button>'+
       '</div>'+
       '<div class="door-block">'+
         '<div class="db-title">Door</div>'+
         '<div class="tog-row"><label class="toggle"><input type="checkbox" id="don-'+si+'"'+(sec.door.on?' checked':'')+' onchange="toggleDoor('+si+')"><span class="tslide"></span></label><span class="tog-lbl">Include door</span></div>'+
         '<div id="door-opts-'+si+'" style="display:'+(sec.door.on?'flex':'none')+';flex-direction:column;gap:.5rem;margin-top:.35rem">'+
           '<div class="pill-row">'+
-            '<button class="pill'+(sec.door.type==='hinged'?' ac':'')+'" onclick="setDoorProp('+si+','type','hinged')">Hinged</button>'+
-            '<button class="pill'+(sec.door.type==='sliding'?' ac':'')+'" onclick="setDoorProp('+si+','type','sliding')">Sliding</button>'+
+            '<button class="pill'+(sec.door.type==='hinged'?' ac':'')+'" onclick="setDoorProp('+si+',\"type\",\"hinged\")">Hinged</button>'+
+            '<button class="pill'+(sec.door.type==='sliding'?' ac':'')+'" onclick="setDoorProp('+si+',\"type\",\"sliding\")">Sliding</button>'+
           '</div>'+
           '<div class="pill-row">'+
-            '<button class="pill'+(sec.door.bottom==='panel'?' gn':'')+'" onclick="setDoorProp('+si+','bottom','panel')">To panel</button>'+
-            '<button class="pill'+(sec.door.bottom==='full'?' gn':'')+'" onclick="setDoorProp('+si+','bottom','full')">Full height</button>'+
+            '<button class="pill'+(sec.door.bottom==='panel'?' gn':'')+'" onclick="setDoorProp('+si+',\"bottom\",\"panel\")">To panel</button>'+
+            '<button class="pill'+(sec.door.bottom==='full'?' gn':'')+'" onclick="setDoorProp('+si+',\"bottom\",\"full\")">Full height</button>'+
           '</div>'+
           '<div class="tog-row"><span class="tog-lbl" style="margin-right:.5rem">Door count:</span>'+
             '<div class="counter"><button onclick="adjDoor('+si+',-1)">−</button><div class="cv" id="dc-'+si+'">'+sec.door.count+'</div><button onclick="adjDoor('+si+',1)">+</button></div>'+
