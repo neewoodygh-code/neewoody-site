@@ -576,15 +576,57 @@ details[open] .faq-question::after { transform: rotate(45deg); }
 .page-hero .hero-ctas { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
 
 /* ═══ INSTAGRAM GRID ═══ */
-.insta-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: .5rem;
+/* ── Instagram Grid Wrapper (for arrow buttons) ── */
+.insta-grid-wrapper {
+  position: relative;
   margin-top: 1rem;
 }
+
+.insta-scroll-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  background: var(--clr-bg-alt);
+  border: 1px solid #e0d8ce;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  transition: background .2s;
+}
+.insta-scroll-btn:hover { background: #e8dfd3; }
+.insta-scroll-btn--left  { left: -20px; }
+.insta-scroll-btn--right { right: -20px; }
+
+/* ── Grid ── */
+.insta-grid {
+  display: flex;
+  gap: .5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 12px;
+}
+
+.insta-grid::-webkit-scrollbar { height: 4px; }
+.insta-grid::-webkit-scrollbar-track { background: transparent; }
+.insta-grid::-webkit-scrollbar-thumb {
+  background: #c9b99a;
+  border-radius: 4px;
+}
+
+/* ── Cards ── */
 .insta-card {
   position: relative;
-  aspect-ratio: 1;
+  flex: 0 0 280px;
+  height: 280px;
+  scroll-snap-align: start;
   overflow: hidden;
   border-radius: var(--radius);
   background: var(--clr-bg-alt);
@@ -607,13 +649,16 @@ details[open] .faq-question::after { transform: rotate(45deg); }
 .insta-card:hover .insta-card-overlay { opacity: 1; }
 .insta-card--empty {
   background: var(--clr-bg-alt);
-  min-height: 100px;
+  min-height: 280px;
 }
+
+/* ── Hide arrows on mobile (touch swipe is enough) ── */
 @media (max-width: 768px) {
-  .insta-grid { grid-template-columns: repeat(3, 1fr); }
+  .insta-scroll-btn { display: none; }
+  .insta-card { flex: 0 0 220px; height: 220px; }
 }
 @media (max-width: 480px) {
-  .insta-grid { grid-template-columns: repeat(2, 1fr); }
+  .insta-card { flex: 0 0 160px; height: 160px; }
 }
 
 /* ═══ SEO TEXT SECTION ═══ */
