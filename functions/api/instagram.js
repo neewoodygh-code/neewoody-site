@@ -14,10 +14,13 @@ export async function onRequestGet(context) {
     .filter(item =>
       ["IMAGE", "CAROUSEL_ALBUM", "VIDEO"].includes(item.media_type)
     )
+    .filter(item =>
+      item.media_type !== "VIDEO" || item.thumbnail_url
+    )
     .slice(0, 6)
     .map(item => ({
       image: item.media_type === "VIDEO"
-        ? item.thumbnail_url
+        ? (item.thumbnail_url || null)
         : item.media_url,
       caption: item.caption,
       permalink: item.permalink
