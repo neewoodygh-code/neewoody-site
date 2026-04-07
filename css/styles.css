@@ -625,6 +625,7 @@ details[open] .faq-question::after { transform: rotate(45deg); }
 .insta-card {
   position: relative;
   flex: 0 0 280px;
+  width: 280px;
   height: 280px;
   scroll-snap-align: start;
   overflow: hidden;
