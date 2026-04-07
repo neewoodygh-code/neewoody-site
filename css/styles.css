@@ -660,3 +660,18 @@ details[open] .faq-question::after { transform: rotate(45deg); }
   .estimator-teaser-inner { grid-template-columns: 1fr; gap: 1.5rem; padding: 2rem 1.5rem; }
   .estimator-teaser-cta { text-align: left; }
 }
+.reviews-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:30px;
+margin-top:40px;
+}
+
+.review-card{
+background:#fff;
+padding:25px;
+border-radius:8px;
+box-shadow:0 4px 15px rgba(0,0,0,0.08);
+font-size:15px;
+line-height:1.6;
+}
