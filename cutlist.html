@@ -412,6 +412,34 @@ select {
   .calc-tab { font-size: .6rem; letter-spacing: .04em; padding: .6rem .25rem; }
   .social-btns { flex-direction: column; align-items: center; }
 }
+
+/* ── Edge Band Sheet ── */
+.eb-sheet{background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:10px;overflow:hidden}
+.eb-sheet-hdr{padding:.6rem 1rem;background:var(--clr-accent-lt);border-bottom:1px solid var(--clr-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.eb-sheet-title{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-accent)}
+.eb-sheet-sub{font-family:var(--mono);font-size:.62rem;color:var(--clr-muted)}
+.eb-hint{font-size:.68rem;color:var(--clr-muted);padding:.4rem 1rem .6rem;text-align:center;font-family:var(--mono)}
+.eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:20px;padding:16px}
+.eb-item{display:flex;flex-direction:column;align-items:center;gap:5px}
+.eb-box-wrap{position:relative;width:84px;height:66px}
+.eb-box{position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:2px solid #aaa;background:#f5f0e8;border-radius:1px}
+.eb-edge{position:absolute;cursor:pointer;transition:background .15s;z-index:2;border-radius:2px}
+.eb-edge.top{top:0;left:8px;right:8px;height:6px}
+.eb-edge.bottom{bottom:0;left:8px;right:8px;height:6px}
+.eb-edge.left{top:8px;bottom:8px;left:0;width:6px}
+.eb-edge.right{top:8px;bottom:8px;right:0;width:6px}
+.eb-edge.active{background:var(--clr-accent)}
+.eb-edge.inactive{background:rgba(0,0,0,.08)}
+.eb-edge:hover{background:var(--clr-accent);opacity:.7}
+.eb-dim-w{font-family:var(--mono);font-size:.58rem;color:var(--clr-mid);text-align:center}
+.eb-dim-h{position:absolute;right:-26px;top:50%;transform:translateY(-50%) rotate(90deg);font-family:var(--mono);font-size:.58rem;color:var(--clr-mid);white-space:nowrap}
+.eb-part-name{font-size:.6rem;color:var(--clr-mid);text-align:center;line-height:1.3;max-width:100px}
+.eb-qty{font-family:var(--mono);font-size:.6rem;color:var(--clr-accent);font-weight:700}
+/* Zone warnings */
+.zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
+@media print{.eb-edge.inactive{display:none}.eb-edge.active{background:#333!important}}
+
+
 </style>
 </head>
 <body>
@@ -1320,12 +1348,78 @@ function calculate(){
   };
 }
 
+
 // ══════════════════════════════════════════════════════
-//  GENERATE RESULTS
+//  EDGE BAND SHEET
 // ══════════════════════════════════════════════════════
+var ebState = {};
+
+function ebKey(p){ return p.tag+'_'+p.w+'x'+p.d; }
+
+function ebDefault(tag, name){
+  var n = name.toLowerCase();
+  if(tag==='door') return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('false front')!==-1) return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('drawer box front')!==-1||n.indexOf('drawer box back')!==-1||n.indexOf('front/back')!==-1)
+    return {t:true,r:true,b:false,l:true};
+  if(n.indexOf('drawer box side')!==-1) return {t:true,r:false,b:false,l:false};
+  if(n.indexOf('drawer base')!==-1||n.indexOf('back panel')!==-1) return {t:false,r:false,b:false,l:false};
+  if(tag==='frame') return {t:false,r:false,b:false,l:false};
+  if(n.indexOf('side panel')!==-1||tag==='panel') return {t:true,r:false,b:true,l:true};
+  if(n.indexOf('top panel')!==-1||n.indexOf('bottom panel')!==-1||n.indexOf('divider')!==-1)
+    return {t:false,r:true,b:false,l:false};
+  if(tag==='shelf') return {t:false,r:true,b:false,l:false};
+  if(n.indexOf('pelmet')!==-1) return {t:false,r:true,b:false,l:false};
+  return {t:false,r:false,b:false,l:false};
+}
+
+function initEbState(parts){
+  var seen={};
+  parts.forEach(function(p){
+    var k=ebKey(p);
+    if(!seen[k]){seen[k]=true;if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name);}
+  });
+}
+
+function buildEbSheet(parts){
+  var seen={},unique=[];
+  parts.forEach(function(p){
+    var k=ebKey(p);
+    if(!seen[k]){seen[k]=true;unique.push({key:k,part:p});}
+  });
+  var html='<div class="eb-sheet"><div class="eb-sheet-hdr">'+
+    '<div class="eb-sheet-title">Edge Band Sheet</div>'+
+    '<div class="eb-sheet-sub">Click edges to toggle · Pre-marked by euro logic · Print &amp; mark changes by pen</div>'+
+  '</div>'+
+  '<div class="eb-hint">Active edges (dark) = apply edgeband. Tap to toggle.</div>'+
+  '<div class="eb-grid">';
+  unique.forEach(function(u){
+    var k=u.key,p=u.part;
+    var eb=ebState[k]||{t:false,r:false,b:false,l:false};
+    var qty=parts.filter(function(x){return ebKey(x)===k;}).reduce(function(s,x){return s+x.qty;},0);
+    var nm=p.name.replace(/\s*\(Sec\s*\d+\)/g,'');
+    html+='<div class="eb-item">'+
+      '<div class="eb-box-wrap">'+
+        '<div class="eb-edge top '+(eb.t?'active':'inactive')+'" data-ebkey="'+k+'" data-side="t"></div>'+
+        '<div class="eb-edge bottom '+(eb.b?'active':'inactive')+'" data-ebkey="'+k+'" data-side="b"></div>'+
+        '<div class="eb-edge left '+(eb.l?'active':'inactive')+'" data-ebkey="'+k+'" data-side="l"></div>'+
+        '<div class="eb-edge right '+(eb.r?'active':'inactive')+'" data-ebkey="'+k+'" data-side="r"></div>'+
+        '<div class="eb-box"></div>'+
+        '<div class="eb-dim-h">'+p.d+'mm</div>'+
+      '</div>'+
+      '<div class="eb-dim-w">'+p.w+'mm</div>'+
+      '<div class="eb-part-name">'+nm+'</div>'+
+      '<div class="eb-qty">x'+qty+'</div>'+
+    '</div>';
+  });
+  html+='</div></div>';
+  return html;
+}
+
 function generate(){
   sync();
   var r=calculate();
+  initEbState(r.parts);
   var parts=r.parts,cutList=r.cutList;
   var TL={carcass:'CARCASS',frame:'SUBFRAME',door:'DOOR',drawer:'DRAWER',shelf:'SHELF',panel:'END PANEL'};
   var totalPcs=parts.reduce(function(s,p){return s+p.qty;},0);
@@ -1407,7 +1501,8 @@ function generate(){
   // Brand footer with logo
   var bf='<div class="brand-footer"><img src="images/Neewoody_PNG_1.png" class="bf-logo" alt="Neewoody logo"><div class="bf-info"><div class="bf-name">Neewoody Custom Woodwork</div><div class="bf-details">Accra, Ghana &nbsp;·&nbsp; <a href="tel:+233244633464">+233 24 463 3464</a> &nbsp;·&nbsp; <a href="https://instagram.com/neewoodygh">@neewoodygh</a> &nbsp;·&nbsp; neewoodygh.com</div></div></div>';
 
-  document.getElementById('rbody').innerHTML=aw+ph+ch+zs+mh+nh+ctaCard+bf;
+  var ebSheet=buildEbSheet(r.parts);
+  document.getElementById('rbody').innerHTML=aw+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
   document.getElementById('rpage').classList.add('show');
   document.getElementById('rpage').scrollTop=0;
 }
@@ -1418,6 +1513,38 @@ function closeR(){document.getElementById('rpage').classList.remove('show');}
 renderSecs();
 setSP('flush');
 live();
+
+// ══════════════════════════════════════════════════════
+//  CLICK DELEGATION — door props + edge band edges
+// ══════════════════════════════════════════════════════
+document.addEventListener('click', function(e){
+  // Door prop pills (Hinged/Sliding/To panel/Full height)
+  var dp = e.target.closest('.dp-btn');
+  if(dp){
+    var si = parseInt(dp.getAttribute('data-si'));
+    var prop = dp.getAttribute('data-prop');
+    var val  = dp.getAttribute('data-val');
+    if(!isNaN(si) && prop && val){
+      S.secs[si].door[prop] = val;
+      renderSecs();
+      live();
+    }
+    return;
+  }
+  // Edge band edge toggles
+  var eg = e.target.closest('.eb-edge');
+  if(eg){
+    var k    = eg.getAttribute('data-ebkey');
+    var side = eg.getAttribute('data-side');
+    if(k && side){
+      if(!ebState[k]) ebState[k] = {t:false,r:false,b:false,l:false};
+      ebState[k][side] = !ebState[k][side];
+      eg.className = 'eb-edge ' + side + ' ' + (ebState[k][side] ? 'active' : 'inactive');
+    }
+    return;
+  }
+});
+
 </script>
 </body>
 </html>
