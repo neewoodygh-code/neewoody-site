@@ -882,7 +882,8 @@ function carcassInnerH(){return S.h - S.tkH - 2*S.thick;}
 //  SYNC
 // ══════════════════════════════════════════════════════
 function sync(){
-  S.w=gi('i-w',2400);S.h=gi('i-h',2100);S.d=gi('i-d',580);
+  var _um = S.unit==='cm' ? 10 : 1;
+  S.w=gi('i-w',2400)*_um;S.h=gi('i-h',2100)*_um;S.d=gi('i-d',580)*_um;
   S.thick=gi('i-thick',18);S.backType=gv('i-back')||'inset';S.backThick=gi('i-backthick',3);
   S.clear=gi('i-clear',2);S.overlay=gi('i-overlay',11);S.doorThick=gi('i-doorthick',18);
   S.dgap=gi('i-dgap',2);S.hinge=S.clear;  // hinge gap = edge clearance (consolidated)S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
@@ -943,6 +944,31 @@ function swDiag(name,el){
 function unlockPrint(){
   var el=document.getElementById('print-reveal');
   if(el) el.classList.add('unlocked');
+}
+
+function setUnit(u, btn){
+  var mult = (u === 'cm') ? 10 : 0.1;  // direction: current→new
+  if(S.unit === u) return;
+  S.unit = u;
+  // Convert existing input values
+  ['i-w','i-h','i-d'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(!el) return;
+    var v = parseFloat(el.value);
+    if(!isNaN(v)) el.value = u === 'cm' ? +(v/10).toFixed(1) : Math.round(v*10);
+  });
+  // Update labels
+  var unit = u === 'cm' ? 'cm' : 'mm';
+  ['lbl-w','lbl-h','lbl-d'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = el.textContent.replace(/mm|cm/, unit);
+  });
+  document.getElementById('unit-hint').textContent =
+    u === 'cm' ? 'Enter dimensions in centimetres' : 'Enter dimensions in millimetres';
+  // Swap active pill
+  document.querySelectorAll('.unit-pill').forEach(function(p){ p.classList.remove('active'); });
+  btn.classList.add('active');
+  live();
 }
 function toggleXray(btn){
   S.diagXray=!S.diagXray;
@@ -1111,8 +1137,39 @@ function drawFront(){
       var zh=z.h*scaleZ;
       var col=z.type==='hanging'?'rgba(160,120,74,.12)':z.type==='shelves'?'rgba(122,96,64,.1)':'rgba(176,64,48,.08)';
       e.push('<rect x="'+(secX+1)+'" y="'+(curY+1)+'" width="'+(secInnerW-2)+'" height="'+(zh-2)+'" fill="'+col+'" rx="1"/>');
-      var lbl=z.type.charAt(0).toUpperCase();
-      e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(curY+zh/2+3)+'" text-anchor="middle" font-family="monospace" font-size="7" font-weight="700" fill="'+ac+'" opacity=".7">'+lbl+'</text>');
+      if(z.type==='hanging'){
+        // hanging rod ~200px from top of zone
+        var rodY=curY+Math.min(zh*0.18, 12);
+        e.push('<line x1="'+(secX+4)+'" y1="'+rodY+'" x2="'+(secX+secInnerW-4)+'" y2="'+rodY+'" stroke="'+ac+'" stroke-width="1.5" opacity=".45"/>');
+        // hanging items suggestion lines
+        var itemCount=Math.max(2,Math.min(6,Math.floor(secInnerW/14)));
+        var itemSpacing=secInnerW/itemCount;
+        for(var ii=0;ii<itemCount;ii++){
+          var ix=secX+itemSpacing*ii+itemSpacing/2;
+          e.push('<line x1="'+ix+'" y1="'+rodY+'" x2="'+ix+'" y2="'+(curY+zh-6)+'" stroke="'+mid+'" stroke-width=".8" opacity=".25"/>');
+        }
+      } else if(z.type==='shelves'){
+        var sCount=Math.max(1,z.shelves||3);
+        var sSpacing=zh/(sCount+1);
+        for(var si2=1;si2<=sCount;si2++){
+          var sy=curY+sSpacing*si2;
+          e.push('<line x1="'+(secX+3)+'" y1="'+sy+'" x2="'+(secX+secInnerW-3)+'" y2="'+sy+'" stroke="'+ac+'" stroke-width="1" opacity=".35"/>');
+        }
+      } else if(z.type==='drawers'){
+        var dCount=Math.max(1,z.drawers||2);
+        var dSpacing=zh/dCount;
+        for(var di=1;di<dCount;di++){
+          var dy=curY+dSpacing*di;
+          e.push('<line x1="'+(secX+3)+'" y1="'+dy+'" x2="'+(secX+secInnerW-3)+'" y2="'+dy+'" stroke="'+ac+'" stroke-width="1" opacity=".35"/>');
+        }
+        // drawer pulls
+        for(var dpi=0;dpi<dCount;dpi++){
+          var dpy=curY+dSpacing*dpi+dSpacing/2;
+          e.push('<rect x="'+(secX+secInnerW/2-5)+'" y="'+(dpy-1)+'" width="10" height="2" fill="'+ac+'" rx="1" opacity=".35"/>');
+        }
+      }
+      var lbl=z.type==='hanging'?'H':z.type==='shelves'?'S':'D';
+      e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(curY+zh/2+3)+'" text-anchor="middle" font-family="monospace" font-size="7" font-weight="700" fill="'+ac+'" opacity=".5">'+lbl+'</text>');
       curY+=zh;
     });
     // door outline
