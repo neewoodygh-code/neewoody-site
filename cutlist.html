@@ -1032,10 +1032,35 @@ function drawFront(){
     });
     // door outline
     if(sec.door.on){
-      var doorY=sec.door.bottom==='panel'?(oy+t):(oy);
-      var doorH2=sec.door.bottom==='panel'?(dH-tkPx-2*t):(dH);
-      var doorInset=2;
-      e.push('<rect x="'+(secX+doorInset)+'" y="'+(doorY+doorInset)+'" width="'+(secInnerW-doorInset*2)+'" height="'+(doorH2-doorInset*2)+'" fill="none" stroke="'+ac+'" stroke-width="1.2" rx="1" opacity=".6"/>');
+      var tg=S.topgap*sc, bg=S.botgap*sc;
+      var doorInset=1.5;
+      var doorX=secX+doorInset;
+      var doorW2=secInnerW-doorInset*2;
+      var doorY2, doorH2;
+      if(sec.door.bottom==='panel'){
+        // "To panel": door sits within carcass panels, toe kick strip visible below
+        // Top: just below top panel + top gap
+        // Bottom: just above bottom panel + bottom gap
+        doorY2 = oy + t + tg;
+        doorH2 = dH - tkPx - 2*t - tg - bg;
+      } else {
+        // "Full height": door covers toe kick face, only floor gap at bottom
+        // Top: top gap from top of wardrobe
+        // Bottom: floor gap at very bottom
+        doorY2 = oy + tg;
+        doorH2 = dH - tg - bg;
+      }
+      // Door fill — semi-transparent warm tone
+      e.push('<rect x="'+doorX+'" y="'+(doorY2+doorInset)+'" width="'+doorW2+'" height="'+(doorH2-doorInset*2)+'" fill="rgba(160,120,74,.18)" stroke="'+ac+'" stroke-width="1.5" rx="1"/>');
+      // Toe kick indicator: only visible on "to panel"
+      if(sec.door.bottom==='panel'){
+        var tkY=oy+dH-tkPx;
+        e.push('<rect x="'+doorX+'" y="'+tkY+'" width="'+doorW2+'" height="'+(tkPx-2)+'" fill="rgba(160,120,74,.06)" stroke="'+ac+'" stroke-width=".5" stroke-dasharray="3,2" rx="1" opacity=".5"/>');
+        e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(tkY+tkPx/2+3)+'" text-anchor="middle" font-family="monospace" font-size="6" fill="'+ac+'" opacity=".6">TOE KICK</text>');
+      }
+      // Handle mark
+      var hx=sec.door.type==='sliding'?(doorX+doorW2*0.55):(doorX+doorW2-6);
+      e.push('<rect x="'+(hx-1)+'" y="'+(doorY2+doorH2/2-10)+'" width="2.5" height="20" fill="'+ac+'" rx="1" opacity=".5"/>');
     }
   });
   // unit dividers
