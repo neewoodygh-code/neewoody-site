@@ -555,7 +555,7 @@ select {
     <div class="callout"><p><strong>OVERLAY:</strong> How far the door covers the carcass frame on each side. Standard is 11mm. Gap values control clearance between door edges.</p></div>
     <div class="adv-grid">
       <div class="igrid c3" style="padding:0">
-        <div class="ig"><label>Overlay (mm)</label><input type="number" id="i-overlay" value="11" inputmode="numeric" oninput="live()"></div>
+        <div class="ig"><label>Edge Clearance (mm)</label><input type="number" id="i-overlay" value="2" inputmode="numeric" oninput="live()"></div>
         <div class="ig"><label>Door Gap (mm)</label><input type="number" id="i-dgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Between adj. doors</div></div>
         <div class="ig"><label>Hinge Gap (mm)</label><input type="number" id="i-hinge" value="2" inputmode="numeric" oninput="live()"><div class="hint">Side panel clearance</div></div>
       </div>
@@ -778,7 +778,7 @@ select {
 var S = {
   w:2400, h:2100, d:580,
   thick:18, backType:'inset', backThick:3, clear:2,
-  overlay:11, doorThick:18, dgap:2, hinge:2, topgap:2, botgap:2,
+  overlay:2, doorThick:18, dgap:2, hinge:2, topgap:2, botgap:2,
   sections:3,
   secs:[
     {zones:[{type:'hanging',h:1200,shelves:0,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}},
@@ -1228,17 +1228,24 @@ function calculate(){
     if(sec.door.on){
       var nd=sec.door.count||1;
       if(sec.door.type==='hinged'){
-        // Full height: floor to top of carcass minus gaps. To panel: carcass panel to panel
         var doorH=sec.door.bottom==='panel'?R(carcH-topgap-botgap):R(h-topgap-botgap);
-        // Width: section opening + overlay each side, divided by door count, minus gap between doors
-        var doorW=R((unitOpenW+overlay*2)/nd - (nd>1?dgap:0));
-        var mNote=sec.door.bottom==='panel'
-          ?'To bottom panel — toe kick visible.'
-          :'Full height — covers subframe, '+botgap+'mm floor gap.';
+
+        // ── FULL OVERLAY DOOR WIDTH ──
+        // Full overlay = door edge flush with outer face of carcass side panel.
+        // Outer edge overlay: board thickness minus clearance gap (flush with panel face)
+        var outerOv = t - clear;   // e.g. 18 - 2 = 16mm each outer side
+        // Inner edge between adjacent doors: half the divider thickness minus door gap
+        // Total width available = opening + outerOv on each outer side
+        // Multiple doors: subtract the gaps between adjacent door pairs
+        var doorW = R((unitOpenW + outerOv * 2 - (nd > 1 ? dgap * (nd - 1) : 0)) / nd);
+
+        var mNote = sec.door.bottom==='panel'
+          ? 'To bottom panel — toe kick visible.'
+          : 'Full height — covers subframe, '+botgap+'mm floor gap.';
+        var ovNote = 'Outer overlay: '+outerOv+'mm ('+t+'mm board − '+clear+'mm clearance). Door edge flush with carcass side face.';
         parts.push({name:'Door ('+sn+')',qty:nd,w:doorW,d:doorH,tag:'door',
-          note:'W×H: '+doorW+' × '+doorH+' | overlay '+overlay+'mm. '+mNote});
+          note:'W×H: '+doorW+' × '+doorH+'. '+mNote+' '+ovNote});
       } else {
-        // Sliding: panels overlap ~10%, height slightly less for track
         var slideH=sec.door.bottom==='panel'?R(carcH-20):R(h-20);
         var slideW=R(unitOpenW*0.55);
         parts.push({name:'Sliding Door Leaf ('+sn+')',qty:Math.max(2,nd),w:slideW,d:slideH,tag:'door',
