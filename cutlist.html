@@ -1028,7 +1028,7 @@ function drawFront(){
       var col=z.type==='hanging'?'rgba(160,120,74,.12)':z.type==='shelves'?'rgba(122,96,64,.1)':'rgba(176,64,48,.08)';
       e.push('<rect x="'+(secX+1)+'" y="'+(curY+1)+'" width="'+(secInnerW-2)+'" height="'+(zh-2)+'" fill="'+col+'" rx="1"/>');
       var lbl=z.type.charAt(0).toUpperCase();
-      e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(curY+zh/2+3)+'" text-anchor="middle" font-family="'DM Sans'" font-size="7" font-weight="700" fill="'+ac+'" opacity=".7">'+lbl+'</text>');
+      e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(curY+zh/2+3)+'" text-anchor="middle" font-family="monospace" font-size="7" font-weight="700" fill="'+ac+'" opacity=".7">'+lbl+'</text>');
       curY+=zh;
     });
     // door outline
@@ -1052,12 +1052,12 @@ function drawFront(){
   e.push('<line x1="'+ox+'" y1="'+awY+'" x2="'+(ox+dW)+'" y2="'+awY+'" stroke="'+ac+'" stroke-width="1"/>');
   e.push('<polygon points="'+ox+','+(awY-3)+' '+(ox+6)+','+awY+' '+ox+','+(awY+3)+'" fill="'+ac+'"/>');
   e.push('<polygon points="'+(ox+dW)+','+(awY-3)+' '+(ox+dW-6)+','+awY+' '+(ox+dW)+','+(awY+3)+'" fill="'+ac+'"/>');
-  e.push('<text x="'+(ox+dW/2)+'" y="'+(awY+9)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac+'">'+S.w+'mm</text>');
+  e.push('<text x="'+(ox+dW/2)+'" y="'+(awY+9)+'" text-anchor="middle" font-family="monospace" font-size="8" font-weight="600" fill="'+ac+'">'+S.w+'mm</text>');
   var ahX=ox-14;
   e.push('<line x1="'+ahX+'" y1="'+oy+'" x2="'+ahX+'" y2="'+(oy+dH)+'" stroke="'+ac+'" stroke-width="1"/>');
   e.push('<polygon points="'+(ahX-3)+','+oy+' '+ahX+','+(oy+5)+' '+(ahX+3)+','+oy+'" fill="'+ac+'"/>');
   e.push('<polygon points="'+(ahX-3)+','+(oy+dH)+' '+ahX+','+(oy+dH-5)+' '+(ahX+3)+','+(oy+dH)+'" fill="'+ac+'"/>');
-  e.push('<text x="'+ahX+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac+'" transform="rotate(-90 '+ahX+' '+(oy+dH/2)+')">'+S.h+'mm</text>');
+  e.push('<text x="'+ahX+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="monospace" font-size="8" font-weight="600" fill="'+ac+'" transform="rotate(-90 '+ahX+' '+(oy+dH/2)+')">'+S.h+'mm</text>');
   document.getElementById('wsvg').innerHTML=e.join('');
 }
 
@@ -1087,18 +1087,18 @@ function drawSide(){
   e.push('<rect x="'+bX+'" y="'+(oy+t)+'" width="'+(S.backThick*sc)+'" height="'+(dH-2*t-tkPx)+'" fill="#DDD5C8" stroke="'+light+'" stroke-width="1"/>');
   var dX=ox+dW+3;
   e.push('<rect x="'+dX+'" y="'+(oy+S.topgap*sc)+'" width="'+doorPx+'" height="'+(dH-S.topgap*sc-S.botgap*sc)+'" rx="1" fill="#E8E1D6" stroke="'+ac+'" stroke-width="1.5" opacity=".85"/>');
-  e.push('<text x="'+(dX+doorPx/2)+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="'DM Sans'" font-size="7" fill="'+ac+'" transform="rotate(-90 '+(dX+doorPx/2)+' '+(oy+dH/2)+')">DOOR '+S.doorThick+'mm</text>');
+  e.push('<text x="'+(dX+doorPx/2)+'" y="'+(oy+dH/2)+'" text-anchor="middle" font-family="monospace" font-size="7" fill="'+ac+'" transform="rotate(-90 '+(dX+doorPx/2)+' '+(oy+dH/2)+')">DOOR '+S.doorThick+'mm</text>');
   if(S.spType!=='none'){
     var spT3=S.spThick*sc,spEH4=S.spType==='extended'?S.spEH*sc:0;
     e.push('<rect x="'+(ox-spT3-2)+'" y="'+(oy-spEH4)+'" width="'+spT3+'" height="'+(dH+spEH4)+'" fill="#F0EAE0" stroke="'+ac+'" stroke-width="1.5" rx="1"/>');
     var anY=oy+dH+18;
     e.push('<line x1="'+ox+'" y1="'+anY+'" x2="'+(ox+dW+doorPx+S.hinge*sc)+'" y2="'+anY+'" stroke="'+ac+'" stroke-width="1"/>');
-    e.push('<text x="'+((ox+ox+dW+doorPx+S.hinge*sc)/2)+'" y="'+(anY+9)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" fill="'+ac+'">Panel depth: '+(S.d+S.doorThick+S.hinge)+'mm</text>');
+    e.push('<text x="'+((ox+ox+dW+doorPx+S.hinge*sc)/2)+'" y="'+(anY+9)+'" text-anchor="middle" font-family="monospace" font-size="8" fill="'+ac+'">Panel depth: '+(S.d+S.doorThick+S.hinge)+'mm</text>');
   }
   e.push('<rect x="'+ox+'" y="'+oy+'" width="'+dW+'" height="'+dH+'" fill="none" stroke="'+light+'" stroke-width="2" rx="2"/>');
   var ac4='#A0784A';
   e.push('<line x1="'+ox+'" y1="'+(oy-12)+'" x2="'+(ox+dW)+'" y2="'+(oy-12)+'" stroke="'+ac4+'" stroke-width="1"/>');
-  e.push('<text x="'+(ox+dW/2)+'" y="'+(oy-16)+'" text-anchor="middle" font-family="'DM Sans'" font-size="8" font-weight="600" fill="'+ac4+'">'+S.d+'mm depth</text>');
+  e.push('<text x="'+(ox+dW/2)+'" y="'+(oy-16)+'" text-anchor="middle" font-family="monospace" font-size="8" font-weight="600" fill="'+ac4+'">'+S.d+'mm depth</text>');
   document.getElementById('wsvg').innerHTML=e.join('');
 }
 
