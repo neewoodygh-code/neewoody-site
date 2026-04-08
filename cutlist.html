@@ -204,6 +204,8 @@ select {
 .diag-tabs { display: flex; border-bottom: 1px solid var(--clr-border); }
 .dtab { flex: 1; padding: .4rem; text-align: center; font-family: var(--mono); font-size: .65rem; font-weight: 600; letter-spacing: .08em; color: var(--clr-muted); cursor: pointer; border-bottom: 2px solid transparent; text-transform: uppercase; }
 .dtab.active { color: var(--clr-accent); border-bottom-color: var(--clr-accent); }
+.xray-btn { flex: none; padding: .4rem .7rem; border-left: 1px solid var(--clr-border); }
+.xray-btn.on { color: #2a7a9a; border-bottom-color: #2a7a9a; }
 #wsvg { display: block; width: 100%; }
 
 /* ── GENERATE BUTTON ── */
@@ -413,7 +415,37 @@ select {
   .social-btns { flex-direction: column; align-items: center; }
 }
 
-/* ── Edge Band Sheet ── */
+
+/* ── Print reveal ── */
+.print-gate { margin-top: .9rem; padding-top: .9rem; border-top: 1px dashed var(--clr-border); text-align: center; }
+.print-gate-hint { font-family: var(--mono); font-size: .68rem; color: var(--clr-muted); margin-bottom: .6rem; }
+.print-gate-hint span { color: var(--clr-accent); font-weight: 700; }
+.print-reveal { display: none; margin-top: .6rem; }
+.print-reveal.unlocked { display: block; }
+.btn-print {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: #1C1A17; color: #EFE8DC; border: none; border-radius: 8px;
+  padding: .6rem 1.4rem; font-family: var(--mono); font-size: .8rem;
+  font-weight: 700; letter-spacing: .06em; cursor: pointer;
+  transition: opacity .2s;
+}
+.btn-print:hover { opacity: .82; }
+.unlock-check { font-family: var(--mono); font-size: .62rem; color: #5a9a5a; margin-top: .4rem; display: none; }
+.unlock-check.show { display: block; }
+@media print {
+  .calc-wrap, .gen-btn, .hero, nav, footer, .result-cta { display: none !important; }
+  .rpage { display: block !important; }
+  .rbody { padding: 0 !important; }
+}
+
+/* ── Unit Toggle Bar ── */
+.unit-toggle-bar{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;background:var(--clr-accent-lt);border:1.5px solid var(--clr-border);border-radius:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.unit-toggle-lbl{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--clr-accent)}
+.unit-pill-row{display:flex;gap:2px;background:var(--clr-border);border-radius:6px;padding:2px}
+.unit-pill{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:.25rem .7rem;border:none;background:transparent;border-radius:4px;cursor:pointer;color:var(--clr-muted);transition:all .15s}
+.unit-pill.active{background:#fff;color:var(--clr-accent);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.unit-toggle-hint{font-family:var(--mono);font-size:.63rem;color:var(--clr-muted);margin-left:auto}
+
 .eb-sheet{background:var(--clr-surface);border:1.5px solid var(--clr-border);border-radius:10px;overflow:hidden}
 .eb-sheet-hdr{padding:.6rem 1rem;background:var(--clr-accent-lt);border-bottom:1px solid var(--clr-border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 .eb-sheet-title{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-accent)}
@@ -422,7 +454,8 @@ select {
 .eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:20px;padding:16px}
 .eb-item{display:flex;flex-direction:column;align-items:center;gap:5px}
 .eb-box-wrap{position:relative;width:84px;height:66px}
-.eb-box{position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:2px solid #aaa;background:#f5f0e8;border-radius:1px}
+.eb-box{position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:2px solid #aaa;background:#f5f0e8;border-radius:1px;display:flex;align-items:center;justify-content:center}
+.eb-qty-inner{font-family:var(--mono);font-size:.75rem;font-weight:700;color:var(--clr-accent);line-height:1;pointer-events:none}
 .eb-edge{position:absolute;cursor:pointer;transition:background .15s;z-index:2;border-radius:2px}
 .eb-edge.top{top:0;left:8px;right:8px;height:6px}
 .eb-edge.bottom{bottom:0;left:8px;right:8px;height:6px}
@@ -542,11 +575,20 @@ select {
   <!-- ════ DIMS ════ -->
   <div class="calc-page active" id="tab-dims">
 
+    <div class="unit-toggle-bar">
+      <span class="unit-toggle-lbl">Input units</span>
+      <div class="unit-pill-row">
+        <button class="unit-pill active" id="upill-mm" onclick="setUnit('mm',this)">mm</button>
+        <button class="unit-pill" id="upill-cm" onclick="setUnit('cm',this)">cm</button>
+      </div>
+      <span class="unit-toggle-hint" id="unit-hint">Enter dimensions in millimetres</span>
+    </div>
+
     <div class="sh"><div class="sh-txt">Wardrobe Dimensions</div><div class="sh-line"></div></div>
     <div class="igrid c3">
-      <div class="ig"><label>Width (mm)</label><input type="number" id="i-w" value="2400" inputmode="numeric" oninput="live()"><div class="hint">Total outer width</div></div>
-      <div class="ig"><label>Height (mm)</label><input type="number" id="i-h" value="2100" inputmode="numeric" oninput="live()"><div class="hint">Floor to ceiling</div></div>
-      <div class="ig"><label>Depth (mm)</label><input type="number" id="i-d" value="580" inputmode="numeric" oninput="live()"><div class="hint">Front to back</div></div>
+      <div class="ig"><label id="lbl-w">Width (mm)</label><input type="number" id="i-w" value="2400" inputmode="decimal" oninput="live()"><div class="hint">Total outer width</div></div>
+      <div class="ig"><label id="lbl-h">Height (mm)</label><input type="number" id="i-h" value="2100" inputmode="decimal" oninput="live()"><div class="hint">Floor to ceiling</div></div>
+      <div class="ig"><label id="lbl-d">Depth (mm)</label><input type="number" id="i-d" value="580" inputmode="decimal" oninput="live()"><div class="hint">Front to back</div></div>
     </div>
 
     <div class="sh"><div class="sh-txt">Board Thickness</div><div class="sh-line"></div></div>
@@ -573,6 +615,7 @@ select {
       <div class="diag-tabs">
         <div class="dtab active" onclick="swDiag('front',this)">Front</div>
         <div class="dtab" onclick="swDiag('side',this)">Side</div>
+        <div class="dtab xray-btn" id="xray-btn" onclick="toggleXray(this)" title="Show internals through doors">X-Ray</div>
       </div>
       <svg id="wsvg" viewBox="0 0 340 280" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
@@ -820,7 +863,7 @@ var S = {
   modUnits:1, modJoin:'butt',
   spType:'flush', spL:1, spR:1, spThick:18, spEH:50, spED:0, spSW:30,
   pelEn:false, pelH:80,
-  diagView:'front'
+  diagView:'front', diagXray:false, unit:'mm'
 };
 
 function gv(id){var e=document.getElementById(id);return e?e.value:'';}
@@ -892,9 +935,20 @@ function swTab(name,el){
 }
 function swDiag(name,el){
   S.diagView=name;
-  document.querySelectorAll('.dtab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.dtab:not(.xray-btn)').forEach(function(t){t.classList.remove('active');});
   el.classList.add('active');
   drawDiagram();
+}
+
+function unlockPrint(){
+  var el=document.getElementById('print-reveal');
+  if(el) el.classList.add('unlocked');
+}
+function toggleXray(btn){
+  S.diagXray=!S.diagXray;
+  btn.classList.toggle('on',S.diagXray);
+  btn.title=S.diagXray?'X-Ray ON — showing internals':'X-Ray OFF — click to see through doors';
+  if(S.diagView!=='side') drawFront();
 }
 
 // ══════════════════════════════════════════════════════
@@ -1081,17 +1135,23 @@ function drawFront(){
         doorY2 = oy + tg;
         doorH2 = dH - tg - bg;
       }
-      // Door fill — semi-transparent warm tone
-      e.push('<rect x="'+doorX+'" y="'+(doorY2+doorInset)+'" width="'+doorW2+'" height="'+(doorH2-doorInset*2)+'" fill="rgba(160,120,74,.18)" stroke="'+ac+'" stroke-width="1.5" rx="1"/>');
+      // Door fill — solid or ghost depending on xray mode
+      if(S.diagXray){
+        e.push('<rect x="'+doorX+'" y="'+(doorY2+doorInset)+'" width="'+doorW2+'" height="'+(doorH2-doorInset*2)+'" fill="rgba(160,120,74,.04)" stroke="'+ac+'" stroke-width="1" stroke-dasharray="4,3" rx="1" opacity=".55"/>');
+      } else {
+        e.push('<rect x="'+doorX+'" y="'+(doorY2+doorInset)+'" width="'+doorW2+'" height="'+(doorH2-doorInset*2)+'" fill="rgba(160,120,74,.18)" stroke="'+ac+'" stroke-width="1.5" rx="1"/>');
+      }
       // Toe kick indicator: only visible on "to panel"
       if(sec.door.bottom==='panel'){
         var tkY=oy+dH-tkPx;
         e.push('<rect x="'+doorX+'" y="'+tkY+'" width="'+doorW2+'" height="'+(tkPx-2)+'" fill="rgba(160,120,74,.06)" stroke="'+ac+'" stroke-width=".5" stroke-dasharray="3,2" rx="1" opacity=".5"/>');
         e.push('<text x="'+(secX+secInnerW/2)+'" y="'+(tkY+tkPx/2+3)+'" text-anchor="middle" font-family="monospace" font-size="6" fill="'+ac+'" opacity=".6">TOE KICK</text>');
       }
-      // Handle mark
-      var hx=sec.door.type==='sliding'?(doorX+doorW2*0.55):(doorX+doorW2-6);
-      e.push('<rect x="'+(hx-1)+'" y="'+(doorY2+doorH2/2-10)+'" width="2.5" height="20" fill="'+ac+'" rx="1" opacity=".5"/>');
+      // Handle mark — skip in xray
+      if(!S.diagXray){
+        var hx=sec.door.type==='sliding'?(doorX+doorW2*0.55):(doorX+doorW2-6);
+        e.push('<rect x="'+(hx-1)+'" y="'+(doorY2+doorH2/2-10)+'" width="2.5" height="20" fill="'+ac+'" rx="1" opacity=".5"/>');
+      }
     }
   });
   // unit dividers
@@ -1404,12 +1464,11 @@ function buildEbSheet(parts){
         '<div class="eb-edge bottom '+(eb.b?'active':'inactive')+'" data-ebkey="'+k+'" data-side="b"></div>'+
         '<div class="eb-edge left '+(eb.l?'active':'inactive')+'" data-ebkey="'+k+'" data-side="l"></div>'+
         '<div class="eb-edge right '+(eb.r?'active':'inactive')+'" data-ebkey="'+k+'" data-side="r"></div>'+
-        '<div class="eb-box"></div>'+
+        '<div class="eb-box"><div class="eb-qty-inner">'+qty+'</div></div>'+
         '<div class="eb-dim-h">'+p.d+'mm</div>'+
       '</div>'+
       '<div class="eb-dim-w">'+p.w+'mm</div>'+
       '<div class="eb-part-name">'+nm+'</div>'+
-      '<div class="eb-qty">x'+qty+'</div>'+
     '</div>';
   });
   html+='</div></div>';
@@ -1496,7 +1555,24 @@ function generate(){
   nh+='</div>';
 
   // CTA card
-  var ctaCard='<div class="result-cta"><h3>Found this useful?</h3><p>Follow us to get updates when we add new features, fix bugs, and release new carpenter tools.</p><div class="social-btns"><a href="https://www.instagram.com/neewoodygh" class="btn-ig" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>@neewoodygh Instagram</a><a href="https://www.tiktok.com/@neewoodygh" class="btn-tk" target="_blank" rel="noopener"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>@neewoodygh TikTok</a></div></div>';
+  var igSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>';
+  var tkSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>';
+  var prSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>';
+  var ctaCard='<div class="result-cta">'+
+    '<h3>Found this useful?</h3>'+
+    '<p>Follow us to get updates when we add new features, fix bugs, and release new carpenter tools.</p>'+
+    '<div class="social-btns">'+
+      '<a href="https://www.instagram.com/neewoodygh" class="btn-ig" target="_blank" rel="noopener" onclick="unlockPrint()">'+igSVG+'@neewoodygh Instagram</a>'+
+      '<a href="https://www.tiktok.com/@neewoodygh" class="btn-tk" target="_blank" rel="noopener" onclick="unlockPrint()">'+tkSVG+'@neewoodygh TikTok</a>'+
+    '</div>'+
+    '<div class="print-gate">'+
+      '<div class="print-gate-hint">Follow us on Instagram or TikTok to <span>unlock print</span></div>'+
+      '<div class="print-reveal" id="print-reveal">'+
+        '<button class="btn-print" onclick="window.print()">'+prSVG+' Print Cut List</button>'+
+        '<div class="unlock-check show">✓ Thanks for the follow — print unlocked</div>'+
+      '</div>'+
+    '</div>'+
+  '</div>';
 
   // Brand footer with logo
   var bf='<div class="brand-footer"><img src="images/Neewoody_PNG_1.png" class="bf-logo" alt="Neewoody logo"><div class="bf-info"><div class="bf-name">Neewoody Custom Woodwork</div><div class="bf-details">Accra, Ghana &nbsp;·&nbsp; <a href="tel:+233244633464">+233 24 463 3464</a> &nbsp;·&nbsp; <a href="https://instagram.com/neewoodygh">@neewoodygh</a> &nbsp;·&nbsp; neewoodygh.com</div></div></div>';
@@ -1539,7 +1615,8 @@ document.addEventListener('click', function(e){
     if(k && side){
       if(!ebState[k]) ebState[k] = {t:false,r:false,b:false,l:false};
       ebState[k][side] = !ebState[k][side];
-      eg.className = 'eb-edge ' + side + ' ' + (ebState[k][side] ? 'active' : 'inactive');
+      eg.classList.toggle('active',   ebState[k][side]);
+      eg.classList.toggle('inactive', !ebState[k][side]);
     }
     return;
   }
