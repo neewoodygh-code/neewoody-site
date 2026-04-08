@@ -487,6 +487,9 @@ select {
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span aria-current="page">Carpenter Tools</span>
     </nav>
+    <img src="images/Neewoody_PNG_1.png" alt="Neewoody Custom Woodwork"
+         style="height:48px;width:auto;object-fit:contain;margin-bottom:1rem;display:block"
+         onerror="this.style.display='none'">
     <div class="carpenter-badge">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
       Carpenter Tools by Neewoody
@@ -910,12 +913,12 @@ function renderSecs(){
         '<div class="tog-row"><label class="toggle"><input type="checkbox" id="don-'+si+'"'+(sec.door.on?' checked':'')+' onchange="toggleDoor('+si+')"><span class="tslide"></span></label><span class="tog-lbl">Include door</span></div>'+
         '<div id="door-opts-'+si+'" style="display:'+(sec.door.on?'flex':'none')+';flex-direction:column;gap:.5rem;margin-top:.35rem">'+
           '<div class="pill-row">'+
-            '<button class="pill'+(sec.door.type==='hinged'?' ac':'')+'" onclick="setDoorProp('+si+',\"type\",\"hinged\")">Hinged</button>'+
-            '<button class="pill'+(sec.door.type==='sliding'?' ac':'')+'" onclick="setDoorProp('+si+',\"type\",\"sliding\")">Sliding</button>'+
+            '<button class="pill dp-btn'+(sec.door.type==='hinged'?' ac':'')+'" data-si="'+si+'" data-prop="type" data-val="hinged">Hinged</button>'+
+            '<button class="pill dp-btn'+(sec.door.type==='sliding'?' ac':'')+'" data-si="'+si+'" data-prop="type" data-val="sliding">Sliding</button>'+
           '</div>'+
           '<div class="pill-row">'+
-            '<button class="pill'+(sec.door.bottom==='panel'?' gn':'')+'" onclick="setDoorProp('+si+',\"bottom\",\"panel\")">To panel</button>'+
-            '<button class="pill'+(sec.door.bottom==='full'?' gn':'')+'" onclick="setDoorProp('+si+',\"bottom\",\"full\")">Full height</button>'+
+            '<button class="pill dp-btn'+(sec.door.bottom==='panel'?' gn':'')+'" data-si="'+si+'" data-prop="bottom" data-val="panel">To panel</button>'+
+            '<button class="pill dp-btn'+(sec.door.bottom==='full'?' gn':'')+'" data-si="'+si+'" data-prop="bottom" data-val="full">Full height</button>'+
           '</div>'+
           '<div class="tog-row"><span class="tog-lbl" style="margin-right:.5rem">Door count:</span>'+
             '<div class="counter"><button onclick="adjDoor('+si+',-1)">−</button><div class="cv" id="dc-'+si+'">'+sec.door.count+'</div><button onclick="adjDoor('+si+',1)">+</button></div>'+
