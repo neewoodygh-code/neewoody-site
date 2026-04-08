@@ -882,7 +882,7 @@ function buildZoneRow(z,si,zi,total){
   var extra='';
   if(z.type==='shelves')extra='<div class="ig"><label>Shelves</label><input type="number" id="zsh-'+si+'-'+zi+'" value="'+z.shelves+'" min="0" max="12" inputmode="numeric" oninput="live()"></div>';
   if(z.type==='drawers')extra='<div class="ig"><label>Drawers</label><input type="number" id="zdr-'+si+'-'+zi+'" value="'+z.drawers+'" min="1" max="12" inputmode="numeric" oninput="live()"></div>';
-  return '<div class="zone-row"><div class="zone-hdr"><span class="zone-badge '+bc[z.type]+'">'+z.type+'</span><div class="zone-flex"></div>'+up+dn+'<button class="zone-del" onclick="delZone('+si+','+zi+')" title="Remove zone">×</button></div><div class="zone-dims"><div class="ig"><label>Height (mm)</label><input type="number" id="zh-'+si+'-'+zi+'" value="'+z.h+'" inputmode="numeric" oninput="live()"></div>'+extra+'</div></div>';
+  return '<div class="zone-row"><div class="zone-hdr"><span class="zone-badge '+bc[z.type]+'">'+z.type+'</span><div class="zone-flex"></div>'+up+dn+'<button class="zone-del" onclick="delZone('+si+','+zi+')" title="Remove zone">×</button></div><div class="zone-dims"><div class="ig"><label>Height (mm)</label><input type="number" id="zh-'+si+'-'+zi+'" value="'+z.h+'" inputmode="numeric" oninput="zoneHeightChanged('+si+','+zi+')"></div>'+extra+'</div></div>';
 }
 
 function renderSecs(){
@@ -951,7 +951,7 @@ function toggleDoor(si){
   var o=document.getElementById('door-opts-'+si);if(o)o.style.display=S.secs[si].door.on?'flex':'none';
 }
 function setDoorProp(si,prop,val){
-  S.secs[si].door[prop]=val;renderSecs();
+  S.secs[si].door[prop]=val;renderSecs();live();
 }
 function adjDoor(si,d){
   var el=document.getElementById('dc-'+si);if(!el)return;
