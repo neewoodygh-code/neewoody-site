@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ZP77WR6BNH');
+</script>
+
+<meta charset="UTF-8" />
+<link rel="icon" href="../images/favicon.ico" />
+<link rel="apple-touch-icon" href="../images/logo.png" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>House of Walker Accra — Johnnie Walker 200-Year Installation | Neewoody Custom Woodwork</title>
+<meta name="description" content="Neewoody built the branded seating installation for the House of Walker Accra — Johnnie Walker's 200-year celebration at One Airport Square. Structural carpentry, MDF cladding, and integrated LED lighting to brand specification." />
+<link rel="canonical" href="https://neewoodygh.com/projects/house-of-walker.html" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://neewoodygh.com/projects/house-of-walker.html" />
+<meta property="og:title" content="House of Walker Accra — Johnnie Walker 200-Year Installation | Neewoody" />
+<meta property="og:description" content="The branded seating installation for Johnnie Walker's 200-year celebration in Accra — structural carpentry, MDF cladding, and integrated LED lighting built by Neewoody." />
+<meta property="og:image" content="https://neewoodygh.com/images/projects/house-of-walker/how-hero.jpg" />
+<link rel="stylesheet" href="../css/styles.css" />
+
+<style>
+/* ── Project Hero ── */
+.project-hero{position:relative;height:75vh;min-height:480px;max-height:700px;overflow:hidden;display:flex;align-items:flex-end}
+.project-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%}
+.project-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.8) 0%,rgba(0,0,0,.25) 55%,transparent 100%)}
+.project-hero-content{position:relative;z-index:2;width:100%;padding:0 0 3rem}
+.project-hero-content .container{display:flex;flex-direction:column;gap:.75rem}
+.project-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);font-family:monospace}
+.project-hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#fff;line-height:1.1;margin:0}
+.project-hero-sub{font-size:1.05rem;color:rgba(255,255,255,.8);margin:0;max-width:560px}
+
+/* ── Spec Bar ── */
+.spec-bar{background:var(--clr-surface);border-bottom:1px solid var(--clr-border);padding:1.5rem 0}
+.spec-bar-inner{display:flex;flex-wrap:wrap;gap:0}
+.spec-item{flex:1;min-width:140px;padding:0 2rem 0 0;border-right:1px solid var(--clr-border);margin-right:2rem}
+.spec-item:last-child{border-right:none;margin-right:0}
+.spec-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.3rem}
+.spec-value{font-size:.95rem;font-weight:600;color:var(--clr-text)}
+@media(max-width:600px){.spec-bar-inner{gap:1.25rem}.spec-item{flex:1 1 calc(50% - .625rem);border-right:none;margin-right:0;padding-right:0}}
+
+/* ── Case Study Sections ── */
+.cs-section{padding:4rem 0}
+.cs-section+.cs-section{border-top:1px solid var(--clr-border)}
+.cs-section--alt{background:var(--clr-bg-alt)}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+.cs-grid--reverse{direction:rtl}
+.cs-grid--reverse>*{direction:ltr}
+@media(max-width:768px){.cs-grid{grid-template-columns:1fr;gap:2rem}.cs-grid--reverse{direction:ltr}}
+.cs-text h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:1rem;line-height:1.2}
+.cs-text p{color:var(--clr-mid);line-height:1.75;margin-bottom:1rem}
+.cs-text p:last-child{margin-bottom:0}
+.cs-img{border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3}
+.cs-img img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── Before/After Gallery ── */
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem}
+.ba-item{overflow:hidden;border-radius:var(--radius)}
+.ba-item img{width:100%;height:100%;object-fit:cover;display:block;aspect-ratio:4/3}
+.ba-label{font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;padding:.5rem 0 .25rem;display:block}
+@media(max-width:600px){.ba-grid{grid-template-columns:1fr}}
+
+/* ── Gallery ── */
+.gallery-section{padding:4rem 0;border-top:1px solid var(--clr-border)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.gallery-item{overflow:hidden;border-radius:var(--radius);aspect-ratio:4/3;cursor:pointer}
+.gallery-item.wide{grid-column:span 2;aspect-ratio:16/9}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+.gallery-item:hover img{transform:scale(1.04)}
+@media(max-width:768px){.gallery-grid{grid-template-columns:repeat(2,1fr)}.gallery-item.wide{grid-column:span 2}}
+@media(max-width:480px){.gallery-grid{grid-template-columns:1fr}.gallery-item.wide{grid-column:span 1;aspect-ratio:4/3}}
+
+/* ── Lightbox ── */
+.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+.lightbox.open{display:flex}
+.lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:var(--radius)}
+.lightbox-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:.8}
+.lightbox-close:hover{opacity:1}
+.lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;padding:.75rem 1rem;cursor:pointer;border-radius:var(--radius);transition:background .2s}
+.lightbox-prev{left:1rem}.lightbox-next{right:1rem}
+.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
+
+/* ── Scope ── */
+.scope-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;margin-top:2rem}
+.scope-item{background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:flex-start;gap:1rem}
+.scope-icon{font-size:1.4rem;flex-shrink:0;margin-top:.1rem}
+.scope-item-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--clr-text);margin-bottom:.2rem}
+.scope-item-text span{font-size:.83rem;color:var(--clr-mid);line-height:1.5}
+
+/* ── Context band ── */
+.context-band{background:var(--clr-dark);padding:4rem 0}
+.context-band-inner{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
+@media(max-width:768px){.context-band-inner{grid-template-columns:1fr;gap:2rem}}
+.context-band p{color:rgba(255,255,255,.75);line-height:1.8;margin-bottom:1rem}
+.context-band p:last-child{margin-bottom:0}
+.context-band h2{color:#fff;font-size:clamp(1.5rem,3vw,2rem);margin-bottom:1.25rem}
+.context-band .section-label{color:rgba(160,120,74,.85)}
+.context-band-img{border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3}
+.context-band-img img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── Next Project ── */
+.next-project{border-top:1px solid var(--clr-border);padding:3rem 0}
+.next-project-inner{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
+.next-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.4rem}
+</style>
+
+</head>
+<body>
+
+  <!-- ═══ HEADER ═══ -->
+  <header class="site-header" role="banner">
+    <div class="container">
+      <div class="header-inner">
+        <a href="../index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
+          <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
+          <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
+        </a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="../index.html">Home</a>
+          <div class="nav-services-wrap">
+            <span class="nav-services-trigger">Services &#9663;</span>
+            <div class="nav-services-dropdown">
+              <div class="nav-services-col">
+                <span class="nav-services-col-label">Custom Furniture</span>
+                <a href="../wardrobes.html">Wardrobes</a>
+                <a href="../beds.html">Beds</a>
+                <a href="../kitchens.html">Kitchens</a>
+                <a href="../dining-living.html">Dining &amp; Living</a>
+                <a href="../solid-wood.html">Solid Wood</a>
+              </div>
+              <div class="nav-services-col">
+                <span class="nav-services-col-label">Storage &amp; Displays</span>
+                <a href="../tv-units.html">TV Units</a>
+                <a href="../shelving.html">Shelving</a>
+              </div>
+            </div>
+          </div>
+          <a href="../portfolio.html" style="color:var(--clr-accent)">Portfolio</a>
+          <a href="../contact.html">Contact</a>
+          <div class="nav-tools-wrap">
+            <span class="nav-tools-trigger">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+              Tools &#9663;
+            </span>
+            <div class="nav-tools-dropdown">
+              <div class="nav-tools-dropdown-label">Carpenter Tools</div>
+              <a href="../cutlist.html">Wardrobe Cutlist <span class="tool-tag">Alpha</span></a>
+            </div>
+          </div>
+          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project." class="btn btn-wa btn-sm" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp
+          </a>
+        </nav>
+        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a href="../index.html">Home</a>
+    <a href="../wardrobes.html">Wardrobes</a>
+    <a href="../beds.html">Beds</a>
+    <a href="../kitchens.html">Kitchens</a>
+    <a href="../dining-living.html">Dining &amp; Living</a>
+    <a href="../solid-wood.html">Solid Wood</a>
+    <a href="../tv-units.html">TV Units</a>
+    <a href="../shelving.html">Shelving</a>
+    <a href="../portfolio.html">Portfolio</a>
+    <a href="../contact.html">Contact</a>
+    <a href="../cutlist.html" style="color:var(--clr-accent)">&#9874; Wardrobe Cutlist (Alpha)</a>
+    <div class="mobile-nav-ctas">
+      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+      <a href="../contact.html" class="btn btn-outline">Request a Quote</a>
+    </div>
+  </nav>
+
+  <main>
+
+    <!-- ═══ HERO ═══ -->
+    <!--
+      IMAGE: how-hero.jpg → Use the wide no-people night shot (Image 4 from first batch)
+      Full curved platform, floor graphics, clean view of the entire installation
+      Upload to: /images/projects/house-of-walker/how-hero.jpg
+    -->
+    <div class="project-hero">
+      <img class="project-hero-img"
+        src="../images/projects/house-of-walker/how-hero.jpg"
+        alt="House of Walker Accra — branded seating installation built by Neewoody Custom Woodwork at One Airport Square"
+      />
+      <div class="project-hero-overlay" aria-hidden="true"></div>
+      <div class="project-hero-content">
+        <div class="container">
+          <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:.5rem">
+            <a href="../index.html" style="color:rgba(255,255,255,.6)">Home</a>
+            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
+            <a href="../portfolio.html" style="color:rgba(255,255,255,.6)">Portfolio</a>
+            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
+            <span style="color:rgba(255,255,255,.85)" aria-current="page">House of Walker Accra</span>
+          </nav>
+          <p class="project-hero-label">Commercial Installation · One Airport Square, Accra</p>
+          <h1 class="project-hero-title">House of Walker Accra</h1>
+          <p class="project-hero-sub">Branded seating installation built for Johnnie Walker's 200-year celebration — carpentry, cladding, and integrated LED lighting to brand specification.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SPEC BAR ═══ -->
+    <div class="spec-bar">
+      <div class="container">
+        <div class="spec-bar-inner">
+          <div class="spec-item">
+            <span class="spec-label">Activation</span>
+            <span class="spec-value">House of Walker Accra</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Brand</span>
+            <span class="spec-value">Johnnie Walker — 200 Years</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Venue</span>
+            <span class="spec-value">XO Lounge, One Airport Square</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Year</span>
+            <span class="spec-value">December 2020</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-label">Type</span>
+            <span class="spec-value">Commercial Event Installation</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ THE BRIEF ═══ -->
+    <section class="cs-section" aria-labelledby="brief-heading">
+      <div class="container">
+        <div class="cs-grid">
+          <div class="cs-text reveal">
+            <p class="section-label">The Brief</p>
+            <h2 id="brief-heading">A Problem to Solve, Not a Blank Canvas</h2>
+            <p>Johnnie Walker chose XO Lounge at One Airport Square — one of Accra's premium commercial addresses — as the venue for their House of Walker activation, celebrating 200 years of the brand. The space had the right scale and location. But it had a structural problem.</p>
+            <p>The venue's existing concrete seating — a large curved platform and a central cubby seating area — was too deep for the brand's planned display installations. The geometry didn't work. The displays would sit wrong. The activation couldn't proceed without resolving it.</p>
+            <p>Neewoody was brought in to fix the problem and deliver a finished installation to Johnnie Walker's exact brand specification: black and gold, with integrated lighting, built fast.</p>
+          </div>
+          <div class="cs-img reveal">
+            <!--
+              IMAGE: how-brief.jpg → Use Image 1 from second batch (finished bench with cushions and branding, clean detail)
+              Upload to: /images/projects/house-of-walker/how-brief.jpg
+            -->
+            <img src="../images/projects/house-of-walker/how-brief.jpg"
+              alt="Finished House of Walker branded bench seating at One Airport Square Accra"
+              loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ THE PROBLEM ═══ -->
+    <section class="cs-section cs-section--alt" aria-labelledby="problem-heading">
+      <div class="container">
+        <div class="cs-grid cs-grid--reverse">
+          <div class="cs-text reveal">
+            <p class="section-label">The Challenge</p>
+            <h2 id="problem-heading">Adapting What Exists to What the Brand Needs</h2>
+            <p>This wasn't a build from scratch. The concrete seating infrastructure was already there — fixed, heavy, and the wrong depth. Neewoody's job was to work with it, not around it.</p>
+            <p>The central cubby seating units were infilled completely to create flush, usable display surfaces — then finished for tiling by the wider fit-out team. The curved platform was the more visible transformation: structurally modified, then clad in MDF to the brand's black and gold specification, with integrated LED strip lighting channels running the full length of the base.</p>
+            <p>Every dimension, every colour, every material decision was dictated by Johnnie Walker's brand guidelines. There was no creative latitude — only execution accuracy. Under event pressure, with a fixed deadline and a global brand watching.</p>
+          </div>
+          <div class="cs-img reveal">
+            <!--
+              IMAGE: how-build.jpg → Use construction Image (curved platform mid-build with LED channels glowing)
+              Best option: House_of_Walker_2.jpg (full sweep of curved platform under construction)
+              Upload to: /images/projects/house-of-walker/how-build.jpg
+            -->
+            <img src="../images/projects/house-of-walker/how-build.jpg"
+              alt="Neewoody team building the curved platform for House of Walker Accra during construction"
+              loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BEFORE / AFTER ═══ -->
+    <section class="cs-section" aria-labelledby="ba-heading">
+      <div class="container reveal">
+        <p class="section-label">Process</p>
+        <h2 id="ba-heading">From Construction to Brand Activation</h2>
+        <p style="color:var(--clr-mid);line-height:1.75;max-width:600px;margin-bottom:0">The same space, before and after. Every surface you see in the finished installation was built or transformed by Neewoody.</p>
+        <div class="ba-grid">
+          <div>
+            <span class="ba-label">During construction</span>
+            <div class="ba-item">
+              <!--
+                IMAGE: how-during-1.jpg → House_of_Walker_1.jpg (straight-on bench under construction, LED channels visible)
+                Upload to: /images/projects/house-of-walker/how-during-1.jpg
+              -->
+              <img src="../images/projects/house-of-walker/how-during-1.jpg"
+                alt="House of Walker Accra seating installation during construction by Neewoody"
+                loading="lazy" />
+            </div>
+          </div>
+          <div>
+            <span class="ba-label">Finished installation</span>
+            <div class="ba-item">
+              <!--
+                IMAGE: how-finished-1.jpg → Image 3 from first finished batch (close bench detail, Estd 1820, cushions)
+                Upload to: /images/projects/house-of-walker/how-finished-1.jpg
+              -->
+              <img src="../images/projects/house-of-walker/how-finished-1.jpg"
+                alt="Finished House of Walker Accra seating installation — branded and dressed for the event"
+                loading="lazy" />
+            </div>
+          </div>
+          <div>
+            <span class="ba-label">During construction</span>
+            <div class="ba-item">
+              <!--
+                IMAGE: how-during-2.jpg → House_of_Walker_6.jpg (yellow LED channel glowing, paper protection on surfaces)
+                Upload to: /images/projects/house-of-walker/how-during-2.jpg
+              -->
+              <img src="../images/projects/house-of-walker/how-during-2.jpg"
+                alt="LED channel and cladding work during House of Walker construction"
+                loading="lazy" />
+            </div>
+          </div>
+          <div>
+            <span class="ba-label">Finished installation</span>
+            <div class="ba-item">
+              <!--
+                IMAGE: how-finished-2.jpg → Wide no-people finished shot (Image 5 from first batch — clean night exterior angle)
+                Upload to: /images/projects/house-of-walker/how-finished-2.jpg
+              -->
+              <img src="../images/projects/house-of-walker/how-finished-2.jpg"
+                alt="Finished House of Walker Accra curved platform — wide view of full installation"
+                loading="lazy" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ GALLERY ═══ -->
+    <section class="gallery-section" aria-labelledby="gallery-heading">
+      <div class="container">
+        <p class="section-label">Event Photography</p>
+        <h2 id="gallery-heading">The Finished Installation</h2>
+        <p style="color:var(--clr-mid);max-width:560px;margin-bottom:2.5rem;line-height:1.75">Photographed during the House of Walker Accra activation, December 2020. The curved platform and seating installation Neewoody built became the centrepiece photo location for thousands of guests throughout the month.</p>
+
+        <!--
+          IMAGE UPLOAD GUIDE — rename and upload to /images/projects/house-of-walker/
+
+          how-gallery-1.jpg  → Wide no-people night shot (Image 4 first batch) — WIDE slot
+          how-gallery-2.jpg  → Image 1 second batch (man in blue shirt, bench + branding)
+          how-gallery-3.jpg  → Image 3 second batch (man sitting on bench, cushion detail)
+          how-gallery-4.jpg  → Image 4 second batch (woman in black, full platform view) — WIDE slot
+          how-gallery-5.jpg  → Image 2 second batch (man in blue suit from side, full curved platform)
+          how-gallery-6.jpg  → Image 1 first batch (bench detail, 200 Years, cushions)
+          how-gallery-7.jpg  → Image 3 first batch (close bench, Estd 1820, House of Walker Accra cushion)
+        -->
+
+        <div class="gallery-grid" id="gallery-grid">
+
+          <div class="gallery-item wide" data-index="0">
+            <img src="../images/projects/house-of-walker/how-gallery-1.jpg"
+              alt="House of Walker Accra — full curved platform installation, clean night view" loading="lazy" />
+          </div>
+
+          <div class="gallery-item" data-index="1">
+            <img src="../images/projects/house-of-walker/how-gallery-2.jpg"
+              alt="Guest photographed at House of Walker Accra seating installation" loading="lazy" />
+          </div>
+
+          <div class="gallery-item" data-index="2">
+            <img src="../images/projects/house-of-walker/how-gallery-3.jpg"
+              alt="Guest seated on House of Walker bench — House of Walker Accra cushion detail" loading="lazy" />
+          </div>
+
+          <div class="gallery-item wide" data-index="3">
+            <img src="../images/projects/house-of-walker/how-gallery-4.jpg"
+              alt="House of Walker Accra — full platform view with Keep Walking floor graphics" loading="lazy" />
+          </div>
+
+          <div class="gallery-item" data-index="4">
+            <img src="../images/projects/house-of-walker/how-gallery-5.jpg"
+              alt="Wide angle of House of Walker Accra curved platform installation" loading="lazy" />
+          </div>
+
+          <div class="gallery-item" data-index="5">
+            <img src="../images/projects/house-of-walker/how-gallery-6.jpg"
+              alt="200 Years branding detail on House of Walker Accra seating" loading="lazy" />
+          </div>
+
+          <div class="gallery-item" data-index="6">
+            <img src="../images/projects/house-of-walker/how-gallery-7.jpg"
+              alt="Close detail of finished bench — House of Walker Accra, Estd 1820" loading="lazy" />
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ LIGHTBOX ═══ -->
+    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+      <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
+      <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous">&#8592;</button>
+      <img id="lightbox-img" src="" alt="" />
+      <button class="lightbox-next" id="lightbox-next" aria-label="Next">&#8594;</button>
+    </div>
+
+    <!-- ═══ SCOPE ═══ -->
+    <section class="cs-section" aria-labelledby="scope-heading">
+      <div class="container">
+        <div style="max-width:640px;margin-bottom:1rem" class="reveal">
+          <p class="section-label">What Was Built</p>
+          <h2 id="scope-heading">Neewoody's Scope</h2>
+          <p style="color:var(--clr-mid);line-height:1.75">Every item below was designed, modified, built, and finished by Neewoody — to Johnnie Walker's brand specification.</p>
+        </div>
+        <div class="scope-grid reveal">
+          <div class="scope-item">
+            <span class="scope-icon">🏗️</span>
+            <div class="scope-item-text">
+              <strong>Structural Infill — Central Cubby Seating</strong>
+              <span>Existing concrete cubby seating units were too deep for the planned display installations. Neewoody infilled the entire structure to create flush, usable display surfaces ready for finishing.</span>
+            </div>
+          </div>
+          <div class="scope-item">
+            <span class="scope-icon">🔄</span>
+            <div class="scope-item-text">
+              <strong>Curved Platform Transformation</strong>
+              <span>The existing curved concrete platform was structurally modified and fully reclad in MDF — transformed from raw concrete into the finished branded installation visible at the event.</span>
+            </div>
+          </div>
+          <div class="scope-item">
+            <span class="scope-icon">🎨</span>
+            <div class="scope-item-text">
+              <strong>Brand-Spec Cladding & Finishing</strong>
+              <span>All MDF surfaces finished in Johnnie Walker's black and gold brand colours. Every dimension and colour match executed to brand guidelines with no creative deviation.</span>
+            </div>
+          </div>
+          <div class="scope-item">
+            <span class="scope-icon">💡</span>
+            <div class="scope-item-text">
+              <strong>Integrated LED Lighting</strong>
+              <span>LED strip lighting channels built into the full perimeter of the platform base — the continuous yellow glow visible in all finished photos is integral to the structure Neewoody built.</span>
+            </div>
+          </div>
+          <div class="scope-item">
+            <span class="scope-icon">📐</span>
+            <div class="scope-item-text">
+              <strong>Display Shelving Unit</strong>
+              <span>Full-wall black and gold shelving display unit — built to house brand merchandise and bottles for the heritage and flavour academy sections of the activation.</span>
+            </div>
+          </div>
+          <div class="scope-item">
+            <span class="scope-icon">⚡</span>
+            <div class="scope-item-text">
+              <strong>Event Turnaround</strong>
+              <span>Delivered under event production timelines — a fixed deadline with a global brand activation dependent on the carpentry being complete and finished correctly.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ CONTEXT BAND ═══ -->
+    <div class="context-band">
+      <div class="container">
+        <div class="context-band-inner">
+          <div class="reveal">
+            <p class="section-label">What This Project Demonstrates</p>
+            <h2>Commercial Carpentry at Brand Activation Scale</h2>
+            <p>House of Walker is a different kind of project from Neewoody's residential work — and that's the point. The brief had no room for interpretation. Brand guidelines are exact. Event deadlines are fixed. Global activations don't move for contractors who aren't ready.</p>
+            <p>Neewoody delivered. The curved installation became the centrepiece of one of Accra's most talked-about brand activations of 2020 — photographed by thousands of guests throughout December.</p>
+            <p>For developers, event producers, and commercial clients who need carpentry work delivered accurately and on time, this project is the reference.</p>
+          </div>
+          <div class="context-band-img reveal">
+            <!--
+              IMAGE: how-context.jpg → Image 2 second batch (man in blue suit, side angle, full curved platform visible)
+              Upload to: /images/projects/house-of-walker/how-context.jpg
+            -->
+            <img src="../images/projects/house-of-walker/how-context.jpg"
+              alt="House of Walker Accra curved platform installation — side angle showing full scale"
+              loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ CTA ═══ -->
+    <section class="cta-band" aria-labelledby="how-cta">
+      <div class="container reveal">
+        <p class="section-label" style="color:rgba(160,120,74,.85)">Work with Neewoody</p>
+        <h2 id="how-cta">Have a Commercial or Event Brief?</h2>
+        <p>If your project requires carpentry delivered accurately to specification and on schedule — residential, commercial, or event production — get in touch.</p>
+        <div class="cta-buttons">
+          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20House%20of%20Walker%20project%20and%20would%20like%20to%20discuss%20a%20commercial%20brief."
+            class="btn btn-wa btn-lg" target="_blank" rel="noopener">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            WhatsApp Us Now
+          </a>
+          <a href="../contact.html" class="btn btn-outline-light btn-lg">Request a Quote</a>
+          <a href="sage-centre.html" class="btn btn-outline-light btn-lg">View Sage Centre Project</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ BACK TO PORTFOLIO ═══ -->
+    <div class="next-project">
+      <div class="container">
+        <div class="next-project-inner">
+          <div>
+            <span class="next-label">Portfolio</span>
+            <a href="../portfolio.html" style="font-size:1.1rem;font-weight:600;color:var(--clr-text);text-decoration:none"
+              onmouseover="this.style.color='var(--clr-accent)'" onmouseout="this.style.color='var(--clr-text)'">
+              ← Back to All Projects
+            </a>
+          </div>
+          <a href="sage-centre.html" class="btn btn-accent">View Sage Centre →</a>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="site-footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="../index.html" class="logo">
+            <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
+            <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
+          </a>
+          <p>Made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
+            <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="footer-col"><h5>Services</h5><ul>
+          <li><a href="../wardrobes.html">Custom Wardrobes</a></li>
+          <li><a href="../beds.html">Custom Beds</a></li>
+          <li><a href="../kitchens.html">Kitchen Cabinets</a></li>
+          <li><a href="../dining-living.html">Dining &amp; Living</a></li>
+          <li><a href="../solid-wood.html">Solid Wood</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Company</h5><ul>
+          <li><a href="../portfolio.html">Portfolio</a></li>
+          <li><a href="../contact.html">Contact Us</a></li>
+          <li><a href="../contact.html">Request a Quote</a></li>
+          <li><a href="../wardrobe-estimator.html">Price Estimator</a></li>
+          <li><a href="../privacy.html">Privacy Policy</a></li>
+        </ul></div>
+        <div class="footer-col"><h5>Contact</h5>
+          <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
+          <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
+          <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
+          <div class="footer-contact-item">Accra, Ghana</div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
+        <div class="footer-bottom-links"><a href="../privacy.html">Privacy Policy</a><a href="../contact.html">Contact</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project."
+    class="wa-float" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <span class="wa-tooltip">Chat on WhatsApp</span>
+  </a>
+
+  <script src="../js/main.js"></script>
+  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+  <script>
+  document.addEventListener('click', function(e){
+    var nt = document.getElementById('nav-tools');
+    if(nt && !nt.contains(e.target)) nt.classList.remove('open');
+  });
+
+  // Lightbox
+  (function(){
+    var items = document.querySelectorAll('#gallery-grid .gallery-item');
+    var lb = document.getElementById('lightbox');
+    var lbImg = document.getElementById('lightbox-img');
+    var lbClose = document.getElementById('lightbox-close');
+    var lbPrev = document.getElementById('lightbox-prev');
+    var lbNext = document.getElementById('lightbox-next');
+    var current = 0;
+    var srcs = [], alts = [];
+
+    items.forEach(function(item, i){
+      var img = item.querySelector('img');
+      srcs.push(img.src); alts.push(img.alt);
+      item.addEventListener('click', function(){ open(i); });
+    });
+
+    function open(i){
+      current = i;
+      lbImg.src = srcs[i]; lbImg.alt = alts[i];
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function close(){
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    lbClose.addEventListener('click', close);
+    lb.addEventListener('click', function(e){ if(e.target === lb) close(); });
+    lbPrev.addEventListener('click', function(){ open((current - 1 + srcs.length) % srcs.length); });
+    lbNext.addEventListener('click', function(){ open((current + 1) % srcs.length); });
+    document.addEventListener('keydown', function(e){
+      if(!lb.classList.contains('open')) return;
+      if(e.key === 'Escape') close();
+      if(e.key === 'ArrowLeft') lbPrev.click();
+      if(e.key === 'ArrowRight') lbNext.click();
+    });
+  })();
+  </script>
+
+</body>
+</html>
