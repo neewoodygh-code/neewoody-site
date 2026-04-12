@@ -22,7 +22,32 @@
 </url>
 
 <url>
+  <loc>https://neewoodygh.com/dining-living.html</loc>
+  <priority>0.9</priority>
+</url>
+
+<url>
+  <loc>https://neewoodygh.com/solid-wood.html</loc>
+  <priority>0.9</priority>
+</url>
+
+<url>
+  <loc>https://neewoodygh.com/tv-units.html</loc>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://neewoodygh.com/shelving.html</loc>
+  <priority>0.8</priority>
+</url>
+
+<url>
   <loc>https://neewoodygh.com/portfolio.html</loc>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://neewoodygh.com/projects/sage-centre.html</loc>
   <priority>0.8</priority>
 </url>
 
