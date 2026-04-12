@@ -781,7 +781,17 @@ line-height:1.6;
   padding: 1rem;
   z-index: 500;
   min-width: 420px;
-  display: none;
+}
+
+/* Invisible bridge fills the gap between trigger and dropdown
+   so hover state is maintained as the mouse travels down */
+.nav-services-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
 }
 
 .nav-services-wrap:hover .nav-services-dropdown {
