@@ -771,7 +771,7 @@ line-height:1.6;
 .nav-services-dropdown {
   display: none;
   position: absolute;
-  top: calc(100% + 14px);
+  top: calc(100% + 4px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--clr-surface);
