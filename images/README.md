@@ -86,28 +86,57 @@ Each project has its own image folder under `/images/projects/project-name/`.
 Full teak fitout for Sage Experience NGO, Wli, Volta Region (June 2022 – October 2024).
 Rename your original files exactly as shown below before uploading.
 
-| Filename to upload         | Your original file | What it shows                                          | Used as          |
-|----------------------------|--------------------|--------------------------------------------------------|------------------|
-| sage-grounds.jpg           | IMG_20220913_120353| Sage Centre gardens with Agumatsa mountains behind     | Setting section  |
-| sage-hero.jpg              | IMG_0425           | Dining room with Edison lights and live edge table     | Page hero        |
-| sage-brief.jpg             | IMG_1163           | Architectural wide shot — glass wall, sofa, sideboard  | Brief section    |
-| sage-story.jpg             | IMG_1312           | Bedroom with louvre feature wall and storage bed       | Story section    |
-| sage-gallery-1.jpg         | IMG_1122           | Living room wide — L-shaped sofa and bookshelves       | Gallery (wide)   |
-| sage-gallery-2.jpg         | IMG_0440           | Live edge dining table close-up — natural grain detail | Gallery          |
-| sage-gallery-3.jpg         | IMG_1314           | Bedroom: louvre wall and clothes rack detail           | Gallery          |
-| sage-gallery-4.jpg         | IMG_0431           | Dining room second angle with buffet unit              | Gallery          |
-| sage-gallery-5.jpg         | IMG_1331           | Bedroom wide shot with ceiling fan                     | Gallery          |
-| sage-gallery-6.jpg         | IMG_0895           | Outdoor L-shaped sofa with grey cushions               | Gallery          |
-| sage-gallery-7.jpg         | IMG_0193           | Louvre corridor with armchairs                         | Gallery          |
-| sage-gallery-8.jpg         | IMG_0229           | Bookshelf unit with lower cabinet storage              | Gallery          |
-| sage-gallery-9.jpg         | IMG_1067           | Evening living room wide shot                          | Gallery (wide)   |
-| sage-gallery-10.jpg        | IMG_1105           | Evening living room — blue sofa close-up               | Gallery          |
-| sage-gallery-11.jpg        | IMG_1181           | Grey sofa guest room with TV unit                      | Gallery          |
-| sage-gallery-12.jpg        | IMG_1098           | Evening projector room with cabinet units              | Gallery          |
+| Filename to upload  | Your original file  | What it shows                                          | Used as         | Ideal size  |
+|---------------------|---------------------|--------------------------------------------------------|-----------------|-------------|
+| sage-grounds.jpg    | IMG_20220913_120353 | Sage Centre gardens with Agumatsa mountains behind     | Setting section | 1200×800    |
+| sage-hero.jpg       | IMG_0425            | Dining room with Edison lights and live edge table     | Page hero       | 1600×900    |
+| sage-brief.jpg      | IMG_1163            | Architectural wide shot — glass wall, sofa, sideboard  | Brief section   | 1200×900    |
+| sage-story.jpg      | IMG_1312            | Bedroom with louvre feature wall and storage bed       | Story section   | 1200×900    |
+| sage-gallery-1.jpg  | IMG_1122            | Living room wide — L-shaped sofa and bookshelves       | Gallery (wide)  | 1600×900    |
+| sage-gallery-2.jpg  | IMG_0440            | Live edge dining table close-up — natural grain detail | Gallery         | 1200×900    |
+| sage-gallery-3.jpg  | IMG_1314            | Bedroom: louvre wall and clothes rack detail           | Gallery         | 1200×900    |
+| sage-gallery-4.jpg  | IMG_0431            | Dining room second angle with buffet unit              | Gallery         | 1200×900    |
+| sage-gallery-5.jpg  | IMG_1331            | Bedroom wide shot with ceiling fan                     | Gallery         | 1200×900    |
+| sage-gallery-6.jpg  | IMG_0895            | Outdoor L-shaped sofa with grey cushions               | Gallery         | 1200×900    |
+| sage-gallery-7.jpg  | IMG_0193            | Louvre corridor with armchairs                         | Gallery         | 1200×900    |
+| sage-gallery-8.jpg  | IMG_0229            | Bookshelf unit with lower cabinet storage              | Gallery         | 1200×900    |
+| sage-gallery-9.jpg  | IMG_1067            | Evening living room wide shot                          | Gallery (wide)  | 1600×900    |
+| sage-gallery-10.jpg | IMG_1105            | Evening living room — blue sofa close-up               | Gallery         | 1200×900    |
+| sage-gallery-11.jpg | IMG_1181            | Grey sofa guest room with TV unit                      | Gallery         | 1200×900    |
+| sage-gallery-12.jpg | IMG_1098            | Evening projector room with cabinet units              | Gallery         | 1200×900    |
 
 **Upload path:** `/images/projects/sage-centre/`
 **Page location:** `/projects/sage-centre.html`
-**Recommended compression:** squoosh.app — WebP or JPEG at 82% quality, max 1600px wide
+**Recommended compression:** Photoshop Export As → JPEG quality 7 (max), or squoosh.app JPEG 82%
+
+---
+
+### House of Walker — `/images/projects/house-of-walker/`
+
+Branded seating installation for the Johnnie Walker 200-year celebration, XO Lounge, One Airport Square, Accra (December 2020).
+
+| Filename            | Source image                                              | What it shows                                            | Used as              | Ideal size |
+|---------------------|-----------------------------------------------------------|----------------------------------------------------------|----------------------|------------|
+| how-hero.jpg        | Wide no-people night shot (Image 4, first finished batch) | Full curved platform, floor graphics, clean night view   | Page hero + portfolio card | 1600×900 |
+| how-brief.jpg       | Image 1, second batch (man in blue shirt)                 | Finished bench with branding, scale reference            | Brief section        | 1200×900   |
+| how-build.jpg       | House_of_Walker_2.jpg (curved platform under construction)| Full sweep of curved platform mid-build, LED channels    | Challenge section    | 1200×900   |
+| how-during-1.jpg    | House_of_Walker_1.jpg (straight bench construction)       | Straight bench section under construction                | Before/after grid    | 1200×900   |
+| how-during-2.jpg    | House_of_Walker_6.jpg (yellow LED channels glowing)       | LED channel and cladding work, yellow glow               | Before/after grid    | 1200×900   |
+| how-finished-1.jpg  | Image 3, first finished batch (close bench detail)        | Finished bench — Estd 1820, House of Walker cushions     | Before/after grid    | 1200×900   |
+| how-finished-2.jpg  | Image 5, first finished batch (clean night exterior)      | Clean exterior night shot of full platform               | Before/after grid    | 1200×900   |
+| how-context.jpg     | Image 2, second batch (man in blue suit, side angle)      | Wide side angle of full curved installation              | Dark context band    | 1200×900   |
+| how-gallery-1.jpg   | Wide no-people shot (same as hero)                        | Full curved platform, floor graphics                     | Gallery (wide)       | 1600×900   |
+| how-gallery-2.jpg   | Image 1, second batch (man in blue shirt)                 | Guest with finished bench and branding                   | Gallery              | 1200×900   |
+| how-gallery-3.jpg   | Image 3, second batch (man sitting, cushion detail)       | Guest seated — House of Walker Accra cushion visible     | Gallery              | 1200×900   |
+| how-gallery-4.jpg   | Image 4, second batch (woman in black, full platform)     | Full platform view with Keep Walking floor graphics      | Gallery (wide)       | 1600×900   |
+| how-gallery-5.jpg   | Image 2, second batch (man in blue suit)                  | Wide angle curved platform from side                     | Gallery              | 1200×900   |
+| how-gallery-6.jpg   | Image 1, first finished batch (bench detail, 200 Years)   | 200 Years branding and illuminated base detail           | Gallery              | 1200×900   |
+| how-gallery-7.jpg   | Image 3, first finished batch (close bench, Estd 1820)    | Close bench detail — Estd 1820, cushions                 | Gallery              | 1200×900   |
+
+**Upload path:** `/images/projects/house-of-walker/`  
+**⚠ Important:** This folder should be inside `images/projects/` — the full path on your server must be `images/projects/house-of-walker/` not `images/house-of-walker/`  
+**Page location:** `/projects/house-of-walker.html`  
+**Recommended compression:** Photoshop Export As → JPEG quality 7 (max), or squoosh.app JPEG 82%
 
 ---
 
