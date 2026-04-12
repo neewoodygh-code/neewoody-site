@@ -146,7 +146,7 @@ h4 { font-size: 1.05rem; }
 .logo-img { height: 96px; width: auto; display: block; flex-shrink: 0; }
 .logo-text { display: flex; flex-direction: column; }
 .logo-sub { display: block; font-family: var(--font-body); font-size: .62rem; font-weight: 400; letter-spacing: .14em; text-transform: uppercase; color: var(--clr-muted); margin-top: 2px; }
-@media (max-width: 400px) { .logo-img { height: 54px; } }
+@media (max-width: 400px) { .logo-img { height: 36px; } }
 
 .nav-links { display: flex; align-items: center; gap: 1.6rem; }
 .nav-links a { font-size: .87rem; font-weight: 500; color: var(--clr-mid); transition: color var(--ease); position: relative; }
