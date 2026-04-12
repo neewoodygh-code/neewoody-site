@@ -108,6 +108,10 @@ gtag('config', 'G-ZP77WR6BNH');
   .nav-tools-dropdown-label{padding:.35rem .9rem .2rem;font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace}
   @media(max-width:900px){.nav-tools-wrap{display:none}}
   </style>
+<style>
+.featured-cs-card:hover .featured-cs-img { transform: scale(1.04); }
+@media (max-width: 640px) { .featured-cs-grid { grid-template-columns: 1fr !important; } }
+</style>
 </head>
 
 <body>
@@ -203,12 +207,11 @@ gtag('config', 'G-ZP77WR6BNH');
           <div class="hero-eyebrow">Custom Furniture · Accra, Ghana</div>
 
           <h1 id="hero-heading">
-            Custom Wardrobes, Beds & Kitchens In Accra.
+            Custom Furniture Built for Accra Homes & Commercial Spaces.
           </h1>
 
           <p class="hero-sub">
-            We design and build custom wardrobes, beds, kitchen cabinets, and bespoke
-            furniture in Accra — made to measure, finished with care, delivered on time.
+            Wardrobes, beds, kitchens, dining tables, solid wood furniture, and commercial installations — made to measure, finished with care, delivered on time.
           </p>
 
           <div class="hero-ctas">
@@ -318,8 +321,6 @@ gtag('config', 'G-ZP77WR6BNH');
           <!-- Shelving & Storage -->
           <article class="service-card reveal">
             <div class="service-card-img">
-              <!-- REPLACE: Photo of shelving, a TV unit, or storage unit build.
-                   Filename: images/service-shelving.jpg | Size: 600×400px min -->
               <img src="images/service-shelving.jpg"
                    alt="Custom shelving and TV unit built in Accra living room"
                    loading="lazy"
@@ -328,8 +329,54 @@ gtag('config', 'G-ZP77WR6BNH');
             <div class="service-card-body">
               <h3>Shelving & Storage</h3>
               <p>TV units, wall shelves, home office storage, and display units — custom built to make the most of any room.</p>
-              <a href="portfolio.html" class="card-link">
-                View examples
+              <a href="shelving.html" class="card-link">
+                Explore shelving
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Dining & Living -->
+          <article class="service-card reveal reveal-delay-1">
+            <div class="service-card-img">
+              <!--
+                IMAGE: service-dining.jpg — use one of the Sage Centre dining table shots
+                Recommended: crop from images/projects/sage-centre/sage-hero.jpg
+                Upload to: images/service-dining.jpg | Size: 600×400px
+              -->
+              <img src="images/service-dining.jpg"
+                   alt="Custom solid wood dining table built by Neewoody in Accra"
+                   loading="lazy"
+                   onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#8A8178;font-size:.8rem\'>Dining photo coming soon</div>'" />
+            </div>
+            <div class="service-card-body">
+              <h3>Dining & Living</h3>
+              <p>Dining tables, coffee tables, sofas with solid wood frames, and living room pieces — built to your dimensions in solid hardwood.</p>
+              <a href="dining-living.html" class="card-link">
+                Explore dining & living
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- Solid Wood -->
+          <article class="service-card reveal reveal-delay-2">
+            <div class="service-card-img">
+              <!--
+                IMAGE: service-solidwood.jpg — use the live edge dining table close-up
+                Recommended: crop from images/projects/sage-centre/sage-gallery-2.jpg
+                Upload to: images/service-solidwood.jpg | Size: 600×400px
+              -->
+              <img src="images/service-solidwood.jpg"
+                   alt="Solid Ghanaian teak furniture built by Neewoody Custom Woodwork"
+                   loading="lazy"
+                   onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;color:#8A8178;font-size:.8rem\'>Solid wood photo coming soon</div>'" />
+            </div>
+            <div class="service-card-body">
+              <h3>Solid Wood</h3>
+              <p>Teak, mahogany, and iroko — specified by you, built by us. No MDF, no laminate. Furniture built to outlast the trends.</p>
+              <a href="solid-wood.html" class="card-link">
+                Explore solid wood
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
               </a>
             </div>
@@ -509,6 +556,70 @@ gtag('config', 'G-ZP77WR6BNH');
             </div>
           </article>
 
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══════════════════════════════════════
+         FEATURED WORK — Case Studies
+    ═══════════════════════════════════════ -->
+    <section style="background:var(--clr-dark);padding:5rem 0" aria-labelledby="featured-heading">
+      <div class="container">
+        <div class="reveal" style="margin-bottom:3rem">
+          <p class="section-label" style="color:rgba(160,120,74,.85)">Featured Work</p>
+          <h2 id="featured-heading" style="color:#fff;font-size:clamp(1.6rem,3vw,2.4rem)">Projects That Define What We Can Do</h2>
+          <p style="color:rgba(255,255,255,.6);max-width:560px;line-height:1.75;margin-top:.75rem">Two commissions that show the full range — from a 26-month teak fitout for a US-based NGO, to a branded installation for a global whisky brand's 200-year celebration.</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem" class="featured-cs-grid">
+
+          <!-- Sage Centre -->
+          <a href="projects/sage-centre.html" style="text-decoration:none;display:block;border-radius:var(--radius-lg);overflow:hidden;position:relative;aspect-ratio:4/3;background:#1a1208" class="reveal featured-cs-card">
+            <img src="images/projects/sage-centre/sage-hero.jpg"
+              alt="Sage Centre full teak fitout — live edge dining table by Neewoody"
+              style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease;opacity:.75"
+              loading="lazy"
+              onerror="this.style.display='none'"
+              class="featured-cs-img"
+            />
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 60%,transparent 100%)"></div>
+            <div style="position:absolute;bottom:0;left:0;right:0;padding:2rem">
+              <span style="font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(160,120,74,.9);font-family:monospace;display:block;margin-bottom:.5rem">Case Study · Wli, Volta Region</span>
+              <h3 style="color:#fff;font-size:clamp(1.1rem,2vw,1.5rem);margin:0 0 .5rem;line-height:1.2">Sage Centre — Full Teak Fitout</h3>
+              <p style="color:rgba(255,255,255,.7);font-size:.85rem;line-height:1.6;margin:0 0 1rem">26 months. 18 bunk beds, live edge dining tables, sofas, cabinetry — entire property built in solid Ghanaian teak to international standards.</p>
+              <span style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--clr-accent)">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </span>
+            </div>
+          </a>
+
+          <!-- House of Walker -->
+          <a href="projects/house-of-walker.html" style="text-decoration:none;display:block;border-radius:var(--radius-lg);overflow:hidden;position:relative;aspect-ratio:4/3;background:#1a1500" class="reveal featured-cs-card">
+            <img src="images/projects/house-of-walker/how-hero.jpg"
+              alt="House of Walker Accra — branded installation by Neewoody at One Airport Square"
+              style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease;opacity:.75"
+              loading="lazy"
+              onerror="this.style.display='none'"
+              class="featured-cs-img"
+            />
+            <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 60%,transparent 100%)"></div>
+            <div style="position:absolute;bottom:0;left:0;right:0;padding:2rem">
+              <span style="font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(160,120,74,.9);font-family:monospace;display:block;margin-bottom:.5rem">Case Study · One Airport Square, Accra</span>
+              <h3 style="color:#fff;font-size:clamp(1.1rem,2vw,1.5rem);margin:0 0 .5rem;line-height:1.2">House of Walker — Johnnie Walker 200 Years</h3>
+              <p style="color:rgba(255,255,255,.7);font-size:.85rem;line-height:1.6;margin:0 0 1rem">Branded seating installation for Johnnie Walker's 200-year celebration — structural carpentry, MDF cladding, and integrated LED lighting to brand spec.</p>
+              <span style="display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;font-weight:600;color:var(--clr-accent)">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </span>
+            </div>
+          </a>
+
+        </div>
+
+        <div style="text-align:center;margin-top:2.5rem">
+          <a href="portfolio.html" class="btn btn-outline-light">View Full Portfolio</a>
         </div>
       </div>
     </section>
