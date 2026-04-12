@@ -72,6 +72,45 @@ Upload your photos here with the exact filenames listed below.
 | kitchen-open-shelf.jpg  | Open shelving on kitchen wall                         | 600×420     |
 | kitchen-bar.jpg         | Breakfast bar or counter with stools                  | 600×420     |
 
+---
+
+## Project Case Studies (projects/)
+
+Case study pages live in a `/projects/` subfolder.
+Each project has its own image folder under `/images/projects/project-name/`.
+
+---
+
+### Sage Centre — `/images/projects/sage-centre/`
+
+Full teak fitout for Sage Experience NGO, Wli, Volta Region (June 2022 – October 2024).
+Rename your original files exactly as shown below before uploading.
+
+| Filename to upload         | Your original file | What it shows                                          | Used as          |
+|----------------------------|--------------------|--------------------------------------------------------|------------------|
+| sage-grounds.jpg           | IMG_20220913_120353| Sage Centre gardens with Agumatsa mountains behind     | Setting section  |
+| sage-hero.jpg              | IMG_0425           | Dining room with Edison lights and live edge table     | Page hero        |
+| sage-brief.jpg             | IMG_1163           | Architectural wide shot — glass wall, sofa, sideboard  | Brief section    |
+| sage-story.jpg             | IMG_1312           | Bedroom with louvre feature wall and storage bed       | Story section    |
+| sage-gallery-1.jpg         | IMG_1122           | Living room wide — L-shaped sofa and bookshelves       | Gallery (wide)   |
+| sage-gallery-2.jpg         | IMG_0440           | Live edge dining table close-up — natural grain detail | Gallery          |
+| sage-gallery-3.jpg         | IMG_1314           | Bedroom: louvre wall and clothes rack detail           | Gallery          |
+| sage-gallery-4.jpg         | IMG_0431           | Dining room second angle with buffet unit              | Gallery          |
+| sage-gallery-5.jpg         | IMG_1331           | Bedroom wide shot with ceiling fan                     | Gallery          |
+| sage-gallery-6.jpg         | IMG_0895           | Outdoor L-shaped sofa with grey cushions               | Gallery          |
+| sage-gallery-7.jpg         | IMG_0193           | Louvre corridor with armchairs                         | Gallery          |
+| sage-gallery-8.jpg         | IMG_0229           | Bookshelf unit with lower cabinet storage              | Gallery          |
+| sage-gallery-9.jpg         | IMG_1067           | Evening living room wide shot                          | Gallery (wide)   |
+| sage-gallery-10.jpg        | IMG_1105           | Evening living room — blue sofa close-up               | Gallery          |
+| sage-gallery-11.jpg        | IMG_1181           | Grey sofa guest room with TV unit                      | Gallery          |
+| sage-gallery-12.jpg        | IMG_1098           | Evening projector room with cabinet units              | Gallery          |
+
+**Upload path:** `/images/projects/sage-centre/`
+**Page location:** `/projects/sage-centre.html`
+**Recommended compression:** squoosh.app — WebP or JPEG at 82% quality, max 1600px wide
+
+---
+
 ## Tips
 - Shoot in good natural light or bright indoor lighting — avoid flash shadows
 - Clean the furniture before shooting — remove dust, stickers, tape
