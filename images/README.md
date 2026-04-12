@@ -18,6 +18,8 @@ Upload your photos here with the exact filenames listed below.
 | service-beds.jpg       | Homepage       | Bed frame close-up or room shot                       | 600×400     |
 | service-kitchens.jpg   | Homepage       | Kitchen cabinet close-up or full kitchen view         | 600×400     |
 | service-shelving.jpg   | Homepage       | Shelving or TV unit project                           | 600×400     |
+| service-dining.jpg     | Homepage       | Dining table — crop from sage-hero.jpg works well     | 600×400     |
+| service-solidwood.jpg  | Homepage       | Live edge or solid wood detail — crop from sage-gallery-2.jpg | 600×400 |
 
 ## Portfolio Images (portfolio.html)
 
