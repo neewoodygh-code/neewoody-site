@@ -792,29 +792,7 @@ function JobCard({job,crew,onView}){
     <Btn ch="Open →" onClick={onView} full outline/>
   </div>}/>);
 }
-function SupervisorDash({user,crew,jobs,onViewJob,onLogout}){
-  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)||j.fieldSupId===user.id);
-  const active=mine.filter(j=>j.status!=='closed');
-  const closed=mine.filter(j=>j.status==='closed');
-  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
-    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
-    <div style={{flex:1,overflowY:'auto',padding:18}}>
-      {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned.</div>}
-      {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE</div><div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
-      {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div><div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
-    </div>
-  </div>);
-}
-function CrewDash({user,crew,jobs,onViewJob,onLogout}){
-  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)&&j.status!=='closed');
-  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
-    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
-    <div style={{flex:1,overflowY:'auto',padding:18}}>
-      {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned.</div>}
-      <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>
-    </div>
-  </div>);
-}
+function SupervisorDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){\n  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)||j.fieldSupId===user.id);\n  const active=mine.filter(j=>j.status!=='closed');\n  const closed=mine.filter(j=>j.status==='closed');\n  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>\n    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>\n      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>\n      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>\n    </div>}/>\n    <div style={{flex:1,overflowY:'auto',padding:18}}>\n      {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned yet. Pull down to refresh if you were recently added to a job.</div>}\n      {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE</div><div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}\n      {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div><div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}\n    </div>\n  </div>);\n}\nfunction CrewDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){\n  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)&&j.status!=='closed');\n  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>\n    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>\n      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>\n      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>\n    </div>}/>\n    <div style={{flex:1,overflowY:'auto',padding:18}}>\n      {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned. Tap ↻ Refresh if you were just added to a job.</div>}\n      <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>\n    </div>\n  </div>);\n}
 
 // ── Root App ──────────────────────────────────────────────────────────
 function App(){
@@ -826,6 +804,14 @@ function App(){
   const [screen,setScreen]=useState('home');
   const [params,setParams]=useState({});
   const [user,setUser]=useState(null);
+  const [refreshing,setRefreshing]=useState(false);
+
+  const refreshJobs=async()=>{
+    setRefreshing(true);
+    const [j,d]=await Promise.all([load('nwd-jobs',[]),load('nwd-damage',[])]);
+    setJobs(j);setDamage(d);
+    setRefreshing(false);
+  };
 
   useEffect(()=>{
     // Register service worker
@@ -847,6 +833,10 @@ function App(){
       }
       setReady(true);
     });
+    // Refresh jobs when app comes back into view (phone switching back to app)
+    const onVisible=()=>{ if(document.visibilityState==='visible') refreshJobs(); };
+    document.addEventListener('visibilitychange',onVisible);
+    return ()=>document.removeEventListener('visibilitychange',onVisible);
   },[]);
 
   const saveCrew=async d=>{setCrew(d);await save('nwd-crew',d);};
@@ -904,8 +894,8 @@ function App(){
       {screen==='adminDash'&&user&&<AdminDash {...{user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage}} onCreateJob={()=>go('createJob')} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout}/>}
       {screen==='createJob'&&<CreateJobScreen crew={crew} tools={tools} onSave={createJob} onBack={()=>go('adminDash')}/>}
       {screen==='jobView'&&user&&<JobScreen {...jobProps} jobId={params.jobId} onBack={jobBack}/>}
-      {screen==='supervisorDash'&&user&&<SupervisorDash user={user} crew={crew} jobs={jobs} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout}/>}
-      {screen==='crewDash'&&user&&<CrewDash user={user} crew={crew} jobs={jobs} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout}/>}
+      {screen==='supervisorDash'&&user&&<SupervisorDash user={user} crew={crew} jobs={jobs} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout} onRefresh={refreshJobs} refreshing={refreshing}/>}
+      {screen==='crewDash'&&user&&<CrewDash user={user} crew={crew} jobs={jobs} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout} onRefresh={refreshJobs} refreshing={refreshing}/>}
     </div>
   );
 }
