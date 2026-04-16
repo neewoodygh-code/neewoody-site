@@ -30,29 +30,8 @@ gtag('config', 'G-ZP77WR6BNH');
 
   <!-- Carpenter Tools nav dropdown -->
   <style>
-  .nav-tools{position:relative;display:inline-flex;align-items:center;margin-left:16px;padding-left:16px;border-left:1px solid var(--clr-border)}
-  .nav-tools-btn{background:none;border:1.5px solid var(--clr-accent);color:var(--clr-accent);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
-  .nav-tools-btn:hover{background:var(--clr-accent);color:#fff}
-  .nav-tools-drop{display:none;position:absolute;top:calc(100% + 10px);right:0;background:#fff;border:1.5px solid var(--clr-border);border-radius:10px;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:200;overflow:hidden}
-  .nav-tools-drop a{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;font-weight:600;color:var(--clr-text);text-decoration:none;border-bottom:1px solid var(--clr-border);transition:background .15s}
-  .nav-tools-drop a:last-child{border-bottom:none}
-  .nav-tools-drop a:hover{background:var(--clr-bg)}
-  .nav-tools-drop .drop-badge{font-size:9px;background:rgba(160,120,64,.15);color:var(--clr-accent);border:1px solid var(--clr-accent);border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.5px;margin-left:auto}
-  .nav-tools.open .nav-tools-drop{display:block}
-  @media(max-width:768px){.nav-tools{display:none}}
   </style>
   <style>
-  .nav-tools-wrap{position:relative;display:flex;align-items:center;margin-left:.5rem}
-  .nav-tools-trigger{font-size:.82rem;font-weight:600;color:var(--clr-accent);padding:.3rem .75rem;border:1.5px solid rgba(160,120,74,.4);border-radius:2px;cursor:pointer;letter-spacing:.05em;display:flex;align-items:center;gap:.3rem;transition:background var(--ease);white-space:nowrap;background:rgba(160,120,74,.06)}
-  .nav-tools-trigger:hover{background:var(--clr-accent-lt)}
-  .nav-tools-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);min-width:220px;box-shadow:var(--shadow-lg);padding:.5rem;z-index:500}
-  .nav-tools-wrap:hover .nav-tools-dropdown{display:block}
-  .nav-tools-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.65rem .9rem;border-radius:var(--radius);font-size:.85rem;font-weight:500;color:var(--clr-mid);transition:background var(--ease),color var(--ease)}
-  .nav-tools-dropdown a:hover{background:var(--clr-bg-alt);color:var(--clr-accent)}
-  .nav-tools-dropdown a::after{display:none!important}
-  .tool-tag{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(160,120,74,.15);color:var(--clr-accent);padding:.1rem .4rem;border-radius:2px;font-family:monospace}
-  .nav-tools-dropdown-label{padding:.35rem .9rem .2rem;font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace}
-  @media(max-width:900px){.nav-tools-wrap{display:none}}
   </style>
 </head>
 <body>
@@ -91,6 +70,17 @@ gtag('config', 'G-ZP77WR6BNH');
 
           <a href="portfolio.html">Portfolio</a>
           <a href="contact.html">Contact</a>
+        <div class="nav-tools-wrap">
+          <span class="nav-tools-trigger">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+            Tools &#9663;
+          </span>
+          <div class="nav-tools-dropdown">
+            <div class="nav-tools-dropdown-label">Carpenter Tools</div>
+                <div class="mobile-nav-section-label">For Carpenters</div>
+    <a href="cutlist.html">&#9874; Wardrobe Cutlist <span class="mobile-tool-tag">Alpha</span></a>
+          </div>
+        </div>
         </nav>
         <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
@@ -108,7 +98,8 @@ gtag('config', 'G-ZP77WR6BNH');
     <a href="shelving.html">Shelving</a>
     <a href="portfolio.html">Portfolio</a>
     <a href="contact.html">Contact</a>
-    <a href="cutlist.html" style="color:var(--clr-accent)">&#9874; Wardrobe Cutlist (Alpha)</a>
+        <div class="mobile-nav-section-label">For Carpenters</div>
+    <a href="cutlist.html">&#9874; Wardrobe Cutlist <span class="mobile-tool-tag">Alpha</span></a>
     <div class="mobile-nav-ctas">
       <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20dining%20table%20or%20living%20room%20furniture." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
       <a href="contact.html" class="btn btn-outline">Request a Quote</a>
@@ -116,7 +107,6 @@ gtag('config', 'G-ZP77WR6BNH');
   </nav>
 
   <main>
-
     <!-- ═══ PAGE HERO ═══ -->
     <div class="page-hero">
       <div class="page-hero-accent" aria-hidden="true"></div>
@@ -124,17 +114,17 @@ gtag('config', 'G-ZP77WR6BNH');
         <nav class="breadcrumb" aria-label="Breadcrumb">
           <a href="index.html">Home</a>
           <span class="breadcrumb-sep" aria-hidden="true">›</span>
-          <span aria-current="page">Dining & Living</span>
+          <span aria-current="page">Dining &amp; Living</span>
         </nav>
-        <p class="section-label">Dining & Living Room Furniture</p>
-        <h1>Dining Tables & Living Room Pieces, Built in Solid Wood</h1>
-        <p>Whether you need a simple built-in or a full walk-in dressing room, we design and build wardrobes that use every centimetre of your space.</p>
+        <p class="section-label">Dining Tables, Display Units &amp; Living Room Furniture</p>
+        <h1>Furniture Built for How You Actually Live</h1>
+        <p>Dining tables that fit your family, display units that hold your things, and living room pieces that look like they belong — made to measure, made in Accra.</p>
         <div style="margin-top:2rem; display:flex; flex-wrap:wrap; gap:1rem;">
-          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20wardrobe%20and%20would%20like%20a%20quote." class="btn btn-wa" target="_blank" rel="noopener">
+          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20custom%20dining%20or%20living%20room%20furniture." class="btn btn-wa" target="_blank" rel="noopener">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
             WhatsApp for a Quote
           </a>
-          <a href="contact.html" class="btn btn-outline-light">Request a Quote</a>
+          <a href="contact.html" class="btn btn-outline">Request a Quote</a>
         </div>
       </div>
     </div>
@@ -144,322 +134,83 @@ gtag('config', 'G-ZP77WR6BNH');
       <div class="container">
         <div class="split-section reveal">
           <div class="split-content">
-            <p class="section-label">Why Custom?</p>
-            <h2>A Wardrobe Built for Your Room, Not Borrowed from a Showroom</h2>
+            <p class="section-label">Made for Your Home</p>
+            <h2>No Two Rooms Are the Same. Neither Are Our Pieces.</h2>
             <p style="color:var(--clr-muted); margin-top:1rem; line-height:1.8;">
-              Most homes in Accra don't have standard dimensions. Ceilings are higher or lower than expected, walls aren't perfectly square, and alcoves create awkward spaces that off-the-shelf wardrobes never quite fill.
+              A dining table from a furniture shop comes in three sizes. Your dining room has one size. A living room display unit off the shelf is never quite the right width, always a bit too short or too tall, never exactly the finish you wanted.
             </p>
             <p style="color:var(--clr-muted); margin-top:1rem; line-height:1.8;">
-              A Neewoody custom wardrobe is designed around your actual room — measured, drawn up, built, and installed to fit perfectly from wall to wall and floor to ceiling. No filler panels, no gaps, no half-measures.
-            </p>
-            <p style="color:var(--clr-muted); margin-top:1rem; line-height:1.8;">
-              We build wardrobes for bedrooms across Accra — from single-room apartments to master bedrooms in larger homes. Every project gets the same level of care and attention to detail.
+              We build dining and living room furniture to your exact dimensions, seating requirements, and finish preferences — the table that seats eight comfortably in your specific room, the display unit that fills that exact wall and holds what you need to hold.
             </p>
             <div style="margin-top:1.5rem;">
               <a href="contact.html" class="btn btn-primary">Get a Free Quote</a>
             </div>
           </div>
           <div class="split-img">
-            <!-- REPLACE: A wide, clean photo of one of your best wardrobe builds.
-                 Filename: images/wardrobes-intro.jpg | Size: 800×600px min -->
-            <img src="images/wardrobes-intro.jpg" alt="Custom built-in wardrobe in Accra bedroom, floor-to-ceiling with clean finish" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Add photo: images/wardrobes-intro.jpg</div>'" />
+            <!-- REPLACE: Photo of dining table or living room piece. Filename: images/dining-intro.jpg -->
+            <img src="images/dining-intro.jpg" alt="Custom dining table built in Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Add photo: images/dining-intro.jpg</div>'" />
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ═══ BENEFITS ═══ -->
-    <section class="section section-alt" aria-labelledby="wardrobe-benefits">
-      <div class="container">
-        <div class="reveal">
-          <p class="section-label">The Advantages</p>
-          <h2 id="wardrobe-benefits">What Makes a Custom Wardrobe Worth It</h2>
-        </div>
-        <div class="benefits-grid">
-          <div class="benefit-item reveal">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></div>
-            <div><h4>Uses Every Centimetre</h4><p>Built floor-to-ceiling and wall-to-wall — no wasted space above or beside the unit.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-1">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-            <div><h4>Built to Last</h4><p>Quality boards, solid door mechanisms, and proper fixings — made to handle years of daily use.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-2">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div>
-            <div><h4>Your Interior, Your Choice</h4><p>You choose the layout, door style, finish, handles, and internal organisation to match your needs.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-3">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-            <div><h4>Adds Value to Your Home</h4><p>Well-fitted, built-in storage is one of the most valued features in a bedroom. It stays with the property.</p></div>
-          </div>
-          <div class="benefit-item reveal">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
-            <div><h4>Looks Like It Was Always There</h4><p>A properly fitted built-in wardrobe integrates with the room — no visible sides, no mismatched finishes.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-1">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-            <div><h4>Fair, Transparent Pricing</h4><p>You receive a clear quote before any work begins — no hidden costs, no surprises at the end.</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ WARDROBE TYPES ═══ -->
-    <section class="section" aria-labelledby="wardrobe-types">
+    <!-- ═══ TYPES ═══ -->
+    <section class="section section-alt" aria-labelledby="dining-types">
       <div class="container">
         <div class="reveal">
           <p class="section-label">What We Build</p>
-          <h2 id="wardrobe-types">Types of Wardrobes We Make</h2>
-          <p class="section-intro">Every style is available in the size, finish, and internal layout that works for your bedroom.</p>
+          <h2 id="dining-types">Dining &amp; Living Room Pieces We Make</h2>
         </div>
-
-        <div class="types-grid">
-          <div class="type-card reveal">
-            <div class="type-card-img">
-              <!-- REPLACE: Photo of sliding door wardrobe. Filename: images/wardrobe-sliding.jpg -->
-              <img src="images/wardrobe-sliding.jpg" alt="Custom sliding door wardrobe in Accra bedroom" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: sliding wardrobe</div>'" />
+        <div class="product-grid" style="margin-top:2rem;">
+          <div class="product-card reveal">
+            <div class="product-img">
+              <img src="images/dining-table.jpg" alt="Custom dining table Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:200px;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: dining table</div>'" />
             </div>
-            <div class="type-card-body">
-              <h4>Sliding Door Wardrobes</h4>
-              <p>Space-saving sliding doors in wood, mirror, or glass. Ideal for rooms where swing clearance is limited. Two or three-panel configurations available.</p>
+            <div class="product-body">
+              <h4>Dining Tables</h4>
+              <p>Built to seat your household comfortably — 4 seats, 6 seats, 8 or more. We work in solid wood, engineered board with veneer, or a mix depending on your budget and look.</p>
             </div>
           </div>
-
-          <div class="type-card reveal reveal-delay-1">
-            <div class="type-card-img">
-              <!-- REPLACE: Photo of hinged door wardrobe. Filename: images/wardrobe-hinged.jpg -->
-              <img src="images/wardrobe-hinged.jpg" alt="Custom hinged door wardrobe built in Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: hinged wardrobe</div>'" />
+          <div class="product-card reveal reveal-delay-1">
+            <div class="product-img">
+              <img src="images/display-unit.jpg" alt="Custom display unit living room Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:200px;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: display unit</div>'" />
             </div>
-            <div class="type-card-body">
-              <h4>Hinged Door Wardrobes</h4>
-              <p>Classic full-access hinged doors for a traditional or contemporary look. Available in single, double, or multi-door layouts with soft-close hinges.</p>
+            <div class="product-body">
+              <h4>Display Units &amp; China Cabinets</h4>
+              <p>Open shelving, glass-door cabinets, or a combination — built to display glassware, décor, or books without looking cluttered.</p>
             </div>
           </div>
-
-          <div class="type-card reveal reveal-delay-2">
-            <div class="type-card-img">
-              <!-- REPLACE: Photo of a floor-to-ceiling wardrobe. Filename: images/wardrobe-floor-ceiling.jpg -->
-              <img src="images/wardrobe-floor-ceiling.jpg" alt="Floor to ceiling custom wardrobe in Accra, Ghana" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: floor-to-ceiling wardrobe</div>'" />
+          <div class="product-card reveal reveal-delay-2">
+            <div class="product-img">
+              <img src="images/sideboard.jpg" alt="Custom sideboard and buffet Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:200px;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: sideboard</div>'" />
             </div>
-            <div class="type-card-body">
-              <h4>Floor-to-Ceiling Wardrobes</h4>
-              <p>Maximum height storage that reaches the ceiling — great for high-ceilinged rooms common in Accra homes. Can include a top section for less-used items.</p>
+            <div class="product-body">
+              <h4>Sideboards &amp; Buffet Units</h4>
+              <p>Low storage units for the dining room — drawers for cutlery, cupboards for serving dishes, a top surface for food and drinks when entertaining.</p>
             </div>
           </div>
-
-          <div class="type-card reveal">
-            <div class="type-card-img">
-              <!-- REPLACE: Walk-in / dressing room photo. Filename: images/wardrobe-walkin.jpg -->
-              <img src="images/wardrobe-walkin.jpg" alt="Custom walk-in wardrobe or dressing room in Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: walk-in wardrobe</div>'" />
+          <div class="product-card reveal reveal-delay-3">
+            <div class="product-img">
+              <img src="images/console-table.jpg" alt="Custom console and entrance table Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:200px;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: console table</div>'" />
             </div>
-            <div class="type-card-body">
-              <h4>Walk-in Wardrobes</h4>
-              <p>If you have the space, a walk-in wardrobe changes how you start your morning. We design open dressing areas with shelves, rails, drawers, and optional island units.</p>
-            </div>
-          </div>
-
-          <div class="type-card reveal reveal-delay-1">
-            <div class="type-card-img">
-              <!-- REPLACE: Photo of bedroom storage solution or alcove wardrobe. Filename: images/wardrobe-alcove.jpg -->
-              <img src="images/wardrobe-alcove.jpg" alt="Built-in alcove storage wardrobe in Accra bedroom" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: alcove wardrobe</div>'" />
-            </div>
-            <div class="type-card-body">
-              <h4>Alcove & Fitted Storage</h4>
-              <p>We make use of awkward spaces — alcoves, sloped ceilings, and narrow recesses — turning them into useful, built-in storage.</p>
-            </div>
-          </div>
-
-          <div class="type-card reveal reveal-delay-2">
-            <div class="type-card-img">
-              <!-- REPLACE: Photo showing internal wardrobe layout with drawers and rails. Filename: images/wardrobe-interior.jpg -->
-              <img src="images/wardrobe-interior.jpg" alt="Custom wardrobe interior layout with drawers, shelves and rails" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: wardrobe interior</div>'" />
-            </div>
-            <div class="type-card-body">
-              <h4>Custom Interior Layouts</h4>
-              <p>Rails, shelves, drawers, shoe racks, tie holders, and accessories — we configure the inside of your wardrobe to suit how you actually organise your things.</p>
+            <div class="product-body">
+              <h4>Console Tables &amp; Entrance Furniture</h4>
+              <p>Hallway and entrance tables, narrow console pieces, and small storage units for entryways and corridors.</p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
-
-    <!-- ═══ MATERIALS ═══ -->
-    <section class="section section-alt" aria-labelledby="materials-heading">
-      <div class="container">
-        <div class="reveal">
-          <p class="section-label">Materials & Finish</p>
-          <h2 id="materials-heading">What We Build With</h2>
-          <p class="section-intro">We work with a range of materials to suit different budgets and aesthetics. We'll recommend what's right for your project during the consultation.</p>
-        </div>
-
-        <div class="benefits-grid">
-          <div class="benefit-item reveal">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
-            <div><h4>Melamine-Faced Boards</h4><p>Durable, moisture-resistant, and available in a wide range of colours and wood-effect finishes. The most common and cost-effective choice.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-1">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 3l14 9-14 9V3z"/></svg></div>
-            <div><h4>MDF with Paint Finish</h4><p>Smooth, paintable finish for a seamless, modern look. Ideal when the wardrobe needs to match wall colour or achieve a built-in, joinery feel.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-2">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-            <div><h4>Solid Wood Accents</h4><p>Natural hardwood can be incorporated for shelving, drawer fronts, or handles to add warmth and a premium feel to your wardrobe.</p></div>
-          </div>
-          <div class="benefit-item reveal reveal-delay-3">
-            <div class="benefit-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
-            <div><h4>Mirror Doors</h4><p>Mirror-fronted sliding panels create the illusion of more space and add practicality. Available in full-length or framed styles.</p></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PRICING FACTORS ═══ -->
-    <section class="section" aria-labelledby="pricing-heading">
-      <div class="container">
-        <div class="reveal">
-          <p class="section-label">Pricing</p>
-          <h2 id="pricing-heading">What Affects the Cost of a Custom Wardrobe?</h2>
-          <p class="section-intro">We don't publish fixed prices because every wardrobe is different. These are the main factors that influence the final cost.</p>
-        </div>
-        <div class="pricing-list">
-          <div class="pricing-item reveal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><strong>Size & Dimensions</strong><p>Larger wardrobes use more material and take more time to build and install.</p></div></div>
-          <div class="pricing-item reveal reveal-delay-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg><div><strong>Door Style</strong><p>Sliding doors cost more than hinged due to the track mechanism. Mirror or glass doors add to this further.</p></div></div>
-          <div class="pricing-item reveal reveal-delay-2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div><strong>Material Choice</strong><p>Melamine boards are the most economical. Solid wood, high-gloss, or lacquered finishes cost more.</p></div></div>
-          <div class="pricing-item reveal reveal-delay-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><div><strong>Internal Fittings</strong><p>Drawers, shoe racks, tie holders, and accessories add functionality — and some cost — to the interior.</p></div></div>
-          <div class="pricing-item reveal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><strong>Complexity</strong><p>A straight run is simpler than a design with angles, integrated lighting, or unusual dimensions.</p></div></div>
-          <div class="pricing-item reveal reveal-delay-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><div><strong>Location</strong><p>We serve Accra and Greater Accra. Longer distances may include a small transport charge.</p></div></div>
-        </div>
-        <div class="notice">
-          <strong>Ready for a quote?</strong> Send us a WhatsApp message with your room dimensions and what you have in mind — we'll give you a realistic indication quickly. <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20a%20quote%20for%20a%20custom%20wardrobe." target="_blank" rel="noopener" style="color:var(--clr-accent);font-weight:600;">WhatsApp us now →</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ FAQ ═══ -->
-    <section class="section section-alt" aria-labelledby="faq-heading">
-      <div class="container" style="max-width:780px;">
-        <div class="reveal">
-          <p class="section-label">FAQ</p>
-          <h2 id="faq-heading">Common Questions About Custom Wardrobes</h2>
-        </div>
-        <div class="faq-list reveal">
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">How long does it take to build and install a wardrobe?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">Most wardrobes take between 5 and 15 working days from deposit to installation, depending on size and complexity. We'll give you a specific timeline when we quote.</div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">Do you visit before quoting?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">Yes — for wardrobes we always do a site visit to take accurate measurements and see the space. This helps us give you a precise quote and flag anything that might affect the design.</div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">Can I choose the internal layout?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">Absolutely. The internal layout is one of the most important parts of the design. We'll discuss how you use your wardrobe — how much hanging space you need, whether you want drawers, shoe storage, and so on — and build the interior around that.</div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">Do you install the wardrobe yourselves?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">Yes. Our team builds and installs the wardrobe in your home. We won't leave until it's properly fitted, level, and working correctly.</div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">What areas do you serve?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">We serve Accra and Greater Accra — including East Legon, Cantonments, Labone, Airport Residential, Dzorwulu, Spintex, Tema, Adenta, and surrounding areas. Contact us if you're not sure whether we cover your location.</div>
-          </div>
-
-          <div class="faq-item">
-            <button class="faq-question" aria-expanded="false">Do I need to have a design in mind before contacting you?<span class="faq-icon" aria-hidden="true">+</span></button>
-            <div class="faq-answer" role="region">No. Many clients come to us with just a rough idea of what they need. We'll guide you through the options based on your room, your storage needs, and your budget. Reference photos are helpful but not required.</div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ═══ INTRO ═══ -->
-    <section class="section">
-      <div class="container">
-        <div class="split-section reveal">
-          <div class="split-text">
-            <p class="section-label">What We Build</p>
-            <h2>Statement Pieces for Your Dining Room & Living Space</h2>
-            <p>A dining table is often the most used surface in a home. We build ours from solid hardwood — typically teak, mahogany, or iroko — with joinery and finishes that hold up to daily use and still look exceptional ten years later.</p>
-            <p>Our living room pieces — coffee tables, side tables, TV benches, sofas with solid wood frames — are built with the same care. No MDF, no shortcuts. Everything is made to your exact dimensions and specifications.</p>
-          </div>
-          <div class="split-img">
-            <!--
-              IMAGE: dining-intro.jpg — use one of the Sage Centre dining table shots
-              Recommended: images/projects/sage-centre/sage-gallery-2.jpg (live edge close-up)
-              Or copy that file to images/dining-intro.jpg
-            -->
-            <img src="images/projects/sage-centre/sage-hero.jpg" alt="Custom solid teak live edge dining table built by Neewoody in Accra" onerror="this.parentNode.style.background='#EFEBE3'" />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ WHAT WE MAKE ═══ -->
-    <section class="section section-alt">
-      <div class="container">
-        <div class="text-center reveal" style="max-width:600px;margin:0 auto 3rem">
-          <p class="section-label">Our Range</p>
-          <h2>What We Can Build for You</h2>
-        </div>
-        <div class="services-grid">
-          <div class="service-card reveal">
-            <h3>Dining Tables</h3>
-            <p>Rectangular, round, extending, and live edge tables. Solid wood tops with steel or wood bases. Built to seat your household — or a full extended family gathering.</p>
-          </div>
-          <div class="service-card reveal reveal-delay-1">
-            <h3>Dining Benches & Chairs</h3>
-            <p>Matching benches and upholstered dining chairs built to complement your table. Consistent material and finish throughout.</p>
-          </div>
-          <div class="service-card reveal reveal-delay-2">
-            <h3>Coffee & Centre Tables</h3>
-            <p>Low profile solid wood coffee tables, glass-top centre tables, and accent pieces designed to anchor your living room.</p>
-          </div>
-          <div class="service-card reveal">
-            <h3>Solid Wood Sofas & Seating</h3>
-            <p>Sectional sofas, two and three-seater sofas, and armchairs with solid wood frames and custom upholstery. Built to a different standard than imported alternatives.</p>
-          </div>
-          <div class="service-card reveal reveal-delay-1">
-            <h3>Side & Console Tables</h3>
-            <p>Entryway consoles, bedside tables, and side tables in any size. Small pieces made with the same attention as our largest commissions.</p>
-          </div>
-          <div class="service-card reveal reveal-delay-2">
-            <h3>Custom Buffets & Sideboards</h3>
-            <p>Dining room sideboards, display units, and drink stations. Built with drawers, shelving, and storage to your specification.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ FEATURED PROJECT ═══ -->
-    <section class="section">
-      <div class="container reveal">
-        <p class="section-label">Featured Work</p>
-        <h2>Sage Centre — Wli, Volta Region</h2>
-        <p style="color:var(--clr-mid);max-width:600px;line-height:1.75;margin-bottom:2rem">Our most ambitious dining commission to date: two live edge teak dining tables with glass centres and steel X-bases, dining bench seating, and a full dining sideboard — all in solid Ghanaian teak — for an international educational NGO in Wli.</p>
-        <a href="projects/sage-centre.html" class="btn btn-accent">View the Full Case Study →</a>
       </div>
     </section>
 
     <!-- ═══ CTA ═══ -->
-    <section class="cta-band" aria-labelledby="wardrobe-cta">
+    <section class="section" style="text-align:center;">
       <div class="container reveal">
-        <p class="section-label" style="color:rgba(160,120,74,.85);">Get started today</p>
-        <h2 id="wardrobe-cta">Ready to Commission a Dining Table or Living Room Set?</h2>
-        <p>Send us a WhatsApp message with your dimensions and style references — we'll come back to you quickly.</p>
-        <div class="cta-buttons">
-          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20wardrobe%20and%20would%20like%20a%20quote." class="btn btn-wa btn-lg" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp Us Now
-          </a>
-          <a href="contact.html" class="btn btn-outline-light btn-lg">Request a Quote</a>
-          <a href="portfolio.html" class="btn btn-outline-light btn-lg">See Our Work</a>
+        <p class="section-label">Let's Build It</p>
+        <h2>Tell Us What You Have in Mind</h2>
+        <p style="color:var(--clr-muted); max-width:52ch; margin:1rem auto 2rem;">Even a rough idea is enough to start — dimensions, number of seats, finish preference, or a photo of something you like. We'll take it from there.</p>
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20custom%20dining%20or%20living%20room%20furniture." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+          <a href="contact.html" class="btn btn-outline">Request a Quote</a>
         </div>
       </div>
     </section>

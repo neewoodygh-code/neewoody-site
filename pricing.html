@@ -714,6 +714,10 @@ function App(){
       if(session&&session.id===admin.id){ setUser(admin); setScreen('dashboard'); }
       else setScreen('login');
       setReady(true);
+    }).catch(()=>{
+      // API unreachable — show login anyway, errors will surface on action
+      setScreen('no-admin');
+      setReady(true);
     });
   },[]);
 
