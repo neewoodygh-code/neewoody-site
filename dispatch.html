@@ -7,6 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="NW Dispatch"/>
+  <link rel="manifest" href="/manifest.json"/>
   <title>Neewoody Dispatch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -25,12 +26,68 @@
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
 <script type="text/babel" data-presets="react">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef } = React;
 
 // ── Config ────────────────────────────────────────────────────────────
-const API = 'https://neewoodygh.com/api';
-const API_KEY = 'nwd-dispatch-2024';
+const API      = 'https://neewoodygh.com/api';
+const API_KEY  = 'nwd-dispatch-2024';
+const VAPID_PK = 'BGvZiwVp3M7Nahk4VXj_1BtlaTD8pWZ-iSARA5x0ja9T7rAaWDAYUQ9hqZ-_85ps8uMgYt8nSJpZCkeLbbaGdgk';
 const SESSION_KEY = 'nwd-session';
+
+// ── Push helpers ──────────────────────────────────────────────────────
+function urlB64ToUint8(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = window.atob(base64);
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
+async function registerPush(crewId) {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(VAPID_PK),
+      });
+    }
+    await apiFetch('/subscribe', 'POST', { crewId, subscription: sub.toJSON() });
+  } catch (e) {
+    console.warn('Push registration failed:', e.message);
+  }
+}
+
+async function notify(crewIds, title, body) {
+  if (!crewIds?.length) return;
+  try { await apiFetch('/notify', 'POST', { crewIds, title, body }); }
+  catch (e) { console.warn('Notify failed:', e.message); }
+}
+
+// ── API ───────────────────────────────────────────────────────────────
+async function apiFetch(path, method = 'GET', body) {
+  const opts = {
+    method,
+    headers: { 'X-NWD-Key': API_KEY, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  };
+  const r = await fetch(`${API}${path}`, opts);
+  return r.json();
+}
+
+async function load(key, fb) {
+  try { const d = await apiFetch(`/${key}`); return d !== null ? d : fb; }
+  catch { return fb; }
+}
+async function save(key, data) {
+  try { await apiFetch(`/${key}`, 'PUT', data); } catch (e) { console.error(e); }
+}
+
+// ── Session ───────────────────────────────────────────────────────────
+const getSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } };
+const setSession = u => localStorage.setItem(SESSION_KEY, JSON.stringify({ id: u.id, name: u.name, role: u.role }));
+const clearSession = () => localStorage.removeItem(SESSION_KEY);
 
 // ── Defaults ──────────────────────────────────────────────────────────
 const DEFAULT_TOOLS = [
@@ -66,7 +123,6 @@ const DEFAULT_TOOLS = [
   {id:'c09',name:'Finishing materials',cat:'consumable',cab:false,hw:true,qty:1},
   {id:'c10',name:'Wood filler',cat:'consumable',cab:false,hw:true,qty:1},
 ];
-
 const DEFAULT_CREW = [
   {id:'cr01',name:'Nuer',role:'admin',pin:null,active:true,phone:'0244633464'},
   {id:'cr02',name:'Kevin',role:'supervisor',pin:null,active:true,phone:''},
@@ -76,57 +132,19 @@ const ROLE_LABELS = {admin:'Admin',supervisor:'Supervisor',lead:'Lead apprentice
 const STATUS = {created:'Briefed','pre-departure':'Pre-departure',departed:'En route','on-site':'On site','return-check':'Return check',closed:'Closed'};
 const STATUS_COLOR = {created:'#3a9457','pre-departure':'#c8820a',departed:'#3a9457','on-site':'#3a9457','return-check':'#c8820a',closed:'#6b6459'};
 
-// ── Utils ─────────────────────────────────────────────────────────────
 const uid = () => Math.random().toString(36).slice(2,8).toUpperCase();
-const haversine = (lat1,lng1,lat2,lng2) => {
-  const R=6371000,r=x=>x*Math.PI/180,dLat=r(lat2-lat1),dLng=r(lng2-lng1);
-  const a=Math.sin(dLat/2)**2+Math.cos(r(lat1))*Math.cos(r(lat2))*Math.sin(dLng/2)**2;
-  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
-};
+const haversine = (la1,ln1,la2,ln2) => { const R=6371000,r=x=>x*Math.PI/180,dL=r(la2-la1),dN=r(ln2-ln1),a=Math.sin(dL/2)**2+Math.cos(r(la1))*Math.cos(r(la2))*Math.sin(dN/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); };
 const fmtTime = iso => new Date(iso).toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit',hour12:true});
 const fmtDate = iso => new Date(iso).toLocaleDateString('en-GH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
 const elapsed = iso => { const m=Math.floor((Date.now()-new Date(iso))/60000); return m<60?`${m}m`:`${Math.floor(m/60)}h ${m%60}m`; };
 const fmtDepart = iso => { try{return new Date(iso).toLocaleString('en-GH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});}catch{return iso;} };
+const buildChecklist = (tools,jobType) => tools.filter(t=>jobType==='cabinetry'?t.cab:t.hw).map(t=>({id:uid(),toolId:t.id,name:t.name,cat:t.cat,qty:t.qty,packed:false,packedBy:null,packedAt:null,returned:false,returnedBy:null,returnedAt:null,condition:'good',conditionNote:''}));
 
-const buildChecklist = (tools,jobType) =>
-  tools.filter(t=>jobType==='cabinetry'?t.cab:t.hw).map(t=>({
-    id:uid(),toolId:t.id,name:t.name,cat:t.cat,qty:t.qty,
-    packed:false,packedBy:null,packedAt:null,
-    returned:false,returnedBy:null,returnedAt:null,
-    condition:'good',conditionNote:'',
-  }));
-
-// ── API / Storage ─────────────────────────────────────────────────────
-async function load(key, fb) {
-  try {
-    const r = await fetch(`${API}/${key}`, { headers: { 'X-NWD-Key': API_KEY } });
-    if (!r.ok) return fb;
-    const data = await r.json();
-    return data !== null ? data : fb;
-  } catch { return fb; }
-}
-
-async function save(key, data) {
-  try {
-    await fetch(`${API}/${key}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-NWD-Key': API_KEY },
-      body: JSON.stringify(data),
-    });
-  } catch(e) { console.error('Save error:', e); }
-}
-
-// ── Session ───────────────────────────────────────────────────────────
-const getSession = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } };
-const setSession = u => localStorage.setItem(SESSION_KEY, JSON.stringify({id:u.id,name:u.name,role:u.role}));
-const clearSession = () => localStorage.removeItem(SESSION_KEY);
-
-// ── Design Tokens ─────────────────────────────────────────────────────
+// ── Design ────────────────────────────────────────────────────────────
 const C={bg:'#0c0b09',s1:'#171512',s2:'#1d1b17',acc:'#c97c0a',ok:'#3a9457',err:'#b8534a',warn:'#c8820a',txt:'#e2d9cc',muted:'#6b6459',bdr:'#262118'};
 const BF="'Barlow Condensed',sans-serif";
 const MF="'Inconsolata',monospace";
 
-// ── UI Primitives ─────────────────────────────────────────────────────
 const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
   const p=size==='lg'?'18px 22px':size==='sm'?'5px 10px':'9px 16px';
   const fs=size==='lg'?20:size==='sm'?10:12;
@@ -182,7 +200,6 @@ function PinScreen({user,onSuccess,onBack}){
   const [p2,setP2]=useState('');
   const [shake,setShake]=useState(false);
   const cur=step==='confirm'?p2:p1;
-
   const press=d=>{
     if(step==='enter'){
       if(p1.length>=4) return;
@@ -202,7 +219,6 @@ function PinScreen({user,onSuccess,onBack}){
     }
   };
   const del=()=>{if(step==='enter')setP1(p=>p.slice(0,-1));else setP2(p=>p.slice(0,-1));};
-
   return(
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{width:'100%',maxWidth:280}}>
@@ -236,7 +252,6 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
   const [tab,setTab]=useState('today');
   const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'}];
   const active=jobs.filter(j=>j.status!=='closed');
-  const closed=jobs.filter(j=>j.status==='closed');
   const openDmg=damage.filter(d=>d.status!=='resolved');
   return(
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
@@ -251,7 +266,7 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
       </div>
       <div style={{flex:1,overflowY:'auto',padding:18}}>
         {tab==='today'&&<TodayTab jobs={active} crew={crew} onViewJob={onViewJob} onCreateJob={onCreateJob}/>}
-        {tab==='jobs'&&<ClosedJobsTab jobs={closed} crew={crew} onViewJob={onViewJob}/>}
+        {tab==='jobs'&&<ClosedJobsTab jobs={jobs.filter(j=>j.status==='closed')} crew={crew} onViewJob={onViewJob}/>}
         {tab==='tools'&&<ToolsTab tools={tools} saveTools={saveTools}/>}
         {tab==='crew'&&<CrewTab crew={crew} saveCrew={saveCrew}/>}
         {tab==='damage'&&<DamageTab damage={damage} saveDamage={saveDamage} crew={crew} tools={tools} saveTools={saveTools}/>}
@@ -268,11 +283,11 @@ function TodayTab({jobs,crew,onViewJob,onCreateJob}){
         <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>{jobs.length} ACTIVE</div>
         <Btn ch="+ New Job" onClick={onCreateJob} size="sm"/>
       </div>
-      {jobs.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs. Create one to get started.</div>}
+      {jobs.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs.</div>}
       <div style={{display:'flex',flexDirection:'column',gap:10}}>
         {jobs.map(j=>(
           <Card key={j.id} ch={<div>
-            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
               <div style={{fontFamily:BF,fontSize:18,fontWeight:600}}>{j.client}</div>
               <SPill status={j.status}/>
             </div>
@@ -293,19 +308,17 @@ function ClosedJobsTab({jobs,crew,onViewJob}){
   return(
     <div>
       <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:16}}>{jobs.length} CLOSED JOBS</div>
-      <div style={{display:'flex',flexDirection:'column',gap:8}}>
-        {jobs.map(j=>(
-          <Card key={j.id} ch={<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-            <div>
-              <div style={{fontFamily:BF,fontSize:16,fontWeight:600}}>{j.client}</div>
-              <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>{j.closedAt?fmtDate(j.closedAt):''} · {j.jobType}</div>
-              {(j.mishaps||[]).length>0&&<div style={{fontSize:10,color:C.warn,fontFamily:MF,marginTop:3}}>{j.mishaps.length} mishap{j.mishaps.length>1?'s':''}</div>}
-            </div>
-            <Btn ch="View" onClick={()=>onViewJob(j.id)} size="sm" outline/>
-          </div>}/>
-        ))}
-        {jobs.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No closed jobs yet.</div>}
-      </div>
+      {jobs.map(j=>(
+        <Card key={j.id} ch={<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:BF,fontSize:16,fontWeight:600}}>{j.client}</div>
+            <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>{j.closedAt?fmtDate(j.closedAt):''} · {j.jobType}</div>
+            {(j.mishaps||[]).length>0&&<div style={{fontSize:10,color:C.warn,fontFamily:MF,marginTop:3}}>{j.mishaps.length} mishap{j.mishaps.length>1?'s':''}</div>}
+          </div>
+          <Btn ch="View" onClick={()=>onViewJob(j.id)} size="sm" outline/>
+        </div>} style={{marginBottom:8}}/>
+      ))}
+      {jobs.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No closed jobs yet.</div>}
     </div>
   );
 }
@@ -314,11 +327,7 @@ function ToolsTab({tools,saveTools}){
   const [adding,setAdding]=useState(false);
   const [form,setForm]=useState({name:'',cat:'power',cab:true,hw:true,qty:1});
   const cats=['power','hand','consumable'];
-  const add=()=>{
-    if(!form.name.trim()) return;
-    saveTools([...tools,{id:uid(),name:form.name.trim(),cat:form.cat,cab:form.cab,hw:form.hw,qty:+form.qty,active:true,condition:'good'}]);
-    setForm({name:'',cat:'power',cab:true,hw:true,qty:1}); setAdding(false);
-  };
+  const add=()=>{if(!form.name.trim())return;saveTools([...tools,{id:uid(),name:form.name.trim(),cat:form.cat,cab:form.cab,hw:form.hw,qty:+form.qty,active:true,condition:'good'}]);setForm({name:'',cat:'power',cab:true,hw:true,qty:1});setAdding(false);};
   const remove=id=>{if(window.confirm('Remove this tool?'))saveTools(tools.filter(t=>t.id!==id));};
   return(
     <div>
@@ -326,48 +335,26 @@ function ToolsTab({tools,saveTools}){
         <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>{tools.length} TOOLS</div>
         <Btn ch={adding?'Cancel':'+ Add Tool'} onClick={()=>setAdding(!adding)} size="sm" outline={adding}/>
       </div>
-      {adding&&(
-        <Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
-          <div><Lbl ch="Tool name"/><Inp value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="e.g. Nail gun"/></div>
-          <div><Lbl ch="Category"/>
-            <Sel value={form.cat} onChange={e=>setForm(f=>({...f,cat:e.target.value}))}>
-              <option value="power">Power tool</option><option value="hand">Hand tool</option><option value="consumable">Consumable</option>
-            </Sel>
-          </div>
-          <div><Lbl ch="Default quantity"/><Inp type="number" min={1} value={form.qty} onChange={e=>setForm(f=>({...f,qty:e.target.value}))}/></div>
-          <div style={{display:'flex',gap:16}}>
-            <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12,fontFamily:MF,cursor:'pointer',color:C.txt}}>
-              <input type="checkbox" checked={form.cab} onChange={e=>setForm(f=>({...f,cab:e.target.checked}))}/> Cabinetry default
-            </label>
-            <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12,fontFamily:MF,cursor:'pointer',color:C.txt}}>
-              <input type="checkbox" checked={form.hw} onChange={e=>setForm(f=>({...f,hw:e.target.checked}))}/> Hardwood default
-            </label>
-          </div>
-          <Btn ch="Add to inventory" onClick={add} full/>
-        </div>} style={{marginBottom:16}}/>
-      )}
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <div><Lbl ch="Tool name"/><Inp value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="e.g. Nail gun"/></div>
+        <div><Lbl ch="Category"/><Sel value={form.cat} onChange={e=>setForm(f=>({...f,cat:e.target.value}))}><option value="power">Power tool</option><option value="hand">Hand tool</option><option value="consumable">Consumable</option></Sel></div>
+        <div><Lbl ch="Qty"/><Inp type="number" min={1} value={form.qty} onChange={e=>setForm(f=>({...f,qty:e.target.value}))}/></div>
+        <div style={{display:'flex',gap:16}}>
+          <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12,fontFamily:MF,cursor:'pointer',color:C.txt}}><input type="checkbox" checked={form.cab} onChange={e=>setForm(f=>({...f,cab:e.target.checked}))}/> Cabinetry</label>
+          <label style={{display:'flex',alignItems:'center',gap:6,fontSize:12,fontFamily:MF,cursor:'pointer',color:C.txt}}><input type="checkbox" checked={form.hw} onChange={e=>setForm(f=>({...f,hw:e.target.checked}))}/> Hardwood</label>
+        </div>
+        <Btn ch="Add" onClick={add} full/>
+      </div>} style={{marginBottom:16}}/>}
       {cats.map(cat=>{
-        const items=tools.filter(t=>t.cat===cat);
-        if(!items.length) return null;
-        return(
-          <div key={cat} style={{marginBottom:20}}>
-            <div style={{fontSize:9,letterSpacing:2,color:C.acc,textTransform:'uppercase',fontFamily:MF,marginBottom:8}}>{cat} tools</div>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>
-              {items.map(t=>(
-                <Card key={t.id} ch={<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                  <div>
-                    <div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:t.condition==='needs_attention'?C.warn:C.txt}}>{t.name}</div>
-                    <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>
-                      {t.cab?'Cab':'—'} · {t.hw?'HW':'—'} · qty {t.qty}
-                      {t.condition==='needs_attention'&&<span style={{color:C.warn}}> · ⚠ needs attention</span>}
-                    </div>
-                  </div>
-                  <button onClick={()=>remove(t.id)} style={{background:'transparent',border:'none',color:C.err,fontSize:16,cursor:'pointer'}}>✕</button>
-                </div>}/>
-              ))}
-            </div>
-          </div>
-        );
+        const items=tools.filter(t=>t.cat===cat); if(!items.length) return null;
+        return(<div key={cat} style={{marginBottom:20}}>
+          <div style={{fontSize:9,letterSpacing:2,color:C.acc,textTransform:'uppercase',fontFamily:MF,marginBottom:8}}>{cat}</div>
+          {items.map(t=><Card key={t.id} ch={<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div><div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:t.condition==='needs_attention'?C.warn:C.txt}}>{t.name}</div>
+            <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{t.cab?'Cab':'—'} · {t.hw?'HW':'—'} · qty {t.qty}{t.condition==='needs_attention'&&<span style={{color:C.warn}}> · ⚠</span>}</div></div>
+            <button onClick={()=>remove(t.id)} style={{background:'transparent',border:'none',color:C.err,fontSize:16,cursor:'pointer'}}>✕</button>
+          </div>} style={{marginBottom:6}}/>)}
+        </div>);
       })}
     </div>
   );
@@ -377,69 +364,45 @@ function CrewTab({crew,saveCrew}){
   const [adding,setAdding]=useState(false);
   const [editId,setEditId]=useState(null);
   const [form,setForm]=useState({name:'',role:'hand',phone:''});
-  const [editForm,setEditForm]=useState({});
-  const add=()=>{
-    if(!form.name.trim()) return;
-    saveCrew([...crew,{id:uid(),name:form.name.trim(),role:form.role,phone:form.phone,pin:null,active:true}]);
-    setForm({name:'',role:'hand',phone:''}); setAdding(false);
-  };
-  const startEdit=m=>{setEditId(m.id);setEditForm({name:m.name,role:m.role,phone:m.phone||''});};
-  const saveEdit=id=>{
-    if(!editForm.name.trim()) return;
-    saveCrew(crew.map(c=>c.id===id?{...c,name:editForm.name.trim(),role:editForm.role,phone:editForm.phone}:c));
-    setEditId(null);
-  };
+  const [ef,setEf]=useState({});
+  const add=()=>{if(!form.name.trim())return;saveCrew([...crew,{id:uid(),name:form.name.trim(),role:form.role,phone:form.phone,pin:null,active:true}]);setForm({name:'',role:'hand',phone:''});setAdding(false);};
+  const saveEdit=id=>{if(!ef.name?.trim())return;saveCrew(crew.map(c=>c.id===id?{...c,name:ef.name.trim(),role:ef.role,phone:ef.phone}:c));setEditId(null);};
   const resetPin=id=>{if(window.confirm("Reset this person's PIN?"))saveCrew(crew.map(c=>c.id===id?{...c,pin:null}:c));};
   const toggle=id=>saveCrew(crew.map(c=>c.id===id?{...c,active:!c.active}:c));
   return(
     <div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
-        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>{crew.length} CREW MEMBERS</div>
+        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>{crew.length} CREW</div>
         <Btn ch={adding?'Cancel':'+ Add'} onClick={()=>{setAdding(!adding);setEditId(null);}} size="sm" outline={adding}/>
       </div>
-      {adding&&(
-        <Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
-          <div><Lbl ch="Full name"/><Inp value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Name"/></div>
-          <div><Lbl ch="Role"/>
-            <Sel value={form.role} onChange={e=>setForm(f=>({...f,role:e.target.value}))}>
-              {Object.entries(ROLE_LABELS).map(([v,l])=><option key={v} value={v}>{l}</option>)}
-            </Sel>
-          </div>
-          <div><Lbl ch="WhatsApp number"/><Inp value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="0244000000"/></div>
-          <Btn ch="Add crew member" onClick={add} full/>
-        </div>} style={{marginBottom:16}}/>
-      )}
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <div><Lbl ch="Name"/><Inp value={form.name} onChange={e=>setForm(f=>({...f,name:e.target.value}))} placeholder="Full name"/></div>
+        <div><Lbl ch="Role"/><Sel value={form.role} onChange={e=>setForm(f=>({...f,role:e.target.value}))}>{Object.entries(ROLE_LABELS).map(([v,l])=><option key={v} value={v}>{l}</option>)}</Sel></div>
+        <div><Lbl ch="WhatsApp"/><Inp value={form.phone} onChange={e=>setForm(f=>({...f,phone:e.target.value}))} placeholder="0244000000"/></div>
+        <Btn ch="Add crew member" onClick={add} full/>
+      </div>} style={{marginBottom:16}}/>}
       <div style={{display:'flex',flexDirection:'column',gap:8}}>
         {crew.map(m=>(
-          <Card key={m.id} ch={
-            editId===m.id?(
-              <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                <div><Lbl ch="Name"/><Inp value={editForm.name} onChange={e=>setEditForm(f=>({...f,name:e.target.value}))}/></div>
-                <div><Lbl ch="Role"/>
-                  <Sel value={editForm.role} onChange={e=>setEditForm(f=>({...f,role:e.target.value}))}>
-                    {Object.entries(ROLE_LABELS).map(([v,l])=><option key={v} value={v}>{l}</option>)}
-                  </Sel>
-                </div>
-                <div><Lbl ch="WhatsApp"/><Inp value={editForm.phone} onChange={e=>setEditForm(f=>({...f,phone:e.target.value}))} placeholder="0244000000"/></div>
-                <div style={{display:'flex',gap:8}}>
-                  <Btn ch="Save" onClick={()=>saveEdit(m.id)} style={{flex:1}}/>
-                  <Btn ch="Cancel" onClick={()=>setEditId(null)} outline style={{flex:1}}/>
-                </div>
+          <Card key={m.id} ch={editId===m.id?(
+            <div style={{display:'flex',flexDirection:'column',gap:10}}>
+              <div><Lbl ch="Name"/><Inp value={ef.name||''} onChange={e=>setEf(f=>({...f,name:e.target.value}))}/></div>
+              <div><Lbl ch="Role"/><Sel value={ef.role||'hand'} onChange={e=>setEf(f=>({...f,role:e.target.value}))}>{Object.entries(ROLE_LABELS).map(([v,l])=><option key={v} value={v}>{l}</option>)}</Sel></div>
+              <div><Lbl ch="WhatsApp"/><Inp value={ef.phone||''} onChange={e=>setEf(f=>({...f,phone:e.target.value}))}/></div>
+              <div style={{display:'flex',gap:8}}><Btn ch="Save" onClick={()=>saveEdit(m.id)} style={{flex:1}}/><Btn ch="Cancel" onClick={()=>setEditId(null)} outline style={{flex:1}}/></div>
+            </div>
+          ):(
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div style={{opacity:m.active?1:.5}}>
+                <div style={{fontFamily:BF,fontSize:16,fontWeight:600}}>{m.name}</div>
+                <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{ROLE_LABELS[m.role]} · {m.pin?'PIN set':'No PIN'}{m.phone?` · ${m.phone}`:''}</div>
               </div>
-            ):(
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                <div style={{opacity:m.active?1:.5}}>
-                  <div style={{fontFamily:BF,fontSize:16,fontWeight:600}}>{m.name}</div>
-                  <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{ROLE_LABELS[m.role]} · {m.pin?'PIN set':'No PIN'}{m.phone?` · ${m.phone}`:''}</div>
-                </div>
-                <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'flex-end'}}>
-                  <Btn ch="Edit" onClick={()=>startEdit(m)} size="sm" outline/>
-                  {m.pin&&<Btn ch="Reset PIN" onClick={()=>resetPin(m.id)} size="sm" outline/>}
-                  <Btn ch={m.active?'Off':'On'} onClick={()=>toggle(m.id)} size="sm" outline color={m.active?C.err:C.ok}/>
-                </div>
+              <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'flex-end'}}>
+                <Btn ch="Edit" onClick={()=>{setEditId(m.id);setEf({name:m.name,role:m.role,phone:m.phone||''});}} size="sm" outline/>
+                {m.pin&&<Btn ch="Reset PIN" onClick={()=>resetPin(m.id)} size="sm" outline/>}
+                <Btn ch={m.active?'Off':'On'} onClick={()=>toggle(m.id)} size="sm" outline color={m.active?C.err:C.ok}/>
               </div>
-            )
-          }/>
+            </div>
+          )}/>
         ))}
       </div>
     </div>
@@ -450,54 +413,26 @@ function DamageTab({damage,saveDamage,crew,tools,saveTools}){
   const open=damage.filter(d=>d.status!=='resolved');
   const resolved=damage.filter(d=>d.status==='resolved');
   const update=(id,u)=>saveDamage(damage.map(d=>d.id===id?{...d,...u}:d));
-  const resolve=(id,note)=>{
-    const d=damage.find(x=>x.id===id);
-    update(id,{status:'resolved',resolutionNote:note,resolvedAt:new Date().toISOString()});
-    if(d?.toolId) saveTools(tools.map(t=>t.id===d.toolId?{...t,condition:'good'}:t));
-  };
+  const resolve=(id,note)=>{const d=damage.find(x=>x.id===id);update(id,{status:'resolved',resolutionNote:note,resolvedAt:new Date().toISOString()});if(d?.toolId)saveTools(tools.map(t=>t.id===d.toolId?{...t,condition:'good'}:t));};
   return(
     <div>
       <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:16}}>{open.length} OPEN · {resolved.length} RESOLVED</div>
       {open.map(d=><DmgCard key={d.id} d={d} crew={crew} onUpdate={u=>update(d.id,u)} onResolve={note=>resolve(d.id,note)}/>)}
-      {open.length===0&&<div style={{color:C.ok,fontSize:12,fontFamily:MF,marginBottom:16}}>All clear — no open damage records.</div>}
-      {resolved.length>0&&<>
-        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,margin:'16px 0 10px'}}>RESOLVED</div>
-        {resolved.map(d=>(
-          <Card key={d.id} ch={<div>
-            <div style={{fontFamily:BF,fontSize:14,fontWeight:600,color:C.muted}}>{d.toolName}</div>
-            <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{d.description} · {d.resolvedAt?fmtDate(d.resolvedAt):''}</div>
-          </div>} style={{marginBottom:6,opacity:.6}}/>
-        ))}
-      </>}
+      {open.length===0&&<div style={{color:C.ok,fontSize:12,fontFamily:MF,marginBottom:16}}>All clear.</div>}
+      {resolved.map(d=><Card key={d.id} ch={<div><div style={{fontFamily:BF,fontSize:14,color:C.muted}}>{d.toolName}</div><div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{d.description} · {d.resolvedAt?fmtDate(d.resolvedAt):''}</div></div>} style={{marginBottom:6,opacity:.6}}/>)}
     </div>
   );
 }
-
 function DmgCard({d,crew,onUpdate,onResolve}){
   const [note,setNote]=useState('');
-  return(
-    <Card ch={<div style={{marginBottom:4}}>
-      <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-        <div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:C.warn}}>{d.toolName}</div>
-        <span style={{fontSize:9,letterSpacing:1,color:C.warn,fontFamily:MF}}>{(d.status||'open').toUpperCase()}</span>
-      </div>
-      <div style={{fontSize:11,color:C.muted,fontFamily:MF,marginBottom:10}}>{d.description} · Job: {d.jobClient}</div>
-      <div style={{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap'}}>
-        {['repair','replace','monitor'].map(a=>(
-          <button key={a} onClick={()=>onUpdate({action:a})} style={{background:d.action===a?C.acc:C.s2,color:d.action===a?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'4px 10px',fontFamily:MF,fontSize:10,cursor:'pointer',textTransform:'capitalize'}}>{a}</button>
-        ))}
-      </div>
-      <div style={{marginBottom:8}}>
-        <Lbl ch="Responsible"/>
-        <Sel value={d.responsibleId||''} onChange={e=>onUpdate({responsibleId:e.target.value})}>
-          <option value="">Not assigned</option>
-          {crew.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-        </Sel>
-      </div>
-      <TA value={note} onChange={e=>setNote(e.target.value)} placeholder="Resolution note…" rows={2} style={{marginBottom:8}}/>
-      <Btn ch="Mark Resolved" onClick={()=>onResolve(note)} full color={C.ok} disabled={!d.action}/>
-    </div>} style={{marginBottom:10}}/>
-  );
+  return(<Card ch={<div>
+    <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}><div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:C.warn}}>{d.toolName}</div><span style={{fontSize:9,color:C.warn,fontFamily:MF}}>{(d.status||'open').toUpperCase()}</span></div>
+    <div style={{fontSize:11,color:C.muted,fontFamily:MF,marginBottom:10}}>{d.description} · {d.jobClient}</div>
+    <div style={{display:'flex',gap:6,marginBottom:10,flexWrap:'wrap'}}>{['repair','replace','monitor'].map(a=><button key={a} onClick={()=>onUpdate({action:a})} style={{background:d.action===a?C.acc:C.s2,color:d.action===a?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'4px 10px',fontFamily:MF,fontSize:10,cursor:'pointer',textTransform:'capitalize'}}>{a}</button>)}</div>
+    <div style={{marginBottom:8}}><Lbl ch="Responsible"/><Sel value={d.responsibleId||''} onChange={e=>onUpdate({responsibleId:e.target.value})}><option value="">Not assigned</option>{crew.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</Sel></div>
+    <TA value={note} onChange={e=>setNote(e.target.value)} placeholder="Resolution note…" rows={2} style={{marginBottom:8}}/>
+    <Btn ch="Mark Resolved" onClick={()=>onResolve(note)} full color={C.ok} disabled={!d.action}/>
+  </div>} style={{marginBottom:10}}/>);
 }
 
 // ── Create Job ────────────────────────────────────────────────────────
@@ -511,13 +446,7 @@ function CreateJobScreen({crew,tools,onSave,onBack}){
   const [err,setErr]=useState('');
   const eligible=crew.filter(c=>c.active);
   const toggleCrew=id=>setCrewIds(ids=>ids.includes(id)?ids.filter(x=>x!==id):[...ids,id]);
-  const detectSite=()=>{
-    setDetecting(true);
-    navigator.geolocation.getCurrentPosition(
-      pos=>{setForm(f=>({...f,siteLat:pos.coords.latitude.toFixed(6),siteLng:pos.coords.longitude.toFixed(6)}));setDetecting(false);},
-      ()=>{setDetecting(false);setErr('Could not detect location.');},{enableHighAccuracy:true}
-    );
-  };
+  const detectSite=()=>{setDetecting(true);navigator.geolocation.getCurrentPosition(pos=>{setForm(f=>({...f,siteLat:pos.coords.latitude.toFixed(6),siteLng:pos.coords.longitude.toFixed(6)}));setDetecting(false);},()=>{setDetecting(false);setErr('Could not detect location.');},{enableHighAccuracy:true});};
   const addMr=()=>{if(mrItem.trim()){setMarketRun(m=>[...m,{id:uid(),item:mrItem.trim(),done:false}]);setMrItem('');}};
   const submit=()=>{
     if(!form.client.trim()){setErr('Client name required.');return;}
@@ -534,59 +463,44 @@ function CreateJobScreen({crew,tools,onSave,onBack}){
         {err&&<div style={{color:C.err,fontSize:11,fontFamily:MF,marginBottom:12,padding:'8px 12px',background:'rgba(184,83,74,.1)',borderRadius:2}}>{err}</div>}
         <div style={{display:'flex',flexDirection:'column',gap:14}}>
           <div><Lbl ch="Client name"/><Inp value={form.client} onChange={e=>setForm(f=>({...f,client:e.target.value}))} placeholder="e.g. Mensah Residence"/></div>
-          <div>
-            <Lbl ch="Job type"/>
+          <div><Lbl ch="Job type"/>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
               {[{v:'cabinetry',l:'Cabinetry'},{v:'hardwood',l:'Hardwood / General'}].map(({v,l})=>(
-                <button key={v} onClick={()=>setForm(f=>({...f,jobType:v}))} style={{background:form.jobType===v?C.acc:C.s2,color:form.jobType===v?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:10,fontFamily:BF,fontSize:14,letterSpacing:1,cursor:'pointer'}}>{l}</button>
+                <button key={v} onClick={()=>setForm(f=>({...f,jobType:v}))} style={{background:form.jobType===v?C.acc:C.s2,color:form.jobType===v?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:10,fontFamily:BF,fontSize:14,cursor:'pointer'}}>{l}</button>
               ))}
             </div>
           </div>
           <div><Lbl ch="Site address"/><Inp value={form.siteAddress} onChange={e=>setForm(f=>({...f,siteAddress:e.target.value}))} placeholder="e.g. East Legon, Accra"/></div>
           <div>
-            <Lbl ch="Site GPS (for geofencing)"/>
+            <Lbl ch="Site GPS"/>
             <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}}>
               <Inp value={form.siteLat} onChange={e=>setForm(f=>({...f,siteLat:e.target.value}))} placeholder="Latitude"/>
               <Inp value={form.siteLng} onChange={e=>setForm(f=>({...f,siteLng:e.target.value}))} placeholder="Longitude"/>
             </div>
             <Btn ch={detecting?'⟳ Detecting…':'📍 Use current location'} onClick={detectSite} outline full/>
-            <div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:6}}>Visit the site and tap "Use current location", or paste coordinates from Google Maps.</div>
+            <div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:6}}>Visit the site and tap "Use current location", or paste from Google Maps.</div>
           </div>
           <div><Lbl ch="Geofence radius (metres)"/><Inp type="number" value={form.geofenceRadius} onChange={e=>setForm(f=>({...f,geofenceRadius:e.target.value}))}/></div>
           <div><Lbl ch="Departure date + time"/><Inp type="datetime-local" value={form.departureTime} onChange={e=>setForm(f=>({...f,departureTime:e.target.value}))}/></div>
-          <div>
-            <Lbl ch="Assign crew"/>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>
-              {eligible.map(m=>(
-                <button key={m.id} onClick={()=>toggleCrew(m.id)} style={{background:crewIds.includes(m.id)?C.s2:C.s1,border:`1px solid ${crewIds.includes(m.id)?C.acc:C.bdr}`,borderRadius:2,padding:'10px 14px',display:'flex',justifyContent:'space-between',cursor:'pointer',color:C.txt}}>
-                  <span style={{fontFamily:BF,fontSize:15,fontWeight:600}}>{m.name}</span>
-                  <span style={{fontSize:9,color:crewIds.includes(m.id)?C.acc:C.muted,fontFamily:MF}}>{ROLE_LABELS[m.role]}{crewIds.includes(m.id)?' ✓':''}</span>
-                </button>
-              ))}
-            </div>
+          <div><Lbl ch="Assign crew"/>
+            {eligible.map(m=>(
+              <button key={m.id} onClick={()=>toggleCrew(m.id)} style={{background:crewIds.includes(m.id)?C.s2:C.s1,border:`1px solid ${crewIds.includes(m.id)?C.acc:C.bdr}`,borderRadius:2,padding:'10px 14px',display:'flex',justifyContent:'space-between',cursor:'pointer',color:C.txt,width:'100%',marginBottom:6}}>
+                <span style={{fontFamily:BF,fontSize:15,fontWeight:600}}>{m.name}</span>
+                <span style={{fontSize:9,color:crewIds.includes(m.id)?C.acc:C.muted,fontFamily:MF}}>{ROLE_LABELS[m.role]}{crewIds.includes(m.id)?' ✓':''}</span>
+              </button>
+            ))}
           </div>
-          {crewIds.length>0&&(
-            <div><Lbl ch="Field supervisor for this job"/>
-              <Sel value={fieldSupId} onChange={e=>setFieldSupId(e.target.value)}>
-                <option value="">Select field supervisor</option>
-                {crewIds.map(id=>{const m=crew.find(c=>c.id===id);return m?<option key={id} value={id}>{m.name} — {ROLE_LABELS[m.role]}</option>:null;})}
-              </Sel>
-            </div>
-          )}
-          <div>
-            <Lbl ch="Market run items"/>
-            <div style={{display:'flex',gap:8,marginBottom:8}}>
-              <Inp value={mrItem} onChange={e=>setMrItem(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addMr()} placeholder="Add item…"/>
-              <Btn ch="Add" onClick={addMr} size="sm"/>
-            </div>
-            <div style={{display:'flex',flexDirection:'column',gap:4}}>
-              {marketRun.map(m=>(
-                <div key={m.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 10px',background:C.s2,borderRadius:2,fontSize:12,fontFamily:MF,color:C.txt}}>
-                  <span>{m.item}</span>
-                  <button onClick={()=>setMarketRun(mr=>mr.filter(x=>x.id!==m.id))} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14}}>✕</button>
-                </div>
-              ))}
-            </div>
+          {crewIds.length>0&&<div><Lbl ch="Field supervisor"/>
+            <Sel value={fieldSupId} onChange={e=>setFieldSupId(e.target.value)}>
+              <option value="">Select field supervisor</option>
+              {crewIds.map(id=>{const m=crew.find(c=>c.id===id);return m?<option key={id} value={id}>{m.name} — {ROLE_LABELS[m.role]}</option>:null;})}
+            </Sel>
+          </div>}
+          <div><Lbl ch="Market run items"/>
+            <div style={{display:'flex',gap:8,marginBottom:8}}><Inp value={mrItem} onChange={e=>setMrItem(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addMr()} placeholder="Add item…"/><Btn ch="Add" onClick={addMr} size="sm"/></div>
+            {marketRun.map(m=><div key={m.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'6px 10px',background:C.s2,borderRadius:2,fontSize:12,fontFamily:MF,color:C.txt,marginBottom:4}}>
+              <span>{m.item}</span><button onClick={()=>setMarketRun(mr=>mr.filter(x=>x.id!==m.id))} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14}}>✕</button>
+            </div>)}
           </div>
           <div><Lbl ch="Notes (optional)"/><TA value={form.notes} onChange={e=>setForm(f=>({...f,notes:e.target.value}))} placeholder="Anything the team should know…" rows={3}/></div>
           <Btn ch="Create Job →" onClick={submit} full size="lg"/>
@@ -604,21 +518,28 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
   const isAdmin=user.role==='admin';
   const isFieldSup=job.fieldSupId===user.id||user.role==='supervisor'||user.role==='admin';
   const isCrew=job.crewIds?.includes(user.id)||isAdmin;
-  const getCrew=()=>(job.crewIds||[]).map(id=>crew.find(c=>c.id===id)?.name).filter(Boolean);
   const getFieldSup=()=>crew.find(c=>c.id===job.fieldSupId)?.name||'Not assigned';
+  const getCrew=()=>(job.crewIds||[]).map(id=>crew.find(c=>c.id===id)?.name).filter(Boolean);
+  const otherCrew=()=>(job.crewIds||[]).filter(id=>id!==user.id);
+
   const [gpsMsg,setGpsMsg]=useState('');
   const [gpsOk,setGpsOk]=useState(false);
   const [loading,setLoading]=useState(false);
   const [tab,setTab]=useState('overview');
   const getGPS=()=>new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:12000}));
 
+  const adminIds=crew.filter(c=>c.role==='admin').map(c=>c.id);
+
   const triggerDepart=async()=>{
-    setLoading(true);setGpsMsg('Checking location…');
+    setLoading(true);setGpsMsg('Checking GPS…');
     try{
       const pos=await getGPS();
-      updateJob({status:'departed',departedAt:new Date().toISOString(),departLat:pos.coords.latitude,departLng:pos.coords.longitude});
-      setGpsMsg('Departed. En route.');setGpsOk(true);
-    }catch{setGpsMsg('GPS unavailable — enable location and try again.');setGpsOk(false);}
+      const updates={status:'departed',departedAt:new Date().toISOString(),departLat:pos.coords.latitude,departLng:pos.coords.longitude};
+      updateJob(updates);
+      notify(otherCrew(),`${job.client} — En route`,`Departed. ETA to site: check with ${getFieldSup()}.`);
+      notify(adminIds,`Job departed`,`${job.client} crew is en route.`);
+      setGpsMsg('Departed.');setGpsOk(true);
+    }catch{setGpsMsg('GPS unavailable.');setGpsOk(false);}
     setLoading(false);
   };
   const checkArrival=async()=>{
@@ -626,22 +547,36 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
     try{
       const pos=await getGPS();
       const {latitude:lat,longitude:lng}=pos.coords;
-      if(!job.siteLat||!job.siteLng){updateJob({status:'on-site',arrivedAt:new Date().toISOString()});setGpsMsg('Arrived. Job started.');setGpsOk(true);setLoading(false);return;}
+      if(!job.siteLat||!job.siteLng){
+        updateJob({status:'on-site',arrivedAt:new Date().toISOString()});
+        notify(adminIds,'On site',`${job.client} crew has arrived.`);
+        setGpsMsg('Arrived.');setGpsOk(true);setLoading(false);return;
+      }
       const dist=Math.round(haversine(lat,lng,job.siteLat,job.siteLng));
-      if(dist<=job.geofenceRadius){updateJob({status:'on-site',arrivedAt:new Date().toISOString()});setGpsMsg(`Arrived — ${dist}m from site.`);setGpsOk(true);}
-      else{setGpsMsg(`You are ${dist}m from site. Must be within ${job.geofenceRadius}m.`);setGpsOk(false);}
+      if(dist<=job.geofenceRadius){
+        updateJob({status:'on-site',arrivedAt:new Date().toISOString()});
+        notify(adminIds,'On site',`${job.client} crew arrived — ${dist}m from site.`);
+        setGpsMsg(`Arrived — ${dist}m.`);setGpsOk(true);
+      } else {setGpsMsg(`${dist}m from site. Must be within ${job.geofenceRadius}m.`);setGpsOk(false);}
     }catch{setGpsMsg('GPS unavailable.');setGpsOk(false);}
     setLoading(false);
   };
   const triggerReturnCheck=async()=>{
-    setLoading(true);setGpsMsg('Verifying site location…');
+    setLoading(true);setGpsMsg('Verifying location…');
     try{
       const pos=await getGPS();
       const {latitude:lat,longitude:lng}=pos.coords;
-      if(!job.siteLat||!job.siteLng){updateJob({status:'return-check',returnStartedAt:new Date().toISOString()});setGpsOk(true);setLoading(false);return;}
+      if(!job.siteLat||!job.siteLng){
+        updateJob({status:'return-check',returnStartedAt:new Date().toISOString()});
+        notify(otherCrew(),'Return check',`${job.client} — Begin packing up and returning tools.`);
+        setGpsOk(true);setLoading(false);return;
+      }
       const dist=Math.round(haversine(lat,lng,job.siteLat,job.siteLng));
-      if(dist<=job.geofenceRadius*1.5){updateJob({status:'return-check',returnStartedAt:new Date().toISOString()});setGpsMsg('Return check started.');setGpsOk(true);}
-      else{setGpsMsg(`Must be at site. Currently ${dist}m away.`);setGpsOk(false);}
+      if(dist<=job.geofenceRadius*1.5){
+        updateJob({status:'return-check',returnStartedAt:new Date().toISOString()});
+        notify(otherCrew(),'Return check started',`${job.client} — Account for all tools before leaving site.`);
+        setGpsMsg('Return check started.');setGpsOk(true);
+      } else {setGpsMsg(`Must be at site. ${dist}m away.`);setGpsOk(false);}
     }catch{setGpsMsg('GPS unavailable.');setGpsOk(false);}
     setLoading(false);
   };
@@ -652,21 +587,20 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
   const allPacked=cl.length>0&&packed===cl.length;
   const allReturned=cl.length>0&&returned===cl.length;
 
-  const packItem=itemId=>{
-    updateJob({checklist:cl.map(i=>i.id===itemId?{...i,packed:!i.packed,packedBy:user.name,packedAt:new Date().toISOString()}:i)});
-  };
+  const packItem=itemId=>updateJob({checklist:cl.map(i=>i.id===itemId?{...i,packed:!i.packed,packedBy:user.name,packedAt:new Date().toISOString()}:i)});
   const returnItem=(itemId,condition,note)=>{
     updateJob({checklist:cl.map(i=>i.id===itemId?{...i,returned:true,returnedBy:user.name,returnedAt:new Date().toISOString(),condition,conditionNote:note||''}:i)});
     if(condition==='damaged'||condition==='missing'){
       const item=cl.find(i=>i.id===itemId);
-      const dr={id:uid(),toolId:item?.toolId,toolName:item?.name,jobId:job.id,jobClient:job.client,reportedBy:user.name,reportedAt:new Date().toISOString(),description:note||'',action:null,responsibleId:null,status:'open'};
-      saveDamage([...damage,dr]);
+      saveDamage([...damage,{id:uid(),toolId:item?.toolId,toolName:item?.name,jobId:job.id,jobClient:job.client,reportedBy:user.name,reportedAt:new Date().toISOString(),description:note||'',action:null,responsibleId:null,status:'open'}]);
       if(item?.toolId) saveTools(tools.map(t=>t.id===item.toolId?{...t,condition:'needs_attention'}:t));
+      notify(adminIds,'Tool issue',`${item?.name} returned ${condition} on ${job.client} job.`);
     }
   };
   const closeJob=()=>{
     if(cl.filter(i=>!i.returned).length>0){alert('All items must be returned before closing.');return;}
     updateJob({status:'closed',closedAt:new Date().toISOString()});
+    notify(adminIds,'Job closed',`${job.client} is wrapped up.`);
   };
   const addMishap=m=>updateJob({mishaps:[...(job.mishaps||[]),{id:uid(),...m,loggedBy:user.name,loggedAt:new Date().toISOString()}]});
   const toggleMrItem=id=>updateJob({marketRun:(job.marketRun||[]).map(m=>m.id===id?{...m,done:!m.done}:m)});
@@ -686,50 +620,38 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
           <div style={{display:'flex',flexDirection:'column',gap:14}}>
             <Card ch={<div>
               <div style={{fontFamily:BF,fontSize:11,letterSpacing:2,color:C.muted,marginBottom:10}}>JOB DETAILS</div>
-              {[['Client',job.client],['Type',job.jobType==='cabinetry'?'Cabinetry':'Hardwood / General'],['Site',job.siteAddress||'TBC'],['Departure',job.departureTime?fmtDepart(job.departureTime):'TBC'],['Field supervisor',getFieldSup()],['Crew',getCrew().join(', ')||'None']].map(([k,v])=>(
+              {[['Client',job.client],['Type',job.jobType==='cabinetry'?'Cabinetry':'Hardwood'],['Site',job.siteAddress||'TBC'],['Departure',job.departureTime?fmtDepart(job.departureTime):'TBC'],['Field sup',getFieldSup()],['Crew',getCrew().join(', ')||'None']].map(([k,v])=>(
                 <div key={k} style={{display:'flex',gap:8,padding:'5px 0',borderBottom:`1px solid ${C.bdr}`,fontSize:12,fontFamily:MF}}>
-                  <span style={{color:C.muted,minWidth:110,flexShrink:0}}>{k}</span><span>{v}</span>
+                  <span style={{color:C.muted,minWidth:90,flexShrink:0}}>{k}</span><span>{v}</span>
                 </div>
               ))}
-              {job.arrivedAt&&<div style={{display:'flex',gap:8,padding:'5px 0',fontSize:12,fontFamily:MF}}><span style={{color:C.muted,minWidth:110}}>On site for</span><span>{elapsed(job.arrivedAt)}</span></div>}
+              {job.arrivedAt&&<div style={{display:'flex',gap:8,padding:'5px 0',fontSize:12,fontFamily:MF}}><span style={{color:C.muted,minWidth:90}}>On site for</span><span>{elapsed(job.arrivedAt)}</span></div>}
               {job.notes&&<div style={{marginTop:10,fontSize:11,color:C.muted,fontFamily:MF,lineHeight:1.6}}>{job.notes}</div>}
             </div>}/>
             {gpsMsg&&<div style={{fontSize:11,color:gpsOk?C.ok:C.warn,textAlign:'center',padding:'6px 0',fontFamily:MF}}>{gpsMsg}</div>}
-            {job.status==='created'&&isFieldSup&&(
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                <Btn ch="Go to Checklist →" onClick={()=>setTab('checklist')} full outline/>
-                <Btn ch="Move to Pre-departure →" onClick={()=>updateJob({status:'pre-departure'})} full disabled={!job.checklistLocked}/>
-                {!job.checklistLocked&&<div style={{fontSize:10,color:C.warn,textAlign:'center',fontFamily:MF}}>Lock the checklist before proceeding</div>}
-              </div>
-            )}
-            {job.status==='pre-departure'&&isFieldSup&&(
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                <div style={{fontSize:12,fontFamily:MF,textAlign:'center',color:allPacked?C.ok:C.muted}}>{allPacked?'✓ All items packed — ready to depart':`${packed}/${cl.length} items packed`}</div>
-                <Btn ch={loading?'⟳ Checking GPS…':'Confirm Departure (GPS gated)'} onClick={triggerDepart} full disabled={!allPacked||loading} color={C.ok}/>
-              </div>
-            )}
-            {job.status==='departed'&&isCrew&&(
-              <Btn ch={loading?'⟳ Checking GPS…':'Confirm Arrival at Site'} onClick={checkArrival} full disabled={loading} color={C.ok}/>
-            )}
-            {job.status==='on-site'&&isFieldSup&&(
-              <Btn ch={loading?'⟳ Verifying GPS…':'Begin Return Check'} onClick={triggerReturnCheck} full disabled={loading} color={C.warn}/>
-            )}
-            {job.status==='return-check'&&isFieldSup&&(
-              <div style={{display:'flex',flexDirection:'column',gap:8}}>
-                <div style={{fontSize:12,fontFamily:MF,textAlign:'center',color:allReturned?C.ok:C.muted}}>{allReturned?'✓ All items accounted for':`${returned}/${cl.length} items returned`}</div>
-                <Btn ch="Close Job" onClick={closeJob} full disabled={!allReturned} color={C.ok}/>
-              </div>
-            )}
-            {job.status==='closed'&&(
-              <div style={{textAlign:'center',padding:20}}>
-                <div style={{fontFamily:BF,fontSize:26,fontWeight:700,color:C.ok}}>JOB COMPLETE</div>
-                <div style={{fontSize:11,color:C.muted,fontFamily:MF,marginTop:6}}>Closed {job.closedAt?fmtDate(job.closedAt):''}</div>
-              </div>
-            )}
+            {job.status==='created'&&isFieldSup&&<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <Btn ch="Go to Checklist →" onClick={()=>setTab('checklist')} full outline/>
+              <Btn ch="Move to Pre-departure →" onClick={()=>updateJob({status:'pre-departure'})} full disabled={!job.checklistLocked}/>
+              {!job.checklistLocked&&<div style={{fontSize:10,color:C.warn,textAlign:'center',fontFamily:MF}}>Lock the checklist before proceeding</div>}
+            </div>}
+            {job.status==='pre-departure'&&isFieldSup&&<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <div style={{fontSize:12,fontFamily:MF,textAlign:'center',color:allPacked?C.ok:C.muted}}>{allPacked?'✓ All items packed':`${packed}/${cl.length} packed`}</div>
+              <Btn ch={loading?'⟳ Checking GPS…':'Confirm Departure (GPS gated)'} onClick={triggerDepart} full disabled={!allPacked||loading} color={C.ok}/>
+            </div>}
+            {job.status==='departed'&&isCrew&&<Btn ch={loading?'⟳ Checking GPS…':'Confirm Arrival at Site'} onClick={checkArrival} full disabled={loading} color={C.ok}/>}
+            {job.status==='on-site'&&isFieldSup&&<Btn ch={loading?'⟳ Verifying GPS…':'Begin Return Check'} onClick={triggerReturnCheck} full disabled={loading} color={C.warn}/>}
+            {job.status==='return-check'&&isFieldSup&&<div style={{display:'flex',flexDirection:'column',gap:8}}>
+              <div style={{fontSize:12,fontFamily:MF,textAlign:'center',color:allReturned?C.ok:C.muted}}>{allReturned?'✓ All items accounted for':`${returned}/${cl.length} returned`}</div>
+              <Btn ch="Close Job" onClick={closeJob} full disabled={!allReturned} color={C.ok}/>
+            </div>}
+            {job.status==='closed'&&<div style={{textAlign:'center',padding:20}}>
+              <div style={{fontFamily:BF,fontSize:26,fontWeight:700,color:C.ok}}>JOB COMPLETE</div>
+              <div style={{fontSize:11,color:C.muted,fontFamily:MF,marginTop:6}}>Closed {job.closedAt?fmtDate(job.closedAt):''}</div>
+            </div>}
           </div>
         )}
         {tab==='checklist'&&<ChecklistTab job={job} user={user} isFieldSup={isFieldSup} updateJob={updateJob} onPackItem={packItem} onReturnItem={returnItem}/>}
-        {tab==='marketrun'&&<MarketRunTab job={job} user={user} onToggle={toggleMrItem} onAdd={addMrItem}/>}
+        {tab==='marketrun'&&<MarketRunTab job={job} onToggle={toggleMrItem} onAdd={addMrItem}/>}
         {tab==='mishaps'&&<MishapsTab job={job} user={user} crew={crew} onAdd={addMishap}/>}
       </div>
     </div>
@@ -747,17 +669,13 @@ function ChecklistTab({job,user,isFieldSup,updateJob,onPackItem,onReturnItem}){
   const cats=['power','hand','consumable'];
   const packed=cl.filter(i=>i.packed).length;
   const returned=cl.filter(i=>i.returned).length;
-  const addItem=()=>{
-    if(!newItem.name.trim()) return;
-    updateJob({checklist:[...cl,{id:uid(),toolId:null,name:newItem.name.trim(),cat:newItem.cat,qty:newItem.qty,packed:false,packedBy:null,packedAt:null,returned:false,returnedBy:null,returnedAt:null,condition:'good',conditionNote:''}]});
-    setNewItem({name:'',cat:'power',qty:1}); setAdding(false);
-  };
+  const addItem=()=>{if(!newItem.name.trim())return;updateJob({checklist:[...cl,{id:uid(),toolId:null,name:newItem.name.trim(),cat:newItem.cat,qty:newItem.qty,packed:false,packedBy:null,packedAt:null,returned:false,returnedBy:null,returnedAt:null,condition:'good',conditionNote:''}]});setNewItem({name:'',cat:'power',qty:1});setAdding(false);};
   const removeItem=id=>updateJob({checklist:cl.filter(i=>i.id!==id)});
   const setRS=(id,u)=>setRetStates(s=>({...s,[id]:{...s[id],...u}}));
   const confirmReturn=item=>{
     const rs=retStates[item.id]||{};
     const cond=rs.condition||'good';
-    if((cond==='damaged'||cond==='missing')&&!rs.note){alert('A note is required for damaged or missing items.');return;}
+    if((cond==='damaged'||cond==='missing')&&!rs.note){alert('A note is required.');return;}
     onReturnItem(item.id,cond,rs.note);
     setRetStates(s=>({...s,[item.id]:{...s[item.id],open:false}}));
   };
@@ -770,94 +688,66 @@ function ChecklistTab({job,user,isFieldSup,updateJob,onPackItem,onReturnItem}){
           {isFieldSup&&job.status==='created'&&<Btn ch={job.checklistLocked?'🔓 Unlock':'🔒 Lock'} onClick={()=>updateJob({checklistLocked:!job.checklistLocked})} size="sm" color={job.checklistLocked?C.warn:C.ok}/>}
         </div>
       </div>
-      {job.checklistLocked&&job.status==='created'&&<div style={{fontSize:10,color:C.ok,fontFamily:MF,marginBottom:12}}>✓ Checklist locked — ready for pre-departure.</div>}
-      {adding&&(
-        <Card ch={<div style={{display:'flex',flexDirection:'column',gap:8}}>
-          <Inp placeholder="Tool / item name" value={newItem.name} onChange={e=>setNewItem(f=>({...f,name:e.target.value}))}/>
-          <div style={{display:'flex',gap:8}}>
-            <Sel value={newItem.cat} onChange={e=>setNewItem(f=>({...f,cat:e.target.value}))} style={{flex:1}}>
-              <option value="power">Power</option><option value="hand">Hand</option><option value="consumable">Consumable</option>
-            </Sel>
-            <Inp type="number" min={1} value={newItem.qty} onChange={e=>setNewItem(f=>({...f,qty:+e.target.value}))} style={{width:60}}/>
-          </div>
-          <div style={{display:'flex',gap:8}}>
-            <Btn ch="Add" onClick={addItem} style={{flex:1}}/><Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/>
-          </div>
-        </div>} style={{marginBottom:14}}/>
-      )}
+      {job.checklistLocked&&job.status==='created'&&<div style={{fontSize:10,color:C.ok,fontFamily:MF,marginBottom:12}}>✓ Checklist locked.</div>}
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:8}}>
+        <Inp placeholder="Tool name" value={newItem.name} onChange={e=>setNewItem(f=>({...f,name:e.target.value}))}/>
+        <div style={{display:'flex',gap:8}}>
+          <Sel value={newItem.cat} onChange={e=>setNewItem(f=>({...f,cat:e.target.value}))} style={{flex:1}}><option value="power">Power</option><option value="hand">Hand</option><option value="consumable">Consumable</option></Sel>
+          <Inp type="number" min={1} value={newItem.qty} onChange={e=>setNewItem(f=>({...f,qty:+e.target.value}))} style={{width:60}}/>
+        </div>
+        <div style={{display:'flex',gap:8}}><Btn ch="Add" onClick={addItem} style={{flex:1}}/><Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/></div>
+      </div>} style={{marginBottom:14}}/>}
       {cats.map(cat=>{
-        const items=cl.filter(i=>i.cat===cat);
-        if(!items.length) return null;
-        return(
-          <div key={cat} style={{marginBottom:20}}>
-            <div style={{fontSize:9,letterSpacing:2,color:C.acc,textTransform:'uppercase',fontFamily:MF,marginBottom:8}}>{cat}</div>
-            <div style={{display:'flex',flexDirection:'column',gap:6}}>
-              {items.map(item=>{
-                const rs=retStates[item.id]||{};
-                const isGood=(isPre&&item.packed)||(isReturn&&item.returned);
-                return(
-                  <Card key={item.id} ch={<div>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-                      <div style={{flex:1}}>
-                        <div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:isGood?C.ok:C.txt}}>{item.name}</div>
-                        <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>
-                          qty {item.qty}
-                          {item.packed&&` · packed by ${item.packedBy}`}
-                          {item.returned&&<> · returned · <span style={{color:item.condition==='good'?C.ok:C.warn}}>{item.condition}</span></>}
-                        </div>
-                      </div>
-                      <div style={{display:'flex',gap:6,alignItems:'center',flexShrink:0}}>
-                        {canEdit&&<button onClick={()=>removeItem(item.id)} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14}}>✕</button>}
-                        {isPre&&!item.packed&&<Btn ch="Packed ✓" onClick={()=>onPackItem(item.id)} size="sm" color={C.ok}/>}
-                        {isPre&&item.packed&&<span style={{fontSize:10,color:C.ok,fontFamily:MF}}>✓</span>}
-                        {isReturn&&!item.returned&&<Btn ch={rs.open?'Cancel':'Return'} onClick={()=>setRS(item.id,{open:!rs.open})} size="sm" color={C.warn}/>}
-                        {isReturn&&item.returned&&<span style={{fontSize:10,color:item.condition==='good'?C.ok:C.warn,fontFamily:MF}}>✓</span>}
-                      </div>
-                    </div>
-                    {isReturn&&rs.open&&!item.returned&&(
-                      <div style={{marginTop:10,display:'flex',flexDirection:'column',gap:8}}>
-                        <div style={{display:'flex',gap:6}}>
-                          {['good','damaged','missing'].map(c=>(
-                            <button key={c} onClick={()=>setRS(item.id,{condition:c})} style={{flex:1,background:(rs.condition||'good')===c?C.acc:C.s2,color:(rs.condition||'good')===c?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'6px 4px',fontFamily:MF,fontSize:10,cursor:'pointer',textTransform:'capitalize'}}>{c}</button>
-                          ))}
-                        </div>
-                        {(rs.condition==='damaged'||rs.condition==='missing')&&(
-                          <TA value={rs.note||''} onChange={e=>setRS(item.id,{note:e.target.value})} placeholder="Describe the issue — required for damage or missing items…" rows={2}/>
-                        )}
-                        <Btn ch="Confirm Return" onClick={()=>confirmReturn(item)} full size="sm"/>
-                      </div>
-                    )}
-                  </div>}/>
-                );
-              })}
-            </div>
-          </div>
-        );
+        const items=cl.filter(i=>i.cat===cat); if(!items.length) return null;
+        return(<div key={cat} style={{marginBottom:20}}>
+          <div style={{fontSize:9,letterSpacing:2,color:C.acc,textTransform:'uppercase',fontFamily:MF,marginBottom:8}}>{cat}</div>
+          {items.map(item=>{
+            const rs=retStates[item.id]||{};
+            const isGood=(isPre&&item.packed)||(isReturn&&item.returned);
+            return(<Card key={item.id} ch={<div>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:isGood?C.ok:C.txt}}>{item.name}</div>
+                  <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>qty {item.qty}{item.packed&&` · ${item.packedBy}`}{item.returned&&<> · <span style={{color:item.condition==='good'?C.ok:C.warn}}>{item.condition}</span></>}</div>
+                </div>
+                <div style={{display:'flex',gap:6,alignItems:'center',flexShrink:0}}>
+                  {canEdit&&<button onClick={()=>removeItem(item.id)} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14}}>✕</button>}
+                  {isPre&&!item.packed&&<Btn ch="Packed ✓" onClick={()=>onPackItem(item.id)} size="sm" color={C.ok}/>}
+                  {isPre&&item.packed&&<span style={{fontSize:10,color:C.ok,fontFamily:MF}}>✓</span>}
+                  {isReturn&&!item.returned&&<Btn ch={rs.open?'Cancel':'Return'} onClick={()=>setRS(item.id,{open:!rs.open})} size="sm" color={C.warn}/>}
+                  {isReturn&&item.returned&&<span style={{fontSize:10,color:item.condition==='good'?C.ok:C.warn,fontFamily:MF}}>✓</span>}
+                </div>
+              </div>
+              {isReturn&&rs.open&&!item.returned&&<div style={{marginTop:10,display:'flex',flexDirection:'column',gap:8}}>
+                <div style={{display:'flex',gap:6}}>
+                  {['good','damaged','missing'].map(c=><button key={c} onClick={()=>setRS(item.id,{condition:c})} style={{flex:1,background:(rs.condition||'good')===c?C.acc:C.s2,color:(rs.condition||'good')===c?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'6px 4px',fontFamily:MF,fontSize:10,cursor:'pointer',textTransform:'capitalize'}}>{c}</button>)}
+                </div>
+                {(rs.condition==='damaged'||rs.condition==='missing')&&<TA value={rs.note||''} onChange={e=>setRS(item.id,{note:e.target.value})} placeholder="Describe the issue…" rows={2}/>}
+                <Btn ch="Confirm Return" onClick={()=>confirmReturn(item)} full size="sm"/>
+              </div>}
+            </div>}/>);
+          })}
+        </div>);
       })}
     </div>
   );
 }
 
-function MarketRunTab({job,user,onToggle,onAdd}){
+function MarketRunTab({job,onToggle,onAdd}){
   const [item,setItem]=useState('');
   const items=job.marketRun||[];
   const add=()=>{if(item.trim()){onAdd(item.trim());setItem('');}};
   return(
     <div>
-      <div style={{display:'flex',gap:8,marginBottom:14}}>
-        <Inp value={item} onChange={e=>setItem(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="Add to market run…"/>
-        <Btn ch="Add" onClick={add} size="sm"/>
-      </div>
-      <div style={{display:'flex',flexDirection:'column',gap:6}}>
-        {items.map(m=>(
-          <button key={m.id} onClick={()=>onToggle(m.id)} style={{background:m.done?C.s2:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'11px 13px',display:'flex',alignItems:'center',gap:10,cursor:'pointer',color:m.done?C.muted:C.txt,textAlign:'left',width:'100%'}}>
-            <div style={{width:16,height:16,borderRadius:'50%',border:`1.5px solid ${m.done?C.ok:C.bdr}`,background:m.done?C.ok:'transparent',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:C.bg}}>{m.done?'✓':''}</div>
-            <span style={{fontFamily:MF,fontSize:13,textDecoration:m.done?'line-through':'none'}}>{m.item}</span>
-            {m.addedBy&&<span style={{fontSize:9,color:C.muted,marginLeft:'auto',fontFamily:MF}}>+{m.addedBy}</span>}
-          </button>
-        ))}
-        {items.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No market run items.</div>}
-      </div>
+      <div style={{display:'flex',gap:8,marginBottom:14}}><Inp value={item} onChange={e=>setItem(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} placeholder="Add item…"/><Btn ch="Add" onClick={add} size="sm"/></div>
+      {items.map(m=>(
+        <button key={m.id} onClick={()=>onToggle(m.id)} style={{background:m.done?C.s2:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'11px 13px',display:'flex',alignItems:'center',gap:10,cursor:'pointer',color:m.done?C.muted:C.txt,textAlign:'left',width:'100%',marginBottom:6}}>
+          <div style={{width:16,height:16,borderRadius:'50%',border:`1.5px solid ${m.done?C.ok:C.bdr}`,background:m.done?C.ok:'transparent',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,color:C.bg}}>{m.done?'✓':''}</div>
+          <span style={{fontFamily:MF,fontSize:13,textDecoration:m.done?'line-through':'none'}}>{m.item}</span>
+          {m.addedBy&&<span style={{fontSize:9,color:C.muted,marginLeft:'auto',fontFamily:MF}}>+{m.addedBy}</span>}
+        </button>
+      ))}
+      {items.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No market run items.</div>}
     </div>
   );
 }
@@ -866,109 +756,64 @@ function MishapsTab({job,user,crew,onAdd}){
   const [adding,setAdding]=useState(false);
   const [form,setForm]=useState({category:'missing-tool',description:'',impact:'time',accountableId:'',resolution:''});
   const cats=['missing-tool','damaged-tool','material','timing','other'];
-  const submit=()=>{
-    if(!form.description.trim()) return;
-    onAdd(form); setForm({category:'missing-tool',description:'',impact:'time',accountableId:'',resolution:''}); setAdding(false);
-  };
+  const submit=()=>{if(!form.description.trim())return;onAdd(form);setForm({category:'missing-tool',description:'',impact:'time',accountableId:'',resolution:''});setAdding(false);};
   return(
     <div>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
         <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>{(job.mishaps||[]).length} LOGGED</div>
         {job.status!=='closed'&&<Btn ch="+ Log Mishap" onClick={()=>setAdding(!adding)} size="sm" color={C.warn}/>}
       </div>
-      {adding&&(
-        <Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
-          <div><Lbl ch="Category"/>
-            <Sel value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>
-              {cats.map(c=><option key={c} value={c}>{c.replace(/-/g,' ')}</option>)}
-            </Sel>
-          </div>
-          <div><Lbl ch="What happened"/><TA value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} rows={3} placeholder="Describe in full. This becomes institutional memory."/></div>
-          <div><Lbl ch="Impact"/>
-            <Sel value={form.impact} onChange={e=>setForm(f=>({...f,impact:e.target.value}))}>
-              <option value="time">Time lost</option><option value="cost">Cost incurred</option><option value="both">Both time and cost</option>
-            </Sel>
-          </div>
-          <div><Lbl ch="Accountable person"/>
-            <Sel value={form.accountableId} onChange={e=>setForm(f=>({...f,accountableId:e.target.value}))}>
-              <option value="">Not specified</option>
-              {crew.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}
-            </Sel>
-          </div>
-          <div><Lbl ch="Resolution / workaround"/><TA value={form.resolution} onChange={e=>setForm(f=>({...f,resolution:e.target.value}))} rows={2} placeholder="How was it handled?"/></div>
-          <div style={{display:'flex',gap:8}}>
-            <Btn ch="Log Mishap" onClick={submit} style={{flex:1}} color={C.warn}/>
-            <Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/>
-          </div>
-        </div>} style={{marginBottom:16}}/>
-      )}
-      <div style={{display:'flex',flexDirection:'column',gap:8}}>
-        {(job.mishaps||[]).map(m=>{
-          const accountable=crew.find(c=>c.id===m.accountableId)?.name;
-          return(
-            <Card key={m.id} ch={<div>
-              <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
-                <span style={{fontSize:9,letterSpacing:1.5,color:C.warn,fontFamily:BF,fontWeight:700}}>{m.category.replace(/-/g,' ').toUpperCase()}</span>
-                <span style={{fontSize:10,color:C.muted,fontFamily:MF}}>{m.loggedAt?fmtTime(m.loggedAt):''} · {m.loggedBy}</span>
-              </div>
-              <div style={{fontSize:13,fontFamily:MF,marginBottom:6,lineHeight:1.5}}>{m.description}</div>
-              <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>Impact: {m.impact}{accountable&&` · Accountable: ${accountable}`}{m.resolution&&` · ${m.resolution}`}</div>
-            </div>}/>
-          );
-        })}
-        {(job.mishaps||[]).length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No mishaps logged.</div>}
-      </div>
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <div><Lbl ch="Category"/><Sel value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>{cats.map(c=><option key={c} value={c}>{c.replace(/-/g,' ')}</option>)}</Sel></div>
+        <div><Lbl ch="What happened"/><TA value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} rows={3} placeholder="Full description — this becomes institutional memory."/></div>
+        <div><Lbl ch="Impact"/><Sel value={form.impact} onChange={e=>setForm(f=>({...f,impact:e.target.value}))}><option value="time">Time lost</option><option value="cost">Cost incurred</option><option value="both">Both</option></Sel></div>
+        <div><Lbl ch="Accountable"/><Sel value={form.accountableId} onChange={e=>setForm(f=>({...f,accountableId:e.target.value}))}><option value="">Not specified</option>{crew.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</Sel></div>
+        <div><Lbl ch="Resolution"/><TA value={form.resolution} onChange={e=>setForm(f=>({...f,resolution:e.target.value}))} rows={2} placeholder="How was it handled?"/></div>
+        <div style={{display:'flex',gap:8}}><Btn ch="Log" onClick={submit} style={{flex:1}} color={C.warn}/><Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/></div>
+      </div>} style={{marginBottom:16}}/>}
+      {(job.mishaps||[]).map(m=>{
+        const accountable=crew.find(c=>c.id===m.accountableId)?.name;
+        return(<Card key={m.id} ch={<div>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}><span style={{fontSize:9,letterSpacing:1.5,color:C.warn,fontFamily:BF,fontWeight:700}}>{m.category.replace(/-/g,' ').toUpperCase()}</span><span style={{fontSize:10,color:C.muted,fontFamily:MF}}>{m.loggedAt?fmtTime(m.loggedAt):''} · {m.loggedBy}</span></div>
+          <div style={{fontSize:13,fontFamily:MF,marginBottom:6,lineHeight:1.5}}>{m.description}</div>
+          <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>Impact: {m.impact}{accountable&&` · ${accountable}`}{m.resolution&&` · ${m.resolution}`}</div>
+        </div>} style={{marginBottom:8}}/>);
+      })}
+      {(job.mishaps||[]).length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No mishaps logged.</div>}
     </div>
   );
 }
 
-// ── Supervisor & Crew Dashboards ──────────────────────────────────────
+// ── Supervisor / Crew Dashboards ──────────────────────────────────────
 function JobCard({job,crew,onView}){
-  const fs=crew.find(c=>c.id===job.fieldSupId)?.name||'—';
-  return(
-    <Card ch={<div>
-      <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
-        <div style={{fontFamily:BF,fontSize:17,fontWeight:600}}>{job.client}</div>
-        <SPill status={job.status}/>
-      </div>
-      <div style={{fontSize:11,color:C.muted,fontFamily:MF,lineHeight:1.7,marginBottom:10}}>
-        {job.jobType} · {job.siteAddress||'Site TBC'}<br/>
-        Field sup: {fs} · Depart: {job.departureTime?fmtDepart(job.departureTime):'TBC'}
-      </div>
-      <Btn ch="Open →" onClick={onView} full outline/>
-    </div>}/>
-  );
+  return(<Card ch={<div>
+    <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}><div style={{fontFamily:BF,fontSize:17,fontWeight:600}}>{job.client}</div><SPill status={job.status}/></div>
+    <div style={{fontSize:11,color:C.muted,fontFamily:MF,lineHeight:1.7,marginBottom:10}}>{job.jobType} · {job.siteAddress||'TBC'}<br/>Field sup: {crew.find(c=>c.id===job.fieldSupId)?.name||'—'}</div>
+    <Btn ch="Open →" onClick={onView} full outline/>
+  </div>}/>);
 }
-
 function SupervisorDash({user,crew,jobs,onViewJob,onLogout}){
   const mine=jobs.filter(j=>j.crewIds?.includes(user.id)||j.fieldSupId===user.id);
   const active=mine.filter(j=>j.status!=='closed');
   const closed=mine.filter(j=>j.status==='closed');
-  return(
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
-      <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
-      <div style={{flex:1,overflowY:'auto',padding:18}}>
-        {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned to you yet.</div>}
-        {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE JOBS</div>
-          <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
-        {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div>
-          <div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
-      </div>
+  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
+    <div style={{flex:1,overflowY:'auto',padding:18}}>
+      {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned.</div>}
+      {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE</div><div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
+      {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div><div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
     </div>
-  );
+  </div>);
 }
-
 function CrewDash({user,crew,jobs,onViewJob,onLogout}){
   const mine=jobs.filter(j=>j.crewIds?.includes(user.id)&&j.status!=='closed');
-  return(
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
-      <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
-      <div style={{flex:1,overflowY:'auto',padding:18}}>
-        {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned to you.</div>}
-        <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>
-      </div>
+  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>}/>
+    <div style={{flex:1,overflowY:'auto',padding:18}}>
+      {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned.</div>}
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>
     </div>
-  );
+  </div>);
 }
 
 // ── Root App ──────────────────────────────────────────────────────────
@@ -983,25 +828,21 @@ function App(){
   const [user,setUser]=useState(null);
 
   useEffect(()=>{
-    Promise.all([
-      load('nwd-crew',null),
-      load('nwd-tools',null),
-      load('nwd-jobs',[]),
-      load('nwd-damage',[]),
-    ]).then(([c,t,j,d])=>{
+    // Register service worker
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW reg failed:',e));
+    }
+    Promise.all([load('nwd-crew',null),load('nwd-tools',null),load('nwd-jobs',[]),load('nwd-damage',[])]).then(([c,t,j,d])=>{
       const crewData=c||DEFAULT_CREW;
       const toolData=t||DEFAULT_TOOLS;
-      setCrew(crewData); setTools(toolData); setJobs(j); setDamage(d);
-      // Restore session if exists
+      setCrew(crewData);setTools(toolData);setJobs(j);setDamage(d);
       const session=getSession();
       if(session){
         const current=crewData.find(m=>m.id===session.id);
         if(current&&current.active){
           setUser(current);
           const r=current.role;
-          if(r==='admin') setScreen('adminDash');
-          else if(r==='supervisor'||r==='lead') setScreen('supervisorDash');
-          else setScreen('crewDash');
+          setScreen(r==='admin'?'adminDash':r==='supervisor'||r==='lead'?'supervisorDash':'crewDash');
         }
       }
       setReady(true);
@@ -1012,48 +853,50 @@ function App(){
   const saveTools=async d=>{setTools(d);await save('nwd-tools',d);};
   const saveJobs=async d=>{setJobs(d);await save('nwd-jobs',d);};
   const saveDamage=async d=>{setDamage(d);await save('nwd-damage',d);};
-
   const go=(sc,p={})=>{setScreen(sc);setParams(p);};
-
   const logout=()=>{clearSession();setUser(null);go('home');};
-
   const handleSelect=member=>{setUser(member);go('pin',{member});};
-
-  const handlePin=newPin=>{
+  const handlePin=async newPin=>{
     let current=params.member;
     if(newPin&&!params.member.pin){
       const updated=crew.map(c=>c.id===params.member.id?{...c,pin:newPin}:c);
-      saveCrew(updated);
+      await saveCrew(updated);
       current=updated.find(c=>c.id===params.member.id);
       setUser(current);
     }
     setSession(current);
+    // Request notification permission and register push subscription
+    if('Notification' in window && Notification.permission === 'default'){
+      const perm = await Notification.requestPermission();
+      if(perm === 'granted') await registerPush(current.id);
+    } else if(Notification.permission === 'granted'){
+      await registerPush(current.id);
+    }
     const r=current.role;
-    if(r==='admin') go('adminDash');
-    else if(r==='supervisor'||r==='lead') go('supervisorDash');
-    else go('crewDash');
+    go(r==='admin'?'adminDash':r==='supervisor'||r==='lead'?'supervisorDash':'crewDash');
   };
-
-  const createJob=job=>{const updated=[...jobs,job];saveJobs(updated);go('jobView',{jobId:job.id});};
-
+  const createJob=async job=>{
+    const updated=[...jobs,job];
+    await saveJobs(updated);
+    // Notify assigned crew
+    notify(job.crewIds,`New job: ${job.client}`,`Depart ${job.departureTime?fmtDepart(job.departureTime):'TBC'} · ${job.siteAddress}`);
+    go('jobView',{jobId:job.id});
+  };
   const jobBack=()=>{
     if(!user) return go('home');
     const r=user.role;
-    if(r==='admin') go('adminDash');
-    else if(r==='supervisor'||r==='lead') go('supervisorDash');
-    else go('crewDash');
+    go(r==='admin'?'adminDash':r==='supervisor'||r==='lead'?'supervisorDash':'crewDash');
   };
 
   if(!ready) return(
     <div style={{minHeight:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
       <div style={{width:36,height:3,background:C.acc}}/>
       <div style={{fontFamily:BF,fontSize:9,letterSpacing:5,color:C.muted}}>NEEWOODY DISPATCH</div>
-      <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>Loading…</div>
+      <div style={{fontSize:11,color:C.muted,fontFamily:"'Inconsolata',monospace"}}>Loading…</div>
     </div>
   );
 
   const jobProps={user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTools};
-
   return(
     <div style={{minHeight:'100vh',background:C.bg,color:C.txt,fontFamily:MF}}>
       {screen==='home'&&<HomeScreen crew={crew} onSelect={handleSelect}/>}
