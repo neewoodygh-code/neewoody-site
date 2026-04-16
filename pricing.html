@@ -43,7 +43,39 @@ const API_KEY = 'nwd-dispatch-2024';
 const SESSION = 'nwd-pricing-session';
 
 // ── Constants ─────────────────────────────────────────────────────────
-const OVERHEAD_PER_DAY = 274;
+const OVERHEAD_PER_DAY = 274; // Neewoody default — overridden by user config
+
+const DEFAULT_OVERHEAD = {
+  billableDays: 22,
+  running: [
+    { id:'r01', name:'Workshop rent',       amount:800,  hint:'Monthly rent or equivalent if owned' },
+    { id:'r02', name:'Electricity',         amount:300,  hint:'Workshop power — lights, machines, charging' },
+    { id:'r03', name:'Transport / fuel',    amount:400,  hint:'Getting to market, site visits, material runs' },
+    { id:'r04', name:'Phone & internet',    amount:150,  hint:'Business calls, WhatsApp, data' },
+    { id:'r05', name:'Miscellaneous',       amount:200,  hint:'Small consumables, cleaning, unexpected costs' },
+  ],
+  capital: [
+    { id:'c01', name:'Table saw',           cost:15000, lifeYears:7  },
+    { id:'c02', name:'Routers (set)',        cost:5000,  lifeYears:2  },
+    { id:'c03', name:'Spindle moulder',      cost:10000, lifeYears:7  },
+    { id:'c04', name:'Drills & fasteners',  cost:10000, lifeYears:4  },
+    { id:'c05', name:'Bench planer',         cost:7000,  lifeYears:3.5},
+    { id:'c06', name:'Welding machine',      cost:4000,  lifeYears:2  },
+    { id:'c07', name:'Other machinery',      cost:10000, lifeYears:3  },
+  ],
+};
+
+function calcOverheadDay(cfg){
+  const c = cfg || DEFAULT_OVERHEAD;
+  const runningTotal = (c.running||[]).reduce((s,r)=>s+(+r.amount||0), 0);
+  const capitalMonthly = (c.capital||[]).reduce((s,cap)=>{
+    const yrs = +cap.lifeYears||1;
+    return s + (+cap.cost||0) / (yrs * 12);
+  }, 0);
+  const totalMonthly = runningTotal + capitalMonthly;
+  const days = Math.max(1, +c.billableDays||22);
+  return Math.round(totalMonthly / days);
+}
 
 const TIERS = [
   { id:'basic',    label:'Basic Build',    sub:'Just the essentials',     mult:1.45, nuerRate:200 },
@@ -141,10 +173,11 @@ const setSession = u => localStorage.setItem(SESSION,JSON.stringify({id:u.id,nam
 const clearSession = () => localStorage.removeItem(SESSION);
 
 // ── Pricing Engine ────────────────────────────────────────────────────
-function calcQuote(q){
+function calcQuote(q, overheadCfg){
   const tier = TIERS.find(t=>t.id===q.tierId) || TIERS[1];
   const totalDays = (q.workshopDays||0)+(q.siteDays||0);
-  const overhead  = OVERHEAD_PER_DAY * totalDays;
+  const dayRate = calcOverheadDay(overheadCfg);
+  const overhead  = dayRate * totalDays;
   let labour = 0;
   (q.crew||[]).forEach(r=>{ labour += (LABOUR_RATES[r.roleId]||0)*(r.count||0)*(r.days||totalDays); });
   if(q.includeNuer) labour += tier.nuerRate*(q.nuerDays||totalDays);
@@ -158,7 +191,7 @@ function calcQuote(q){
   const quotedPrice = rawCost*tier.mult*addOnMult;
   const grossMargin = quotedPrice-rawCost;
   const marginPct   = quotedPrice>0?(grossMargin/quotedPrice)*100:0;
-  return {overhead,labour,matAmt,logistics,rawCost,tier,addOnMult,quotedPrice,grossMargin,marginPct};
+  return {overhead,labour,matAmt,logistics,rawCost,tier,addOnMult,quotedPrice,grossMargin,marginPct,dayRate};
 }
 
 function calcActual(exp=[]){
@@ -321,8 +354,137 @@ function PinScreen({user,onSuccess,onBack}){
   );
 }
 
+// ── Overhead Settings Screen ───────────────────────────────────────────
+function OverheadSettings({cfg, onSave, onBack}){
+  const [c, setC] = useState(() => ({
+    billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
+    running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
+    capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
+  }));
+  const [saving, setSaving] = useState(false);
+  const updRun = (id,u) => setC(prev=>({...prev, running:prev.running.map(r=>r.id===id?{...r,...u}:r)}));
+  const updCap = (id,u) => setC(prev=>({...prev, capital:prev.capital.map(x=>x.id===id?{...x,...u}:x)}));
+  const addRun = () => setC(prev=>({...prev, running:[...prev.running,{id:uid(),name:'',amount:0,hint:''}]}));
+  const addCap = () => setC(prev=>({...prev, capital:[...prev.capital,{id:uid(),name:'',cost:0,lifeYears:3}]}));
+  const remRun = id => setC(prev=>({...prev, running:prev.running.filter(r=>r.id!==id)}));
+  const remCap = id => setC(prev=>({...prev, capital:prev.capital.filter(x=>x.id!==id)}));
+  const resetDefaults = () => setC({
+    billableDays: DEFAULT_OVERHEAD.billableDays,
+    running: DEFAULT_OVERHEAD.running.map(r=>({...r})),
+    capital: DEFAULT_OVERHEAD.capital.map(x=>({...x})),
+  });
+
+  const runTotal  = c.running.reduce((s,r)=>s+(+r.amount||0),0);
+  const capMonthly = c.capital.reduce((s,x)=>s+(+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12),0);
+  const totalMonthly = runTotal + capMonthly;
+  const dayRate = Math.round(totalMonthly / Math.max(1,+c.billableDays||22));
+
+  const save = async () => {
+    setSaving(true);
+    await onSave(c);
+    setSaving(false);
+    onBack();
+  };
+
+  return(
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
+      <Hdr title="Overhead Settings" sub="Your monthly costs → daily rate" onBack={onBack}
+        right={<div style={{display:'flex',gap:8}}>
+          <Btn ch="Reset defaults" onClick={resetDefaults} size="sm" outline/>
+          <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
+        </div>}/>
+      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
+
+        {/* Live rate display */}
+        <div style={{background:S.dark,borderRadius:10,padding:'16px 20px',marginBottom:18,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:'rgba(255,255,255,.45)',textTransform:'uppercase',marginBottom:4}}>Your overhead rate</div>
+            <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:700,color:'#c9955f'}}>{GHS(dayRate)}<span style={{fontFamily:FM,fontSize:'.82rem',color:'rgba(255,255,255,.4)',marginLeft:4}}>/day</span></div>
+            <div style={{fontSize:'.72rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginTop:4}}>{GHS(Math.round(totalMonthly))}/month ÷ {c.billableDays} billable days</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:'.68rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginBottom:3}}>Running costs</div>
+            <div style={{fontSize:'.85rem',fontFamily:FM,color:'rgba(255,255,255,.65)'}}>{GHS(runTotal)}/mo</div>
+            <div style={{fontSize:'.68rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginTop:6,marginBottom:3}}>Capital reserve</div>
+            <div style={{fontSize:'.85rem',fontFamily:FM,color:'rgba(255,255,255,.65)'}}>{GHS(Math.round(capMonthly))}/mo</div>
+          </div>
+        </div>
+
+        {/* Billable days */}
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Billable days per month</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>How many days per month do you actually work on paying jobs? Most small shops manage 18–22. Be honest — this divides your total overhead into a daily rate.</div>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <NumInp value={c.billableDays} onChange={e=>setC(prev=>({...prev,billableDays:Math.min(30,Math.max(1,+e.target.value||22))}))} style={{maxWidth:100}}/>
+            <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FM}}>days / month</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        {/* Running costs */}
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Monthly running costs</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>Fixed costs that happen every month whether you have jobs or not.</div>
+          <div style={{display:'grid',gridTemplateColumns:'auto 1fr 80px 24px',gap:8,alignItems:'center',marginBottom:6,paddingBottom:6,borderBottom:`1px solid ${S.border}`}}>
+            <div/><div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>Item</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>GH₵/mo</div><div/>
+          </div>
+          {c.running.map(r=>(
+            <div key={r.id} style={{display:'grid',gridTemplateColumns:'1fr 80px 24px',gap:8,alignItems:'start',marginBottom:10}}>
+              <div>
+                <CtrlInp value={r.name} onChange={e=>updRun(r.id,{name:e.target.value})} placeholder="Cost item name" style={{marginBottom:4}}/>
+                {r.hint&&<div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM}}>{r.hint}</div>}
+              </div>
+              <NumInp value={r.amount} onChange={e=>updRun(r.id,{amount:+e.target.value||0})}/>
+              <button onClick={()=>remRun(r.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem',paddingTop:6}}>✕</button>
+            </div>
+          ))}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${S.border}`}}>
+            <Btn ch="+ Add item" onClick={addRun} size="sm" outline/>
+            <span style={{fontFamily:FM,fontSize:'.82rem',fontWeight:600,color:S.dark}}>{GHS(runTotal)}</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        {/* Capital reserve */}
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Capital replacement reserve</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>
+            Your tools and machines will need replacing. Set aside a little from every job so when the time comes, you're not scrambling. Enter what each item would cost to replace and how long it should last.
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 80px 70px 60px 24px',gap:6,alignItems:'center',marginBottom:6,paddingBottom:6,borderBottom:`1px solid ${S.border}`}}>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>Tool / machine</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>Replace (GH₵)</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'center'}}>Years</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>Mo. reserve</div>
+            <div/>
+          </div>
+          {c.capital.map(x=>{
+            const moReserve = (+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12);
+            return(
+              <div key={x.id} style={{display:'grid',gridTemplateColumns:'1fr 80px 70px 60px 24px',gap:6,alignItems:'center',marginBottom:8}}>
+                <CtrlInp value={x.name} onChange={e=>updCap(x.id,{name:e.target.value})} placeholder="Tool name"/>
+                <NumInp value={x.cost} onChange={e=>updCap(x.id,{cost:+e.target.value||0})}/>
+                <NumInp value={x.lifeYears} onChange={e=>updCap(x.id,{lifeYears:+e.target.value||1})} placeholder="yrs"/>
+                <span style={{fontFamily:FM,fontSize:'.72rem',color:S.muted,textAlign:'right'}}>{GHS(Math.round(moReserve))}</span>
+                <button onClick={()=>remCap(x.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem'}}>✕</button>
+              </div>
+            );
+          })}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${S.border}`}}>
+            <Btn ch="+ Add tool" onClick={addCap} size="sm" outline/>
+            <span style={{fontFamily:FM,fontSize:'.82rem',fontWeight:600,color:S.dark}}>{GHS(Math.round(capMonthly))}/mo</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <div style={{padding:'12px 14px',background:S.accentLt,border:`1.5px solid ${S.border}`,borderRadius:8,fontSize:'.75rem',color:S.mid,fontFamily:FB,lineHeight:1.7}}>
+          <strong style={{color:S.accentDk}}>These are your costs, not the client's problem.</strong> The daily rate feeds quietly into every quote — clients see one total price. This just makes sure that price actually covers what it needs to cover.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────
-function Dashboard({quotes,onNew,onOpen,onLogout}){
+function Dashboard({quotes,onNew,onOpen,onSettings,onLogout}){
   const [filter,setFilter]=useState('all');
   const filtered=filter==='all'?quotes:quotes.filter(q=>q.status===filter);
   return(
@@ -330,6 +492,7 @@ function Dashboard({quotes,onNew,onOpen,onLogout}){
       <Hdr title="Pricing" sub="Neewoody Custom Woodwork"
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
           <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
+          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1.5px solid ${S.border}`,borderRadius:6,color:S.muted,cursor:'pointer',fontFamily:FM,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
           <button onClick={onLogout} style={{background:'transparent',border:'none',color:S.muted,fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Exit</button>
         </div>}/>
       <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
@@ -392,13 +555,13 @@ function newQuote(refNum){
 }
 
 // ── Quote Editor ───────────────────────────────────────────────────────
-function QuoteEditor({quote:initial,onSave,onBack}){
+function QuoteEditor({quote:initial,overheadCfg,onSave,onBack}){
   const [q,setQ]=useState(initial);
   const [tab,setTab]=useState('setup');
   const [saving,setSaving]=useState(false);
   const upd=u=>setQ(prev=>({...prev,...u}));
   const totalDays=(q.workshopDays||0)+(q.siteDays||0);
-  const calc=useMemo(()=>calcQuote(q),[q]);
+  const calc=useMemo(()=>calcQuote(q,overheadCfg),[q,overheadCfg]);
   const save=async()=>{setSaving(true);await onSave(q);setSaving(false);};
   const sm=STATUS_META[q.status]||STATUS_META.draft;
   const TABS=[
@@ -462,7 +625,7 @@ function SetupTab({q,upd,totalDays}){
           </div>
         </div>
         {totalDays>0&&<div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM,padding:'6px 10px',background:S.bgAlt,borderRadius:4}}>
-          {totalDays} days total · Overhead: {GHS(274*totalDays)}
+          {totalDays} days total · Overhead: {GHS(calc.overhead)} ({GHS(calc.dayRate)}/day)
         </div>}
       </div>}/>
 
@@ -711,7 +874,7 @@ function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
       <Card ch={<div>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Cost breakdown</div>
         <Row label="Overhead" value={GHS(calc.overhead)}/>
-        <Row label={`  ${totalDays} days × GH₵274`} value="" indent/>
+        <Row label={`  ${totalDays} days × ${GHS(calc.dayRate)}/day`} value="" indent/>
         <Row label="Labour" value={GHS(calc.labour)}/>
         <Row label="Materials" value={GHS(calc.matAmt)}/>
         <Row label="Logistics" value={GHS(calc.logistics)}/>
@@ -868,16 +1031,18 @@ function App(){
   const [ready,setReady]=useState(false);
   const [crew,setCrew]=useState([]);
   const [quotes,setQuotes]=useState([]);
+  const [overheadCfg,setOverheadCfg]=useState(null);
   const [screen,setScreen]=useState('loading');
   const [user,setUser]=useState(null);
   const [activeId,setActiveId]=useState(null);
 
   useEffect(()=>{
-    Promise.all([loadKV('nwd-crew',null),loadKV('nwd-quotes',[])])
-      .then(([c,q])=>{
+    Promise.all([loadKV('nwd-crew',null),loadKV('nwd-quotes',[]),loadKV('nwd-overhead',null)])
+      .then(([c,q,oh])=>{
         const crewData=c||[];
         setCrew(crewData);
         setQuotes(q||[]);
+        setOverheadCfg(oh||null);
         const admin=crewData.find(m=>m.role==='admin'&&m.active);
         if(!admin){setScreen('no-admin');setReady(true);return;}
         const session=getSession();
@@ -890,6 +1055,7 @@ function App(){
 
   const admin=crew.find(m=>m.role==='admin'&&m.active);
   const saveQuotes=async updated=>{setQuotes(updated);await saveKV('nwd-quotes',updated);};
+  const saveOverhead=async cfg=>{setOverheadCfg(cfg);await saveKV('nwd-overhead',cfg);};
 
   const handlePin=async newPin=>{
     let current=admin;
@@ -942,12 +1108,14 @@ function App(){
 
   if(screen==='login'&&admin) return <PinScreen user={admin} onSuccess={handlePin} onBack={null}/>;
 
-  if(screen==='dashboard') return <Dashboard quotes={quotes} onNew={createNew} onOpen={openQuote} onLogout={logout}/>;
+  if(screen==='dashboard') return <Dashboard quotes={quotes} onNew={createNew} onOpen={openQuote} onSettings={()=>setScreen('settings')} onLogout={logout}/>;
+
+  if(screen==='settings') return <OverheadSettings cfg={overheadCfg} onSave={saveOverhead} onBack={()=>setScreen('dashboard')}/>;
 
   if(screen==='editor'){
     const q=quotes.find(x=>x.id===activeId);
     if(!q) return null;
-    return <QuoteEditor quote={q} onSave={async updated=>{await saveQuote(updated);}} onBack={()=>setScreen('dashboard')}/>;
+    return <QuoteEditor quote={q} overheadCfg={overheadCfg} onSave={async updated=>{await saveQuote(updated);}} onBack={()=>setScreen('dashboard')}/>;
   }
   return null;
 }
