@@ -497,13 +497,6 @@ select {
         <a href="kitchens.html">Kitchens</a>
         <a href="portfolio.html">Portfolio</a>
         <a href="contact.html">Contact</a>
-        <div class="nav-tools-wrap">
-          <span class="nav-tools-trigger">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-            Tools ▾
-          </span>
-          <div class="nav-tools-dropdown">
-            <div class="nav-tools-dropdown-label">Carpenter Tools</div>
             <a href="cutlist.html">
               Wardrobe Cutlist
               <span class="tool-tag">Alpha</span>
@@ -530,7 +523,8 @@ select {
   <a href="kitchens.html">Kitchens</a>
   <a href="portfolio.html">Portfolio</a>
   <a href="contact.html">Contact</a>
-  <a href="cutlist.html" style="color:var(--clr-accent)">⚒ Wardrobe Cutlist (Alpha)</a>
+      <div class="mobile-nav-section-label">For Carpenters</div>
+    <a href="cutlist.html">&#9874; Wardrobe Cutlist <span class="mobile-tool-tag">Alpha</span></a>
   <div class="mobile-nav-ctas">
     <a href="https://wa.me/233244633464" class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
     <a href="contact.html" class="btn btn-outline">Request a Quote</a>
@@ -820,7 +814,8 @@ select {
           <li><a href="portfolio.html">Portfolio</a></li>
           <li><a href="contact.html">Contact Us</a></li>
           <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
-          <li><a href="cutlist.html">Cutlist Calculator</a></li>
+          <li>    <div class="mobile-nav-section-label">For Carpenters</div>
+    <a href="cutlist.html">&#9874; Wardrobe Cutlist <span class="mobile-tool-tag">Alpha</span></a></li>
           <li><a href="privacy.html">Privacy Policy</a></li>
         </ul>
       </div>
@@ -886,7 +881,8 @@ function sync(){
   S.w=gi('i-w',2400)*_um;S.h=gi('i-h',2100)*_um;S.d=gi('i-d',580)*_um;
   S.thick=gi('i-thick',18);S.backType=gv('i-back')||'inset';S.backThick=gi('i-backthick',3);
   S.clear=gi('i-clear',2);S.overlay=gi('i-overlay',11);S.doorThick=gi('i-doorthick',18);
-  S.dgap=gi('i-dgap',2);S.hinge=S.clear;  // hinge gap = edge clearance (consolidated)S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
+  S.dgap=gi('i-dgap',2);S.hinge=S.clear;  // hinge gap = edge clearance (consolidated)
+  S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
   S.tkH=gi('tk-h',100);S.tkStyle=gv('tk-style')||'setback';S.tkSetback=gi('tk-setback',60);
   S.tkThick=gi('tk-thick',18);S.tkGap=gi('tk-gap',3);
   S.tkMrMode=gv('tk-mr-mode')||'auto';S.tkMrQty=gi('tk-mr-qty',3);
