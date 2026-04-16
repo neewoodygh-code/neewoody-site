@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0c0b09"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="NW Pricing"/>
+  <title>Neewoody Pricing</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#0c0b09;color:#e2d9cc;-webkit-tap-highlight-color:transparent;}
+    input,select,textarea,button{font-family:inherit;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:#0c0b09;}
+    ::-webkit-scrollbar-thumb{background:#262118;}
+    input[type=number]::-webkit-inner-spin-button{opacity:.4;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+
+// ── Config ────────────────────────────────────────────────────────────
+const API     = 'https://neewoodygh.com/api';
+const API_KEY = 'nwd-dispatch-2024';
+const SESSION = 'nwd-pricing-session';
+
+// ── Constants ─────────────────────────────────────────────────────────
+const OVERHEAD_PER_DAY = 274;
+
+const TIERS = [
+  { id:'basic',    label:'Basic Build',     sub:'Just the essentials',    mult:1.45, nuerRate:200  },
+  { id:'standard', label:'Standard Build',  sub:'Functional & presentable',mult:1.65, nuerRate:400 },
+  { id:'premium',  label:'Premium',         sub:'We take our time',        mult:1.90, nuerRate:600 },
+  { id:'luxury',   label:'Luxury',          sub:'At your beck and call',   mult:2.10, nuerRate:700 },
+];
+
+const ADDONS = [
+  { id:'rush',         label:'Rush',           pct:20 },
+  { id:'customDesign', label:'Custom design',  pct:12 },
+  { id:'cnc',          label:'CNC / carved',   pct:18 },
+  { id:'remoteInstall',label:'Remote install', pct:8  },
+];
+
+const LABOUR_RATES = { supervisor:200, lead:150, hand:100, trainee:50 };
+const LABOUR_ROLES = [
+  { id:'supervisor', label:'Supervisor (Kevin)' },
+  { id:'lead',       label:'Lead apprentice' },
+  { id:'hand',       label:'Work hand' },
+  { id:'trainee',    label:'Trainee' },
+];
+
+const DEFAULT_MATERIALS_CAB = [
+  { id:'m01', name:'Boards',                  cab:true,  hw:false },
+  { id:'m02', name:'Back panels',             cab:true,  hw:false },
+  { id:'m03', name:'Edge band',               cab:true,  hw:false },
+  { id:'m04', name:'Edge banding application',cab:true,  hw:false },
+  { id:'m05', name:'Cutting (machine shop)',  cab:true,  hw:false },
+  { id:'m06', name:'Timber',                  cab:false, hw:true  },
+  { id:'m07', name:'Stain',                   cab:false, hw:true  },
+  { id:'m08', name:'Finishes',                cab:false, hw:true  },
+  { id:'m09', name:'Joinery hardware',        cab:false, hw:true  },
+  { id:'m10', name:'Fixtures',                cab:true,  hw:true  },
+  { id:'m11', name:'Finishing materials',     cab:true,  hw:true  },
+  { id:'m12', name:'Abrasives',               cab:true,  hw:true  },
+  { id:'m13', name:'Consumables',             cab:true,  hw:true  },
+  { id:'m14', name:'Protective packaging',    cab:true,  hw:true  },
+  { id:'m15', name:'Wood filler / grain filler', cab:false, hw:true },
+];
+
+const OPTIONAL_MATERIALS = [
+  { id:'o01', name:'Stone material' },
+  { id:'o02', name:'Stone fabrication' },
+  { id:'o03', name:'Templates / jigs' },
+  { id:'o04', name:'Glass' },
+];
+
+const STATUS_META = {
+  draft:    { label:'Draft',    color:'#6b6459' },
+  sent:     { label:'Sent',     color:'#c8820a' },
+  accepted: { label:'Accepted', color:'#3a9457' },
+  declined: { label:'Declined', color:'#b8534a' },
+};
+
+const EXP_CATS = ['materials','labour','logistics','overhead','other'];
+
+// ── Utils ─────────────────────────────────────────────────────────────
+const uid  = () => Math.random().toString(36).slice(2,8).toUpperCase();
+const GHS  = n  => `GH₵ ${(+n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const pct  = n  => `${n>0?'+':''}${n}%`;
+const fmtDate = iso => new Date(iso).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'});
+
+async function apiFetch(path, method='GET', body){
+  const r = await fetch(`${API}${path}`,{method,headers:{'X-NWD-Key':API_KEY,...(body?{'Content-Type':'application/json'}:{})}, ...(body?{body:JSON.stringify(body)}:{})});
+  return r.json();
+}
+const loadKV  = async (key,fb) => { try{ const d=await apiFetch(`/${key}`); return d!==null?d:fb; }catch{ return fb; } };
+const saveKV  = async (key,data) => { try{ await apiFetch(`/${key}`,'PUT',data); }catch(e){ console.error(e); } };
+
+const getSession = () => { try{ return JSON.parse(localStorage.getItem(SESSION)); }catch{ return null; } };
+const setSession = u => localStorage.setItem(SESSION,JSON.stringify({id:u.id,name:u.name,role:u.role}));
+const clearSession = () => localStorage.removeItem(SESSION);
+
+// ── Pricing Engine ────────────────────────────────────────────────────
+function calcQuote(q) {
+  const tier    = TIERS.find(t=>t.id===q.tierId) || TIERS[1];
+  const totalDays = (q.workshopDays||0) + (q.siteDays||0);
+
+  const overhead = OVERHEAD_PER_DAY * totalDays;
+
+  let labour = 0;
+  (q.crew||[]).forEach(r => {
+    labour += (LABOUR_RATES[r.roleId]||0) * (r.count||0) * (r.days||totalDays);
+  });
+  if(q.includeNuer) labour += tier.nuerRate * (q.nuerDays||totalDays);
+
+  const matTotal = (q.materials||[]).filter(m=>m.on).reduce((s,m)=>s+(+m.amount||0),0);
+
+  const { primary=0, secondary=0, secondaryReturn=false, siteVisits=0, siteVisitCost=0 } = q.logistics||{};
+  const logistics = (+primary) + (+secondary)*(secondaryReturn?2:1) + (+siteVisits)*(+siteVisitCost);
+
+  const rawCost = overhead + labour + matTotal + logistics;
+
+  let addOnMult = 1;
+  Object.entries(q.addOns||{}).forEach(([id,on]) => {
+    if(on){ const a=ADDONS.find(x=>x.id===id); if(a) addOnMult *= 1+(a.pct/100); }
+  });
+
+  const quotedPrice = rawCost * tier.mult * addOnMult;
+  const grossMargin = quotedPrice - rawCost;
+  const marginPct   = quotedPrice>0 ? (grossMargin/quotedPrice)*100 : 0;
+
+  return { overhead, labour, matTotal, logistics, rawCost, tier, addOnMult, quotedPrice, grossMargin, marginPct };
+}
+
+function calcActual(expenditure=[]) {
+  return EXP_CATS.reduce((acc,cat)=>{
+    acc[cat] = expenditure.filter(e=>e.category===cat).reduce((s,e)=>s+(+e.amount||0),0);
+    return acc;
+  },{});
+}
+
+// ── Design ────────────────────────────────────────────────────────────
+const C = {bg:'#0c0b09',s1:'#171512',s2:'#1d1b17',s3:'#221f1a',acc:'#c97c0a',ok:'#3a9457',err:'#b8534a',warn:'#c8820a',txt:'#e2d9cc',muted:'#6b6459',bdr:'#262118'};
+const BF = "'Barlow Condensed',sans-serif";
+const MF = "'Inconsolata',monospace";
+
+const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
+  const p=size==='lg'?'16px 20px':size==='sm'?'5px 10px':'8px 14px';
+  const fs=size==='lg'?18:size==='sm'?10:12;
+  const base={border:'none',borderRadius:2,padding:p,fontFamily:BF,fontWeight:700,fontSize:fs,letterSpacing:1.5,cursor:disabled?'not-allowed':'pointer',textTransform:'uppercase',width:full?'100%':'auto',...st};
+  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||C.muted,border:`1px solid ${C.bdr}`,opacity:disabled?.4:1}}>{ch}</button>;
+  return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?C.s2:(color||C.acc),color:disabled?C.muted:C.bg,opacity:disabled?.6:1}}>{ch}</button>;
+};
+const Card=({ch,style:st={}})=><div style={{background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'12px 14px',...st}}>{ch}</div>;
+const Lbl=({ch})=><div style={{fontSize:9,letterSpacing:2,color:C.muted,textTransform:'uppercase',marginBottom:5,fontFamily:MF}}>{ch}</div>;
+const Inp=({style:st={},...p})=><input style={{background:C.s2,border:`1px solid ${C.bdr}`,borderRadius:2,color:C.txt,padding:'8px 10px',fontFamily:MF,fontSize:13,outline:'none',width:'100%',...st}} {...p}/>;
+const Sel=({children,style:st={},...p})=><select style={{background:C.s2,border:`1px solid ${C.bdr}`,borderRadius:2,color:C.txt,padding:'8px 10px',fontFamily:MF,fontSize:13,outline:'none',width:'100%',appearance:'none',...st}} {...p}>{children}</select>;
+const TA=({style:st={},...p})=><textarea style={{background:C.s2,border:`1px solid ${C.bdr}`,borderRadius:2,color:C.txt,padding:'8px 10px',fontFamily:MF,fontSize:13,outline:'none',width:'100%',resize:'vertical',...st}} {...p}/>;
+
+const Hdr=({title,sub,onBack,right})=>(
+  <div style={{padding:'12px 18px',borderBottom:`1px solid ${C.bdr}`,flexShrink:0,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+    <div style={{display:'flex',alignItems:'center',gap:10}}>
+      {onBack&&<button onClick={onBack} style={{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:11,fontFamily:MF}}>← back</button>}
+      <div>
+        <div style={{fontFamily:BF,fontSize:15,fontWeight:700,letterSpacing:2}}>{title}</div>
+        {sub&&<div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:2}}>{sub}</div>}
+      </div>
+    </div>
+    {right||<div/>}
+  </div>
+);
+
+const Row=({label,value,bold,color,indent})=>(
+  <div style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:`1px solid ${C.bdr}`,paddingLeft:indent?12:0}}>
+    <span style={{fontSize:12,fontFamily:MF,color:C.muted}}>{label}</span>
+    <span style={{fontSize:12,fontFamily:MF,fontWeight:bold?600:400,color:color||C.txt}}>{value}</span>
+  </div>
+);
+
+const MarginBar=({pct})=>{
+  const color = pct>=35?C.ok:pct>=20?C.warn:C.err;
+  return(
+    <div style={{marginTop:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+        <span style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>GROSS MARGIN</span>
+        <span style={{fontSize:12,fontFamily:MF,color,fontWeight:600}}>{pct.toFixed(1)}%</span>
+      </div>
+      <div style={{height:4,background:C.s2,borderRadius:2,overflow:'hidden'}}>
+        <div style={{height:'100%',width:`${Math.min(pct,100)}%`,background:color,transition:'width .3s,background .3s'}}/>
+      </div>
+      {pct<30&&<div style={{fontSize:10,color:C.warn,fontFamily:MF,marginTop:4}}>⚠ Margin below 30% — consider raising tier or add-ons</div>}
+    </div>
+  );
+};
+
+// ── PIN Screen ────────────────────────────────────────────────────────
+function PinScreen({user,onSuccess,onBack}){
+  const isFirst=!user.pin;
+  const [step,setStep]=useState('enter');
+  const [p1,setP1]=useState('');
+  const [p2,setP2]=useState('');
+  const [shake,setShake]=useState(false);
+  const cur=step==='confirm'?p2:p1;
+  const press=d=>{
+    if(step==='enter'){
+      if(p1.length>=4)return;
+      const np=p1+d; setP1(np);
+      if(np.length===4){
+        if(isFirst) setStep('confirm');
+        else if(np===user.pin) onSuccess();
+        else{setShake(true);setTimeout(()=>{setP1('');setShake(false);},700);}
+      }
+    } else {
+      if(p2.length>=4)return;
+      const np=p2+d; setP2(np);
+      if(np.length===4){
+        if(np===p1) onSuccess(np);
+        else{setShake(true);setTimeout(()=>{setP2('');setShake(false);},700);}
+      }
+    }
+  };
+  const del=()=>{if(step==='enter')setP1(p=>p.slice(0,-1));else setP2(p=>p.slice(0,-1));};
+  return(
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{width:'100%',maxWidth:280}}>
+        <div style={{width:28,height:2,background:C.acc,margin:'0 auto 24px'}}/>
+        <div style={{fontFamily:BF,fontSize:9,letterSpacing:5,color:C.muted,textAlign:'center',marginBottom:6}}>{user.name.toUpperCase()}</div>
+        <div style={{fontSize:11,color:C.muted,textAlign:'center',marginBottom:30,fontFamily:MF}}>
+          {isFirst?(step==='enter'?'Set your admin PIN':'Confirm PIN'):'Admin PIN'}
+        </div>
+        <div style={{display:'flex',gap:14,justifyContent:'center',marginBottom:34,transform:shake?'translateX(6px)':'none',transition:'transform .08s'}}>
+          {[0,1,2,3].map(i=><div key={i} style={{width:10,height:10,borderRadius:'50%',background:cur.length>i?(shake?C.err:C.acc):C.bdr,transition:'background .15s'}}/>)}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}}>
+          {[1,2,3,4,5,6,7,8,9].map(n=>(
+            <button key={n} onClick={()=>press(String(n))} style={{background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,color:C.txt,padding:14,fontFamily:MF,fontSize:18,cursor:'pointer'}}>{n}</button>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+          <div/>
+          <button onClick={()=>press('0')} style={{background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,color:C.txt,padding:14,fontFamily:MF,fontSize:18,cursor:'pointer'}}>0</button>
+          <button onClick={del} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,padding:14,fontSize:14,cursor:'pointer'}}>⌫</button>
+        </div>
+        {onBack&&<button onClick={()=>{if(step==='confirm'){setStep('enter');setP2('');}else onBack();}} style={{display:'block',width:'100%',marginTop:16,background:'transparent',border:'none',color:C.muted,fontSize:11,cursor:'pointer',fontFamily:MF}}>← {step==='confirm'?'re-enter':'back'}</button>}
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────
+function Dashboard({quotes,onNew,onOpen,onLogout}){
+  const [filter,setFilter]=useState('all');
+  const filtered=filter==='all'?quotes:quotes.filter(q=>q.status===filter);
+  const total=q=>calcQuote(q).quotedPrice;
+  return(
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+      <Hdr title="PRICING" sub="Neewoody Custom Woodwork"
+        right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <Btn ch="+ New Quote" onClick={onNew} size="sm"/>
+          <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>
+        </div>}/>
+      <div style={{display:'flex',gap:0,borderBottom:`1px solid ${C.bdr}`,overflowX:'auto',flexShrink:0}}>
+        {['all',...Object.keys(STATUS_META)].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:filter===f?`2px solid ${C.acc}`:'2px solid transparent',color:filter===f?C.txt:C.muted,padding:'8px 14px',fontFamily:BF,fontSize:11,letterSpacing:2,cursor:'pointer',whiteSpace:'nowrap',textTransform:'uppercase'}}>
+            {f==='all'?'All':STATUS_META[f].label}
+          </button>
+        ))}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:18}}>
+        {filtered.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No quotes yet.</div>}
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {filtered.map(q=>{
+            const calc=calcQuote(q);
+            const sm=STATUS_META[q.status]||STATUS_META.draft;
+            return(
+              <Card key={q.id} ch={<div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:4}}>
+                  <div>
+                    <div style={{fontFamily:BF,fontSize:18,fontWeight:700,letterSpacing:.5}}>{q.client||'Untitled'}</div>
+                    <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
+                  </div>
+                  <span style={{fontSize:9,letterSpacing:1.5,color:sm.color,fontFamily:BF,fontWeight:700}}>{sm.label}</span>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                  <div>
+                    <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
+                    <div style={{fontFamily:BF,fontSize:22,fontWeight:700,color:C.acc,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
+                  </div>
+                  <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                </div>
+              </div>}/>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── New / Edit Quote ──────────────────────────────────────────────────
+function newQuote(refNum){
+  return {
+    id: uid(),
+    refId: `NWD-${String(refNum).padStart(3,'0')}`,
+    client:'', jobType:'cabinetry', status:'draft',
+    createdAt: new Date().toISOString(),
+    tierId:'standard',
+    workshopDays:0, siteDays:0,
+    crew:[ {id:uid(),roleId:'supervisor',count:1,days:null}, {id:uid(),roleId:'hand',count:1,days:null} ],
+    includeNuer:true, nuerDays:null,
+    materials: DEFAULT_MATERIALS_CAB.map(m=>({...m,on:m.cab,amount:''})),
+    optionals: OPTIONAL_MATERIALS.map(m=>({...m,on:false,amount:''})),
+    addOns:{},
+    logistics:{ primary:'', secondary:'', secondaryReturn:false, siteVisits:'', siteVisitCost:'' },
+    expenditure:[],
+    notes:'',
+    dispatchJobId:null,
+  };
+}
+
+function QuoteEditor({quote:initial,quotes,onSave,onBack}){
+  const [q,setQ]=useState(initial);
+  const [tab,setTab]=useState('setup');
+  const [saving,setSaving]=useState(false);
+
+  const upd=u=>setQ(prev=>({...prev,...u}));
+  const totalDays=(q.workshopDays||0)+(q.siteDays||0);
+  const calc=useMemo(()=>calcQuote(q),[q]);
+
+  const save=async(status)=>{
+    setSaving(true);
+    const updated={...q,status:status||q.status};
+    await onSave(updated);
+    setSaving(false);
+  };
+
+  const TABS=[{id:'setup',l:'Setup'},{id:'materials',l:'Materials'},{id:'logistics',l:'Logistics'},{id:'summary',l:'Summary'},{id:'costs',l:'Actual Costs'},{id:'notes',l:'Notes'}];
+
+  const sm=STATUS_META[q.status]||STATUS_META.draft;
+
+  return(
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+      <Hdr title={q.refId} sub={q.client||'New quote'}
+        onBack={onBack}
+        right={<div style={{display:'flex',gap:6,alignItems:'center'}}>
+          <span style={{fontSize:9,letterSpacing:1.5,color:sm.color,fontFamily:BF,fontWeight:700}}>{sm.label}</span>
+          <Btn ch={saving?'Saving…':'Save'} onClick={()=>save()} disabled={saving} size="sm"/>
+        </div>}/>
+      <div style={{display:'flex',borderBottom:`1px solid ${C.bdr}`,overflowX:'auto',flexShrink:0}}>
+        {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:tab===t.id?`2px solid ${C.acc}`:'2px solid transparent',color:tab===t.id?C.txt:C.muted,padding:'8px 12px',fontFamily:BF,fontSize:11,letterSpacing:1.5,cursor:'pointer',whiteSpace:'nowrap',textTransform:'uppercase'}}>{t.l}</button>)}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:18}}>
+        {tab==='setup'&&<SetupTab q={q} upd={upd} totalDays={totalDays}/>}
+        {tab==='materials'&&<MaterialsTab q={q} upd={upd}/>}
+        {tab==='logistics'&&<LogisticsTab q={q} upd={upd}/>}
+        {tab==='summary'&&<SummaryTab q={q} calc={calc} totalDays={totalDays} onStatusChange={s=>{upd({status:s});}} onSave={save}/>}
+        {tab==='costs'&&<CostsTab q={q} upd={upd} calc={calc}/>}
+        {tab==='notes'&&<div><Lbl ch="Notes"/><TA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
+      </div>
+    </div>
+  );
+}
+
+function SetupTab({q,upd,totalDays}){
+  const addCrewRow=()=>upd({crew:[...q.crew,{id:uid(),roleId:'hand',count:1,days:null}]});
+  const updCrew=(id,u)=>upd({crew:q.crew.map(r=>r.id===id?{...r,...u}:r)});
+  const remCrew=id=>upd({crew:q.crew.filter(r=>r.id!==id)});
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:16}}>
+      {/* Client + type */}
+      <div><Lbl ch="Client name"/><Inp value={q.client} onChange={e=>upd({client:e.target.value})} placeholder="e.g. Mensah Residence"/></div>
+      <div>
+        <Lbl ch="Job type"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {[{v:'cabinetry',l:'Cabinetry'},{v:'hardwood',l:'Hardwood / General'}].map(({v,l})=>(
+            <button key={v} onClick={()=>upd({jobType:v,materials:DEFAULT_MATERIALS_CAB.map(m=>({...m,on:v==='cabinetry'?m.cab:m.hw,amount:''})),optionals:OPTIONAL_MATERIALS.map(m=>({...m,on:false,amount:''})) })} style={{background:q.jobType===v?C.acc:C.s2,color:q.jobType===v?C.bg:C.muted,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'10px 8px',fontFamily:BF,fontSize:13,letterSpacing:1,cursor:'pointer'}}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Days */}
+      <div>
+        <Lbl ch="Job duration"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          <div><div style={{fontSize:10,color:C.muted,fontFamily:MF,marginBottom:4}}>Workshop days</div><Inp type="number" min={0} value={q.workshopDays||''} onChange={e=>upd({workshopDays:+e.target.value})} placeholder="0"/></div>
+          <div><div style={{fontSize:10,color:C.muted,fontFamily:MF,marginBottom:4}}>Site days</div><Inp type="number" min={0} value={q.siteDays||''} onChange={e=>upd({siteDays:+e.target.value})} placeholder="0"/></div>
+        </div>
+        {totalDays>0&&<div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:6}}>Total: {totalDays} days · Overhead: {GHS(274*totalDays)}</div>}
+      </div>
+
+      {/* Build tier */}
+      <div>
+        <Lbl ch="Build tier"/>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {TIERS.map(t=>(
+            <button key={t.id} onClick={()=>upd({tierId:t.id})} style={{background:q.tierId===t.id?C.s2:C.s1,border:`1px solid ${q.tierId===t.id?C.acc:C.bdr}`,borderRadius:2,padding:'10px 12px',cursor:'pointer',textAlign:'left',width:'100%'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div>
+                  <div style={{fontFamily:BF,fontSize:16,fontWeight:700,color:q.tierId===t.id?C.acc:C.txt,letterSpacing:.5}}>{t.label}</div>
+                  <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{t.sub}</div>
+                </div>
+                <div style={{textAlign:'right'}}>
+                  <div style={{fontFamily:MF,fontSize:11,color:q.tierId===t.id?C.acc:C.muted}}>×{t.mult}</div>
+                  <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>Nuer {GHS(t.nuerRate)}/day</div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Add-ons */}
+      <div>
+        <Lbl ch="Add-ons"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+          {ADDONS.map(a=>(
+            <button key={a.id} onClick={()=>upd({addOns:{...q.addOns,[a.id]:!q.addOns?.[a.id]}})} style={{background:q.addOns?.[a.id]?C.s2:C.s1,border:`1px solid ${q.addOns?.[a.id]?C.acc:C.bdr}`,borderRadius:2,padding:'8px 10px',cursor:'pointer',textAlign:'left'}}>
+              <div style={{fontFamily:BF,fontSize:13,fontWeight:600,color:q.addOns?.[a.id]?C.acc:C.txt}}>{a.label}</div>
+              <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{pct(a.pct)}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Crew labour */}
+      <div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+          <Lbl ch="Crew labour"/>
+          <Btn ch="+ Row" onClick={addCrewRow} size="sm" outline/>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {q.crew.map(r=>(
+            <div key={r.id} style={{display:'grid',gridTemplateColumns:'1fr 60px 60px 28px',gap:6,alignItems:'center'}}>
+              <Sel value={r.roleId} onChange={e=>updCrew(r.id,{roleId:e.target.value})}>
+                {LABOUR_ROLES.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}
+              </Sel>
+              <Inp type="number" min={1} value={r.count||''} onChange={e=>updCrew(r.id,{count:+e.target.value})} placeholder="qty"/>
+              <Inp type="number" min={0} value={r.days??''} onChange={e=>updCrew(r.id,{days:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)}/>
+              <button onClick={()=>remCrew(r.id)} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:16}}>✕</button>
+            </div>
+          ))}
+          <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>Days field blank = defaults to total job days ({totalDays})</div>
+        </div>
+      </div>
+
+      {/* Nuer's labour */}
+      <div>
+        <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginBottom:8}}>
+          <input type="checkbox" checked={q.includeNuer||false} onChange={e=>upd({includeNuer:e.target.checked})}/>
+          <span style={{fontFamily:BF,fontSize:14,fontWeight:600,color:C.txt}}>Include Nuer's labour</span>
+          {q.includeNuer&&<span style={{fontSize:10,color:C.muted,fontFamily:MF}}>{GHS(TIERS.find(t=>t.id===q.tierId)?.nuerRate||0)}/day</span>}
+        </label>
+        {q.includeNuer&&<div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <Inp type="number" min={0} value={q.nuerDays??''} onChange={e=>upd({nuerDays:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)} style={{maxWidth:120}}/>
+          <span style={{fontSize:10,color:C.muted,fontFamily:MF}}>days (blank = {totalDays})</span>
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+function MaterialsTab({q,upd}){
+  const [newName,setNewName]=useState('');
+  const updMat=(id,u,isOpt)=>{
+    if(isOpt) upd({optionals:q.optionals.map(m=>m.id===id?{...m,...u}:m)});
+    else upd({materials:q.materials.map(m=>m.id===id?{...m,...u}:m)});
+  };
+  const addCustom=()=>{
+    if(!newName.trim()) return;
+    upd({materials:[...q.materials,{id:uid(),name:newName.trim(),on:true,amount:'',custom:true}]});
+    setNewName('');
+  };
+  const remCustom=id=>upd({materials:q.materials.filter(m=>m.id!==id)});
+  const MatRow=({m,isOpt})=>(
+    <div style={{display:'grid',gridTemplateColumns:'auto 1fr 100px',gap:8,alignItems:'center',padding:'5px 0',borderBottom:`1px solid ${C.bdr}`}}>
+      <input type="checkbox" checked={m.on} onChange={e=>updMat(m.id,{on:e.target.checked},isOpt)} style={{cursor:'pointer',accentColor:C.acc}}/>
+      <span style={{fontSize:12,fontFamily:MF,color:m.on?C.txt:C.muted}}>{m.name}</span>
+      <div style={{display:'flex',alignItems:'center',gap:4}}>
+        <span style={{fontSize:10,color:C.muted,fontFamily:MF}}>GH₵</span>
+        <Inp type="number" min={0} value={m.amount||''} onChange={e=>updMat(m.id,{amount:e.target.value,on:true},isOpt)} disabled={!m.on} placeholder="0" style={{width:70,opacity:m.on?1:.4}}/>
+        {m.custom&&<button onClick={()=>remCustom(m.id)} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:12,flexShrink:0}}>✕</button>}
+      </div>
+    </div>
+  );
+  return(
+    <div>
+      <div style={{marginBottom:20}}>
+        <Lbl ch={`${q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} materials`}/>
+        {q.materials.map(m=><MatRow key={m.id} m={m} isOpt={false}/>)}
+      </div>
+      <div style={{marginBottom:20}}>
+        <Lbl ch="Optional add-ons"/>
+        {q.optionals.map(m=><MatRow key={m.id} m={m} isOpt={true}/>)}
+      </div>
+      <div>
+        <Lbl ch="Add custom material"/>
+        <div style={{display:'flex',gap:8}}>
+          <Inp value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addCustom()} placeholder="Material name…"/>
+          <Btn ch="Add" onClick={addCustom} size="sm"/>
+        </div>
+      </div>
+      <div style={{marginTop:16,padding:'10px 12px',background:C.s2,borderRadius:2}}>
+        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:4}}>MATERIALS TOTAL</div>
+        <div style={{fontFamily:BF,fontSize:22,fontWeight:700,color:C.acc}}>{GHS(q.materials.filter(m=>m.on).reduce((s,m)=>s+(+m.amount||0),0)+(q.optionals||[]).filter(m=>m.on).reduce((s,m)=>s+(+m.amount||0),0))}</div>
+      </div>
+    </div>
+  );
+}
+
+function LogisticsTab({q,upd}){
+  const log=q.logistics||{};
+  const set=(k,v)=>upd({logistics:{...log,[k]:v}});
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <div>
+        <Lbl ch="Primary logistics — materials to workshop"/>
+        <div style={{display:'flex',alignItems:'center',gap:8}}><span style={{fontSize:11,color:C.muted,fontFamily:MF,flexShrink:0}}>GH₵</span><Inp type="number" min={0} value={log.primary||''} onChange={e=>set('primary',e.target.value)} placeholder="0"/></div>
+      </div>
+      <div>
+        <Lbl ch="Secondary logistics — delivery to site"/>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8}}><span style={{fontSize:11,color:C.muted,fontFamily:MF,flexShrink:0}}>GH₵</span><Inp type="number" min={0} value={log.secondary||''} onChange={e=>set('secondary',e.target.value)} placeholder="0"/></div>
+        <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+          <input type="checkbox" checked={log.secondaryReturn||false} onChange={e=>set('secondaryReturn',e.target.checked)} style={{accentColor:C.acc}}/>
+          <span style={{fontSize:12,fontFamily:MF,color:C.txt}}>Return trip needed (doubles cost)</span>
+        </label>
+      </div>
+      <div>
+        <Lbl ch="Tertiary — site visit trips"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          <div><div style={{fontSize:10,color:C.muted,fontFamily:MF,marginBottom:4}}>No. of trips</div><Inp type="number" min={0} value={log.siteVisits||''} onChange={e=>set('siteVisits',e.target.value)} placeholder="0"/></div>
+          <div><div style={{fontSize:10,color:C.muted,fontFamily:MF,marginBottom:4}}>Cost per trip (GH₵)</div><Inp type="number" min={0} value={log.siteVisitCost||''} onChange={e=>set('siteVisitCost',e.target.value)} placeholder="0"/></div>
+        </div>
+      </div>
+      <div style={{padding:'10px 12px',background:C.s2,borderRadius:2}}>
+        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:4}}>LOGISTICS TOTAL</div>
+        <div style={{fontFamily:BF,fontSize:20,fontWeight:700,color:C.acc}}>{GHS(calcQuote(q).logistics)}</div>
+        {log.secondaryReturn&&<div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:4}}>Includes return trip on delivery</div>}
+      </div>
+    </div>
+  );
+}
+
+function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
+  const tier=TIERS.find(t=>t.id===q.tierId)||TIERS[1];
+  const activeAddOns=ADDONS.filter(a=>q.addOns?.[a.id]);
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      {/* Cost breakdown */}
+      <Card ch={<div>
+        <div style={{fontFamily:BF,fontSize:11,letterSpacing:2,color:C.muted,marginBottom:10}}>COST BREAKDOWN</div>
+        <Row label="Overhead" value={GHS(calc.overhead)}/>
+        <Row label={`  ${totalDays} days × GH₵274`} value="" indent/>
+        <Row label="Labour" value={GHS(calc.labour)}/>
+        <Row label="Materials" value={GHS(calc.matTotal)}/>
+        <Row label="Logistics" value={GHS(calc.logistics)}/>
+        <Row label="Total cost" value={GHS(calc.rawCost)} bold/>
+      </div>}/>
+
+      {/* Pricing */}
+      <Card ch={<div>
+        <div style={{fontFamily:BF,fontSize:11,letterSpacing:2,color:C.muted,marginBottom:10}}>PRICING</div>
+        <Row label={`Build tier: ${tier.label}`} value={`×${tier.mult}`}/>
+        {activeAddOns.map(a=><Row key={a.id} label={a.label} value={pct(a.pct)} indent/>)}
+        {activeAddOns.length>0&&<Row label="Combined add-on multiplier" value={`×${calc.addOnMult.toFixed(3)}`}/>}
+        <div style={{borderTop:`1px solid ${C.acc}`,marginTop:10,paddingTop:10}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontFamily:BF,fontSize:14,fontWeight:700,letterSpacing:1}}>QUOTED PRICE</span>
+            <span style={{fontFamily:BF,fontSize:24,fontWeight:700,color:C.acc}}>{GHS(calc.quotedPrice)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:6}}>
+            <span style={{fontSize:11,color:C.muted,fontFamily:MF}}>Gross margin</span>
+            <span style={{fontSize:11,fontFamily:MF,color:calc.marginPct>=30?C.ok:C.warn}}>{GHS(calc.grossMargin)}</span>
+          </div>
+        </div>
+        <MarginBar pct={calc.marginPct}/>
+      </div>}/>
+
+      {/* Status actions */}
+      <Card ch={<div>
+        <Lbl ch="Quote status"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:12}}>
+          {Object.entries(STATUS_META).map(([s,m])=>(
+            <button key={s} onClick={()=>onStatusChange(s)} style={{background:q.status===s?C.s2:C.s1,border:`1px solid ${q.status===s?m.color:C.bdr}`,borderRadius:2,padding:'8px 10px',cursor:'pointer',fontFamily:BF,fontSize:13,letterSpacing:1,color:q.status===s?m.color:C.muted}}>{m.label}</button>
+          ))}
+        </div>
+        <Btn ch="Save quote" onClick={()=>onSave()} full/>
+      </div>}/>
+    </div>
+  );
+}
+
+// ── Costs Tab (admin only) ────────────────────────────────────────────
+function CostsTab({q,upd,calc}){
+  const [form,setForm]=useState({date:new Date().toISOString().slice(0,10),category:'materials',description:'',amount:''});
+  const [adding,setAdding]=useState(false);
+  const exp=q.expenditure||[];
+  const actual=calcActual(exp);
+  const totalActual=Object.values(actual).reduce((s,v)=>s+v,0);
+  const actualMargin=calc.quotedPrice-totalActual;
+  const actualMarginPct=calc.quotedPrice>0?(actualMargin/calc.quotedPrice)*100:0;
+
+  const addEntry=()=>{
+    if(!form.amount||!form.description.trim()) return;
+    upd({expenditure:[...exp,{id:uid(),...form,amount:+form.amount,loggedAt:new Date().toISOString()}]});
+    setForm(f=>({...f,description:'',amount:''}));
+    setAdding(false);
+  };
+  const remove=id=>upd({expenditure:exp.filter(e=>e.id!==id)});
+
+  const quoted={
+    materials: calc.matTotal,
+    labour: calc.labour,
+    logistics: calc.logistics,
+    overhead: calc.overhead,
+    other: 0,
+  };
+
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      {/* Variance table */}
+      <Card ch={<div>
+        <div style={{fontFamily:BF,fontSize:11,letterSpacing:2,color:C.muted,marginBottom:10}}>QUOTED vs ACTUAL</div>
+        {EXP_CATS.map(cat=>{
+          const q_=quoted[cat]||0;
+          const a_=actual[cat]||0;
+          const diff=q_-a_;
+          return(<div key={cat} style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 70px',gap:4,padding:'5px 0',borderBottom:`1px solid ${C.bdr}`,alignItems:'center'}}>
+            <span style={{fontSize:11,fontFamily:MF,color:C.muted,textTransform:'capitalize'}}>{cat}</span>
+            <span style={{fontSize:11,fontFamily:MF,textAlign:'right'}}>{GHS(q_)}</span>
+            <span style={{fontSize:11,fontFamily:MF,textAlign:'right',color:a_>q_?C.err:C.txt}}>{GHS(a_)}</span>
+            <span style={{fontSize:11,fontFamily:MF,textAlign:'right',color:diff>=0?C.ok:C.err}}>{diff>=0?'+':''}{GHS(diff)}</span>
+          </div>);
+        })}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px 70px',gap:4,padding:'8px 0 4px',alignItems:'center'}}>
+          <span style={{fontSize:10,letterSpacing:1.5,fontFamily:MF,color:C.muted}}>TOTAL COST</span>
+          <span style={{fontSize:12,fontFamily:MF,fontWeight:600,textAlign:'right'}}>{GHS(calc.rawCost)}</span>
+          <span style={{fontSize:12,fontFamily:MF,fontWeight:600,textAlign:'right',color:totalActual>calc.rawCost?C.err:C.txt}}>{GHS(totalActual)}</span>
+          <span/>
+        </div>
+        <div style={{borderTop:`1px solid ${C.bdr}`,paddingTop:8,marginTop:4}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+            <span style={{fontSize:11,fontFamily:MF,color:C.muted}}>Quoted price</span>
+            <span style={{fontSize:11,fontFamily:MF}}>{GHS(calc.quotedPrice)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between'}}>
+            <span style={{fontSize:11,fontFamily:MF,color:C.muted}}>Actual profit so far</span>
+            <span style={{fontSize:13,fontFamily:MF,fontWeight:600,color:actualMargin>=0?C.ok:C.err}}>{GHS(actualMargin)}</span>
+          </div>
+        </div>
+        <MarginBar pct={actualMarginPct}/>
+        <div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:8}}>{exp.length} entries logged · {GHS(totalActual)} spent so far</div>
+      </div>}/>
+
+      {/* Add entry */}
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF}}>EXPENDITURE LOG</div>
+        <Btn ch={adding?'Cancel':'+ Log expense'} onClick={()=>setAdding(!adding)} size="sm" outline={adding}/>
+      </div>
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          <div><Lbl ch="Date"/><Inp type="date" value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))}/></div>
+          <div><Lbl ch="Category"/><Sel value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>{EXP_CATS.map(c=><option key={c} value={c} style={{textTransform:'capitalize'}}>{c}</option>)}</Sel></div>
+        </div>
+        <div><Lbl ch="Description"/><Inp value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="e.g. Timber from Accra Sawmill"/></div>
+        <div><Lbl ch="Amount (GH₵)"/><Inp type="number" min={0} value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))} placeholder="0.00"/></div>
+        <div style={{display:'flex',gap:8}}><Btn ch="Log" onClick={addEntry} style={{flex:1}}/><Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/></div>
+      </div>}/>
+
+      {/* Entry list */}
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        {[...exp].reverse().map(e=>(
+          <div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 12px',background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2}}>
+            <div>
+              <div style={{fontSize:12,fontFamily:MF,color:C.txt}}>{e.description}</div>
+              <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>{e.date} · <span style={{textTransform:'capitalize'}}>{e.category}</span></div>
+            </div>
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              <span style={{fontFamily:BF,fontSize:15,fontWeight:600,color:C.warn}}>{GHS(e.amount)}</span>
+              <button onClick={()=>remove(e.id)} style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14}}>✕</button>
+            </div>
+          </div>
+        ))}
+        {exp.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No expenses logged yet.</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Root App ──────────────────────────────────────────────────────────
+function App(){
+  const [ready,setReady]=useState(false);
+  const [crew,setCrew]=useState([]);
+  const [quotes,setQuotes]=useState([]);
+  const [screen,setScreen]=useState('loading');
+  const [user,setUser]=useState(null);
+  const [activeId,setActiveId]=useState(null);
+
+  useEffect(()=>{
+    Promise.all([loadKV('nwd-crew',null),loadKV('nwd-quotes',[])]).then(([c,q])=>{
+      const crewData=c||[];
+      setCrew(crewData);
+      setQuotes(q||[]);
+      const admin=crewData.find(m=>m.role==='admin'&&m.active);
+      if(!admin){ setScreen('no-admin'); setReady(true); return; }
+      const session=getSession();
+      if(session&&session.id===admin.id){ setUser(admin); setScreen('dashboard'); }
+      else setScreen('login');
+      setReady(true);
+    });
+  },[]);
+
+  const admin=crew.find(m=>m.role==='admin'&&m.active);
+
+  const saveQuotes=async updated=>{ setQuotes(updated); await saveKV('nwd-quotes',updated); };
+
+  const handlePin=async newPin=>{
+    let current=admin;
+    if(newPin&&!admin.pin){
+      const updated=crew.map(c=>c.id===admin.id?{...c,pin:newPin}:c);
+      setCrew(updated);
+      await saveKV('nwd-crew',updated);
+      current=updated.find(c=>c.id===admin.id);
+    }
+    setUser(current);
+    setSession(current);
+    setScreen('dashboard');
+  };
+
+  const logout=()=>{ clearSession(); setUser(null); setScreen('login'); };
+
+  const createNew=()=>{
+    const refNum=(quotes.length)+1;
+    const q=newQuote(refNum);
+    setActiveId(q.id);
+    setScreen('editor');
+    setQuotes(prev=>[...prev,q]);
+  };
+
+  const openQuote=id=>{ setActiveId(id); setScreen('editor'); };
+
+  const saveQuote=async updated=>{
+    const next=quotes.map(q=>q.id===updated.id?updated:q);
+    await saveQuotes(next);
+  };
+
+  if(!ready) return(
+    <div style={{minHeight:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
+      <div style={{width:28,height:2,background:C.acc}}/>
+      <div style={{fontFamily:BF,fontSize:9,letterSpacing:5,color:C.muted}}>NEEWOODY PRICING</div>
+      <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>Loading…</div>
+    </div>
+  );
+
+  if(screen==='no-admin') return(
+    <div style={{minHeight:'100vh',background:C.bg,display:'flex',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{textAlign:'center'}}>
+        <div style={{fontSize:12,color:C.err,fontFamily:MF,marginBottom:8}}>No admin account found.</div>
+        <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>Set up crew in the Dispatch app first.</div>
+      </div>
+    </div>
+  );
+
+  if(screen==='login'&&admin) return(
+    <div style={{background:C.bg,minHeight:'100vh'}}>
+      <PinScreen user={admin} onSuccess={handlePin} onBack={null}/>
+    </div>
+  );
+
+  if(screen==='dashboard') return(
+    <div style={{background:C.bg,minHeight:'100vh'}}>
+      <Dashboard quotes={quotes} onNew={createNew} onOpen={openQuote} onLogout={logout}/>
+    </div>
+  );
+
+  if(screen==='editor'){
+    const q=quotes.find(x=>x.id===activeId);
+    if(!q) return null;
+    return(
+      <div style={{background:C.bg,minHeight:'100vh'}}>
+        <QuoteEditor quote={q} quotes={quotes} onSave={async updated=>{ await saveQuote(updated); }} onBack={()=>setScreen('dashboard')}/>
+      </div>
+    );
+  }
+
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
