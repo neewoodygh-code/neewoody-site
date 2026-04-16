@@ -386,6 +386,8 @@ function newQuote(refNum){
     logistics:{primary:'',secondary:'',secondaryReturn:false,siteVisits:'',siteVisitCost:''},
     expenditure:[],
     notes:'',
+    taxRate:15,
+    idleBuffer:20,
   };
 }
 
@@ -525,6 +527,23 @@ function SetupTab({q,upd,totalDays}){
             <NumInp value={q.nuerDays??''} onChange={e=>upd({nuerDays:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)} style={{maxWidth:100}}/>
             <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>days (blank = {totalDays})</span>
           </div>}
+        </div>
+      </div>}/>
+
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Projections</div>
+        <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>Used to estimate net profit after tax and idle periods. Adjust to your situation.</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div>
+            <Lbl ch="Income tax estimate (%)"/>
+            <NumInp value={q.taxRate??15} onChange={e=>upd({taxRate:Math.min(50,Math.max(0,+e.target.value||0))})} placeholder="15"/>
+            <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Ghana self-employed: ~15% effective</div>
+          </div>
+          <div>
+            <Lbl ch="Idle time reserve (%)"/>
+            <NumInp value={q.idleBuffer??20} onChange={e=>upd({idleBuffer:Math.min(60,Math.max(0,+e.target.value||0))})} placeholder="20"/>
+            <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Set aside for slow months</div>
+          </div>
         </div>
       </div>}/>
     </div>
@@ -682,6 +701,11 @@ function LogisticsTab({q,upd}){
 // ── Summary Tab ────────────────────────────────────────────────────────
 function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
   const activeAddOns=ADDONS.filter(a=>q.addOns?.[a.id]);
+  const taxRate   = q.taxRate??15;
+  const idleBuf   = q.idleBuffer??20;
+  const taxAmt    = calc.grossMargin * (taxRate/100);
+  const idleAmt   = calc.grossMargin * (idleBuf/100);
+  const netProfit = calc.grossMargin - taxAmt - idleAmt;
   return(
     <div style={{display:'flex',flexDirection:'column',gap:14}}>
       <Card ch={<div>
@@ -710,6 +734,27 @@ function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
         </div>
         <MarginBar pct={calc.marginPct}/>
       </div>}/>
+
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Projected net profit</div>
+        <div style={{fontSize:'.75rem',color:S.muted,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>
+          What you might actually keep from this job, after setting aside tax and a reserve for slow months.
+        </div>
+        <Row label="Gross profit" value={GHS(calc.grossMargin)} bold/>
+        <Row label={`Income tax (${taxRate}%)`} value={`− ${GHS(taxAmt)}`} color={S.err} indent/>
+        <Row label={`Idle time reserve (${idleBuf}%)`} value={`− ${GHS(idleAmt)}`} color={S.warn} indent/>
+        <div style={{borderTop:`2px solid ${S.dark}`,marginTop:10,paddingTop:10,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>Projected net</div>
+            <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FM,marginTop:2}}>Adjust rates in Setup → Projections</div>
+          </div>
+          <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:netProfit>=0?S.ok:S.err}}>{GHS(netProfit)}</div>
+        </div>
+        <div style={{marginTop:12,padding:'10px 12px',background:S.bgAlt,borderRadius:6,fontSize:'.72rem',color:S.mid,fontFamily:FB,lineHeight:1.6}}>
+          <strong style={{color:S.dark}}>Note:</strong> The idle reserve isn't lost — it goes into a buffer for months when jobs are slow. Tax is an estimate; speak to an accountant for your actual liability.
+        </div>
+      </div>}/>
+
       <Card ch={<div>
         <Lbl ch="Quote status"/>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
@@ -732,6 +777,11 @@ function CostsTab({q,upd,calc}){
   const totalActual=Object.values(actual).reduce((s,v)=>s+v,0);
   const actualMargin=calc.quotedPrice-totalActual;
   const actualMarginPct=calc.quotedPrice>0?(actualMargin/calc.quotedPrice)*100:0;
+  const taxRate=q.taxRate??15;
+  const idleBuf=q.idleBuffer??20;
+  const actualTax=actualMargin*(taxRate/100);
+  const actualIdle=actualMargin*(idleBuf/100);
+  const actualNet=actualMargin-actualTax-actualIdle;
   const addEntry=()=>{
     if(!form.amount||!form.description.trim())return;
     upd({expenditure:[...exp,{id:uid(),...form,amount:+form.amount,loggedAt:new Date().toISOString()}]});
@@ -766,6 +816,10 @@ function CostsTab({q,upd,calc}){
           <div style={{display:'flex',justifyContent:'space-between'}}>
             <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FB}}>Actual profit so far</span>
             <span style={{fontSize:'.88rem',fontFamily:FM,fontWeight:600,color:actualMargin>=0?S.ok:S.err}}>{GHS(actualMargin)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:4,paddingTop:6,borderTop:`1px dashed ${S.border}`}}>
+            <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>Projected net (after tax + reserve)</span>
+            <span style={{fontSize:'.85rem',fontFamily:FD,fontWeight:600,color:actualNet>=0?S.ok:S.err}}>{GHS(actualNet)}</span>
           </div>
         </div>
         <MarginBar pct={actualMarginPct} label="Actual margin"/>
