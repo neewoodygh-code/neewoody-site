@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="theme-color" content="#0c0b09"/>
+  <meta name="theme-color" content="#F7F4EF"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="NW Dispatch"/>
   <link rel="manifest" href="/manifest.json"/>
   <title>Neewoody Dispatch</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inconsolata:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#0c0b09;color:#e2d9cc;-webkit-tap-highlight-color:transparent;}
+    body{background:#F7F4EF;color:#1C1A17;-webkit-tap-highlight-color:transparent;}
     input,select,textarea,button{font-family:inherit;}
     ::-webkit-scrollbar{width:4px;}
-    ::-webkit-scrollbar-track{background:#0c0b09;}
-    ::-webkit-scrollbar-thumb{background:#262118;}
+    ::-webkit-scrollbar-track{background:#F7F4EF;}
+    ::-webkit-scrollbar-thumb{background:#DDD5C8;}
   </style>
 </head>
 <body>
@@ -130,7 +130,7 @@ const DEFAULT_CREW = [
 
 const ROLE_LABELS = {admin:'Admin',supervisor:'Supervisor',lead:'Lead apprentice',hand:'Work hand',trainee:'Trainee'};
 const STATUS = {created:'Briefed','pre-departure':'Pre-departure',departed:'En route','on-site':'On site','return-check':'Return check',closed:'Closed'};
-const STATUS_COLOR = {created:'#3a9457','pre-departure':'#c8820a',departed:'#3a9457','on-site':'#3a9457','return-check':'#c8820a',closed:'#6b6459'};
+const STATUS_COLOR = {created:'#5a8a5a','pre-departure':'#A0784A',departed:'#5a8a5a','on-site':'#5a8a5a','return-check':'#7D5C34',closed:'#8A8178'};
 
 const uid = () => Math.random().toString(36).slice(2,8).toUpperCase();
 const haversine = (la1,ln1,la2,ln2) => { const R=6371000,r=x=>x*Math.PI/180,dL=r(la2-la1),dN=r(ln2-ln1),a=Math.sin(dL/2)**2+Math.cos(r(la1))*Math.cos(r(la2))*Math.sin(dN/2)**2; return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a)); };
@@ -141,16 +141,16 @@ const fmtDepart = iso => { try{return new Date(iso).toLocaleString('en-GH',{week
 const buildChecklist = (tools,jobType) => tools.filter(t=>jobType==='cabinetry'?t.cab:t.hw).map(t=>({id:uid(),toolId:t.id,name:t.name,cat:t.cat,qty:t.qty,packed:false,packedBy:null,packedAt:null,returned:false,returnedBy:null,returnedAt:null,condition:'good',conditionNote:''}));
 
 // ── Design ────────────────────────────────────────────────────────────
-const C={bg:'#0c0b09',s1:'#171512',s2:'#1d1b17',acc:'#c97c0a',ok:'#3a9457',err:'#b8534a',warn:'#c8820a',txt:'#e2d9cc',muted:'#6b6459',bdr:'#262118'};
-const BF="'Barlow Condensed',sans-serif";
-const MF="'Inconsolata',monospace";
+const C={bg:'#F7F4EF',s1:'#FFFFFF',s2:'#EFEBE3',acc:'#A0784A',ok:'#5a8a5a',err:'#b04030',warn:'#7D5C34',txt:'#1C1A17',muted:'#8A8178',bdr:'#DDD5C8'};
+const BF="'Playfair Display',Georgia,serif";
+const MF="'DM Mono','Courier New',monospace";
 
 const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
   const p=size==='lg'?'18px 22px':size==='sm'?'5px 10px':'9px 16px';
   const fs=size==='lg'?20:size==='sm'?10:12;
   const base={border:'none',borderRadius:2,padding:p,fontFamily:BF,fontWeight:700,fontSize:fs,letterSpacing:1.5,cursor:disabled?'not-allowed':'pointer',textTransform:'uppercase',width:full?'100%':'auto',...st};
   if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||C.muted,border:`1px solid ${C.bdr}`,opacity:disabled?.4:1}}>{ch}</button>;
-  return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?C.s2:(color||C.acc),color:disabled?C.muted:C.bg,opacity:disabled?.6:1}}>{ch}</button>;
+  return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?C.s2:(color||C.acc),color:disabled?C.muted:'#fff',opacity:disabled?.6:1}}>{ch}</button>;
 };
 const Card=({ch,style:st={}})=><div style={{background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'11px 13px',...st}}>{ch}</div>;
 const Lbl=({ch})=><div style={{fontSize:9,letterSpacing:2,color:C.muted,textTransform:'uppercase',marginBottom:5,fontFamily:MF}}>{ch}</div>;
@@ -220,7 +220,7 @@ function PinScreen({user,onSuccess,onBack}){
   };
   const del=()=>{if(step==='enter')setP1(p=>p.slice(0,-1));else setP2(p=>p.slice(0,-1));};
   return(
-    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
+    <div style={{minHeight:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:24}}>
       <div style={{width:'100%',maxWidth:280}}>
         <div style={{fontFamily:BF,fontSize:9,letterSpacing:5,color:C.muted,textAlign:'center',marginBottom:6}}>{user.name.toUpperCase()}</div>
         <div style={{fontSize:11,color:C.muted,textAlign:'center',marginBottom:30,fontFamily:MF}}>
@@ -892,7 +892,7 @@ function App(){
     <div style={{minHeight:'100vh',background:C.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:16}}>
       <div style={{width:36,height:3,background:C.acc}}/>
       <div style={{fontFamily:BF,fontSize:9,letterSpacing:5,color:C.muted}}>NEEWOODY DISPATCH</div>
-      <div style={{fontSize:11,color:C.muted,fontFamily:"'Inconsolata',monospace"}}>Loading…</div>
+      <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>Loading…</div>
     </div>
   );
 
