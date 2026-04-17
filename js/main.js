@@ -111,20 +111,7 @@
     revealEls.forEach(function (el) { observer.observe(el); });
   }
 
-  /* ── Contact form (front-end only — wire up Formspree or Netlify Forms later) ──
-     
-     TO CONNECT FORMSPREE:
-     1. Sign up at formspree.io
-     2. Create a new form and get your endpoint URL
-     3. Replace the action attribute on the form: action="https://formspree.io/f/YOUR_ID"
-     4. Add method="POST" to the form
-     5. Remove or update the JS below and use standard form submission
-     
-     TO CONNECT NETLIFY FORMS:
-     1. Add netlify attribute to the <form> tag: <form netlify>
-     2. Add name="contact" to the <form> tag
-     3. Netlify will automatically handle submissions
-  */
+  /* ── Contact form — posts to Cloudflare Worker ── */
   const contactForm = document.getElementById('quote-form');
 
   if (contactForm) {
@@ -132,12 +119,12 @@
       e.preventDefault();
 
       // Basic validation
-      const name    = contactForm.querySelector('[name="name"]');
-      const phone   = contactForm.querySelector('[name="phone"]');
-      const message = contactForm.querySelector('[name="message"]');
+      const nameEl    = contactForm.querySelector('[name="name"]');
+      const phoneEl   = contactForm.querySelector('[name="phone"]');
+      const messageEl = contactForm.querySelector('[name="message"]');
       let valid = true;
 
-      [name, phone, message].forEach(function (field) {
+      [nameEl, phoneEl, messageEl].forEach(function (field) {
         if (field && !field.value.trim()) {
           field.style.borderColor = '#c0392b';
           valid = false;
@@ -148,17 +135,56 @@
 
       if (!valid) return;
 
-      // Show success message (replace with real submission logic)
-      const submitBtn = contactForm.querySelector('[type="submit"]');
-      if (submitBtn) {
-        submitBtn.textContent = 'Message Sent ✓';
-        submitBtn.disabled = true;
-        submitBtn.style.background = '#27ae60';
-      }
+      const submitBtn   = contactForm.querySelector('[type="submit"]');
+      const btnLabel    = contactForm.querySelector('.btn-label');
+      const btnLoading  = contactForm.querySelector('.btn-loading');
+      const successMsg  = contactForm.querySelector('.form-success');
 
-      // Optional: redirect to WhatsApp after form submit
-      // const waMessage = encodeURIComponent('Hi Neewoody, I just filled your quote form and would like to discuss my project.');
-      // setTimeout(function() { window.open('https://wa.me/233244633464?text=' + waMessage, '_blank'); }, 1500);
+      // Show loading state
+      if (submitBtn)  submitBtn.disabled = true;
+      if (btnLabel)   btnLabel.style.display = 'none';
+      if (btnLoading) btnLoading.style.display = 'inline';
+
+      // Collect form data
+      const data = {
+        name:         nameEl ? nameEl.value.trim() : '',
+        phone:        phoneEl ? phoneEl.value.trim() : '',
+        email:        (contactForm.querySelector('[name="email"]') || {}).value || '',
+        project_type: (contactForm.querySelector('[name="project_type"]') || {}).value || '',
+        dimensions:   (contactForm.querySelector('[name="dimensions"]') || {}).value || '',
+        budget:       (contactForm.querySelector('[name="budget"]') || {}).value || '',
+        message:      messageEl ? messageEl.value.trim() : '',
+        location:     (contactForm.querySelector('[name="location"]') || {}).value || '',
+        _gotcha:      (contactForm.querySelector('[name="_gotcha"]') || {}).value || '',
+      };
+
+      fetch('https://neewoodygh.com/api/lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res.ok) {
+          // Success
+          contactForm.reset();
+          if (submitBtn)  submitBtn.style.display = 'none';
+          if (successMsg) successMsg.style.display = 'flex';
+          // GA event
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'form_submit', { event_category: 'contact', event_label: data.project_type || 'quote_request' });
+          }
+        } else {
+          throw new Error(res.error || 'Submission failed');
+        }
+      })
+      .catch(function () {
+        // Reset button and show error
+        if (submitBtn)  { submitBtn.disabled = false; }
+        if (btnLabel)   { btnLabel.style.display = 'inline'; }
+        if (btnLoading) { btnLoading.style.display = 'none'; }
+        alert('Something went wrong — please try again or WhatsApp us directly on 0244 633 464.');
+      });
     });
   }
 
