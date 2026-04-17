@@ -363,8 +363,9 @@
             <div class="est-result-label">Estimated Price Range</div>
             <div class="est-result-range" id="est-range-display">GH₵ — – GH₵ —</div>
             <div class="est-result-note">
-              This is an indicative estimate only. Final pricing depends on exact specifications,
-              site conditions, and current material costs. A site visit gives the most accurate quote.
+              This is an indicative range based on Neewoody's standard build pricing — 
+              covering materials, labour, overhead, and logistics. Your actual quote may vary 
+              based on exact specifications and site conditions.
             </div>
             <div class="est-result-summary" id="est-summary"></div>
             <a href="#" class="est-wa-btn" id="est-wa-link" target="_blank" rel="noopener">
@@ -374,14 +375,12 @@
           </div>
 
           <p class="est-disclaimer">
-            <strong>How are estimates calculated?</strong> This tool uses size-band pricing based on Ghana carpentry realities:
-            laminate panels at approximately GH₵&nbsp;500 each, edge banding at GH₵&nbsp;7/m, with allowances for
-            labour, hardware (hinges, rails, handles), installation, transport, and material waste.
-            Prices shown are conservative ranges — actual quotes may vary based on current material
-            availability and your specific requirements.
-            <br><br>
-            <strong>To edit the pricing logic:</strong> open <code>wardrobe-estimator.html</code> and find the
-            section labelled <code>/* ── PRICING ENGINE ── */</code> in the JavaScript below.
+            <strong>How are estimates calculated?</strong> This tool uses Neewoody's actual cost model — 
+            workshop overhead, labour rates, materials, hardware, and logistics — scaled by wardrobe size, 
+            door type, interior layout, and finish. The range shown (±12%) reflects real variation in 
+            material costs and job complexity. The midpoint aligns with our Standard Build tier. 
+            Premium finishes, complex interiors, or challenging site access may push toward or above the 
+            upper end.
           </p>
 
         </div>
@@ -472,13 +471,14 @@
       const PANEL_COST_GHS = 500;    // GHS per standard laminate panel (approx 2440×1220mm)
       const EDGEBAND_PER_M = 7;      // GHS per metre of edge banding
 
-      // Base price by width band (GHS) — before any multipliers
-      // These represent a conservative midpoint for a standard 2400mm tall wardrobe
+      // Base price by width band (GHS) — calibrated against Neewoody's fully-loaded cost model
+      // (overhead + labour + materials + logistics × Standard Build tier)
+      // Assumes standard 2400mm height, 600mm depth, hinged doors, standard interior, laminate finish
       const BASE = {
-        small:  7500,   // width < 1500mm
-        medium: 12000,  // width 1500–2500mm
-        large:  18500,  // width 2500–3500mm
-        xlarge: 26000   // width > 3500mm
+        small:  8000,   // width < 1500mm  (~3 day job)
+        medium: 10500,  // width 1500–2500mm (~4 day job)
+        large:  16000,  // width 2500–3500mm (~6 day job)
+        xlarge: 21000   // width > 3500mm   (~8 day job)
       };
 
       // Spread applied to produce a low–high range (fraction of base)
