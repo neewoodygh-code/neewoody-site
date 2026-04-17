@@ -29,8 +29,29 @@ gtag('config', 'G-ZP77WR6BNH');
 
   <!-- Carpenter Tools nav dropdown -->
   <style>
+  .nav-tools{position:relative;display:inline-flex;align-items:center;margin-left:16px;padding-left:16px;border-left:1px solid var(--clr-border)}
+  .nav-tools-btn{background:none;border:1.5px solid var(--clr-accent);color:var(--clr-accent);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
+  .nav-tools-btn:hover{background:var(--clr-accent);color:#fff}
+  .nav-tools-drop{display:none;position:absolute;top:calc(100% + 10px);right:0;background:#fff;border:1.5px solid var(--clr-border);border-radius:10px;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:200;overflow:hidden}
+  .nav-tools-drop a{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;font-weight:600;color:var(--clr-text);text-decoration:none;border-bottom:1px solid var(--clr-border);transition:background .15s}
+  .nav-tools-drop a:last-child{border-bottom:none}
+  .nav-tools-drop a:hover{background:var(--clr-bg)}
+  .nav-tools-drop .drop-badge{font-size:9px;background:rgba(160,120,64,.15);color:var(--clr-accent);border:1px solid var(--clr-accent);border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.5px;margin-left:auto}
+  .nav-tools.open .nav-tools-drop{display:block}
+  @media(max-width:768px){.nav-tools{display:none}}
   </style>
   <style>
+  .nav-tools-wrap{position:relative;display:flex;align-items:center;margin-left:.5rem}
+  .nav-tools-trigger{font-size:.82rem;font-weight:600;color:var(--clr-accent);padding:.3rem .75rem;border:1.5px solid rgba(160,120,74,.4);border-radius:2px;cursor:pointer;letter-spacing:.05em;display:flex;align-items:center;gap:.3rem;transition:background var(--ease);white-space:nowrap;background:rgba(160,120,74,.06)}
+  .nav-tools-trigger:hover{background:var(--clr-accent-lt)}
+  .nav-tools-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);min-width:220px;box-shadow:var(--shadow-lg);padding:.5rem;z-index:500}
+  .nav-tools-wrap:hover .nav-tools-dropdown{display:block}
+  .nav-tools-dropdown a{display:flex;align-items:center;gap:.6rem;padding:.65rem .9rem;border-radius:var(--radius);font-size:.85rem;font-weight:500;color:var(--clr-mid);transition:background var(--ease),color var(--ease)}
+  .nav-tools-dropdown a:hover{background:var(--clr-bg-alt);color:var(--clr-accent)}
+  .nav-tools-dropdown a::after{display:none!important}
+  .tool-tag{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(160,120,74,.15);color:var(--clr-accent);padding:.1rem .4rem;border-radius:2px;font-family:monospace}
+  .nav-tools-dropdown-label{padding:.35rem .9rem .2rem;font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace}
+  @media(max-width:900px){.nav-tools-wrap{display:none}}
   </style>
 </head>
 <body>
@@ -86,8 +107,7 @@ gtag('config', 'G-ZP77WR6BNH');
     <a href="shelving.html">Shelving</a>
     <a href="portfolio.html">Portfolio</a>
     <a href="contact.html">Contact</a>
-        <div class="mobile-nav-section-label">For Carpenters</div>
-    <a href="cutlist.html">&#9874; Wardrobe Cutlist <span class="mobile-tool-tag">Alpha</span></a>
+    <a href="cutlist.html" style="color:var(--clr-accent)">&#9874; Wardrobe Cutlist (Alpha)</a>
     <div class="mobile-nav-ctas">
       <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20project." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
       <a href="contact.html" class="btn btn-outline">Request a Quote</a>
@@ -120,27 +140,9 @@ gtag('config', 'G-ZP77WR6BNH');
             <h2 id="contact-heading" class="reveal">Request a Quote</h2>
             <p class="reveal" style="margin-bottom:2rem;color:var(--clr-text-muted)">Fill in the form below and we'll send you a quote. Fields marked * are required.</p>
 
-            <!--
-              FORM SETUP OPTIONS:
-              Option A — Formspree (recommended for static sites):
-                1. Go to formspree.io, create a free account
-                2. Create a new form and get your endpoint URL
-                3. Replace "YOUR_FORM_ID" in the action below with your actual ID
-                4. The form will work immediately — submissions go to your email
-              
-              Option B — Netlify Forms (if hosting on Netlify):
-                1. Add  netlify  attribute to the form tag below
-                2. Add  data-netlify="true"  
-                3. Netlify will detect and handle submissions automatically
-              
-              Option C — EmailJS or custom backend:
-                Contact your developer to wire up the submit handler in main.js
-            -->
             <form
               id="quote-form"
               class="contact-form reveal"
-              action="https://formspree.io/f/YOUR_FORM_ID"
-              method="POST"
               novalidate
             >
               <!-- Hidden subject for email clarity -->
