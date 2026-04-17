@@ -225,3 +225,129 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 });
+
+/* ── GA4 Event Tracking ──────────────────────────────────────────────
+   Fires on every page that loads main.js.
+   Safe to call even if gtag isn't loaded — checks first.
+   ─────────────────────────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', function () {
+
+  function gEvent(name, params) {
+    if (typeof gtag === 'undefined') return;
+    gtag('event', name, params || {});
+  }
+
+  var page = window.location.pathname.replace(/^\/|\.html$/g, '') || 'home';
+
+  /* ── WhatsApp clicks — all buttons, all pages ── */
+  document.querySelectorAll('a[href*="wa.me"]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      // Determine button position from classes/context
+      var label = 'whatsapp_click';
+      if (el.classList.contains('wa-float'))        label = 'floating_button';
+      else if (el.closest('.hero'))                 label = 'hero_cta';
+      else if (el.closest('.contact-form-col'))     label = 'contact_page';
+      else if (el.closest('.page-hero'))            label = 'page_hero';
+      else if (el.closest('footer'))                label = 'footer';
+      else if (el.closest('.contact-card'))         label = 'sidebar';
+      else if (el.closest('.result-cta'))           label = 'estimator_result';
+      else if (el.closest('.section'))              label = 'inline_cta';
+      gEvent('whatsapp_click', { page: page, button_location: label });
+    });
+  });
+
+  /* ── Phone number clicks ── */
+  document.querySelectorAll('a[href^="tel:"]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      gEvent('phone_click', { page: page });
+    });
+  });
+
+  /* ── Instagram link clicks ── */
+  document.querySelectorAll('a[href*="instagram.com"]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      gEvent('instagram_click', { page: page });
+    });
+  });
+
+  /* ── Contact form view (fires when contact page loads) ── */
+  if (document.getElementById('quote-form')) {
+    gEvent('contact_form_view', { page: page });
+  }
+
+  /* ── Portfolio page view (high intent signal) ── */
+  if (page === 'portfolio') {
+    gEvent('portfolio_view', {});
+  }
+
+  /* ── Case study page views ── */
+  if (page === 'sage-centre' || page === 'house-of-walker') {
+    gEvent('case_study_view', { case_study: page });
+  }
+
+  /* ── Wardrobe estimator: quote generated + WA handoff ── */
+  /* Hook into the estimator's showResult function if on that page */
+  if (page === 'wardrobe-estimator') {
+    gEvent('estimator_view', {});
+    // Patch the result display — estimator calls showResult or updates .est-result
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.target && m.target.classList && m.target.classList.contains('visible')) {
+          gEvent('estimator_quote_generated', {});
+          observer.disconnect();
+        }
+      });
+    });
+    var resultEl = document.querySelector('.est-result');
+    if (resultEl) {
+      observer.observe(resultEl, { attributes: true, attributeFilter: ['class'] });
+    }
+    // WA handoff from estimator result
+    var waResultBtn = document.querySelector('.est-result a[href*="wa.me"]');
+    if (waResultBtn) {
+      waResultBtn.addEventListener('click', function () {
+        gEvent('estimator_whatsapp_handoff', {});
+      });
+    }
+  }
+
+  /* ── Cutlist: cutlist generated ── */
+  /* Hooks into the generate() function called by gen-btn */
+  if (page === 'cutlist') {
+    gEvent('cutlist_view', {});
+    // Observe the results page becoming visible
+    var rpage = document.getElementById('rpage');
+    if (rpage) {
+      var rObserver = new MutationObserver(function (mutations) {
+        mutations.forEach(function (m) {
+          if (m.target.classList.contains('show')) {
+            gEvent('cutlist_generated', {});
+            rObserver.disconnect();
+          }
+        });
+      });
+      rObserver.observe(rpage, { attributes: true, attributeFilter: ['class'] });
+    }
+  }
+
+  /* ── Service page views (intent signals) ── */
+  var servicePages = ['wardrobes','beds','kitchens','dining-living','solid-wood','tv-units','shelving'];
+  if (servicePages.indexOf(page) !== -1) {
+    gEvent('service_page_view', { service: page });
+  }
+
+  /* ── Scroll depth — fires once at 50% and 90% ── */
+  var scrollMilestones = { 50: false, 90: false };
+  window.addEventListener('scroll', function () {
+    var pct = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+    if (pct >= 50 && !scrollMilestones[50]) {
+      scrollMilestones[50] = true;
+      gEvent('scroll_depth', { page: page, depth: '50%' });
+    }
+    if (pct >= 90 && !scrollMilestones[90]) {
+      scrollMilestones[90] = true;
+      gEvent('scroll_depth', { page: page, depth: '90%' });
+    }
+  }, { passive: true });
+
+});
