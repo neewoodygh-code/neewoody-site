@@ -792,7 +792,35 @@ function JobCard({job,crew,onView}){
     <Btn ch="Open →" onClick={onView} full outline/>
   </div>}/>);
 }
-function SupervisorDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){\n  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)||j.fieldSupId===user.id);\n  const active=mine.filter(j=>j.status!=='closed');\n  const closed=mine.filter(j=>j.status==='closed');\n  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>\n    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>\n      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>\n      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>\n    </div>}/>\n    <div style={{flex:1,overflowY:'auto',padding:18}}>\n      {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned yet. Pull down to refresh if you were recently added to a job.</div>}\n      {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE</div><div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}\n      {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div><div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}\n    </div>\n  </div>);\n}\nfunction CrewDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){\n  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)&&j.status!=='closed');\n  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>\n    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>\n      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>\n      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>\n    </div>}/>\n    <div style={{flex:1,overflowY:'auto',padding:18}}>\n      {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned. Tap ↻ Refresh if you were just added to a job.</div>}\n      <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>\n    </div>\n  </div>);\n}
+function SupervisorDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){
+  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)||j.fieldSupId===user.id);
+  const active=mine.filter(j=>j.status!=='closed');
+  const closed=mine.filter(j=>j.status==='closed');
+  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>
+      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>
+    </div>}/>
+    <div style={{flex:1,overflowY:'auto',padding:18}}>
+      {active.length===0&&closed.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No jobs assigned yet. Tap ↻ Refresh if you were recently added to a job.</div>}
+      {active.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>ACTIVE</div><div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>{active.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
+      {closed.length>0&&<><div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:12}}>COMPLETED</div><div style={{display:'flex',flexDirection:'column',gap:8}}>{closed.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div></>}
+    </div>
+  </div>);
+}
+function CrewDash({user,crew,jobs,onViewJob,onLogout,onRefresh,refreshing}){
+  const mine=jobs.filter(j=>j.crewIds?.includes(user.id)&&j.status!=='closed');
+  return(<div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
+    <Hdr title={user.name.toUpperCase()} sub={ROLE_LABELS[user.role]} right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+      <button onClick={onRefresh} disabled={refreshing} style={{background:'transparent',border:`1px solid ${C.bdr}`,borderRadius:2,color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF,padding:'4px 8px'}}>{refreshing?'⟳':'↻ Refresh'}</button>
+      <button onClick={onLogout} style={{background:'transparent',border:'none',color:C.muted,fontSize:10,cursor:'pointer',fontFamily:MF}}>EXIT ×</button>
+    </div>}/>
+    <div style={{flex:1,overflowY:'auto',padding:18}}>
+      {mine.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No active jobs assigned. Tap ↻ Refresh if you were just added to a job.</div>}
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>{mine.map(j=><JobCard key={j.id} job={j} crew={crew} onView={()=>onViewJob(j.id)}/>)}</div>
+    </div>
+  </div>);
+}
 
 // ── Root App ──────────────────────────────────────────────────────────
 function App(){
