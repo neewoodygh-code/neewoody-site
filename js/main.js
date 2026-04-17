@@ -3,6 +3,11 @@
    neewoodygh.com
    ===================================================== */
 
+/* ── Register service worker (enables push notifications site-wide) ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(function () {});
+}
+
 (function () {
   'use strict';
 
