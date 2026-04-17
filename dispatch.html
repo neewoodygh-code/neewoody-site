@@ -253,6 +253,10 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
   const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'}];
   const active=jobs.filter(j=>j.status!=='closed');
   const openDmg=damage.filter(d=>d.status!=='resolved');
+  const deleteJob=id=>{
+    if(!window.confirm('Delete this job permanently? This cannot be undone.')) return;
+    saveJobs(jobs.filter(j=>j.id!==id));
+  };
   return(
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
       <Hdr title="ADMIN PANEL" sub={`${active.length} active job${active.length!==1?'s':''}`}
@@ -265,8 +269,8 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
         ))}
       </div>
       <div style={{flex:1,overflowY:'auto',padding:18}}>
-        {tab==='today'&&<TodayTab jobs={active} crew={crew} onViewJob={onViewJob} onCreateJob={onCreateJob}/>}
-        {tab==='jobs'&&<ClosedJobsTab jobs={jobs.filter(j=>j.status==='closed')} crew={crew} onViewJob={onViewJob}/>}
+        {tab==='today'&&<TodayTab jobs={active} crew={crew} onViewJob={onViewJob} onCreateJob={onCreateJob} onDeleteJob={deleteJob}/>}
+        {tab==='jobs'&&<ClosedJobsTab jobs={jobs.filter(j=>j.status==='closed')} crew={crew} onViewJob={onViewJob} onDeleteJob={deleteJob}/>}
         {tab==='tools'&&<ToolsTab tools={tools} saveTools={saveTools}/>}
         {tab==='crew'&&<CrewTab crew={crew} saveCrew={saveCrew}/>}
         {tab==='damage'&&<DamageTab damage={damage} saveDamage={saveDamage} crew={crew} tools={tools} saveTools={saveTools}/>}
@@ -275,7 +279,7 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
   );
 }
 
-function TodayTab({jobs,crew,onViewJob,onCreateJob}){
+function TodayTab({jobs,crew,onViewJob,onCreateJob,onDeleteJob}){
   const getCrew=ids=>(ids||[]).map(id=>crew.find(c=>c.id===id)?.name).filter(Boolean).join(', ');
   return(
     <div>
@@ -289,7 +293,10 @@ function TodayTab({jobs,crew,onViewJob,onCreateJob}){
           <Card key={j.id} ch={<div>
             <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
               <div style={{fontFamily:BF,fontSize:18,fontWeight:600}}>{j.client}</div>
-              <SPill status={j.status}/>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <SPill status={j.status}/>
+                <button onClick={()=>onDeleteJob(j.id)} title="Delete job" style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14,lineHeight:1,padding:'0 2px'}}>✕</button>
+              </div>
             </div>
             <div style={{fontSize:11,color:C.muted,fontFamily:MF,lineHeight:1.7,marginBottom:10}}>
               {j.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {j.siteAddress||'Site TBC'}<br/>
@@ -304,7 +311,7 @@ function TodayTab({jobs,crew,onViewJob,onCreateJob}){
   );
 }
 
-function ClosedJobsTab({jobs,crew,onViewJob}){
+function ClosedJobsTab({jobs,crew,onViewJob,onDeleteJob}){
   return(
     <div>
       <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:16}}>{jobs.length} CLOSED JOBS</div>
@@ -315,7 +322,10 @@ function ClosedJobsTab({jobs,crew,onViewJob}){
             <div style={{fontSize:11,color:C.muted,fontFamily:MF}}>{j.closedAt?fmtDate(j.closedAt):''} · {j.jobType}</div>
             {(j.mishaps||[]).length>0&&<div style={{fontSize:10,color:C.warn,fontFamily:MF,marginTop:3}}>{j.mishaps.length} mishap{j.mishaps.length>1?'s':''}</div>}
           </div>
-          <Btn ch="View" onClick={()=>onViewJob(j.id)} size="sm" outline/>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <Btn ch="View" onClick={()=>onViewJob(j.id)} size="sm" outline/>
+            <button onClick={()=>onDeleteJob(j.id)} title="Delete job" style={{background:'transparent',border:'none',color:C.err,cursor:'pointer',fontSize:14,lineHeight:1,padding:'0 2px'}}>✕</button>
+          </div>
         </div>} style={{marginBottom:8}}/>
       ))}
       {jobs.length===0&&<div style={{color:C.muted,fontSize:12,fontFamily:MF}}>No closed jobs yet.</div>}
