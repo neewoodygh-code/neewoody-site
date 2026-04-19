@@ -248,9 +248,182 @@ function PinScreen({user,onSuccess,onBack}){
 }
 
 // ── Admin Dashboard ───────────────────────────────────────────────────
-function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage,onCreateJob,onViewJob,onLogout}){
+
+// ── Workshop Settings ─────────────────────────────────────────────────
+function WorkshopSettings({cfg, onSave}){
+  const [lat,setLat]=useState(cfg?.lat||'');
+  const [lng,setLng]=useState(cfg?.lng||'');
+  const [radius,setRadius]=useState(cfg?.radius||100);
+  const [detecting,setDetecting]=useState(false);
+  const [saved,setSaved]=useState(false);
+  const detect=()=>{
+    setDetecting(true);
+    navigator.geolocation.getCurrentPosition(
+      pos=>{setLat(pos.coords.latitude.toFixed(6));setLng(pos.coords.longitude.toFixed(6));setDetecting(false);},
+      ()=>{setDetecting(false);alert('Could not detect location.');},{enableHighAccuracy:true}
+    );
+  };
+  const save=async()=>{
+    if(!lat||!lng){alert('Set workshop location first.');return;}
+    await onSave({lat:+lat,lng:+lng,radius:+radius,setAt:new Date().toISOString()});
+    setSaved(true);setTimeout(()=>setSaved(false),2000);
+  };
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <Card ch={<div>
+        <div style={{fontFamily:BF,fontSize:11,letterSpacing:2,color:C.muted,marginBottom:6}}>WORKSHOP LOCATION</div>
+        <div style={{fontSize:12,color:C.muted,fontFamily:MF,marginBottom:14,lineHeight:1.6}}>
+          This is used to verify crew attendance at the workshop before departure. Stand at your workshop and tap detect, or enter coordinates from Google Maps.
+        </div>
+        {cfg?.lat&&<div style={{padding:'8px 12px',background:C.s2,borderRadius:2,fontSize:11,fontFamily:MF,color:C.ok,marginBottom:12}}>
+          ✓ Workshop set — {cfg.lat.toFixed?cfg.lat.toFixed(5):cfg.lat}, {cfg.lng.toFixed?cfg.lng.toFixed(5):cfg.lng}
+        </div>}
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:10}}>
+          <div><Lbl ch="Latitude"/><Inp value={lat} onChange={e=>setLat(e.target.value)} placeholder="e.g. 5.61234"/></div>
+          <div><Lbl ch="Longitude"/><Inp value={lng} onChange={e=>setLng(e.target.value)} placeholder="e.g. -0.18765"/></div>
+        </div>
+        <Btn ch={detecting?'⟳ Detecting…':'📍 Use current location'} onClick={detect} outline full style={{marginBottom:10}}/>
+        <div><Lbl ch="Geofence radius (metres)"/><Inp type="number" min={50} max={500} value={radius} onChange={e=>setRadius(+e.target.value)}/></div>
+        <div style={{fontSize:10,color:C.muted,fontFamily:MF,marginTop:6,marginBottom:12}}>
+          Crew must be within this distance of the workshop to check in. 100m is recommended.
+        </div>
+        <Btn ch={saved?'✓ Saved':'Save Workshop Location'} onClick={save} full color={saved?C.ok:C.acc}/>
+      </div>}/>
+    </div>
+  );
+}
+
+// ── Attendance Tab ────────────────────────────────────────────────────
+function AttendanceTab({job,user,crew,workshopCfg,updateJob,isFieldSup}){
+  const [gpsMsg,setGpsMsg]=useState('');
+  const [gpsOk,setGpsOk]=useState(false);
+  const [loading,setLoading]=useState(false);
+  const attendance = job.attendance || {};
+  const assignedCrew = job.crewIds || [];
+
+  const getGPS=()=>new Promise((res,rej)=>navigator.geolocation.getCurrentPosition(res,rej,{enableHighAccuracy:true,timeout:12000}));
+
+  const haversine=(la1,ln1,la2,ln2)=>{
+    const R=6371000,r=x=>x*Math.PI/180,dL=r(la2-la1),dN=r(ln2-ln1);
+    const a=Math.sin(dL/2)**2+Math.cos(r(la1))*Math.cos(r(la2))*Math.sin(dN/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  };
+
+  const checkIn=async()=>{
+    setLoading(true);setGpsMsg('Verifying location…');setGpsOk(false);
+    try{
+      const pos=await getGPS();
+      const {latitude:lat,longitude:lng}=pos.coords;
+      if(!workshopCfg?.lat){
+        // No workshop set — allow check-in without gate but note it
+        const updated={...attendance,[user.id]:{status:'present',time:new Date().toISOString(),gated:false}};
+        updateJob({attendance:updated});
+        setGpsMsg('Checked in (no workshop GPS set by admin).');setGpsOk(true);
+      } else {
+        const dist=Math.round(haversine(lat,lng,workshopCfg.lat,workshopCfg.lng));
+        if(dist<=workshopCfg.radius){
+          const updated={...attendance,[user.id]:{status:'present',time:new Date().toISOString(),lat,lng,dist,gated:true}};
+          updateJob({attendance:updated});
+          setGpsMsg(`Checked in — ${dist}m from workshop. ✓`);setGpsOk(true);
+        } else {
+          setGpsMsg(`You are ${dist}m from the workshop. Must be within ${workshopCfg.radius}m.`);setGpsOk(false);
+        }
+      }
+    }catch{setGpsMsg('GPS unavailable — enable location and try again.');setGpsOk(false);}
+    setLoading(false);
+  };
+
+  const markAbsent=(crewId)=>{
+    const updated={...attendance,[crewId]:{status:'absent',markedBy:user.name,markedAt:new Date().toISOString()}};
+    updateJob({attendance:updated});
+  };
+
+  const clearAttendance=(crewId)=>{
+    const updated={...attendance};
+    delete updated[crewId];
+    updateJob({attendance:updated});
+  };
+
+  const myRecord=attendance[user.id];
+  const presentCount=assignedCrew.filter(id=>attendance[id]?.status==='present').length;
+  const absentCount=assignedCrew.filter(id=>attendance[id]?.status==='absent').length;
+  const pendingCount=assignedCrew.length-presentCount-absentCount;
+  const allAccounted=pendingCount===0;
+
+  const fmtTime=iso=>{try{return new Date(iso).toLocaleTimeString('en-GH',{hour:'2-digit',minute:'2-digit',hour12:true});}catch{return iso;}};
+
+  const statusColor={present:C.ok,absent:C.err,pending:C.muted};
+  const statusLabel={present:'Present',absent:'Absent',pending:'Pending'};
+
+  return(
+    <div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8,marginBottom:16}}>
+        {[['Present',presentCount,C.ok],['Absent',absentCount,C.err],['Pending',pendingCount,C.muted]].map(([l,n,c])=>(
+          <div key={l} style={{background:C.s1,border:`1px solid ${C.bdr}`,borderRadius:2,padding:'10px 8px',textAlign:'center'}}>
+            <div style={{fontFamily:BF,fontSize:22,fontWeight:700,color:c}}>{n}</div>
+            <div style={{fontSize:9,letterSpacing:1.5,color:C.muted,fontFamily:MF}}>{l.toUpperCase()}</div>
+          </div>
+        ))}
+      </div>
+
+      {!workshopCfg?.lat&&<div style={{padding:'8px 12px',background:C.s2,borderRadius:2,fontSize:11,fontFamily:MF,color:C.warn,marginBottom:12}}>
+        ⚠ No workshop location set. Check-ins will not be GPS-verified. Set location in Settings tab.
+      </div>}
+
+      {/* My own check-in button — visible to all crew */}
+      {assignedCrew.includes(user.id)&&(
+        <Card ch={<div>
+          <div style={{fontFamily:BF,fontSize:13,letterSpacing:1,color:C.muted,marginBottom:8}}>YOUR ATTENDANCE</div>
+          {!myRecord&&<Btn ch={loading?'⟳ Checking GPS…':'Check In at Workshop'} onClick={checkIn} full disabled={loading} color={C.ok}/>}
+          {myRecord?.status==='present'&&<div>
+            <div style={{fontSize:12,color:C.ok,fontFamily:MF,marginBottom:4}}>✓ Checked in at {fmtTime(myRecord.time)}{myRecord.gated?` · ${myRecord.dist}m from workshop`:' · location unverified'}</div>
+            {isFieldSup&&<Btn ch="Clear check-in" onClick={()=>clearAttendance(user.id)} size="sm" outline/>}
+          </div>}
+          {myRecord?.status==='absent'&&<div style={{fontSize:12,color:C.err,fontFamily:MF}}>Marked absent by {myRecord.markedBy}</div>}
+          {gpsMsg&&<div style={{fontSize:11,color:gpsOk?C.ok:C.warn,fontFamily:MF,marginTop:8}}>{gpsMsg}</div>}
+        </div>} style={{marginBottom:14}}/>
+      )}
+
+      {/* Full crew list — visible to field supervisor and admin */}
+      {isFieldSup&&(
+        <div>
+          <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:10}}>CREW ATTENDANCE</div>
+          <div style={{display:'flex',flexDirection:'column',gap:8}}>
+            {assignedCrew.map(id=>{
+              const member=crew.find(c=>c.id===id);
+              if(!member) return null;
+              const rec=attendance[id];
+              const st=rec?.status||'pending';
+              return(
+                <Card key={id} ch={<div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <div>
+                    <div style={{fontFamily:BF,fontSize:15,fontWeight:600,color:st==='present'?C.ok:st==='absent'?C.err:C.txt}}>{member.name}</div>
+                    <div style={{fontSize:10,color:C.muted,fontFamily:MF}}>
+                      {st==='present'&&`Checked in at ${fmtTime(rec.time)}${rec.gated?` · ${rec.dist}m`:' · unverified'}`}
+                      {st==='absent'&&`Absent — marked by ${rec.markedBy} at ${fmtTime(rec.markedAt)}`}
+                      {st==='pending'&&'Not checked in'}
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:6}}>
+                    {st==='pending'&&<Btn ch="Mark Absent" onClick={()=>markAbsent(id)} size="sm" color={C.err}/>}
+                    {st!=='pending'&&<Btn ch="Clear" onClick={()=>clearAttendance(id)} size="sm" outline/>}
+                  </div>
+                </div>}/>
+              );
+            })}
+          </div>
+          {allAccounted&&<div style={{marginTop:12,padding:'8px 12px',background:C.s2,borderRadius:2,fontSize:11,fontFamily:MF,color:C.ok}}>
+            ✓ All crew accounted for — {presentCount} present, {absentCount} absent. Ready to proceed.
+          </div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage,workshopCfg,saveConfig,onCreateJob,onViewJob,onLogout}){
   const [tab,setTab]=useState('today');
-  const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'}];
+  const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'},{id:'settings',l:'Settings'}];
   const active=jobs.filter(j=>j.status!=='closed');
   const openDmg=damage.filter(d=>d.status!=='resolved');
   const deleteJob=id=>{
@@ -274,6 +447,7 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
         {tab==='tools'&&<ToolsTab tools={tools} saveTools={saveTools}/>}
         {tab==='crew'&&<CrewTab crew={crew} saveCrew={saveCrew}/>}
         {tab==='damage'&&<DamageTab damage={damage} saveDamage={saveDamage} crew={crew} tools={tools} saveTools={saveTools}/>}
+        {tab==='settings'&&<WorkshopSettings cfg={workshopCfg} onSave={saveConfig}/>}
       </div>
     </div>
   );
@@ -521,7 +695,7 @@ function CreateJobScreen({crew,tools,onSave,onBack}){
 }
 
 // ── Job Screen ────────────────────────────────────────────────────────
-function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTools,onBack}){
+function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTools,workshopCfg,onBack}){
   const job=jobs.find(j=>j.id===jobId);
   if(!job) return <div style={{padding:20,color:C.err,fontFamily:MF}}>Job not found.</div>;
   const updateJob=updates=>saveJobs(jobs.map(j=>j.id===jobId?{...j,...updates}:j));
@@ -616,7 +790,8 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
   const toggleMrItem=id=>updateJob({marketRun:(job.marketRun||[]).map(m=>m.id===id?{...m,done:!m.done}:m)});
   const addMrItem=item=>updateJob({marketRun:[...(job.marketRun||[]),{id:uid(),item,done:false,addedBy:user.name}]});
 
-  const TABS=[{id:'overview',l:'Overview'},{id:'checklist',l:`Checklist (${packed}/${cl.length})`},{id:'marketrun',l:'Market Run'},{id:'mishaps',l:`Mishaps${(job.mishaps||[]).length?` (${job.mishaps.length})`:''}`}];
+  const attendanceCount=Object.values(job.attendance||{}).length;
+  const TABS=[{id:'attendance',l:`Attendance (${attendanceCount}/${(job.crewIds||[]).length})`},{id:'overview',l:'Overview'},{id:'checklist',l:`Checklist (${packed}/${cl.length})`},{id:'marketrun',l:'Market Run'},{id:'mishaps',l:`Mishaps${(job.mishaps||[]).length?` (${job.mishaps.length})`:''}`}];
 
   return(
     <div style={{minHeight:'100vh',display:'flex',flexDirection:'column'}}>
@@ -661,6 +836,7 @@ function JobScreen({jobId,user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTo
           </div>
         )}
         {tab==='checklist'&&<ChecklistTab job={job} user={user} isFieldSup={isFieldSup} updateJob={updateJob} onPackItem={packItem} onReturnItem={returnItem}/>}
+        {tab==='attendance'&&<AttendanceTab job={job} user={user} crew={crew} workshopCfg={workshopCfg} updateJob={updateJob} isFieldSup={isFieldSup}/>}
         {tab==='marketrun'&&<MarketRunTab job={job} onToggle={toggleMrItem} onAdd={addMrItem}/>}
         {tab==='mishaps'&&<MishapsTab job={job} user={user} crew={crew} onAdd={addMishap}/>}
       </div>
@@ -843,6 +1019,7 @@ function App(){
   const [params,setParams]=useState({});
   const [user,setUser]=useState(null);
   const [refreshing,setRefreshing]=useState(false);
+  const [workshopCfg,setWorkshopCfg]=useState(null);
 
   const refreshJobs=async()=>{
     setRefreshing(true);
@@ -856,10 +1033,10 @@ function App(){
     if('serviceWorker' in navigator){
       navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW reg failed:',e));
     }
-    Promise.all([load('nwd-crew',null),load('nwd-tools',null),load('nwd-jobs',[]),load('nwd-damage',[])]).then(([c,t,j,d])=>{
+    Promise.all([load('nwd-crew',null),load('nwd-tools',null),load('nwd-jobs',[]),load('nwd-damage',[]),load('nwd-config',null)]).then(([c,t,j,d,cfg])=>{
       const crewData=c||DEFAULT_CREW;
       const toolData=t||DEFAULT_TOOLS;
-      setCrew(crewData);setTools(toolData);setJobs(j);setDamage(d);
+      setCrew(crewData);setTools(toolData);setJobs(j);setDamage(d);setWorkshopCfg(cfg||{lat:5.56108374374371,lng:-0.21373364856801483,radius:100,setAt:'default'});
       const session=getSession();
       if(session){
         const current=crewData.find(m=>m.id===session.id);
@@ -881,6 +1058,7 @@ function App(){
   const saveTools=async d=>{setTools(d);await save('nwd-tools',d);};
   const saveJobs=async d=>{setJobs(d);await save('nwd-jobs',d);};
   const saveDamage=async d=>{setDamage(d);await save('nwd-damage',d);};
+  const saveConfig=async cfg=>{setWorkshopCfg(cfg);await save('nwd-config',cfg);};
   const go=(sc,p={})=>{setScreen(sc);setParams(p);};
   const logout=()=>{clearSession();setUser(null);go('home');};
   const handleSelect=member=>{setUser(member);go('pin',{member});};
@@ -924,12 +1102,12 @@ function App(){
     </div>
   );
 
-  const jobProps={user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTools};
+  const jobProps={user,crew,jobs,tools,damage,saveJobs,saveDamage,saveTools,workshopCfg};
   return(
     <div style={{minHeight:'100vh',background:C.bg,color:C.txt,fontFamily:MF}}>
       {screen==='home'&&<HomeScreen crew={crew} onSelect={handleSelect}/>}
       {screen==='pin'&&params.member&&<PinScreen user={params.member} onSuccess={handlePin} onBack={()=>{setUser(null);go('home');}}/>}
-      {screen==='adminDash'&&user&&<AdminDash {...{user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage}} onCreateJob={()=>go('createJob')} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout}/>}
+      {screen==='adminDash'&&user&&<AdminDash {...{user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage,workshopCfg,saveConfig}} onCreateJob={()=>go('createJob')} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout}/>}
       {screen==='createJob'&&<CreateJobScreen crew={crew} tools={tools} onSave={createJob} onBack={()=>go('adminDash')}/>}
       {screen==='jobView'&&user&&<JobScreen {...jobProps} jobId={params.jobId} onBack={jobBack}/>}
       {screen==='supervisorDash'&&user&&<SupervisorDash user={user} crew={crew} jobs={jobs} onViewJob={id=>go('jobView',{jobId:id})} onLogout={logout} onRefresh={refreshJobs} refreshing={refreshing}/>}
