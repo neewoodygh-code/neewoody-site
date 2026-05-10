@@ -2,6 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Standing Instructions
+
+1. At the end of every session where decisions were made, scope was clarified, features were built, or anything changed about the business, site, or tools — automatically update this CLAUDE.md file to reflect those changes without being asked.
+
+2. If a correction is made during a session (wrong attribution, wrong scope, wrong technical detail) — update CLAUDE.md immediately, not at the end.
+
+3. Never remove existing context. Only add or correct.
+
+4. After updating CLAUDE.md, include it in the same commit as the rest of the session's changes.
+
 ## What this project is
 
 Static multi-page marketing website for **Neewoody Custom Woodwork** (Accra, Ghana), with an embedded React-based crew dispatch app and Cloudflare Workers serverless functions. No build system — all files are deployed directly.
@@ -188,6 +198,14 @@ Net profit projection defaults: 15% income tax, 20% idle time reserve
 - Instagram token: set as IG_TOKEN in Cloudflare Pages dashboard (expires every 60 days — refresh required)
 - Contact form: POSTs to /api/lead (Worker saves to KV, sends push to admin)
 - Analytics: GA4 (G-ZP77WR6BNH) + Cloudflare Web Analytics (automatic)
+
+### Jerksoul Restaurant — Scope Clarification (2026-05-10)
+The rooftop structure (pergola/polycarbonate roof) visible in Jerksoul photos and videos **belongs to the venue — it was not built by Neewoody**. Neewoody's actual scope was:
+- Custom pine dining tables with branded Issacher glass tops (15+ sets)
+- Upholstered cube stools paired to the dining sets and bar counter
+- Large interior bar counter with reclaimed-style timber panel cladding and solid wood top
+
+All site copy, case study text, and portfolio cards have been corrected to reflect this. Do not re-introduce pergola attribution to Neewoody in any future content.
 
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
