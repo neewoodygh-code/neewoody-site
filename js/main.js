@@ -163,7 +163,7 @@ if ('serviceWorker' in navigator) {
         _gotcha:      (contactForm.querySelector('[name="_gotcha"]') || {}).value || '',
       };
 
-      fetch('https://neewoodygh.com/api/lead', {
+      fetch('/api/lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -335,6 +335,54 @@ document.addEventListener('DOMContentLoaded', function () {
   if (servicePages.indexOf(page) !== -1) {
     gEvent('service_page_view', { service: page });
   }
+
+  /* ── Lightbox — opens .lightbox-img on click ── */
+  (function () {
+    var lb = document.createElement('div');
+    lb.id  = 'lightbox';
+    lb.setAttribute('role', 'dialog');
+    lb.setAttribute('aria-modal', 'true');
+    lb.setAttribute('aria-label', 'Image viewer');
+    lb.innerHTML =
+      '<button id="lightbox-close" aria-label="Close image">&times;</button>' +
+      '<img id="lightbox-img" src="" alt="" />';
+    document.body.appendChild(lb);
+
+    var lbImg  = lb.querySelector('#lightbox-img');
+    var lbClose = lb.querySelector('#lightbox-close');
+
+    function openLightbox(src, alt) {
+      lbImg.src = src;
+      lbImg.alt = alt || '';
+      lb.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      lbClose.focus();
+    }
+
+    function closeLightbox() {
+      lb.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(function () { lbImg.src = ''; }, 200);
+    }
+
+    lb.addEventListener('click', function (e) {
+      if (e.target === lb || e.target === lbClose) closeLightbox();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && lb.classList.contains('open')) closeLightbox();
+    });
+
+    document.addEventListener('click', function (e) {
+      var el = e.target.closest('.lightbox-img');
+      if (!el) return;
+      e.preventDefault();
+      var src = el.dataset.full || el.src || el.getAttribute('href') || '';
+      var img = el.tagName === 'IMG' ? el : el.querySelector('img');
+      var alt = (img && img.alt) || el.alt || '';
+      if (src) openLightbox(src, alt);
+    });
+  })();
 
   /* ── Scroll depth — fires once at 50% and 90% ── */
   var scrollMilestones = { 50: false, 90: false };
