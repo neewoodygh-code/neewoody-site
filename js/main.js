@@ -68,8 +68,9 @@ if ('serviceWorker' in navigator) {
 
         // Show / hide cards
         projectCards.forEach(function (card) {
-          const cat = card.getAttribute('data-category');
-          if (filter === 'all' || cat === filter) {
+          var cat  = card.getAttribute('data-category') || '';
+          var cats = cat.trim().split(/\s+/);
+          if (filter === 'all' || cats.indexOf(filter) !== -1) {
             card.removeAttribute('data-hidden');
           } else {
             card.setAttribute('data-hidden', 'true');
