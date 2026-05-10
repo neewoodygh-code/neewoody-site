@@ -207,6 +207,16 @@ The rooftop structure (pergola/polycarbonate roof) visible in Jerksoul photos an
 
 All site copy, case study text, and portfolio cards have been corrected to reflect this. Do not re-introduce pergola attribution to Neewoody in any future content.
 
+### Project History (Key Commissions)
+- **Ridge Residence (2021):** Afromosia live-edge dining table with solid timber U-frame legs. Commissioned by French expatriates on posting in Ghana. Private residential client — not a French Embassy commission. Images in `images/projects/french-embassy/`. Case study: `projects/french-embassy.html`.
+- **Judith East Legon (2022):** Full Hyedua dining room commission — large-format dining table, 6 upholstered chairs with linen fabric panels, console unit with full-extension drawers and waterfall edge sides. All three pieces built to one unified brief in the same timber, finished in a rich espresso. Images in `images/projects/judith-east-legon/`. Case study: `projects/judith-east-legon.html`.
+- **Jerksoul Restaurant (2022):** Bar counter and dining furniture for a rooftop restaurant in Accra. Neewoody scope was dining tables, cube stools, and bar counter only. The rooftop structure/pergola belongs to the venue — never claim it as Neewoody work.
+- **Sage Centre (2022–2024):** 26-month full-property teak fitout for a US-based educational NGO in Wli, Volta Region. Case study: `projects/sage-centre.html`.
+- **House of Walker:** Branded structural carpentry installation for Johnnie Walker's 200-year celebration at One Airport Square, Accra. Case study: `projects/house-of-walker.html`.
+
+### _inbox Workflow
+Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
+
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
