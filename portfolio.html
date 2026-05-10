@@ -27,33 +27,23 @@ gtag('config', 'G-ZP77WR6BNH');
 
 
 
-  <!-- Carpenter Tools nav dropdown -->
   <style>
-  </style>
-  <style>
-  </style>
-  <!-- Carpenter Tools nav dropdown -->
-  <style>
-  .nav-tools{position:relative;display:inline-flex;align-items:center;margin-left:16px;padding-left:16px;border-left:1px solid var(--clr-border)}
-  .nav-tools-btn{background:none;border:1.5px solid var(--clr-accent);color:var(--clr-accent);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;white-space:nowrap}
-  .nav-tools-btn:hover{background:var(--clr-accent);color:#fff}
-  .nav-tools-drop{display:none;position:absolute;top:calc(100% + 10px);right:0;background:#fff;border:1.5px solid var(--clr-border);border-radius:10px;min-width:190px;box-shadow:0 8px 24px rgba(0,0,0,.1);z-index:200;overflow:hidden}
-  .nav-tools-drop a{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;font-weight:600;color:var(--clr-text);text-decoration:none;border-bottom:1px solid var(--clr-border);transition:background .15s}
-  .nav-tools-drop a:last-child{border-bottom:none}
-  .nav-tools-drop a:hover{background:var(--clr-bg)}
-  .nav-tools-drop .drop-badge{font-size:9px;background:rgba(160,120,64,.15);color:var(--clr-accent);border:1px solid var(--clr-accent);border-radius:4px;padding:1px 6px;font-weight:700;letter-spacing:.5px;margin-left:auto}
-  .nav-tools.open .nav-tools-drop{display:block}
-  @media(max-width:768px){.nav-tools{display:none}}
-  .nav-tools-wrap{position:relative;display:flex;align-items:center;margin-left:.5rem}
-  .nav-tools-trigger{font-size:.82rem;font-weight:600;color:var(--clr-accent);padding:.3rem .75rem;border:1.5px solid rgba(160,120,74,.4);border-radius:2px;cursor:pointer;letter-spacing:.05em;display:flex;align-items:center;gap:.3rem;transition:background var(--ease);white-space:nowrap;background:rgba(160,120,74,.06)}
-  .nav-tools-trigger:hover{background:var(--clr-accent-lt)}
-  .nav-tools-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);min-width:220px;box-shadow:var(--shadow-lg);padding:.5rem;z-index:500}
-  .nav-tools-wrap:hover .nav-tools-dropdown{display:block}
-  .nav-tools-dropdown-label{padding:.35rem .9rem .2rem;font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace}
-  .nav-tools-dropdown a{display:block;padding:.5rem .9rem;font-size:.85rem;font-weight:500;color:var(--clr-mid);text-decoration:none;border-radius:var(--radius);transition:background var(--ease),color var(--ease)}
-  .nav-tools-dropdown a:hover{background:var(--clr-bg-alt);color:var(--clr-accent)}
-  .tool-tag{font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:rgba(160,120,74,.15);color:var(--clr-accent);padding:.1rem .4rem;border-radius:2px;font-family:monospace;margin-left:.4rem}
-  @media(max-width:900px){.nav-tools-wrap{display:none}}
+  /* ── Video card play button overlay ── */
+  .video-thumb { position: relative; cursor: pointer; }
+  .video-play-btn {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,.25); transition: background .2s;
+  }
+  .video-thumb:hover .video-play-btn { background: rgba(0,0,0,.45); }
+  .video-play-btn svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); transition: transform .2s; }
+  .video-thumb:hover .video-play-btn svg { transform: scale(1.1); }
+  .video-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    background: #c00; color: #fff; padding: .18rem .55rem; border-radius: 3px;
+    margin-bottom: .4rem;
+  }
   </style>
 </head>
 <body>
@@ -149,29 +139,17 @@ gtag('config', 'G-ZP77WR6BNH');
 
         <!-- Filter bar -->
         <div class="filter-bar" role="group" aria-label="Filter projects by category">
-          <button class="filter-btn active" data-filter="all">All Projects</button>
-          <button class="filter-btn" data-filter="featured">Featured</button>
-          <button class="filter-btn" data-filter="wardrobe">Wardrobes</button>
-          <button class="filter-btn" data-filter="bed">Beds</button>
-          <button class="filter-btn" data-filter="kitchen">Kitchens</button>
-          <button class="filter-btn" data-filter="dining">Dining & Living</button>
-          <button class="filter-btn" data-filter="solid-wood">Solid Wood</button>
-          <button class="filter-btn" data-filter="shelving">Shelving</button>
-          <button class="filter-btn" data-filter="tv-units">TV Units</button>
-          <button class="filter-btn" data-filter="other">Other</button>
+          <button class="filter-btn active" data-filter="all">All</button>
+          <button class="filter-btn" data-filter="video">Videos</button>
+          <button class="filter-btn" data-filter="photo">Photos</button>
+          <button class="filter-btn" data-filter="commercial">Commercial</button>
+          <button class="filter-btn" data-filter="residential">Residential</button>
         </div>
 
         <div class="gallery-grid" id="portfolio-grid">
 
-          <!-- ─────────────────────────────────────────
-               PROJECT CARDS — 12 total
-               REPLACE all image src values with your actual project photos.
-               Each image should be 700×500px minimum, JPG format.
-               File naming convention: /images/project-[type]-[number].jpg
-          ───────────────────────────────────────── -->
-
           <!-- ═══ FEATURED: Sage Centre ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="featured solid-wood dining">
+          <article class="project-card project-card--featured reveal" data-category="photo commercial featured">
             <div class="project-card-img">
               <!--
                 IMAGE: sage-hero.jpg — rename IMG_0425 and upload to images/projects/sage-centre/sage-hero.jpg
@@ -203,7 +181,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- ═══ FEATURED: House of Walker ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="featured other">
+          <article class="project-card project-card--featured reveal" data-category="photo commercial featured">
             <div class="project-card-img">
               <img
                 src="images/projects/house-of-walker/how-hero.jpg"
@@ -230,8 +208,110 @@ gtag('config', 'G-ZP77WR6BNH');
             </div>
           </article>
 
+          <!-- ═══ JERKSOUL — Video: Bar construction ═══ -->
+          <article class="project-card reveal" data-category="video commercial">
+            <div class="project-card-img video-thumb"
+                 data-embed="https://www.youtube.com/embed/UiJU_FxjISM?autoplay=1"
+                 data-title="Jerksoul bar construction — Neewoody">
+              <img
+                src="https://img.youtube.com/vi/UiJU_FxjISM/hqdefault.jpg"
+                alt="Jerksoul Restaurant bar counter construction — Neewoody Custom Woodwork"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              />
+              <div class="video-play-btn" aria-label="Play video">
+                <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
+                </svg>
+              </div>
+            </div>
+            <div class="project-card-body">
+              <div class="video-badge">&#9654; Video</div>
+              <h4>Bar Construction — Jerksoul Rooftop</h4>
+              <p>Reclaimed-style timber panel cladding and solid wood top bar counter built for Jerksoul's rooftop dining space.</p>
+              <a href="projects/jerksoul.html" class="card-link">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- ═══ JERKSOUL — Video: Daytime rooftop ═══ -->
+          <article class="project-card reveal reveal-delay-1" data-category="video commercial">
+            <div class="project-card-img video-thumb"
+                 data-embed="https://www.youtube.com/embed/SPWB-wfQDbc?autoplay=1"
+                 data-title="Jerksoul daytime rooftop — Neewoody">
+              <img
+                src="https://img.youtube.com/vi/SPWB-wfQDbc/hqdefault.jpg"
+                alt="Jerksoul Restaurant rooftop dining space daytime view — Neewoody Custom Woodwork"
+                loading="lazy"
+                onerror="this.style.display='none'"
+              />
+              <div class="video-play-btn" aria-label="Play video">
+                <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
+                </svg>
+              </div>
+            </div>
+            <div class="project-card-body">
+              <div class="video-badge">&#9654; Video</div>
+              <h4>Daytime Rooftop — Jerksoul</h4>
+              <p>The completed Jerksoul rooftop — custom timber pergola with polycarbonate roof and 15+ branded dining sets.</p>
+              <a href="projects/jerksoul.html" class="card-link">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- ═══ JERKSOUL — Photo 1 ═══ -->
+          <article class="project-card reveal reveal-delay-2" data-category="photo commercial">
+            <div class="project-card-img">
+              <img
+                src="images/projects/jerksoul/jerksoul-day-1.jpg"
+                alt="Jerksoul Restaurant rooftop — daytime view of custom timber pergola and dining sets"
+                loading="lazy"
+                class="lightbox-img"
+                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/projects/jerksoul/jerksoul-day-1.jpg</div>'"
+              />
+              <span class="project-badge" style="background:#7D5C34;color:#fff">Commercial</span>
+            </div>
+            <div class="project-card-body">
+              <h4>Rooftop Dining Space — Jerksoul Restaurant</h4>
+              <p>Completed rooftop showing the full custom timber pergola with polycarbonate roof and 15+ Issacher-branded pine dining sets.</p>
+              <a href="projects/jerksoul.html" class="card-link">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
+          <!-- ═══ JERKSOUL — Photo 2 ═══ -->
+          <article class="project-card reveal" data-category="photo commercial">
+            <div class="project-card-img">
+              <img
+                src="images/projects/jerksoul/jerksoul-day-2.jpg"
+                alt="Jerksoul Restaurant — bar counter with reclaimed timber cladding and solid wood top"
+                loading="lazy"
+                class="lightbox-img"
+                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/projects/jerksoul/jerksoul-day-2.jpg</div>'"
+              />
+              <span class="project-badge" style="background:#7D5C34;color:#fff">Commercial</span>
+            </div>
+            <div class="project-card-body">
+              <h4>Bar Counter — Jerksoul Restaurant</h4>
+              <p>Large interior bar counter with reclaimed-style timber panel cladding and solid wood top — anchor piece of the rooftop space.</p>
+              <a href="projects/jerksoul.html" class="card-link">
+                View case study
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+              </a>
+            </div>
+          </article>
+
           <!-- 1 -->
-          <article class="project-card reveal" data-category="wardrobe">
+          <article class="project-card reveal" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Wardrobe project 1 — e.g. your best built-in wardrobe. Filename: images/project-wardrobe-1.jpg -->
               <img src="images/project-wardrobe-1.jpg" alt="Custom floor-to-ceiling built-in wardrobe, East Legon Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-wardrobe-1.jpg</div>'" />
@@ -245,7 +325,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 2 -->
-          <article class="project-card reveal reveal-delay-1" data-category="kitchen">
+          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Kitchen project 1 — full kitchen cabinet installation. Filename: images/project-kitchen-1.jpg -->
               <img src="images/project-kitchen-1.jpg" alt="Custom kitchen cabinets with upper and lower units, Cantonments Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-kitchen-1.jpg</div>'" />
@@ -259,7 +339,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 3 -->
-          <article class="project-card reveal reveal-delay-2" data-category="bed">
+          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Bed project 1 — storage bed or platform bed. Filename: images/project-bed-1.jpg -->
               <img src="images/project-bed-1.jpg" alt="Custom Double-size storage bed with drawers, Airport Residential Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-bed-1.jpg</div>'" />
@@ -273,7 +353,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 4 -->
-          <article class="project-card reveal" data-category="wardrobe">
+          <article class="project-card reveal" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Wardrobe project 2 — hinged wardrobe or walk-in. Filename: images/project-wardrobe-2.jpg -->
               <img src="images/project-wardrobe-2.jpg" alt="Hinged door wardrobe with custom interior, Labone Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-wardrobe-2.jpg</div>'" />
@@ -287,7 +367,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 5 -->
-          <article class="project-card reveal reveal-delay-1" data-category="shelving">
+          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Shelving/TV unit project. Filename: images/project-shelving-1.jpg -->
               <img src="images/project-shelving-1.jpg" alt="Custom TV unit and wall shelving in living room, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-shelving-1.jpg</div>'" />
@@ -301,7 +381,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 6 -->
-          <article class="project-card reveal reveal-delay-2" data-category="kitchen">
+          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Kitchen project 2 — kitchen island or pantry. Filename: images/project-kitchen-2.jpg -->
               <img src="images/project-kitchen-2.jpg" alt="Custom kitchen with island and pantry unit, Tema Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-kitchen-2.jpg</div>'" />
@@ -315,7 +395,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 7 -->
-          <article class="project-card reveal" data-category="bed">
+          <article class="project-card reveal" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Bed project 2 — platform or upholstered bed. Filename: images/project-bed-2.jpg -->
               <img src="images/project-bed-2.jpg" alt="Custom platform bed with upholstered headboard, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-bed-2.jpg</div>'" />
@@ -329,7 +409,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 8 -->
-          <article class="project-card reveal reveal-delay-1" data-category="wardrobe">
+          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Wardrobe project 3 — master bedroom wardrobe. Filename: images/project-wardrobe-3.jpg -->
               <img src="images/project-wardrobe-3.jpg" alt="Master bedroom sliding wardrobe with dark finish, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-wardrobe-3.jpg</div>'" />
@@ -343,7 +423,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 9 -->
-          <article class="project-card reveal reveal-delay-2" data-category="shelving">
+          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Home office or bookshelf project. Filename: images/project-shelving-2.jpg -->
               <img src="images/project-shelving-2.jpg" alt="Custom home office shelving and desk unit, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-shelving-2.jpg</div>'" />
@@ -357,7 +437,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 10 -->
-          <article class="project-card reveal" data-category="kitchen">
+          <article class="project-card reveal" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Kitchen project 3 — compact or apartment kitchen. Filename: images/project-kitchen-3.jpg -->
               <img src="images/project-kitchen-3.jpg" alt="Compact apartment kitchen cabinets, Adenta Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-kitchen-3.jpg</div>'" />
@@ -371,7 +451,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 11 -->
-          <article class="project-card reveal reveal-delay-1" data-category="other">
+          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Kids room furniture or dressing table. Filename: images/project-other-1.jpg -->
               <img src="images/project-other-1.jpg" alt="Custom kids bedroom furniture with bunk bed and wardrobe, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-other-1.jpg</div>'" />
@@ -385,7 +465,7 @@ gtag('config', 'G-ZP77WR6BNH');
           </article>
 
           <!-- 12 -->
-          <article class="project-card reveal reveal-delay-2" data-category="wardrobe">
+          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
             <div class="project-card-img">
               <!-- REPLACE: Wardrobe project 4 — walk-in or dressing room. Filename: images/project-wardrobe-4.jpg -->
               <img src="images/project-wardrobe-4.jpg" alt="Custom dressing room with open shelving and hanging rails, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: images/project-wardrobe-4.jpg</div>'" />
@@ -461,10 +541,22 @@ gtag('config', 'G-ZP77WR6BNH');
   <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
   <script>
-  // Close nav-tools dropdown on outside click
-  document.addEventListener('click', function(e){
-    var nt = document.getElementById('nav-tools');
-    if(nt && !nt.contains(e.target)) nt.classList.remove('open');
+  /* ── Video card: click play button to embed inline ── */
+  document.querySelectorAll('.video-thumb').forEach(function(thumb) {
+    thumb.addEventListener('click', function() {
+      var url = this.dataset.embed;
+      if (!url || this.querySelector('iframe')) return;
+      var iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.title = this.dataset.title || 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;';
+      this.innerHTML = '';
+      this.style.position = 'relative';
+      this.appendChild(iframe);
+      this.style.cursor = 'default';
+    });
   });
   </script>
 </body>
