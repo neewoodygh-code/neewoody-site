@@ -54,6 +54,31 @@ gtag('config', 'G-ZP77WR6BNH');
   .nav-tools-dropdown-label{padding:.35rem .9rem .2rem;font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace}
   @media(max-width:900px){.nav-tools-wrap{display:none}}
   </style>
+  <style>
+  /* ── Wardrobe Gallery ── */
+  .wardrobe-gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2rem}
+  @media(max-width:900px){.wardrobe-gallery-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.wardrobe-gallery-grid{grid-template-columns:1fr}}
+  .wardrobe-card{background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius-lg);overflow:hidden}
+  .wardrobe-card-img{position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer}
+  .wardrobe-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
+  .wardrobe-card-img:hover img{transform:scale(1.04)}
+  .wardrobe-badge{position:absolute;top:.6rem;left:.6rem;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:var(--clr-dark);color:#fff;padding:.2rem .55rem;border-radius:3px}
+  .wardrobe-card-body{padding:1rem 1.1rem}
+  .wardrobe-card-location{font-size:.78rem;font-weight:600;color:var(--clr-text);margin-bottom:.35rem;display:flex;align-items:center;justify-content:space-between}
+  .wardrobe-card-year{font-size:.7rem;font-weight:500;color:var(--clr-muted);font-family:monospace}
+  .wardrobe-card-caption{font-size:.82rem;color:var(--clr-mid);line-height:1.5;margin:0}
+  .wardrobe-card.wg-hidden{display:none}
+  /* ── Wardrobe Gallery Lightbox ── */
+  .wlb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:1rem}
+  .wlb.open{display:flex}
+  .wlb-img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:4px}
+  .wlb-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;opacity:.8;line-height:1}
+  .wlb-close:hover{opacity:1}
+  .wlb-prev,.wlb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;padding:.75rem 1rem;cursor:pointer;border-radius:4px;transition:background .2s}
+  .wlb-prev{left:1rem}.wlb-next{right:1rem}
+  .wlb-prev:hover,.wlb-next:hover{background:rgba(255,255,255,.25)}
+  </style>
 </head>
 <body>
 
@@ -225,7 +250,7 @@ gtag('config', 'G-ZP77WR6BNH');
           <div class="type-card reveal">
             <div class="type-card-img">
               <!-- REPLACE: Photo of sliding door wardrobe. Filename: images/wardrobe-sliding.jpg -->
-              <img src="images/wardrobe-sliding.jpg" alt="Custom sliding door wardrobe in Accra bedroom" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: sliding wardrobe</div>'" />
+              <img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Custom sliding door wardrobe in cherry-effect laminate — Dansoman, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: sliding wardrobe</div>'" />
             </div>
             <div class="type-card-body">
               <h4>Sliding Door Wardrobes</h4>
@@ -247,7 +272,7 @@ gtag('config', 'G-ZP77WR6BNH');
           <div class="type-card reveal reveal-delay-2">
             <div class="type-card-img">
               <!-- REPLACE: Photo of a floor-to-ceiling wardrobe. Filename: images/wardrobe-floor-ceiling.jpg -->
-              <img src="images/wardrobe-floor-ceiling.jpg" alt="Floor to ceiling custom wardrobe in Accra, Ghana" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: floor-to-ceiling wardrobe</div>'" />
+              <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Floor-to-ceiling built-in wardrobe in greige oak laminate — Oyarifa, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: floor-to-ceiling wardrobe</div>'" />
             </div>
             <div class="type-card-body">
               <h4>Floor-to-Ceiling Wardrobes</h4>
@@ -258,7 +283,7 @@ gtag('config', 'G-ZP77WR6BNH');
           <div class="type-card reveal">
             <div class="type-card-img">
               <!-- REPLACE: Walk-in / dressing room photo. Filename: images/wardrobe-walkin.jpg -->
-              <img src="images/wardrobe-walkin.jpg" alt="Custom walk-in wardrobe or dressing room in Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: walk-in wardrobe</div>'" />
+              <img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Custom open wardrobe system creating a walk-in dressing room — Nmai Dzorn, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: walk-in wardrobe</div>'" />
             </div>
             <div class="type-card-body">
               <h4>Walk-in Wardrobes</h4>
@@ -280,7 +305,7 @@ gtag('config', 'G-ZP77WR6BNH');
           <div class="type-card reveal reveal-delay-2">
             <div class="type-card-img">
               <!-- REPLACE: Photo showing internal wardrobe layout with drawers and rails. Filename: images/wardrobe-interior.jpg -->
-              <img src="images/wardrobe-interior.jpg" alt="Custom wardrobe interior layout with drawers, shelves and rails" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: wardrobe interior</div>'" />
+              <img src="images/projects/adenta/adenta-interior-right.jpg" alt="Custom wardrobe interior layout with open shelves and drawers — Adenta, Accra" loading="lazy" onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem\'>Photo: wardrobe interior</div>'" />
             </div>
             <div class="type-card-body">
               <h4>Custom Interior Layouts</h4>
@@ -290,6 +315,182 @@ gtag('config', 'G-ZP77WR6BNH');
         </div>
       </div>
     </section>
+
+    <!-- ═══ WARDROBE GALLERY ═══ -->
+    <section class="section section-alt" aria-labelledby="wardrobe-gallery-heading">
+      <div class="container">
+        <div class="reveal" style="margin-bottom:1.5rem">
+          <p class="section-label">Our Wardrobe Work</p>
+          <h2 id="wardrobe-gallery-heading">Projects Gallery</h2>
+          <p class="section-intro">A selection of wardrobe commissions across Accra. Every style is available in your choice of finish and internal layout.</p>
+        </div>
+        <div class="filter-bar" role="group" aria-label="Filter by wardrobe type" style="margin-bottom:2rem" id="wardrobe-filter-bar">
+          <button class="filter-btn active" data-wardrobe-filter="all">All</button>
+          <button class="filter-btn" data-wardrobe-filter="builtin">Built-in</button>
+          <button class="filter-btn" data-wardrobe-filter="sliding">Sliding</button>
+          <button class="filter-btn" data-wardrobe-filter="hinged">Hinged</button>
+          <button class="filter-btn" data-wardrobe-filter="open">Open Systems</button>
+        </div>
+        <div class="wardrobe-gallery-grid" id="wardrobe-gallery">
+
+          <!-- ── Built-in ── -->
+          <article class="wardrobe-card reveal" data-wardrobe-cat="builtin">
+            <div class="wardrobe-card-img" data-wlb-index="0">
+              <img src="images/projects/agbogba/agbogba-builtin-interior.jpg"
+                alt="Floor-to-ceiling built-in wardrobe interior with shelving tower and hanging rail — Agbogba, Accra 2022"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Built-in</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Agbogba, Accra <span class="wardrobe-card-year">2022</span></div>
+              <p class="wardrobe-card-caption">Floor-to-ceiling built-in wardrobe in oak-effect laminate with open shelving tower, hanging rail, and bottom drawers.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-1" data-wardrobe-cat="builtin">
+            <div class="wardrobe-card-img" data-wlb-index="1">
+              <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+                alt="Master bedroom wall-to-wall floor-to-ceiling wardrobe in greige oak laminate with matte black handles — Oyarifa, Accra 2025"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Built-in</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Oyarifa, Accra <span class="wardrobe-card-year">2025</span></div>
+              <p class="wardrobe-card-caption">Master bedroom wall-to-wall floor-to-ceiling wardrobe in greige oak laminate with matte black handles and recessed downlight. One of two wardrobes built for this property.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-2" data-wardrobe-cat="builtin">
+            <div class="wardrobe-card-img" data-wlb-index="2">
+              <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg"
+                alt="Guest bedroom narrow floor-to-ceiling wardrobe with 6-shelf tower and hanging section — Oyarifa, Accra 2025"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Built-in</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Oyarifa, Accra — Guest Room <span class="wardrobe-card-year">2025</span></div>
+              <p class="wardrobe-card-caption">Narrow guest bedroom wardrobe, floor to ceiling, with 6-shelf tower and hanging section with drawers at base.</p>
+            </div>
+          </article>
+
+          <!-- ── Sliding ── -->
+          <article class="wardrobe-card reveal" data-wardrobe-cat="sliding">
+            <div class="wardrobe-card-img" data-wlb-index="3">
+              <img src="images/projects/dansoman/dansoman-closed-1.jpg"
+                alt="Freestanding sliding door wardrobe in cherry-effect laminate — Dansoman, Accra 2024"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Sliding</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Dansoman, Accra <span class="wardrobe-card-year">2024</span></div>
+              <p class="wardrobe-card-caption">Freestanding wardrobe in cherry-effect laminate with 2 large sliding doors on aluminium track, open top shelf, overhead cabinet, and internal drawers.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-1" data-wardrobe-cat="sliding">
+            <div class="wardrobe-card-img" data-wlb-index="4">
+              <img src="images/projects/adenta/adenta-interior-left.jpg"
+                alt="Alcove sliding door wardrobe interior with hanging rail and shelves — Adenta, Accra 2024"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Sliding</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Adenta, Accra <span class="wardrobe-card-year">2024</span></div>
+              <p class="wardrobe-card-caption">Alcove sliding door wardrobe in light ash laminate. Left section: hanging rail and shelf. Right section: 5 open shelves and 3 drawers with black edge detail.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-2" data-wardrobe-cat="sliding">
+            <div class="wardrobe-card-img" data-wlb-index="5">
+              <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg"
+                alt="Freestanding two-panel sliding door wardrobe with integrated 4-drawer chest — Cantonments, Accra 2026"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Sliding</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Cantonments, Accra <span class="wardrobe-card-year">2026</span></div>
+              <p class="wardrobe-card-caption">Freestanding wardrobe with 2-panel sliding doors above and an integrated 4-drawer chest at the base. Dark walnut-effect laminate with matte black handles.</p>
+            </div>
+          </article>
+
+          <!-- ── Hinged ── -->
+          <article class="wardrobe-card reveal" data-wardrobe-cat="hinged">
+            <div class="wardrobe-card-img" data-wlb-index="6">
+              <img src="images/projects/agbogba/agbogba-dresser-lit.jpg"
+                alt="Full-width freestanding wardrobe with integrated dresser recess and recessed spotlights — Agbogba, Accra 2022"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Hinged</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Agbogba, Accra <span class="wardrobe-card-year">2022</span></div>
+              <p class="wardrobe-card-caption">Full-width freestanding wardrobe with integrated dresser recess, overhead cabinets, and recessed spotlights. Oak-effect laminate.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-1" data-wardrobe-cat="hinged">
+            <div class="wardrobe-card-img" data-wlb-index="7">
+              <img src="images/projects/dobro/dobro-wide-closed.jpg"
+                alt="Master bedroom wardrobe with 2 hinged doors and 6 drawers at base — Dobro, Accra 2025"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Hinged</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Dobro, Accra <span class="wardrobe-card-year">2025</span></div>
+              <p class="wardrobe-card-caption">Master bedroom wardrobe with 2 hinged doors above and 6 drawers at base in cherry-effect laminate. One of 4 wardrobes built for this new-build property.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal reveal-delay-2" data-wardrobe-cat="hinged">
+            <div class="wardrobe-card-img" data-wlb-index="8">
+              <img src="images/projects/dobro/dobro-narrow-closed.jpg"
+                alt="Guest bedroom wardrobe with 2 hinged doors and 3 drawers — Dobro, Accra 2025"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Hinged</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Dobro, Accra — Guest Room <span class="wardrobe-card-year">2025</span></div>
+              <p class="wardrobe-card-caption">Guest bedroom wardrobe, 2 hinged doors with 3 drawers at base. Same cherry-effect laminate across all 4 rooms.</p>
+            </div>
+          </article>
+
+          <article class="wardrobe-card reveal" data-wardrobe-cat="hinged">
+            <div class="wardrobe-card-img" data-wlb-index="9">
+              <img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg"
+                alt="Freestanding wardrobe in dark rustic walnut-effect laminate with 2 hinged doors and 3 drawers — Dome, Accra 2025"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Hinged</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Dome, Accra <span class="wardrobe-card-year">2025</span></div>
+              <p class="wardrobe-card-caption">Freestanding wardrobe in dark rustic walnut-effect laminate with 2 hinged doors and 3 drawers. Part of a full home commission.</p>
+            </div>
+          </article>
+
+          <!-- ── Open Systems ── -->
+          <article class="wardrobe-card reveal" data-wardrobe-cat="open">
+            <div class="wardrobe-card-img" data-wlb-index="10">
+              <img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg"
+                alt="Open wardrobe system — 4 units installed facing in pairs creating a walk-in dressing room — Nmai Dzorn, Accra"
+                loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
+              <span class="wardrobe-badge">Open System</span>
+            </div>
+            <div class="wardrobe-card-body">
+              <div class="wardrobe-card-location">Nmai Dzorn, Accra</div>
+              <p class="wardrobe-card-caption">Open wardrobe system — 4 white melamine units installed facing each other in pairs, creating a dedicated walk-in dressing room. Multiple shelf configurations, drawers at base, and integrated full-length mirror.</p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Wardrobe Gallery Lightbox -->
+    <div class="wlb" id="wlb" role="dialog" aria-modal="true" aria-label="Photo viewer">
+      <button class="wlb-close" id="wlb-close" aria-label="Close">&times;</button>
+      <button class="wlb-prev" id="wlb-prev" aria-label="Previous">&#8592;</button>
+      <img class="wlb-img" id="wlb-img" src="" alt="" />
+      <button class="wlb-next" id="wlb-next" aria-label="Next">&#8594;</button>
+    </div>
 
     <!-- ═══ MATERIALS ═══ -->
     <section class="section section-alt" aria-labelledby="materials-heading">
@@ -486,6 +687,55 @@ gtag('config', 'G-ZP77WR6BNH');
     var nt = document.getElementById('nav-tools');
     if(nt && !nt.contains(e.target)) nt.classList.remove('open');
   });
+  </script>
+  <script>
+  /* ── Wardrobe gallery filter ── */
+  (function(){
+    var gallery = document.getElementById('wardrobe-gallery');
+    if (!gallery) return;
+    var cards = gallery.querySelectorAll('.wardrobe-card');
+    var btns = document.querySelectorAll('#wardrobe-filter-bar .filter-btn');
+    btns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var f = this.dataset.wardrobeFilter;
+        btns.forEach(function(b){ b.classList.remove('active'); });
+        this.classList.add('active');
+        cards.forEach(function(c){
+          var show = f === 'all' || c.dataset.wardrobeCat === f;
+          c.classList.toggle('wg-hidden', !show);
+        });
+      });
+    });
+  })();
+  /* ── Wardrobe gallery lightbox ── */
+  (function(){
+    var gallery = document.getElementById('wardrobe-gallery');
+    if (!gallery) return;
+    var lb = document.getElementById('wlb');
+    var lbImg = document.getElementById('wlb-img');
+    var lbClose = document.getElementById('wlb-close');
+    var lbPrev = document.getElementById('wlb-prev');
+    var lbNext = document.getElementById('wlb-next');
+    var current = 0, srcs = [], alts = [];
+    var imgDivs = gallery.querySelectorAll('.wardrobe-card-img');
+    imgDivs.forEach(function(div, i){
+      var img = div.querySelector('img');
+      srcs.push(img.src); alts.push(img.alt);
+      div.addEventListener('click', function(){ open(i); });
+    });
+    function open(i){ current=i; lbImg.src=srcs[i]; lbImg.alt=alts[i]; lb.classList.add('open'); document.body.style.overflow='hidden'; }
+    function close(){ lb.classList.remove('open'); document.body.style.overflow=''; }
+    lbClose.addEventListener('click', close);
+    lb.addEventListener('click', function(e){ if(e.target===lb) close(); });
+    lbPrev.addEventListener('click', function(){ open((current-1+srcs.length)%srcs.length); });
+    lbNext.addEventListener('click', function(){ open((current+1)%srcs.length); });
+    document.addEventListener('keydown', function(e){
+      if(!lb.classList.contains('open')) return;
+      if(e.key==='Escape') close();
+      if(e.key==='ArrowLeft') lbPrev.click();
+      if(e.key==='ArrowRight') lbNext.click();
+    });
+  })();
   </script>
 </body>
 </html>
