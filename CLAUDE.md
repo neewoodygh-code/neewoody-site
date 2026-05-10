@@ -216,6 +216,24 @@ All site copy, case study text, and portfolio cards have been corrected to refle
 - **Sage Centre (2022–2024):** 26-month full-property teak fitout for a US-based educational NGO in Wli, Volta Region. Case study: `projects/sage-centre.html`.
 - **House of Walker:** Branded structural carpentry installation for Johnnie Walker's 200-year celebration at One Airport Square, Accra. Case study: `projects/house-of-walker.html`.
 
+### Wardrobe Projects Catalogued
+
+**Agbogba (2022)** — Oak-effect laminate, silver handles. Two pieces, same bedroom: (1) Built-in between two windows — overhead cabinet, hanging rail, shelving tower, drawers; (2) Freestanding full-width with integrated dresser recess, overhead cabinets, recessed spotlights. Best images: `agbogba-dresser-lit.jpg` (hero), `agbogba-builtin-interior.jpg`.
+
+**Dansoman (2024)** — Cherry/mahogany-effect laminate. Freestanding sliding door wardrobe. 2 sliding doors on aluminium track, open top shelf, overhead 2-door cabinet, internal hanging rail and 3 drawers. Best image: `dansoman-closed-1.jpg` (hero).
+
+**Adenta (2024)** — Light ash/white oak laminate. Alcove sliding door wardrobe. No handles (push-to-open). Left: shelf + hanging. Right: 5 shelves + 3 drawers. Best photographed wardrobe in the catalogue. Best images: `adenta-interior-left.jpg`, `adenta-interior-right.jpg`.
+
+**Oyarifa (2025)** — Greige oak-effect laminate, matte black handles. Two floor-to-ceiling built-in wardrobes, same property: (1) Master — wall-to-wall, 4 doors, overhead cabinets, 2 central base drawers, recessed downlight, marble floor; (2) Guest — narrow alcove, overhead cabinet, 6-shelf tower left, hanging + 2 drawers right. Best images: `oyarifa-master-closed-1.jpg` (hero), `oyarifa-guest-interior.jpg`.
+
+**Zoe, Cantonments (2026)** — Dark walnut-effect laminate, matte black handles. Freestanding wardrobe. 2-panel sliding doors above, integrated 4-drawer chest at base (2+2 configuration). Cantonments — premium target market location. Best images: `zoe-front-closed.jpg` (hero), `zoe-angled.jpg`.
+
+**Seyram, Nmai Dzorn** — White melamine. Open wardrobe system. 4 units installed facing each other in pairs — dedicated walk-in dressing room. Multiple shelf configs, base drawers, integrated full-length mirror. Only 1 installed photo exists. Category: Open/Walk-in Systems. Best image: `seyram-installed.jpg`.
+
+**Dobro, Nsawam Road (Dec 2025)** — Cherry-effect laminate, matte black handles. 4 wardrobes across one new-build house: master (wide, 6 drawers 3+3), kids room (narrow, 3 drawers), 2 guest bedrooms (narrow, 3 drawers each). Built-in drawer organisers with compartments in some units. Scope was wardrobes only — no other furniture. Best images: `dobro-wide-closed.jpg` (hero), `dobro-wide-interior.jpg`, `dobro-drawers-open.jpg`, `dobro-interior-cubbies.jpg`.
+
+**Nadia standalone wardrobe, Dome (2025)** — Dark rustic/distressed walnut-effect laminate, matte black handles. Single wardrobe, 2 hinged doors, 3 drawers. Part of Nadia full home commission (see `nadia-dome.html`). Distinct from the dark walnut on Zoe — this is a distressed/rustic grain, darker overall. Best images: `nadia-wardrobe-front.jpg`, `nadia-wardrobe-angled.jpg`.
+
 ### _inbox Workflow
 Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
 
