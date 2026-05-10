@@ -70,10 +70,21 @@
   .scope-icon{font-size:1.4rem;flex-shrink:0;margin-top:.1rem}
   .scope-item-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--clr-text);margin-bottom:.2rem}
   .scope-item-text span{font-size:.83rem;color:var(--clr-mid);line-height:1.5}
-  /* ── Playlist ── */
+  /* ── Video Cards ── */
   .playlist-section{padding:4rem 0;border-top:1px solid var(--clr-border);background:var(--clr-bg-alt)}
-  .playlist-wrapper{position:relative;width:100%;max-width:840px;margin:2rem auto 0;padding-top:56.25%;border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
-  .playlist-wrapper iframe{position:absolute;inset:0;width:100%;height:100%;border:none}
+  .video-card-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2rem}
+  @media(max-width:900px){.video-card-grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:520px){.video-card-grid{grid-template-columns:1fr}}
+  .video-card{border-radius:var(--radius);overflow:hidden;background:var(--clr-surface);border:1px solid var(--clr-border)}
+  .video-thumb{position:relative;cursor:pointer;aspect-ratio:16/9;overflow:hidden;background:#111}
+  .video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .video-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);transition:background .2s}
+  .video-thumb:hover .video-play-btn{background:rgba(0,0,0,.45)}
+  .video-play-btn svg{filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));transition:transform .2s}
+  .video-thumb:hover .video-play-btn svg{transform:scale(1.1)}
+  .video-card-body{padding:1rem}
+  .video-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:#c00;color:#fff;padding:.18rem .55rem;border-radius:3px;margin-bottom:.5rem}
+  .video-card-body p{font-size:.83rem;color:var(--clr-mid);line-height:1.5;margin:0}
   /* ── Next Project ── */
   .next-project{border-top:1px solid var(--clr-border);padding:3rem 0}
   .next-project-inner{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
@@ -255,22 +266,80 @@
       </div>
     </section>
 
-    <!-- ═══ PLAYLIST ═══ -->
+    <!-- ═══ VIDEOS ═══ -->
     <section class="playlist-section" aria-labelledby="playlist-heading">
       <div class="container">
         <div class="reveal" style="max-width:640px">
           <p class="section-label">See the Build</p>
           <h2 id="playlist-heading">Project Videos</h2>
-          <p style="color:var(--clr-mid);line-height:1.75;margin-top:.5rem">Watch the full Jerksoul build playlist — the construction process from bare rooftop to finished dining space.</p>
+          <p style="color:var(--clr-mid);line-height:1.75;margin-top:.5rem">Individual clips and the full build playlist — bar counter construction, the completed space, and the whole sequence start to finish.</p>
         </div>
-        <div class="playlist-wrapper reveal">
-          <iframe
-            src="https://www.youtube.com/embed/videoseries?list=PLPO1KREhuGMN1LvZIuJXgIItVYhL9q1Ia"
-            title="Jerksoul Restaurant rooftop fit-out — Neewoody Custom Woodwork build playlist"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowfullscreen
-            loading="lazy"
-          ></iframe>
+        <div class="video-card-grid reveal">
+
+          <!-- Bar Construction -->
+          <div class="video-card">
+            <div class="video-thumb"
+                 data-embed="https://www.youtube.com/embed/UiJU_FxjISM?autoplay=1"
+                 data-title="Jerksoul bar counter construction — Neewoody">
+              <img src="https://img.youtube.com/vi/UiJU_FxjISM/hqdefault.jpg"
+                   alt="Jerksoul bar counter construction" loading="lazy"
+                   onerror="this.style.display='none'" />
+              <div class="video-play-btn" aria-label="Play video">
+                <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
+                </svg>
+              </div>
+            </div>
+            <div class="video-card-body">
+              <div class="video-badge">&#9654; Video</div>
+              <p>Bar counter construction — reclaimed-style timber cladding and solid wood top built on-site.</p>
+            </div>
+          </div>
+
+          <!-- Completed Dining Space -->
+          <div class="video-card">
+            <div class="video-thumb"
+                 data-embed="https://www.youtube.com/embed/SPWB-wfQDbc?autoplay=1"
+                 data-title="Jerksoul completed dining space — Neewoody">
+              <img src="https://img.youtube.com/vi/SPWB-wfQDbc/hqdefault.jpg"
+                   alt="Jerksoul rooftop dining space — completed fit-out daytime view" loading="lazy"
+                   onerror="this.style.display='none'" />
+              <div class="video-play-btn" aria-label="Play video">
+                <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
+                </svg>
+              </div>
+            </div>
+            <div class="video-card-body">
+              <div class="video-badge">&#9654; Video</div>
+              <p>Completed dining space — tables, stools, and bar counter installed and ready for service.</p>
+            </div>
+          </div>
+
+          <!-- Full Playlist -->
+          <div class="video-card">
+            <div class="video-thumb"
+                 data-embed="https://www.youtube.com/embed/videoseries?list=PLPO1KREhuGMN1LvZIuJXgIItVYhL9q1Ia&autoplay=1"
+                 data-title="Jerksoul full build playlist — Neewoody">
+              <img src="https://img.youtube.com/vi/SPWB-wfQDbc/mqdefault.jpg"
+                   alt="Jerksoul full build playlist" loading="lazy"
+                   onerror="this.style.display='none'" />
+              <div class="video-play-btn" aria-label="Play full playlist">
+                <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
+                </svg>
+              </div>
+              <span style="position:absolute;top:.5rem;left:.5rem;background:rgba(0,0,0,.72);color:#fff;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.2rem .55rem;border-radius:3px">&#9654;&#9654; Playlist</span>
+            </div>
+            <div class="video-card-body">
+              <div class="video-badge">&#9654;&#9654; Playlist</div>
+              <p>Full build playlist — the complete construction sequence from workshop prep to finished installation.</p>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -419,6 +488,24 @@
 
   <script src="../js/main.js"></script>
   <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+  <script>
+  document.querySelectorAll('.video-thumb').forEach(function(thumb) {
+    thumb.addEventListener('click', function() {
+      var url = this.dataset.embed;
+      if (!url || this.querySelector('iframe')) return;
+      var iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.title = this.dataset.title || 'Video';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', '');
+      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;';
+      this.innerHTML = '';
+      this.style.position = 'relative';
+      this.appendChild(iframe);
+      this.style.cursor = 'default';
+    });
+  });
+  </script>
 
 </body>
 </html>
