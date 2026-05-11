@@ -237,6 +237,14 @@ All site copy, case study text, and portfolio cards have been corrected to refle
 ### _inbox Workflow
 Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
 
+### Site Content Cleanup (2026-05-11)
+- **portfolio.html:** 12 generic placeholder project cards removed (project-wardrobe-1 through -4, project-kitchen-1 through -3, project-bed-1 through -2, project-shelving-1 through -2, project-other-1). The 12 real named project cards (Sage Centre, House of Walker, Nadia Dome, Jerksoul, Golf Hills Estate, Afromosia Ridge, Judith East Legon, Oyarifa, Zoe Cantonments, Agbogba, Dobro, Seyram) are preserved intact.
+- **dining-living.html:** The "What We Build" product type cards section removed (4 cards: dining-table.jpg, display-unit.jpg, sideboard.jpg, console-table.jpg — all placeholder images). The intro split, featured projects grid, and timber species section are preserved.
+- **solid-wood.html:** The "Solid Wood Pieces We Make" product type cards section removed (4 cards: solid-wood-table.jpg, solid-wood-bed.jpg, solid-wood-bench.jpg, solid-wood-bespoke.jpg — all placeholder images). The intro split and species showcase cards are preserved.
+- **index.html:** Jerksoul case study card layout bug fixed — card was outside the display:grid container. Now all 3 featured case study cards (Sage Centre, House of Walker, Jerksoul) sit inside the same 3-column grid.
+- **projects/house-of-walker.html:** Two broken links to `../sage-centre.html` corrected to `sage-centre.html`. All 9 IMAGE upload instruction comments removed (all images were already uploaded: how-hero.jpg, how-brief.jpg, how-build.jpg, how-during-1.jpg, how-finished-1.jpg, how-during-2.jpg, how-finished-2.jpg, gallery upload guide, how-context.jpg).
+- **projects/sage-centre.html:** Upload instruction comments removed for sage-hero.jpg, sage-brief.jpg, sage-story.jpg, and gallery guide — all images confirmed uploaded.
+
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
