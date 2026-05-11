@@ -237,6 +237,28 @@ All site copy, case study text, and portfolio cards have been corrected to refle
 ### _inbox Workflow
 Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
 
+### Kitchen Projects Catalogued (2026-05-11)
+
+**Spintex — Regimanuel Gray Estate (2024)** — L-shaped kitchen, dark espresso laminate, Calacatta marble-effect countertop with gold veining, black aluminium-framed frosted glass upper cabinets, undermount black sink, integrated hob, matte black handles. Private residential. Best images: `spintex-kitchen-hero.jpg` (hero), `spintex-kitchen-wide.jpg`. Before: `spintex-kitchen-during.jpg`. Images in `images/projects/spintex-kitchen/`.
+
+**Dansoman Kitchen (2024)** — Large kitchen, cherry/teak-effect laminate, white engineered quartz countertops, freestanding island with open shelving end and seating overhang, integrated 6-burner range, undermount sink. Professionally photographed with Neewoody watermark. Best images: `dansoman-kitchen-layout.jpg` (hero), `dansoman-kitchen-island.jpg`. Images in `images/projects/dansoman-kitchen/`.
+
+**Tantra Hill Kitchen (Uncle Jo)** — Cream high-gloss laminate, warm beige speckled granite countertops, central island, integrated Beko fridge-freezer tower, washing machine under counter. Night photography only — weaker image quality. Portfolio grid only, not featured content. Best: `tantra-kitchen-overview.jpg`. Images in `images/projects/tantra-kitchen/`.
+
+**Danfa Kitchen (2025)** — Mediterranean-inspired, client brief. Warm beech-effect laminate, exposed sealed concrete countertops, Belfast farmhouse sink, brass handles, open-grid upper storage cabinet. No finished photos — construction/installation context only. Portfolio grid only, not featured. Best: `danfa-kitchen-layout.jpg`. Images in `images/projects/danfa-kitchen/`.
+
+**Kokrobite Kitchen (2021)** — Burgundy/wine red high-gloss laminate, black galaxy granite countertops, island with 4 drawers, integrated fridge housing, glazed upper cabinets. Bold colour — portfolio grid only, not featured. Best: `kokrobite-kitchen-hero.jpg`. 2 images. Images in `images/projects/kokrobite-kitchen/`.
+
+**Kukurantumi Kitchen (Eastern Region)** — Dark charcoal concrete-effect laminate, blue-grey veined granite countertops, integrated LG fridge tower, gas hob, matte black sink fittings. Notable: client in Kukurantumi, Eastern Region — 2+ hours from Accra, demonstrates geographic reach. Portfolio grid only, not featured. Best: `kukurantumi-kitchen-hero.jpg`. Images in `images/projects/kukurantumi-kitchen/`.
+
+### Homepage & Service Page Updates (2026-05-11)
+- `index.html` hero updated to `images/projects/oyarifa/oyarifa-master-closed-1.jpg`
+- Service cards updated: Wardrobes → `oyarifa-master-closed-1.jpg`, Kitchens → `spintex-kitchen-hero.jpg`, Dining → `judith-set-installed-2.jpg`, Solid Wood → `afromosia-table-installed-1.jpg`. Beds and Shelving still have no real photos.
+- `index.html` "Recent Projects" section replaced with 3 real cards: Oyarifa wardrobes, Spintex kitchen, Judith dining.
+- `wardrobes.html` intro split, hinged type card, and alcove type card all updated with real project photos. Recent project image path corrected to `nadia-wardrobe-front.jpg`.
+- `kitchens.html` intro split and type cards updated; 3 placeholder type cards removed; 2 featured project split sections added (Spintex, Dansoman); compact grid section added (Danfa, Kukurantumi).
+- 6 kitchen project cards added to `portfolio.html`.
+
 ### Site Content Cleanup (2026-05-11)
 - **portfolio.html:** 12 generic placeholder project cards removed (project-wardrobe-1 through -4, project-kitchen-1 through -3, project-bed-1 through -2, project-shelving-1 through -2, project-other-1). The 12 real named project cards (Sage Centre, House of Walker, Nadia Dome, Jerksoul, Golf Hills Estate, Afromosia Ridge, Judith East Legon, Oyarifa, Zoe Cantonments, Agbogba, Dobro, Seyram) are preserved intact.
 - **dining-living.html:** The "What We Build" product type cards section removed (4 cards: dining-table.jpg, display-unit.jpg, sideboard.jpg, console-table.jpg — all placeholder images). The intro split, featured projects grid, and timber species section are preserved.
