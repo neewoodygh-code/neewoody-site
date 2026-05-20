@@ -232,6 +232,157 @@ gtag('config', 'G-ZP77WR6BNH');
   .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
 }
 </style>
+<style>
+/* ── REDESIGN NAV + FOOTER ── */
+:root{
+  --green:#0b1f0e;--gold:#c8922a;--cream:#f0e8d0;--cream-dark:#e8dfc4;
+  --ink:#1c1c1a;--muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 3rem;
+  background:rgba(240,232,208,0.95);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(11,31,14,0.08);
+  transition:background 0.4s;
+}
+#nav .logo{
+  font-family:var(--display);font-size:1.05rem;font-weight:500;
+  color:var(--ink);letter-spacing:0.03em;text-decoration:none;flex-shrink:0;
+}
+.logo-sub{
+  display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;
+  letter-spacing:0.22em;text-transform:uppercase;opacity:0.55;margin-top:2px;
+}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{
+  font-family:var(--ui);font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap;
+}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{
+  font-family:var(--ui);font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;gap:0.3rem;
+  transition:color 0.3s;user-select:none;white-space:nowrap;
+}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{
+  position:absolute;top:calc(100% + 0.8rem);left:50%;
+  transform:translateX(-50%) translateY(-6px);
+  background:var(--green);border:1px solid rgba(240,232,208,0.08);
+  padding:0.6rem 0;min-width:180px;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.2s,transform 0.2s;z-index:300;
+}
+.nav-more:hover .nav-dropdown{
+  opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);
+}
+.nav-dropdown a{
+  display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;
+  transition:color 0.2s,background 0.2s;text-decoration:none;
+}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{
+  font-family:var(--ui);font-size:0.65rem;font-weight:500;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--green);background:var(--gold);
+  padding:0.5rem 1.1rem;transition:background 0.2s;
+  text-decoration:none;white-space:nowrap;flex-shrink:0;
+}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{
+  display:none;flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;padding:4px;
+}
+.nav-toggle span{
+  display:block;width:24px;height:2px;background:var(--ink);
+  transition:background 0.3s;
+}
+.mobile-nav{
+  position:fixed;inset:0;z-index:190;background:var(--green);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{
+  font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:400;color:rgba(240,232,208,0.75);
+  padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);
+  transition:color 0.2s;text-decoration:none;display:block;
+}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{
+  position:absolute;top:1.4rem;right:1.5rem;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--ui);font-size:0.65rem;
+  letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
+}
+.redesign-footer{
+  background:var(--green);padding:3.5rem 3rem;
+  display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem;
+}
+.redesign-footer .foot-logo{
+  font-family:var(--display);font-size:1.05rem;font-weight:500;
+  color:var(--cream);letter-spacing:0.03em;display:block;margin-bottom:0.5rem;
+  text-decoration:none;
+}
+.redesign-footer .foot-tagline{
+  font-family:var(--body);font-style:italic;font-size:0.82rem;
+  color:rgba(240,232,208,0.45);
+}
+.redesign-footer .foot-nav{
+  display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
+}
+.redesign-footer .foot-nav a{
+  font-family:var(--ui);font-size:0.65rem;font-weight:300;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:rgba(240,232,208,0.5);transition:color 0.2s;text-decoration:none;
+}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{
+  grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
+  padding-top:1.5rem;margin-top:0.5rem;
+  font-family:var(--ui);font-size:0.6rem;font-weight:300;
+  letter-spacing:0.1em;color:rgba(240,232,208,0.25);
+}
+.redesign-wa-float{
+  position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;
+  background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,0.38);
+  transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;
+}
+.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
+.redesign-wa-float svg{width:28px;height:28px}
+.redesign-wa-tooltip{
+  position:absolute;right:66px;white-space:nowrap;
+  background:#1c1c1a;color:#fff;font-family:var(--ui);
+  font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;
+  opacity:0;pointer-events:none;transform:translateX(6px);
+  transition:opacity 0.25s,transform 0.25s;
+}
+.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links{display:none}
+  #nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+}
+</style>
 </head>
 <body>
 
