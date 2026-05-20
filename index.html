@@ -80,15 +80,15 @@ img{display:block;max-width:100%}
 a{text-decoration:none}
 
 /* ── NAV ── */
-nav{
+#nav{
   position:fixed;top:0;left:0;right:0;
-  z-index:100;
+  z-index:200;
   display:flex;align-items:center;justify-content:space-between;
-  padding:1.6rem 3rem;
+  padding:1.4rem 3rem;
   transition:background 0.4s,backdrop-filter 0.4s;
 }
-nav.scrolled{
-  background:rgba(240,232,208,0.92);
+#nav.scrolled{
+  background:rgba(240,232,208,0.95);
   backdrop-filter:blur(8px);
   border-bottom:1px solid rgba(11,31,14,0.08);
 }
@@ -98,8 +98,9 @@ nav.scrolled{
   color:var(--cream);
   letter-spacing:0.03em;
   transition:color 0.4s;
+  flex-shrink:0;
 }
-nav.scrolled .logo{color:var(--ink)}
+#nav.scrolled .logo{color:var(--ink)}
 .logo-sub{
   display:block;
   font-family:var(--ui);
@@ -107,26 +108,114 @@ nav.scrolled .logo{color:var(--ink)}
   letter-spacing:0.22em;text-transform:uppercase;
   opacity:0.65;margin-top:2px;
 }
-.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
 .nav-links a{
   font-family:var(--ui);
-  font-size:0.72rem;font-weight:400;
-  letter-spacing:0.18em;text-transform:uppercase;
+  font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
   color:rgba(240,232,208,0.8);
   transition:color 0.3s;
+  white-space:nowrap;
 }
-nav.scrolled .nav-links a{color:var(--muted)}
+#nav.scrolled .nav-links a{color:var(--muted)}
 .nav-links a:hover{color:var(--gold)}
+
+/* More dropdown */
+.nav-more{position:relative}
+.nav-more-trigger{
+  font-family:var(--ui);
+  font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:rgba(240,232,208,0.8);
+  cursor:pointer;
+  display:flex;align-items:center;gap:0.3rem;
+  transition:color 0.3s;
+  user-select:none;
+  white-space:nowrap;
+}
+#nav.scrolled .nav-more-trigger{color:var(--muted)}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{
+  position:absolute;top:calc(100% + 0.8rem);left:50%;
+  transform:translateX(-50%);
+  background:var(--green);
+  border:1px solid rgba(240,232,208,0.08);
+  padding:0.6rem 0;
+  min-width:180px;
+  opacity:0;pointer-events:none;
+  transform:translateX(-50%) translateY(-6px);
+  transition:opacity 0.2s,transform 0.2s;
+}
+.nav-more:hover .nav-dropdown{
+  opacity:1;pointer-events:auto;
+  transform:translateX(-50%) translateY(0);
+}
+.nav-dropdown a{
+  display:block;
+  font-family:var(--ui);
+  font-size:0.65rem;font-weight:400;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(240,232,208,0.6);
+  padding:0.6rem 1.4rem;
+  transition:color 0.2s,background 0.2s;
+}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+
 .nav-cta{
   font-family:var(--ui);
-  font-size:0.68rem;font-weight:500;
+  font-size:0.65rem;font-weight:500;
   letter-spacing:0.15em;text-transform:uppercase;
   color:var(--green);
   background:var(--gold);
-  padding:0.55rem 1.2rem;
+  padding:0.5rem 1.1rem;
   transition:background 0.2s;
+  white-space:nowrap;
+  flex-shrink:0;
 }
 .nav-cta:hover{background:#b07d20}
+
+/* Hamburger */
+.nav-toggle{
+  display:none;
+  flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;
+  padding:4px;
+}
+.nav-toggle span{
+  display:block;width:24px;height:2px;
+  background:var(--cream);
+  transition:background 0.4s,transform 0.3s,opacity 0.3s;
+}
+#nav.scrolled .nav-toggle span{background:var(--ink)}
+
+/* Mobile nav overlay */
+.mobile-nav{
+  position:fixed;inset:0;z-index:190;
+  background:var(--green);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:3rem 2rem;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.3s;
+}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{
+  font-family:var(--display);
+  font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:400;
+  color:rgba(240,232,208,0.75);
+  padding:0.7rem 0;
+  border-bottom:1px solid rgba(240,232,208,0.06);
+  transition:color 0.2s;
+}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{
+  position:absolute;top:1.4rem;right:1.5rem;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--ui);font-size:0.65rem;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(240,232,208,0.5);
+}
 
 /* ── HERO ── */
 .hero{
@@ -599,8 +688,10 @@ footer{
   .feat-text{padding:4rem 2.5rem}
 }
 @media(max-width:768px){
-  nav{padding:1.2rem 1.5rem}
+  #nav{padding:1.2rem 1.5rem}
   .nav-links{display:none}
+  .nav-cta{display:none}
+  .nav-toggle{display:flex}
   .hero-body{bottom:3rem;left:1.5rem;right:1.5rem}
   .featured{grid-template-columns:1fr;min-height:auto}
   .feat-img-wrap{min-height:60vw}
@@ -630,15 +721,48 @@ footer{
 </head>
 <body>
 
+<!-- MOBILE NAV OVERLAY -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close">✕ Close</button>
+  <a href="index.html">Home</a>
+  <a href="wardrobes.html">Wardrobes</a>
+  <a href="kitchens.html">Kitchens</a>
+  <a href="beds.html">Beds</a>
+  <a href="dining-living.html">Dining &amp; Living</a>
+  <a href="tv-units.html">TV Units</a>
+  <a href="shelving.html">Shelving</a>
+  <a href="solid-wood.html">Solid Wood</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+    <a href="contact.html" class="btn btn-outline" style="border-color:rgba(240,232,208,0.3);color:var(--cream)">Request a Quote</a>
+  </div>
+</nav>
+
 <!-- NAV -->
 <nav id="nav">
   <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
   <ul class="nav-links">
-    <li><a href="portfolio.html">Work</a></li>
-    <li><a href="wardrobes.html">Services</a></li>
+    <li><a href="wardrobes.html">Wardrobes</a></li>
+    <li><a href="kitchens.html">Kitchens</a></li>
+    <li><a href="beds.html">Beds</a></li>
+    <li class="nav-more">
+      <span class="nav-more-trigger">More ▾</span>
+      <div class="nav-dropdown">
+        <a href="dining-living.html">Dining &amp; Living</a>
+        <a href="tv-units.html">TV Units</a>
+        <a href="shelving.html">Shelving</a>
+        <a href="solid-wood.html">Solid Wood</a>
+      </div>
+    </li>
+    <li><a href="portfolio.html">Portfolio</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
   <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="nav-cta">WhatsApp Us</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -839,6 +963,13 @@ const io = new IntersectionObserver(([e]) => {
   nav.classList.toggle('scrolled', !e.isIntersecting);
 }, { threshold: 0.05 });
 io.observe(hero);
+
+const mobileNav = document.getElementById('mobile-nav');
+const navToggle = document.getElementById('nav-toggle');
+const mobileNavClose = document.getElementById('mobile-nav-close');
+navToggle.addEventListener('click', () => mobileNav.classList.add('open'));
+mobileNavClose.addEventListener('click', () => mobileNav.classList.remove('open'));
+mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
 </script>
 
 </body>
