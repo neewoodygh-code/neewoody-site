@@ -160,7 +160,7 @@ Pages are implemented one at a time. Do not proceed to the next page until instr
 | # | Cue | File | Status |
 |---|---|---|---|
 | 1 | Go index.html | index.html | **done** |
-| 2 | Go nav-footer | All 13 pages — nav + footer only | pending |
+| 2 | Go nav-footer | All 13 pages — nav + footer only | **done** |
 | 3 | Go wardrobes | wardrobes.html | pending |
 | 4 | Go kitchens | kitchens.html | pending |
 | 5 | Go beds | beds.html | pending |
