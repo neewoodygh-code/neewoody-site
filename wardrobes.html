@@ -79,62 +79,207 @@ gtag('config', 'G-ZP77WR6BNH');
   .wlb-prev{left:1rem}.wlb-next{right:1rem}
   .wlb-prev:hover,.wlb-next:hover{background:rgba(255,255,255,.25)}
   </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── REDESIGN NAV + FOOTER ── */
+:root{
+  --green:#0b1f0e;--gold:#c8922a;--cream:#f0e8d0;--cream-dark:#e8dfc4;
+  --ink:#1c1c1a;--muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+#nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.4rem 3rem;
+  background:rgba(240,232,208,0.95);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(11,31,14,0.08);
+  transition:background 0.4s;
+}
+#nav .logo{
+  font-family:var(--display);font-size:1.05rem;font-weight:500;
+  color:var(--ink);letter-spacing:0.03em;text-decoration:none;flex-shrink:0;
+}
+.logo-sub{
+  display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;
+  letter-spacing:0.22em;text-transform:uppercase;opacity:0.55;margin-top:2px;
+}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{
+  font-family:var(--ui);font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap;
+}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{
+  font-family:var(--ui);font-size:0.68rem;font-weight:400;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--muted);cursor:pointer;
+  display:flex;align-items:center;gap:0.3rem;
+  transition:color 0.3s;user-select:none;white-space:nowrap;
+}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{
+  position:absolute;top:calc(100% + 0.8rem);left:50%;
+  transform:translateX(-50%) translateY(-6px);
+  background:var(--green);border:1px solid rgba(240,232,208,0.08);
+  padding:0.6rem 0;min-width:180px;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.2s,transform 0.2s;z-index:300;
+}
+.nav-more:hover .nav-dropdown{
+  opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);
+}
+.nav-dropdown a{
+  display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;
+  transition:color 0.2s,background 0.2s;text-decoration:none;
+}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{
+  font-family:var(--ui);font-size:0.65rem;font-weight:500;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--green);background:var(--gold);
+  padding:0.5rem 1.1rem;transition:background 0.2s;
+  text-decoration:none;white-space:nowrap;flex-shrink:0;
+}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{
+  display:none;flex-direction:column;gap:5px;
+  background:none;border:none;cursor:pointer;padding:4px;
+}
+.nav-toggle span{
+  display:block;width:24px;height:2px;background:var(--ink);
+  transition:background 0.3s;
+}
+.mobile-nav{
+  position:fixed;inset:0;z-index:190;background:var(--green);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{
+  font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);
+  font-weight:400;color:rgba(240,232,208,0.75);
+  padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);
+  transition:color 0.2s;text-decoration:none;display:block;
+}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{
+  position:absolute;top:1.4rem;right:1.5rem;
+  background:none;border:none;cursor:pointer;
+  font-family:var(--ui);font-size:0.65rem;
+  letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
+}
+.redesign-footer{
+  background:var(--green);padding:3.5rem 3rem;
+  display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem;
+}
+.redesign-footer .foot-logo{
+  font-family:var(--display);font-size:1.05rem;font-weight:500;
+  color:var(--cream);letter-spacing:0.03em;display:block;margin-bottom:0.5rem;
+  text-decoration:none;
+}
+.redesign-footer .foot-tagline{
+  font-family:var(--body);font-style:italic;font-size:0.82rem;
+  color:rgba(240,232,208,0.45);
+}
+.redesign-footer .foot-nav{
+  display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
+}
+.redesign-footer .foot-nav a{
+  font-family:var(--ui);font-size:0.65rem;font-weight:300;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:rgba(240,232,208,0.5);transition:color 0.2s;text-decoration:none;
+}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{
+  grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
+  padding-top:1.5rem;margin-top:0.5rem;
+  font-family:var(--ui);font-size:0.6rem;font-weight:300;
+  letter-spacing:0.1em;color:rgba(240,232,208,0.25);
+}
+.redesign-wa-float{
+  position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;
+  background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 20px rgba(37,211,102,0.38);
+  transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;
+}
+.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
+.redesign-wa-float svg{width:28px;height:28px}
+.redesign-wa-tooltip{
+  position:absolute;right:66px;white-space:nowrap;
+  background:#1c1c1a;color:#fff;font-family:var(--ui);
+  font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;
+  opacity:0;pointer-events:none;transform:translateX(6px);
+  transition:opacity 0.25s,transform 0.25s;
+}
+.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links{display:none}
+  #nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+}
+</style>
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
-  <header class="site-header" role="banner">
-    <div class="container">
-      <div class="header-inner">
-        <a href="index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
-          <img src="images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-          <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-        </a>
-                <nav class="nav-links" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="wardrobes.html" style="color:var(--clr-accent)">Wardrobes</a>
-        <a href="kitchens.html">Kitchens</a>
-        <a href="beds.html">Beds</a>
 
-        <div class="nav-services-wrap">
-          <span class="nav-services-trigger">
-            More &#9663;
-          </span>
-          <div class="nav-services-dropdown">
-            <div class="nav-services-col">
-              <span class="nav-services-col-label">More Services</span>
-              <a href="dining-living.html">Dining &amp; Living</a>
-              <a href="tv-units.html">TV Units</a>
-              <a href="shelving.html">Shelving</a>
-              <a href="solid-wood.html">Solid Wood</a>
-            </div>
-          </div>
-        </div>
+<!-- MOBILE NAV OVERLAY -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close">✕ Close</button>
+  <a href="index.html">Home</a>
+  <a href="wardrobes.html">Wardrobes</a>
+  <a href="kitchens.html">Kitchens</a>
+  <a href="beds.html">Beds</a>
+  <a href="dining-living.html">Dining &amp; Living</a>
+  <a href="tv-units.html">TV Units</a>
+  <a href="shelving.html">Shelving</a>
+  <a href="solid-wood.html">Solid Wood</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="contact.html">Contact</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
+    <a href="contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
+  </div>
+</nav>
 
-        <a href="portfolio.html">Portfolio</a>
-        <a href="contact.html">Contact</a>
-        </nav>
-        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+<!-- NAV -->
+<nav id="nav">
+  <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
+  <ul class="nav-links">
+    <li><a href="wardrobes.html">Wardrobes</a></li>
+    <li><a href="kitchens.html">Kitchens</a></li>
+    <li><a href="beds.html">Beds</a></li>
+    <li class="nav-more">
+      <span class="nav-more-trigger">More ▾</span>
+      <div class="nav-dropdown">
+        <a href="dining-living.html">Dining &amp; Living</a>
+        <a href="tv-units.html">TV Units</a>
+        <a href="shelving.html">Shelving</a>
+        <a href="solid-wood.html">Solid Wood</a>
       </div>
-    </div>
-  </header>
+    </li>
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="nav-cta">WhatsApp Us</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-    <nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="index.html">Home</a>
-    <a href="wardrobes.html">Wardrobes</a>
-    <a href="beds.html">Beds</a>
-    <a href="kitchens.html">Kitchens</a>
-    <a href="dining-living.html">Dining &amp; Living</a>
-    <a href="solid-wood.html">Solid Wood</a>
-    <a href="tv-units.html">TV Units</a>
-    <a href="shelving.html">Shelving</a>
-    <a href="portfolio.html">Portfolio</a>
-    <a href="contact.html">Contact</a>
-    <div class="mobile-nav-ctas">
-      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20wardrobe." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
-      <a href="contact.html" class="btn btn-outline">Request a Quote</a>
-    </div>
-  </nav>
 
   <main>
 
@@ -632,52 +777,44 @@ gtag('config', 'G-ZP77WR6BNH');
 
   </main>
 
-  <!-- ═══ FOOTER ═══ -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-            <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-          </a>
-          <p>Made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
-          <div class="footer-social">
-            <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-            <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
-          </div>
-        </div>
-        <div class="footer-col"><h5>Services</h5><ul><li><a href="wardrobes.html">Custom Wardrobes</a></li><li><a href="beds.html">Custom Beds</a></li><li><a href="kitchens.html">Kitchen Cabinets</a></li><li><a href="portfolio.html">Shelving & Storage</a></li></ul></div>
-        <div class="footer-col"><h5>Company</h5><ul><li><a href="portfolio.html">Portfolio</a></li><li><a href="contact.html">Contact Us</a></li><li><a href="contact.html">Request a Quote</a></li><li><a href="wardrobe-estimator.html">Price Estimator</a></li><li><a href="tools.html">Tools</a></li><li><a href="privacy.html">Privacy Policy</a></li></ul></div>
-        <div class="footer-col"><h5>Contact</h5>
-          <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
-          <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
-          <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
-          <div class="footer-contact-item">Accra, Ghana</div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
-        <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></div>
-      </div>
-    </div>
-  </footer>
 
-  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20wardrobe." class="wa-float" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    <span class="wa-tooltip">Chat on WhatsApp</span>
-  </a>
+<!-- FOOTER -->
+<footer class="redesign-footer">
+  <div>
+    <a href="index.html" class="foot-logo">Neewoody</a>
+    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+  </div>
+  <nav class="foot-nav">
+    <a href="portfolio.html">Work</a>
+    <a href="wardrobes.html">Services</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
+    <a href="privacy.html">Privacy Policy</a>
+  </nav>
+  <p class="foot-copy">© 2025 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
+</footer>
 
-  <script src="js/main.js"></script>
-  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+<!-- FLOATING WHATSAPP BUTTON -->
+<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project."
+   class="redesign-wa-float"
+   onclick="gtag('event','whatsapp_click',{event_category:'contact',event_label:'floating_whatsapp'})"
+   target="_blank" rel="noopener"
+   aria-label="Chat with Neewoody on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <span class="redesign-wa-tooltip">Chat on WhatsApp</span>
+</a>
 
-  <script>
-  // Close nav-tools dropdown on outside click
-  document.addEventListener('click', function(e){
-    var nt = document.getElementById('nav-tools');
-    if(nt && !nt.contains(e.target)) nt.classList.remove('open');
+<script src="js/main.js"></script>
+<script>
+const mobileNavClose = document.getElementById('mobile-nav-close');
+if (mobileNavClose) {
+  mobileNavClose.addEventListener('click', () => {
+    document.getElementById('mobile-nav').classList.remove('open');
+    document.body.style.overflow = '';
   });
-  </script>
+}
+</script>
+
   <script>
   /* ── Wardrobe gallery filter ── */
   (function(){
