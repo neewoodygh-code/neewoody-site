@@ -267,6 +267,26 @@ Raw images can be dropped in `_inbox/` with a description. Claude Code will rena
 - **projects/house-of-walker.html:** Two broken links to `../sage-centre.html` corrected to `sage-centre.html`. All 9 IMAGE upload instruction comments removed (all images were already uploaded: how-hero.jpg, how-brief.jpg, how-build.jpg, how-during-1.jpg, how-finished-1.jpg, how-during-2.jpg, how-finished-2.jpg, gallery upload guide, how-context.jpg).
 - **projects/sage-centre.html:** Upload instruction comments removed for sage-hero.jpg, sage-brief.jpg, sage-story.jpg, and gallery guide — all images confirmed uploaded.
 
+### Full-Site Redesign (2026-05-20)
+
+A full visual and structural redesign is in progress. Design brief and execution plan are in `REDESIGN-BRIEF.md`. Per-page instruction sets are filed as `REDESIGN-[PAGE].md`.
+
+**New design system (replaces the old --clr-accent / DM Sans tokens):**
+- `--green: #0b1f0e` (deep forest green — primary dark)
+- `--gold: #c8922a` (warm gold — accent only)
+- `--cream: #f0e8d0` (main background)
+- `--cream-dark: #e8dfc4` (secondary background)
+- `--ink: #1c1c1a` (body text)
+- `--muted: #6b6557` (secondary text)
+- Fonts: Playfair Display (headings) + Lora (body) + Jost (UI/labels)
+
+**Redesigned pages (index.html is the reference implementation):**
+- `index.html` — complete. New CSS is fully inline; no `css/styles.css` dependency on this page. Nav colour toggle via IntersectionObserver. Hero: 3-slide Ken Burns crossfade (pure CSS, 26.4s cycle). WhatsApp float is inlined. Removed: "Why Neewoody" feature cards, stats row, badge pills, "How It Works" steps, SEO paragraph dump, 4-column footer.
+
+**Pages still using old design (css/styles.css):** All other pages — will be migrated per the execution plan in REDESIGN-BRIEF.md.
+
+**Do not add css/styles.css back to index.html.** The new design is self-contained per page.
+
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
