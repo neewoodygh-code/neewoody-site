@@ -569,6 +569,10 @@ a{text-decoration:none}
 #nav.over-hero .logo-img{filter:invert(1)}
 .redesign-footer .logo-img{filter:invert(1);height:30px}
 </style>
+<style>
+.logo{display:flex!important;align-items:center;gap:0.65rem}
+.foot-logo{display:flex!important;align-items:center;gap:0.6rem;margin-bottom:0.5rem}
+</style>
 </head>
 <body>
 
@@ -593,7 +597,7 @@ a{text-decoration:none}
 
 <!-- NAV -->
 <nav id="nav" class="over-hero">
-  <a href="index.html" class="logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img"></a>
+  <a href="index.html" class="logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img" aria-hidden="true"><span>Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span></a>
   <ul class="nav-links">
     <li><a href="wardrobes.html">Wardrobes</a></li>
     <li><a href="kitchens.html">Kitchens</a></li>
@@ -923,7 +927,7 @@ a{text-decoration:none}
 <!-- FOOTER -->
 <footer class="redesign-footer">
   <div>
-    <a href="index.html" class="foot-logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img"></a>
+    <a href="index.html" class="foot-logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img" aria-hidden="true"><span>Neewoody</span></a>
     <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
   </div>
   <nav class="foot-nav">
