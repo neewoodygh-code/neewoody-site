@@ -460,6 +460,59 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 }
 .redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
 
+/* ── WORK GRID ── */
+.bd-work{padding:6rem 3rem 0;background:var(--cream-dark)}
+.bd-work-head{
+  display:flex;align-items:baseline;
+  justify-content:space-between;margin-bottom:2.5rem;
+}
+.bd-work-head h2{
+  font-family:var(--display);
+  font-size:clamp(1.4rem,2.5vw,2.2rem);font-weight:400;
+}
+.see-all{
+  font-family:var(--ui);font-size:0.65rem;font-weight:400;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);
+  display:inline-flex;align-items:center;gap:0.5rem;
+  transition:color 0.2s,gap 0.3s;
+}
+.see-all:hover{color:var(--gold);gap:0.9rem}
+.see-all::after{content:'→'}
+.bd-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+}
+.bd-card{
+  position:relative;overflow:hidden;background:var(--green);display:block;
+  height:300px;
+}
+.bd-card.featured{
+  grid-column:1/-1;height:460px;
+}
+.bd-card img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.8s ease,filter 0.4s;
+  filter:brightness(0.88);
+}
+.bd-card:hover img{transform:scale(1.06);filter:brightness(0.7)}
+.bd-card-meta{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:1.2rem 1.4rem;
+  background:linear-gradient(to top,rgba(11,31,14,0.88),transparent);
+  transform:translateY(5px);transition:transform 0.3s;
+}
+.bd-card:hover .bd-card-meta{transform:translateY(0)}
+.bd-card-type{
+  font-family:var(--ui);font-size:0.58rem;font-weight:400;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.2rem;
+}
+.bd-card-name{
+  font-family:var(--display);font-size:0.92rem;font-weight:400;color:var(--cream);
+}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{
   from{opacity:0;transform:translateY(24px)}
@@ -471,6 +524,9 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   .bd-types-top{grid-template-columns:1fr;gap:1.5rem}
   .bd-types-grid{grid-template-columns:repeat(2,1fr)}
   .bd-cta{grid-template-columns:1fr;gap:3rem}
+  .bd-grid{grid-template-columns:repeat(2,1fr)}
+  .bd-card.featured{grid-column:1/-1;height:380px}
+  .bd-card{height:260px}
 }
 @media(max-width:768px){
   #nav{padding:1.2rem 1.5rem}
@@ -485,6 +541,11 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   .bd-featured{grid-template-columns:1fr;min-height:auto}
   .bd-feat-img{min-height:60vw}
   .bd-feat-text{padding:3rem 1.5rem}
+  .bd-work{padding:4rem 1.5rem 0}
+  .bd-work-head{flex-wrap:wrap;gap:0.75rem}
+  .bd-grid{grid-template-columns:1fr}
+  .bd-card.featured{grid-column:auto;height:280px}
+  .bd-card{height:250px}
   .bd-faq{padding:4rem 1.5rem}
   .bd-testimonial{padding:5rem 1.5rem}
   .bd-cta{padding:5rem 1.5rem;gap:2rem}
@@ -551,7 +612,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 
 <main>
 
-<!-- HERO (text-only, dark green — no bed photography currently in portfolio) -->
+<!-- HERO (text-only, dark green) -->
 <section class="bd-hero">
   <div class="bd-hero-grain" aria-hidden="true"></div>
   <div class="bd-hero-body">
@@ -625,8 +686,8 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 <!-- SAGE CENTRE FEATURED -->
 <div class="bd-featured">
   <div class="bd-feat-img">
-    <img src="images/projects/sage-centre/sage-hero.jpg"
-      alt="Sage Centre — solid teak furniture, Wli, Volta Region"
+    <img src="images/projects/sage-centre/sage-bed-overview.jpg"
+      alt="Custom teak bed with louvre wall headboard and solid teak garment rack, Sage Centre retreat, Wli, Volta Region"
       loading="lazy" />
   </div>
   <div class="bd-feat-text">
@@ -637,6 +698,87 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
     <a href="projects/sage-centre.html" class="link-arrow-light">Read the full case study</a>
   </div>
 </div>
+
+<!-- WORK GRID -->
+<section class="bd-work" id="work">
+  <div class="bd-work-head">
+    <h2>From the workshop</h2>
+    <a href="portfolio.html" class="see-all">Full portfolio</a>
+  </div>
+  <div class="bd-grid">
+
+    <a href="#" class="bd-card featured" onclick="return false;" aria-label="4-Pod Bunk Unit — Montessori School">
+      <img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg"
+        alt="Custom 4-pod bunk unit with arched entries and under-bed drawers, built for a Montessori school, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Commercial · Bunk Beds</p>
+        <p class="bd-card-name">4-Pod Bunk Unit — Montessori School</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Four-Poster Bed — Ridge">
+      <img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg"
+        alt="Custom solid wood four-poster bed with slatted headboard, installed at a private residence in Ridge, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Solid Wood</p>
+        <p class="bd-card-name">Four-Poster Bed — Ridge</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Storage Bed with Upper Cabinet — Golf Hills">
+      <img src="images/projects/golf-hills-bed/golf-hills-bed-overview.jpg"
+        alt="Custom storage bed with under-bed drawers and wall-mounted upper cabinet, Golf Hills, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Storage</p>
+        <p class="bd-card-name">Storage Bed with Upper Cabinet — Golf Hills</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Sink-in Platform Bed — Dansoman">
+      <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg"
+        alt="Custom sink-in platform bed with integrated nightstand, Dansoman, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Platform</p>
+        <p class="bd-card-name">Sink-in Platform Bed — Dansoman</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Platform Bed in Dark Walnut">
+      <img src="images/projects/platform-walnut/platform-walnut-overview.jpg"
+        alt="Custom platform bed in dark walnut stain with upholstered linen headboard panels, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Platform</p>
+        <p class="bd-card-name">Platform Bed in Dark Walnut</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Platform Bed in Weathered Grey">
+      <img src="images/projects/platform-grey/platform-grey-overview.jpg"
+        alt="Custom platform bed in grey weathered finish with linen upholstered headboard, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Platform</p>
+        <p class="bd-card-name">Platform Bed in Weathered Grey</p>
+      </div>
+    </a>
+
+    <a href="#" class="bd-card" onclick="return false;" aria-label="Platform Bed in Natural Iroko">
+      <img src="images/projects/platform-iroko/platform-iroko-headboard.jpg"
+        alt="Custom platform bed in natural iroko with solid timber slab headboard, Accra"
+        loading="lazy" />
+      <div class="bd-card-meta">
+        <p class="bd-card-type">Beds · Solid Wood</p>
+        <p class="bd-card-name">Platform Bed in Natural Iroko</p>
+      </div>
+    </a>
+
+  </div>
+</section>
 
 <!-- FAQ -->
 <section class="bd-faq">
