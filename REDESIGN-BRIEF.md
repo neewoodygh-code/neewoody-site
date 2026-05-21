@@ -162,7 +162,7 @@ Pages are implemented one at a time. Do not proceed to the next page until instr
 | 1 | Go index.html | index.html | **done** |
 | 2 | Go nav-footer | All 13 pages — nav + footer only | **done** |
 | 3 | Go wardrobes | wardrobes.html | **done** |
-| 4 | Go kitchens | kitchens.html | pending |
+| 4 | Go kitchens | kitchens.html | **done** |
 | 5 | Go beds | beds.html | pending |
 | 6 | Go dining | dining-living.html | pending |
 | 7 | Go tvunits | tv-units.html | pending |
