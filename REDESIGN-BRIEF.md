@@ -166,13 +166,13 @@ Pages are implemented one at a time. Do not proceed to the next page until instr
 | 5 | Go beds | beds.html | **done** |
 | 6 | Go dining | dining-living.html | **done** |
 | 7 | Go tvunits | tv-units.html | **done** |
-| 8 | Go shelving | shelving.html | pending |
-| 9 | Go solidwood | solid-wood.html | pending |
-| 10 | Go portfolio | portfolio.html | pending |
-| 11 | Go contact | contact.html | pending |
+| 8 | Go shelving | shelving.html | **done** |
+| 9 | Go solidwood | solid-wood.html | **done** |
+| 10 | Go portfolio | portfolio.html | **done** |
+| 11 | Go contact | contact.html | **done** |
 | 12 | Go sage | projects/sage-centre.html | **done** |
-| 13 | Go walker | projects/house-of-walker.html | pending |
-| 14 | Go jerksoul | projects/jerksoul.html | pending |
+| 13 | Go walker | projects/house-of-walker.html | **done** |
+| 14 | Go jerksoul | projects/jerksoul.html | **done** |
 
 ---
 

@@ -12,354 +12,160 @@ gtag('config', 'G-ZP77WR6BNH');
 </script>
 
 <meta charset="UTF-8" />
-  <link rel="icon" href="images/favicon.ico" />
-  <link rel="apple-touch-icon" href="images/logo.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Portfolio | Custom Furniture Projects in Accra — Neewoody Custom Woodwork</title>
-  <meta name="description" content="Browse Neewoody's portfolio of custom wardrobes, beds, kitchen cabinets, and bespoke furniture built for homes across Accra, Ghana." />
-  <link rel="canonical" href="https://neewoodygh.com/portfolio.html" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://neewoodygh.com/portfolio.html" />
-  <meta property="og:title" content="Portfolio — Neewoody Custom Woodwork, Accra" />
-  <meta property="og:description" content="Custom wardrobes, beds, kitchens, and bespoke furniture built in Accra. See our recent work." />
-  <meta property="og:image" content="https://neewoodygh.com/images/og-image.jpg" />
-  <link rel="stylesheet" href="css/styles.css" />
+<link rel="icon" href="images/favicon.ico" />
+<link rel="apple-touch-icon" href="images/logo.png" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portfolio | Custom Furniture Projects in Accra — Neewoody Custom Woodwork</title>
+<meta name="description" content="Browse Neewoody's portfolio of custom wardrobes, beds, kitchen cabinets, and bespoke furniture built for homes across Accra, Ghana." />
+<link rel="canonical" href="https://neewoodygh.com/portfolio.html" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://neewoodygh.com/portfolio.html" />
+<meta property="og:title" content="Portfolio — Neewoody Custom Woodwork, Accra" />
+<meta property="og:description" content="Custom wardrobes, beds, kitchens, and bespoke furniture built in Accra. See our recent work." />
+<meta property="og:image" content="https://neewoodygh.com/images/og-image.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
 
-
-
-  <style>
-  /* ── Video card play button overlay ── */
-  .video-thumb { position: relative; cursor: pointer; }
-  .video-play-btn {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    background: rgba(0,0,0,.25); transition: background .2s;
-  }
-  .video-thumb:hover .video-play-btn { background: rgba(0,0,0,.45); }
-  .video-play-btn svg { filter: drop-shadow(0 2px 8px rgba(0,0,0,.5)); transition: transform .2s; }
-  .video-thumb:hover .video-play-btn svg { transform: scale(1.1); }
-  .video-badge {
-    display: inline-flex; align-items: center; gap: .3rem;
-    font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
-    background: #c00; color: #fff; padding: .18rem .55rem; border-radius: 3px;
-    margin-bottom: .4rem;
-  }
-  </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ── REDESIGN NAV + FOOTER ── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --green:#0b1f0e;--gold:#c8922a;--cream:#f0e8d0;--cream-dark:#e8dfc4;
-  --ink:#1c1c1a;--muted:#6b6557;
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
   --display:'Playfair Display',Georgia,serif;
   --body:'Lora',Georgia,serif;
   --ui:'Jost',sans-serif;
 }
-#nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1.4rem 3rem;
-  background:rgba(240,232,208,0.95);
-  backdrop-filter:blur(8px);
-  border-bottom:1px solid rgba(11,31,14,0.08);
-  transition:background 0.4s;
-}
-#nav .logo{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--ink);letter-spacing:0.03em;text-decoration:none;flex-shrink:0;
-}
-.logo-sub{
-  display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.22em;text-transform:uppercase;opacity:0.55;margin-top:2px;
-}
-#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
-#nav .nav-links a{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap;
-}
-#nav .nav-links a:hover{color:var(--gold)}
-.nav-more{position:relative}
-.nav-more-trigger{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;gap:0.3rem;
-  transition:color 0.3s;user-select:none;white-space:nowrap;
-}
-.nav-more:hover .nav-more-trigger{color:var(--gold)}
-.nav-dropdown{
-  position:absolute;top:calc(100% + 0.8rem);left:50%;
-  transform:translateX(-50%) translateY(-6px);
-  background:var(--green);border:1px solid rgba(240,232,208,0.08);
-  padding:0.6rem 0;min-width:180px;
-  opacity:0;pointer-events:none;
-  transition:opacity 0.2s,transform 0.2s;z-index:300;
-}
-.nav-more:hover .nav-dropdown{
-  opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);
-}
-.nav-dropdown a{
-  display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;
-  transition:color 0.2s,background 0.2s;text-decoration:none;
-}
-.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
-#nav .nav-cta{
-  font-family:var(--ui);font-size:0.65rem;font-weight:500;
-  letter-spacing:0.15em;text-transform:uppercase;
-  color:var(--green);background:var(--gold);
-  padding:0.5rem 1.1rem;transition:background 0.2s;
-  text-decoration:none;white-space:nowrap;flex-shrink:0;
-}
-#nav .nav-cta:hover{background:#b07d20}
-.nav-toggle{
-  display:none;flex-direction:column;gap:5px;
-  background:none;border:none;cursor:pointer;padding:4px;
-}
-.nav-toggle span{
-  display:block;width:24px;height:2px;background:var(--ink);
-  transition:background 0.3s;
-}
-.mobile-nav{
-  position:fixed;inset:0;z-index:190;background:var(--green);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
-.mobile-nav.open{opacity:1;pointer-events:auto}
-.mobile-nav a{
-  font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);
-  font-weight:400;color:rgba(240,232,208,0.75);
-  padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);
-  transition:color 0.2s;text-decoration:none;display:block;
-}
-.mobile-nav a:hover{color:var(--gold)}
-.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
-.mobile-nav-close{
-  position:absolute;top:1.4rem;right:1.5rem;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--ui);font-size:0.65rem;
-  letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
-}
-.redesign-footer{
-  background:var(--green);padding:3.5rem 3rem;
-  display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem;
-}
-.redesign-footer .foot-logo{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--cream);letter-spacing:0.03em;display:block;margin-bottom:0.5rem;
-  text-decoration:none;
-}
-.redesign-footer .foot-tagline{
-  font-family:var(--body);font-style:italic;font-size:0.82rem;
-  color:rgba(240,232,208,0.45);
-}
-.redesign-footer .foot-nav{
-  display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
-}
-.redesign-footer .foot-nav a{
-  font-family:var(--ui);font-size:0.65rem;font-weight:300;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:rgba(240,232,208,0.5);transition:color 0.2s;text-decoration:none;
-}
-.redesign-footer .foot-nav a:hover{color:var(--gold)}
-.redesign-footer .foot-copy{
-  grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
-  padding-top:1.5rem;margin-top:0.5rem;
-  font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.1em;color:rgba(240,232,208,0.25);
-}
-.redesign-wa-float{
-  position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;
-  background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(37,211,102,0.38);
-  transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;
-}
-.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
-.redesign-wa-float svg{width:28px;height:28px}
-.redesign-wa-tooltip{
-  position:absolute;right:66px;white-space:nowrap;
-  background:#1c1c1a;color:#fff;font-family:var(--ui);
-  font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;
-  opacity:0;pointer-events:none;transform:translateX(6px);
-  transition:opacity 0.25s,transform 0.25s;
-}
-.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
-@media(max-width:768px){
-  #nav{padding:1.2rem 1.5rem}
-  #nav .nav-links{display:none}
-  #nav .nav-cta{display:none}
-  .nav-toggle{display:flex}
-  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
-  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
-  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
-}
-</style>
-<style>
-/* ── REDESIGN NAV + FOOTER ── */
-:root{
-  --green:#0b1f0e;--gold:#c8922a;--cream:#f0e8d0;--cream-dark:#e8dfc4;
-  --ink:#1c1c1a;--muted:#6b6557;
-  --display:'Playfair Display',Georgia,serif;
-  --body:'Lora',Georgia,serif;
-  --ui:'Jost',sans-serif;
-}
-#nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1.4rem 3rem;
-  background:rgba(240,232,208,0.95);
-  backdrop-filter:blur(8px);
-  border-bottom:1px solid rgba(11,31,14,0.08);
-  transition:background 0.4s;
-}
-#nav .logo{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--ink);letter-spacing:0.03em;text-decoration:none;flex-shrink:0;
-}
-.logo-sub{
-  display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.22em;text-transform:uppercase;opacity:0.55;margin-top:2px;
-}
-#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
-#nav .nav-links a{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap;
-}
-#nav .nav-links a:hover{color:var(--gold)}
-.nav-more{position:relative}
-.nav-more-trigger{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;gap:0.3rem;
-  transition:color 0.3s;user-select:none;white-space:nowrap;
-}
-.nav-more:hover .nav-more-trigger{color:var(--gold)}
-.nav-dropdown{
-  position:absolute;top:calc(100% + 0.8rem);left:50%;
-  transform:translateX(-50%) translateY(-6px);
-  background:var(--green);border:1px solid rgba(240,232,208,0.08);
-  padding:0.6rem 0;min-width:180px;
-  opacity:0;pointer-events:none;
-  transition:opacity 0.2s,transform 0.2s;z-index:300;
-}
-.nav-more:hover .nav-dropdown{
-  opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0);
-}
-.nav-dropdown a{
-  display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;
-  transition:color 0.2s,background 0.2s;text-decoration:none;
-}
-.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
-#nav .nav-cta{
-  font-family:var(--ui);font-size:0.65rem;font-weight:500;
-  letter-spacing:0.15em;text-transform:uppercase;
-  color:var(--green);background:var(--gold);
-  padding:0.5rem 1.1rem;transition:background 0.2s;
-  text-decoration:none;white-space:nowrap;flex-shrink:0;
-}
-#nav .nav-cta:hover{background:#b07d20}
-.nav-toggle{
-  display:none;flex-direction:column;gap:5px;
-  background:none;border:none;cursor:pointer;padding:4px;
-}
-.nav-toggle span{
-  display:block;width:24px;height:2px;background:var(--ink);
-  transition:background 0.3s;
-}
-.mobile-nav{
-  position:fixed;inset:0;z-index:190;background:var(--green);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
-.mobile-nav.open{opacity:1;pointer-events:auto}
-.mobile-nav a{
-  font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);
-  font-weight:400;color:rgba(240,232,208,0.75);
-  padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);
-  transition:color 0.2s;text-decoration:none;display:block;
-}
-.mobile-nav a:hover{color:var(--gold)}
-.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
-.mobile-nav-close{
-  position:absolute;top:1.4rem;right:1.5rem;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--ui);font-size:0.65rem;
-  letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
-}
-.redesign-footer{
-  background:var(--green);padding:3.5rem 3rem;
-  display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem;
-}
-.redesign-footer .foot-logo{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--cream);letter-spacing:0.03em;display:block;margin-bottom:0.5rem;
-  text-decoration:none;
-}
-.redesign-footer .foot-tagline{
-  font-family:var(--body);font-style:italic;font-size:0.82rem;
-  color:rgba(240,232,208,0.45);
-}
-.redesign-footer .foot-nav{
-  display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
-}
-.redesign-footer .foot-nav a{
-  font-family:var(--ui);font-size:0.65rem;font-weight:300;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:rgba(240,232,208,0.5);transition:color 0.2s;text-decoration:none;
-}
-.redesign-footer .foot-nav a:hover{color:var(--gold)}
-.redesign-footer .foot-copy{
-  grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
-  padding-top:1.5rem;margin-top:0.5rem;
-  font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.1em;color:rgba(240,232,208,0.25);
-}
-.redesign-wa-float{
-  position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;
-  background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(37,211,102,0.38);
-  transition:transform 0.3s,box-shadow 0.3s;text-decoration:none;
-}
-.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
-.redesign-wa-float svg{width:28px;height:28px}
-.redesign-wa-tooltip{
-  position:absolute;right:66px;white-space:nowrap;
-  background:#1c1c1a;color:#fff;font-family:var(--ui);
-  font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;
-  opacity:0;pointer-events:none;transform:translateX(6px);
-  transition:opacity 0.25s,transform 0.25s;
-}
-.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
-@media(max-width:768px){
-  #nav{padding:1.2rem 1.5rem}
-  #nav .nav-links{display:none}
-  #nav .nav-cta{display:none}
-  .nav-toggle{display:flex}
-  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
-  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
-  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
-}
-</style>
-<style>
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(240,232,208,0.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(11,31,14,0.08);transition:background 0.4s,border-color 0.4s}
+#nav .logo{display:flex;align-items:center;gap:0.65rem;text-decoration:none;flex-shrink:0}
 .logo-img{height:36px;width:auto;display:block;transition:filter 0.4s}
-.redesign-footer .logo-img{filter:invert(1);height:30px}
-</style>
-<style>
-.logo{display:flex!important;align-items:center;gap:0.65rem}
-.foot-logo{display:flex!important;align-items:center;gap:0.6rem;margin-bottom:0.5rem}
+.logo-text-wrap{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--ink);letter-spacing:0.03em;transition:color 0.4s}
+.logo-sub{display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;opacity:0.6;margin-top:2px}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:color 0.3s;user-select:none;white-space:nowrap}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{position:absolute;top:calc(100% + 0.8rem);left:50%;transform:translateX(-50%) translateY(-6px);background:var(--green);border:1px solid rgba(240,232,208,0.08);padding:0.6rem 0;min-width:180px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:300}
+.nav-more:hover .nav-dropdown{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-dropdown a{display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;transition:color 0.2s,background 0.2s}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s;white-space:nowrap;flex-shrink:0}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:24px;height:2px;background:var(--ink);transition:background 0.3s}
+.mobile-nav{position:fixed;inset:0;z-index:190;background:var(--green);display:flex;flex-direction:column;justify-content:center;padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);font-weight:400;color:rgba(240,232,208,0.75);padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);transition:color 0.2s;display:block}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{position:absolute;top:1.4rem;right:1.5rem;background:none;border:none;cursor:pointer;font-family:var(--ui);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* PAGE HEADER */
+.pf-head{background:var(--cream);padding:10rem 3rem 4rem}
+.pf-head-eyebrow{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;display:block}
+.pf-head h1{font-family:var(--display);font-size:clamp(2.4rem,5vw,4rem);font-weight:400;line-height:1.1;margin-bottom:1rem}
+.pf-head p{font-family:var(--body);font-size:1rem;line-height:1.75;color:var(--muted);max-width:48ch}
+
+/* FEATURED CASE STUDIES */
+.pf-featured{background:var(--cream-dark);padding:0 3rem 6rem}
+.pf-featured-label{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--muted);padding:3rem 0 1.5rem;display:block}
+.pf-feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.pf-feat-card{position:relative;overflow:hidden;height:480px;display:block;background:var(--green)}
+.pf-feat-card img{width:100%;height:100%;object-fit:cover;filter:brightness(0.85);transition:transform 0.8s ease,filter 0.4s}
+.pf-feat-card:hover img{transform:scale(1.05);filter:brightness(0.6)}
+.pf-feat-meta{position:absolute;bottom:0;left:0;right:0;padding:2rem 2rem 1.8rem;background:linear-gradient(to top,rgba(11,31,14,0.92) 0%,rgba(11,31,14,0.4) 60%,transparent 100%)}
+.pf-feat-type{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;display:block}
+.pf-feat-meta h3{font-family:var(--display);font-size:1.2rem;font-weight:400;color:var(--cream);margin-bottom:0.4rem;line-height:1.2}
+.pf-feat-meta p{font-family:var(--body);font-size:0.82rem;line-height:1.6;color:rgba(240,232,208,0.7);margin-bottom:1rem}
+.link-arrow-light{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--cream);border-bottom:1px solid rgba(200,146,42,0.35);padding-bottom:0.3rem;display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,border-color 0.2s,gap 0.3s}
+.link-arrow-light:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
+.link-arrow-light::after{content:'→'}
+
+/* WORK GRID */
+.pf-work{padding:6rem 3rem 0;background:var(--cream)}
+.pf-work-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2.5rem}
+.pf-work-head h2{font-family:var(--display);font-size:clamp(1.4rem,2.5vw,2.2rem);font-weight:400}
+.see-all{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:0.5rem;transition:color 0.2s,gap 0.3s}
+.see-all:hover{color:var(--gold);gap:0.9rem}
+.see-all::after{content:'→'}
+.pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.pf-card{position:relative;overflow:hidden;background:var(--green);display:block;height:320px}
+.pf-card-plain{position:relative;overflow:hidden;background:var(--green);height:320px}
+.pf-card img,.pf-card-plain img{width:100%;height:100%;object-fit:cover;transition:transform 0.8s ease,filter 0.4s;filter:brightness(0.88)}
+.pf-card:hover img{transform:scale(1.06);filter:brightness(0.7)}
+.pf-card-meta,.pf-card-plain-meta{position:absolute;bottom:0;left:0;right:0;padding:1.2rem 1.4rem;background:linear-gradient(to top,rgba(11,31,14,0.88),transparent);transform:translateY(5px);transition:transform 0.3s}
+.pf-card:hover .pf-card-meta{transform:translateY(0)}
+.pf-card-type{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.2rem}
+.pf-card-name{font-family:var(--display);font-size:0.92rem;font-weight:400;color:var(--cream)}
+
+/* CTA */
+.pf-cta{background:var(--green);padding:8rem 3rem;text-align:center}
+.pf-cta-eyebrow{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:rgba(240,232,208,0.4);margin-bottom:1rem;display:block}
+.pf-cta h2{font-family:var(--display);font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.15;color:var(--cream);margin-bottom:1.5rem}
+.pf-cta h2 em{font-style:italic;color:var(--gold)}
+.pf-cta p{font-family:var(--body);font-size:0.9rem;line-height:1.85;color:rgba(240,232,208,0.6);max-width:44ch;margin:0 auto 2.5rem}
+.pf-cta-btns{display:flex;gap:0.8rem;flex-wrap:wrap;justify-content:center}
+.btn-wa{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:var(--gold);color:var(--green);display:inline-flex;align-items:center;gap:0.6rem;transition:background 0.25s}
+.btn-wa:hover{background:#b07d20}
+.btn-outline-light{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:transparent;border:1px solid rgba(240,232,208,0.35);color:var(--cream);display:inline-flex;align-items:center;transition:background 0.25s,color 0.25s,border-color 0.25s}
+.btn-outline-light:hover{background:var(--cream);color:var(--green);border-color:var(--cream)}
+
+/* FOOTER */
+.redesign-footer{background:var(--green);padding:3.5rem 3rem;display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem}
+.redesign-footer .foot-logo{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;text-decoration:none}
+.redesign-footer .logo-img{filter:invert(1);height:30px;width:auto}
+.redesign-footer .foot-logo span{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--cream);letter-spacing:0.03em}
+.redesign-footer .foot-tagline{font-family:var(--body);font-style:italic;font-size:0.82rem;color:rgba(240,232,208,0.45)}
+.redesign-footer .foot-nav{display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem}
+.redesign-footer .foot-nav a{font-family:var(--ui);font-size:0.65rem;font-weight:300;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,232,208,0.5);transition:color 0.2s}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);padding-top:1.5rem;margin-top:0.5rem;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.1em;color:rgba(240,232,208,0.25)}
+
+/* WA FLOAT */
+.redesign-wa-float{position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.38);transition:transform 0.3s,box-shadow 0.3s}
+.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
+.redesign-wa-float svg{width:28px;height:28px}
+.redesign-wa-tooltip{position:absolute;right:66px;white-space:nowrap;background:#1c1c1a;color:#fff;font-family:var(--ui);font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;opacity:0;pointer-events:none;transform:translateX(6px);transition:opacity 0.25s,transform 0.25s}
+.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
+
+@media(max-width:900px){
+  .pf-feat-grid{grid-template-columns:1fr}
+  .pf-feat-card{height:380px}
+  .pf-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links{display:none}
+  #nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .pf-head{padding:8rem 1.5rem 3rem}
+  .pf-featured{padding:0 1.5rem 4rem}
+  .pf-work{padding:4rem 1.5rem 0}
+  .pf-work-head{flex-wrap:wrap;gap:0.75rem}
+  .pf-grid{grid-template-columns:1fr}
+  .pf-card,.pf-card-plain{height:260px}
+  .pf-feat-card{height:320px}
+  .pf-cta{padding:5rem 1.5rem}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+}
 </style>
 </head>
 <body>
-
 
 <!-- MOBILE NAV OVERLAY -->
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
@@ -375,14 +181,17 @@ gtag('config', 'G-ZP77WR6BNH');
   <a href="portfolio.html">Portfolio</a>
   <a href="contact.html">Contact</a>
   <div class="mobile-nav-ctas">
-    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
     <a href="contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
   </div>
 </nav>
 
 <!-- NAV -->
 <nav id="nav">
-  <a href="index.html" class="logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img" aria-hidden="true"><span>Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span></a>
+  <a href="index.html" class="logo">
+    <img src="images/logo.png" alt="" class="logo-img" aria-hidden="true">
+    <span class="logo-text-wrap">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
+  </a>
   <ul class="nav-links">
     <li><a href="wardrobes.html">Wardrobes</a></li>
     <li><a href="kitchens.html">Kitchens</a></li>
@@ -399,500 +208,188 @@ gtag('config', 'G-ZP77WR6BNH');
     <li><a href="portfolio.html">Portfolio</a></li>
     <li><a href="contact.html">Contact</a></li>
   </ul>
-  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." class="nav-cta">WhatsApp Us</a>
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project." class="nav-cta">WhatsApp Us</a>
   <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
+<main>
 
-  <main>
+<!-- PAGE HEADER -->
+<header class="pf-head">
+  <span class="pf-head-eyebrow">Our Work</span>
+  <h1>Recent Projects</h1>
+  <p>A selection of wardrobes, kitchens, beds, and custom furniture built for homes and commercial spaces across Accra and beyond.</p>
+</header>
 
-    <!-- ═══ PAGE HERO ═══ -->
-    <div class="page-hero">
-      <div class="page-hero-accent" aria-hidden="true"></div>
-      <div class="container">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="index.html">Home</a>
-          <span class="breadcrumb-sep" aria-hidden="true">›</span>
-          <span aria-current="page">Portfolio</span>
-        </nav>
-        <p class="section-label">Our Work</p>
-        <h1>Recent Projects</h1>
-        <p>A selection of wardrobes, beds, kitchens, and custom furniture we've built for homes across Accra and Greater Accra.</p>
+<!-- FEATURED CASE STUDIES -->
+<section class="pf-featured">
+  <span class="pf-featured-label">Case Studies</span>
+  <div class="pf-feat-grid">
+
+    <a href="projects/sage-centre.html" class="pf-feat-card">
+      <img src="images/projects/sage-centre/sage-hero.jpg"
+        alt="Sage Centre full teak fitout, Wli — built by Neewoody"
+        loading="lazy" />
+      <div class="pf-feat-meta">
+        <span class="pf-feat-type">Case Study · Commercial</span>
+        <h3>Sage Centre — Full Teak Fitout</h3>
+        <p>26 months. 18 bunk beds. Every piece in solid Ghanaian teak. International NGO, Volta Region.</p>
+        <span class="link-arrow-light">Read the case study</span>
+      </div>
+    </a>
+
+    <a href="projects/house-of-walker.html" class="pf-feat-card">
+      <img src="images/projects/house-of-walker/how-gallery-1.jpg"
+        alt="House of Walker branded seating installation, One Airport Square Accra"
+        loading="lazy" />
+      <div class="pf-feat-meta">
+        <span class="pf-feat-type">Case Study · Commercial</span>
+        <h3>House of Walker — Johnnie Walker 200 Years</h3>
+        <p>Branded structural carpentry, MDF cladding, and integrated LED lighting for one of Accra's most talked-about brand activations.</p>
+        <span class="link-arrow-light">Read the case study</span>
+      </div>
+    </a>
+
+    <a href="projects/nadia-dome.html" class="pf-feat-card">
+      <img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg"
+        alt="Wave-carved Guarea chest of drawers — Nadia Dome, Accra"
+        loading="lazy" />
+      <div class="pf-feat-meta">
+        <span class="pf-feat-type">Case Study · Residential</span>
+        <h3>Full Home Commission — Dome, Accra</h3>
+        <p>Four pieces to one brief: wave-carved Guarea chest, compact kitchenette, bar stools, and fitted wardrobe.</p>
+        <span class="link-arrow-light">Read the case study</span>
+      </div>
+    </a>
+
+    <a href="projects/jerksoul.html" class="pf-feat-card">
+      <img src="images/projects/jerksoul/jerksoul-day-2.jpg"
+        alt="Jerksoul Restaurant bar counter and dining fit-out, Accra"
+        loading="lazy" />
+      <div class="pf-feat-meta">
+        <span class="pf-feat-type">Case Study · Commercial</span>
+        <h3>Jerksoul Restaurant — Rooftop Dining Fit-out</h3>
+        <p>15+ branded dining sets, upholstered cube stools, and a centrepiece bar counter — full commercial hospitality fit-out.</p>
+        <span class="link-arrow-light">Read the case study</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- WORK GRID -->
+<section class="pf-work">
+  <div class="pf-work-head">
+    <h2>From the workshop</h2>
+    <a href="contact.html" class="see-all">Start your project</a>
+  </div>
+  <div class="pf-grid">
+
+    <a href="projects/golf-hills-estate.html" class="pf-card">
+      <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
+        alt="X-frame pine dining table and built-in banquette, Golf Hills Estate, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Dining &amp; Living</p>
+        <p class="pf-card-name">Dining Set &amp; Banquette — Golf Hills Estate</p>
+      </div>
+    </a>
+
+    <a href="projects/french-embassy.html" class="pf-card">
+      <img src="images/projects/french-embassy/afromosia-table-installed-1.jpg"
+        alt="Afromosia live-edge dining table, Ridge, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Solid Wood</p>
+        <p class="pf-card-name">Afromosia Live-Edge Table — Ridge</p>
+      </div>
+    </a>
+
+    <a href="projects/judith-east-legon.html" class="pf-card">
+      <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
+        alt="Full Hyedua dining commission, East Legon, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Solid Wood</p>
+        <p class="pf-card-name">Full Dining Commission — East Legon</p>
+      </div>
+    </a>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+        alt="Built-in floor-to-ceiling wardrobes, Oyarifa, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">Built-in Wardrobes — Oyarifa</p>
       </div>
     </div>
 
-    <!-- ═══ PORTFOLIO SECTION ═══ -->
-    <section class="section" aria-labelledby="portfolio-heading">
-      <div class="container">
-        <h2 id="portfolio-heading" class="sr-only">Portfolio of custom furniture projects</h2>
-
-        <!-- Filter bar -->
-        <div class="filter-bar" role="group" aria-label="Filter projects by category">
-          <button class="filter-btn active" data-filter="all">All</button>
-          <button class="filter-btn" data-filter="video">Videos</button>
-          <button class="filter-btn" data-filter="photo">Photos</button>
-          <button class="filter-btn" data-filter="commercial">Commercial</button>
-          <button class="filter-btn" data-filter="residential">Residential</button>
-        </div>
-
-        <div class="gallery-grid" id="portfolio-grid">
-
-          <!-- ═══ FEATURED: Sage Centre ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="photo commercial featured">
-            <div class="project-card-img">
-              <!--
-                IMAGE: sage-hero.jpg — rename IMG_0425 and upload to images/projects/sage-centre/sage-hero.jpg
-                Then update src below to: images/projects/sage-centre/sage-hero.jpg
-              -->
-              <img
-                src="images/projects/sage-centre/sage-hero.jpg"
-                alt="Live edge teak dining table at Sage Centre, Wli — built by Neewoody Custom Woodwork"
-                loading="lazy"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#2a1f12;color:#a07840;font-size:.85rem;padding:2rem;text-align:center\'>Add photo: images/projects/sage-centre/sage-hero.jpg</div>'"
-              />
-              <span class="project-badge" style="background:var(--clr-accent);color:#fff">Featured</span>
-            </div>
-            <div class="project-card-body">
-              <span class="featured-badge">Case Study</span>
-              <h3>Sage Centre — Full Teak Fitout</h3>
-              <p>A 26-month full-property commission for a US-based educational NGO in Wli, Volta Region. Every piece — from 18 student bunk beds to a live edge dining table — built in solid Ghanaian teak to international standards.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Solid Teak</span>
-                <span class="project-meta-tag">Dining & Living</span>
-                <span class="project-meta-tag">Hostel Furniture</span>
-                <span class="project-meta-tag">Wli, Volta Region</span>
-              </div>
-              <a href="projects/sage-centre.html" class="card-link--primary">
-                View full case study
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ FEATURED: House of Walker ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="photo commercial featured">
-            <div class="project-card-img">
-              <img
-                src="images/projects/house-of-walker/how-hero.jpg"
-                alt="House of Walker Accra — branded seating installation built by Neewoody Custom Woodwork"
-                loading="lazy"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#1a1a1a;color:#a07840;font-size:.85rem;padding:2rem;text-align:center\'>Add photo: images/projects/house-of-walker/how-hero.jpg</div>'"
-              />
-              <span class="project-badge" style="background:#1a1a1a;color:#f5c518">Commercial</span>
-            </div>
-            <div class="project-card-body">
-              <span class="featured-badge" style="background:#1a1a1a">Case Study</span>
-              <h3>House of Walker Accra — Johnnie Walker 200 Years</h3>
-              <p>Neewoody transformed XO Lounge at One Airport Square into the centrepiece installation for Johnnie Walker's 200-year celebration. Structural carpentry, MDF cladding, and integrated LED lighting — all delivered to brand specification under event production timelines.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Commercial</span>
-                <span class="project-meta-tag">Brand Installation</span>
-                <span class="project-meta-tag">Event Production</span>
-                <span class="project-meta-tag">One Airport Square</span>
-              </div>
-              <a href="projects/house-of-walker.html" class="card-link--primary">
-                View full case study
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ FEATURED: Nadia Dome — Full Home Commission ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="photo residential featured">
-            <div class="project-card-img">
-              <img
-                src="images/projects/nadia-dome/nadia-wave-chest-1.jpg"
-                alt="Wave-carved Guarea chest of drawers — full home commission, Dome Accra, built by Neewoody Custom Woodwork"
-                loading="lazy"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#1a1208;color:#a07840;font-size:.85rem;padding:2rem;text-align:center\'>Add photo: nadia-wave-chest-1.jpg</div>'"
-              />
-              <span class="project-badge" style="background:var(--clr-accent);color:#fff">Residential</span>
-            </div>
-            <div class="project-card-body">
-              <span class="featured-badge">Case Study</span>
-              <h3>Full Home Commission — Dome, Accra</h3>
-              <p>Wave-carved Guarea chest of drawers, compact kitchenette, solid wood bar stools, and a full-height fitted wardrobe — four pieces built to one brief for a private home in Dome, Accra (2025).</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Residential</span>
-                <span class="project-meta-tag">Full Commission</span>
-                <span class="project-meta-tag">Hardwood</span>
-                <span class="project-meta-tag">Cabinetry</span>
-              </div>
-              <a href="projects/nadia-dome.html" class="card-link--primary">
-                View full case study
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ FEATURED: Jerksoul Restaurant ═══ -->
-          <article class="project-card project-card--featured reveal" data-category="photo commercial featured">
-            <div class="project-card-img">
-              <img
-                src="images/projects/jerksoul/jerksoul-day-2.jpg"
-                alt="Jerksoul Restaurant rooftop dining fit-out — custom dining tables, cube stools, and bar counter built by Neewoody Custom Woodwork"
-                loading="lazy"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#1a0f08;color:#a07840;font-size:.85rem;padding:2rem;text-align:center\'>Add photo: images/projects/jerksoul/jerksoul-day-2.jpg</div>'"
-              />
-              <span class="project-badge" style="background:#7D5C34;color:#fff">Commercial</span>
-            </div>
-            <div class="project-card-body">
-              <span class="featured-badge" style="background:#7D5C34">Case Study</span>
-              <h3>Jerksoul Restaurant — Rooftop Dining Fit-out</h3>
-              <p>Full commercial dining fit-out in Accra. Custom pine dining tables with branded Issacher glass tops, upholstered cube stools, and a large interior bar counter with reclaimed-style timber cladding — built and installed entirely by the Neewoody team.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Commercial</span>
-                <span class="project-meta-tag">Hospitality</span>
-                <span class="project-meta-tag">Custom Furniture</span>
-                <span class="project-meta-tag">Bar Counter</span>
-              </div>
-              <a href="projects/jerksoul.html" class="card-link--primary">
-                View full case study
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ Golf Hills Estate — Dining Set & Banquette ═══ -->
-          <article class="project-card reveal" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
-                alt="X-frame pine dining table and built-in leatherette banquette installed in Golf Hills Estate, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: golf-hills-installed-6.jpg</div>'"
-              />
-              <span class="project-badge">Dining &amp; Living</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Kitchen Dining Set &amp; Banquette — Golf Hills Estate</h4>
-              <p>X-frame pine dining table, matching bench, and a built-in L-shaped leatherette banquette with under-seat storage and timber-framed mirror.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Dining &amp; Living</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-              <a href="projects/golf-hills-estate.html" class="card-link">
-                View case study
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ Afromosia Table — Ridge ═══ -->
-          <article class="project-card reveal" data-category="photo residential hardwood">
-            <div class="project-card-img">
-              <img
-                src="images/projects/french-embassy/afromosia-table-installed-1.jpg"
-                alt="Afromosia live-edge dining table installed at a private residence in Ridge, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: afromosia-table-installed-1.jpg</div>'"
-              />
-              <span class="project-badge" style="background:#5C4A2A;color:#fff">Hardwood</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Afromosia Live-Edge Table — Ridge</h4>
-              <p>Solid Afromosia live-edge dining table with timber U-frame legs. Commissioned by French expatriates for a private residence in Ridge, Accra.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Hardwood</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-              <a href="projects/french-embassy.html" class="card-link">
-                View case study
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ Judith Dining Commission — East Legon ═══ -->
-          <article class="project-card reveal reveal-delay-1" data-category="photo residential hardwood">
-            <div class="project-card-img">
-              <img
-                src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
-                alt="Full Hyedua dining room commission installed in East Legon — table, chairs, and console by Neewoody"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Add photo: judith-set-installed-2.jpg</div>'"
-              />
-              <span class="project-badge" style="background:#5C4A2A;color:#fff">Hardwood</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Full Dining Commission in Hyedua — East Legon</h4>
-              <p>Dining table, six upholstered chairs, and a console unit — all in solid Hyedua with an espresso finish, built to one unified brief.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Hardwood</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-              <a href="projects/judith-east-legon.html" class="card-link">
-                View case study
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-              </a>
-            </div>
-          </article>
-
-          <!-- ═══ Oyarifa — Built-in Wardrobes ═══ -->
-          <article class="project-card reveal" data-category="photo residential">
-            <div class="project-card-img">
-              <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
-                alt="Floor-to-ceiling built-in wardrobes in greige oak laminate — Oyarifa, Accra"
-                loading="lazy" class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: oyarifa-master-closed-1.jpg</div>'" />
-              <span class="project-badge">Wardrobes</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Floor-to-Ceiling Built-in Wardrobes — Oyarifa</h4>
-              <p>Two custom built-in wardrobes for a private residence in Oyarifa — master bedroom (wall-to-wall, floor to ceiling) and guest bedroom (narrow, tall). Greige oak-effect laminate, matte black handles.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Wardrobes</span>
-                <span class="project-meta-tag">Built-in</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Zoe Cantonments — Sliding Wardrobe ═══ -->
-          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
-            <div class="project-card-img">
-              <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg"
-                alt="Freestanding sliding door wardrobe with integrated 4-drawer chest — Cantonments, Accra"
-                loading="lazy" class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: zoe-front-closed.jpg</div>'" />
-              <span class="project-badge">Wardrobes</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Sliding Wardrobe with Integrated Chest — Cantonments</h4>
-              <p>Freestanding wardrobe in dark walnut-effect laminate. Two-panel sliding doors above with an integrated 4-drawer chest at the base. Matte black handles throughout.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Wardrobes</span>
-                <span class="project-meta-tag">Sliding</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Agbogba — Wardrobe with Dresser ═══ -->
-          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
-            <div class="project-card-img">
-              <img src="images/projects/agbogba/agbogba-dresser-lit.jpg"
-                alt="Full-width wardrobe with integrated dresser recess and recessed spotlights — Agbogba, Accra"
-                loading="lazy" class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: agbogba-dresser-lit.jpg</div>'" />
-              <span class="project-badge">Wardrobes</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Wardrobe with Integrated Dresser — Agbogba</h4>
-              <p>Two-piece bedroom commission — a built-in wardrobe and a full-width freestanding wardrobe with integrated dresser recess and recessed spotlights. Oak-effect laminate, silver handles.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Wardrobes</span>
-                <span class="project-meta-tag">Hinged</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Dobro — 4-Bedroom Wardrobe Commission ═══ -->
-          <article class="project-card reveal" data-category="photo residential">
-            <div class="project-card-img">
-              <img src="images/projects/dobro/dobro-wide-interior.jpg"
-                alt="Wardrobe interior with drawers and hanging rail — Dobro new-build, Accra 2025"
-                loading="lazy" class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: dobro-wide-interior.jpg</div>'" />
-              <span class="project-badge">Wardrobes</span>
-            </div>
-            <div class="project-card-body">
-              <h4>4-Bedroom Wardrobe Commission — Dobro</h4>
-              <p>Four wardrobes across four rooms of a new-build house — master, kids, and two guest bedrooms. Same cherry-effect laminate throughout with matte black handles and varied widths. Internal drawer organisers with built-in compartments.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Wardrobes</span>
-                <span class="project-meta-tag">Hinged</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Seyram — Open Walk-in System ═══ -->
-          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
-            <div class="project-card-img">
-              <img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg"
-                alt="Open wardrobe system creating a walk-in dressing room — Nmai Dzorn, Accra"
-                loading="lazy" class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: seyram-installed.jpg</div>'" />
-              <span class="project-badge">Wardrobes</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Open Walk-in Wardrobe System — Nmai Dzorn</h4>
-              <p>Custom open wardrobe system for a new house — 4 white melamine units installed facing each other in pairs, creating a dedicated dressing room. Multiple shelf configurations, base drawers, and integrated full-length mirror.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Wardrobes</span>
-                <span class="project-meta-tag">Open System</span>
-                <span class="project-meta-tag">Walk-in</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Spintex Kitchen ═══ -->
-          <article class="project-card reveal" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
-                alt="Custom L-shaped kitchen in dark laminate with Calacatta marble-effect countertop and frosted glass uppers, Spintex, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: spintex-kitchen-hero.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Custom Kitchen — Regimanuel Gray Estate, Spintex</h4>
-              <p>Dark laminate L-shaped kitchen with Calacatta marble-effect countertop and black frosted glass upper cabinets.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Dansoman Kitchen ═══ -->
-          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
-                alt="Large kitchen with freestanding island in cherry-effect laminate and white quartz countertops, Dansoman, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: dansoman-kitchen-layout.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Kitchen with Island — Dansoman</h4>
-              <p>Cherry-effect laminate kitchen with freestanding island, white quartz countertops, and integrated 6-burner range.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Island</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Danfa Kitchen ═══ -->
-          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg"
-                alt="Mediterranean-inspired kitchen with sealed concrete countertops and beech-effect cabinets, Danfa"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: danfa-kitchen-layout.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Sealed Concrete Kitchen — Danfa</h4>
-              <p>Mediterranean-inspired kitchen with exposed sealed concrete countertops, warm beech cabinets, brass handles, and a Belfast farmhouse sink.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Kukurantumi Kitchen ═══ -->
-          <article class="project-card reveal" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg"
-                alt="Dark charcoal concrete-effect laminate kitchen with blue-grey granite countertops, Kukurantumi, Eastern Region"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: kukurantumi-kitchen-hero.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Kitchen Fit-out — Kukurantumi, Eastern Region</h4>
-              <p>Dark charcoal concrete-effect laminate with blue-grey veined granite countertops and integrated fridge tower. Eastern Region commission.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Tantra Hill Kitchen ═══ -->
-          <article class="project-card reveal reveal-delay-1" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg"
-                alt="Cream high-gloss kitchen with granite countertops and central island, Tantra Hill, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: tantra-kitchen-overview.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Kitchen with Island — Tantra Hill</h4>
-              <p>Cream high-gloss kitchen with warm granite countertops, integrated fridge-freezer tower, and central island.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-          <!-- ═══ Kokrobite Kitchen ═══ -->
-          <article class="project-card reveal reveal-delay-2" data-category="photo residential">
-            <div class="project-card-img">
-              <img
-                src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg"
-                alt="High-gloss kitchen with island and black galaxy granite countertops, Kokrobite, Accra"
-                loading="lazy"
-                class="lightbox-img"
-                onerror="this.parentNode.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:100%;background:#EFEBE3;color:#8A8178;font-size:.8rem;padding:1rem;text-align:center\'>Photo: kokrobite-kitchen-hero.jpg</div>'"
-              />
-              <span class="project-badge">Kitchens</span>
-            </div>
-            <div class="project-card-body">
-              <h4>Full Kitchen — Kokrobite</h4>
-              <p>High-gloss kitchen with island, black galaxy granite countertops, integrated fridge housing, and glazed upper cabinets.</p>
-              <div class="project-meta">
-                <span class="project-meta-tag">Kitchens</span>
-                <span class="project-meta-tag">Residential</span>
-              </div>
-            </div>
-          </article>
-
-        </div>
+    <div class="pf-card-plain">
+      <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg"
+        alt="Sliding wardrobe with integrated drawer chest, Cantonments, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">Sliding Wardrobe — Cantonments</p>
       </div>
-    </section>
+    </div>
 
-    <!-- ═══ CTA BAND ═══ -->
-    <section class="cta-band" aria-labelledby="portfolio-cta">
-      <div class="container reveal">
-        <p class="section-label" style="color:rgba(160,120,74,.85);">Like what you see?</p>
-        <h2 id="portfolio-cta">Let's Build Something for Your Home</h2>
-        <p>Every project starts with a conversation. Tell us about your space and what you're looking for — we'll take it from there.</p>
-        <div class="cta-buttons">
-          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project." class="btn btn-wa btn-lg" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp Us
-          </a>
-          <a href="contact.html" class="btn btn-outline-light btn-lg">Request a Quote</a>
-        </div>
+    <div class="pf-card-plain">
+      <img src="images/projects/dobro/dobro-wide-interior.jpg"
+        alt="4-bedroom wardrobe commission, Dobro new-build, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">4-Bedroom Commission — Dobro</p>
       </div>
-    </section>
+    </div>
 
-  </main>
+    <div class="pf-card-plain">
+      <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
+        alt="L-shaped kitchen, dark laminate, marble countertop, Spintex, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Kitchens</p>
+        <p class="pf-card-name">Custom Kitchen — Spintex</p>
+      </div>
+    </div>
 
+    <div class="pf-card-plain">
+      <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
+        alt="Kitchen with freestanding island, Dansoman, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Kitchens</p>
+        <p class="pf-card-name">Kitchen with Island — Dansoman</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="pf-cta">
+  <span class="pf-cta-eyebrow">Like what you see?</span>
+  <h2>Let's build something <em>for your home.</em></h2>
+  <p>Every project starts with a conversation. Tell us about your space and what you're looking for — we'll take it from there.</p>
+  <div class="pf-cta-btns">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project." class="btn-wa" target="_blank" rel="noopener">WhatsApp Us →</a>
+    <a href="contact.html" class="btn-outline-light">Request a Quote</a>
+  </div>
+</section>
+
+</main>
 
 <!-- FOOTER -->
 <footer class="redesign-footer">
   <div>
-    <a href="index.html" class="foot-logo"><img src="images/logo.png" alt="Neewoody Custom Woodwork" class="logo-img" aria-hidden="true"><span>Neewoody</span></a>
+    <a href="index.html" class="foot-logo">
+      <img src="images/logo.png" alt="" class="logo-img" aria-hidden="true">
+      <span>Neewoody</span>
+    </a>
     <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
   </div>
   <nav class="foot-nav">
@@ -906,7 +403,7 @@ gtag('config', 'G-ZP77WR6BNH');
 </footer>
 
 <!-- FLOATING WHATSAPP BUTTON -->
-<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project."
+<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20discuss%20a%20project."
    class="redesign-wa-float"
    onclick="gtag('event','whatsapp_click',{event_category:'contact',event_label:'floating_whatsapp'})"
    target="_blank" rel="noopener"
@@ -917,34 +414,22 @@ gtag('config', 'G-ZP77WR6BNH');
 
 <script src="js/main.js"></script>
 <script>
-const mobileNavClose = document.getElementById('mobile-nav-close');
-if (mobileNavClose) {
-  mobileNavClose.addEventListener('click', () => {
-    document.getElementById('mobile-nav').classList.remove('open');
-    document.body.style.overflow = '';
+document.querySelectorAll('.video-thumb').forEach(function(thumb){
+  thumb.addEventListener('click',function(){
+    var url=this.dataset.embed;if(!url||this.querySelector('iframe'))return;
+    var iframe=document.createElement('iframe');iframe.src=url;iframe.title=this.dataset.title||'Video';
+    iframe.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+    iframe.setAttribute('allowfullscreen','');
+    iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none;';
+    this.innerHTML='';this.style.position='relative';this.appendChild(iframe);this.style.cursor='default';
   });
-}
+});
+(function(){
+  var t=document.getElementById('nav-toggle'),m=document.getElementById('mobile-nav'),c=document.getElementById('mobile-nav-close');
+  function cl(){m.classList.remove('open');document.body.style.overflow='';}
+  if(t)t.addEventListener('click',function(){m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':'';});
+  if(c)c.addEventListener('click',cl);
+})();
 </script>
-
-
-  <script>
-  /* ── Video card: click play button to embed inline ── */
-  document.querySelectorAll('.video-thumb').forEach(function(thumb) {
-    thumb.addEventListener('click', function() {
-      var url = this.dataset.embed;
-      if (!url || this.querySelector('iframe')) return;
-      var iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.title = this.dataset.title || 'Video';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', '');
-      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;';
-      this.innerHTML = '';
-      this.style.position = 'relative';
-      this.appendChild(iframe);
-      this.style.cursor = 'default';
-    });
-  });
-  </script>
 </body>
 </html>
