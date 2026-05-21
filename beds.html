@@ -142,21 +142,19 @@ a{text-decoration:none}
   letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
 }
 
-/* ── HERO (text-only, dark green) ── */
+/* ── HERO ── */
 .bd-hero{
-  background:var(--green);
-  min-height:100vh;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:0 3rem 4.5rem;
-  position:relative;overflow:hidden;
+  position:relative;height:100vh;min-height:560px;overflow:hidden;
+}
+.bd-hero-img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
 }
 .bd-hero-grain{
-  position:absolute;inset:0;
-  background:radial-gradient(ellipse at 70% 30%, rgba(200,146,42,0.06) 0%, transparent 60%),
-             radial-gradient(ellipse at 20% 80%, rgba(11,31,14,0.8) 0%, transparent 50%);
+  position:absolute;inset:0;z-index:1;
+  background:linear-gradient(170deg,rgba(11,31,14,0.12) 0%,rgba(11,31,14,0.05) 30%,rgba(11,31,14,0.58) 70%,rgba(11,31,14,0.82) 100%);
 }
 .bd-hero-body{
-  position:relative;z-index:1;
+  position:absolute;bottom:4.5rem;left:3rem;right:3rem;z-index:2;
   animation:fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.3s both;
 }
 .hero-tag{
@@ -513,6 +511,20 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   font-family:var(--display);font-size:0.92rem;font-weight:400;color:var(--cream);
 }
 
+/* ── LIGHTBOX ── */
+.lb-overlay{
+  display:none;position:fixed;inset:0;z-index:1000;
+  background:rgba(0,0,0,0.88);
+  align-items:center;justify-content:center;
+  cursor:zoom-out;
+}
+.lb-overlay.open{display:flex}
+.lb-overlay img{
+  max-width:90vw;max-height:90vh;
+  object-fit:contain;cursor:default;
+  box-shadow:0 8px 48px rgba(0,0,0,0.7);
+}
+
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{
   from{opacity:0;transform:translateY(24px)}
@@ -533,7 +545,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   #nav .nav-links{display:none}
   #nav .nav-cta{display:none}
   .nav-toggle{display:flex}
-  .bd-hero{padding:0 1.5rem 3.5rem}
+  .bd-hero-body{bottom:3rem;left:1.5rem;right:1.5rem}
   .bd-intro{grid-template-columns:1fr;gap:2.5rem;padding:5rem 1.5rem}
   .bd-types{padding:4rem 1.5rem}
   .bd-types-grid{grid-template-columns:1fr}
@@ -612,8 +624,11 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 
 <main>
 
-<!-- HERO (text-only, dark green) -->
+<!-- HERO -->
 <section class="bd-hero">
+  <img class="bd-hero-img" src="images/projects/sage-centre/sage-bed-overview.jpg"
+    alt="Custom teak beds at Sage Centre retreat, Wli, Volta Region"
+    fetchpriority="high" />
   <div class="bd-hero-grain" aria-hidden="true"></div>
   <div class="bd-hero-body">
     <p class="hero-tag">Custom Beds · Accra, Ghana</p>
@@ -710,7 +725,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
     <a href="#" class="bd-card featured" onclick="return false;" aria-label="4-Pod Bunk Unit — Montessori School">
       <img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg"
         alt="Custom 4-pod bunk unit with arched entries and under-bed drawers, built for a Montessori school, Accra"
-        loading="lazy" />
+        loading="lazy" style="object-position:center top" />
       <div class="bd-card-meta">
         <p class="bd-card-type">Commercial · Bunk Beds</p>
         <p class="bd-card-name">4-Pod Bunk Unit — Montessori School</p>
@@ -867,6 +882,11 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   <span class="redesign-wa-tooltip">Chat on WhatsApp</span>
 </a>
 
+<!-- LIGHTBOX -->
+<div class="lb-overlay" id="lb-overlay" role="dialog" aria-modal="true" aria-label="Image lightbox">
+  <img id="lb-img" src="" alt="" />
+</div>
+
 <script src="js/main.js"></script>
 <script>
 (function(){
@@ -884,6 +904,34 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   btn.addEventListener('click', function(){
     document.getElementById('mobile-nav').classList.remove('open');
     document.body.style.overflow = '';
+  });
+})();
+(function(){
+  var overlay = document.getElementById('lb-overlay');
+  var lbImg = document.getElementById('lb-img');
+  function openLightbox(src, alt){
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    lbImg.src = '';
+  }
+  document.querySelectorAll('.bd-card').forEach(function(card){
+    card.addEventListener('click', function(e){
+      e.preventDefault();
+      var img = card.querySelector('img');
+      if (img) openLightbox(img.src, img.alt);
+    });
+  });
+  overlay.addEventListener('click', function(e){
+    if (e.target !== lbImg) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeLightbox();
   });
 })();
 </script>
