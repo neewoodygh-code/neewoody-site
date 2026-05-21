@@ -165,7 +165,7 @@ Pages are implemented one at a time. Do not proceed to the next page until instr
 | 4 | Go kitchens | kitchens.html | **done** |
 | 5 | Go beds | beds.html | **done** |
 | 6 | Go dining | dining-living.html | **done** |
-| 7 | Go tvunits | tv-units.html | pending |
+| 7 | Go tvunits | tv-units.html | **done** |
 | 8 | Go shelving | shelving.html | pending |
 | 9 | Go solidwood | solid-wood.html | pending |
 | 10 | Go portfolio | portfolio.html | pending |
