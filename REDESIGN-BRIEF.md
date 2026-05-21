@@ -170,7 +170,7 @@ Pages are implemented one at a time. Do not proceed to the next page until instr
 | 9 | Go solidwood | solid-wood.html | pending |
 | 10 | Go portfolio | portfolio.html | pending |
 | 11 | Go contact | contact.html | pending |
-| 12 | Go sage | projects/sage-centre.html | pending |
+| 12 | Go sage | projects/sage-centre.html | **done** |
 | 13 | Go walker | projects/house-of-walker.html | pending |
 | 14 | Go jerksoul | projects/jerksoul.html | pending |
 
