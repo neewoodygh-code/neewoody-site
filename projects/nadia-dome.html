@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
 <script>
@@ -9,6 +10,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-ZP77WR6BNH');
 </script>
+
 <meta charset="UTF-8" />
 <link rel="icon" href="../images/favicon.ico" />
 <link rel="apple-touch-icon" href="../images/logo.png" />
@@ -21,602 +23,712 @@ gtag('config', 'G-ZP77WR6BNH');
 <meta property="og:title" content="Full Home Commission — Dome, Accra | Neewoody Custom Woodwork" />
 <meta property="og:description" content="Wave-carved Guarea chest, compact kitchenette, solid wood bar stools, and fitted wardrobe — four pieces built for one home in Dome, Accra." />
 <meta property="og:image" content="https://neewoodygh.com/images/projects/nadia-dome/nadia-wave-chest-1.jpg" />
-<link rel="stylesheet" href="../css/styles.css" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ── Project Hero ── */
-.project-hero{position:relative;height:75vh;min-height:480px;max-height:700px;overflow:hidden;display:flex;align-items:flex-end}
-.project-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%}
-.project-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.2) 55%,transparent 100%)}
-.project-hero-content{position:relative;z-index:2;width:100%;padding:0 0 3rem}
-.project-hero-content .container{display:flex;flex-direction:column;gap:.75rem}
-.project-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);font-family:monospace}
-.project-hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#fff;line-height:1.1;margin:0}
-.project-hero-sub{font-size:1.05rem;color:rgba(255,255,255,.8);margin:0;max-width:560px}
-/* ── Spec Bar ── */
-.spec-bar{background:var(--clr-surface);border-bottom:1px solid var(--clr-border);padding:1.5rem 0}
-.spec-bar-inner{display:flex;flex-wrap:wrap;gap:0}
-.spec-item{flex:1;min-width:140px;padding:0 2rem 0 0;border-right:1px solid var(--clr-border);margin-right:2rem}
-.spec-item:last-child{border-right:none;margin-right:0}
-.spec-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.3rem}
-.spec-value{font-size:.95rem;font-weight:600;color:var(--clr-text)}
-@media(max-width:600px){.spec-bar-inner{gap:1.25rem}.spec-item{flex:1 1 calc(50% - .625rem);border-right:none;margin-right:0;padding-right:0}}
-/* ── Case Study Sections ── */
-.cs-section{padding:4rem 0}
-.cs-section+.cs-section{border-top:1px solid var(--clr-border)}
-.cs-section--alt{background:var(--clr-bg-alt)}
-.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
-@media(max-width:768px){.cs-grid{grid-template-columns:1fr;gap:2rem}}
-.cs-text h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:1rem;line-height:1.2}
-.cs-text p{color:var(--clr-mid);line-height:1.75;margin-bottom:1rem}
-.cs-text p:last-child{margin-bottom:0}
-.cs-img{border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3}
-.cs-img img{width:100%;height:100%;object-fit:cover;display:block}
-.cs-piece-label{font-size:.65rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--clr-accent);font-family:monospace;margin-bottom:.5rem;display:block}
-/* ── Video Cards ── */
-.video-card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2rem}
-.video-card-grid.single{grid-template-columns:1fr;max-width:480px}
-.video-card-grid.two-col{grid-template-columns:repeat(2,1fr)}
-@media(max-width:900px){.video-card-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.video-card-grid{grid-template-columns:1fr}.video-card-grid.single{max-width:100%}}
-.video-card{border-radius:var(--radius);overflow:hidden;background:var(--clr-surface);border:1px solid var(--clr-border)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(240,232,208,0.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(11,31,14,0.08);transition:background 0.4s,border-color 0.4s}
+#nav.over-hero{background:transparent;border-bottom-color:transparent}
+#nav .logo{display:flex;align-items:center;gap:0.65rem;text-decoration:none;flex-shrink:0}
+.logo-img{height:36px;width:auto;display:block;transition:filter 0.4s}
+#nav.over-hero .logo-img{filter:invert(1)}
+.logo-text-wrap{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--ink);letter-spacing:0.03em;transition:color 0.4s}
+#nav.over-hero .logo-text-wrap{color:var(--cream)}
+.logo-sub{display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;opacity:0.6;margin-top:2px}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap}
+#nav.over-hero .nav-links a{color:rgba(240,232,208,0.8)}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:color 0.3s;user-select:none;white-space:nowrap}
+#nav.over-hero .nav-more-trigger{color:rgba(240,232,208,0.8)}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{position:absolute;top:calc(100% + 0.8rem);left:50%;transform:translateX(-50%) translateY(-6px);background:var(--green);border:1px solid rgba(240,232,208,0.08);padding:0.6rem 0;min-width:180px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:300}
+.nav-more:hover .nav-dropdown{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-dropdown::before{content:'';position:absolute;bottom:100%;left:0;right:0;height:0.9rem}
+.nav-dropdown a{display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;transition:color 0.2s,background 0.2s}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s;white-space:nowrap;flex-shrink:0}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:24px;height:2px;background:var(--ink);transition:background 0.3s}
+#nav.over-hero .nav-toggle span{background:var(--cream)}
+.mobile-nav{position:fixed;inset:0;z-index:190;background:var(--green);display:flex;flex-direction:column;justify-content:center;padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);font-weight:400;color:rgba(240,232,208,0.75);padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);transition:color 0.2s;display:block}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{position:absolute;top:1.4rem;right:1.5rem;background:none;border:none;cursor:pointer;font-family:var(--ui);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* ── HERO ── */
+.proj-hero{position:relative;height:100vh;min-height:560px;overflow:hidden}
+.proj-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.proj-hero-scrim{position:absolute;inset:0;background:linear-gradient(170deg,rgba(11,31,14,0.15) 0%,rgba(11,31,14,0.05) 25%,rgba(11,31,14,0.55) 65%,rgba(11,31,14,0.82) 100%)}
+.proj-hero-body{position:absolute;bottom:4.5rem;left:3rem;right:3rem;z-index:2;animation:fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.3s both}
+.breadcrumb{font-family:var(--ui);font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(240,232,208,0.55);margin-bottom:0.9rem;display:flex;align-items:center;gap:0.5rem}
+.breadcrumb a{color:rgba(240,232,208,0.55);transition:color 0.2s}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb-sep{opacity:0.4}
+.hero-tag{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.proj-hero h1{font-family:var(--display);font-size:clamp(2.6rem,6vw,5rem);font-weight:400;line-height:1.08;color:var(--cream);margin-bottom:1.4rem;max-width:14ch}
+.proj-hero-sub{font-family:var(--body);font-size:0.95rem;line-height:1.75;color:rgba(240,232,208,0.6);max-width:50ch}
+
+/* ── STATS ── */
+.proj-stats{background:var(--green);display:grid;gap:1px}
+.proj-stats.s5{grid-template-columns:repeat(5,1fr)}
+.proj-stat{padding:2rem 2.5rem;border-right:1px solid rgba(240,232,208,0.06)}
+.proj-stat:last-child{border-right:none}
+.proj-stat-label{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:rgba(240,232,208,0.4);margin-bottom:0.4rem;display:block}
+.proj-stat-value{font-family:var(--display);font-size:0.95rem;font-weight:400;color:var(--cream);line-height:1.3}
+
+/* ── SPLIT ── */
+.proj-split{display:grid;grid-template-columns:1fr 1fr;min-height:55vh}
+.proj-split-img{overflow:hidden;position:relative}
+.proj-split-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.9s ease}
+.proj-split-img:hover img{transform:scale(1.04)}
+.proj-split-text{padding:5rem 4.5rem;display:flex;flex-direction:column;justify-content:center}
+.eyebrow{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.proj-split-text h2{font-family:var(--display);font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:400;line-height:1.2;margin-bottom:1.2rem}
+.proj-split-text p{font-family:var(--body);font-size:0.88rem;line-height:1.85;color:var(--muted);margin-bottom:1rem}
+.proj-split-text p:last-child{margin-bottom:0}
+
+/* ── PIECE SECTIONS ── */
+.proj-piece{overflow:hidden}
+.proj-piece-extras{padding:3rem 3rem 5rem}
+.piece-label{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;display:block}
+
+/* ── VIDEO CARDS ── */
+.video-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.video-grid.one-col{grid-template-columns:1fr;max-width:480px}
+.video-grid.two-col{grid-template-columns:repeat(2,1fr)}
+.video-grid.four-col{grid-template-columns:repeat(4,1fr)}
+.video-card{background:var(--cream-dark);overflow:hidden}
+.video-card.on-cream{background:var(--cream-dark)}
 .video-thumb{position:relative;cursor:pointer;aspect-ratio:16/9;overflow:hidden;background:#111}
 .video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.video-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.28);transition:background .2s}
-.video-thumb:hover .video-play-btn{background:rgba(0,0,0,.48)}
-.video-play-btn svg{filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));transition:transform .2s}
+.video-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25);transition:background 0.2s}
+.video-thumb:hover .video-play-btn{background:rgba(0,0,0,0.45)}
+.video-play-btn svg{filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));transition:transform 0.2s}
 .video-thumb:hover .video-play-btn svg{transform:scale(1.1)}
-.video-card-body{padding:.75rem 1rem}
-.video-badge{display:inline-flex;align-items:center;gap:.3rem;font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:#c00;color:#fff;padding:.18rem .55rem;border-radius:3px;margin-bottom:.4rem}
-.video-card-body p{font-size:.8rem;color:var(--clr-mid);line-height:1.45;margin:0}
-/* ── Gallery ── */
-.gallery-section{padding:4rem 0;border-top:1px solid var(--clr-border)}
-.gallery-section h2{font-size:clamp(1.4rem,2.5vw,1.9rem);margin-bottom:.5rem}
-.gallery-section .section-label{margin-bottom:.5rem}
-.gallery-section>.container>p{color:var(--clr-mid);margin-bottom:2.5rem;max-width:560px}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.gallery-item{overflow:hidden;border-radius:var(--radius);aspect-ratio:4/3;cursor:pointer}
+.video-card-body{padding:1rem 1.2rem 1.2rem}
+.video-badge{display:inline-block;font-family:var(--ui);font-size:0.6rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:#c00;color:#fff;padding:0.18rem 0.55rem;margin-bottom:0.5rem}
+.video-card-body p{font-family:var(--body);font-size:0.82rem;line-height:1.65;color:var(--muted)}
+
+/* ── SCOPE NOTE ── */
+.scope-note{border-left:3px solid var(--gold);padding:1rem 1.4rem;font-family:var(--body);font-size:0.85rem;line-height:1.65;color:var(--muted);margin-top:2.5rem;background:rgba(200,146,42,0.06)}
+.scope-note strong{color:var(--ink)}
+
+/* ── GALLERY ── */
+.proj-gallery{background:var(--cream-dark);padding:6rem 3rem}
+.proj-gallery-head{margin-bottom:2.5rem;max-width:640px}
+.proj-gallery-head .eyebrow{margin-bottom:0.5rem}
+.proj-gallery-head h2{font-family:var(--display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;margin-bottom:0.8rem}
+.proj-gallery-head p{font-family:var(--body);font-size:0.9rem;line-height:1.75;color:var(--muted)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.gallery-item{overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;position:relative;background:var(--green)}
 .gallery-item.wide{grid-column:span 2;aspect-ratio:16/9}
-.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
-.gallery-item:hover img{transform:scale(1.04)}
-@media(max-width:768px){.gallery-grid{grid-template-columns:repeat(2,1fr)}.gallery-item.wide{grid-column:span 2}}
-@media(max-width:480px){.gallery-grid{grid-template-columns:1fr}.gallery-item.wide{grid-column:span 1;aspect-ratio:4/3}}
-/* ── Scope Note ── */
-.scope-note{background:var(--clr-surface);border:1px solid var(--clr-border);border-left:3px solid var(--clr-accent);border-radius:var(--radius);padding:1rem 1.25rem;font-size:.85rem;color:var(--clr-mid);line-height:1.6;margin-top:2rem}
-.scope-note strong{color:var(--clr-text)}
-/* ── Lightbox ── */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:1rem}
-.lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:var(--radius)}
-.lightbox-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:.8}
-.lightbox-close:hover{opacity:1}
-.lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;padding:.75rem 1rem;cursor:pointer;border-radius:var(--radius);transition:background .2s}
-.lightbox-prev{left:1rem}.lightbox-next{right:1rem}
-.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
-/* ── Next Project ── */
-.next-project{border-top:1px solid var(--clr-border);padding:3rem 0}
-.next-project-inner{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
-.next-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.4rem}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease,filter 0.3s;filter:brightness(0.93)}
+.gallery-item:hover img{transform:scale(1.04);filter:brightness(0.75)}
+
+/* ── LIGHTBOX ── */
+.proj-lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center}
+.proj-lightbox.open{display:flex}
+.proj-lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;box-shadow:0 8px 48px rgba(0,0,0,0.7)}
+.lb-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:0.8}
+.lb-close:hover{opacity:1}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:1.5rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.2s}
+.lb-prev{left:1rem}
+.lb-next{right:1rem}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,0.25)}
+
+/* ── CTA ── */
+.proj-cta{background:var(--green);padding:8rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.proj-cta h2{font-family:var(--display);font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.15;color:var(--cream)}
+.proj-cta h2 em{font-style:italic;color:var(--gold)}
+.proj-cta p{font-family:var(--body);font-size:0.9rem;line-height:1.85;color:rgba(240,232,208,0.65);margin-bottom:2.5rem;max-width:38ch}
+.btn-row{display:flex;gap:0.8rem;flex-wrap:wrap}
+.btn-wa{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:var(--gold);color:var(--green);display:inline-flex;align-items:center;gap:0.6rem;transition:background 0.25s}
+.btn-wa:hover{background:#b07d20}
+.btn-outline-light{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:transparent;border:1px solid rgba(240,232,208,0.35);color:var(--cream);display:inline-flex;align-items:center;transition:background 0.25s,color 0.25s,border-color 0.25s}
+.btn-outline-light:hover{background:var(--cream);color:var(--green);border-color:var(--cream)}
+
+/* ── BACK STRIP ── */
+.proj-back{background:var(--cream);padding:2.5rem 3rem;border-top:1px solid rgba(11,31,14,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.proj-back-link{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,gap 0.3s}
+.proj-back-link::before{content:'←'}
+.proj-back-link:hover{color:var(--gold);gap:1rem}
+.proj-back-next{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s}
+.proj-back-next:hover{background:#b07d20}
+
+/* ── FOOTER ── */
+.redesign-footer{background:var(--green);padding:3.5rem 3rem;display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem}
+.redesign-footer .foot-logo{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;text-decoration:none}
+.redesign-footer .logo-img{filter:invert(1);height:30px;width:auto}
+.redesign-footer .foot-logo span{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--cream);letter-spacing:0.03em}
+.redesign-footer .foot-tagline{font-family:var(--body);font-style:italic;font-size:0.82rem;color:rgba(240,232,208,0.45)}
+.redesign-footer .foot-nav{display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem}
+.redesign-footer .foot-nav a{font-family:var(--ui);font-size:0.65rem;font-weight:300;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,232,208,0.5);transition:color 0.2s}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);padding-top:1.5rem;margin-top:0.5rem;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.1em;color:rgba(240,232,208,0.25)}
+
+/* ── WA FLOAT ── */
+.redesign-wa-float{position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.38);transition:transform 0.3s,box-shadow 0.3s}
+.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
+.redesign-wa-float svg{width:28px;height:28px}
+.redesign-wa-tooltip{position:absolute;right:66px;white-space:nowrap;background:#1c1c1a;color:#fff;font-family:var(--ui);font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;opacity:0;pointer-events:none;transform:translateX(6px);transition:opacity 0.25s,transform 0.25s}
+.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── MEDIA QUERIES ── */
+@media(max-width:900px){
+  .proj-stats.s5{grid-template-columns:repeat(3,1fr)}
+  .proj-cta{grid-template-columns:1fr;gap:3rem}
+  .video-grid.four-col{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links,#nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .proj-hero-body{bottom:3rem;left:1.5rem;right:1.5rem}
+  .proj-stats.s5{grid-template-columns:repeat(2,1fr)}
+  .proj-stat{padding:1.5rem}
+  .proj-split{grid-template-columns:1fr;min-height:auto}
+  .proj-split-img{min-height:60vw}
+  .proj-split-text{padding:3.5rem 1.5rem}
+  .proj-piece-extras{padding:2rem 1.5rem 3.5rem}
+  .proj-gallery{padding:4rem 1.5rem}
+  .gallery-grid{grid-template-columns:repeat(2,1fr)}
+  .gallery-item.wide{grid-column:span 2}
+  .video-grid,.video-grid.four-col,.video-grid.two-col{grid-template-columns:1fr 1fr}
+  .video-grid.one-col{max-width:100%}
+  .proj-cta{padding:5rem 1.5rem;gap:2rem}
+  .proj-back{padding:2rem 1.5rem}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+}
+@media(max-width:480px){
+  .gallery-grid{grid-template-columns:1fr}
+  .gallery-item.wide{grid-column:span 1;aspect-ratio:4/3}
+  .video-grid,.video-grid.four-col,.video-grid.two-col{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
-  <header class="site-header" role="banner">
-    <div class="container">
-      <div class="header-inner">
-        <a href="../index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
-          <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-          <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="../index.html">Home</a>
-          <a href="../wardrobes.html">Wardrobes</a>
-          <a href="../kitchens.html">Kitchens</a>
-          <a href="../beds.html">Beds</a>
-          <div class="nav-services-wrap">
-            <span class="nav-services-trigger">More &#9663;</span>
-            <div class="nav-services-dropdown">
-              <div class="nav-services-col">
-                <span class="nav-services-col-label">More Services</span>
-                <a href="../dining-living.html">Dining &amp; Living</a>
-                <a href="../tv-units.html">TV Units</a>
-                <a href="../shelving.html">Shelving</a>
-                <a href="../solid-wood.html">Solid Wood</a>
-              </div>
-            </div>
-          </div>
-          <a href="../portfolio.html" style="color:var(--clr-accent)">Portfolio</a>
-          <a href="../contact.html">Contact</a>
-        </nav>
-        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-      </div>
-    </div>
-  </header>
+<!-- MOBILE NAV OVERLAY -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close">✕ Close</button>
+  <a href="../index.html">Home</a>
+  <a href="../wardrobes.html">Wardrobes</a>
+  <a href="../kitchens.html">Kitchens</a>
+  <a href="../beds.html">Beds</a>
+  <a href="../dining-living.html">Dining &amp; Living</a>
+  <a href="../tv-units.html">TV Units</a>
+  <a href="../shelving.html">Shelving</a>
+  <a href="../solid-wood.html">Solid Wood</a>
+  <a href="../portfolio.html">Portfolio</a>
+  <a href="../contact.html">Contact</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Nadia%20Dome%20project%20and%20would%20like%20to%20discuss%20a%20commission." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
+    <a href="../contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
+  </div>
+</nav>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="../index.html">Home</a>
-    <a href="../wardrobes.html">Wardrobes</a>
-    <a href="../kitchens.html">Kitchens</a>
-    <a href="../beds.html">Beds</a>
-    <a href="../dining-living.html">Dining &amp; Living</a>
-    <a href="../tv-units.html">TV Units</a>
-    <a href="../shelving.html">Shelving</a>
-    <a href="../solid-wood.html">Solid Wood</a>
-    <a href="../portfolio.html">Portfolio</a>
-    <a href="../contact.html">Contact</a>
-    <div class="mobile-nav-ctas">
-      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
-      <a href="../contact.html" class="btn btn-outline">Request a Quote</a>
-    </div>
-  </nav>
-
-  <main>
-
-    <!-- ═══ PROJECT HERO ═══ -->
-    <div class="project-hero">
-      <img
-        class="project-hero-img"
-        src="../images/projects/nadia-dome/nadia-wave-chest-1.jpg"
-        alt="Wave-carved Guarea chest of drawers with integrated recessed pulls — built by Neewoody Custom Woodwork for a private residence in Dome, Accra"
-        fetchpriority="high"
-        onerror="this.style.display='none';document.querySelector('.project-hero').style.background='#1a1208'"
-      />
-      <div class="project-hero-overlay" aria-hidden="true"></div>
-      <div class="project-hero-content">
-        <div class="container">
-          <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:.5rem">
-            <a href="../index.html" style="color:rgba(255,255,255,.6)">Home</a>
-            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
-            <a href="../portfolio.html" style="color:rgba(255,255,255,.6)">Portfolio</a>
-            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
-            <span style="color:rgba(255,255,255,.85)" aria-current="page">Nadia, Dome</span>
-          </nav>
-          <p class="project-hero-label">Residential · Dome, Accra · 2025</p>
-          <h1 class="project-hero-title">Full Home Commission</h1>
-          <p class="project-hero-sub">Wave-carved Guarea chest, kitchenette, bar stools, and fitted wardrobe — four pieces built to one brief for a private residence in Dome, Accra.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SPEC BAR ═══ -->
-    <div class="spec-bar">
-      <div class="container">
-        <div class="spec-bar-inner">
-          <div class="spec-item">
-            <span class="spec-label">Client</span>
-            <span class="spec-value">Nadia, Dome</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Year</span>
-            <span class="spec-value">2025</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Location</span>
-            <span class="spec-value">Dome, Accra, Ghana</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Finish</span>
-            <span class="spec-value">Dark laminate, matte black hardware</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Scope</span>
-            <span class="spec-value">Full home commission — 4 pieces</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ THE COMMISSION ═══ -->
-    <section class="cs-section" aria-labelledby="brief-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <p class="section-label">The Commission</p>
-            <h2 id="brief-heading">Four Pieces. One Home. One Brief.</h2>
-            <p>Neewoody was commissioned to design and build four pieces for a private residence in Dome, Accra — each serving a different room and function, but all following a consistent design language: dark laminate cabinetry, matte black hardware, and a clean, considered finish throughout.</p>
-            <p>The standout piece is the wave-carved Guarea chest of drawers — a solid hardwood chest with a flowing wave pattern carved across the full face of every drawer front. The remaining three pieces — a compact kitchenette, three upholstered bar stools, and a full-height fitted wardrobe — complete the commission with the same attention to detail.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/nadia-dome/nadia-kitchenette-4.jpg"
-              alt="Compact kitchenette in warm russet laminate with dark stone-effect countertop — Dome, Accra"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PIECE 1: WAVE CHEST ═══ -->
-    <section class="cs-section cs-section--alt" aria-labelledby="chest-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <span class="cs-piece-label">Piece 01</span>
-            <h2 id="chest-heading">Wave-Carved Guarea Chest of Drawers</h2>
-            <p>The hero piece of the commission. A chest of drawers in solid Guarea — a premium West African hardwood prized for its fine grain, rich warm tone, and exceptional workability — with a flowing wave pattern carved across the full face of every drawer front.</p>
-            <p>The carving runs as one continuous motion across all the drawers, from edge to edge. Integrated recessed pulls with no visible hardware keep the face clean. Deep walnut-toned finish highlights the natural warmth of the timber. One of the most distinctive pieces in the Neewoody portfolio.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/nadia-dome/nadia-wave-chest-2.jpg"
-              alt="Wave-carved Guarea chest of drawers — second angle showing continuous carving across all drawer fronts"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-        <div class="video-card-grid single reveal" style="margin-top:2.5rem">
-          <div class="video-card">
-            <div class="video-thumb"
-                 data-embed="https://www.youtube.com/embed/KOX5r2eqUVE?autoplay=1"
-                 data-title="Wave-carved Guarea chest of drawers — Neewoody Custom Woodwork">
-              <img src="https://img.youtube.com/vi/KOX5r2eqUVE/hqdefault.jpg"
-                   alt="Wave-carved Guarea chest of drawers video" loading="lazy"
-                   onerror="this.style.display='none'" />
-              <div class="video-play-btn" aria-label="Play video">
-                <svg width="52" height="52" viewBox="0 0 56 56" aria-hidden="true">
-                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
-                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
-                </svg>
-              </div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-badge">&#9654; Video</div>
-              <p>The wave-carved chest — see the carved detail and drawer action.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PIECE 2: KITCHENETTE ═══ -->
-    <section class="cs-section" aria-labelledby="kitchenette-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <span class="cs-piece-label">Piece 02</span>
-            <h2 id="kitchenette-heading">Compact Kitchenette</h2>
-            <p>A single-run kitchenette unit in warm russet laminate with a dark oxidised stone-effect countertop and matching upstand backsplash. Undermount black sink with pull-out mixer tap. Three-door base cabinet with matte black bar handles throughout.</p>
-            <p>Built to fit the space exactly — every dimension calibrated to the room. A compact unit that punches above its size in finish quality and functionality.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/nadia-dome/nadia-kitchenette-3.jpg"
-              alt="Compact kitchenette in russet laminate with dark stone countertop — built by Neewoody for a private residence in Dome, Accra"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-        <div class="video-card-grid two-col reveal" style="margin-top:2.5rem">
-          <div class="video-card">
-            <div class="video-thumb"
-                 data-embed="https://www.youtube.com/embed/TAbjiBb5Bt0?autoplay=1"
-                 data-title="Nadia kitchenette — Neewoody Custom Woodwork">
-              <img src="https://img.youtube.com/vi/TAbjiBb5Bt0/hqdefault.jpg"
-                   alt="Kitchenette video 1" loading="lazy" onerror="this.style.display='none'" />
-              <div class="video-play-btn" aria-label="Play video">
-                <svg width="44" height="44" viewBox="0 0 56 56" aria-hidden="true">
-                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
-                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
-                </svg>
-              </div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-badge">&#9654; Video</div>
-              <p>Kitchenette — overview of the finished unit.</p>
-            </div>
-          </div>
-          <div class="video-card">
-            <div class="video-thumb"
-                 data-embed="https://www.youtube.com/embed/4EWuw0lJXQw?autoplay=1"
-                 data-title="Nadia kitchenette detail — Neewoody Custom Woodwork">
-              <img src="https://img.youtube.com/vi/4EWuw0lJXQw/hqdefault.jpg"
-                   alt="Kitchenette video 2" loading="lazy" onerror="this.style.display='none'" />
-              <div class="video-play-btn" aria-label="Play video">
-                <svg width="44" height="44" viewBox="0 0 56 56" aria-hidden="true">
-                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
-                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
-                </svg>
-              </div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-badge">&#9654; Video</div>
-              <p>Countertop detail — stone-effect surface and undermount sink.</p>
-            </div>
-          </div>
-          <div class="video-card">
-            <div class="video-thumb"
-                 data-embed="https://www.youtube.com/embed/MzB3WHXUt9w?autoplay=1"
-                 data-title="Nadia kitchenette cabinets — Neewoody Custom Woodwork">
-              <img src="https://img.youtube.com/vi/MzB3WHXUt9w/hqdefault.jpg"
-                   alt="Kitchenette video 3" loading="lazy" onerror="this.style.display='none'" />
-              <div class="video-play-btn" aria-label="Play video">
-                <svg width="44" height="44" viewBox="0 0 56 56" aria-hidden="true">
-                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
-                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
-                </svg>
-              </div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-badge">&#9654; Video</div>
-              <p>Cabinet doors and hardware — matte black bar handles.</p>
-            </div>
-          </div>
-          <div class="video-card">
-            <div class="video-thumb"
-                 data-embed="https://www.youtube.com/embed/_wg_vHSfF-U?autoplay=1"
-                 data-title="Nadia kitchenette tap and sink — Neewoody Custom Woodwork">
-              <img src="https://img.youtube.com/vi/_wg_vHSfF-U/hqdefault.jpg"
-                   alt="Kitchenette video 4" loading="lazy" onerror="this.style.display='none'" />
-              <div class="video-play-btn" aria-label="Play video">
-                <svg width="44" height="44" viewBox="0 0 56 56" aria-hidden="true">
-                  <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
-                  <polygon points="22,16 22,40 42,28" fill="#fff"/>
-                </svg>
-              </div>
-            </div>
-            <div class="video-card-body">
-              <div class="video-badge">&#9654; Video</div>
-              <p>Pull-out mixer tap and undermount black sink.</p>
-            </div>
-          </div>
-        </div>
-        <div class="scope-note reveal">
-          <strong>Scope note:</strong> The kitchen island and main kitchen cabinetry visible in the background of some photos are pre-existing and were not part of this commission. Neewoody's scope was the compact kitchenette unit only.
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PIECE 3: BAR STOOLS ═══ -->
-    <section class="cs-section cs-section--alt" aria-labelledby="stools-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <span class="cs-piece-label">Piece 03</span>
-            <h2 id="stools-heading">Solid Wood Bar Stools</h2>
-            <p>Three matching bar stools in solid wood with a matte black finish. Round upholstered seats in dark velvet — padded for comfort and built for daily use. Curved backrest and X-cross stretcher base. Built to pair with the kitchen island counter.</p>
-            <p>All three stools are built to the same height and finish — consistent as a set, sturdy enough for a family kitchen.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/nadia-dome/nadia-bar-stools.jpg"
-              alt="Three matching solid wood bar stools with dark velvet upholstered seats — built by Neewoody for a private residence in Dome, Accra"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ PIECE 4: WARDROBE ═══ -->
-    <section class="cs-section" aria-labelledby="wardrobe-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <span class="cs-piece-label">Piece 04</span>
-            <h2 id="wardrobe-heading">Full-Height Fitted Wardrobe</h2>
-            <p>A full-height two-door fitted wardrobe in dark laminate, matching the finish language of the kitchenette. Three drawers below with matte black bar handles — same hardware specification throughout the commission.</p>
-            <p>Built to exact room dimensions. The fit from floor to ceiling makes use of every centimetre of the space while keeping the look clean and deliberate.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/nadia-dome/nadia-wardrobe-front.jpg"
-              alt="Full-height fitted wardrobe in dark laminate with three drawers and matte black bar handles — Dome, Accra"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ GALLERY ═══ -->
-    <section class="gallery-section" aria-labelledby="gallery-heading">
-      <div class="container">
-        <p class="section-label">Project Photography</p>
-        <h2 id="gallery-heading">The Full Commission</h2>
-        <p>All four pieces — chest, kitchenette, stools, and wardrobe — photographed in situ.</p>
-        <div class="gallery-grid" id="gallery-grid">
-
-          <div class="gallery-item wide" data-index="0">
-            <img src="../images/projects/nadia-dome/nadia-wave-chest-1.jpg"
-              alt="Wave-carved Guarea chest of drawers — hero view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="1">
-            <img src="../images/projects/nadia-dome/nadia-wave-chest-2.jpg"
-              alt="Wave-carved chest — second angle" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="2">
-            <img src="../images/projects/nadia-dome/nadia-kitchenette-3.jpg"
-              alt="Kitchenette — front view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="3">
-            <img src="../images/projects/nadia-dome/nadia-kitchenette-4.jpg"
-              alt="Kitchenette — countertop and sink detail" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="4">
-            <img src="../images/projects/nadia-dome/nadia-kitchenette-5.jpg"
-              alt="Kitchenette — base cabinets and hardware" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="5">
-            <img src="../images/projects/nadia-dome/nadia-kitchenette-11.jpg"
-              alt="Kitchenette — night view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="6">
-            <img src="../images/projects/nadia-dome/nadia-kitchenette-12.jpg"
-              alt="Kitchenette — wide evening view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="7">
-            <img src="../images/projects/nadia-dome/nadia-bar-stools.jpg"
-              alt="Three matching dark velvet bar stools" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="8">
-            <img src="../images/projects/nadia-dome/nadia-wardrobe-front.jpg"
-              alt="Full-height fitted wardrobe in dark laminate — front view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="9">
-            <img src="../images/projects/nadia-dome/nadia-wardrobe-angled.jpg"
-              alt="Full-height fitted wardrobe in dark laminate — angled view" loading="lazy"
-              onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ LIGHTBOX ═══ -->
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
-      <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
-      <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&#8592;</button>
-      <img id="lightbox-img" src="" alt="" />
-      <button class="lightbox-next" id="lightbox-next" aria-label="Next photo">&#8594;</button>
-    </div>
-
-    <!-- ═══ CTA ═══ -->
-    <section class="cta-band" aria-labelledby="cs-cta">
-      <div class="container reveal">
-        <p class="section-label" style="color:rgba(160,120,74,.85)">Work with Neewoody</p>
-        <h2 id="cs-cta">Looking to Commission Multiple Pieces?</h2>
-        <p>Whether it's one piece or a full home — get in touch and we'll discuss what's possible. We work across cabinetry, hardwood furniture, and bespoke joinery.</p>
-        <div class="cta-buttons">
-          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Nadia%20Dome%20project%20and%20would%20like%20to%20discuss%20a%20commission."
-             class="btn btn-wa btn-lg" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp Us Now
-          </a>
-          <a href="../contact.html" class="btn btn-outline-light btn-lg">Request a Quote</a>
-          <a href="../portfolio.html" class="btn btn-outline-light btn-lg">View More Work</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ BACK TO PORTFOLIO ═══ -->
-    <div class="next-project">
-      <div class="container">
-        <div class="next-project-inner">
-          <div>
-            <span class="next-label">Portfolio</span>
-            <a href="../portfolio.html"
-               style="font-size:1.1rem;font-weight:600;color:var(--clr-text);text-decoration:none"
-               onmouseover="this.style.color='var(--clr-accent)'"
-               onmouseout="this.style.color='var(--clr-text)'">
-              ← Back to All Projects
-            </a>
-          </div>
-          <a href="golf-hills-estate.html" class="btn btn-accent">Next Case Study →</a>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- ═══ FOOTER ═══ -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="../index.html" class="logo">
-            <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-            <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-          </a>
-          <p>Made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
-          <div class="footer-social">
-            <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-            <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
-          </div>
-        </div>
-        <div class="footer-col"><h5>Services</h5><ul><li><a href="../wardrobes.html">Custom Wardrobes</a></li><li><a href="../beds.html">Custom Beds</a></li><li><a href="../kitchens.html">Kitchen Cabinets</a></li><li><a href="../shelving.html">Shelving &amp; Storage</a></li><li><a href="../tv-units.html">TV Units</a></li></ul></div>
-        <div class="footer-col"><h5>Company</h5><ul><li><a href="../portfolio.html">Portfolio</a></li><li><a href="../contact.html">Contact Us</a></li><li><a href="../contact.html">Request a Quote</a></li><li><a href="../wardrobe-estimator.html">Price Estimator</a></li><li><a href="../tools.html">Tools</a></li><li><a href="../privacy.html">Privacy Policy</a></li></ul></div>
-        <div class="footer-col"><h5>Contact</h5>
-          <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
-          <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
-          <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
-          <div class="footer-contact-item">Accra, Ghana</div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
-        <div class="footer-bottom-links"><a href="../privacy.html">Privacy Policy</a><a href="../contact.html">Contact</a></div>
-      </div>
-    </div>
-  </footer>
-
-  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project."
-     class="wa-float" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    <span class="wa-tooltip">Chat on WhatsApp</span>
+<!-- NAV -->
+<nav id="nav" class="over-hero">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="" class="logo-img" aria-hidden="true">
+    <span class="logo-text-wrap">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
   </a>
+  <ul class="nav-links">
+    <li><a href="../wardrobes.html">Wardrobes</a></li>
+    <li><a href="../kitchens.html">Kitchens</a></li>
+    <li><a href="../beds.html">Beds</a></li>
+    <li class="nav-more">
+      <span class="nav-more-trigger">More ▾</span>
+      <div class="nav-dropdown">
+        <a href="../dining-living.html">Dining &amp; Living</a>
+        <a href="../tv-units.html">TV Units</a>
+        <a href="../shelving.html">Shelving</a>
+        <a href="../solid-wood.html">Solid Wood</a>
+      </div>
+    </li>
+    <li><a href="../portfolio.html">Portfolio</a></li>
+    <li><a href="../contact.html">Contact</a></li>
+  </ul>
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Nadia%20Dome%20project%20and%20would%20like%20to%20discuss%20a%20commission." class="nav-cta">WhatsApp Us</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-  <script src="../js/main.js"></script>
-  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
-  <script>
-  /* ── Video click-to-embed ── */
-  document.querySelectorAll('.video-thumb').forEach(function(thumb) {
-    thumb.addEventListener('click', function() {
-      var url = this.dataset.embed;
-      if (!url || this.querySelector('iframe')) return;
-      var iframe = document.createElement('iframe');
-      iframe.src = url;
-      iframe.title = this.dataset.title || 'Video';
-      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', '');
-      iframe.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border:none;';
-      this.innerHTML = '';
-      this.style.position = 'relative';
-      this.appendChild(iframe);
-      this.style.cursor = 'default';
-    });
+<main>
+
+<!-- ═══ HERO ═══ -->
+<section class="proj-hero">
+  <img src="../images/projects/nadia-dome/nadia-wave-chest-1.jpg"
+    alt="Wave-carved Guarea chest of drawers with integrated recessed pulls — built by Neewoody Custom Woodwork for a private residence in Dome, Accra"
+    fetchpriority="high" />
+  <div class="proj-hero-scrim" aria-hidden="true"></div>
+  <div class="proj-hero-body">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <a href="../portfolio.html">Portfolio</a>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">Nadia, Dome</span>
+    </nav>
+    <p class="hero-tag">Residential · Dome, Accra · 2025</p>
+    <h1>Full Home Commission</h1>
+    <p class="proj-hero-sub">Wave-carved Guarea chest, kitchenette, bar stools, and fitted wardrobe — four pieces built to one brief for a private residence in Dome, Accra.</p>
+  </div>
+</section>
+
+<!-- ═══ STATS ═══ -->
+<div class="proj-stats s5">
+  <div class="proj-stat">
+    <span class="proj-stat-label">Client</span>
+    <span class="proj-stat-value">Nadia, Dome</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Year</span>
+    <span class="proj-stat-value">2025</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Location</span>
+    <span class="proj-stat-value">Dome, Accra, Ghana</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Finish</span>
+    <span class="proj-stat-value">Dark laminate, matte black hardware</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Scope</span>
+    <span class="proj-stat-value">Full home commission — 4 pieces</span>
+  </div>
+</div>
+
+<!-- ═══ THE COMMISSION ═══ -->
+<div class="proj-split" style="background:var(--cream)">
+  <div class="proj-split-text" style="background:var(--cream)">
+    <p class="eyebrow">The Commission</p>
+    <h2>Four Pieces. One Home. One Brief.</h2>
+    <p>Neewoody was commissioned to design and build four pieces for a private residence in Dome, Accra — each serving a different room and function, but all following a consistent design language: dark laminate cabinetry, matte black hardware, and a clean, considered finish throughout.</p>
+    <p>The standout piece is the wave-carved Guarea chest of drawers — a solid hardwood chest with a flowing wave pattern carved across the full face of every drawer front. The remaining three pieces — a compact kitchenette, three upholstered bar stools, and a full-height fitted wardrobe — complete the commission with the same attention to detail.</p>
+  </div>
+  <div class="proj-split-img">
+    <img src="../images/projects/nadia-dome/nadia-kitchenette-4.jpg"
+      alt="Compact kitchenette in warm russet laminate with dark stone-effect countertop — Dome, Accra"
+      loading="lazy" />
+  </div>
+</div>
+
+<!-- ═══ PIECE 01: WAVE CHEST ═══ -->
+<section class="proj-piece" style="background:var(--cream-dark)">
+  <div class="proj-split">
+    <div class="proj-split-text" style="background:var(--cream-dark)">
+      <span class="piece-label">Piece 01</span>
+      <h2>Wave-Carved Guarea Chest of Drawers</h2>
+      <p>The hero piece of the commission. A chest of drawers in solid Guarea — a premium West African hardwood prized for its fine grain, rich warm tone, and exceptional workability — with a flowing wave pattern carved across the full face of every drawer front.</p>
+      <p>The carving runs as one continuous motion across all the drawers, from edge to edge. Integrated recessed pulls with no visible hardware keep the face clean. Deep walnut-toned finish highlights the natural warmth of the timber. One of the most distinctive pieces in the Neewoody portfolio.</p>
+    </div>
+    <div class="proj-split-img">
+      <img src="../images/projects/nadia-dome/nadia-wave-chest-2.jpg"
+        alt="Wave-carved Guarea chest of drawers — second angle showing continuous carving across all drawer fronts"
+        loading="lazy" />
+    </div>
+  </div>
+  <div class="proj-piece-extras">
+    <div class="video-grid one-col">
+      <div class="video-card">
+        <div class="video-thumb"
+             data-embed="https://www.youtube.com/embed/KOX5r2eqUVE?autoplay=1"
+             data-title="Wave-carved Guarea chest of drawers — Neewoody Custom Woodwork">
+          <img src="https://img.youtube.com/vi/KOX5r2eqUVE/hqdefault.jpg"
+               alt="Wave-carved Guarea chest of drawers video" loading="lazy" />
+          <div class="video-play-btn" aria-label="Play video">
+            <svg width="52" height="52" viewBox="0 0 56 56" aria-hidden="true">
+              <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+              <polygon points="22,16 22,40 42,28" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="video-card-body">
+          <span class="video-badge">Video</span>
+          <p>The wave-carved chest — see the carved detail and drawer action.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PIECE 02: KITCHENETTE ═══ -->
+<section class="proj-piece" style="background:var(--cream)">
+  <div class="proj-split">
+    <div class="proj-split-text" style="background:var(--cream)">
+      <span class="piece-label">Piece 02</span>
+      <h2>Compact Kitchenette</h2>
+      <p>A single-run kitchenette unit in warm russet laminate with a dark oxidised stone-effect countertop and matching upstand backsplash. Undermount black sink with pull-out mixer tap. Three-door base cabinet with matte black bar handles throughout.</p>
+      <p>Built to fit the space exactly — every dimension calibrated to the room. A compact unit that punches above its size in finish quality and functionality.</p>
+    </div>
+    <div class="proj-split-img">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-3.jpg"
+        alt="Compact kitchenette in russet laminate with dark stone countertop — built by Neewoody for a private residence in Dome, Accra"
+        loading="lazy" />
+    </div>
+  </div>
+  <div class="proj-piece-extras">
+    <div class="video-grid two-col">
+      <div class="video-card">
+        <div class="video-thumb"
+             data-embed="https://www.youtube.com/embed/TAbjiBb5Bt0?autoplay=1"
+             data-title="Nadia kitchenette — Neewoody Custom Woodwork">
+          <img src="https://img.youtube.com/vi/TAbjiBb5Bt0/hqdefault.jpg"
+               alt="Kitchenette overview video" loading="lazy" />
+          <div class="video-play-btn" aria-label="Play video">
+            <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+              <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+              <polygon points="22,16 22,40 42,28" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="video-card-body">
+          <span class="video-badge">Video</span>
+          <p>Kitchenette — overview of the finished unit.</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb"
+             data-embed="https://www.youtube.com/embed/4EWuw0lJXQw?autoplay=1"
+             data-title="Nadia kitchenette countertop detail — Neewoody Custom Woodwork">
+          <img src="https://img.youtube.com/vi/4EWuw0lJXQw/hqdefault.jpg"
+               alt="Kitchenette countertop and sink detail video" loading="lazy" />
+          <div class="video-play-btn" aria-label="Play video">
+            <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+              <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+              <polygon points="22,16 22,40 42,28" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="video-card-body">
+          <span class="video-badge">Video</span>
+          <p>Countertop detail — stone-effect surface and undermount sink.</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb"
+             data-embed="https://www.youtube.com/embed/MzB3WHXUt9w?autoplay=1"
+             data-title="Nadia kitchenette cabinet doors — Neewoody Custom Woodwork">
+          <img src="https://img.youtube.com/vi/MzB3WHXUt9w/hqdefault.jpg"
+               alt="Kitchenette cabinet doors and hardware video" loading="lazy" />
+          <div class="video-play-btn" aria-label="Play video">
+            <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+              <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+              <polygon points="22,16 22,40 42,28" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="video-card-body">
+          <span class="video-badge">Video</span>
+          <p>Cabinet doors and hardware — matte black bar handles.</p>
+        </div>
+      </div>
+      <div class="video-card">
+        <div class="video-thumb"
+             data-embed="https://www.youtube.com/embed/_wg_vHSfF-U?autoplay=1"
+             data-title="Nadia kitchenette tap and sink — Neewoody Custom Woodwork">
+          <img src="https://img.youtube.com/vi/_wg_vHSfF-U/hqdefault.jpg"
+               alt="Kitchenette pull-out tap and sink video" loading="lazy" />
+          <div class="video-play-btn" aria-label="Play video">
+            <svg width="48" height="48" viewBox="0 0 56 56" aria-hidden="true">
+              <circle cx="28" cy="28" r="28" fill="rgba(0,0,0,.55)"/>
+              <polygon points="22,16 22,40 42,28" fill="#fff"/>
+            </svg>
+          </div>
+        </div>
+        <div class="video-card-body">
+          <span class="video-badge">Video</span>
+          <p>Pull-out mixer tap and undermount black sink.</p>
+        </div>
+      </div>
+    </div>
+    <div class="scope-note">
+      <strong>Scope note:</strong> The kitchen island and main kitchen cabinetry visible in the background of some photos are pre-existing and were not part of this commission. Neewoody's scope was the compact kitchenette unit only.
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PIECE 03: BAR STOOLS ═══ -->
+<section class="proj-piece" style="background:var(--cream-dark)">
+  <div class="proj-split">
+    <div class="proj-split-text" style="background:var(--cream-dark)">
+      <span class="piece-label">Piece 03</span>
+      <h2>Solid Wood Bar Stools</h2>
+      <p>Three matching bar stools in solid wood with a matte black finish. Round upholstered seats in dark velvet — padded for comfort and built for daily use. Curved backrest and X-cross stretcher base. Built to pair with the kitchen island counter.</p>
+      <p>All three stools are built to the same height and finish — consistent as a set, sturdy enough for a family kitchen.</p>
+    </div>
+    <div class="proj-split-img">
+      <img src="../images/projects/nadia-dome/nadia-bar-stools.jpg"
+        alt="Three matching solid wood bar stools with dark velvet upholstered seats — built by Neewoody for a private residence in Dome, Accra"
+        loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PIECE 04: WARDROBE ═══ -->
+<section class="proj-piece" style="background:var(--cream)">
+  <div class="proj-split">
+    <div class="proj-split-text" style="background:var(--cream)">
+      <span class="piece-label">Piece 04</span>
+      <h2>Full-Height Fitted Wardrobe</h2>
+      <p>A full-height two-door fitted wardrobe in dark laminate, matching the finish language of the kitchenette. Three drawers below with matte black bar handles — same hardware specification throughout the commission.</p>
+      <p>Built to exact room dimensions. The fit from floor to ceiling makes use of every centimetre of the space while keeping the look clean and deliberate.</p>
+    </div>
+    <div class="proj-split-img">
+      <img src="../images/projects/nadia-dome/nadia-wardrobe-front.jpg"
+        alt="Full-height fitted wardrobe in dark laminate with three drawers and matte black bar handles — Dome, Accra"
+        loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<!-- ═══ GALLERY ═══ -->
+<section class="proj-gallery" aria-labelledby="gallery-heading">
+  <div class="proj-gallery-head">
+    <p class="eyebrow">Project Photography</p>
+    <h2 id="gallery-heading">The Full Commission</h2>
+    <p>All four pieces — chest, kitchenette, stools, and wardrobe — photographed in situ.</p>
+  </div>
+  <div class="gallery-grid" id="gallery-grid">
+
+    <div class="gallery-item wide" data-index="0">
+      <img src="../images/projects/nadia-dome/nadia-wave-chest-1.jpg"
+        alt="Wave-carved Guarea chest of drawers — hero view" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="1">
+      <img src="../images/projects/nadia-dome/nadia-wave-chest-2.jpg"
+        alt="Wave-carved chest — second angle" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="2">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-3.jpg"
+        alt="Kitchenette — front view" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="3">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-4.jpg"
+        alt="Kitchenette — countertop and sink detail" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="4">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-5.jpg"
+        alt="Kitchenette — base cabinets and hardware" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="5">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-11.jpg"
+        alt="Kitchenette — night view" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="6">
+      <img src="../images/projects/nadia-dome/nadia-kitchenette-12.jpg"
+        alt="Kitchenette — wide evening view" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="7">
+      <img src="../images/projects/nadia-dome/nadia-bar-stools.jpg"
+        alt="Three matching dark velvet bar stools" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="8">
+      <img src="../images/projects/nadia-dome/nadia-wardrobe-front.jpg"
+        alt="Full-height fitted wardrobe in dark laminate — front view" loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="9">
+      <img src="../images/projects/nadia-dome/nadia-wardrobe-angled.jpg"
+        alt="Full-height fitted wardrobe in dark laminate — angled view" loading="lazy" />
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══ LIGHTBOX ═══ -->
+<div class="proj-lightbox" id="proj-lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+  <button class="lb-prev" id="lb-prev" aria-label="Previous">&#8592;</button>
+  <img id="lb-img" src="" alt="" />
+  <button class="lb-next" id="lb-next" aria-label="Next">&#8594;</button>
+</div>
+
+<!-- ═══ CTA ═══ -->
+<section class="proj-cta" aria-labelledby="cta-heading">
+  <h2 id="cta-heading">Looking to commission <em>multiple pieces?</em></h2>
+  <div>
+    <p>Whether it's one piece or a full home — get in touch and we'll discuss what's possible. We work across cabinetry, hardwood furniture, and bespoke joinery.</p>
+    <div class="btn-row">
+      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Nadia%20Dome%20project%20and%20would%20like%20to%20discuss%20a%20commission."
+         class="btn-wa" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Us Now
+      </a>
+      <a href="../contact.html" class="btn-outline-light">Request a Quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ BACK STRIP ═══ -->
+<div class="proj-back">
+  <a href="../portfolio.html" class="proj-back-link">Back to Portfolio</a>
+  <a href="golf-hills-estate.html" class="proj-back-next">Next: Golf Hills Estate →</a>
+</div>
+
+</main>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="redesign-footer">
+  <div>
+    <a href="../index.html" class="foot-logo">
+      <img src="../images/logo.png" alt="" class="logo-img" aria-hidden="true">
+      <span>Neewoody</span>
+    </a>
+    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+  </div>
+  <nav class="foot-nav">
+    <a href="../portfolio.html">Work</a>
+    <a href="../wardrobes.html">Services</a>
+    <a href="../contact.html">Contact</a>
+    <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
+    <a href="../privacy.html">Privacy Policy</a>
+  </nav>
+  <p class="foot-copy">© 2026 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
+</footer>
+
+<!-- FLOATING WHATSAPP BUTTON -->
+<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project."
+   class="redesign-wa-float"
+   onclick="gtag('event','whatsapp_click',{event_category:'contact',event_label:'floating_whatsapp'})"
+   target="_blank" rel="noopener"
+   aria-label="Chat with Neewoody on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <span class="redesign-wa-tooltip">Chat on WhatsApp</span>
+</a>
+
+<script>
+/* ── Nav: over-hero observer ── */
+(function(){
+  var nav=document.getElementById('nav');
+  var hero=document.querySelector('.proj-hero');
+  if(nav&&hero){
+    var io=new IntersectionObserver(function(e){
+      nav.classList.toggle('over-hero',e[0].isIntersecting);
+    },{threshold:0.05});
+    io.observe(hero);
+  }
+})();
+
+/* ── Nav toggle ── */
+(function(){
+  var t=document.getElementById('nav-toggle');
+  var m=document.getElementById('mobile-nav');
+  var c=document.getElementById('mobile-nav-close');
+  function cl(){m.classList.remove('open');document.body.style.overflow='';}
+  if(t)t.addEventListener('click',function(){
+    m.classList.toggle('open');
+    document.body.style.overflow=m.classList.contains('open')?'hidden':'';
   });
-  /* ── Gallery lightbox ── */
-  (function(){
-    var items = document.querySelectorAll('#gallery-grid .gallery-item');
-    var lb = document.getElementById('lightbox');
-    var lbImg = document.getElementById('lightbox-img');
-    var lbClose = document.getElementById('lightbox-close');
-    var lbPrev = document.getElementById('lightbox-prev');
-    var lbNext = document.getElementById('lightbox-next');
-    var current = 0, srcs = [], alts = [];
-    items.forEach(function(item, i){
-      var img = item.querySelector('img');
-      srcs.push(img.src); alts.push(img.alt);
-      item.addEventListener('click', function(){ open(i); });
-    });
-    function open(i){ current=i; lbImg.src=srcs[i]; lbImg.alt=alts[i]; lb.classList.add('open'); document.body.style.overflow='hidden'; }
-    function close(){ lb.classList.remove('open'); document.body.style.overflow=''; }
-    lbClose.addEventListener('click', close);
-    lb.addEventListener('click', function(e){ if(e.target===lb) close(); });
-    lbPrev.addEventListener('click', function(){ open((current-1+srcs.length)%srcs.length); });
-    lbNext.addEventListener('click', function(){ open((current+1)%srcs.length); });
-    document.addEventListener('keydown', function(e){
-      if(!lb.classList.contains('open')) return;
-      if(e.key==='Escape') close();
-      if(e.key==='ArrowLeft') lbPrev.click();
-      if(e.key==='ArrowRight') lbNext.click();
-    });
-  })();
-  </script>
+  if(c)c.addEventListener('click',cl);
+})();
+
+/* ── Video click-to-embed ── */
+document.querySelectorAll('.video-thumb').forEach(function(thumb){
+  thumb.addEventListener('click',function(){
+    var url=this.dataset.embed;
+    if(!url||this.querySelector('iframe'))return;
+    var iframe=document.createElement('iframe');
+    iframe.src=url;
+    iframe.title=this.dataset.title||'Video';
+    iframe.allow='accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture';
+    iframe.setAttribute('allowfullscreen','');
+    iframe.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none;';
+    this.innerHTML='';
+    this.style.position='relative';
+    this.appendChild(iframe);
+    this.style.cursor='default';
+  });
+});
+
+/* ── Gallery lightbox ── */
+(function(){
+  var grid=document.getElementById('gallery-grid');
+  var lb=document.getElementById('proj-lightbox');
+  var lbImg=document.getElementById('lb-img');
+  var lbClose=document.getElementById('lb-close');
+  var lbPrev=document.getElementById('lb-prev');
+  var lbNext=document.getElementById('lb-next');
+  if(!grid||!lb)return;
+  var items=grid.querySelectorAll('.gallery-item');
+  var current=0;
+  function open(i){
+    current=i;
+    var img=items[i].querySelector('img');
+    lbImg.src=img.src;
+    lbImg.alt=img.alt;
+    lb.classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function close(){
+    lb.classList.remove('open');
+    document.body.style.overflow='';
+  }
+  items.forEach(function(item,i){
+    item.addEventListener('click',function(){open(i);});
+  });
+  lbClose.addEventListener('click',close);
+  lb.addEventListener('click',function(e){if(e.target===lb)close();});
+  lbPrev.addEventListener('click',function(e){
+    e.stopPropagation();
+    current=(current-1+items.length)%items.length;
+    var img=items[current].querySelector('img');
+    lbImg.src=img.src;lbImg.alt=img.alt;
+  });
+  lbNext.addEventListener('click',function(e){
+    e.stopPropagation();
+    current=(current+1)%items.length;
+    var img=items[current].querySelector('img');
+    lbImg.src=img.src;lbImg.alt=img.alt;
+  });
+  document.addEventListener('keydown',function(e){
+    if(!lb.classList.contains('open'))return;
+    if(e.key==='Escape')close();
+    if(e.key==='ArrowLeft')lbPrev.click();
+    if(e.key==='ArrowRight')lbNext.click();
+  });
+})();
+</script>
 
 </body>
 </html>

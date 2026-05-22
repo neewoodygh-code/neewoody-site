@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
 <script>
@@ -9,6 +10,7 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-ZP77WR6BNH');
 </script>
+
 <meta charset="UTF-8" />
 <link rel="icon" href="../images/favicon.ico" />
 <link rel="apple-touch-icon" href="../images/logo.png" />
@@ -21,390 +23,480 @@ gtag('config', 'G-ZP77WR6BNH');
 <meta property="og:title" content="Full Hyedua Dining Room Commission, East Legon — Neewoody Custom Woodwork" />
 <meta property="og:description" content="Dining table, six upholstered chairs, and a console unit — all in solid Hyedua, built to one brief for an East Legon home in Accra." />
 <meta property="og:image" content="https://neewoodygh.com/images/projects/judith-east-legon/judith-set-installed-2.jpg" />
-<link rel="stylesheet" href="../css/styles.css" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-/* ── Project Hero ── */
-.project-hero{position:relative;height:75vh;min-height:480px;max-height:700px;overflow:hidden;display:flex;align-items:flex-end}
-.project-hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 40%}
-.project-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,rgba(0,0,0,.2) 55%,transparent 100%)}
-.project-hero-content{position:relative;z-index:2;width:100%;padding:0 0 3rem}
-.project-hero-content .container{display:flex;flex-direction:column;gap:.75rem}
-.project-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.7);font-family:monospace}
-.project-hero-title{font-size:clamp(2rem,5vw,3.5rem);font-weight:700;color:#fff;line-height:1.1;margin:0}
-.project-hero-sub{font-size:1.05rem;color:rgba(255,255,255,.8);margin:0;max-width:560px}
-/* ── Spec Bar ── */
-.spec-bar{background:var(--clr-surface);border-bottom:1px solid var(--clr-border);padding:1.5rem 0}
-.spec-bar-inner{display:flex;flex-wrap:wrap;gap:0}
-.spec-item{flex:1;min-width:140px;padding:0 2rem 0 0;border-right:1px solid var(--clr-border);margin-right:2rem}
-.spec-item:last-child{border-right:none;margin-right:0}
-.spec-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.3rem}
-.spec-value{font-size:.95rem;font-weight:600;color:var(--clr-text)}
-@media(max-width:600px){.spec-bar-inner{gap:1.25rem}.spec-item{flex:1 1 calc(50% - .625rem);border-right:none;margin-right:0;padding-right:0}}
-/* ── Case Study Sections ── */
-.cs-section{padding:4rem 0}
-.cs-section+.cs-section{border-top:1px solid var(--clr-border)}
-.cs-section--alt{background:var(--clr-bg-alt)}
-.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center}
-@media(max-width:768px){.cs-grid{grid-template-columns:1fr;gap:2rem}}
-.cs-text h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:1rem;line-height:1.2}
-.cs-text p{color:var(--clr-mid);line-height:1.75;margin-bottom:1rem}
-.cs-text p:last-child{margin-bottom:0}
-.cs-img{border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/3}
-.cs-img img{width:100%;height:100%;object-fit:cover;display:block}
-/* ── Scope Grid ── */
-.scope-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;margin-top:2rem}
-.scope-item{background:var(--clr-surface);border:1px solid var(--clr-border);border-radius:var(--radius);padding:1.25rem 1.5rem;display:flex;align-items:flex-start;gap:1rem}
-.scope-icon{font-size:1.4rem;flex-shrink:0;margin-top:.1rem}
-.scope-item-text strong{display:block;font-size:.9rem;font-weight:600;color:var(--clr-text);margin-bottom:.2rem}
-.scope-item-text span{font-size:.83rem;color:var(--clr-mid);line-height:1.5}
-/* ── Gallery ── */
-.gallery-section{padding:4rem 0;border-top:1px solid var(--clr-border)}
-.gallery-section h2{font-size:clamp(1.4rem,2.5vw,1.9rem);margin-bottom:.5rem}
-.gallery-section .section-label{margin-bottom:.5rem}
-.gallery-section>.container>p{color:var(--clr-mid);margin-bottom:2.5rem;max-width:560px}
-.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
-.gallery-item{overflow:hidden;border-radius:var(--radius);aspect-ratio:4/3;cursor:pointer}
-.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease}
-.gallery-item:hover img{transform:scale(1.04)}
-@media(max-width:600px){.gallery-grid{grid-template-columns:1fr}}
-/* ── Lightbox ── */
-.lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;padding:1rem}
-.lightbox.open{display:flex}
-.lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;border-radius:var(--radius)}
-.lightbox-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:.8}
-.lightbox-close:hover{opacity:1}
-.lightbox-prev,.lightbox-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.12);border:none;color:#fff;font-size:1.5rem;padding:.75rem 1rem;cursor:pointer;border-radius:var(--radius);transition:background .2s}
-.lightbox-prev{left:1rem}.lightbox-next{right:1rem}
-.lightbox-prev:hover,.lightbox-next:hover{background:rgba(255,255,255,.25)}
-/* ── Timber Species callout ── */
-.species-callout{background:var(--clr-dark);color:#fff;padding:4rem 0;border-top:1px solid rgba(255,255,255,.08)}
-.species-callout .section-label{color:rgba(160,120,74,.85)}
-.species-callout h2{color:#fff;font-size:clamp(1.4rem,2.5vw,2rem);margin:.5rem 0 1.25rem}
-.species-callout p{color:rgba(255,255,255,.7);line-height:1.8;max-width:660px}
-.species-callout p+p{margin-top:1rem}
-/* ── Next Project ── */
-.next-project{border-top:1px solid var(--clr-border);padding:3rem 0}
-.next-project-inner{display:flex;align-items:center;justify-content:space-between;gap:1.5rem;flex-wrap:wrap}
-.next-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--clr-muted);font-family:monospace;display:block;margin-bottom:.4rem}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(240,232,208,0.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(11,31,14,0.08);transition:background 0.4s,border-color 0.4s}
+#nav.over-hero{background:transparent;border-bottom-color:transparent}
+#nav .logo{display:flex;align-items:center;gap:0.65rem;text-decoration:none;flex-shrink:0}
+.logo-img{height:36px;width:auto;display:block;transition:filter 0.4s}
+#nav.over-hero .logo-img{filter:invert(1)}
+.logo-text-wrap{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--ink);letter-spacing:0.03em;transition:color 0.4s}
+#nav.over-hero .logo-text-wrap{color:var(--cream)}
+.logo-sub{display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;opacity:0.6;margin-top:2px}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap}
+#nav.over-hero .nav-links a{color:rgba(240,232,208,0.8)}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:color 0.3s;user-select:none;white-space:nowrap}
+#nav.over-hero .nav-more-trigger{color:rgba(240,232,208,0.8)}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{position:absolute;top:calc(100% + 0.8rem);left:50%;transform:translateX(-50%) translateY(-6px);background:var(--green);border:1px solid rgba(240,232,208,0.08);padding:0.6rem 0;min-width:180px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:300}
+.nav-more:hover .nav-dropdown{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-dropdown::before{content:'';position:absolute;bottom:100%;left:0;right:0;height:0.9rem}
+.nav-dropdown a{display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;transition:color 0.2s,background 0.2s}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s;white-space:nowrap;flex-shrink:0}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:24px;height:2px;background:var(--ink);transition:background 0.3s}
+#nav.over-hero .nav-toggle span{background:var(--cream)}
+.mobile-nav{position:fixed;inset:0;z-index:190;background:var(--green);display:flex;flex-direction:column;justify-content:center;padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);font-weight:400;color:rgba(240,232,208,0.75);padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);transition:color 0.2s;display:block}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{position:absolute;top:1.4rem;right:1.5rem;background:none;border:none;cursor:pointer;font-family:var(--ui);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* HERO */
+.proj-hero{position:relative;height:100vh;min-height:560px;overflow:hidden}
+.proj-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.proj-hero-scrim{position:absolute;inset:0;background:linear-gradient(170deg,rgba(11,31,14,0.15) 0%,rgba(11,31,14,0.05) 25%,rgba(11,31,14,0.55) 65%,rgba(11,31,14,0.82) 100%)}
+.proj-hero-body{position:absolute;bottom:4.5rem;left:3rem;right:3rem;z-index:2;animation:fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.3s both}
+.breadcrumb{font-family:var(--ui);font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(240,232,208,0.55);margin-bottom:0.9rem;display:flex;align-items:center;gap:0.5rem}
+.breadcrumb a{color:rgba(240,232,208,0.55);transition:color 0.2s}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb-sep{opacity:0.4}
+.hero-tag{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+.proj-hero h1{font-family:var(--display);font-size:clamp(2.6rem,6vw,5rem);font-weight:400;line-height:1.08;color:var(--cream);margin-bottom:1.4rem;max-width:16ch}
+.proj-hero-sub{font-family:var(--body);font-size:0.95rem;line-height:1.75;color:rgba(240,232,208,0.6);max-width:50ch}
+
+/* STATS STRIP */
+.proj-stats{background:var(--green);display:grid;gap:1px}
+.proj-stats.s4{grid-template-columns:repeat(4,1fr)}
+.proj-stats.s5{grid-template-columns:repeat(5,1fr)}
+.proj-stat{padding:2rem 2.5rem;border-right:1px solid rgba(240,232,208,0.06)}
+.proj-stat:last-child{border-right:none}
+.proj-stat-label{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:rgba(240,232,208,0.4);margin-bottom:0.4rem;display:block}
+.proj-stat-value{font-family:var(--display);font-size:0.95rem;font-weight:400;color:var(--cream);line-height:1.3}
+
+/* SPLIT */
+.proj-split{display:grid;grid-template-columns:1fr 1fr;min-height:52vh}
+.proj-split-img{overflow:hidden;position:relative}
+.proj-split-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.9s ease}
+.proj-split-img:hover img{transform:scale(1.04)}
+.proj-split-text{padding:5rem 4.5rem;display:flex;flex-direction:column;justify-content:center;background:var(--cream)}
+.proj-split-text.alt{background:var(--cream-dark)}
+.eyebrow{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem}
+.proj-split-text h2{font-family:var(--display);font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:400;line-height:1.2;margin-bottom:1.2rem}
+.proj-split-text p{font-family:var(--body);font-size:0.88rem;line-height:1.85;color:var(--muted);margin-bottom:1rem}
+.proj-split-text p:last-child{margin-bottom:0}
+
+/* SCOPE */
+.proj-scope{background:var(--cream-dark);padding:6rem 3rem}
+.proj-scope-head{margin-bottom:3rem;max-width:640px}
+.proj-scope-head h2{font-family:var(--display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;margin-bottom:0.8rem}
+.proj-scope-head p{font-family:var(--body);font-size:0.9rem;line-height:1.75;color:var(--muted)}
+.proj-scope-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(11,31,14,0.08)}
+.proj-scope-card{background:var(--cream-dark);padding:2rem 1.8rem;position:relative;overflow:hidden;transition:background 0.3s}
+.proj-scope-card::after{content:'';position:absolute;top:0;left:0;width:0;height:2px;background:var(--gold);transition:width 0.4s}
+.proj-scope-card:hover{background:var(--cream)}
+.proj-scope-card:hover::after{width:100%}
+.proj-scope-num{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:block}
+.proj-scope-card h3{font-family:var(--display);font-size:1rem;font-weight:400;color:var(--ink);margin-bottom:0.5rem;line-height:1.3}
+.proj-scope-card p{font-family:var(--body);font-size:0.82rem;line-height:1.75;color:var(--muted)}
+
+/* GALLERY */
+.proj-gallery{padding:6rem 3rem;background:var(--cream)}
+.proj-gallery-head{margin-bottom:2.5rem;max-width:640px}
+.proj-gallery-head .eyebrow{margin-bottom:0.5rem}
+.proj-gallery-head h2{font-family:var(--display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;margin-bottom:0.8rem}
+.proj-gallery-head p{font-family:var(--body);font-size:0.9rem;line-height:1.75;color:var(--muted)}
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.gallery-item{overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;position:relative;background:var(--green)}
+.gallery-item img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s ease,filter 0.3s;filter:brightness(0.93)}
+.gallery-item:hover img{transform:scale(1.04);filter:brightness(0.75)}
+
+/* SPECIES BLOCK */
+.species-block{background:var(--green);padding:7rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.species-label{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;display:block}
+.species-block h2{font-family:var(--display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;color:var(--cream);line-height:1.2;margin-bottom:2rem}
+.species-block-right{padding-top:3.5rem}
+.species-block p{font-family:var(--body);font-size:0.9rem;line-height:1.85;color:rgba(240,232,208,0.6)}
+.species-block p+p{margin-top:1rem}
+
+/* CTA */
+.proj-cta{background:var(--green);padding:8rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.proj-cta h2{font-family:var(--display);font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.15;color:var(--cream)}
+.proj-cta h2 em{font-style:italic;color:var(--gold)}
+.proj-cta p{font-family:var(--body);font-size:0.9rem;line-height:1.85;color:rgba(240,232,208,0.65);margin-bottom:2.5rem;max-width:38ch}
+.btn-row{display:flex;gap:0.8rem;flex-wrap:wrap}
+.btn-wa{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:var(--gold);color:var(--green);display:inline-flex;align-items:center;gap:0.6rem;transition:background 0.25s}
+.btn-wa:hover{background:#b07d20}
+.btn-outline-light{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;background:transparent;border:1px solid rgba(240,232,208,0.35);color:var(--cream);display:inline-flex;align-items:center;transition:background 0.25s,color 0.25s,border-color 0.25s}
+.btn-outline-light:hover{background:var(--cream);color:var(--green);border-color:var(--cream)}
+
+/* BACK STRIP */
+.proj-back{background:var(--cream);padding:2.5rem 3rem;border-top:1px solid rgba(11,31,14,0.08);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.proj-back-link{font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,gap 0.3s}
+.proj-back-link::before{content:'←'}
+.proj-back-link:hover{color:var(--gold);gap:1rem}
+.proj-back-next{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s}
+.proj-back-next:hover{background:#b07d20}
+
+/* FOOTER */
+.redesign-footer{background:var(--green);padding:3.5rem 3rem;display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem}
+.redesign-footer .foot-logo{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;text-decoration:none}
+.redesign-footer .logo-img{filter:invert(1);height:30px;width:auto}
+.redesign-footer .foot-logo span{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--cream);letter-spacing:0.03em}
+.redesign-footer .foot-tagline{font-family:var(--body);font-style:italic;font-size:0.82rem;color:rgba(240,232,208,0.45)}
+.redesign-footer .foot-nav{display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem}
+.redesign-footer .foot-nav a{font-family:var(--ui);font-size:0.65rem;font-weight:300;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,232,208,0.5);transition:color 0.2s}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);padding-top:1.5rem;margin-top:0.5rem;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.1em;color:rgba(240,232,208,0.25)}
+
+/* WA FLOAT */
+.redesign-wa-float{position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(37,211,102,0.38);transition:transform 0.3s,box-shadow 0.3s}
+.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
+.redesign-wa-float svg{width:28px;height:28px}
+.redesign-wa-tooltip{position:absolute;right:66px;white-space:nowrap;background:#1c1c1a;color:#fff;font-family:var(--ui);font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;opacity:0;pointer-events:none;transform:translateX(6px);transition:opacity 0.25s,transform 0.25s}
+.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
+
+/* LIGHTBOX */
+.proj-lightbox{display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.92);align-items:center;justify-content:center}
+.proj-lightbox.open{display:flex}
+.proj-lightbox img{max-width:90vw;max-height:88vh;object-fit:contain;box-shadow:0 8px 48px rgba(0,0,0,0.7)}
+.lb-close{position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:#fff;font-size:2rem;cursor:pointer;line-height:1;opacity:0.8}
+.lb-close:hover{opacity:1}
+.lb-prev,.lb-next{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.12);border:none;color:#fff;font-size:1.5rem;padding:0.75rem 1rem;cursor:pointer;transition:background 0.2s}
+.lb-prev{left:1rem}.lb-next{right:1rem}
+.lb-prev:hover,.lb-next:hover{background:rgba(255,255,255,0.25)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){
+  .proj-stats.s5{grid-template-columns:repeat(3,1fr)}
+  .proj-scope-grid{grid-template-columns:1fr 1fr}
+  .species-block{grid-template-columns:1fr;gap:3rem}
+  .proj-cta{grid-template-columns:1fr;gap:3rem}
+}
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links,#nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .proj-hero-body{bottom:3rem;left:1.5rem;right:1.5rem}
+  .proj-stats.s5{grid-template-columns:repeat(2,1fr)}
+  .proj-stat{padding:1.5rem}
+  .proj-split{grid-template-columns:1fr;min-height:auto}
+  .proj-split-img{min-height:60vw}
+  .proj-split-text{padding:3.5rem 1.5rem}
+  .proj-scope{padding:4rem 1.5rem}
+  .proj-scope-grid{grid-template-columns:1fr}
+  .proj-gallery{padding:4rem 1.5rem}
+  .gallery-grid{grid-template-columns:1fr}
+  .species-block{padding:5rem 1.5rem}
+  .proj-cta{padding:5rem 1.5rem;gap:2rem}
+  .proj-back{padding:2rem 1.5rem}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
+}
 </style>
 </head>
 <body>
 
-  <!-- ═══ HEADER ═══ -->
-  <header class="site-header" role="banner">
-    <div class="container">
-      <div class="header-inner">
-        <a href="../index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
-          <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-          <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-        </a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="../index.html">Home</a>
-          <a href="../wardrobes.html">Wardrobes</a>
-          <a href="../kitchens.html">Kitchens</a>
-          <a href="../beds.html">Beds</a>
-          <div class="nav-services-wrap">
-            <span class="nav-services-trigger">More &#9663;</span>
-            <div class="nav-services-dropdown">
-              <div class="nav-services-col">
-                <span class="nav-services-col-label">More Services</span>
-                <a href="../dining-living.html">Dining &amp; Living</a>
-                <a href="../tv-units.html">TV Units</a>
-                <a href="../shelving.html">Shelving</a>
-                <a href="../solid-wood.html">Solid Wood</a>
-              </div>
-            </div>
-          </div>
-          <a href="../portfolio.html" style="color:var(--clr-accent)">Portfolio</a>
-          <a href="../contact.html">Contact</a>
-        </nav>
-        <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
-      </div>
-    </div>
-  </header>
+<!-- MOBILE NAV OVERLAY -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close">&#10005; Close</button>
+  <a href="../index.html">Home</a>
+  <a href="../wardrobes.html">Wardrobes</a>
+  <a href="../kitchens.html">Kitchens</a>
+  <a href="../beds.html">Beds</a>
+  <a href="../dining-living.html">Dining &amp; Living</a>
+  <a href="../tv-units.html">TV Units</a>
+  <a href="../shelving.html">Shelving</a>
+  <a href="../solid-wood.html">Solid Wood</a>
+  <a href="../portfolio.html">Portfolio</a>
+  <a href="../contact.html">Contact</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Judith%20dining%20commission%20and%20would%20like%20to%20discuss%20something%20similar." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
+    <a href="../contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
+  </div>
+</nav>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <a href="../index.html">Home</a>
-    <a href="../wardrobes.html">Wardrobes</a>
-    <a href="../kitchens.html">Kitchens</a>
-    <a href="../beds.html">Beds</a>
-    <a href="../dining-living.html">Dining &amp; Living</a>
-    <a href="../tv-units.html">TV Units</a>
-    <a href="../shelving.html">Shelving</a>
-    <a href="../solid-wood.html">Solid Wood</a>
-    <a href="../portfolio.html">Portfolio</a>
-    <a href="../contact.html">Contact</a>
-    <div class="mobile-nav-ctas">
-      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
-      <a href="../contact.html" class="btn btn-outline">Request a Quote</a>
-    </div>
-  </nav>
-
-  <main>
-
-    <!-- ═══ PROJECT HERO ═══ -->
-    <div class="project-hero">
-      <img
-        class="project-hero-img"
-        src="../images/projects/judith-east-legon/judith-set-installed-2.jpg"
-        alt="Hyedua dining table and chairs installed in East Legon home — full dining room commission by Neewoody Custom Woodwork"
-        fetchpriority="high"
-        onerror="this.style.display='none';document.querySelector('.project-hero').style.background='#1a120a'"
-      />
-      <div class="project-hero-overlay" aria-hidden="true"></div>
-      <div class="project-hero-content">
-        <div class="container">
-          <nav class="breadcrumb" aria-label="Breadcrumb" style="margin-bottom:.5rem">
-            <a href="../index.html" style="color:rgba(255,255,255,.6)">Home</a>
-            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
-            <a href="../portfolio.html" style="color:rgba(255,255,255,.6)">Portfolio</a>
-            <span class="breadcrumb-sep" style="color:rgba(255,255,255,.4)" aria-hidden="true">›</span>
-            <span style="color:rgba(255,255,255,.85)" aria-current="page">Judith, East Legon</span>
-          </nav>
-          <p class="project-hero-label">Residential Project · East Legon, Accra · 2022</p>
-          <h1 class="project-hero-title">Full Dining Room Commission in Hyedua</h1>
-          <p class="project-hero-sub">Dining table, six upholstered chairs, and a console unit — three pieces, one timber, one brief.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ SPEC BAR ═══ -->
-    <div class="spec-bar">
-      <div class="container">
-        <div class="spec-bar-inner">
-          <div class="spec-item">
-            <span class="spec-label">Client</span>
-            <span class="spec-value">Judith, East Legon</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Year</span>
-            <span class="spec-value">2022</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Location</span>
-            <span class="spec-value">East Legon, Accra</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Species</span>
-            <span class="spec-value">Hyedua (Tarrietia utilis)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-label">Scope</span>
-            <span class="spec-value">Full dining room commission</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══ THE COMMISSION ═══ -->
-    <section class="cs-section" aria-labelledby="brief-heading">
-      <div class="container">
-        <div class="cs-grid">
-          <div class="cs-text reveal">
-            <p class="section-label">The Commission</p>
-            <h2 id="brief-heading">One Room. One Timber. Three Pieces.</h2>
-            <p>Judith came to Neewoody with a clear brief for her East Legon dining room: solid hardwood throughout, a unified look across every piece, and a rich dark finish that would anchor the space. The commission covered three furniture items designed to work together as a set — a large-format dining table, six matching upholstered chairs, and a console unit.</p>
-            <p>The timber selected was Hyedua — a dense West African hardwood with a naturally deep, warm tone that takes a dark espresso finish exceptionally well. All three pieces were built in the Neewoody workshop, finished in the same species and stain, and delivered and installed in the client's East Legon home.</p>
-          </div>
-          <div class="cs-img reveal">
-            <img
-              src="../images/projects/judith-east-legon/judith-set-staged.jpg"
-              alt="Hyedua dining set staged before delivery — table, chairs, and console unit in matched espresso finish"
-              loading="lazy"
-              onerror="this.style.background='var(--clr-bg-alt)'"
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ SCOPE ═══ -->
-    <section class="cs-section cs-section--alt" aria-labelledby="scope-heading">
-      <div class="container">
-        <div style="max-width:640px;margin-bottom:1rem" class="reveal">
-          <p class="section-label">What Was Built</p>
-          <h2 id="scope-heading">The Full Scope</h2>
-          <p style="color:var(--clr-mid);line-height:1.75">Three pieces, built to the same brief in the same timber — designed to read as a complete room.</p>
-        </div>
-        <div class="scope-grid reveal">
-          <div class="scope-item">
-            <span class="scope-icon">🪵</span>
-            <div class="scope-item-text">
-              <strong>Large-Format Dining Table</strong>
-              <span>Solid Hyedua dining table in an espresso finish — built to seat the full household comfortably, with solid timber legs to match the chairs.</span>
-            </div>
-          </div>
-          <div class="scope-item">
-            <span class="scope-icon">🪑</span>
-            <div class="scope-item-text">
-              <strong>Six Upholstered Dining Chairs</strong>
-              <span>Six matching chairs with solid Hyedua frames and linen fabric upholstered panels — built for daily use and designed to complement the table exactly.</span>
-            </div>
-          </div>
-          <div class="scope-item">
-            <span class="scope-icon">🗄</span>
-            <div class="scope-item-text">
-              <strong>Console Unit</strong>
-              <span>A console unit with full-extension drawers and waterfall-edge sides — same Hyedua timber and espresso finish as the table and chairs.</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ GALLERY ═══ -->
-    <section class="gallery-section" aria-labelledby="gallery-heading">
-      <div class="container">
-        <p class="section-label">Project Photography</p>
-        <h2 id="gallery-heading">The Set</h2>
-        <p>From workshop build to installed dining room — the Hyedua commission at each stage.</p>
-        <div class="gallery-grid" id="gallery-grid">
-
-          <div class="gallery-item" data-index="0">
-            <img src="../images/projects/judith-east-legon/judith-table-workshop.jpg"
-              alt="Hyedua dining table in the Neewoody workshop during build"
-              loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="1">
-            <img src="../images/projects/judith-east-legon/judith-set-staged.jpg"
-              alt="Full Hyedua dining set staged before delivery — table, chairs, and console"
-              loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-          <div class="gallery-item" data-index="2">
-            <img src="../images/projects/judith-east-legon/judith-set-installed-1.jpg"
-              alt="Hyedua dining set installed in the East Legon home"
-              loading="lazy" onerror="this.parentNode.style.background='var(--clr-bg-alt)'" />
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ LIGHTBOX ═══ -->
-    <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
-      <button class="lightbox-close" id="lightbox-close" aria-label="Close">&times;</button>
-      <button class="lightbox-prev" id="lightbox-prev" aria-label="Previous photo">&#8592;</button>
-      <img id="lightbox-img" src="" alt="" />
-      <button class="lightbox-next" id="lightbox-next" aria-label="Next photo">&#8594;</button>
-    </div>
-
-    <!-- ═══ ABOUT THE TIMBER ═══ -->
-    <section class="species-callout" aria-labelledby="species-heading">
-      <div class="container reveal">
-        <p class="section-label">About the Timber</p>
-        <h2 id="species-heading">Hyedua — Tarrietia utilis</h2>
-        <p>Hyedua is a dense, heavy West African hardwood with a naturally deep, warm tone and a tight, even grain. It is harvested across Ghana and Côte d'Ivoire and has long been used in high-quality furniture and joinery for its structural stability and its ability to take a dark stain evenly and richly.</p>
-        <p>Finished in an espresso tone, Hyedua produces furniture with a depth of colour that reads as genuinely premium — without relying on veneers, laminates, or surface treatments to achieve the look. The pieces in this commission were designed specifically to let the timber do the work.</p>
-      </div>
-    </section>
-
-    <!-- ═══ CTA ═══ -->
-    <section class="cta-band" aria-labelledby="cs-cta">
-      <div class="container reveal">
-        <p class="section-label" style="color:rgba(160,120,74,.85)">Work with Neewoody</p>
-        <h2 id="cs-cta">Want a Complete Dining Room Commission?</h2>
-        <p>Whether you need one piece or a full room — we work in genuine West African hardwood and build everything to a unified brief.</p>
-        <div class="cta-buttons">
-          <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Judith%20dining%20commission%20and%20would%20like%20to%20discuss%20something%20similar."
-             class="btn btn-wa btn-lg" target="_blank" rel="noopener">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-            WhatsApp Us Now
-          </a>
-          <a href="../contact.html" class="btn btn-outline-light btn-lg">Request a Quote</a>
-          <a href="../portfolio.html" class="btn btn-outline-light btn-lg">View More Work</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ BACK TO PORTFOLIO ═══ -->
-    <div class="next-project">
-      <div class="container">
-        <div class="next-project-inner">
-          <div>
-            <span class="next-label">Portfolio</span>
-            <a href="../portfolio.html"
-               style="font-size:1.1rem;font-weight:600;color:var(--clr-text);text-decoration:none"
-               onmouseover="this.style.color='var(--clr-accent)'"
-               onmouseout="this.style.color='var(--clr-text)'">
-              ← Back to All Projects
-            </a>
-          </div>
-          <a href="sage-centre.html" class="btn btn-accent">Next Case Study →</a>
-        </div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- ═══ FOOTER ═══ -->
-  <footer class="site-footer" role="contentinfo">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="../index.html" class="logo">
-            <img src="../images/logo.png" alt="Neewoody Custom Woodwork logo" class="logo-img" />
-            <span class="logo-text">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-          </a>
-          <p>Made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
-          <div class="footer-social">
-            <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener" aria-label="Instagram"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg></a>
-            <a href="https://wa.me/233244633464" target="_blank" rel="noopener" aria-label="WhatsApp"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg></a>
-          </div>
-        </div>
-        <div class="footer-col"><h5>Services</h5><ul><li><a href="../wardrobes.html">Custom Wardrobes</a></li><li><a href="../beds.html">Custom Beds</a></li><li><a href="../kitchens.html">Kitchen Cabinets</a></li><li><a href="../shelving.html">Shelving &amp; Storage</a></li><li><a href="../tv-units.html">TV Units</a></li></ul></div>
-        <div class="footer-col"><h5>Company</h5><ul><li><a href="../portfolio.html">Portfolio</a></li><li><a href="../contact.html">Contact Us</a></li><li><a href="../contact.html">Request a Quote</a></li><li><a href="../wardrobe-estimator.html">Price Estimator</a></li><li><a href="../tools.html">Tools</a></li><li><a href="../privacy.html">Privacy Policy</a></li></ul></div>
-        <div class="footer-col"><h5>Contact</h5>
-          <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
-          <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
-          <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
-          <div class="footer-contact-item">Accra, Ghana</div>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
-        <div class="footer-bottom-links"><a href="../privacy.html">Privacy Policy</a><a href="../contact.html">Contact</a></div>
-      </div>
-    </div>
-  </footer>
-
-  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20furniture%20project."
-     class="wa-float" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-    <span class="wa-tooltip">Chat on WhatsApp</span>
+<!-- NAV -->
+<nav id="nav" class="over-hero">
+  <a href="../index.html" class="logo">
+    <img src="../images/logo.png" alt="" class="logo-img" aria-hidden="true">
+    <span class="logo-text-wrap">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
   </a>
+  <ul class="nav-links">
+    <li><a href="../wardrobes.html">Wardrobes</a></li>
+    <li><a href="../kitchens.html">Kitchens</a></li>
+    <li><a href="../beds.html">Beds</a></li>
+    <li class="nav-more">
+      <span class="nav-more-trigger">More ▾</span>
+      <div class="nav-dropdown">
+        <a href="../dining-living.html">Dining &amp; Living</a>
+        <a href="../tv-units.html">TV Units</a>
+        <a href="../shelving.html">Shelving</a>
+        <a href="../solid-wood.html">Solid Wood</a>
+      </div>
+    </li>
+    <li><a href="../portfolio.html">Portfolio</a></li>
+    <li><a href="../contact.html">Contact</a></li>
+  </ul>
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Judith%20dining%20commission%20and%20would%20like%20to%20discuss%20something%20similar." class="nav-cta">WhatsApp Us</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
 
-  <script src="../js/main.js"></script>
-  <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
-  <script>
-  (function(){
-    var items = document.querySelectorAll('#gallery-grid .gallery-item');
-    var lb = document.getElementById('lightbox');
-    var lbImg = document.getElementById('lightbox-img');
-    var lbClose = document.getElementById('lightbox-close');
-    var lbPrev = document.getElementById('lightbox-prev');
-    var lbNext = document.getElementById('lightbox-next');
-    var current = 0, srcs = [], alts = [];
-    items.forEach(function(item, i){
-      var img = item.querySelector('img');
-      srcs.push(img.src); alts.push(img.alt);
-      item.addEventListener('click', function(){ open(i); });
-    });
-    function open(i){ current=i; lbImg.src=srcs[i]; lbImg.alt=alts[i]; lb.classList.add('open'); document.body.style.overflow='hidden'; }
-    function close(){ lb.classList.remove('open'); document.body.style.overflow=''; }
-    lbClose.addEventListener('click', close);
-    lb.addEventListener('click', function(e){ if(e.target===lb) close(); });
-    lbPrev.addEventListener('click', function(){ open((current-1+srcs.length)%srcs.length); });
-    lbNext.addEventListener('click', function(){ open((current+1)%srcs.length); });
-    document.addEventListener('keydown', function(e){
-      if(!lb.classList.contains('open')) return;
-      if(e.key==='Escape') close();
-      if(e.key==='ArrowLeft') lbPrev.click();
-      if(e.key==='ArrowRight') lbNext.click();
-    });
-  })();
-  </script>
+<main>
 
+<!-- HERO -->
+<section class="proj-hero">
+  <img src="../images/projects/judith-east-legon/judith-set-installed-2.jpg"
+    alt="Hyedua dining table and chairs installed in East Legon home — full dining room commission by Neewoody Custom Woodwork"
+    fetchpriority="high" />
+  <div class="proj-hero-scrim" aria-hidden="true"></div>
+  <div class="proj-hero-body">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="../index.html">Home</a>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <a href="../portfolio.html">Portfolio</a>
+      <span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">Judith, East Legon</span>
+    </nav>
+    <p class="hero-tag">Residential Project · East Legon, Accra · 2022</p>
+    <h1>Full Dining Room Commission in Hyedua</h1>
+    <p class="proj-hero-sub">Dining table, six upholstered chairs, and a console unit — three pieces, one timber, one brief.</p>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="proj-stats s5">
+  <div class="proj-stat">
+    <span class="proj-stat-label">Client</span>
+    <span class="proj-stat-value">Judith, East Legon</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Year</span>
+    <span class="proj-stat-value">2022</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Location</span>
+    <span class="proj-stat-value">East Legon, Accra</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Species</span>
+    <span class="proj-stat-value">Hyedua (Tarrietia utilis)</span>
+  </div>
+  <div class="proj-stat">
+    <span class="proj-stat-label">Scope</span>
+    <span class="proj-stat-value">Full dining room commission</span>
+  </div>
+</div>
+
+<!-- THE COMMISSION -->
+<div class="proj-split">
+  <div class="proj-split-text">
+    <p class="eyebrow">The Commission</p>
+    <h2>One Room. One Timber. Three Pieces.</h2>
+    <p>Judith came to Neewoody with a clear brief for her East Legon dining room: solid hardwood throughout, a unified look across every piece, and a rich dark finish that would anchor the space. The commission covered three furniture items designed to work together as a set — a large-format dining table, six matching upholstered chairs, and a console unit.</p>
+    <p>The timber selected was Hyedua — a dense West African hardwood with a naturally deep, warm tone that takes a dark espresso finish exceptionally well. All three pieces were built in the Neewoody workshop, finished in the same species and stain, and delivered and installed in the client's East Legon home.</p>
+  </div>
+  <div class="proj-split-img">
+    <img src="../images/projects/judith-east-legon/judith-set-staged.jpg"
+      alt="Hyedua dining set staged before delivery — table, chairs, and console unit in matched espresso finish"
+      loading="lazy" />
+  </div>
+</div>
+
+<!-- SCOPE -->
+<section class="proj-scope" aria-labelledby="scope-heading">
+  <div class="proj-scope-head">
+    <p class="eyebrow">What Was Built</p>
+    <h2 id="scope-heading">The Full Scope</h2>
+    <p>Three pieces, built to the same brief in the same timber — designed to read as a complete room.</p>
+  </div>
+  <div class="proj-scope-grid">
+    <div class="proj-scope-card">
+      <span class="proj-scope-num">01</span>
+      <h3>Large-Format Dining Table</h3>
+      <p>Solid Hyedua dining table in an espresso finish — built to seat the full household comfortably, with solid timber legs to match the chairs.</p>
+    </div>
+    <div class="proj-scope-card">
+      <span class="proj-scope-num">02</span>
+      <h3>Six Upholstered Dining Chairs</h3>
+      <p>Six matching chairs with solid Hyedua frames and linen fabric upholstered panels — built for daily use and designed to complement the table exactly.</p>
+    </div>
+    <div class="proj-scope-card">
+      <span class="proj-scope-num">03</span>
+      <h3>Console Unit</h3>
+      <p>A console unit with full-extension drawers and waterfall-edge sides — same Hyedua timber and espresso finish as the table and chairs.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="proj-gallery" aria-labelledby="gallery-heading">
+  <div class="proj-gallery-head">
+    <p class="eyebrow">Project Photography</p>
+    <h2 id="gallery-heading">The Set</h2>
+    <p>From workshop build to installed dining room — the Hyedua commission at each stage.</p>
+  </div>
+  <div class="gallery-grid" id="gallery-grid">
+
+    <div class="gallery-item" data-index="0">
+      <img src="../images/projects/judith-east-legon/judith-table-workshop.jpg"
+        alt="Hyedua dining table in the Neewoody workshop during build"
+        loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="1">
+      <img src="../images/projects/judith-east-legon/judith-set-staged.jpg"
+        alt="Full Hyedua dining set staged before delivery — table, chairs, and console"
+        loading="lazy" />
+    </div>
+
+    <div class="gallery-item" data-index="2">
+      <img src="../images/projects/judith-east-legon/judith-set-installed-1.jpg"
+        alt="Hyedua dining set installed in the East Legon home"
+        loading="lazy" />
+    </div>
+
+  </div>
+</section>
+
+<!-- LIGHTBOX -->
+<div class="proj-lightbox" id="proj-lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+  <button class="lb-prev" id="lb-prev" aria-label="Previous">&#8592;</button>
+  <img id="lb-img" src="" alt="" />
+  <button class="lb-next" id="lb-next" aria-label="Next">&#8594;</button>
+</div>
+
+<!-- SPECIES BLOCK -->
+<section class="species-block" aria-labelledby="species-heading">
+  <div>
+    <span class="species-label">About the Timber</span>
+    <h2 id="species-heading">Hyedua — Tarrietia utilis</h2>
+  </div>
+  <div class="species-block-right">
+    <p>Hyedua is a dense, heavy West African hardwood with a naturally deep, warm tone and a tight, even grain. It is harvested across Ghana and Côte d'Ivoire and has long been used in high-quality furniture and joinery for its structural stability and its ability to take a dark stain evenly and richly.</p>
+    <p>Finished in an espresso tone, Hyedua produces furniture with a depth of colour that reads as genuinely premium — without relying on veneers, laminates, or surface treatments to achieve the look. The pieces in this commission were designed specifically to let the timber do the work.</p>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="proj-cta" aria-labelledby="cta-heading">
+  <h2 id="cta-heading">Want a complete dining room commission <em>in Accra?</em></h2>
+  <div>
+    <p>Whether you need one piece or a full room — we work in genuine West African hardwood and build everything to a unified brief.</p>
+    <div class="btn-row">
+      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20saw%20the%20Judith%20dining%20commission%20and%20would%20like%20to%20discuss%20something%20similar." class="btn-wa" target="_blank" rel="noopener">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Us Now
+      </a>
+      <a href="../contact.html" class="btn-outline-light">Request a Quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- BACK STRIP -->
+<div class="proj-back">
+  <a href="../portfolio.html" class="proj-back-link">Back to Portfolio</a>
+  <a href="sage-centre.html" class="proj-back-next">Next: Sage Centre &#8594;</a>
+</div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="redesign-footer">
+  <div>
+    <a href="../index.html" class="foot-logo">
+      <img src="../images/logo.png" alt="" class="logo-img" aria-hidden="true">
+      <span>Neewoody</span>
+    </a>
+    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+  </div>
+  <nav class="foot-nav">
+    <a href="../portfolio.html">Work</a>
+    <a href="../wardrobes.html">Services</a>
+    <a href="../contact.html">Contact</a>
+    <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
+    <a href="../privacy.html">Privacy Policy</a>
+  </nav>
+  <p class="foot-copy">© 2026 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
+</footer>
+
+<!-- FLOATING WHATSAPP BUTTON -->
+<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project."
+   class="redesign-wa-float"
+   onclick="gtag('event','whatsapp_click',{event_category:'contact',event_label:'floating_whatsapp'})"
+   target="_blank" rel="noopener"
+   aria-label="Chat with Neewoody on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  <span class="redesign-wa-tooltip">Chat on WhatsApp</span>
+</a>
+
+<script>
+(function(){
+  var nav=document.getElementById('nav');
+  var hero=document.querySelector('.proj-hero');
+  if(nav&&hero){var io=new IntersectionObserver(function(e){nav.classList.toggle('over-hero',e[0].isIntersecting)},{threshold:0.05});io.observe(hero);}
+})();
+(function(){
+  var t=document.getElementById('nav-toggle'),m=document.getElementById('mobile-nav'),c=document.getElementById('mobile-nav-close');
+  function cl(){m.classList.remove('open');document.body.style.overflow='';}
+  if(t)t.addEventListener('click',function(){m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':'';});
+  if(c)c.addEventListener('click',cl);
+})();
+(function(){
+  var items=document.querySelectorAll('#gallery-grid .gallery-item');
+  var lb=document.getElementById('proj-lightbox');
+  var lbImg=document.getElementById('lb-img');
+  var lbClose=document.getElementById('lb-close');
+  var lbPrev=document.getElementById('lb-prev');
+  var lbNext=document.getElementById('lb-next');
+  if(!lb)return;
+  var current=0,srcs=[],alts=[];
+  items.forEach(function(item,i){
+    var img=item.querySelector('img');
+    srcs.push(img.src);alts.push(img.alt);
+    item.addEventListener('click',function(){open(i);});
+  });
+  function open(i){current=i;lbImg.src=srcs[i];lbImg.alt=alts[i];lb.classList.add('open');document.body.style.overflow='hidden';}
+  function close(){lb.classList.remove('open');document.body.style.overflow='';}
+  lbClose.addEventListener('click',close);
+  lb.addEventListener('click',function(e){if(e.target===lb)close();});
+  lbPrev.addEventListener('click',function(e){e.stopPropagation();current=(current-1+srcs.length)%srcs.length;lbImg.src=srcs[current];lbImg.alt=alts[current];});
+  lbNext.addEventListener('click',function(e){e.stopPropagation();current=(current+1)%srcs.length;lbImg.src=srcs[current];lbImg.alt=alts[current];});
+  document.addEventListener('keydown',function(e){if(!lb.classList.contains('open'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')lbPrev.click();if(e.key==='ArrowRight')lbNext.click();});
+})();
+</script>
 </body>
 </html>
