@@ -423,7 +423,15 @@ function AttendanceTab({job,user,crew,workshopCfg,updateJob,isFieldSup}){
 
 function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,saveDamage,workshopCfg,saveConfig,onCreateJob,onViewJob,onLogout}){
   const [tab,setTab]=useState('today');
-  const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'},{id:'settings',l:'Settings'}];
+  const [leads,setLeads]=useState(null);
+  const [leadsLoading,setLeadsLoading]=useState(false);
+  useEffect(()=>{
+    if(tab==='leads'&&leads===null&&!leadsLoading){
+      setLeadsLoading(true);
+      apiFetch('/leads').then(d=>setLeads(Array.isArray(d)?d:[])).catch(()=>setLeads([])).finally(()=>setLeadsLoading(false));
+    }
+  },[tab]);
+  const TABS=[{id:'today',l:'Today'},{id:'jobs',l:'All Jobs'},{id:'tools',l:'Tools'},{id:'crew',l:'Crew'},{id:'damage',l:'Damage'},{id:'leads',l:'Leads'},{id:'settings',l:'Settings'}];
   const active=jobs.filter(j=>j.status!=='closed');
   const openDmg=damage.filter(d=>d.status!=='resolved');
   const deleteJob=id=>{
@@ -437,7 +445,7 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
       <div style={{display:'flex',borderBottom:`1px solid ${C.bdr}`,overflowX:'auto',flexShrink:0}}>
         {TABS.map(t=>(
           <button key={t.id} onClick={()=>setTab(t.id)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:tab===t.id?`2px solid ${C.acc}`:'2px solid transparent',color:tab===t.id?C.txt:C.muted,padding:'9px 14px',fontFamily:BF,fontSize:11,letterSpacing:2,cursor:'pointer',whiteSpace:'nowrap',textTransform:'uppercase'}}>
-            {t.l}{t.id==='damage'&&openDmg.length>0?` (${openDmg.length})`:''}
+            {t.l}{t.id==='damage'&&openDmg.length>0?` (${openDmg.length})`:''}{t.id==='leads'&&leads&&leads.length>0?` (${leads.length})`:''}
           </button>
         ))}
       </div>
@@ -447,6 +455,7 @@ function AdminDash({user,crew,tools,jobs,damage,saveCrew,saveTools,saveJobs,save
         {tab==='tools'&&<ToolsTab tools={tools} saveTools={saveTools}/>}
         {tab==='crew'&&<CrewTab crew={crew} saveCrew={saveCrew}/>}
         {tab==='damage'&&<DamageTab damage={damage} saveDamage={saveDamage} crew={crew} tools={tools} saveTools={saveTools}/>}
+        {tab==='leads'&&<LeadsTab leads={leads} loading={leadsLoading}/>}
         {tab==='settings'&&<WorkshopSettings cfg={workshopCfg} onSave={saveConfig}/>}
       </div>
     </div>
@@ -617,6 +626,46 @@ function DmgCard({d,crew,onUpdate,onResolve}){
     <TA value={note} onChange={e=>setNote(e.target.value)} placeholder="Resolution note…" rows={2} style={{marginBottom:8}}/>
     <Btn ch="Mark Resolved" onClick={()=>onResolve(note)} full color={C.ok} disabled={!d.action}/>
   </div>} style={{marginBottom:10}}/>);
+}
+
+// ── Leads Tab ─────────────────────────────────────────────────────────
+function LeadsTab({leads,loading}){
+  const fmtTs=iso=>{try{return new Date(iso).toLocaleString('en-GH',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit',hour12:true});}catch{return iso;}};
+  if(loading||leads===null) return <div style={{color:C.muted,fontSize:12,fontFamily:MF,paddingTop:8}}>Loading leads…</div>;
+  if(leads.length===0) return <div style={{color:C.muted,fontSize:12,fontFamily:MF,paddingTop:8}}>No leads yet — submissions from the contact form will appear here.</div>;
+  return(
+    <div>
+      <div style={{fontSize:9,letterSpacing:2,color:C.muted,fontFamily:MF,marginBottom:16}}>{leads.length} LEAD{leads.length!==1?'S':''}</div>
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
+        {leads.map(lead=>{
+          const rawPhone=(lead.phone||'').replace(/\s/g,'');
+          const waPhone=rawPhone.startsWith('0')?'233'+rawPhone.slice(1):rawPhone;
+          const waMsg=encodeURIComponent(`Hi ${lead.name}, thanks for your enquiry about ${lead.project_type}. I'd love to discuss your project.`);
+          return(
+            <Card key={lead.id} ch={<div>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                <div style={{fontFamily:BF,fontSize:16,fontWeight:600}}>{lead.name}</div>
+                <div style={{fontSize:9,color:C.muted,fontFamily:MF,textAlign:'right',flexShrink:0,marginLeft:8}}>{fmtTs(lead.created_at||lead.timestamp)}</div>
+              </div>
+              <div style={{fontSize:11,color:C.muted,fontFamily:MF,lineHeight:1.8,marginBottom:8}}>
+                <a href={`tel:${lead.phone}`} style={{color:C.acc,textDecoration:'none'}}>{lead.phone}</a>
+                {lead.email&&<><br/>{lead.email}</>}
+                <br/>{lead.project_type}
+                {lead.location&&<><br/>📍 {lead.location}</>}
+                {lead.dimensions&&<><br/>Dims: {lead.dimensions}</>}
+                {lead.budget&&<><br/>Budget: {lead.budget}</>}
+              </div>
+              {lead.message&&<div style={{fontSize:11,color:C.txt,fontFamily:MF,lineHeight:1.6,background:C.s2,padding:'8px 10px',borderRadius:2,marginBottom:10,whiteSpace:'pre-wrap'}}>{lead.message}</div>}
+              <a href={`https://wa.me/${waPhone}?text=${waMsg}`} target="_blank" rel="noopener"
+                style={{display:'inline-flex',alignItems:'center',gap:6,background:'#25d366',color:'#fff',padding:'6px 14px',borderRadius:2,fontFamily:MF,fontSize:10,letterSpacing:1,textDecoration:'none',textTransform:'uppercase'}}>
+                WhatsApp {lead.name.split(' ')[0]} →
+              </a>
+            </div>}/>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 // ── Create Job ────────────────────────────────────────────────────────
