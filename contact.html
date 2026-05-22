@@ -366,6 +366,92 @@ a{text-decoration:none}
   if(t)t.addEventListener('click',function(){m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':'';});
   if(c)c.addEventListener('click',cl);
 })();
+
+/* ── Contact form submission ── */
+(function(){
+  var form    = document.getElementById('quote-form');
+  var btnLabel   = form.querySelector('.btn-label');
+  var btnLoading = form.querySelector('.btn-loading');
+  var successBox = form.querySelector('.form-success');
+  var submitBtn  = form.querySelector('button[type="submit"]');
+
+  // Inline error helper
+  function showFieldError(fieldId, msg) {
+    var el = form.querySelector('#' + fieldId);
+    if (!el) return;
+    var err = el.parentNode.querySelector('.field-error');
+    if (err) err.textContent = msg;
+    el.setAttribute('aria-invalid', 'true');
+  }
+  function clearErrors() {
+    form.querySelectorAll('.field-error').forEach(function(e){ e.textContent = ''; });
+    form.querySelectorAll('[aria-invalid]').forEach(function(e){ e.removeAttribute('aria-invalid'); });
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors();
+
+    // Client-side validation
+    var valid = true;
+    var name  = form.querySelector('#name').value.trim();
+    var phone = form.querySelector('#phone').value.trim();
+    var ptype = form.querySelector('#project-type').value;
+    var msg   = form.querySelector('#message').value.trim();
+
+    if (!name)  { showFieldError('name', 'Please enter your name.'); valid = false; }
+    if (!phone) { showFieldError('phone', 'Please enter your phone number.'); valid = false; }
+    if (!ptype) { showFieldError('project-type', 'Please select a project type.'); valid = false; }
+    if (!msg)   { showFieldError('message', 'Please describe your project.'); valid = false; }
+    if (!valid) return;
+
+    // Loading state
+    submitBtn.disabled = true;
+    btnLabel.style.display = 'none';
+    btnLoading.style.display = '';
+
+    var payload = {
+      name:         name,
+      phone:        phone,
+      email:        form.querySelector('#email').value.trim(),
+      project_type: ptype,
+      dimensions:   form.querySelector('#dimensions').value.trim(),
+      budget:       form.querySelector('#budget').value,
+      location:     form.querySelector('#location').value.trim(),
+      message:      msg,
+      _gotcha:      form.querySelector('[name="_gotcha"]').value,
+    };
+
+    fetch('/api/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        // Success
+        form.reset();
+        successBox.style.display = 'flex';
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // GA4 event
+        if (typeof gtag === 'function') {
+          gtag('event', 'form_submit', { event_category: 'lead', event_label: 'contact_form' });
+        }
+      } else {
+        showFieldError('message', data.error || 'Something went wrong — please try WhatsApp instead.');
+      }
+    })
+    .catch(function() {
+      showFieldError('message', 'Could not send — please try WhatsApp or call us directly.');
+    })
+    .finally(function() {
+      submitBtn.disabled = false;
+      btnLabel.style.display = '';
+      btnLoading.style.display = 'none';
+    });
+  });
+})();
 </script>
 </body>
 </html>
