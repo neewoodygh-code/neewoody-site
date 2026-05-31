@@ -148,7 +148,7 @@ function GateScreen({ onAuth }) {
     if (!key.trim()) return;
     setBusy(true); setError('');
     try {
-      await apiFetch('/posts', 'GET', null, key.trim());
+      await apiFetch('/leads', 'GET', null, key.trim()); // /leads requires X-NWD-Key — proper auth test
       localStorage.setItem(KEY_STORE, key.trim());
       onAuth();
     } catch {
