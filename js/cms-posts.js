@@ -1,6 +1,6 @@
-/* cms-posts.js — fetches CMS posts for this page slug, renders a card grid.
-   Modal shows all images in a scrollable strip with prev/next arrows.
-   Clicking any strip image opens a full-screen zoom with arrow navigation. */
+/* cms-posts.js — fetches CMS posts for this page, renders cards matching
+   the wardrobes.html wd-card pattern: cream bg, image top (4:3 ratio),
+   text body always visible below. Modal on click with scrollable image strip. */
 
 (function () {
   'use strict';
@@ -25,29 +25,36 @@
     var style = document.createElement('style');
     style.id = 'cms-posts-style';
     style.textContent =
-      /* eyebrow label */
+      /* eyebrow label — matches .pf-featured-label / existing section labels */
       '.cms-label{font-family:"Jost",sans-serif;font-size:0.6rem;font-weight:400;' +
         'letter-spacing:0.32em;text-transform:uppercase;color:var(--muted,#6b6557);' +
         'display:block;margin-bottom:2rem}' +
-      /* card grid */
-      '.cms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}' +
-      '.cms-card{position:relative;overflow:hidden;background:#0b1f0e;height:420px;cursor:pointer}' +
-      /* card thumbnail: object-position top-center shows subject, not mid-crop */
-      '.cms-card img{width:100%;height:100%;object-fit:cover;object-position:center 15%;' +
-        'filter:brightness(.85);transition:transform .8s ease,filter .4s;' +
-        'display:block;pointer-events:none}' +
-      '.cms-card:hover img{transform:scale(1.05);filter:brightness(.6)}' +
-      '.cms-meta{position:absolute;bottom:0;left:0;right:0;padding:1.2rem 1.4rem;' +
-        'background:linear-gradient(to top,rgba(11,31,14,.92),transparent);' +
-        'transform:translateY(5px);transition:transform .3s;pointer-events:none}' +
-      '.cms-card:hover .cms-meta{transform:translateY(0)}' +
-      '.cms-cat{font-family:"Jost",sans-serif;font-size:.58rem;font-weight:400;' +
-        'letter-spacing:.25em;text-transform:uppercase;color:#c8922a;' +
-        'margin-bottom:.2rem;display:block}' +
-      '.cms-name{font-family:"Playfair Display",Georgia,serif;font-size:.92rem;' +
-        'font-weight:400;color:#f0e8d0;line-height:1.3;display:block}' +
-      '.cms-loc{font-family:"Lora",Georgia,serif;font-style:italic;font-size:.75rem;' +
-        'color:rgba(240,232,208,.55);margin-top:.15rem;display:block}' +
+      /* grid — matches wd-cards-grid */
+      '.cms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}' +
+      /* card — cream bg, same as wd-card */
+      '.cms-card{background:var(--cream-dark,#e8dfc4);overflow:hidden;cursor:pointer}' +
+      /* image wrapper — 4:3 aspect ratio, same as wd-card-img */
+      '.cms-card-img{position:relative;aspect-ratio:4/3;overflow:hidden}' +
+      '.cms-card-img img{width:100%;height:100%;object-fit:cover;display:block;' +
+        'transition:transform 0.5s ease}' +
+      '.cms-card-img:hover img{transform:scale(1.04)}' +
+      /* category badge — top-left of image, green bg + gold text, same as wd-card-badge */
+      '.cms-badge{position:absolute;top:0.75rem;left:0.75rem;' +
+        'font-family:"Jost",sans-serif;font-size:0.58rem;font-weight:500;' +
+        'letter-spacing:0.14em;text-transform:uppercase;' +
+        'background:var(--green,#0b1f0e);color:var(--gold,#c8922a);' +
+        'padding:0.2rem 0.55rem;pointer-events:none}' +
+      /* card body — always visible, same as wd-card-body */
+      '.cms-card-body{padding:1.1rem 1.2rem 1.4rem}' +
+      /* title row — Playfair, with year right-aligned, same as wd-card-location */
+      '.cms-card-title{font-family:"Playfair Display",Georgia,serif;font-size:0.88rem;' +
+        'font-weight:400;color:var(--ink,#1c1c1a);margin-bottom:0.3rem;' +
+        'display:flex;align-items:baseline;justify-content:space-between;gap:0.5rem}' +
+      '.cms-card-title span{font-family:"Jost",sans-serif;font-size:0.6rem;font-weight:300;' +
+        'letter-spacing:0.12em;color:var(--muted,#6b6557);flex-shrink:0}' +
+      /* caption — Lora, muted, always visible, same as wd-card-caption */
+      '.cms-card-caption{font-family:"Lora",Georgia,serif;font-size:0.8rem;' +
+        'line-height:1.6;color:var(--muted,#6b6557)}' +
       /* modal overlay */
       '.cms-overlay{position:fixed;inset:0;z-index:800;background:rgba(11,31,14,.72);' +
         'display:flex;align-items:center;justify-content:center;padding:1.5rem;' +
@@ -56,12 +63,11 @@
       /* modal box */
       '.cms-modal{background:#f0e8d0;max-width:720px;width:100%;max-height:90vh;' +
         'overflow-y:auto;position:relative;display:flex;flex-direction:column}' +
-      /* image strip — all images visible, scrollable horizontally */
+      /* image strip — scrollable, all images visible */
       '.cms-strip-wrap{position:relative;background:#0b1f0e;flex-shrink:0}' +
       '.cms-strip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;' +
         'scrollbar-width:none;-ms-overflow-style:none}' +
       '.cms-strip::-webkit-scrollbar{display:none}' +
-      /* each image in strip: fixed height, width proportional */
       '.cms-strip img{flex:0 0 auto;height:300px;width:auto;max-width:90%;' +
         'object-fit:cover;scroll-snap-align:start;cursor:zoom-in;' +
         'transition:filter .25s;display:block}' +
@@ -73,8 +79,7 @@
         'transition:background .2s;line-height:1}' +
       '.cms-snav:hover{background:rgba(11,31,14,.4)}' +
       '.cms-snav.prev{left:0}.cms-snav.next{right:0}' +
-      '.cms-snav:disabled{opacity:.2;cursor:default}' +
-      '.cms-snav:disabled:hover{background:transparent}' +
+      '.cms-snav:disabled{opacity:.2;cursor:default;pointer-events:none}' +
       /* modal body */
       '.cms-mbody{padding:1.6rem 2rem 2rem}' +
       '.cms-mcat{font-family:"Jost",sans-serif;font-size:.6rem;font-weight:400;' +
@@ -87,10 +92,10 @@
       '.cms-mtext{font-family:"Lora",Georgia,serif;font-size:.9rem;' +
         'line-height:1.85;color:#4A4540}' +
       '.cms-mclose{position:absolute;top:.8rem;right:1rem;background:none;border:none;' +
-        'cursor:pointer;font-family:"Jost",sans-serif;font-size:.6rem;font-weight:400;' +
+        'cursor:pointer;font-family:"Jost",sans-serif;font-size:.6rem;' +
         'letter-spacing:.18em;text-transform:uppercase;color:#6b6557;z-index:10}' +
       '.cms-mclose:hover{color:#1c1c1a}' +
-      /* zoom overlay — standalone, no main.js dependency */
+      /* zoom overlay */
       '.cms-zoom{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.92);' +
         'display:flex;align-items:center;justify-content:center;' +
         'opacity:0;pointer-events:none;transition:opacity .2s}' +
@@ -102,8 +107,7 @@
         'transition:background .2s}' +
       '.cms-znav:hover{background:rgba(255,255,255,.22)}' +
       '.cms-znav.prev{left:.75rem}.cms-znav.next{right:.75rem}' +
-      '.cms-znav:disabled{opacity:.18;cursor:default}' +
-      '.cms-znav:disabled:hover{background:rgba(255,255,255,.1)}' +
+      '.cms-znav:disabled{opacity:.18;cursor:default;pointer-events:none}' +
       '.cms-zclose{position:absolute;top:1rem;right:1rem;background:none;border:none;' +
         'cursor:pointer;color:rgba(255,255,255,.65);font-family:"Jost",sans-serif;' +
         'font-size:.65rem;letter-spacing:.2em;text-transform:uppercase}' +
@@ -114,24 +118,24 @@
       /* responsive */
       '@media(max-width:900px){.cms-grid{grid-template-columns:repeat(2,1fr)}}' +
       '@media(max-width:600px){' +
-        '.cms-grid{grid-template-columns:1fr}.cms-card{height:340px}' +
+        '.cms-grid{grid-template-columns:1fr}' +
         '.cms-strip img{height:220px}' +
         '.cms-mbody{padding:1.2rem 1.25rem 1.5rem}' +
       '}';
     document.head.appendChild(style);
   }
 
-  // ── Shared state ──────────────────────────────────────────────────────
-  var currentImages = [];
+  // ── Shared image state ────────────────────────────────────────────────
+  var currentImages  = [];
   var currentZoomIdx = 0;
 
   // ── Zoom overlay ──────────────────────────────────────────────────────
-  var zoomEl    = mkEl('div','cms-zoom'); zoomEl.setAttribute('role','dialog');
-  var zoomImg   = mkEl('img','cms-zoom-img');
-  var zClose    = mkEl('button','cms-zclose'); zClose.textContent = '✕ Close';
-  var zPrev     = mkEl('button','cms-znav prev'); zPrev.innerHTML  = '&#8249;';
-  var zNext     = mkEl('button','cms-znav next'); zNext.innerHTML  = '&#8250;';
-  var zCount    = mkEl('span','cms-zcount');
+  var zoomEl  = mkEl('div','cms-zoom'); zoomEl.setAttribute('role','dialog');
+  var zoomImg = mkEl('img','cms-zoom-img');
+  var zClose  = mkEl('button','cms-zclose'); zClose.textContent = '✕ Close';
+  var zPrev   = mkEl('button','cms-znav prev'); zPrev.innerHTML  = '&#8249;';
+  var zNext   = mkEl('button','cms-znav next'); zNext.innerHTML  = '&#8250;';
+  var zCount  = mkEl('span','cms-zcount');
   [zoomImg,zClose,zPrev,zNext,zCount].forEach(function(el){zoomEl.appendChild(el);});
   document.body.appendChild(zoomEl);
 
@@ -153,18 +157,12 @@
     var show = n > 1;
     zPrev.style.display = zNext.style.display = show ? 'block' : 'none';
     zCount.style.display = show ? 'block' : 'none';
-    if (show) zCount.textContent = (currentZoomIdx + 1) + ' / ' + n;
+    if (show) zCount.textContent = (currentZoomIdx+1) + ' / ' + n;
   }
   zClose.addEventListener('click', closeZoom);
   zoomEl.addEventListener('click', function(e){ if(e.target===zoomEl) closeZoom(); });
-  zPrev.addEventListener('click', function(e){
-    e.stopPropagation();
-    if(currentZoomIdx > 0){ currentZoomIdx--; refreshZoom(); }
-  });
-  zNext.addEventListener('click', function(e){
-    e.stopPropagation();
-    if(currentZoomIdx < currentImages.length-1){ currentZoomIdx++; refreshZoom(); }
-  });
+  zPrev.addEventListener('click', function(e){ e.stopPropagation(); if(currentZoomIdx>0){currentZoomIdx--;refreshZoom();} });
+  zNext.addEventListener('click', function(e){ e.stopPropagation(); if(currentZoomIdx<currentImages.length-1){currentZoomIdx++;refreshZoom();} });
 
   // ── Detail modal ──────────────────────────────────────────────────────
   var overlay  = mkEl('div','cms-overlay');
@@ -172,7 +170,6 @@
   var modalBox = mkEl('div','cms-modal');
   var mClose   = mkEl('button','cms-mclose'); mClose.textContent = '✕ Close';
 
-  // Strip wrap with nav arrows
   var stripWrap = mkEl('div','cms-strip-wrap');
   var strip     = mkEl('div','cms-strip');
   var sPrev     = mkEl('button','cms-snav prev'); sPrev.innerHTML = '&#8249;';
@@ -182,72 +179,57 @@
   stripWrap.appendChild(sNext);
 
   var mBody = mkEl('div','cms-mbody');
-  [mClose, stripWrap, mBody].forEach(function(el){modalBox.appendChild(el);});
+  [mClose,stripWrap,mBody].forEach(function(el){modalBox.appendChild(el);});
   overlay.appendChild(modalBox);
   document.body.appendChild(overlay);
 
-  // Scroll strip by one image width on arrow click
   function scrollStrip(dir) {
     var imgs = strip.querySelectorAll('img');
     if (!imgs.length) return;
-    var w = imgs[0].offsetWidth || 300;
-    strip.scrollBy({ left: dir * w, behavior: 'smooth' });
+    strip.scrollBy({ left: dir*(imgs[0].offsetWidth||300), behavior:'smooth' });
+  }
+  function updateStripNav() {
+    sPrev.disabled = strip.scrollLeft <= 2;
+    sNext.disabled = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2;
   }
   sPrev.addEventListener('click', function(){ scrollStrip(-1); });
   sNext.addEventListener('click', function(){ scrollStrip( 1); });
-
-  // Update arrow disabled state as strip scrolls
-  function updateStripNav() {
-    var atStart = strip.scrollLeft <= 2;
-    var atEnd   = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 2;
-    sPrev.disabled = atStart;
-    sNext.disabled = atEnd;
-  }
-  strip.addEventListener('scroll', updateStripNav, { passive: true });
+  strip.addEventListener('scroll', updateStripNav, { passive:true });
 
   function openModal(post) {
-    currentImages = (post.images || []).filter(Boolean);
+    currentImages = (post.images||[]).filter(Boolean);
     strip.innerHTML = '';
-
     currentImages.forEach(function(src, idx) {
       var img = mkEl('img');
-      img.src     = abs(src);
-      img.alt     = post.title || '';
-      img.loading = 'lazy';
-      img.title   = 'Click to zoom';
+      img.src = abs(src); img.alt = post.title||''; img.loading='lazy'; img.title='Click to zoom';
       img.addEventListener('click', function(){ openZoom(idx); });
       strip.appendChild(img);
     });
-
-    // Show/hide strip arrows based on image count
     var multi = currentImages.length > 1;
     sPrev.style.display = sNext.style.display = multi ? 'flex' : 'none';
     strip.scrollLeft = 0;
-    setTimeout(updateStripNav, 50); // after images render
+    setTimeout(updateStripNav, 50);
 
     mBody.innerHTML =
-      '<span class="cms-mcat">'   + esc(post.category) + '</span>' +
-      '<h2 class="cms-mtitle">'   + esc(post.title)    + '</h2>'   +
-      (post.location ? '<span class="cms-mloc">' + esc(post.location) + '</span>' : '') +
-      (post.writeup  ? '<p class="cms-mtext">'   + esc(post.writeup).replace(/\n/g,'<br>') + '</p>' : '');
+      '<span class="cms-mcat">'  + esc(post.category) + '</span>' +
+      '<h2 class="cms-mtitle">'  + esc(post.title)    + '</h2>'   +
+      (post.location ? '<span class="cms-mloc">'+esc(post.location)+'</span>' : '') +
+      (post.writeup  ? '<p class="cms-mtext">'+esc(post.writeup).replace(/\n/g,'<br>')+'</p>' : '');
 
     modalBox.scrollTop = 0;
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
   }
 
-  function closeModal() {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
 
   mClose.addEventListener('click', closeModal);
   overlay.addEventListener('click', function(e){ if(e.target===overlay) closeModal(); });
 
   document.addEventListener('keydown', function(e) {
     if (zoomEl.classList.contains('open')) {
-      if (e.key==='ArrowLeft'  && currentZoomIdx > 0)                          { currentZoomIdx--; refreshZoom(); }
-      if (e.key==='ArrowRight' && currentZoomIdx < currentImages.length-1)     { currentZoomIdx++; refreshZoom(); }
+      if (e.key==='ArrowLeft'  && currentZoomIdx>0)                        { currentZoomIdx--;refreshZoom(); }
+      if (e.key==='ArrowRight' && currentZoomIdx<currentImages.length-1)   { currentZoomIdx++;refreshZoom(); }
       if (e.key==='Escape') closeZoom();
       return;
     }
@@ -258,9 +240,7 @@
   fetch(API + '/posts?page=' + encodeURIComponent(slug))
     .then(function(r){ return r.json(); })
     .then(function(data) {
-      var posts = (data.posts || []).filter(function(p){
-        return p.images && p.images[0];
-      });
+      var posts = (data.posts||[]).filter(function(p){ return p.images && p.images[0]; });
       if (!posts.length) return;
 
       var label = mkEl('span','cms-label');
@@ -269,24 +249,44 @@
       var grid = mkEl('div','cms-grid');
 
       posts.forEach(function(p) {
-        var card = mkEl('div','cms-card');
+        var year     = p.date ? p.date.slice(0,4) : '';
+        var caption  = p.writeup
+          ? (p.writeup.length > 110 ? p.writeup.slice(0,108).trim() + '…' : p.writeup)
+          : (p.location || '');
+
+        var card = mkEl('article','cms-card');
         card.setAttribute('role','button');
         card.setAttribute('tabindex','0');
         card.setAttribute('aria-label', p.title || 'View project');
 
-        var img = mkEl('img');
-        img.src     = abs(p.images[0]);
-        img.alt     = '';
-        img.loading = 'lazy';
+        // Image wrapper + badge
+        var imgWrap = mkEl('div','cms-card-img');
+        var img     = mkEl('img');
+        img.src = abs(p.images[0]); img.alt = ''; img.loading = 'lazy';
+        var badge   = mkEl('span','cms-badge');
+        badge.textContent = p.category || '';
+        imgWrap.appendChild(img);
+        imgWrap.appendChild(badge);
 
-        var meta = mkEl('div','cms-meta');
-        meta.innerHTML =
-          '<span class="cms-cat">'  + esc(p.category) + '</span>' +
-          '<span class="cms-name">' + esc(p.title)    + '</span>' +
-          (p.location ? '<span class="cms-loc">' + esc(p.location) + '</span>' : '');
+        // Text body — always visible
+        var body    = mkEl('div','cms-card-body');
+        var titleRow= mkEl('div','cms-card-title');
+        var titleTxt= document.createTextNode(p.title || '');
+        titleRow.appendChild(titleTxt);
+        if (year) {
+          var yearEl = mkEl('span');
+          yearEl.textContent = year;
+          titleRow.appendChild(yearEl);
+        }
+        body.appendChild(titleRow);
+        if (caption) {
+          var cap = mkEl('p','cms-card-caption');
+          cap.textContent = caption;
+          body.appendChild(cap);
+        }
 
-        card.appendChild(img);
-        card.appendChild(meta);
+        card.appendChild(imgWrap);
+        card.appendChild(body);
         card.addEventListener('click', function(){ openModal(p); });
         card.addEventListener('keydown', function(e){
           if(e.key==='Enter'||e.key===' '){ e.preventDefault(); openModal(p); }
