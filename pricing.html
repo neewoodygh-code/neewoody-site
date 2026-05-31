@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <meta name="theme-color" content="#F7F4EF"/>
+  <meta name="theme-color" content="#f0e8d0"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-title" content="NW Pricing"/>
   <title>Neewoody Pricing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     :root{
-      --bg:#F7F4EF; --bg-alt:#EFEBE3; --surface:#FFFFFF;
-      --dark:#1C1A17; --mid:#4A4540; --muted:#8A8178;
-      --accent:#A0784A; --accent-dk:#7D5C34; --accent-lt:rgba(160,120,74,.12);
-      --border:#DDD5C8; --border-dk:#C8BFB2;
+      --bg:#f0e8d0; --bg-alt:#e8dfc4; --surface:#f0e8d0;
+      --dark:#1c1c1a; --mid:#4A4540; --muted:#6b6557;
+      --accent:#c8922a; --accent-dk:#b07d20; --accent-lt:rgba(200,146,42,.12);
+      --border:#d4c9b0; --border-dk:#c4b898;
       --ok:#5a8a5a; --err:#b04030; --warn:#8a6020;
       --shadow-sm:0 1px 4px rgba(28,26,23,.07);
       --shadow-md:0 4px 16px rgba(28,26,23,.10);
       --radius:4px; --radius-lg:10px;
     }
-    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
+    body{font-family:'Jost',system-ui,sans-serif;background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
     input,select,textarea,button{font-family:inherit;}
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:var(--bg-alt);}
@@ -207,32 +207,32 @@ function calcActual(exp=[]){
 
 // ── Design tokens ─────────────────────────────────────────────────────
 const S = {
-  bg:'#F7F4EF', bgAlt:'#EFEBE3', surface:'#FFFFFF',
-  dark:'#1C1A17', mid:'#4A4540', muted:'#8A8178',
-  accent:'#A0784A', accentDk:'#7D5C34', accentLt:'rgba(160,120,74,.12)',
-  border:'#DDD5C8', borderDk:'#C8BFB2',
+  bg:'#f0e8d0', bgAlt:'#e8dfc4', surface:'#f0e8d0',
+  dark:'#1c1c1a', mid:'#4A4540', muted:'#6b6557',
+  accent:'#c8922a', accentDk:'#b07d20', accentLt:'rgba(200,146,42,.12)',
+  border:'#d4c9b0', borderDk:'#c4b898',
   ok:'#5a8a5a', err:'#b04030', warn:'#8a6020',
 };
 const FD = "'Playfair Display',Georgia,serif";
-const FB = "'DM Sans',system-ui,sans-serif";
+const FB = "'Jost',system-ui,sans-serif";
 const FM = "'DM Mono','Courier New',monospace";
 
 // ── UI Primitives ─────────────────────────────────────────────────────
 const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
   const p=size==='lg'?'14px 22px':size==='sm'?'5px 11px':'8px 16px';
   const fs=size==='lg'?'1rem':size==='sm'?'.72rem':'.82rem';
-  const base={border:'none',borderRadius:4,padding:p,fontFamily:FB,fontWeight:600,fontSize:fs,letterSpacing:'.02em',cursor:disabled?'not-allowed':'pointer',width:full?'100%':'auto',transition:'all .15s',...st};
-  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1.5px solid ${S.border}`,opacity:disabled?.4:1}}>{ch}</button>;
+  const base={border:'none',borderRadius:0,padding:p,fontFamily:FB,fontWeight:500,fontSize:fs,letterSpacing:'.06em',cursor:disabled?'not-allowed':'pointer',width:full?'100%':'auto',transition:'all .15s',...st};
+  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1px solid ${S.border}`,opacity:disabled?.4:1}}>{ch}</button>;
   return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?S.bgAlt:(color||S.dark),color:disabled?S.muted:'#fff',opacity:disabled?.6:1}}>{ch}</button>;
 };
 
-const Card=({ch,style:st={}})=><div style={{background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:10,padding:'14px 16px',...st}}>{ch}</div>;
+const Card=({ch,style:st={}})=><div style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,padding:'14px 16px',...st}}>{ch}</div>;
 
 // Stable input components - defined outside any render function to prevent remounting
 const TextInp = React.memo(({value,onChange,onBlur,placeholder,style:st={},type='text',...rest})=>(
   <input type={type} defaultValue={value} onChange={onChange} onBlur={onBlur}
     placeholder={placeholder||''}
-    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,
+    style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,
       padding:'7px 10px',fontFamily:FM,fontSize:'.88rem',outline:'none',width:'100%',...st}}
     {...rest}/>
 ));
@@ -240,21 +240,21 @@ const TextInp = React.memo(({value,onChange,onBlur,placeholder,style:st={},type=
 const NumInp = React.memo(({value,onChange,placeholder,style:st={},...rest})=>(
   <input type="number" min={0} defaultValue={value===0?'':value}
     onChange={onChange} placeholder={placeholder||'0'}
-    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,
+    style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,
       padding:'7px 10px',fontFamily:FM,fontSize:'.88rem',outline:'none',width:'100%',...st}}
     {...rest}/>
 ));
 
 const CtrlInp=({value,onChange,placeholder,style:st={},...rest})=>(
   <input value={value||''} onChange={onChange} placeholder={placeholder||''}
-    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,
+    style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,
       padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',...st}}
     {...rest}/>
 );
 
 const CtrlSel=({value,onChange,children,style:st={}})=>(
   <select value={value} onChange={onChange}
-    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,
+    style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,
       padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',appearance:'none',...st}}>
     {children}
   </select>
@@ -262,7 +262,7 @@ const CtrlSel=({value,onChange,children,style:st={}})=>(
 
 const CtrlTA=({value,onChange,placeholder,rows=3,style:st={}})=>(
   <textarea value={value||''} onChange={onChange} placeholder={placeholder} rows={rows}
-    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,
+    style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,
       padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',resize:'vertical',...st}}/>
 );
 
@@ -344,13 +344,13 @@ function PinScreen({user,onSuccess,onBack}){
         </div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}}>
           {[1,2,3,4,5,6,7,8,9].map(n=>(
-            <button key={n} onClick={()=>press(String(n))} style={{background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:8,color:S.dark,padding:14,fontFamily:FM,fontSize:'1.1rem',cursor:'pointer'}}>{n}</button>
+            <button key={n} onClick={()=>press(String(n))} style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,padding:14,fontFamily:FM,fontSize:'1.1rem',cursor:'pointer'}}>{n}</button>
           ))}
         </div>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
           <div/>
-          <button onClick={()=>press('0')} style={{background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:8,color:S.dark,padding:14,fontFamily:FM,fontSize:'1.1rem',cursor:'pointer'}}>0</button>
-          <button onClick={del} style={{background:'transparent',border:`1.5px solid ${S.border}`,borderRadius:8,color:S.muted,padding:14,fontSize:'.9rem',cursor:'pointer'}}>⌫</button>
+          <button onClick={()=>press('0')} style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,padding:14,fontFamily:FM,fontSize:'1.1rem',cursor:'pointer'}}>0</button>
+          <button onClick={del} style={{background:'transparent',border:`1px solid ${S.border}`,borderRadius:0,color:S.muted,padding:14,fontSize:'.9rem',cursor:'pointer'}}>⌫</button>
         </div>
         {onBack&&<button onClick={()=>{if(step==='confirm'){setStep('enter');setP2('');}else onBack();}} style={{display:'block',width:'100%',marginTop:14,background:'transparent',border:'none',color:S.muted,fontSize:'.82rem',cursor:'pointer',fontFamily:FB}}>← {step==='confirm'?'re-enter':'back'}</button>}
       </div>
@@ -402,7 +402,7 @@ function OverheadSettings({cfg, onSave, onBack}){
       <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
 
         {/* Live rate display */}
-        <div style={{background:S.dark,borderRadius:10,padding:'16px 20px',marginBottom:18,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{background:S.dark,borderRadius:0,padding:'16px 20px',marginBottom:18,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
           <div>
             <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:'rgba(255,255,255,.45)',textTransform:'uppercase',marginBottom:4}}>Your overhead rate</div>
             <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:700,color:'#c9955f'}}>{GHS(dayRate)}<span style={{fontFamily:FM,fontSize:'.82rem',color:'rgba(255,255,255,.4)',marginLeft:4}}>/day</span></div>
@@ -497,7 +497,7 @@ function OverheadSettings({cfg, onSave, onBack}){
           </div>
         </div>} style={{marginBottom:14}}/>
 
-        <div style={{padding:'12px 14px',background:S.accentLt,border:`1.5px solid ${S.border}`,borderRadius:8,fontSize:'.75rem',color:S.mid,fontFamily:FB,lineHeight:1.7}}>
+        <div style={{padding:'12px 14px',background:S.accentLt,border:`1px solid ${S.border}`,borderRadius:0,fontSize:'.75rem',color:S.mid,fontFamily:FB,lineHeight:1.7}}>
           <strong style={{color:S.accentDk}}>These are your costs, not the client's problem.</strong> The daily rate feeds quietly into every quote — clients see one total price. This just makes sure that price actually covers what it needs to cover.
         </div>
       </div>
@@ -514,7 +514,7 @@ function Dashboard({quotes,onNew,onOpen,onSettings,onLogout}){
       <Hdr title="Pricing" sub="Neewoody Custom Woodwork"
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
           <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
-          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1.5px solid ${S.border}`,borderRadius:6,color:S.muted,cursor:'pointer',fontFamily:FM,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
+          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1px solid ${S.border}`,borderRadius:0,color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
           <button onClick={onLogout} style={{background:'transparent',border:'none',color:S.muted,fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Exit</button>
         </div>}/>
       <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
@@ -537,7 +537,7 @@ function Dashboard({quotes,onNew,onOpen,onSettings,onLogout}){
                     <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.client||'Untitled'}</div>
                     <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
                   </div>
-                  <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                  <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:0}}>{sm.label}</span>
                 </div>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
                   <div>
@@ -598,7 +598,7 @@ function QuoteEditor({quote:initial,overheadCfg,onSave,onBack}){
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
       <Hdr title={q.refId} sub={q.client||'New quote'} onBack={onBack}
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
-          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:0}}>{sm.label}</span>
           <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
         </div>}/>
       <div style={{display:'flex',borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
@@ -633,7 +633,7 @@ function SetupTab({q,upd,totalDays,calc,overheadCfg}){
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             {[{v:'cabinetry',l:'Cabinetry'},{v:'hardwood',l:'Hardwood / General'}].map(({v,l})=>(
               <button key={v} onClick={()=>upd({jobType:v,materials:DEFAULT_MATERIALS.map(m=>makeMat(m,v)),optionals:OPTIONAL_MATERIALS.map(makeOpt)})}
-                style={{background:q.jobType===v?S.dark:S.bgAlt,color:q.jobType===v?'#fff':S.mid,border:`1.5px solid ${q.jobType===v?S.dark:S.border}`,borderRadius:6,padding:'9px 12px',fontFamily:FB,fontSize:'.85rem',fontWeight:600,cursor:'pointer',transition:'all .15s'}}>{l}</button>
+                style={{background:q.jobType===v?S.dark:S.bgAlt,color:q.jobType===v?'#fff':S.mid,border:`1px solid ${q.jobType===v?S.dark:S.border}`,borderRadius:0,padding:'9px 12px',fontFamily:FB,fontSize:'.85rem',fontWeight:600,cursor:'pointer',transition:'all .15s'}}>{l}</button>
             ))}
           </div>
         </div>
@@ -660,7 +660,7 @@ function SetupTab({q,upd,totalDays,calc,overheadCfg}){
             </span>
           </div>
         </div>
-        {totalDays>0&&<div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM,padding:'6px 10px',background:S.bgAlt,borderRadius:4}}>
+        {totalDays>0&&<div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM,padding:'6px 10px',background:S.bgAlt,borderRadius:0}}>
           {calc.effectiveDays} days{calc.effectiveDays!==totalDays?` (${totalDays} + buffer)`:' total'} · Overhead: {GHS(calc.overhead)} ({GHS(calc.dayRate)}/day)
         </div>}
       </div>}/>
@@ -669,7 +669,7 @@ function SetupTab({q,upd,totalDays,calc,overheadCfg}){
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:12}}>Build tier</div>
         <div style={{display:'flex',flexDirection:'column',gap:6}}>
           {TIERS.map(t=>(
-            <button key={t.id} onClick={()=>upd({tierId:t.id})} style={{background:q.tierId===t.id?S.dark:S.surface,border:`1.5px solid ${q.tierId===t.id?S.dark:S.border}`,borderRadius:8,padding:'10px 14px',cursor:'pointer',textAlign:'left',width:'100%',transition:'all .15s'}}>
+            <button key={t.id} onClick={()=>upd({tierId:t.id})} style={{background:q.tierId===t.id?S.dark:S.surface,border:`1px solid ${q.tierId===t.id?S.dark:S.border}`,borderRadius:0,padding:'10px 14px',cursor:'pointer',textAlign:'left',width:'100%',transition:'all .15s'}}>
               <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
                 <div>
                   <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:q.tierId===t.id?'#fff':S.dark}}>{t.label}</div>
@@ -690,7 +690,7 @@ function SetupTab({q,upd,totalDays,calc,overheadCfg}){
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
           {ADDONS.map(a=>(
             <button key={a.id} onClick={()=>upd({addOns:{...q.addOns,[a.id]:!q.addOns?.[a.id]}})}
-              style={{background:q.addOns?.[a.id]?S.accentLt:S.bgAlt,border:`1.5px solid ${q.addOns?.[a.id]?S.accent:S.border}`,borderRadius:8,padding:'9px 12px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}>
+              style={{background:q.addOns?.[a.id]?S.accentLt:S.bgAlt,border:`1px solid ${q.addOns?.[a.id]?S.accent:S.border}`,borderRadius:0,padding:'9px 12px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}>
               <div style={{fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.addOns?.[a.id]?S.accentDk:S.dark}}>{a.label}</div>
               <div style={{fontSize:'.72rem',color:q.addOns?.[a.id]?S.accent:S.muted,fontFamily:FM}}>+{a.pct}%</div>
             </button>
@@ -792,7 +792,7 @@ function MaterialRow({m, isOpt, onUpdate, onRemove}){
             </div>
           ))}
           <button onClick={addSubItem}
-            style={{background:'transparent',border:`1px dashed ${S.border}`,borderRadius:4,padding:'4px 10px',fontFamily:FB,fontSize:'.75rem',color:S.muted,cursor:'pointer',marginTop:4}}>
+            style={{background:'transparent',border:`1px dashed ${S.border}`,borderRadius:0,padding:'4px 10px',fontFamily:FB,fontSize:'.75rem',color:S.muted,cursor:'pointer',marginTop:4}}>
             + Add sub-item
           </button>
           {(m.subItems||[]).length>0&&<div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:6}}>
@@ -856,7 +856,7 @@ function MaterialsTab({q,upd}){
         </div>
       </div>}/>
 
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:10}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:0}}>
         <div style={{fontFamily:FM,fontSize:'.68rem',letterSpacing:'.14em',color:'rgba(255,255,255,.5)',textTransform:'uppercase'}}>Materials total</div>
         <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accentLt==='rgba(160,120,74,.12)'?'#c9955f':'#c9955f'}}>{GHS(grandTotal)}</div>
       </div>
@@ -889,7 +889,7 @@ function LogisticsTab({q,upd}){
           </div>
         </div>
       </div>}/>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:10}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:0}}>
         <div style={{fontFamily:FM,fontSize:'.68rem',letterSpacing:'.14em',color:'rgba(255,255,255,.5)',textTransform:'uppercase'}}>Logistics total</div>
         <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:'#c9955f'}}>{GHS(total)}</div>
       </div>
@@ -949,7 +949,7 @@ function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
           </div>
           <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:netProfit>=0?S.ok:S.err}}>{GHS(netProfit)}</div>
         </div>
-        <div style={{marginTop:12,padding:'10px 12px',background:S.bgAlt,borderRadius:6,fontSize:'.72rem',color:S.mid,fontFamily:FB,lineHeight:1.6}}>
+        <div style={{marginTop:12,padding:'10px 12px',background:S.bgAlt,borderRadius:0,fontSize:'.72rem',color:S.mid,fontFamily:FB,lineHeight:1.6}}>
           <strong style={{color:S.dark}}>Note:</strong> The idle reserve isn't lost — it goes into a buffer for months when jobs are slow. Tax is an estimate; speak to an accountant for your actual liability.
         </div>
       </div>}/>
@@ -958,7 +958,7 @@ function SummaryTab({q,calc,totalDays,onStatusChange,onSave}){
         <Lbl ch="Quote status"/>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
           {Object.entries(STATUS_META).map(([s,m])=>(
-            <button key={s} onClick={()=>onStatusChange(s)} style={{background:q.status===s?S.bgAlt:S.surface,border:`1.5px solid ${q.status===s?S.accent:S.border}`,borderRadius:8,padding:'9px 12px',cursor:'pointer',fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.status===s?S.accent:S.mid,transition:'all .15s'}}>{m.label}</button>
+            <button key={s} onClick={()=>onStatusChange(s)} style={{background:q.status===s?S.bgAlt:S.surface,border:`1px solid ${q.status===s?S.accent:S.border}`,borderRadius:0,padding:'9px 12px',cursor:'pointer',fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.status===s?S.accent:S.mid,transition:'all .15s'}}>{m.label}</button>
           ))}
         </div>
         <Btn ch="Save quote" onClick={onSave} full color={S.accent}/>
@@ -1045,7 +1045,7 @@ function CostsTab({q,upd,calc}){
 
       <div style={{display:'flex',flexDirection:'column',gap:6}}>
         {[...exp].reverse().map(e=>(
-          <div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:8}}>
+          <div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',background:S.surface,border:`1px solid ${S.border}`,borderRadius:0}}>
             <div>
               <div style={{fontSize:'.85rem',fontFamily:FB,color:S.dark}}>{e.description}</div>
               <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{e.date} · <span style={{textTransform:'capitalize'}}>{e.category}</span></div>
@@ -1138,7 +1138,7 @@ function App(){
         <div style={{fontFamily:FD,fontSize:'1.4rem',color:S.dark,marginBottom:8}}>Neewoody Pricing</div>
         <div style={{fontSize:'.85rem',color:S.err,fontFamily:FB,marginBottom:6}}>Cannot connect to server.</div>
         <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FM}}>Check that the Cloudflare Worker is deployed and the route is active.</div>
-        <button onClick={()=>window.location.reload()} style={{marginTop:16,background:S.dark,color:'#fff',border:'none',borderRadius:6,padding:'8px 18px',fontFamily:FB,fontWeight:600,fontSize:'.85rem',cursor:'pointer'}}>Retry</button>
+        <button onClick={()=>window.location.reload()} style={{marginTop:16,background:S.dark,color:'#fff',border:'none',borderRadius:0,padding:'8px 18px',fontFamily:FB,fontWeight:600,fontSize:'.85rem',cursor:'pointer'}}>Retry</button>
       </div>
     </div>
   );
