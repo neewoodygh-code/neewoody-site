@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>Admin — Neewoody</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#2C4A3E;
+  --gold:#C9A84C;
+  --cream:#F5F0E8;
+  --cream-dark:#EBE5D4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+button,input,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--cream)}
+::-webkit-scrollbar-thumb{background:rgba(44,74,62,0.18)}
+@media(max-width:900px){.admin-grid{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:600px){
+  .admin-grid{grid-template-columns:1fr!important}
+  .admin-header{padding:1rem 1.25rem!important;flex-wrap:wrap;gap:0.75rem}
+  .admin-main{padding:1.5rem 1.25rem!important}
+  .filter-bar-inner{padding:0 1.25rem!important}
+  .form-panel{padding:1.5rem!important;margin:1rem}
+  .form-two-col{grid-template-columns:1fr!important}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef } = React;
+
+// ── Config ────────────────────────────────────────────────────────────
+const API      = 'https://neewoody-dispatch-api.neewoodygh.workers.dev';
+const KEY_STORE = 'nwd-admin-key';
+
+const PAGES = [
+  { slug:'wardrobes',     label:'Wardrobes' },
+  { slug:'kitchens',      label:'Kitchens' },
+  { slug:'beds',          label:'Beds' },
+  { slug:'tv-units',      label:'TV Units' },
+  { slug:'dining-living', label:'Dining & Living' },
+  { slug:'shelving',      label:'Shelving' },
+  { slug:'solid-wood',    label:'Solid Wood' },
+  { slug:'portfolio',     label:'Portfolio' },
+];
+const PAGE_MAP   = Object.fromEntries(PAGES.map(p => [p.slug, p.label]));
+const FILTERS    = [{ slug:'all', label:'All' }, ...PAGES];
+const CATEGORIES = ['Wardrobes','Kitchens','Beds','TV Units','Dining & Living','Shelving','Solid Wood','Commercial'];
+
+const today = () => new Date().toISOString().slice(0, 10);
+const getKey = () => localStorage.getItem(KEY_STORE) || '';
+
+// ── API helper ────────────────────────────────────────────────────────
+async function apiFetch(path, method = 'GET', body, overrideKey) {
+  const key = overrideKey || getKey();
+  const isForm = body instanceof FormData;
+  const r = await fetch(`${API}${path}`, {
+    method,
+    headers: {
+      'X-NWD-Key': key,
+      ...(!isForm && body ? { 'Content-Type': 'application/json' } : {}),
+    },
+    ...(body ? { body: isForm ? body : JSON.stringify(body) } : {}),
+  });
+  if (r.status === 401) throw new Error('Unauthorized');
+  return r.json();
+}
+
+// ── Shared styles (referenced by name in components) ──────────────────
+const S = {
+  label: {
+    display:'block',
+    fontFamily:'var(--ui)',
+    fontSize:'0.6rem',
+    fontWeight:400,
+    letterSpacing:'0.22em',
+    textTransform:'uppercase',
+    color:'var(--muted)',
+    marginBottom:'0.4rem',
+  },
+  input: {
+    width:'100%',
+    padding:'0.72rem 0.95rem',
+    fontFamily:'var(--body)',
+    fontSize:'0.9rem',
+    color:'var(--ink)',
+    background:'var(--cream-dark)',
+    border:'1px solid rgba(44,74,62,0.15)',
+    outline:'none',
+    lineHeight:1.5,
+  },
+  btnSolid: {
+    fontFamily:'var(--ui)',
+    fontSize:'0.65rem',
+    fontWeight:500,
+    letterSpacing:'0.18em',
+    textTransform:'uppercase',
+    padding:'0.65rem 1.4rem',
+    background:'var(--green)',
+    color:'var(--cream)',
+    border:'none',
+    cursor:'pointer',
+    transition:'background 0.2s',
+    whiteSpace:'nowrap',
+  },
+  btnOutline: {
+    fontFamily:'var(--ui)',
+    fontSize:'0.65rem',
+    fontWeight:400,
+    letterSpacing:'0.18em',
+    textTransform:'uppercase',
+    padding:'0.65rem 1.4rem',
+    background:'transparent',
+    color:'var(--muted)',
+    border:'1px solid rgba(44,74,62,0.22)',
+    cursor:'pointer',
+    transition:'border-color 0.2s,color 0.2s',
+    whiteSpace:'nowrap',
+  },
+};
+
+// ── GateScreen ────────────────────────────────────────────────────────
+function GateScreen({ onAuth }) {
+  const [key, setKey]     = useState('');
+  const [error, setError] = useState('');
+  const [busy, setBusy]   = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!key.trim()) return;
+    setBusy(true); setError('');
+    try {
+      await apiFetch('/posts', 'GET', null, key.trim());
+      localStorage.setItem(KEY_STORE, key.trim());
+      onAuth();
+    } catch {
+      setError('Invalid key — access denied.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',background:'var(--cream)',padding:'2rem'}}>
+      <div style={{width:'100%',maxWidth:360}}>
+        <div style={{textAlign:'center',marginBottom:'3rem'}}>
+          <div style={{width:32,height:2,background:'var(--gold)',margin:'0 auto 1.5rem'}}/>
+          <p style={{fontFamily:'var(--ui)',fontSize:'0.6rem',fontWeight:400,letterSpacing:'0.32em',textTransform:'uppercase',color:'var(--muted)',marginBottom:'0.5rem'}}>
+            Neewoody Custom Woodwork
+          </p>
+          <h1 style={{fontFamily:'var(--display)',fontSize:'2.2rem',fontWeight:400,color:'var(--ink)',lineHeight:1.1}}>
+            Admin
+          </h1>
+        </div>
+        <form onSubmit={submit}>
+          <label style={S.label}>API Key</label>
+          <input
+            type="password"
+            value={key}
+            onChange={e => setKey(e.target.value)}
+            placeholder="Enter your API key"
+            autoFocus
+            style={{...S.input,marginBottom:error?'0.5rem':'1rem'}}
+          />
+          {error && (
+            <p style={{fontFamily:'var(--ui)',fontSize:'0.65rem',color:'#b04030',marginBottom:'1rem'}}>
+              {error}
+            </p>
+          )}
+          <button type="submit" disabled={busy || !key.trim()}
+            style={{...S.btnSolid,width:'100%',justifyContent:'center',opacity:busy||!key.trim()?0.5:1,cursor:busy||!key.trim()?'not-allowed':'pointer'}}>
+            {busy ? 'Checking…' : 'Enter'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── ImageSlot ─────────────────────────────────────────────────────────
+function ImageSlot({ url, uploading, onSelect, onRemove }) {
+  const ref = useRef();
+  const base = { height:148, position:'relative', overflow:'hidden' };
+
+  if (uploading) return (
+    <div style={{...base,background:'var(--cream-dark)',border:'1px dashed rgba(44,74,62,0.2)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+      <span style={{fontFamily:'var(--ui)',fontSize:'0.58rem',letterSpacing:'0.15em',textTransform:'uppercase',color:'var(--muted)'}}>
+        Uploading…
+      </span>
+    </div>
+  );
+
+  if (url) return (
+    <div style={{...base,background:'var(--green)'}}>
+      <img src={url} alt="" style={{width:'100%',height:'100%',objectFit:'cover',display:'block'}}/>
+      <button onClick={onRemove} title="Remove image"
+        style={{position:'absolute',top:6,right:6,width:22,height:22,background:'rgba(11,31,14,0.75)',border:'none',color:'rgba(245,240,232,0.9)',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'var(--ui)',fontSize:'0.8rem',lineHeight:1}}>
+        ×
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      <input ref={ref} type="file" accept="image/*" style={{display:'none'}}
+        onChange={e => { if (e.target.files[0]) onSelect(e.target.files[0]); e.target.value=''; }}/>
+      <div onClick={() => ref.current.click()}
+        style={{...base,background:'transparent',border:'1px dashed rgba(44,74,62,0.22)',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',transition:'border-color 0.2s,background 0.2s'}}
+        onMouseEnter={e => { e.currentTarget.style.borderColor='var(--gold)'; e.currentTarget.style.background='rgba(201,168,76,0.04)'; }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(44,74,62,0.22)'; e.currentTarget.style.background='transparent'; }}>
+        <span style={{fontFamily:'var(--ui)',fontSize:'0.6rem',letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--muted)'}}>
+          + Add image
+        </span>
+      </div>
+    </>
+  );
+}
+
+// ── PostForm (modal overlay) ──────────────────────────────────────────
+function PostForm({ post, onSave, onClose, showToast }) {
+  const isEdit  = !!post;
+  const tmpId   = useRef(isEdit ? post.id : `new-${Date.now()}`);
+
+  const [title,    setTitle]    = useState(post?.title    || '');
+  const [location, setLocation] = useState(post?.location || '');
+  const [category, setCategory] = useState(post?.category || CATEGORIES[0]);
+  const [pages,    setPages]    = useState(post?.pages    || []);
+  const [writeup,  setWriteup]  = useState(post?.writeup  || '');
+  const [featured, setFeatured] = useState(post?.featured || false);
+  const [date,     setDate]     = useState(post?.date     || today());
+  const [images,   setImages]   = useState(
+    Array.from({length:4}, (_,i) => post?.images?.[i] || null)
+  );
+  const [uploading, setUploading] = useState([false,false,false,false]);
+  const [saving,    setSaving]    = useState(false);
+
+  function togglePage(slug) {
+    setPages(p => p.includes(slug) ? p.filter(s => s !== slug) : [...p, slug]);
+  }
+
+  async function handleFileSelect(idx, file) {
+    setUploading(u => { const n=[...u]; n[idx]=true; return n; });
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('postId', tmpId.current);
+      const r = await fetch(`${API}/posts/upload`, {
+        method: 'POST',
+        headers: { 'X-NWD-Key': getKey() },
+        body: form,
+      });
+      const data = await r.json();
+      if (data.ok) {
+        setImages(imgs => { const n=[...imgs]; n[idx]=data.url; return n; });
+      } else {
+        showToast('Upload failed: ' + (data.error || 'Unknown error'));
+      }
+    } catch {
+      showToast('Upload failed — check connection');
+    } finally {
+      setUploading(u => { const n=[...u]; n[idx]=false; return n; });
+    }
+  }
+
+  function removeImage(idx) {
+    setImages(imgs => { const n=[...imgs]; n[idx]=null; return n; });
+  }
+
+  async function save() {
+    if (!title.trim())    { showToast('Title is required'); return; }
+    if (!category.trim()) { showToast('Category is required'); return; }
+    setSaving(true);
+    const payload = {
+      title:    title.trim(),
+      category: category.trim(),
+      location: location.trim() || null,
+      writeup:  writeup.trim()  || null,
+      images:   images.filter(Boolean),
+      pages,
+      date,
+      featured,
+    };
+    try {
+      const res = isEdit
+        ? await apiFetch(`/posts/${post.id}`, 'PUT',  payload)
+        : await apiFetch('/posts',             'POST', payload);
+      if (res.ok) {
+        onSave(res.post, isEdit);
+      } else {
+        showToast(res.error || 'Save failed');
+      }
+    } catch (e) {
+      showToast('Save failed — ' + e.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div
+      style={{position:'fixed',inset:0,zIndex:500,background:'rgba(11,31,14,0.55)',display:'flex',alignItems:'flex-start',justifyContent:'center',padding:'2rem 1rem',overflowY:'auto'}}
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+
+      <div className="form-panel"
+        style={{width:'100%',maxWidth:640,background:'var(--cream)',padding:'2.5rem',position:'relative',marginBottom:'2rem'}}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Form header */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:'2rem',paddingBottom:'1.5rem',borderBottom:'1px solid rgba(44,74,62,0.1)'}}>
+          <div>
+            <span style={{display:'block',fontFamily:'var(--ui)',fontSize:'0.6rem',fontWeight:400,letterSpacing:'0.32em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'0.3rem'}}>
+              {isEdit ? 'Edit Post' : 'New Post'}
+            </span>
+            <h2 style={{fontFamily:'var(--display)',fontSize:'1.6rem',fontWeight:400,color:'var(--ink)',lineHeight:1.1}}>
+              {isEdit ? post.title : 'Create Post'}
+            </h2>
+          </div>
+          <button onClick={onClose}
+            style={{background:'none',border:'none',cursor:'pointer',fontFamily:'var(--ui)',fontSize:'0.6rem',letterSpacing:'0.2em',textTransform:'uppercase',color:'var(--muted)',padding:'0.25rem 0',flexShrink:0,marginLeft:'1rem'}}>
+            ✕ Close
+          </button>
+        </div>
+
+        {/* Fields */}
+        <div style={{display:'flex',flexDirection:'column',gap:'1.5rem'}}>
+
+          {/* Title */}
+          <div>
+            <label style={S.label}>Title *</label>
+            <input value={title} onChange={e=>setTitle(e.target.value)}
+              placeholder="e.g. Built-in Wardrobes — Oyarifa"
+              style={S.input}/>
+          </div>
+
+          {/* Location + Date */}
+          <div className="form-two-col" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem'}}>
+            <div>
+              <label style={S.label}>Location</label>
+              <input value={location} onChange={e=>setLocation(e.target.value)}
+                placeholder="e.g. Oyarifa, Accra"
+                style={S.input}/>
+            </div>
+            <div>
+              <label style={S.label}>Date</label>
+              <input type="date" value={date} onChange={e=>setDate(e.target.value)}
+                style={S.input}/>
+            </div>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label style={S.label}>Category *</label>
+            <select value={category} onChange={e=>setCategory(e.target.value)}
+              style={{...S.input,appearance:'none',backgroundImage:'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'10\' height=\'6\' viewBox=\'0 0 10 6\'%3E%3Cpath d=\'M0 0l5 6 5-6z\' fill=\'%236b6557\'/%3E%3C/svg%3E")',backgroundRepeat:'no-repeat',backgroundPosition:'right 0.9rem center',paddingRight:'2.2rem',cursor:'pointer'}}>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+
+          {/* Page targets */}
+          <div>
+            <label style={S.label}>Page targets</label>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'0.4rem',marginTop:'0.2rem'}}>
+              {PAGES.map(p => {
+                const active = pages.includes(p.slug);
+                return (
+                  <label key={p.slug}
+                    style={{display:'inline-flex',alignItems:'center',gap:'0.35rem',padding:'0.38rem 0.8rem',border:`1px solid ${active?'var(--green)':'rgba(44,74,62,0.2)'}`,background:active?'var(--green)':'transparent',cursor:'pointer',transition:'all 0.15s',userSelect:'none'}}>
+                    <input type="checkbox" checked={active} onChange={()=>togglePage(p.slug)}
+                      style={{display:'none'}}/>
+                    <span style={{fontFamily:'var(--ui)',fontSize:'0.6rem',fontWeight:active?500:400,letterSpacing:'0.14em',textTransform:'uppercase',color:active?'var(--cream)':'var(--muted)',transition:'color 0.15s'}}>
+                      {p.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Writeup */}
+          <div>
+            <label style={S.label}>Writeup</label>
+            <textarea value={writeup} onChange={e=>setWriteup(e.target.value)}
+              rows={4} placeholder="Optional project description…"
+              style={{...S.input,resize:'vertical'}}/>
+          </div>
+
+          {/* Images */}
+          <div>
+            <label style={S.label}>Images (up to 4)</label>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.5rem',marginTop:'0.25rem'}}>
+              {[0,1,2,3].map(i => (
+                <ImageSlot key={i} url={images[i]} uploading={uploading[i]}
+                  onSelect={file => handleFileSelect(i, file)}
+                  onRemove={() => removeImage(i)}/>
+              ))}
+            </div>
+          </div>
+
+          {/* Featured + actions */}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:'1rem',borderTop:'1px solid rgba(44,74,62,0.1)'}}>
+            <label style={{display:'inline-flex',alignItems:'center',gap:'0.55rem',cursor:'pointer'}}>
+              <input type="checkbox" checked={featured} onChange={e=>setFeatured(e.target.checked)}
+                style={{width:16,height:16,accentColor:'var(--green)',cursor:'pointer'}}/>
+              <span style={{fontFamily:'var(--ui)',fontSize:'0.65rem',fontWeight:400,letterSpacing:'0.18em',textTransform:'uppercase',color:'var(--ink)'}}>
+                Featured
+              </span>
+            </label>
+            <div style={{display:'flex',gap:'0.6rem'}}>
+              <button onClick={onClose} style={S.btnOutline}>Cancel</button>
+              <button onClick={save} disabled={saving}
+                style={{...S.btnSolid,opacity:saving?0.55:1,cursor:saving?'not-allowed':'pointer'}}>
+                {saving ? 'Saving…' : (isEdit ? 'Save Changes' : 'Create Post')}
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── PostCard ──────────────────────────────────────────────────────────
+function PostCard({ post, onEdit, onDelete }) {
+  const [confirmDel, setConfirmDel] = useState(false);
+  const thumb  = post.images?.[0];
+  const labels = (post.pages || []).map(s => PAGE_MAP[s] || s);
+
+  return (
+    <div style={{position:'relative',overflow:'hidden',background:'var(--green)',height:320}}
+      onMouseLeave={() => setConfirmDel(false)}>
+
+      {thumb ? (
+        <img src={thumb} alt={post.title} loading="lazy"
+          style={{width:'100%',height:'100%',objectFit:'cover',filter:'brightness(0.82)',display:'block',transition:'transform 0.8s ease,filter 0.4s'}}
+          onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.05)';e.currentTarget.style.filter='brightness(0.65)'}}
+          onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)';e.currentTarget.style.filter='brightness(0.82)'}}
+        />
+      ) : (
+        <div style={{width:'100%',height:'100%',background:'var(--green)',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <span style={{fontFamily:'var(--ui)',fontSize:'0.58rem',letterSpacing:'0.2em',textTransform:'uppercase',color:'rgba(245,240,232,0.18)'}}>
+            No image
+          </span>
+        </div>
+      )}
+
+      {/* Featured badge */}
+      {post.featured && (
+        <div style={{position:'absolute',top:10,right:10,background:'var(--gold)',padding:'0.2rem 0.55rem'}}>
+          <span style={{fontFamily:'var(--ui)',fontSize:'0.5rem',fontWeight:500,letterSpacing:'0.2em',textTransform:'uppercase',color:'var(--green)'}}>
+            Featured
+          </span>
+        </div>
+      )}
+
+      {/* Gradient overlay + meta */}
+      <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'1.2rem 1.4rem 1rem',background:'linear-gradient(to top,rgba(11,31,14,0.94) 0%,rgba(11,31,14,0.45) 70%,transparent 100%)'}}>
+
+        <p style={{fontFamily:'var(--ui)',fontSize:'0.58rem',fontWeight:400,letterSpacing:'0.25em',textTransform:'uppercase',color:'var(--gold)',marginBottom:'0.25rem'}}>
+          {post.category}
+        </p>
+        <p style={{fontFamily:'var(--display)',fontSize:'0.92rem',fontWeight:400,color:'var(--cream)',lineHeight:1.3,marginBottom:'0.15rem'}}>
+          {post.title}
+        </p>
+        {post.location && (
+          <p style={{fontFamily:'var(--body)',fontStyle:'italic',fontSize:'0.75rem',color:'rgba(245,240,232,0.5)',marginBottom:'0.55rem'}}>
+            {post.location}
+          </p>
+        )}
+
+        {/* Page target pills */}
+        {labels.length > 0 && (
+          <div style={{display:'flex',flexWrap:'wrap',gap:'0.3rem',marginBottom:'0.7rem'}}>
+            {labels.map(l => (
+              <span key={l} style={{fontFamily:'var(--ui)',fontSize:'0.5rem',fontWeight:400,letterSpacing:'0.13em',textTransform:'uppercase',color:'rgba(245,240,232,0.45)',border:'1px solid rgba(245,240,232,0.18)',padding:'0.12rem 0.4rem'}}>
+                {l}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Admin actions */}
+        <div style={{display:'flex',gap:'0.45rem',alignItems:'center'}}>
+          <button onClick={() => onEdit(post)}
+            style={{fontFamily:'var(--ui)',fontSize:'0.57rem',fontWeight:500,letterSpacing:'0.15em',textTransform:'uppercase',padding:'0.32rem 0.7rem',background:'transparent',border:'1px solid rgba(201,168,76,0.45)',color:'var(--gold)',cursor:'pointer',transition:'background 0.2s,border-color 0.2s'}}
+            onMouseEnter={e=>{e.currentTarget.style.background='rgba(201,168,76,0.12)';e.currentTarget.style.borderColor='var(--gold)'}}
+            onMouseLeave={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.borderColor='rgba(201,168,76,0.45)'}}>
+            Edit
+          </button>
+
+          {!confirmDel ? (
+            <button onClick={() => setConfirmDel(true)}
+              style={{fontFamily:'var(--ui)',fontSize:'0.57rem',fontWeight:400,letterSpacing:'0.15em',textTransform:'uppercase',padding:'0.32rem 0.7rem',background:'transparent',border:'1px solid rgba(245,240,232,0.18)',color:'rgba(245,240,232,0.4)',cursor:'pointer',transition:'border-color 0.2s,color 0.2s'}}
+              onMouseEnter={e=>{e.currentTarget.style.borderColor='rgba(176,64,48,0.6)';e.currentTarget.style.color='rgba(220,110,90,0.9)'}}
+              onMouseLeave={e=>{e.currentTarget.style.borderColor='rgba(245,240,232,0.18)';e.currentTarget.style.color='rgba(245,240,232,0.4)'}}>
+              Delete
+            </button>
+          ) : (
+            <button onClick={() => onDelete(post.id)}
+              style={{fontFamily:'var(--ui)',fontSize:'0.57rem',fontWeight:500,letterSpacing:'0.15em',textTransform:'uppercase',padding:'0.32rem 0.7rem',background:'rgba(160,50,38,0.85)',border:'1px solid transparent',color:'#fff',cursor:'pointer'}}>
+              Confirm?
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────
+function Toast({ message, onDone }) {
+  useEffect(() => {
+    if (!message) return;
+    const t = setTimeout(onDone, 3200);
+    return () => clearTimeout(t);
+  }, [message]);
+  if (!message) return null;
+  return (
+    <div style={{position:'fixed',bottom:'2rem',left:'50%',transform:'translateX(-50%)',background:'var(--green)',color:'var(--cream)',fontFamily:'var(--ui)',fontSize:'0.68rem',fontWeight:400,letterSpacing:'0.1em',padding:'0.8rem 1.6rem',zIndex:1000,boxShadow:'0 4px 24px rgba(0,0,0,0.18)',whiteSpace:'nowrap',pointerEvents:'none'}}>
+      {message}
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────
+function Dashboard({ onSignOut }) {
+  const [posts,    setPosts]    = useState([]);
+  const [loading,  setLoading]  = useState(true);
+  const [filter,   setFilter]   = useState('all');
+  const [formOpen, setFormOpen] = useState(false);
+  const [editPost, setEditPost] = useState(null);
+  const [toast,    setToast]    = useState('');
+
+  const showToast = msg => setToast(msg);
+
+  useEffect(() => { fetchPosts(); }, []);
+
+  async function fetchPosts() {
+    setLoading(true);
+    try {
+      const data = await apiFetch('/posts');
+      setPosts(data.posts || []);
+    } catch {
+      showToast('Failed to load posts');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filtered = filter === 'all'
+    ? posts
+    : posts.filter(p => Array.isArray(p.pages) && p.pages.includes(filter));
+
+  function openNew()       { setEditPost(null); setFormOpen(true); }
+  function openEdit(post)  { setEditPost(post); setFormOpen(true); }
+  function closeForm()     { setFormOpen(false); setEditPost(null); }
+
+  function handleSaved(savedPost, wasEdit) {
+    setPosts(prev => {
+      if (wasEdit) {
+        return prev.map(p => p.id === savedPost.id ? savedPost : p);
+      }
+      return [savedPost, ...prev];
+    });
+    closeForm();
+    showToast(wasEdit ? 'Post updated' : 'Post created');
+  }
+
+  async function handleDelete(id) {
+    try {
+      const res = await apiFetch(`/posts/${id}`, 'DELETE');
+      if (res.ok) {
+        setPosts(prev => prev.filter(p => p.id !== id));
+        showToast('Post deleted');
+      } else {
+        showToast(res.error || 'Delete failed');
+      }
+    } catch {
+      showToast('Delete failed — check connection');
+    }
+  }
+
+  const countFor = slug => posts.filter(p => Array.isArray(p.pages) && p.pages.includes(slug)).length;
+
+  return (
+    <div style={{minHeight:'100vh',background:'var(--cream)'}}>
+
+      {/* Header */}
+      <header className="admin-header"
+        style={{position:'sticky',top:0,zIndex:100,background:'rgba(245,240,232,0.96)',backdropFilter:'blur(8px)',borderBottom:'1px solid rgba(44,74,62,0.1)',padding:'1.2rem 3rem',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'1rem'}}>
+          <div style={{width:28,height:2,background:'var(--gold)'}}/>
+          <div>
+            <p style={{fontFamily:'var(--ui)',fontSize:'0.55rem',fontWeight:300,letterSpacing:'0.32em',textTransform:'uppercase',color:'var(--muted)'}}>
+              Neewoody Custom Woodwork
+            </p>
+            <h1 style={{fontFamily:'var(--display)',fontSize:'1.15rem',fontWeight:400,color:'var(--ink)',lineHeight:1.1}}>
+              Posts Admin
+            </h1>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:'0.6rem',alignItems:'center'}}>
+          <button onClick={openNew} style={S.btnSolid}>+ New Post</button>
+          <button onClick={onSignOut} style={S.btnOutline}>Sign out</button>
+        </div>
+      </header>
+
+      {/* Filter bar */}
+      <div style={{borderBottom:'1px solid rgba(44,74,62,0.1)',background:'var(--cream)',overflowX:'auto',overflowY:'visible'}}>
+        <div className="filter-bar-inner"
+          style={{display:'flex',padding:'0 3rem',gap:0,minWidth:'max-content'}}>
+          {FILTERS.map(f => {
+            const active = filter === f.slug;
+            const count  = f.slug === 'all' ? null : countFor(f.slug);
+            return (
+              <button key={f.slug} onClick={() => setFilter(f.slug)}
+                style={{fontFamily:'var(--ui)',fontSize:'0.62rem',fontWeight:active?500:400,letterSpacing:'0.18em',textTransform:'uppercase',padding:'1rem 1.1rem',background:'none',border:'none',borderBottom:`2px solid ${active?'var(--gold)':'transparent'}`,color:active?'var(--ink)':'var(--muted)',cursor:'pointer',transition:'color 0.2s,border-color 0.2s',whiteSpace:'nowrap',display:'flex',alignItems:'center',gap:'0.3rem'}}>
+                {f.label}
+                {count !== null && (
+                  <span style={{fontFamily:'var(--ui)',fontSize:'0.5rem',opacity:0.5}}>({count})</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Grid */}
+      <main className="admin-main" style={{padding:'3rem'}}>
+        {loading ? (
+          <div style={{textAlign:'center',padding:'6rem 0'}}>
+            <p style={{fontFamily:'var(--ui)',fontSize:'0.65rem',letterSpacing:'0.22em',textTransform:'uppercase',color:'var(--muted)'}}>
+              Loading…
+            </p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{textAlign:'center',padding:'7rem 0'}}>
+            <p style={{fontFamily:'var(--display)',fontSize:'1.5rem',fontWeight:400,color:'var(--muted)',marginBottom:'0.5rem'}}>
+              No posts{filter !== 'all' ? ' here' : ' yet'}
+            </p>
+            <p style={{fontFamily:'var(--body)',fontStyle:'italic',fontSize:'0.85rem',color:'var(--muted)',marginBottom:'1.75rem'}}>
+              {filter === 'all'
+                ? 'Create your first post to get started.'
+                : `No posts tagged with "${FILTERS.find(f=>f.slug===filter)?.label}".`}
+            </p>
+            {filter === 'all' && (
+              <button onClick={openNew} style={S.btnSolid}>+ New Post</button>
+            )}
+          </div>
+        ) : (
+          <div className="admin-grid"
+            style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'2px'}}>
+            {filtered.map(post => (
+              <PostCard key={post.id} post={post}
+                onEdit={openEdit}
+                onDelete={handleDelete}/>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {/* Form overlay */}
+      {formOpen && (
+        <PostForm
+          post={editPost}
+          onSave={handleSaved}
+          onClose={closeForm}
+          showToast={showToast}/>
+      )}
+
+      <Toast message={toast} onDone={() => setToast('')}/>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────
+function App() {
+  const [authed, setAuthed] = useState(() => !!localStorage.getItem(KEY_STORE));
+
+  function handleAuth()    { setAuthed(true); }
+  function handleSignOut() { localStorage.removeItem(KEY_STORE); setAuthed(false); }
+
+  if (!authed) return <GateScreen onAuth={handleAuth}/>;
+  return <Dashboard onSignOut={handleSignOut}/>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
