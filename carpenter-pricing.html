@@ -42,6 +42,7 @@ const SESSION_KEY = 'nwd-carp-session';
 const DEFAULT_OVERHEAD = {
   billableDays: 20,
   ownerRate: 200,
+  labourRates: { supervisor:200, lead:150, hand:100, trainee:50 },
   running: [
     { id:'r01', name:'Workshop rent / space', amount:500,  hint:'Monthly rent or equivalent if owned' },
     { id:'r02', name:'Electricity',           amount:200,  hint:'Workshop power — lights, machines, charging' },
@@ -179,14 +180,17 @@ async function apiAuth(carpId, pin) {
 
 // ── Pricing engine ────────────────────────────────────────────────────
 function calcQuote(q, overheadCfg) {
-  const tier      = TIERS.find(t=>t.id===q.tierId) || TIERS[1];
-  const totalDays = (q.workshopDays||0) + (q.siteDays||0);
-  const dayRate   = calcOverheadDay(overheadCfg);
-  const overhead  = dayRate * totalDays;
+  const tier        = TIERS.find(t=>t.id===q.tierId) || TIERS[1];
+  const totalDays   = (q.workshopDays||0) + (q.siteDays||0);
+  const contingency = q.contingencyPct || 0;
+  const effectiveDays = contingency > 0 ? Math.ceil(totalDays * (1 + contingency/100)) : totalDays;
+  const dayRate     = calcOverheadDay(overheadCfg);
+  const overhead    = dayRate * effectiveDays;
+  const rates       = overheadCfg?.labourRates || LABOUR_RATES;
   let labour = 0;
-  (q.crew||[]).forEach(r => { labour += (LABOUR_RATES[r.roleId]||0) * (r.count||0) * (r.days||totalDays); });
+  (q.crew||[]).forEach(r => { labour += (rates[r.roleId]||0) * (r.count||0) * (r.days||effectiveDays); });
   const ownerRate = overheadCfg?.ownerRate ?? DEFAULT_OVERHEAD.ownerRate;
-  if (q.includeOwner) labour += ownerRate * (q.ownerDays||totalDays);
+  if (q.includeOwner) labour += ownerRate * (q.ownerDays||effectiveDays);
   const allMats  = [...(q.materials||[]), ...(q.optionals||[])];
   const matAmt   = allMats.filter(m=>m.on).reduce((s,m)=>s+matTotal(m), 0);
   const log      = q.logistics||{};
@@ -197,7 +201,7 @@ function calcQuote(q, overheadCfg) {
   const quotedPrice  = rawCost * tier.mult * addOnMult;
   const grossMargin  = quotedPrice - rawCost;
   const marginPct    = quotedPrice>0?(grossMargin/quotedPrice)*100:0;
-  return { overhead, labour, matAmt, logistics, rawCost, tier, addOnMult, quotedPrice, grossMargin, marginPct, dayRate };
+  return { overhead, labour, matAmt, logistics, rawCost, tier, addOnMult, quotedPrice, grossMargin, marginPct, dayRate, effectiveDays };
 }
 
 function calcActual(exp=[]) {
@@ -444,6 +448,7 @@ function OverheadSettings({ cfg, onSave, onBack }) {
   const [c, setC] = useState(() => ({
     billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
     ownerRate:    cfg?.ownerRate    ?? DEFAULT_OVERHEAD.ownerRate,
+    labourRates:  cfg?.labourRates  ? {...cfg.labourRates} : {...DEFAULT_OVERHEAD.labourRates},
     running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
     capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
   }));
@@ -455,7 +460,7 @@ function OverheadSettings({ cfg, onSave, onBack }) {
   const addCap   = ()     => setC(p=>({...p, capital:[...p.capital,{id:uid(),name:'',cost:0,lifeYears:3}]}));
   const remRun   = id     => setC(p=>({...p, running:p.running.filter(r=>r.id!==id)}));
   const remCap   = id     => setC(p=>({...p, capital:p.capital.filter(x=>x.id!==id)}));
-  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
+  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, labourRates:{...DEFAULT_OVERHEAD.labourRates}, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
 
   const runTotal    = c.running.reduce((s,r)=>s+(+r.amount||0), 0);
   const capMonthly  = c.capital.reduce((s,x)=>s+(+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12), 0);
@@ -503,6 +508,21 @@ function OverheadSettings({ cfg, onSave, onBack }) {
             <NumInp value={c.ownerRate} onChange={e=>setC(p=>({...p,ownerRate:+e.target.value||0}))} style={{maxWidth:120}}/>
             <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FM}}>GH₵ / day</span>
           </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Crew day rates</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>What you pay each role per day on a job. Used to calculate labour cost in every quote.</div>
+          {LABOUR_ROLES.map(role=>(
+            <div key={role.id} style={{display:'grid',gridTemplateColumns:'1fr 110px',gap:8,alignItems:'center',marginBottom:8}}>
+              <span style={{fontSize:'.88rem',fontFamily:FB,color:S.dark}}>{role.label}</span>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <NumInp value={c.labourRates?.[role.id] ?? DEFAULT_OVERHEAD.labourRates[role.id]}
+                  onChange={e=>setC(p=>({...p,labourRates:{...p.labourRates,[role.id]:+e.target.value||0}}))}/>
+                <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,whiteSpace:'nowrap'}}>/day</span>
+              </div>
+            </div>
+          ))}
         </div>} style={{marginBottom:14}}/>
 
         <Card ch={<div>
@@ -617,7 +637,7 @@ function newQuote(refNum, prefix) {
     client:'', jobType:'cabinetry', status:'draft',
     createdAt: new Date().toISOString(),
     tierId:'standard',
-    workshopDays:0, siteDays:0,
+    workshopDays:0, siteDays:0, contingencyPct:0,
     crew:[{id:uid(),roleId:'supervisor',count:1,days:null},{id:uid(),roleId:'hand',count:1,days:null}],
     includeOwner:true, ownerDays:null,
     materials: DEFAULT_MATERIALS.map(m=>makeMat(m,'cabinetry')),
@@ -691,8 +711,21 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
           <div><Lbl ch="Workshop days"/><NumInp value={q.workshopDays} onChange={e=>upd({workshopDays:+e.target.value||0})}/></div>
           <div><Lbl ch="Site days"/><NumInp value={q.siteDays} onChange={e=>upd({siteDays:+e.target.value||0})}/></div>
         </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div>
+            <Lbl ch="Contingency buffer (%)"/>
+            <NumInp value={q.contingencyPct??0} onChange={e=>upd({contingencyPct:Math.min(100,Math.max(0,+e.target.value||0))})} placeholder="0"/>
+          </div>
+          <div style={{display:'flex',alignItems:'flex-end',paddingBottom:1}}>
+            <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,lineHeight:1.5}}>
+              {(q.contingencyPct||0)>0&&totalDays>0
+                ?`${totalDays} days → ${calc.effectiveDays} effective`
+                :'Add % to cover overruns'}
+            </span>
+          </div>
+        </div>
         {totalDays>0&&<div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM,padding:'6px 10px',background:S.bgAlt,borderRadius:4}}>
-          {totalDays} days total · Overhead: {GHS(calc.overhead)} ({GHS(calc.dayRate)}/day)
+          {calc.effectiveDays} days{calc.effectiveDays!==totalDays?` (${totalDays} + buffer)`:' total'} · Overhead: {GHS(calc.overhead)} ({GHS(calc.dayRate)}/day)
         </div>}
       </div>}/>
 
@@ -742,7 +775,7 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
               <button onClick={()=>remCrew(r.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem'}}>✕</button>
             </div>
           ))}
-          <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>Days blank = total job days ({totalDays})</div>
+          <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>Days blank = effective days ({calc.effectiveDays}) · rates from ⚙ overhead settings</div>
         </div>
         <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${S.border}`}}>
           <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginBottom:8}}>
@@ -751,8 +784,8 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
             {q.includeOwner&&<span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>{GHS(ownerRate)}/day</span>}
           </label>
           {q.includeOwner&&<div style={{display:'flex',gap:8,alignItems:'center'}}>
-            <NumInp value={q.ownerDays??''} onChange={e=>upd({ownerDays:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)} style={{maxWidth:100}}/>
-            <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>days (blank = {totalDays})</span>
+            <NumInp value={q.ownerDays??''} onChange={e=>upd({ownerDays:e.target.value===''?null:+e.target.value})} placeholder={String(calc.effectiveDays||0)} style={{maxWidth:100}}/>
+            <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>days (blank = {calc.effectiveDays})</span>
           </div>}
         </div>
       </div>}/>
@@ -904,7 +937,7 @@ function SummaryTab({ q, calc, onStatusChange, onSave }) {
       <Card ch={<div>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Cost breakdown</div>
         <Row label="Overhead"   value={GHS(calc.overhead)}/>
-        <Row label={`  ${totalDays} days × ${GHS(calc.dayRate)}/day`} value="" indent/>
+        <Row label={`  ${calc.effectiveDays} days × ${GHS(calc.dayRate)}/day${calc.effectiveDays!==totalDays?' (incl. buffer)':''}`} value="" indent/>
         <Row label="Labour"     value={GHS(calc.labour)}/>
         <Row label="Materials"  value={GHS(calc.matAmt)}/>
         <Row label="Logistics"  value={GHS(calc.logistics)}/>
@@ -1098,7 +1131,9 @@ function App() {
   };
 
   const createNew = () => {
-    const q = newQuote(quotes.length + 1, refPrefix);
+    const used = quotes.map(q => parseInt((q.refId||'').split('-').pop()) || 0);
+    const refNum = used.length ? Math.max(0, ...used) + 1 : 1;
+    const q = newQuote(refNum, refPrefix);
     setQuotes(prev => [...prev, q]);
     setActiveId(q.id);
     setScreen('editor');
