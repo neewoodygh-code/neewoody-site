@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#F7F4EF"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-title" content="Carpenter Pricing"/>
+  <title>Job Pricing Tool — Neewoody</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#F7F4EF; --bg-alt:#EFEBE3; --surface:#FFFFFF;
+      --dark:#1C1A17; --mid:#4A4540; --muted:#8A8178;
+      --accent:#A0784A; --accent-dk:#7D5C34; --accent-lt:rgba(160,120,74,.12);
+      --border:#DDD5C8; --border-dk:#C8BFB2;
+      --ok:#5a8a5a; --err:#b04030; --warn:#8a6020;
+    }
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
+    input,select,textarea,button{font-family:inherit;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:var(--bg-alt);}
+    ::-webkit-scrollbar-thumb{background:var(--border);}
+    input[type=number]::-webkit-inner-spin-button{opacity:.4;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useRef } = React;
+
+// ── Config ────────────────────────────────────────────────────────────
+const API         = 'https://neewoody-dispatch-api.neewoodygh.workers.dev';
+const SESSION_KEY = 'nwd-carp-session';
+
+// ── Constants ─────────────────────────────────────────────────────────
+const DEFAULT_OVERHEAD = {
+  billableDays: 20,
+  ownerRate: 200,
+  running: [
+    { id:'r01', name:'Workshop rent / space', amount:500,  hint:'Monthly rent or equivalent if owned' },
+    { id:'r02', name:'Electricity',           amount:200,  hint:'Workshop power — lights, machines, charging' },
+    { id:'r03', name:'Transport / fuel',      amount:300,  hint:'Material runs, site visits' },
+    { id:'r04', name:'Phone & internet',      amount:100,  hint:'Business calls, WhatsApp, data' },
+    { id:'r05', name:'Miscellaneous',         amount:150,  hint:'Small consumables, unexpected costs' },
+  ],
+  capital: [
+    { id:'c01', name:'Table saw',         cost:12000, lifeYears:7   },
+    { id:'c02', name:'Router(s)',         cost:3000,  lifeYears:3   },
+    { id:'c03', name:'Drills & drivers',  cost:5000,  lifeYears:4   },
+    { id:'c04', name:'Circular saw',      cost:2000,  lifeYears:4   },
+    { id:'c05', name:'Sander(s)',         cost:1500,  lifeYears:3   },
+    { id:'c06', name:'Other tools',       cost:5000,  lifeYears:3   },
+  ],
+};
+
+function calcOverheadDay(cfg) {
+  const c = cfg || DEFAULT_OVERHEAD;
+  const running  = (c.running||[]).reduce((s,r) => s + (+r.amount||0), 0);
+  const capital  = (c.capital||[]).reduce((s,x) => s + (+x.cost||0) / (Math.max(1,+x.lifeYears||1) * 12), 0);
+  const days     = Math.max(1, +c.billableDays||20);
+  return Math.round((running + capital) / days);
+}
+
+const TIERS = [
+  { id:'basic',    label:'Basic Build',    sub:'Just the essentials',      mult:1.35 },
+  { id:'standard', label:'Standard Build', sub:'Functional & presentable', mult:1.55 },
+  { id:'premium',  label:'Premium',        sub:'We take our time',         mult:1.80 },
+  { id:'luxury',   label:'Luxury',         sub:'At your beck and call',    mult:2.00 },
+];
+
+const ADDONS = [
+  { id:'rush',         label:'Rush',          pct:20 },
+  { id:'customDesign', label:'Custom design', pct:12 },
+  { id:'cnc',          label:'CNC / carved',  pct:18 },
+  { id:'remoteInstall',label:'Remote install', pct:8 },
+];
+
+const LABOUR_RATES = { supervisor:200, lead:150, hand:100, trainee:50 };
+const LABOUR_ROLES = [
+  { id:'supervisor', label:'Supervisor'     },
+  { id:'lead',       label:'Lead apprentice'},
+  { id:'hand',       label:'Work hand'      },
+  { id:'trainee',    label:'Trainee'        },
+];
+
+const DEFAULT_MATERIALS = [
+  { id:'m01', name:'Boards',                     cab:true,  hw:false },
+  { id:'m02', name:'Back panels',                cab:true,  hw:false },
+  { id:'m03', name:'Edge band',                  cab:true,  hw:false },
+  { id:'m04', name:'Edge banding application',   cab:true,  hw:false },
+  { id:'m05', name:'Cutting (machine shop)',      cab:true,  hw:false },
+  { id:'m06', name:'Timber',                      cab:false, hw:true  },
+  { id:'m07', name:'Stain',                       cab:false, hw:true  },
+  { id:'m08', name:'Finishes',                    cab:false, hw:true  },
+  { id:'m09', name:'Joinery hardware',            cab:false, hw:true  },
+  { id:'m10', name:'Fixtures',                    cab:true,  hw:true  },
+  { id:'m11', name:'Finishing materials',         cab:true,  hw:true  },
+  { id:'m12', name:'Abrasives',                   cab:true,  hw:true  },
+  { id:'m13', name:'Consumables',                 cab:true,  hw:true  },
+  { id:'m14', name:'Protective packaging',        cab:true,  hw:true  },
+  { id:'m15', name:'Wood filler / grain filler',  cab:false, hw:true  },
+];
+
+const OPTIONAL_MATERIALS = [
+  { id:'o01', name:'Stone material'   },
+  { id:'o02', name:'Stone fabrication'},
+  { id:'o03', name:'Templates / jigs' },
+  { id:'o04', name:'Glass'            },
+];
+
+const EXP_CATS   = ['materials','labour','logistics','overhead','other'];
+const STATUS_META = {
+  draft:    { label:'Draft',    color:'var(--muted)' },
+  sent:     { label:'Sent',     color:'var(--warn)'  },
+  accepted: { label:'Accepted', color:'var(--ok)'    },
+  declined: { label:'Declined', color:'var(--err)'   },
+};
+
+// ── Utils ─────────────────────────────────────────────────────────────
+const uid     = () => Math.random().toString(36).slice(2,8).toUpperCase();
+const GHS     = n  => `GH₵ ${(+n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+const fmtDate = iso => new Date(iso).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'});
+
+const makeMat = (def, jobType) => ({
+  id:def.id, name:def.name, cab:def.cab, hw:def.hw,
+  on:jobType==='cabinetry'?def.cab:def.hw,
+  qty:1, unitPrice:0, expanded:false, subItems:[],
+});
+const makeOpt = def => ({ id:def.id, name:def.name, on:false, qty:1, unitPrice:0, expanded:false, subItems:[] });
+const matTotal = m => {
+  if (m.subItems?.length) return m.subItems.reduce((s,si)=>s+(si.qty||0)*(si.unitPrice||0), 0);
+  return (m.qty||0)*(m.unitPrice||0);
+};
+
+// ── Session ───────────────────────────────────────────────────────────
+const getSession   = () => { try { return JSON.parse(localStorage.getItem(SESSION_KEY)); } catch { return null; } };
+const setSession   = s  => localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+const clearSession = () => localStorage.removeItem(SESSION_KEY);
+
+// ── API ───────────────────────────────────────────────────────────────
+async function carpFetch(path, method='GET', body, sess) {
+  const s = sess || getSession();
+  const r = await fetch(`${API}${path}`, {
+    method,
+    headers: {
+      'X-Carp-Id':  s.carpId,
+      'X-Carp-Pin': s.pin,
+      ...(body ? { 'Content-Type':'application/json' } : {}),
+    },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+  if (r.status === 401) throw new Error('Unauthorized');
+  return r.json();
+}
+
+async function apiRegister(workshopName, pin) {
+  const r = await fetch(`${API}/carp/register`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ workshopName, pin }),
+  });
+  return r.json();
+}
+
+async function apiAuth(carpId, pin) {
+  const r = await fetch(`${API}/carp/auth`, {
+    method: 'POST',
+    headers: { 'Content-Type':'application/json' },
+    body: JSON.stringify({ carpId: carpId.toUpperCase(), pin }),
+  });
+  return r.json();
+}
+
+// ── Pricing engine ────────────────────────────────────────────────────
+function calcQuote(q, overheadCfg) {
+  const tier      = TIERS.find(t=>t.id===q.tierId) || TIERS[1];
+  const totalDays = (q.workshopDays||0) + (q.siteDays||0);
+  const dayRate   = calcOverheadDay(overheadCfg);
+  const overhead  = dayRate * totalDays;
+  let labour = 0;
+  (q.crew||[]).forEach(r => { labour += (LABOUR_RATES[r.roleId]||0) * (r.count||0) * (r.days||totalDays); });
+  const ownerRate = overheadCfg?.ownerRate ?? DEFAULT_OVERHEAD.ownerRate;
+  if (q.includeOwner) labour += ownerRate * (q.ownerDays||totalDays);
+  const allMats  = [...(q.materials||[]), ...(q.optionals||[])];
+  const matAmt   = allMats.filter(m=>m.on).reduce((s,m)=>s+matTotal(m), 0);
+  const log      = q.logistics||{};
+  const logistics= (+log.primary||0) + (+log.secondary||0)*(log.secondaryReturn?2:1) + (+log.siteVisits||0)*(+log.siteVisitCost||0);
+  const rawCost  = overhead + labour + matAmt + logistics;
+  let addOnMult  = 1;
+  Object.entries(q.addOns||{}).forEach(([id,on])=>{if(on){const a=ADDONS.find(x=>x.id===id);if(a)addOnMult*=1+(a.pct/100);}});
+  const quotedPrice  = rawCost * tier.mult * addOnMult;
+  const grossMargin  = quotedPrice - rawCost;
+  const marginPct    = quotedPrice>0?(grossMargin/quotedPrice)*100:0;
+  return { overhead, labour, matAmt, logistics, rawCost, tier, addOnMult, quotedPrice, grossMargin, marginPct, dayRate };
+}
+
+function calcActual(exp=[]) {
+  return EXP_CATS.reduce((acc,cat)=>{ acc[cat]=exp.filter(e=>e.category===cat).reduce((s,e)=>s+(+e.amount||0),0); return acc; },{});
+}
+
+// ── Design tokens ─────────────────────────────────────────────────────
+const S  = {
+  bg:'#F7F4EF', bgAlt:'#EFEBE3', surface:'#FFFFFF',
+  dark:'#1C1A17', mid:'#4A4540', muted:'#8A8178',
+  accent:'#A0784A', accentDk:'#7D5C34', accentLt:'rgba(160,120,74,.12)',
+  border:'#DDD5C8', borderDk:'#C8BFB2',
+  ok:'#5a8a5a', err:'#b04030', warn:'#8a6020',
+};
+const FD = "'Playfair Display',Georgia,serif";
+const FB = "'DM Sans',system-ui,sans-serif";
+const FM = "'DM Mono','Courier New',monospace";
+
+// ── UI primitives ─────────────────────────────────────────────────────
+const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
+  const p=size==='lg'?'14px 22px':size==='sm'?'5px 11px':'8px 16px';
+  const fs=size==='lg'?'1rem':size==='sm'?'.72rem':'.82rem';
+  const base={border:'none',borderRadius:4,padding:p,fontFamily:FB,fontWeight:600,fontSize:fs,letterSpacing:'.02em',cursor:disabled?'not-allowed':'pointer',width:full?'100%':'auto',transition:'all .15s',...st};
+  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1.5px solid ${S.border}`,opacity:disabled?.4:1}}>{ch}</button>;
+  return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?S.bgAlt:(color||S.dark),color:disabled?S.muted:'#fff',opacity:disabled?.6:1}}>{ch}</button>;
+};
+const Card=({ch,style:st={}})=><div style={{background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:10,padding:'14px 16px',...st}}>{ch}</div>;
+const TextInp=React.memo(({value,onChange,onBlur,placeholder,style:st={},type='text',...rest})=>(
+  <input type={type} defaultValue={value} onChange={onChange} onBlur={onBlur} placeholder={placeholder||''}
+    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'.88rem',outline:'none',width:'100%',...st}} {...rest}/>
+));
+const NumInp=React.memo(({value,onChange,placeholder,style:st={},...rest})=>(
+  <input type="number" min={0} defaultValue={value===0?'':value} onChange={onChange} placeholder={placeholder||'0'}
+    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'.88rem',outline:'none',width:'100%',...st}} {...rest}/>
+));
+const CtrlInp=({value,onChange,placeholder,style:st={},...rest})=>(
+  <input value={value||''} onChange={onChange} placeholder={placeholder||''}
+    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',...st}} {...rest}/>
+);
+const CtrlSel=({value,onChange,children,style:st={}})=>(
+  <select value={value} onChange={onChange}
+    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',appearance:'none',...st}}>
+    {children}
+  </select>
+);
+const CtrlTA=({value,onChange,placeholder,rows=3,style:st={}})=>(
+  <textarea value={value||''} onChange={onChange} placeholder={placeholder} rows={rows}
+    style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',resize:'vertical',...st}}/>
+);
+const Lbl=({ch})=><div style={{fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:5,fontFamily:FM,fontWeight:500}}>{ch}</div>;
+const Hdr=({title,sub,onBack,right})=>(
+  <div style={{padding:'13px 18px',borderBottom:`1.5px solid ${S.border}`,background:S.surface,flexShrink:0,display:'flex',justifyContent:'space-between',alignItems:'center',position:'sticky',top:0,zIndex:10,boxShadow:'0 1px 4px rgba(28,26,23,.06)'}}>
+    <div style={{display:'flex',alignItems:'center',gap:10}}>
+      {onBack&&<button onClick={onBack} style={{background:'transparent',border:'none',color:S.muted,cursor:'pointer',fontSize:'.82rem',fontFamily:FB}}>← back</button>}
+      <div>
+        <div style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.dark}}>{title}</div>
+        {sub&&<div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{sub}</div>}
+      </div>
+    </div>
+    {right||<div/>}
+  </div>
+);
+const MarginBar=({pct,label='Gross margin'})=>{
+  const color=pct>=35?S.ok:pct>=20?S.warn:S.err;
+  return(
+    <div style={{marginTop:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+        <span style={{fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>{label}</span>
+        <span style={{fontSize:'.82rem',fontFamily:FM,color,fontWeight:600}}>{pct.toFixed(1)}%</span>
+      </div>
+      <div style={{height:4,background:S.bgAlt,borderRadius:2,overflow:'hidden'}}>
+        <div style={{height:'100%',width:`${Math.min(pct,100)}%`,background:color,transition:'width .3s,background .3s'}}/>
+      </div>
+      {pct<30&&<div style={{fontSize:'.68rem',color:S.warn,fontFamily:FM,marginTop:4}}>Margin below 30% — consider raising tier or add-ons</div>}
+    </div>
+  );
+};
+const Row=({label,value,bold,color,indent})=>(
+  <div style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:`1px solid ${S.border}`,paddingLeft:indent?10:0}}>
+    <span style={{fontSize:'.82rem',fontFamily:FB,color:S.muted}}>{label}</span>
+    <span style={{fontSize:'.82rem',fontFamily:FM,fontWeight:bold?600:400,color:color||S.dark}}>{value}</span>
+  </div>
+);
+
+// ── Auth screens ──────────────────────────────────────────────────────
+function WelcomeScreen({ onRegister, onLogin }) {
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:'100%',maxWidth:320,textAlign:'center'}}>
+        <div style={{width:36,height:3,background:S.accent,margin:'0 auto 20px'}}/>
+        <div style={{fontFamily:FM,fontSize:'.68rem',letterSpacing:'.18em',color:S.muted,textTransform:'uppercase',marginBottom:8}}>Carpenter Tools</div>
+        <div style={{fontFamily:FD,fontSize:'2rem',fontWeight:600,color:S.dark,lineHeight:.95,marginBottom:8}}>Job Pricing<br/><span style={{color:S.accent}}>Tool</span></div>
+        <div style={{fontFamily:FB,fontSize:'.82rem',color:S.muted,marginBottom:36,lineHeight:1.6}}>Build accurate quotes. Know your margins. Understand your overhead.</div>
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          <Btn ch="Create a free account" onClick={onRegister} size="lg" full color={S.dark}/>
+          <Btn ch="Sign in with my workshop code" onClick={onLogin} size="lg" full outline/>
+        </div>
+        <div style={{marginTop:28,fontSize:'.72rem',color:S.muted,fontFamily:FM,lineHeight:1.6}}>
+          Free to use. Your data stays private to your account.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegisterScreen({ onSuccess, onBack }) {
+  const [name, setName]       = useState('');
+  const [pin,  setPin]        = useState('');
+  const [pin2, setPin2]       = useState('');
+  const [busy, setBusy]       = useState(false);
+  const [error, setError]     = useState('');
+
+  async function submit(e) {
+    e.preventDefault();
+    setError('');
+    if (!name.trim())          return setError('Enter your workshop name.');
+    if (!/^\d{4}$/.test(pin))  return setError('PIN must be exactly 4 digits.');
+    if (pin !== pin2)          return setError('PINs don\'t match.');
+    setBusy(true);
+    try {
+      const res = await apiRegister(name.trim(), pin);
+      if (res.ok) onSuccess(res.carpId, res.workshopName, pin);
+      else setError(res.error || 'Registration failed — please try again.');
+    } catch {
+      setError('Connection error — check your internet and try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:'100%',maxWidth:320}}>
+        <button onClick={onBack} style={{background:'transparent',border:'none',color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',marginBottom:24}}>← back</button>
+        <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:600,color:S.dark,marginBottom:4}}>New account</div>
+        <div style={{fontFamily:FB,fontSize:'.82rem',color:S.muted,marginBottom:24}}>Takes 30 seconds. No email needed.</div>
+        <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div>
+            <Lbl ch="Workshop name"/>
+            <CtrlInp value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Mensah Woodworks"/>
+          </div>
+          <div>
+            <Lbl ch="Set a 4-digit PIN"/>
+            <input type="password" inputMode="numeric" maxLength={4} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,4))}
+              placeholder="••••"
+              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'1.2rem',outline:'none',width:'100%',letterSpacing:'.3em'}}/>
+          </div>
+          <div>
+            <Lbl ch="Confirm PIN"/>
+            <input type="password" inputMode="numeric" maxLength={4} value={pin2} onChange={e=>setPin2(e.target.value.replace(/\D/g,'').slice(0,4))}
+              placeholder="••••"
+              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'1.2rem',outline:'none',width:'100%',letterSpacing:'.3em'}}/>
+          </div>
+          {error && <div style={{fontSize:'.78rem',color:S.err,fontFamily:FB,padding:'8px 12px',background:'rgba(176,64,48,.08)',borderRadius:4}}>{error}</div>}
+          <Btn ch={busy?'Creating account…':'Create account'} disabled={busy} full color={S.accent} style={{marginTop:4}}/>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function RegisterSuccessScreen({ carpId, workshopName, onContinue }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard?.writeText(carpId).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); });
+  }
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:'100%',maxWidth:340,textAlign:'center'}}>
+        <div style={{width:36,height:3,background:S.ok,margin:'0 auto 20px'}}/>
+        <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:600,color:S.dark,marginBottom:8}}>Account created</div>
+        <div style={{fontFamily:FB,fontSize:'.88rem',color:S.muted,marginBottom:28,lineHeight:1.65}}>
+          Welcome, <strong style={{color:S.dark}}>{workshopName}</strong>. Save your workshop code — you'll need it to sign in from another device.
+        </div>
+        <div style={{background:S.dark,borderRadius:12,padding:'20px 24px',marginBottom:8}}>
+          <div style={{fontFamily:FM,fontSize:'.62rem',letterSpacing:'.2em',color:'rgba(255,255,255,.4)',textTransform:'uppercase',marginBottom:8}}>Your workshop code</div>
+          <div style={{fontFamily:FD,fontSize:'2.2rem',fontWeight:700,color:S.accent,letterSpacing:'.12em'}}>{carpId}</div>
+        </div>
+        <button onClick={copy} style={{background:'transparent',border:'none',fontFamily:FB,fontSize:'.78rem',color:copied?S.ok:S.muted,cursor:'pointer',marginBottom:28,padding:'4px 0'}}>
+          {copied ? '✓ Copied' : 'Copy code'}
+        </button>
+        <div style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:8,padding:'12px 16px',marginBottom:28,textAlign:'left'}}>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:6}}>Keep this code safe</div>
+          <div style={{fontFamily:FB,fontSize:'.78rem',color:S.mid,lineHeight:1.65}}>Your code + PIN = your login on any device. We can't recover a lost code — if you lose both, you'll need to register again.</div>
+        </div>
+        <Btn ch="Open my dashboard →" onClick={onContinue} full color={S.accent} size="lg"/>
+      </div>
+    </div>
+  );
+}
+
+function LoginScreen({ onSuccess, onBack }) {
+  const [code, setCode]   = useState('');
+  const [pin,  setPin]    = useState('');
+  const [busy, setBusy]   = useState(false);
+  const [error, setError] = useState('');
+
+  async function submit(e) {
+    e.preventDefault();
+    setError('');
+    if (!code.trim()) return setError('Enter your workshop code.');
+    if (!pin)         return setError('Enter your PIN.');
+    setBusy(true);
+    try {
+      const res = await apiAuth(code.trim(), pin);
+      if (res.ok) onSuccess(res.carpId, res.workshopName, pin);
+      else setError('Invalid code or PIN.');
+    } catch {
+      setError('Connection error — check your internet and try again.');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:32}}>
+      <div style={{width:'100%',maxWidth:320}}>
+        <button onClick={onBack} style={{background:'transparent',border:'none',color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',marginBottom:24}}>← back</button>
+        <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:600,color:S.dark,marginBottom:4}}>Sign in</div>
+        <div style={{fontFamily:FB,fontSize:'.82rem',color:S.muted,marginBottom:24}}>Enter the 6-character code from when you registered.</div>
+        <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:14}}>
+          <div>
+            <Lbl ch="Workshop code"/>
+            <input value={code} onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6))}
+              placeholder="e.g. A7F3KP" maxLength={6}
+              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'10px 14px',fontFamily:FM,fontSize:'1.3rem',outline:'none',width:'100%',letterSpacing:'.2em',textTransform:'uppercase'}}/>
+          </div>
+          <div>
+            <Lbl ch="PIN"/>
+            <input type="password" inputMode="numeric" maxLength={4} value={pin} onChange={e=>setPin(e.target.value.replace(/\D/g,'').slice(0,4))}
+              placeholder="••••"
+              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'1.2rem',outline:'none',width:'100%',letterSpacing:'.3em'}}/>
+          </div>
+          {error && <div style={{fontSize:'.78rem',color:S.err,fontFamily:FB,padding:'8px 12px',background:'rgba(176,64,48,.08)',borderRadius:4}}>{error}</div>}
+          <Btn ch={busy?'Signing in…':'Sign in'} disabled={busy} full color={S.accent} style={{marginTop:4}}/>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ── Overhead Settings ─────────────────────────────────────────────────
+function OverheadSettings({ cfg, onSave, onBack }) {
+  const [c, setC] = useState(() => ({
+    billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
+    ownerRate:    cfg?.ownerRate    ?? DEFAULT_OVERHEAD.ownerRate,
+    running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
+    capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
+  }));
+  const [saving, setSaving] = useState(false);
+
+  const updRun   = (id,u) => setC(p=>({...p, running:p.running.map(r=>r.id===id?{...r,...u}:r)}));
+  const updCap   = (id,u) => setC(p=>({...p, capital:p.capital.map(x=>x.id===id?{...x,...u}:x)}));
+  const addRun   = ()     => setC(p=>({...p, running:[...p.running,{id:uid(),name:'',amount:0,hint:''}]}));
+  const addCap   = ()     => setC(p=>({...p, capital:[...p.capital,{id:uid(),name:'',cost:0,lifeYears:3}]}));
+  const remRun   = id     => setC(p=>({...p, running:p.running.filter(r=>r.id!==id)}));
+  const remCap   = id     => setC(p=>({...p, capital:p.capital.filter(x=>x.id!==id)}));
+  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
+
+  const runTotal    = c.running.reduce((s,r)=>s+(+r.amount||0), 0);
+  const capMonthly  = c.capital.reduce((s,x)=>s+(+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12), 0);
+  const totalMonthly= runTotal + capMonthly;
+  const dayRate     = Math.round(totalMonthly / Math.max(1,+c.billableDays||20));
+
+  const save = async () => { setSaving(true); await onSave(c); setSaving(false); onBack(); };
+
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
+      <Hdr title="Overhead Settings" sub="Your monthly costs → daily rate" onBack={onBack}
+        right={<div style={{display:'flex',gap:8}}>
+          <Btn ch="Reset defaults" onClick={reset} size="sm" outline/>
+          <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
+        </div>}/>
+      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
+
+        <div style={{background:S.dark,borderRadius:10,padding:'16px 20px',marginBottom:18,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:'rgba(255,255,255,.45)',textTransform:'uppercase',marginBottom:4}}>Your overhead rate</div>
+            <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:700,color:'#c9955f'}}>{GHS(dayRate)}<span style={{fontFamily:FM,fontSize:'.82rem',color:'rgba(255,255,255,.4)',marginLeft:4}}>/day</span></div>
+            <div style={{fontSize:'.72rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginTop:4}}>{GHS(Math.round(totalMonthly))}/month ÷ {c.billableDays} billable days</div>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:'.68rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginBottom:3}}>Running costs</div>
+            <div style={{fontSize:'.85rem',fontFamily:FM,color:'rgba(255,255,255,.65)'}}>{GHS(runTotal)}/mo</div>
+            <div style={{fontSize:'.68rem',color:'rgba(255,255,255,.35)',fontFamily:FM,marginTop:6,marginBottom:3}}>Capital reserve</div>
+            <div style={{fontSize:'.85rem',fontFamily:FM,color:'rgba(255,255,255,.65)'}}>{GHS(Math.round(capMonthly))}/mo</div>
+          </div>
+        </div>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Billable days per month</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>How many days per month do you work on paying jobs? Most small shops manage 18–22. This divides your total overhead into a daily rate.</div>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <NumInp value={c.billableDays} onChange={e=>setC(p=>({...p,billableDays:Math.min(30,Math.max(1,+e.target.value||20))}))} style={{maxWidth:100}}/>
+            <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FM}}>days / month</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Owner's labour rate</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>Your own day rate when you're working on a job. Used when "Include owner's labour" is ticked in a quote.</div>
+          <div style={{display:'flex',alignItems:'center',gap:12}}>
+            <NumInp value={c.ownerRate} onChange={e=>setC(p=>({...p,ownerRate:+e.target.value||0}))} style={{maxWidth:120}}/>
+            <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FM}}>GH₵ / day</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Monthly running costs</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>Fixed costs every month regardless of jobs.</div>
+          {c.running.map(r=>(
+            <div key={r.id} style={{display:'grid',gridTemplateColumns:'1fr 80px 24px',gap:8,alignItems:'start',marginBottom:10}}>
+              <div>
+                <CtrlInp value={r.name} onChange={e=>updRun(r.id,{name:e.target.value})} placeholder="Cost item name" style={{marginBottom:4}}/>
+                {r.hint&&<div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM}}>{r.hint}</div>}
+              </div>
+              <NumInp value={r.amount} onChange={e=>updRun(r.id,{amount:+e.target.value||0})}/>
+              <button onClick={()=>remRun(r.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem',paddingTop:6}}>✕</button>
+            </div>
+          ))}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${S.border}`}}>
+            <Btn ch="+ Add item" onClick={addRun} size="sm" outline/>
+            <span style={{fontFamily:FM,fontSize:'.82rem',fontWeight:600,color:S.dark}}>{GHS(runTotal)}</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Capital replacement reserve</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>Set aside from every job so you're ready when tools need replacing.</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 80px 70px 60px 24px',gap:6,alignItems:'center',marginBottom:6,paddingBottom:6,borderBottom:`1px solid ${S.border}`}}>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>Tool / machine</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>Replace (GH₵)</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'center'}}>Years</div>
+            <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>Mo. reserve</div>
+            <div/>
+          </div>
+          {c.capital.map(x=>{
+            const mo = (+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12);
+            return(
+              <div key={x.id} style={{display:'grid',gridTemplateColumns:'1fr 80px 70px 60px 24px',gap:6,alignItems:'center',marginBottom:8}}>
+                <CtrlInp value={x.name} onChange={e=>updCap(x.id,{name:e.target.value})} placeholder="Tool name"/>
+                <NumInp value={x.cost} onChange={e=>updCap(x.id,{cost:+e.target.value||0})}/>
+                <NumInp value={x.lifeYears} onChange={e=>updCap(x.id,{lifeYears:+e.target.value||1})} placeholder="yrs"/>
+                <span style={{fontFamily:FM,fontSize:'.72rem',color:S.muted,textAlign:'right'}}>{GHS(Math.round(mo))}</span>
+                <button onClick={()=>remCap(x.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem'}}>✕</button>
+              </div>
+            );
+          })}
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',paddingTop:8,borderTop:`1px solid ${S.border}`}}>
+            <Btn ch="+ Add tool" onClick={addCap} size="sm" outline/>
+            <span style={{fontFamily:FM,fontSize:'.82rem',fontWeight:600,color:S.dark}}>{GHS(Math.round(capMonthly))}/mo</span>
+          </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <div style={{padding:'12px 14px',background:S.accentLt,border:`1.5px solid ${S.border}`,borderRadius:8,fontSize:'.75rem',color:S.mid,fontFamily:FB,lineHeight:1.7}}>
+          <strong style={{color:S.accentDk}}>These are your costs, not the client's problem.</strong> The daily rate feeds quietly into every quote — clients see one total price.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────
+function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, onLogout }) {
+  const [filter, setFilter] = useState('all');
+  const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
+      <Hdr title={session.workshopName} sub="Job Pricing"
+        right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
+          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1.5px solid ${S.border}`,borderRadius:6,color:S.muted,cursor:'pointer',fontFamily:FM,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
+          <button onClick={onLogout} style={{background:'transparent',border:'none',color:S.muted,fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
+        </div>}/>
+      <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
+        {['all',...Object.keys(STATUS_META)].map(f=>(
+          <button key={f} onClick={()=>setFilter(f)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:filter===f?`2px solid ${S.accent}`:'2px solid transparent',color:filter===f?S.accent:S.muted,padding:'9px 16px',fontFamily:FB,fontSize:'.78rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>
+            {f==='all'?'All':STATUS_META[f].label}
+          </button>
+        ))}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
+        {filtered.length===0&&<div style={{color:S.muted,fontSize:'.85rem',fontFamily:FB,padding:'32px 0',textAlign:'center'}}>No quotes yet. Create your first one.</div>}
+        <div style={{display:'flex',flexDirection:'column',gap:10,paddingTop:4}}>
+          {[...filtered].reverse().map(q=>{
+            const calc = calcQuote(q, overheadCfg);
+            const sm   = STATUS_META[q.status]||STATUS_META.draft;
+            return(
+              <Card key={q.id} ch={<div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                  <div>
+                    <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.client||'Untitled'}</div>
+                    <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
+                  </div>
+                  <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                </div>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                  <div>
+                    <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
+                    <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
+                  </div>
+                  <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                </div>
+              </div>}/>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── New Quote factory ─────────────────────────────────────────────────
+function newQuote(refNum, prefix) {
+  return {
+    id:uid(), refId:`${prefix}-${String(refNum).padStart(3,'0')}`,
+    client:'', jobType:'cabinetry', status:'draft',
+    createdAt: new Date().toISOString(),
+    tierId:'standard',
+    workshopDays:0, siteDays:0,
+    crew:[{id:uid(),roleId:'supervisor',count:1,days:null},{id:uid(),roleId:'hand',count:1,days:null}],
+    includeOwner:true, ownerDays:null,
+    materials: DEFAULT_MATERIALS.map(m=>makeMat(m,'cabinetry')),
+    optionals: OPTIONAL_MATERIALS.map(makeOpt),
+    addOns:{},
+    logistics:{primary:'',secondary:'',secondaryReturn:false,siteVisits:'',siteVisitCost:''},
+    expenditure:[],
+    notes:'',
+    taxRate:15,
+    idleBuffer:20,
+  };
+}
+
+// ── Quote Editor ──────────────────────────────────────────────────────
+function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
+  const [q, setQ]       = useState(initial);
+  const [tab, setTab]   = useState('setup');
+  const [saving, setSaving] = useState(false);
+  const upd  = u => setQ(prev=>({...prev,...u}));
+  const calc = useMemo(()=>calcQuote(q,overheadCfg),[q,overheadCfg]);
+  const save = async () => { setSaving(true); await onSave(q); setSaving(false); };
+  const sm   = STATUS_META[q.status]||STATUS_META.draft;
+  const TABS = [
+    {id:'setup',l:'Setup'},{id:'materials',l:'Materials'},{id:'logistics',l:'Logistics'},
+    {id:'summary',l:'Summary'},{id:'costs',l:'Actual Costs'},{id:'notes',l:'Notes'},
+  ];
+  return(
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
+      <Hdr title={q.refId} sub={q.client||'New quote'} onBack={onBack}
+        right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+          <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
+        </div>}/>
+      <div style={{display:'flex',borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
+        {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:tab===t.id?`2px solid ${S.accent}`:'2px solid transparent',color:tab===t.id?S.accent:S.muted,padding:'9px 14px',fontFamily:FB,fontSize:'.78rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>{t.l}</button>)}
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
+        {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg}/>}
+        {tab==='materials' && <MaterialsTab q={q} upd={upd}/>}
+        {tab==='logistics' && <LogisticsTab q={q} upd={upd}/>}
+        {tab==='summary'   && <SummaryTab q={q} calc={calc} onStatusChange={s=>upd({status:s})} onSave={save}/>}
+        {tab==='costs'     && <CostsTab q={q} upd={upd} calc={calc}/>}
+        {tab==='notes'     && <div><Lbl ch="Notes"/><CtrlTA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Setup Tab ─────────────────────────────────────────────────────────
+function SetupTab({ q, upd, calc, overheadCfg }) {
+  const totalDays = (q.workshopDays||0)+(q.siteDays||0);
+  const addCrewRow = () => upd({crew:[...q.crew,{id:uid(),roleId:'hand',count:1,days:null}]});
+  const updCrew = (id,u) => upd({crew:q.crew.map(r=>r.id===id?{...r,...u}:r)});
+  const remCrew = id => upd({crew:q.crew.filter(r=>r.id!==id)});
+  const ownerRate = overheadCfg?.ownerRate ?? DEFAULT_OVERHEAD.ownerRate;
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:18}}>
+      <Card ch={<div style={{display:'flex',flexDirection:'column',gap:12}}>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:2}}>Job details</div>
+        <div><Lbl ch="Client name"/><CtrlInp value={q.client} onChange={e=>upd({client:e.target.value})} placeholder="e.g. Mensah Residence"/></div>
+        <div>
+          <Lbl ch="Job type"/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            {[{v:'cabinetry',l:'Cabinetry'},{v:'hardwood',l:'Hardwood / General'}].map(({v,l})=>(
+              <button key={v} onClick={()=>upd({jobType:v,materials:DEFAULT_MATERIALS.map(m=>makeMat(m,v)),optionals:OPTIONAL_MATERIALS.map(makeOpt)})}
+                style={{background:q.jobType===v?S.dark:S.bgAlt,color:q.jobType===v?'#fff':S.mid,border:`1.5px solid ${q.jobType===v?S.dark:S.border}`,borderRadius:6,padding:'9px 12px',fontFamily:FB,fontSize:'.85rem',fontWeight:600,cursor:'pointer',transition:'all .15s'}}>{l}</button>
+            ))}
+          </div>
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div><Lbl ch="Workshop days"/><NumInp value={q.workshopDays} onChange={e=>upd({workshopDays:+e.target.value||0})}/></div>
+          <div><Lbl ch="Site days"/><NumInp value={q.siteDays} onChange={e=>upd({siteDays:+e.target.value||0})}/></div>
+        </div>
+        {totalDays>0&&<div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM,padding:'6px 10px',background:S.bgAlt,borderRadius:4}}>
+          {totalDays} days total · Overhead: {GHS(calc.overhead)} ({GHS(calc.dayRate)}/day)
+        </div>}
+      </div>}/>
+
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:12}}>Build tier</div>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {TIERS.map(t=>(
+            <button key={t.id} onClick={()=>upd({tierId:t.id})} style={{background:q.tierId===t.id?S.dark:S.surface,border:`1.5px solid ${q.tierId===t.id?S.dark:S.border}`,borderRadius:8,padding:'10px 14px',cursor:'pointer',textAlign:'left',width:'100%',transition:'all .15s'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div>
+                  <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:q.tierId===t.id?'#fff':S.dark}}>{t.label}</div>
+                  <div style={{fontSize:'.75rem',color:q.tierId===t.id?'rgba(255,255,255,.65)':S.muted,fontFamily:FB,marginTop:2}}>{t.sub}</div>
+                </div>
+                <div style={{fontFamily:FM,fontSize:'.82rem',color:q.tierId===t.id?'rgba(255,255,255,.7)':S.muted,fontWeight:600}}>×{t.mult}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>}/>
+
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:12}}>Add-ons</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          {ADDONS.map(a=>(
+            <button key={a.id} onClick={()=>upd({addOns:{...q.addOns,[a.id]:!q.addOns?.[a.id]}})}
+              style={{background:q.addOns?.[a.id]?S.accentLt:S.bgAlt,border:`1.5px solid ${q.addOns?.[a.id]?S.accent:S.border}`,borderRadius:8,padding:'9px 12px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}>
+              <div style={{fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.addOns?.[a.id]?S.accentDk:S.dark}}>{a.label}</div>
+              <div style={{fontSize:'.72rem',color:q.addOns?.[a.id]?S.accent:S.muted,fontFamily:FM}}>+{a.pct}%</div>
+            </button>
+          ))}
+        </div>
+      </div>}/>
+
+      <Card ch={<div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase'}}>Crew labour</div>
+          <Btn ch="+ Row" onClick={addCrewRow} size="sm" outline/>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:8}}>
+          {q.crew.map(r=>(
+            <div key={r.id} style={{display:'grid',gridTemplateColumns:'1fr 56px 56px 28px',gap:6,alignItems:'center'}}>
+              <CtrlSel value={r.roleId} onChange={e=>updCrew(r.id,{roleId:e.target.value})}>
+                {LABOUR_ROLES.map(x=><option key={x.id} value={x.id}>{x.label}</option>)}
+              </CtrlSel>
+              <NumInp value={r.count} onChange={e=>updCrew(r.id,{count:+e.target.value||1})} placeholder="qty"/>
+              <NumInp value={r.days??''} onChange={e=>updCrew(r.id,{days:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)}/>
+              <button onClick={()=>remCrew(r.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem'}}>✕</button>
+            </div>
+          ))}
+          <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>Days blank = total job days ({totalDays})</div>
+        </div>
+        <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${S.border}`}}>
+          <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginBottom:8}}>
+            <input type="checkbox" checked={q.includeOwner||false} onChange={e=>upd({includeOwner:e.target.checked})} style={{accentColor:S.accent,width:15,height:15}}/>
+            <span style={{fontFamily:FB,fontSize:'.88rem',fontWeight:600,color:S.dark}}>Include owner's labour</span>
+            {q.includeOwner&&<span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>{GHS(ownerRate)}/day</span>}
+          </label>
+          {q.includeOwner&&<div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <NumInp value={q.ownerDays??''} onChange={e=>upd({ownerDays:e.target.value===''?null:+e.target.value})} placeholder={String(totalDays||0)} style={{maxWidth:100}}/>
+            <span style={{fontSize:'.72rem',color:S.muted,fontFamily:FM}}>days (blank = {totalDays})</span>
+          </div>}
+        </div>
+      </div>}/>
+
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Projections</div>
+        <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>Estimate net profit after tax and idle time. Adjust to your situation.</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          <div>
+            <Lbl ch="Income tax estimate (%)"/>
+            <NumInp value={q.taxRate??15} onChange={e=>upd({taxRate:Math.min(50,Math.max(0,+e.target.value||0))})} placeholder="15"/>
+            <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Ghana self-employed: ~15% effective</div>
+          </div>
+          <div>
+            <Lbl ch="Idle time reserve (%)"/>
+            <NumInp value={q.idleBuffer??20} onChange={e=>upd({idleBuffer:Math.min(60,Math.max(0,+e.target.value||0))})} placeholder="20"/>
+            <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Set aside for slow months</div>
+          </div>
+        </div>
+      </div>}/>
+    </div>
+  );
+}
+
+// ── Material Row ──────────────────────────────────────────────────────
+function MaterialRow({ m, onUpdate, onRemove }) {
+  const total = matTotal(m);
+  const addSub = () => onUpdate({ expanded:true, subItems:[...(m.subItems||[]),{id:uid(),name:'',qty:1,unitPrice:0}] });
+  const updSub = (sid,u) => onUpdate({ subItems:(m.subItems||[]).map(s=>s.id===sid?{...s,...u}:s) });
+  const remSub = sid => { const next=(m.subItems||[]).filter(s=>s.id!==sid); onUpdate({subItems:next,expanded:next.length>0}); };
+  return(
+    <div style={{borderBottom:`1px solid ${S.border}`,padding:'8px 0'}}>
+      <div style={{display:'grid',gridTemplateColumns:'auto 1fr 70px 80px 80px 28px',gap:6,alignItems:'center'}}>
+        <input type="checkbox" checked={m.on} onChange={e=>onUpdate({on:e.target.checked})} style={{cursor:'pointer',accentColor:S.accent,width:14,height:14,flexShrink:0}}/>
+        <span style={{fontSize:'.85rem',fontFamily:FB,color:m.on?S.dark:S.muted}}>{m.name}</span>
+        <NumInp value={m.qty} onChange={e=>onUpdate({qty:+e.target.value||0,on:true})} placeholder="qty" style={{opacity:m.on?1:.4}}/>
+        <NumInp value={m.unitPrice} onChange={e=>onUpdate({unitPrice:+e.target.value||0,on:true})} placeholder="price" style={{opacity:m.on?1:.4}}/>
+        <span style={{fontSize:'.78rem',fontFamily:FM,color:m.on&&total>0?S.dark:S.muted,textAlign:'right',fontWeight:500}}>{total>0?GHS(total):'—'}</span>
+        <div style={{display:'flex',gap:3}}>
+          <button onClick={()=>onUpdate({expanded:!m.expanded})} style={{background:'transparent',border:'none',color:m.expanded?S.accent:S.muted,cursor:'pointer',fontSize:'.8rem',padding:'2px',lineHeight:1}}>{m.expanded?'▲':'▾'}</button>
+          {onRemove&&<button onClick={onRemove} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'.9rem',padding:'2px',lineHeight:1}}>✕</button>}
+        </div>
+      </div>
+      {m.expanded&&(
+        <div style={{marginTop:8,marginLeft:20,borderLeft:`2px solid ${S.accentLt}`,paddingLeft:10}}>
+          {(m.subItems||[]).map(si=>(
+            <div key={si.id} style={{display:'grid',gridTemplateColumns:'1fr 60px 80px 24px',gap:6,alignItems:'center',marginBottom:6}}>
+              <TextInp value={si.name} onChange={e=>updSub(si.id,{name:e.target.value})} placeholder="Sub-item name"/>
+              <NumInp value={si.qty} onChange={e=>updSub(si.id,{qty:+e.target.value||0})} placeholder="qty"/>
+              <NumInp value={si.unitPrice} onChange={e=>updSub(si.id,{unitPrice:+e.target.value||0})} placeholder="unit price"/>
+              <button onClick={()=>remSub(si.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'.9rem'}}>✕</button>
+            </div>
+          ))}
+          <button onClick={addSub} style={{background:'transparent',border:`1px dashed ${S.border}`,borderRadius:4,padding:'4px 10px',fontFamily:FB,fontSize:'.75rem',color:S.muted,cursor:'pointer',marginTop:4}}>+ Add sub-item</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Materials Tab ─────────────────────────────────────────────────────
+function MaterialsTab({ q, upd }) {
+  const [newName, setNewName] = useState('');
+  const updMat = (id,u,isOpt) => {
+    if(isOpt) upd({optionals:q.optionals.map(m=>m.id===id?{...m,...u}:m)});
+    else upd({materials:q.materials.map(m=>m.id===id?{...m,...u}:m)});
+  };
+  const addCustom = () => {
+    if(!newName.trim()) return;
+    upd({materials:[...q.materials,{id:uid(),name:newName.trim(),cab:true,hw:true,on:true,qty:1,unitPrice:0,expanded:false,subItems:[],custom:true}]});
+    setNewName('');
+  };
+  const remCustom = id => upd({materials:q.materials.filter(m=>m.id!==id)});
+  const grandTotal = [...q.materials,...q.optionals].filter(m=>m.on).reduce((s,m)=>s+matTotal(m),0);
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <Card ch={<div>
+        <div style={{display:'grid',gridTemplateColumns:'auto 1fr 70px 80px 80px 28px',gap:6,alignItems:'center',marginBottom:6,paddingBottom:6,borderBottom:`1px solid ${S.border}`}}>
+          <div/><div style={{fontSize:'.65rem',letterSpacing:'.1em',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>Item</div>
+          <div style={{fontSize:'.65rem',letterSpacing:'.1em',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'center'}}>Qty</div>
+          <div style={{fontSize:'.65rem',letterSpacing:'.1em',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'center'}}>Unit (GH₵)</div>
+          <div style={{fontSize:'.65rem',letterSpacing:'.1em',color:S.muted,fontFamily:FM,textTransform:'uppercase',textAlign:'right'}}>Total</div>
+          <div/>
+        </div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:6}}>{q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} materials</div>
+        {q.materials.map(m=>(<MaterialRow key={m.id} m={m} onUpdate={u=>updMat(m.id,u,false)} onRemove={m.custom?()=>remCustom(m.id):null}/>))}
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginTop:14,marginBottom:6}}>Optional add-ons</div>
+        {q.optionals.map(m=>(<MaterialRow key={m.id} m={m} onUpdate={u=>updMat(m.id,u,true)} onRemove={null}/>))}
+      </div>}/>
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:8}}>Add custom material</div>
+        <div style={{display:'flex',gap:8}}>
+          <CtrlInp value={newName} onChange={e=>setNewName(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addCustom()} placeholder="Material name…" style={{flex:1}}/>
+          <Btn ch="Add" onClick={addCustom} size="sm" color={S.accent}/>
+        </div>
+      </div>}/>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:10}}>
+        <div style={{fontFamily:FM,fontSize:'.68rem',letterSpacing:'.14em',color:'rgba(255,255,255,.5)',textTransform:'uppercase'}}>Materials total</div>
+        <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:'#c9955f'}}>{GHS(grandTotal)}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Logistics Tab ─────────────────────────────────────────────────────
+function LogisticsTab({ q, upd }) {
+  const log = q.logistics||{};
+  const set = (k,v) => upd({logistics:{...log,[k]:v}});
+  const total = (+log.primary||0)+(+log.secondary||0)*(log.secondaryReturn?2:1)+(+log.siteVisits||0)*(+log.siteVisitCost||0);
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <Card ch={<div style={{display:'flex',flexDirection:'column',gap:12}}>
+        <div><Lbl ch="Primary — materials to workshop (GH₵)"/><NumInp value={log.primary||''} onChange={e=>set('primary',e.target.value)}/></div>
+        <div>
+          <Lbl ch="Secondary — delivery to site (GH₵)"/>
+          <NumInp value={log.secondary||''} onChange={e=>set('secondary',e.target.value)} style={{marginBottom:8}}/>
+          <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}}>
+            <input type="checkbox" checked={log.secondaryReturn||false} onChange={e=>set('secondaryReturn',e.target.checked)} style={{accentColor:S.accent,width:14,height:14}}/>
+            <span style={{fontSize:'.82rem',fontFamily:FB,color:S.mid}}>Return trip needed (doubles cost)</span>
+          </label>
+        </div>
+        <div>
+          <Lbl ch="Tertiary — site visit trips"/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+            <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Number of trips</div><NumInp value={log.siteVisits||''} onChange={e=>set('siteVisits',e.target.value)}/></div>
+            <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Cost per trip (GH₵)</div><NumInp value={log.siteVisitCost||''} onChange={e=>set('siteVisitCost',e.target.value)}/></div>
+          </div>
+        </div>
+      </div>}/>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 16px',background:S.dark,borderRadius:10}}>
+        <div style={{fontFamily:FM,fontSize:'.68rem',letterSpacing:'.14em',color:'rgba(255,255,255,.5)',textTransform:'uppercase'}}>Logistics total</div>
+        <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:'#c9955f'}}>{GHS(total)}</div>
+      </div>
+    </div>
+  );
+}
+
+// ── Summary Tab ───────────────────────────────────────────────────────
+function SummaryTab({ q, calc, onStatusChange, onSave }) {
+  const totalDays   = (q.workshopDays||0)+(q.siteDays||0);
+  const activeAddOns= ADDONS.filter(a=>q.addOns?.[a.id]);
+  const taxRate     = q.taxRate??15;
+  const idleBuf     = q.idleBuffer??20;
+  const taxAmt      = calc.grossMargin*(taxRate/100);
+  const idleAmt     = calc.grossMargin*(idleBuf/100);
+  const netProfit   = calc.grossMargin-taxAmt-idleAmt;
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Cost breakdown</div>
+        <Row label="Overhead"   value={GHS(calc.overhead)}/>
+        <Row label={`  ${totalDays} days × ${GHS(calc.dayRate)}/day`} value="" indent/>
+        <Row label="Labour"     value={GHS(calc.labour)}/>
+        <Row label="Materials"  value={GHS(calc.matAmt)}/>
+        <Row label="Logistics"  value={GHS(calc.logistics)}/>
+        <Row label="Total cost" value={GHS(calc.rawCost)} bold/>
+      </div>}/>
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Pricing</div>
+        <Row label={`Tier: ${calc.tier.label}`} value={`×${calc.tier.mult}`}/>
+        {activeAddOns.map(a=><Row key={a.id} label={a.label} value={`+${a.pct}%`} indent/>)}
+        {activeAddOns.length>0&&<Row label="Combined add-on multiplier" value={`×${calc.addOnMult.toFixed(3)}`}/>}
+        <div style={{borderTop:`1.5px solid ${S.accent}`,marginTop:12,paddingTop:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>Quoted Price</span>
+            <span style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:S.accent}}>{GHS(calc.quotedPrice)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:6}}>
+            <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FB}}>Gross margin</span>
+            <span style={{fontSize:'.82rem',fontFamily:FM,color:calc.marginPct>=30?S.ok:S.warn}}>{GHS(calc.grossMargin)}</span>
+          </div>
+        </div>
+        <MarginBar pct={calc.marginPct}/>
+      </div>}/>
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Projected net profit</div>
+        <Row label="Gross profit" value={GHS(calc.grossMargin)} bold/>
+        <Row label={`Income tax (${taxRate}%)`} value={`− ${GHS(taxAmt)}`} color={S.err} indent/>
+        <Row label={`Idle time reserve (${idleBuf}%)`} value={`− ${GHS(idleAmt)}`} color={S.warn} indent/>
+        <div style={{borderTop:`2px solid ${S.dark}`,marginTop:10,paddingTop:10,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div>
+            <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>Projected net</div>
+            <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FM,marginTop:2}}>Adjust rates in Setup → Projections</div>
+          </div>
+          <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:netProfit>=0?S.ok:S.err}}>{GHS(netProfit)}</div>
+        </div>
+      </div>}/>
+      <Card ch={<div>
+        <Lbl ch="Quote status"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
+          {Object.entries(STATUS_META).map(([s,m])=>(
+            <button key={s} onClick={()=>onStatusChange(s)} style={{background:q.status===s?S.bgAlt:S.surface,border:`1.5px solid ${q.status===s?S.accent:S.border}`,borderRadius:8,padding:'9px 12px',cursor:'pointer',fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.status===s?S.accent:S.mid,transition:'all .15s'}}>{m.label}</button>
+          ))}
+        </div>
+        <Btn ch="Save quote" onClick={onSave} full color={S.accent}/>
+      </div>}/>
+    </div>
+  );
+}
+
+// ── Costs Tab ─────────────────────────────────────────────────────────
+function CostsTab({ q, upd, calc }) {
+  const [form,    setForm]    = useState({date:new Date().toISOString().slice(0,10),category:'materials',description:'',amount:''});
+  const [adding,  setAdding]  = useState(false);
+  const exp         = q.expenditure||[];
+  const actual      = calcActual(exp);
+  const totalActual = Object.values(actual).reduce((s,v)=>s+v,0);
+  const actMargin   = calc.quotedPrice-totalActual;
+  const actMarginPct= calc.quotedPrice>0?(actMargin/calc.quotedPrice)*100:0;
+  const taxRate     = q.taxRate??15;
+  const idleBuf     = q.idleBuffer??20;
+  const actNet      = actMargin - actMargin*(taxRate/100) - actMargin*(idleBuf/100);
+  const addEntry    = () => {
+    if(!form.amount||!form.description.trim()) return;
+    upd({expenditure:[...exp,{id:uid(),...form,amount:+form.amount,loggedAt:new Date().toISOString()}]});
+    setForm(f=>({...f,description:'',amount:''}));
+    setAdding(false);
+  };
+  const remove = id => upd({expenditure:exp.filter(e=>e.id!==id)});
+  const quoted = {materials:calc.matAmt,labour:calc.labour,logistics:calc.logistics,overhead:calc.overhead,other:0};
+  return(
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <Card ch={<div>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Quoted vs Actual</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 80px 80px',gap:4,marginBottom:6}}>
+          <div/><div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textAlign:'right'}}>Quoted</div>
+          <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM,textAlign:'right'}}>Actual</div>
+        </div>
+        {EXP_CATS.map(cat=>{
+          const q_=quoted[cat]||0, a_=actual[cat]||0;
+          return(<div key={cat} style={{display:'grid',gridTemplateColumns:'1fr 80px 80px',gap:4,padding:'5px 0',borderBottom:`1px solid ${S.border}`,alignItems:'center'}}>
+            <span style={{fontSize:'.82rem',fontFamily:FB,color:S.mid,textTransform:'capitalize'}}>{cat}</span>
+            <span style={{fontSize:'.78rem',fontFamily:FM,textAlign:'right'}}>{GHS(q_)}</span>
+            <span style={{fontSize:'.78rem',fontFamily:FM,textAlign:'right',color:a_>q_&&q_>0?S.err:S.dark}}>{GHS(a_)}</span>
+          </div>);
+        })}
+        <div style={{paddingTop:10,marginTop:4}}>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+            <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FB}}>Quoted price</span>
+            <span style={{fontSize:'.82rem',fontFamily:FM}}>{GHS(calc.quotedPrice)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between'}}>
+            <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FB}}>Actual profit so far</span>
+            <span style={{fontSize:'.88rem',fontFamily:FM,fontWeight:600,color:actMargin>=0?S.ok:S.err}}>{GHS(actMargin)}</span>
+          </div>
+          <div style={{display:'flex',justifyContent:'space-between',marginTop:4,paddingTop:6,borderTop:`1px dashed ${S.border}`}}>
+            <span style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>Projected net (after tax + reserve)</span>
+            <span style={{fontSize:'.85rem',fontFamily:FD,fontWeight:600,color:actNet>=0?S.ok:S.err}}>{GHS(actNet)}</span>
+          </div>
+        </div>
+        <MarginBar pct={actMarginPct} label="Actual margin"/>
+        <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:8}}>{exp.length} entries · {GHS(totalActual)} spent so far</div>
+      </div>}/>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,fontFamily:FM,textTransform:'uppercase'}}>Expenditure log</div>
+        <Btn ch={adding?'Cancel':'+ Log expense'} onClick={()=>setAdding(!adding)} size="sm" outline={adding} color={adding?S.err:S.dark}/>
+      </div>
+      {adding&&<Card ch={<div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          <div><Lbl ch="Date"/><CtrlInp value={form.date} onChange={e=>setForm(f=>({...f,date:e.target.value}))} type="date"/></div>
+          <div><Lbl ch="Category"/><CtrlSel value={form.category} onChange={e=>setForm(f=>({...f,category:e.target.value}))}>{EXP_CATS.map(c=><option key={c} value={c} style={{textTransform:'capitalize'}}>{c}</option>)}</CtrlSel></div>
+        </div>
+        <div><Lbl ch="Description"/><CtrlInp value={form.description} onChange={e=>setForm(f=>({...f,description:e.target.value}))} placeholder="e.g. Timber from Accra Sawmill"/></div>
+        <div><Lbl ch="Amount (GH₵)"/><CtrlInp type="number" value={form.amount} onChange={e=>setForm(f=>({...f,amount:e.target.value}))} placeholder="0.00"/></div>
+        <div style={{display:'flex',gap:8}}>
+          <Btn ch="Log" onClick={addEntry} style={{flex:1}} color={S.accent}/>
+          <Btn ch="Cancel" onClick={()=>setAdding(false)} outline style={{flex:1}}/>
+        </div>
+      </div>}/>}
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        {[...exp].reverse().map(e=>(
+          <div key={e.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'10px 14px',background:S.surface,border:`1.5px solid ${S.border}`,borderRadius:8}}>
+            <div>
+              <div style={{fontSize:'.85rem',fontFamily:FB,color:S.dark}}>{e.description}</div>
+              <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{e.date} · <span style={{textTransform:'capitalize'}}>{e.category}</span></div>
+            </div>
+            <div style={{display:'flex',gap:10,alignItems:'center'}}>
+              <span style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.accent}}>{GHS(e.amount)}</span>
+              <button onClick={()=>remove(e.id)} style={{background:'transparent',border:'none',color:S.err,cursor:'pointer',fontSize:'1rem'}}>✕</button>
+            </div>
+          </div>
+        ))}
+        {exp.length===0&&<div style={{color:S.muted,fontSize:'.85rem',fontFamily:FB,textAlign:'center',padding:'20px 0'}}>No expenses logged yet.</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Root App ──────────────────────────────────────────────────────────
+function App() {
+  const [screen,      setScreen]      = useState('loading');
+  const [session,     setSession_]    = useState(null);
+  const [quotes,      setQuotes]      = useState([]);
+  const [overheadCfg, setOverheadCfg] = useState(null);
+  const [activeId,    setActiveId]    = useState(null);
+
+  function persistSession(carpId, workshopName, pin) {
+    const s = { carpId, workshopName, pin };
+    setSession_(s);
+    setSession(s);
+  }
+  function logout() {
+    clearSession();
+    setSession_(null);
+    setQuotes([]);
+    setOverheadCfg(null);
+    setScreen('welcome');
+  }
+
+  async function loadData(sess) {
+    try {
+      const [cfgRes, qRes] = await Promise.all([
+        carpFetch('/carp/config', 'GET', null, sess),
+        carpFetch('/carp/quotes', 'GET', null, sess),
+      ]);
+      setOverheadCfg(cfgRes.config || null);
+      setQuotes(qRes.quotes || []);
+      return true;
+    } catch { return false; }
+  }
+
+  useEffect(() => {
+    const saved = getSession();
+    if (!saved) { setScreen('welcome'); return; }
+    loadData(saved).then(ok => {
+      if (ok) { setSession_(saved); setScreen('dashboard'); }
+      else    { clearSession(); setScreen('welcome'); }
+    });
+  }, []);
+
+  // Derive ref prefix from workshop name (first 3 alpha chars, uppercase)
+  const refPrefix = session
+    ? (session.workshopName.replace(/[^a-zA-Z]/g,'').slice(0,3).toUpperCase() || 'JOB')
+    : 'JOB';
+
+  const saveQuotes = async updated => {
+    setQuotes(updated);
+    await carpFetch('/carp/quotes', 'PUT', updated);
+  };
+  const saveOverhead = async cfg => {
+    setOverheadCfg(cfg);
+    await carpFetch('/carp/config', 'PUT', cfg);
+  };
+
+  const createNew = () => {
+    const q = newQuote(quotes.length + 1, refPrefix);
+    setQuotes(prev => [...prev, q]);
+    setActiveId(q.id);
+    setScreen('editor');
+  };
+  const openQuote  = id  => { setActiveId(id); setScreen('editor'); };
+  const saveQuote  = async updated => {
+    const next = quotes.map(q => q.id===updated.id ? updated : q);
+    await saveQuotes(next);
+  };
+
+  if (screen === 'loading') return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}>
+      <div style={{fontFamily:FD,fontSize:'1.4rem',fontWeight:600,color:S.dark}}>Job Pricing Tool</div>
+      <div style={{fontSize:'.82rem',color:S.muted,fontFamily:FB,marginTop:8}}>Loading…</div>
+    </div>
+  );
+
+  if (screen === 'welcome')  return <WelcomeScreen onRegister={()=>setScreen('register')} onLogin={()=>setScreen('login')}/>;
+
+  if (screen === 'register') return (
+    <RegisterScreen
+      onBack={()=>setScreen('welcome')}
+      onSuccess={(carpId, workshopName, pin) => {
+        persistSession(carpId, workshopName, pin);
+        setScreen('register-success');
+      }}/>
+  );
+
+  if (screen === 'register-success') return (
+    <RegisterSuccessScreen
+      carpId={session.carpId}
+      workshopName={session.workshopName}
+      onContinue={async () => {
+        await loadData(session);
+        setScreen('dashboard');
+      }}/>
+  );
+
+  if (screen === 'login') return (
+    <LoginScreen
+      onBack={()=>setScreen('welcome')}
+      onSuccess={async (carpId, workshopName, pin) => {
+        const s = { carpId, workshopName, pin };
+        persistSession(carpId, workshopName, pin);
+        await loadData(s);
+        setScreen('dashboard');
+      }}/>
+  );
+
+  if (screen === 'dashboard') return (
+    <Dashboard
+      session={session}
+      quotes={quotes}
+      overheadCfg={overheadCfg}
+      onNew={createNew}
+      onOpen={openQuote}
+      onSettings={()=>setScreen('settings')}
+      onLogout={logout}/>
+  );
+
+  if (screen === 'settings') return (
+    <OverheadSettings
+      cfg={overheadCfg}
+      onSave={saveOverhead}
+      onBack={()=>setScreen('dashboard')}/>
+  );
+
+  if (screen === 'editor') {
+    const q = quotes.find(x => x.id === activeId);
+    if (!q) return null;
+    return (
+      <QuoteEditor
+        quote={q}
+        overheadCfg={overheadCfg}
+        session={session}
+        onSave={async updated => { await saveQuote(updated); }}
+        onBack={()=>setScreen('dashboard')}/>
+    );
+  }
+
+  return null;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>

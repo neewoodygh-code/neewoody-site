@@ -153,6 +153,20 @@ async function sendExpoPush(expoToken, title, body) {
   }
 }
 
+// ── Carpenter tool helpers ────────────────────────────────────────────
+
+function genCarpId() {
+  // 6-char uppercase, avoids 0/O/1/I confusion
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+async function verifyCarp(env, carpId, pin) {
+  if (!carpId || !pin) return false;
+  const stored = await env.NEEWOODY_KV.get(`carp-${carpId}-pin`);
+  return stored !== null && stored === pin;
+}
+
 // ── Unified notify — sends via whichever channel exists ───────────────
 
 async function notifyCrew(env, crewId, title, body) {
@@ -212,6 +226,73 @@ export default {
       return new Response(JSON.stringify({ ok: true, id: lead.id }), {
         headers: { ...cors, 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
+    }
+
+    // ── Carpenter tool routes (/api/carp/*) ──────────────────────────
+    if (route === 'carp') {
+      const sub = parts[1];
+
+      // POST /api/carp/register — create a new carpenter account
+      if (sub === 'register' && request.method === 'POST') {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+        const { workshopName, pin } = body;
+        if (!workshopName?.trim()) return json({ error: 'workshopName required' }, 422);
+        if (!pin || !/^\d{4}$/.test(pin)) return json({ error: 'PIN must be 4 digits' }, 422);
+        // Generate unique ID — retry once on collision (astronomically unlikely)
+        let carpId = genCarpId();
+        if (await env.NEEWOODY_KV.get(`carp-${carpId}`)) carpId = genCarpId();
+        const account = { id: carpId, workshopName: workshopName.trim(), createdAt: new Date().toISOString() };
+        await env.NEEWOODY_KV.put(`carp-${carpId}`, JSON.stringify(account));
+        await env.NEEWOODY_KV.put(`carp-${carpId}-pin`, pin);
+        return json({ ok: true, carpId, workshopName: account.workshopName }, 201);
+      }
+
+      // POST /api/carp/auth — verify credentials, return account info
+      if (sub === 'auth' && request.method === 'POST') {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+        const { carpId, pin } = body;
+        if (!await verifyCarp(env, carpId, pin)) return json({ error: 'Invalid code or PIN' }, 401);
+        const raw = await env.NEEWOODY_KV.get(`carp-${carpId}`);
+        const account = raw ? JSON.parse(raw) : { id: carpId };
+        return json({ ok: true, carpId, workshopName: account.workshopName });
+      }
+
+      // All further /api/carp/* routes require X-Carp-Id + X-Carp-Pin
+      const carpId = request.headers.get('X-Carp-Id');
+      const carpPin = request.headers.get('X-Carp-Pin');
+      if (!await verifyCarp(env, carpId, carpPin)) return json({ error: 'Unauthorized' }, 401);
+
+      // GET /api/carp/config
+      if (sub === 'config' && request.method === 'GET') {
+        const raw = await env.NEEWOODY_KV.get(`carp-${carpId}-config`);
+        return json({ ok: true, config: raw ? JSON.parse(raw) : null });
+      }
+
+      // PUT /api/carp/config
+      if (sub === 'config' && request.method === 'PUT') {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+        await env.NEEWOODY_KV.put(`carp-${carpId}-config`, JSON.stringify(body));
+        return json({ ok: true });
+      }
+
+      // GET /api/carp/quotes
+      if (sub === 'quotes' && request.method === 'GET') {
+        const raw = await env.NEEWOODY_KV.get(`carp-${carpId}-quotes`);
+        return json({ ok: true, quotes: raw ? JSON.parse(raw) : [] });
+      }
+
+      // PUT /api/carp/quotes
+      if (sub === 'quotes' && request.method === 'PUT') {
+        let body;
+        try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
+        await env.NEEWOODY_KV.put(`carp-${carpId}-quotes`, JSON.stringify(body));
+        return json({ ok: true });
+      }
+
+      return json({ error: 'Not found' }, 404);
     }
 
     // ── Public: GET /api/posts  (list / filter) ──────────────────────
