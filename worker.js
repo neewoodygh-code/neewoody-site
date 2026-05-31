@@ -1,13 +1,7 @@
 // Neewoody Dispatch — Cloudflare Worker
 // KV data storage + Web Push notifications (RFC 8291 aes128gcm) + Expo push
 
-const API_KEY = 'nwd-dispatch-2024';
 const ALLOWED_KEYS = ['nwd-crew', 'nwd-tools', 'nwd-jobs', 'nwd-damage', 'nwd-quotes', 'nwd-overhead', 'nwd-leads', 'nwd-config'];
-
-const VAPID_PUBLIC  = 'VAPID_PUBLIC_REDACTED';
-const VAPID_PRIVATE = 'VAPID_PRIVATE_REDACTED';
-const VAPID_X       = 'VAPID_X_REDACTED';
-const VAPID_Y       = '7rAaWDAYUQ9hqZ-_85ps8uMgYt8nSJpZCkeLbbaGdgk';
 const VAPID_SUBJECT = 'mailto:neewoodygh@gmail.com';
 
 const cors = {
@@ -43,7 +37,7 @@ function json(data, status = 200) {
 
 // ── Web Push (existing, untouched) ────────────────────────────────────
 
-async function makeVAPIDAuth(endpoint) {
+async function makeVAPIDAuth(endpoint, env) {
   const url = new URL(endpoint);
   const enc = new TextEncoder();
   const header  = b64uEncode(enc.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
@@ -54,13 +48,13 @@ async function makeVAPIDAuth(endpoint) {
   })));
   const key = await crypto.subtle.importKey(
     'jwk',
-    { kty: 'EC', crv: 'P-256', d: VAPID_PRIVATE, x: VAPID_X, y: VAPID_Y, key_ops: ['sign'] },
+    { kty: 'EC', crv: 'P-256', d: env.VAPID_PRIVATE, x: env.VAPID_X, y: env.VAPID_Y, key_ops: ['sign'] },
     { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
   );
   const sig = await crypto.subtle.sign(
     { name: 'ECDSA', hash: 'SHA-256' }, key, enc.encode(`${header}.${payload}`)
   );
-  return `vapid t=${header}.${payload}.${b64uEncode(sig)},k=${VAPID_PUBLIC}`;
+  return `vapid t=${header}.${payload}.${b64uEncode(sig)},k=${env.VAPID_PUBLIC}`;
 }
 
 async function encryptPayload(subscription, message) {
@@ -112,11 +106,11 @@ async function encryptPayload(subscription, message) {
   return concat(header, new Uint8Array(ciphertext));
 }
 
-async function sendWebPush(subscription, title, body) {
+async function sendWebPush(subscription, title, body, env) {
   try {
     const payload   = JSON.stringify({ title, body, icon: '/icon-192.png' });
     const encrypted = await encryptPayload(subscription, payload);
-    const auth      = await makeVAPIDAuth(subscription.endpoint);
+    const auth      = await makeVAPIDAuth(subscription.endpoint, env);
     await fetch(subscription.endpoint, {
       method: 'POST',
       headers: {
@@ -165,7 +159,7 @@ async function notifyCrew(env, crewId, title, body) {
   // Web Push (browser)
   const webRaw = await env.NEEWOODY_KV.get(`sub-${crewId}`);
   if (webRaw) {
-    await sendWebPush(JSON.parse(webRaw), title, body);
+    await sendWebPush(JSON.parse(webRaw), title, body, env);
   }
   // Expo Push (native app)
   const expoToken = await env.NEEWOODY_KV.get(`expo-${crewId}`);
@@ -221,7 +215,7 @@ export default {
     }
 
     // All other routes require API key
-    if (request.headers.get('X-NWD-Key') !== API_KEY) {
+    if (request.headers.get('X-NWD-Key') !== env.NWD_API_KEY) {
       return json({ error: 'Unauthorized' }, 401);
     }
 
