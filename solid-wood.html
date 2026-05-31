@@ -303,6 +303,10 @@ a{text-decoration:none}
 </section>
 
 <!-- CTA -->
+
+<!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
+<section id="cms-posts" data-page="solid-wood" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+
 <section class="sw-cta">
   <h2>Let's talk about <em>your project.</em></h2>
   <div>
@@ -346,6 +350,8 @@ a{text-decoration:none}
 </a>
 
 <script src="js/main.js"></script>
+<script src="js/cms-posts.js"></script>
+
 <script>
 (function(){
   var nav=document.getElementById('nav');

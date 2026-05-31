@@ -787,6 +787,10 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 </section>
 
 <!-- CTA -->
+
+<!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
+<section id="cms-posts" data-page="kitchens" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+
 <section class="kt-cta">
   <h2>Let's talk about<br><em>your kitchen.</em></h2>
   <div>
@@ -827,6 +831,8 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 </a>
 
 <script src="js/main.js"></script>
+<script src="js/cms-posts.js"></script>
+
 <script>
 (function(){
   var nav = document.getElementById('nav');
