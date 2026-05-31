@@ -169,11 +169,11 @@ async function apiRegister(workshopName, pin) {
   return r.json();
 }
 
-async function apiAuth(carpId, pin) {
+async function apiAuth(identifier, pin) {
   const r = await fetch(`${API}/carp/auth`, {
     method: 'POST',
     headers: { 'Content-Type':'application/json' },
-    body: JSON.stringify({ carpId: carpId.toUpperCase(), pin }),
+    body: JSON.stringify({ identifier: identifier.trim(), pin }),
   });
   return r.json();
 }
@@ -372,20 +372,21 @@ function RegisterSuccessScreen({ carpId, workshopName, onContinue }) {
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:32}}>
       <div style={{width:'100%',maxWidth:340,textAlign:'center'}}>
         <div style={{width:36,height:3,background:S.ok,margin:'0 auto 20px'}}/>
-        <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:600,color:S.dark,marginBottom:8}}>Account created</div>
+        <div style={{fontFamily:FD,fontSize:'1.6rem',fontWeight:600,color:S.dark,marginBottom:8}}>You're in</div>
         <div style={{fontFamily:FB,fontSize:'.88rem',color:S.muted,marginBottom:28,lineHeight:1.65}}>
-          Welcome, <strong style={{color:S.dark}}>{workshopName}</strong>. Save your workshop code — you'll need it to sign in from another device.
+          Welcome, <strong style={{color:S.dark}}>{workshopName}</strong>. Sign in anytime using your workshop name and PIN.
         </div>
-        <div style={{background:S.dark,borderRadius:12,padding:'20px 24px',marginBottom:8}}>
-          <div style={{fontFamily:FM,fontSize:'.62rem',letterSpacing:'.2em',color:'rgba(255,255,255,.4)',textTransform:'uppercase',marginBottom:8}}>Your workshop code</div>
-          <div style={{fontFamily:FD,fontSize:'2.2rem',fontWeight:700,color:S.accent,letterSpacing:'.12em'}}>{carpId}</div>
-        </div>
-        <button onClick={copy} style={{background:'transparent',border:'none',fontFamily:FB,fontSize:'.78rem',color:copied?S.ok:S.muted,cursor:'pointer',marginBottom:28,padding:'4px 0'}}>
-          {copied ? '✓ Copied' : 'Copy code'}
-        </button>
-        <div style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:8,padding:'12px 16px',marginBottom:28,textAlign:'left'}}>
-          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:6}}>Keep this code safe</div>
-          <div style={{fontFamily:FB,fontSize:'.78rem',color:S.mid,lineHeight:1.65}}>Your code + PIN = your login on any device. We can't recover a lost code — if you lose both, you'll need to register again.</div>
+        <div style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:8,padding:'14px 18px',marginBottom:28,textAlign:'left'}}>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:6}}>Recovery code</div>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <div style={{fontFamily:FM,fontSize:'1.1rem',fontWeight:600,color:S.dark,letterSpacing:'.12em'}}>{carpId}</div>
+            <button onClick={copy} style={{background:'transparent',border:'none',fontFamily:FB,fontSize:'.75rem',color:copied?S.ok:S.muted,cursor:'pointer',padding:'2px 0'}}>
+              {copied ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <div style={{fontFamily:FB,fontSize:'.72rem',color:S.muted,lineHeight:1.6,marginTop:8}}>
+            If you ever forget your workshop name spelling, use this code to sign in instead. Keep it somewhere safe.
+          </div>
         </div>
         <Btn ch="Open my dashboard →" onClick={onContinue} full color={S.accent} size="lg"/>
       </div>
@@ -394,21 +395,21 @@ function RegisterSuccessScreen({ carpId, workshopName, onContinue }) {
 }
 
 function LoginScreen({ onSuccess, onBack }) {
-  const [code, setCode]   = useState('');
-  const [pin,  setPin]    = useState('');
-  const [busy, setBusy]   = useState(false);
-  const [error, setError] = useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [pin,  setPin]              = useState('');
+  const [busy, setBusy]             = useState(false);
+  const [error, setError]           = useState('');
 
   async function submit(e) {
     e.preventDefault();
     setError('');
-    if (!code.trim()) return setError('Enter your workshop code.');
-    if (!pin)         return setError('Enter your PIN.');
+    if (!identifier.trim()) return setError('Enter your workshop name.');
+    if (!pin)               return setError('Enter your PIN.');
     setBusy(true);
     try {
-      const res = await apiAuth(code.trim(), pin);
+      const res = await apiAuth(identifier.trim(), pin);
       if (res.ok) onSuccess(res.carpId, res.workshopName, pin);
-      else setError('Invalid code or PIN.');
+      else setError(res.error || 'Workshop not found or incorrect PIN.');
     } catch {
       setError('Connection error — check your internet and try again.');
     } finally {
@@ -421,13 +422,13 @@ function LoginScreen({ onSuccess, onBack }) {
       <div style={{width:'100%',maxWidth:320}}>
         <button onClick={onBack} style={{background:'transparent',border:'none',color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',marginBottom:24}}>← back</button>
         <div style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:600,color:S.dark,marginBottom:4}}>Sign in</div>
-        <div style={{fontFamily:FB,fontSize:'.82rem',color:S.muted,marginBottom:24}}>Enter the 6-character code from when you registered.</div>
+        <div style={{fontFamily:FB,fontSize:'.82rem',color:S.muted,marginBottom:24}}>Use your workshop name and PIN. Or enter your recovery code if you don't remember the name.</div>
         <form onSubmit={submit} style={{display:'flex',flexDirection:'column',gap:14}}>
           <div>
-            <Lbl ch="Workshop code"/>
-            <input value={code} onChange={e=>setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6))}
-              placeholder="e.g. A7F3KP" maxLength={6}
-              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'10px 14px',fontFamily:FM,fontSize:'1.3rem',outline:'none',width:'100%',letterSpacing:'.2em',textTransform:'uppercase'}}/>
+            <Lbl ch="Workshop name (or recovery code)"/>
+            <input value={identifier} onChange={e=>setIdentifier(e.target.value)}
+              placeholder="e.g. Mensah Woodworks"
+              style={{background:S.bgAlt,border:`1.5px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'10px 14px',fontFamily:FB,fontSize:'.95rem',outline:'none',width:'100%'}}/>
           </div>
           <div>
             <Lbl ch="PIN"/>

@@ -239,21 +239,36 @@ export default {
         const { workshopName, pin } = body;
         if (!workshopName?.trim()) return json({ error: 'workshopName required' }, 422);
         if (!pin || !/^\d{4}$/.test(pin)) return json({ error: 'PIN must be 4 digits' }, 422);
+        // Check name uniqueness via normalised lookup key
+        const nameKey = 'carp-name-' + workshopName.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (await env.NEEWOODY_KV.get(nameKey)) {
+          return json({ error: 'That workshop name is already registered — try adding your location or initial.' }, 409);
+        }
         // Generate unique ID — retry once on collision (astronomically unlikely)
         let carpId = genCarpId();
         if (await env.NEEWOODY_KV.get(`carp-${carpId}`)) carpId = genCarpId();
         const account = { id: carpId, workshopName: workshopName.trim(), createdAt: new Date().toISOString() };
         await env.NEEWOODY_KV.put(`carp-${carpId}`, JSON.stringify(account));
         await env.NEEWOODY_KV.put(`carp-${carpId}-pin`, pin);
+        await env.NEEWOODY_KV.put(nameKey, carpId); // reverse lookup: name → id
         return json({ ok: true, carpId, workshopName: account.workshopName }, 201);
       }
 
-      // POST /api/carp/auth — verify credentials, return account info
+      // POST /api/carp/auth — accepts workshop name OR recovery code + PIN
       if (sub === 'auth' && request.method === 'POST') {
         let body;
         try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400); }
-        const { carpId, pin } = body;
-        if (!await verifyCarp(env, carpId, pin)) return json({ error: 'Invalid code or PIN' }, 401);
+        const { identifier, pin } = body;
+        if (!identifier?.trim()) return json({ error: 'Workshop name or recovery code required' }, 422);
+        // Resolve identifier: 6-char uppercase = recovery code, anything else = name lookup
+        let carpId = identifier.trim();
+        if (!/^[A-Z0-9]{6}$/.test(carpId)) {
+          const nameKey = 'carp-name-' + carpId.toLowerCase().replace(/[^a-z0-9]/g, '');
+          const looked = await env.NEEWOODY_KV.get(nameKey);
+          if (!looked) return json({ error: 'Workshop not found — check the name or use your recovery code' }, 401);
+          carpId = looked;
+        }
+        if (!await verifyCarp(env, carpId, pin)) return json({ error: 'Incorrect PIN' }, 401);
         const raw = await env.NEEWOODY_KV.get(`carp-${carpId}`);
         const account = raw ? JSON.parse(raw) : { id: carpId };
         return json({ ok: true, carpId, workshopName: account.workshopName });
