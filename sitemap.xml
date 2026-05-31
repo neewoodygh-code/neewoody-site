@@ -83,18 +83,23 @@
 </url>
 
 <url>
-  <loc>https://neewoodygh.com/pricing.html</loc>
-  <priority>0.8</priority>
-</url>
-
-<url>
   <loc>https://neewoodygh.com/contact.html</loc>
   <priority>0.8</priority>
 </url>
 
 <url>
+  <loc>https://neewoodygh.com/tools.html</loc>
+  <priority>0.7</priority>
+</url>
+
+<url>
   <loc>https://neewoodygh.com/wardrobe-estimator.html</loc>
   <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://neewoodygh.com/carpenter-pricing.html</loc>
+  <priority>0.6</priority>
 </url>
 
 <url>
