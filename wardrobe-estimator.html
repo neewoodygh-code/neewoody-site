@@ -396,11 +396,15 @@ a{text-decoration:none}
     const PANEL_COST_GHS = 500;
     const EDGEBAND_PER_M = 7;
 
+    // Base prices calibrated to Neewoody's actual cost model at Basic Build tier (×1.45).
+    // Derived from: overhead (GH₵274/day) + crew labour (supervisor + hand + Nuer basic)
+    // + cabinetry materials + logistics, multiplied by 1.45.
+    // Updated 2026-05-31 — previously understated by ~40%.
     const BASE = {
-      small:  7500,
-      medium: 12000,
-      large:  18500,
-      xlarge: 26000
+      small:  12000,  // < 1500mm wide, ~5 job days
+      medium: 15500,  // 1500–2500mm wide, ~6 job days
+      large:  23000,  // 2500–3500mm wide, ~9 job days
+      xlarge: 34000   // > 3500mm wide, ~12 job days
     };
 
     const RANGE_SPREAD  = 0.12;
