@@ -153,6 +153,7 @@ All jobs have workshop prep days. Pergolas: air dry, cut rafter tails, pre-stain
 **Pricing tool:** /pricing.html — admin only, internal cost calculator with quotes
 **Cutlist generator:** /cutlist.html — parametric wardrobe cutlist for carpenters
 **Wardrobe estimator:** /wardrobe-estimator.html — client-facing price range tool
+**Catalogue:** /catalogue.html — print-to-PDF lookbook (2026-06-05). Self-contained single file, fully inline CSS, A4 print-optimised (`@page size:A4`), uses the new green/gold/cream design system (Playfair + Lora + Jost). 6 sections: Wardrobes · Kitchens · Beds · Dining & Living · Solid Wood · Commercial & Institutional. Real project photos only (no placeholders), no pricing. Open in a browser → Save as PDF to send to clients. Listed in sitemap.xml. Not yet linked from site nav.
 
 **Backend:**
 - Cloudflare Worker: neewoody-dispatch-api

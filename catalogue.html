@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neewoody Custom Woodwork — Catalogue</title>
+<meta name="description" content="Selected works by Neewoody Custom Woodwork — bespoke wardrobes, kitchens, beds, dining, solid wood and commercial joinery, handcrafted in Accra, Ghana." />
+<link rel="icon" href="images/favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px}
+body{
+  background:#b8b09a;
+  color:var(--ink);
+  font-family:var(--body);
+  -webkit-font-smoothing:antialiased;
+  padding:24px 0;
+}
+img{display:block;max-width:100%}
+
+/* ── PAGE FRAME (A4) ── */
+.page{
+  position:relative;
+  width:210mm;
+  height:297mm;
+  margin:0 auto 24px;
+  background:var(--cream);
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,0.28);
+  page-break-after:always;
+  break-after:page;
+}
+.page:last-child{margin-bottom:0}
+
+/* ── SHARED TYPE ── */
+.eyebrow{
+  font-family:var(--ui);
+  font-weight:500;
+  font-size:9pt;
+  letter-spacing:0.32em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.kicker{
+  font-family:var(--ui);
+  font-weight:400;
+  font-size:8pt;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(--green)}
+.lead{font-family:var(--body);color:var(--muted);line-height:1.7}
+
+/* ── COVER ── */
+.cover{
+  background:var(--green);
+  color:var(--cream);
+  display:flex;
+  flex-direction:column;
+}
+.cover-art{
+  height:64%;
+  position:relative;
+  overflow:hidden;
+}
+.cover-art img{width:100%;height:100%;object-fit:cover}
+.cover-art::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,31,14,0.12) 0%,rgba(11,31,14,0.55) 100%);
+}
+.cover-body{
+  flex:1;
+  padding:16mm 18mm;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.cover-body .eyebrow{color:var(--gold)}
+.cover-body h1{
+  color:var(--cream);
+  font-size:40pt;
+  letter-spacing:-0.01em;
+  margin:10px 0 14px;
+}
+.cover-body h1 em{font-style:italic;color:var(--gold)}
+.cover-body p{
+  font-family:var(--body);
+  font-size:11pt;
+  line-height:1.7;
+  color:rgba(240,232,208,0.78);
+  max-width:135mm;
+}
+.cover-meta{
+  margin-top:18px;
+  font-family:var(--ui);
+  font-size:8.5pt;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:rgba(240,232,208,0.6);
+}
+.cover-rule{width:46px;height:2px;background:var(--gold);margin:0 0 4px}
+
+/* ── ABOUT ── */
+.pad{padding:18mm}
+.about{display:flex;flex-direction:column;justify-content:center;height:100%}
+.about h2{font-size:26pt;margin:12px 0 18px;max-width:150mm}
+.about .lead{font-size:11.5pt;max-width:150mm;margin-bottom:14px}
+.about-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;margin-top:28px;border-top:1px solid rgba(11,31,14,0.14);
+}
+.about-stats div{padding:18px 0 0}
+.about-stats .n{font-family:var(--display);font-size:26pt;color:var(--gold);line-height:1}
+.about-stats .l{font-family:var(--ui);font-size:8pt;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+/* ── SECTION DIVIDER ── */
+.divider{
+  background:var(--green);color:var(--cream);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:18mm;position:relative;
+}
+.divider .num{
+  font-family:var(--display);
+  font-size:120pt;line-height:0.8;
+  color:rgba(200,146,42,0.16);
+  position:absolute;top:26mm;right:18mm;
+}
+.divider .eyebrow{position:relative}
+.divider h2{color:var(--cream);font-size:38pt;margin:12px 0 16px;position:relative}
+.divider h2 em{color:var(--gold);font-style:italic}
+.divider p{
+  font-family:var(--body);font-size:11pt;line-height:1.7;
+  color:rgba(240,232,208,0.74);max-width:130mm;position:relative;
+}
+.divider .rule{width:46px;height:2px;background:var(--gold);margin-bottom:8px;position:relative}
+
+/* ── FEATURE (full-bleed hero + overlay caption) ── */
+.feature{position:relative;color:var(--cream)}
+.feature>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feature::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,31,14,0) 38%,rgba(11,31,14,0.82) 100%);
+}
+.feature .cap{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:16mm 18mm;z-index:2;
+}
+.feature .cap .eyebrow{color:var(--gold)}
+.feature .cap h3{color:var(--cream);font-size:30pt;margin:8px 0 8px}
+.feature .cap p{font-family:var(--body);font-size:10.5pt;line-height:1.6;color:rgba(240,232,208,0.85);max-width:140mm}
+
+/* ── SPREAD (one big image + spec panel) ── */
+.spread{display:flex;flex-direction:column;height:100%}
+.spread-img{height:62%;overflow:hidden;background:var(--cream-dark)}
+.spread-img img{width:100%;height:100%;object-fit:cover}
+.spread-body{flex:1;padding:12mm 18mm;display:flex;flex-direction:column;justify-content:center}
+.spread-body .head{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.spread-body h3{font-size:22pt}
+.spread-body .yr{font-family:var(--ui);font-size:9pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.spread-body .desc{font-family:var(--body);font-size:10.5pt;line-height:1.65;color:var(--muted);margin:10px 0 0;max-width:150mm}
+.specs{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:7px 28px;
+  margin-top:14px;padding-top:14px;border-top:1px solid rgba(11,31,14,0.14);
+}
+.specs div{display:flex;flex-direction:column;gap:2px}
+.specs dt{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+.specs dd{font-family:var(--body);font-size:10pt;color:var(--ink)}
+
+/* ── DUO (two stacked images + caption strip), used for variety ── */
+.duo{display:flex;flex-direction:column;height:100%}
+.duo .imgs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4mm;padding:14mm 14mm 0}
+.duo .imgs img{width:100%;height:100%;object-fit:cover;background:var(--cream-dark)}
+.duo .strip{padding:10mm 14mm 12mm}
+.duo .strip .head{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.duo .strip h3{font-size:20pt}
+.duo .strip .yr{font-family:var(--ui);font-size:9pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold)}
+.duo .strip p{font-family:var(--body);font-size:10pt;line-height:1.6;color:var(--muted);margin-top:8px;max-width:160mm}
+
+/* ── GRID (catalogue thumbnails) ── */
+.grid-pg{padding:16mm 16mm 14mm;display:flex;flex-direction:column;height:100%}
+.grid-pg .pg-head{margin-bottom:10mm}
+.grid-pg .pg-head h3{font-size:18pt;margin-top:6px}
+.thumbs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+.card{display:flex;flex-direction:column}
+.card .ph{height:62mm;overflow:hidden;background:var(--cream-dark)}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .nm{font-family:var(--display);font-size:13pt;color:var(--green);margin-top:8px}
+.card .mt{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-top:3px}
+.card .ds{font-family:var(--body);font-size:9pt;line-height:1.5;color:var(--muted);margin-top:5px}
+
+/* ── BACK COVER ── */
+.back{
+  background:var(--green);color:var(--cream);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:20mm;text-align:left;
+}
+.back .rule{width:46px;height:2px;background:var(--gold);margin-bottom:14px}
+.back h2{color:var(--cream);font-size:30pt;margin-bottom:10px}
+.back h2 em{color:var(--gold);font-style:italic}
+.back p{font-family:var(--body);font-size:11pt;line-height:1.75;color:rgba(240,232,208,0.78);max-width:140mm;margin-bottom:26px}
+.contact{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 32px;max-width:150mm}
+.contact .row .l{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.contact .row .v{font-family:var(--body);font-size:11pt;color:var(--cream)}
+.back .sign{margin-top:34px;font-family:var(--ui);font-size:8pt;letter-spacing:0.24em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* ── PRINT ── */
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff;padding:0}
+  .page{margin:0;box-shadow:none;width:210mm;height:297mm}
+}
+@media screen and (max-width:760px){
+  .page{width:100%;height:auto;min-height:auto;aspect-ratio:210/297}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ COVER ════════════ -->
+<section class="page cover">
+  <div class="cover-art">
+    <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Floor-to-ceiling fitted wardrobe by Neewoody">
+  </div>
+  <div class="cover-body">
+    <div class="cover-rule"></div>
+    <div class="eyebrow">Selected Works · Accra, Ghana</div>
+    <h1>Neewoody<br><em>Custom Woodwork</em></h1>
+    <p>Bespoke furniture and architectural joinery, designed and built by hand for homes and institutions across Ghana. This catalogue is a selection of pieces we have made to measure.</p>
+    <div class="cover-meta">Catalogue · Volume One</div>
+  </div>
+</section>
+
+<!-- ════════════ ABOUT ════════════ -->
+<section class="page">
+  <div class="pad about">
+    <div class="eyebrow">The Workshop</div>
+    <h2>Furniture made to measure, not made to fit.</h2>
+    <p class="lead">Neewoody Custom Woodwork is a bespoke furniture and carpentry workshop based on Amugi Avenue in Accra. Every commission begins with the room it is built for — its dimensions, its light, the way it will be used — and is drawn, cut, finished and installed by our own crew.</p>
+    <p class="lead">We work in laminate and solid hardwood alike: fitted wardrobes and kitchens, dining sets and beds, live-edge tables, and full institutional fitouts. The pages that follow show real installations in clients' homes and premises — no renders, no stock photography.</p>
+    <div class="about-stats">
+      <div><div class="n">4.8★</div><div class="l">Google rating</div></div>
+      <div><div class="n">East&nbsp;Legon</div><div class="l">to the Volta Region</div></div>
+      <div><div class="n">By&nbsp;hand</div><div class="l">Designed · built · installed</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 01 · WARDROBES ════════════ -->
+<section class="page divider">
+  <div class="num">01</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section One</div>
+  <h2>Fitted &amp; Freestanding<br><em>Wardrobes</em></h2>
+  <p>Built-in, alcove and freestanding wardrobes in laminate and melamine — floor-to-ceiling storage, sliding and hinged doors, integrated drawers, dressers and downlights, fitted to the exact wall.</p>
+</section>
+
+<!-- Oyarifa — feature -->
+<section class="page feature">
+  <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Oyarifa master wardrobe">
+  <div class="cap">
+    <div class="eyebrow">Oyarifa · 2025</div>
+    <h3>Floor-to-Ceiling Built-ins</h3>
+    <p>Two greige oak-effect wardrobes for one property — a wall-to-wall master with four doors, overhead cabinets and a recessed downlight, and a narrow alcove guest unit with a six-shelf tower. Matte black hardware throughout.</p>
+  </div>
+</section>
+
+<!-- Oyarifa + Adenta interiors -->
+<section class="page duo">
+  <div class="imgs">
+    <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg" alt="Oyarifa guest wardrobe interior">
+    <img src="images/projects/adenta/adenta-interior-left.jpg" alt="Adenta wardrobe interior">
+  </div>
+  <div class="strip">
+    <div class="head"><h3>Interiors, considered</h3><span class="yr">Oyarifa · Adenta</span></div>
+    <p>Every wardrobe is planned from the inside out — hanging rails, adjustable shelving, drawer banks and cubbies arranged around how the room is actually used. At Adenta, a light ash alcove unit runs entirely handleless on push-to-open doors.</p>
+  </div>
+</section>
+
+<!-- Zoe Cantonments — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/zoe-cantonments/zoe-front-closed.jpg" alt="Zoe Cantonments wardrobe"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Zoe, Cantonments</h3><span class="yr">2026</span></div>
+    <p class="desc">A freestanding wardrobe in dark walnut-effect laminate — two-panel sliding doors above an integrated four-drawer chest in a 2 + 2 configuration, finished with matte black bar handles.</p>
+    <dl class="specs">
+      <div><dt>Finish</dt><dd>Dark walnut-effect laminate</dd></div>
+      <div><dt>Hardware</dt><dd>Matte black</dd></div>
+      <div><dt>Type</dt><dd>Freestanding · sliding doors</dd></div>
+      <div><dt>Detail</dt><dd>Integrated 4-drawer chest</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Dobro — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/dobro/dobro-wide-interior.jpg" alt="Dobro wardrobe interior"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Dobro, Nsawam Road</h3><span class="yr">2025</span></div>
+    <p class="desc">Four wardrobes across one new-build house — a wide master with six drawers, plus a kids' room and two guest bedrooms. Several units carry built-in drawer organisers with fitted compartments.</p>
+    <dl class="specs">
+      <div><dt>Finish</dt><dd>Cherry-effect laminate</dd></div>
+      <div><dt>Hardware</dt><dd>Matte black</dd></div>
+      <div><dt>Scope</dt><dd>4 wardrobes, whole house</dd></div>
+      <div><dt>Detail</dt><dd>Compartmented drawer organisers</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Wardrobes grid: Agbogba, Dansoman, Seyram, Nadia -->
+<section class="page grid-pg">
+  <div class="pg-head">
+    <div class="eyebrow">Wardrobes</div>
+    <h3>More from the catalogue</h3>
+  </div>
+  <div class="thumbs">
+    <div class="card">
+      <div class="ph"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Agbogba wardrobe"></div>
+      <div class="nm">Agbogba</div>
+      <div class="mt">Oak-effect · 2022</div>
+      <div class="ds">Built-in plus freestanding unit with an integrated dresser recess and recessed spotlights.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Dansoman wardrobe"></div>
+      <div class="nm">Dansoman</div>
+      <div class="mt">Cherry-effect · 2024</div>
+      <div class="ds">Freestanding sliding-door wardrobe on aluminium track, with overhead cabinet and internal drawers.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Seyram open wardrobe"></div>
+      <div class="nm">Seyram, Nmai Dzorn</div>
+      <div class="mt">Open walk-in system</div>
+      <div class="ds">White melamine open dressing room — four units in facing pairs with an integrated full-length mirror.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Nadia wardrobe"></div>
+      <div class="nm">Nadia, Dome</div>
+      <div class="mt">Distressed walnut · 2025</div>
+      <div class="ds">Rustic distressed walnut-effect wardrobe, two hinged doors over three drawers. Part of a full-home commission.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 02 · KITCHENS ════════════ -->
+<section class="page divider">
+  <div class="num">02</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Two</div>
+  <h2>Bespoke<br><em>Kitchens</em></h2>
+  <p>Fitted kitchens built around the way you cook — laminate cabinetry, stone and quartz worktops, islands with seating, integrated appliances and undermount sinks, from Spintex to the Eastern Region.</p>
+</section>
+
+<!-- Spintex — feature -->
+<section class="page feature">
+  <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg" alt="Spintex kitchen">
+  <div class="cap">
+    <div class="eyebrow">Spintex · 2024</div>
+    <h3>L-Shaped in Espresso &amp; Gold</h3>
+    <p>Dark espresso cabinetry under a Calacatta marble-effect worktop with gold veining, framed by black aluminium frosted-glass upper cabinets, an undermount sink and an integrated hob.</p>
+  </div>
+</section>
+
+<!-- Dansoman kitchen — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/dansoman-kitchen/dansoman-kitchen-island.jpg" alt="Dansoman kitchen island"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Dansoman Kitchen</h3><span class="yr">2024</span></div>
+    <p class="desc">A large family kitchen in cherry/teak-effect laminate under white engineered quartz, anchored by a freestanding island with an open-shelf end and a seating overhang. Integrated six-burner range and undermount sink.</p>
+    <dl class="specs">
+      <div><dt>Cabinetry</dt><dd>Cherry/teak-effect laminate</dd></div>
+      <div><dt>Worktop</dt><dd>White engineered quartz</dd></div>
+      <div><dt>Island</dt><dd>Open shelving · seating overhang</dd></div>
+      <div><dt>Appliances</dt><dd>6-burner range · undermount sink</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Kitchens grid: Tantra, Danfa, Kokrobite, Kukurantumi -->
+<section class="page grid-pg">
+  <div class="pg-head">
+    <div class="eyebrow">Kitchens</div>
+    <h3>Across the regions</h3>
+  </div>
+  <div class="thumbs">
+    <div class="card">
+      <div class="ph"><img src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg" alt="Tantra Hill kitchen"></div>
+      <div class="nm">Tantra Hill</div>
+      <div class="mt">Cream high-gloss</div>
+      <div class="ds">Warm beige speckled granite, a central island and an integrated fridge-freezer tower.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg" alt="Danfa kitchen"></div>
+      <div class="nm">Danfa</div>
+      <div class="mt">Mediterranean · 2025</div>
+      <div class="ds">Warm beech-effect cabinetry, sealed concrete worktops, a Belfast farmhouse sink and brass handles.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg" alt="Kokrobite kitchen"></div>
+      <div class="nm">Kokrobite</div>
+      <div class="mt">Wine-red gloss · 2021</div>
+      <div class="ds">Bold burgundy high-gloss cabinetry over black galaxy granite, with glazed upper cabinets.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg" alt="Kukurantumi kitchen"></div>
+      <div class="nm">Kukurantumi</div>
+      <div class="mt">Eastern Region</div>
+      <div class="ds">Charcoal concrete-effect laminate with blue-grey veined granite — delivered two hours from Accra.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 03 · BEDS ════════════ -->
+<section class="page divider">
+  <div class="num">03</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Three</div>
+  <h2>Beds &amp;<br><em>Bedroom Pieces</em></h2>
+  <p>Platform beds, four-posters, bunks and matching nightstands — built in solid timber and laminate, with feature headboards and integrated bases.</p>
+</section>
+
+<!-- Dansoman bed — feature -->
+<section class="page feature">
+  <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg" alt="Dansoman bed">
+  <div class="cap">
+    <div class="eyebrow">Platform Bed</div>
+    <h3>Bed &amp; Matching Nightstand</h3>
+    <p>A low platform bed with an integrated base and a matching nightstand, built and finished as a single bedroom set.</p>
+  </div>
+</section>
+
+<!-- Beds grid: Ridge four-poster, Golf Hills bed, Montessori bunk, Platform iroko -->
+<section class="page grid-pg">
+  <div class="pg-head">
+    <div class="eyebrow">Beds</div>
+    <h3>Frames &amp; headboards</h3>
+  </div>
+  <div class="thumbs">
+    <div class="card">
+      <div class="ph"><img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg" alt="Ridge four-poster bed"></div>
+      <div class="nm">Ridge Four-Poster</div>
+      <div class="mt">Solid timber</div>
+      <div class="ds">A clean-lined solid timber four-poster frame, built for a Ridge residence.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/golf-hills-bed/golf-hills-bed-feature.jpg" alt="Golf Hills bed"></div>
+      <div class="nm">Golf Hills Bed</div>
+      <div class="mt">Feature headboard</div>
+      <div class="ds">A platform bed with a full feature headboard, built for the Golf Hills estate.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg" alt="Montessori bunk bed"></div>
+      <div class="nm">Montessori Bunk</div>
+      <div class="mt">Children's room</div>
+      <div class="ds">A low Montessori-style bunk built to a child-safe height with an open frame.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/platform-iroko/platform-iroko-headboard.jpg" alt="Iroko platform bed"></div>
+      <div class="nm">Iroko Platform</div>
+      <div class="mt">Solid iroko</div>
+      <div class="ds">A solid iroko platform bed with a slatted timber headboard.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 04 · DINING & LIVING ════════════ -->
+<section class="page divider">
+  <div class="num">04</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Four</div>
+  <h2>Dining &amp;<br><em>Living</em></h2>
+  <p>Dining sets built to one brief — tables, seating, consoles and banquettes in matched timber, designed as complete rooms rather than single pieces.</p>
+</section>
+
+<!-- Judith — feature -->
+<section class="page feature">
+  <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Judith East Legon dining set">
+  <div class="cap">
+    <div class="eyebrow">Judith, East Legon · 2022</div>
+    <h3>A Hyedua Dining Room</h3>
+    <p>A full dining room to one unified brief — a large-format table, six upholstered chairs with linen fabric panels, and a console with full-extension drawers and waterfall-edge sides, all in Hyedua finished in rich espresso.</p>
+  </div>
+</section>
+
+<!-- Golf Hills Estate — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Golf Hills dining zone"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Golf Hills Estate</h3><span class="yr">2021</span></div>
+    <p class="desc">A complete kitchen dining zone built and installed as one commission — a stained pine X-frame dining table and matching bench, a built-in L-shaped leatherette banquette with under-seat storage, and a timber-framed wall mirror above.</p>
+    <dl class="specs">
+      <div><dt>Table</dt><dd>Stained pine · X-frame</dd></div>
+      <div><dt>Seating</dt><dd>Bench · L-shaped banquette</dd></div>
+      <div><dt>Storage</dt><dd>Under-seat banquette storage</dd></div>
+      <div><dt>Extra</dt><dd>Timber-framed wall mirror</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ════════════ 05 · SOLID WOOD ════════════ -->
+<section class="page divider">
+  <div class="num">05</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Five</div>
+  <h2>Solid Wood<br><em>&amp; Statement Pieces</em></h2>
+  <p>Hardwood at its most expressive — live-edge tables, hand-carved fronts and sculptural seating in Afromosia, Guarea and other Ghanaian timbers.</p>
+</section>
+
+<!-- Nadia wave chest — feature -->
+<section class="page feature">
+  <img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg" alt="Nadia wave-carved chest of drawers">
+  <div class="cap">
+    <div class="eyebrow">Nadia, Dome · 2025</div>
+    <h3>The Wave-Carved Chest</h3>
+    <p>A Guarea chest of drawers carved with a continuous wave pattern running unbroken across every drawer front, with integrated recessed pulls and a walnut-toned finish — one of the most distinctive pieces in the portfolio.</p>
+  </div>
+</section>
+
+<!-- Ridge Afromosia + Nadia stools — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Afromosia live-edge dining table"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Ridge Residence</h3><span class="yr">2021</span></div>
+    <p class="desc">An Afromosia live-edge dining table on solid timber U-frame legs, commissioned by French expatriates on posting in Ghana — the natural edge of the board kept and finished as the defining feature of the piece.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Afromosia</dd></div>
+      <div><dt>Top</dt><dd>Live-edge slab</dd></div>
+      <div><dt>Base</dt><dd>Solid U-frame legs</dd></div>
+      <div><dt>Client</dt><dd>Private residence, Ridge</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ════════════ 06 · COMMERCIAL ════════════ -->
+<section class="page divider">
+  <div class="num">06</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Six</div>
+  <h2>Commercial &amp;<br><em>Institutional</em></h2>
+  <p>Larger commissions for venues and institutions — full-property fitouts, branded installations and restaurant furniture, delivered as managed projects from brief to handover.</p>
+</section>
+
+<!-- Sage Centre — feature -->
+<section class="page feature">
+  <img src="images/projects/sage-centre/sage-hero.jpg" alt="Sage Centre teak fitout">
+  <div class="cap">
+    <div class="eyebrow">Sage Centre, Wli · 2022–2024</div>
+    <h3>A 26-Month Teak Fitout</h3>
+    <p>A full-property teak fitout for a US-based educational NGO at an educational retreat centre in Wli, in the Volta Region — furniture and joinery throughout the buildings and grounds, delivered over twenty-six months.</p>
+  </div>
+</section>
+
+<!-- House of Walker — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/house-of-walker/how-hero.jpg" alt="House of Walker installation"></div>
+  <div class="spread-body">
+    <div class="head"><h3>House of Walker</h3><span class="yr">One Airport Square</span></div>
+    <p class="desc">A branded structural carpentry installation built for Johnnie Walker's 200-year celebration at One Airport Square, Accra — designed and fabricated to a brand brief and installed on site for the event.</p>
+    <dl class="specs">
+      <div><dt>Client</dt><dd>Johnnie Walker · 200 years</dd></div>
+      <div><dt>Venue</dt><dd>One Airport Square, Accra</dd></div>
+      <div><dt>Scope</dt><dd>Branded structural carpentry</dd></div>
+      <div><dt>Delivery</dt><dd>Fabricated &amp; installed on site</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Jerksoul — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul restaurant furniture"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Jerksoul Restaurant</h3><span class="yr">2022</span></div>
+    <p class="desc">Dining and bar furniture for a rooftop restaurant in Accra — custom pine dining tables with branded glass tops, upholstered cube stools paired to the sets and bar, and a large interior bar counter clad in reclaimed-style timber panels with a solid wood top.</p>
+    <dl class="specs">
+      <div><dt>Tables</dt><dd>Pine · branded glass tops</dd></div>
+      <div><dt>Seating</dt><dd>Upholstered cube stools</dd></div>
+      <div><dt>Bar</dt><dd>Timber-clad counter, solid top</dd></div>
+      <div><dt>Setting</dt><dd>Rooftop restaurant, Accra</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ════════════ BACK COVER ════════════ -->
+<section class="page back">
+  <div class="rule"></div>
+  <div class="eyebrow">Commission a Piece</div>
+  <h2>Let's build something<br><em>for your space.</em></h2>
+  <p>Every piece in this catalogue began as a conversation about a room. If you have a space in mind — a wardrobe wall, a kitchen, a dining room, or something we haven't made before — we'd be glad to talk it through and measure up.</p>
+  <div class="contact">
+    <div class="row"><div class="l">Email</div><div class="v">neewoodygh@gmail.com</div></div>
+    <div class="row"><div class="l">Telephone</div><div class="v">+233 24 463 3464</div></div>
+    <div class="row"><div class="l">Instagram</div><div class="v">@neewoodygh</div></div>
+    <div class="row"><div class="l">Web</div><div class="v">neewoodygh.com</div></div>
+    <div class="row"><div class="l">Workshop</div><div class="v">Amugi Avenue, Accra, Ghana</div></div>
+    <div class="row"><div class="l">Hours</div><div class="v">Mon–Sat · 08:00–18:00</div></div>
+  </div>
+  <div class="sign">Neewoody Custom Woodwork · Handcrafted in Accra</div>
+</section>
+
+</body>
+</html>
