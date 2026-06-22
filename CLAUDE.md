@@ -239,6 +239,28 @@ All site copy, case study text, and portfolio cards have been corrected to refle
 ### _inbox Workflow
 Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
 
+## Image Format Policy
+
+- New projects (new photos, not yet used anywhere else on the site): 
+  convert to WebP with JPG fallback using <picture> markup, per the 
+  pattern established in images/projects/spintex-newyork-vanities/ 
+  (commit d12c6c5). Hero images target 200-300KB, supporting/detail 
+  images target 80-150KB.
+
+- Existing/legacy images already in use on the site (plain .jpg, no 
+  <picture> wrapper): leave as-is by default. Do NOT convert as a side 
+  effect of an unrelated task.
+
+- Migrating a legacy image to WebP/<picture> is only done as a deliberate, 
+  scoped task — and only after first identifying every page that 
+  references that image (many project photos are reused across multiple 
+  pages, e.g. homepage service cards pull from individual project 
+  folders). If migrating, update all referencing pages in the same pass 
+  so no image exists inconsistently in both formats across the site.
+
+- No site-wide bulk conversion sweep without an explicit, separate 
+  instruction scoped to that task alone.
+
 ### Kitchen Projects Catalogued (2026-05-11)
 
 **Spintex — Regimanuel Gray Estate (2024)** — L-shaped kitchen, dark espresso laminate, Calacatta marble-effect countertop with gold veining, black aluminium-framed frosted glass upper cabinets, undermount black sink, integrated hob, matte black handles. Private residential. Best images: `spintex-kitchen-hero.jpg` (hero), `spintex-kitchen-wide.jpg`. Before: `spintex-kitchen-during.jpg`. Images in `images/projects/spintex-kitchen/`.
