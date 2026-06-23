@@ -290,6 +290,22 @@ a{text-decoration:none}
   font-family:var(--body);font-size:0.82rem;line-height:1.75;color:var(--muted);
 }
 
+/* ── ACHIMOTA TV + PANELING FEATURE ── */
+.tv-project{padding:6rem 3rem;background:var(--cream-dark)}
+.tv-project-top{max-width:760px;margin:0 auto 3rem;text-align:center}
+.tv-project-label{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:block}
+.tv-project-top h2{font-family:var(--display);font-size:clamp(1.6rem,3vw,2.5rem);font-weight:400;line-height:1.15;color:var(--ink)}
+.tv-project-note{font-family:var(--body);font-size:0.88rem;line-height:1.8;color:var(--muted);margin-top:1.4rem}
+.tv-project-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.tv-project-gallery figure{margin:0;position:relative;overflow:hidden;aspect-ratio:3/4;background:#000}
+.tv-project-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s ease}
+.tv-project-gallery figure:hover img{transform:scale(1.05)}
+.tv-project-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:0.8rem 0.9rem;font-family:var(--ui);font-size:0.56rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream);background:linear-gradient(to top,rgba(11,31,14,0.85),transparent)}
+.tv-project-cta{text-align:center;margin-top:2.5rem}
+.tv-project-cta a{font-family:var(--ui);font-size:0.66rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid rgba(200,146,42,0.4);padding-bottom:0.3rem;display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,border-color 0.2s,gap 0.3s}
+.tv-project-cta a:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
+.tv-project-cta a::after{content:'→'}
+
 /* ── MAKER'S STATEMENT ── */
 .tv-statement{
   background:var(--green);
@@ -469,6 +485,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 @media(max-width:900px){
   .tv-types-top{grid-template-columns:1fr;gap:1.5rem}
   .tv-cta{grid-template-columns:1fr;gap:3rem}
+  .tv-project-gallery{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:768px){
   #nav{padding:1.2rem 1.5rem}
@@ -481,6 +498,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   .tv-types-grid{grid-template-columns:1fr}
   .tv-details{padding:4rem 1.5rem}
   .tv-detail-grid{grid-template-columns:1fr}
+  .tv-project{padding:4rem 1.5rem}
   .tv-statement{padding:5rem 1.5rem}
   .tv-faq{padding:4rem 1.5rem}
   .tv-testimonial{padding:5rem 1.5rem}
@@ -632,6 +650,62 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
       <h3>Any Budget, Any Scale</h3>
       <p>A simple console or a full feature wall — we scope to what you want to spend without compromising on structure or finish.</p>
     </div>
+  </div>
+</section>
+
+<!-- ACHIMOTA TV + PANELING FEATURE -->
+<section class="tv-project" id="achimota">
+  <div class="tv-project-top">
+    <span class="tv-project-label">Project · Achimota Guesthouse</span>
+    <h2>TV Unit &amp; Wall Paneling — Achimota Guesthouse</h2>
+    <p class="tv-project-note">A marble feature wall with floating TV bench and lit glass display cabinet, paired with slat wall paneling and hallway wainscotting. We group paneling and TV unit work together because they're so often ordered as one — a single wall composition rather than separate jobs.</p>
+  </div>
+
+  <div class="tv-project-gallery">
+    <figure>
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.jpg"
+          alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
+      </picture>
+      <figcaption>TV unit &amp; marble wall</figcaption>
+    </figure>
+    <figure>
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-tv-marble-wall-2.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-2.jpg"
+          alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
+      </picture>
+      <figcaption>Feature wall &amp; display cabinet</figcaption>
+    </figure>
+    <figure>
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-ac-paneling-1.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-ac-paneling-1.jpg"
+          alt="Wood slat wall paneling detail, Achimota guesthouse" loading="lazy" />
+      </picture>
+      <figcaption>Slat wall paneling</figcaption>
+    </figure>
+    <figure>
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-ac-paneling-2.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-ac-paneling-2.jpg"
+          alt="Wood slat wall paneling detail, Achimota guesthouse" loading="lazy" />
+      </picture>
+      <figcaption>Paneling detail</figcaption>
+    </figure>
+    <figure>
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-hallway-wainscot.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-hallway-wainscot.jpg"
+          alt="Wainscot wall paneling, hallway leading to guesthouse room, Achimota" loading="lazy" />
+      </picture>
+      <figcaption>Hallway wainscotting &amp; molding</figcaption>
+    </figure>
+  </div>
+
+  <div class="tv-project-cta">
+    <a href="portfolio.html#achimota-guesthouse">See the full project</a>
   </div>
 </section>
 

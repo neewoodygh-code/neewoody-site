@@ -289,9 +289,11 @@ a{text-decoration:none}
   display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;
 }
 .wd-card{background:var(--cream-dark);overflow:hidden}
+a.wd-card{display:block;text-decoration:none}
 .wd-card-img{
   position:relative;aspect-ratio:4/3;overflow:hidden;cursor:pointer;
 }
+.wd-card-img picture{display:block;width:100%;height:100%}
 .wd-card-img img{
   width:100%;height:100%;object-fit:cover;display:block;
   transition:transform 0.5s ease;
@@ -840,6 +842,21 @@ a{text-decoration:none}
       </div>
     </article>
 
+    <a class="wd-card" data-cat="builtin" href="portfolio.html#achimota-guesthouse" aria-label="Built-in Wardrobe &amp; Vanity — Achimota">
+      <div class="wd-card-img no-lb">
+        <picture>
+          <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.webp">
+          <img src="images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.jpg"
+            alt="Built-in wardrobe with floating vanity desk and glass display cabinet, Achimota" loading="lazy" />
+        </picture>
+        <span class="wd-card-badge">Built-in</span>
+      </div>
+      <div class="wd-card-body">
+        <div class="wd-card-location">Achimota, Accra <span class="wd-card-year">2026</span></div>
+        <p class="wd-card-caption">Built-in wardrobe with floating vanity desk and glass display cabinet — part of a full guesthouse room conversion. See the full project →</p>
+      </div>
+    </a>
+
   </div>
 </section>
 
@@ -1013,7 +1030,7 @@ a{text-decoration:none}
   var lbNext = document.getElementById('wlb-next');
   if (!grid || !lb) return;
   var current = 0, srcs = [], alts = [];
-  var imgDivs = grid.querySelectorAll('.wd-card-img');
+  var imgDivs = grid.querySelectorAll('.wd-card-img:not(.no-lb)');
   imgDivs.forEach(function(div, i){
     var img = div.querySelector('img');
     srcs.push(img.src); alts.push(img.alt);
