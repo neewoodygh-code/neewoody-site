@@ -85,8 +85,13 @@ a{text-decoration:none}
 .pf-featured-label{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--muted);padding:3rem 0 1.5rem;display:block}
 .pf-feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
 .pf-feat-card{position:relative;overflow:hidden;height:480px;display:block;background:var(--green)}
+.pf-feat-card.hero{grid-column:1/-1;height:600px}
 .pf-feat-card img{width:100%;height:100%;object-fit:cover;filter:brightness(0.85);transition:transform 0.8s ease,filter 0.4s}
+.pf-feat-card picture{display:block;width:100%;height:100%}
 .pf-feat-card:hover img{transform:scale(1.05);filter:brightness(0.6)}
+.pf-feat-card.hero .pf-feat-meta{padding:2.5rem 2.5rem 2.2rem}
+.pf-feat-card.hero .pf-feat-meta h3{font-size:1.7rem}
+.pf-feat-card.hero .pf-feat-meta p{font-size:0.9rem;max-width:60ch}
 .pf-feat-meta{position:absolute;bottom:0;left:0;right:0;padding:2rem 2rem 1.8rem;background:linear-gradient(to top,rgba(11,31,14,0.92) 0%,rgba(11,31,14,0.4) 60%,transparent 100%)}
 .pf-feat-type{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;display:block}
 .pf-feat-meta h3{font-family:var(--display);font-size:1.2rem;font-weight:400;color:var(--cream);margin-bottom:0.4rem;line-height:1.2}
@@ -112,22 +117,6 @@ a{text-decoration:none}
 .pf-card:hover .pf-card-meta{transform:translateY(0)}
 .pf-card-type{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:0.2rem}
 .pf-card-name{font-family:var(--display);font-size:0.92rem;font-weight:400;color:var(--cream)}
-
-/* ACHIMOTA GUESTHOUSE — full project feature */
-.ag-project{background:var(--green);padding:6rem 3rem;color:var(--cream)}
-.ag-top{max-width:860px;margin:0 auto 3rem;text-align:center}
-.ag-label{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:block}
-.ag-top h2{font-family:var(--display);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:400;line-height:1.15;color:var(--cream)}
-.ag-tags{display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center;margin:1.4rem 0 0;padding:0;list-style:none}
-.ag-tags li{font-family:var(--ui);font-size:0.58rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,232,208,0.85);border:1px solid rgba(200,146,42,0.4);padding:0.3rem 0.7rem}
-.ag-copy{font-family:var(--body);font-size:0.9rem;line-height:1.85;color:rgba(240,232,208,0.72);margin-top:1.6rem}
-.ag-lead{margin-bottom:2px}
-.ag-lead img{width:100%;height:auto;max-height:80vh;object-fit:cover;display:block}
-.ag-gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}
-.ag-gallery figure{margin:0;position:relative;overflow:hidden;background:#000;aspect-ratio:3/4}
-.ag-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s ease}
-.ag-gallery figure:hover img{transform:scale(1.05)}
-.ag-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:0.8rem 0.9rem;font-family:var(--ui);font-size:0.56rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream);background:linear-gradient(to top,rgba(11,31,14,0.85),transparent)}
 
 /* CTA */
 .pf-cta{background:var(--green);padding:8rem 3rem;text-align:center}
@@ -163,7 +152,6 @@ a{text-decoration:none}
   .pf-feat-grid{grid-template-columns:1fr}
   .pf-feat-card{height:380px}
   .pf-grid{grid-template-columns:repeat(2,1fr)}
-  .ag-gallery{grid-template-columns:repeat(2,1fr)}
 }
 @media(max-width:768px){
   #nav{padding:1.2rem 1.5rem}
@@ -172,7 +160,6 @@ a{text-decoration:none}
   .nav-toggle{display:flex}
   .pf-head{padding:8rem 1.5rem 3rem}
   .pf-featured{padding:0 1.5rem 4rem}
-  .ag-project{padding:4rem 1.5rem}
   .pf-work{padding:4rem 1.5rem 0}
   .pf-work-head{flex-wrap:wrap;gap:0.75rem}
   .pf-grid{grid-template-columns:1fr}
@@ -250,7 +237,7 @@ a{text-decoration:none}
   <span class="pf-featured-label">Case Studies</span>
   <div class="pf-feat-grid">
 
-    <a href="projects/sage-centre.html" class="pf-feat-card">
+    <a href="projects/sage-centre.html" class="pf-feat-card hero">
       <img src="images/projects/sage-centre/sage-hero.jpg"
         alt="Sage Centre full teak fitout, Wli — built by Neewoody"
         loading="lazy" />
@@ -298,91 +285,21 @@ a{text-decoration:none}
       </div>
     </a>
 
-  </div>
-</section>
+    <a href="projects/achimota-guesthouse.html" class="pf-feat-card">
+      <picture>
+        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-hero-wide.webp">
+        <img src="images/projects/achimota-guesthouse/achimota-hero-wide.jpg"
+          alt="Achimota guesthouse room conversion — wardrobe, vanity, and lit glass display cabinet, Accra"
+          loading="lazy" />
+      </picture>
+      <div class="pf-feat-meta">
+        <span class="pf-feat-type">Case Study · Residential</span>
+        <h3>Achimota Guesthouse — Room Conversion</h3>
+        <p>A full single-room upgrade to Airbnb standard: bed, wardrobe, vanity, glass cabinets, TV unit with marble wall, paneling, and hallway wainscotting.</p>
+        <span class="link-arrow-light">Read the case study</span>
+      </div>
+    </a>
 
-<!-- ACHIMOTA GUESTHOUSE — full project story -->
-<section class="ag-project" id="achimota-guesthouse">
-  <div class="ag-top">
-    <span class="ag-label">Project · Residential · Achimota</span>
-    <h2>Achimota Guesthouse — Room Conversion to Airbnb Standard</h2>
-    <ul class="ag-tags">
-      <li>Beds</li>
-      <li>Wardrobes</li>
-      <li>TV Units</li>
-      <li>Wall Paneling</li>
-      <li>Residential</li>
-      <li>Achimota</li>
-    </ul>
-    <p class="ag-copy"><em>Placeholder copy — final copy to follow.</em> Commissioned by a guesthouse owner to convert one room from standard guesthouse level to Airbnb-grade. The full scope included a queen bed, nightstand, wardrobe, dresser, desk, wall paneling, wall molding, TV unit, glass display cabinets, and wainscotting in the adjoining hallway.</p>
-  </div>
-
-  <div class="ag-lead">
-    <picture>
-      <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-bed-wardrobe-wide.webp">
-      <img src="images/projects/achimota-guesthouse/achimota-bed-wardrobe-wide.jpg"
-        alt="Queen bed with built-in wardrobe and vanity, Achimota guesthouse room conversion"
-        loading="lazy" />
-    </picture>
-  </div>
-
-  <div class="ag-gallery">
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-bed-detail.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-bed-detail.jpg"
-          alt="Custom queen bed frame detail, Achimota guesthouse" loading="lazy" />
-      </picture>
-      <figcaption>Queen bed</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.jpg"
-          alt="Built-in wardrobe with floating vanity desk and glass display cabinet, Achimota" loading="lazy" />
-      </picture>
-      <figcaption>Wardrobe &amp; vanity</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.jpg"
-          alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
-      </picture>
-      <figcaption>TV &amp; marble wall</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-tv-marble-wall-2.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-2.jpg"
-          alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
-      </picture>
-      <figcaption>Feature wall &amp; display cabinet</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-ac-paneling-1.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-ac-paneling-1.jpg"
-          alt="Wood slat wall paneling detail, Achimota guesthouse" loading="lazy" />
-      </picture>
-      <figcaption>Slat wall paneling</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-ac-paneling-2.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-ac-paneling-2.jpg"
-          alt="Wood slat wall paneling detail, Achimota guesthouse" loading="lazy" />
-      </picture>
-      <figcaption>Paneling detail</figcaption>
-    </figure>
-    <figure>
-      <picture>
-        <source type="image/webp" srcset="images/projects/achimota-guesthouse/achimota-hallway-wainscot.webp">
-        <img src="images/projects/achimota-guesthouse/achimota-hallway-wainscot.jpg"
-          alt="Wainscot wall paneling, hallway leading to guesthouse room, Achimota" loading="lazy" />
-      </picture>
-      <figcaption>Hallway wainscotting</figcaption>
-    </figure>
   </div>
 </section>
 
