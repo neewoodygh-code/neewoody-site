@@ -171,6 +171,40 @@ a{text-decoration:none}
   .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
 }
 </style>
+
+<style>
+/* PROJECT MODAL (reusable component) */
+.pm-trigger{cursor:pointer}
+button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:inherit;color:inherit;text-align:left;width:100%;display:block}
+.pm-overlay{position:fixed;inset:0;z-index:1000;background:rgba(11,31,14,0.78);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:2.5rem}
+.pm-overlay.open{display:flex}
+.pm-dialog{position:relative;background:var(--cream);max-width:1080px;width:100%;max-height:88vh;overflow:hidden;display:grid;grid-template-columns:1.25fr 1fr;box-shadow:0 24px 80px rgba(0,0,0,0.55)}
+.pm-close{position:absolute;top:0.8rem;right:0.9rem;z-index:5;background:rgba(11,31,14,0.55);color:#fff;border:none;width:34px;height:34px;font-size:1.4rem;line-height:1;cursor:pointer;transition:background 0.2s}
+.pm-close:hover{background:var(--green)}
+.pm-media{background:#000;display:flex;flex-direction:column;min-height:0}
+.pm-main{position:relative;flex:1;min-height:0;overflow:hidden;cursor:zoom-in;background:#000}
+.pm-main img{width:100%;height:100%;object-fit:cover;display:block}
+.pm-main::after{content:'\2922';position:absolute;bottom:0.6rem;right:0.7rem;color:#fff;font-size:1rem;background:rgba(0,0,0,0.45);width:26px;height:26px;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.pm-thumbs{display:flex;gap:2px;padding:2px;background:#000;overflow-x:auto;flex-shrink:0}
+.pm-thumb{flex:0 0 auto;width:76px;height:58px;border:none;padding:0;cursor:pointer;opacity:0.5;transition:opacity 0.2s;background:#222}
+.pm-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.pm-thumb.is-active,.pm-thumb:hover{opacity:1}
+.pm-text{padding:2.6rem 2.4rem;overflow-y:auto}
+.pm-eyebrow{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:0.7rem;display:block}
+.pm-text h2{font-family:var(--display);font-size:clamp(1.4rem,2.4vw,2rem);font-weight:400;line-height:1.15;color:var(--ink);margin-bottom:0.6rem}
+.pm-meta{font-family:var(--ui);font-size:0.62rem;font-weight:300;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:1.4rem}
+.pm-text p:not(.pm-meta){font-family:var(--body);font-size:0.88rem;line-height:1.8;color:var(--muted);margin-bottom:1rem}
+.pm-text p:last-child{margin-bottom:0}
+.pm-zoom{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,0.93);display:none;align-items:center;justify-content:center;cursor:zoom-out;padding:2rem}
+.pm-zoom.open{display:flex}
+.pm-zoom img{max-width:95vw;max-height:92vh;object-fit:contain}
+@media(max-width:820px){
+  .pm-overlay{padding:0}
+  .pm-dialog{grid-template-columns:1fr;max-height:100vh;height:100dvh}
+  .pm-media{height:44vh}
+  .pm-text{padding:1.8rem 1.5rem}
+}
+</style>
 </head>
 <body>
 
@@ -310,6 +344,19 @@ a{text-decoration:none}
     <a href="contact.html" class="see-all">Start your project</a>
   </div>
   <div class="pf-grid">
+
+    <button type="button" class="pf-card pm-trigger" data-pm="pm-prampram" aria-label="Open Kitchen &amp; TV Unit — Prampram (open details)">
+      <picture>
+        <source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-kitchen-hero.webp">
+        <img src="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg"
+          alt="Open kitchen with waterfall marble-effect peninsula, Prampram"
+          loading="lazy" />
+      </picture>
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Kitchens · Prampram</p>
+        <p class="pf-card-name">Open Kitchen &amp; TV Unit</p>
+      </div>
+    </button>
 
     <a href="projects/golf-hills-estate.html" class="pf-card">
       <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
@@ -474,5 +521,97 @@ document.querySelectorAll('.video-thumb').forEach(function(thumb){
   if(c)c.addEventListener('click',cl);
 })();
 </script>
+
+<!-- PROJECT MODAL - reusable overlay + per-project templates -->
+<div class="pm-overlay" id="pm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="pm-dialog">
+    <button class="pm-close" id="pm-close" aria-label="Close">&times;</button>
+    <div class="pm-media">
+      <div class="pm-main" id="pm-main"><img id="pm-main-img" src="" alt=""></div>
+      <div class="pm-thumbs" id="pm-thumbs"></div>
+    </div>
+    <div class="pm-text" id="pm-text"></div>
+  </div>
+</div>
+<div class="pm-zoom" id="pm-zoom" aria-hidden="true"><img id="pm-zoom-img" src="" alt=""></div>
+
+<template id="pm-prampram"
+  data-eyebrow="Kitchens · Prampram"
+  data-title="Open Kitchen &amp; TV Unit"
+  data-meta="Prampram, Greater Accra · 2026 · Open kitchen + TV unit">
+  <p>An estate developer in Prampram commissioned this open kitchen and a matching TV unit for a newly built house being prepared for sale &mdash; a clean, market-ready fit-out that photographs well and appeals to a buyer.</p>
+  <p>The kitchen is a compact open-plan U-shape in warm walnut-grain laminate, topped with grey marble-effect counters and a waterfall peninsula that doubles as a casual breakfast bar. Integrated oven, hob, and a recessed microwave keep the run uncluttered, with under-cabinet lighting along the splashback.</p>
+  <p>In the adjoining living area, a simple floating TV console in the same walnut tone &mdash; push-open drawers with a wall-mounted open shelf &mdash; keeps the media wall minimal and in step with the kitchen.</p>
+  <div class="pm-srcs" hidden>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-kitchen-hero.webp" data-jpg="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg" data-alt="Open U-shaped kitchen with waterfall marble-effect peninsula, Prampram"></figure>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-kitchen-corner.webp" data-jpg="images/projects/prampram-kitchen/prampram-kitchen-corner.jpg" data-alt="Kitchen run with integrated oven, hob, and recessed microwave, Prampram"></figure>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-kitchen-cabinets.webp" data-jpg="images/projects/prampram-kitchen/prampram-kitchen-cabinets.jpg" data-alt="Walnut-grain tall cabinets and recessed microwave niche, Prampram kitchen"></figure>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-tv-unit.webp" data-jpg="images/projects/prampram-kitchen/prampram-tv-unit.jpg" data-alt="Floating TV console with wall-mounted open shelf, Prampram"></figure>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-tv-unit-shelf.webp" data-jpg="images/projects/prampram-kitchen/prampram-tv-unit-shelf.jpg" data-alt="TV console and open display shelf, Prampram"></figure>
+    <figure data-webp="images/projects/prampram-kitchen/prampram-tv-unit-angle.webp" data-jpg="images/projects/prampram-kitchen/prampram-tv-unit-angle.jpg" data-alt="Floating TV console, full length, Prampram"></figure>
+  </div>
+</template>
+
+<script>
+/* PROJECT MODAL (reusable) */
+(function(){
+  var overlay=document.getElementById('pm-overlay');
+  if(!overlay)return;
+  var mainImg=document.getElementById('pm-main-img');
+  var thumbs=document.getElementById('pm-thumbs');
+  var textCol=document.getElementById('pm-text');
+  var zoom=document.getElementById('pm-zoom');
+  var zoomImg=document.getElementById('pm-zoom-img');
+  var imgs=[];
+  function setMain(i){
+    var f=imgs[i];if(!f)return;
+    mainImg.src=f.jpg;mainImg.alt=f.alt;
+    var ch=thumbs.children;
+    for(var t=0;t<ch.length;t++)ch[t].classList.toggle('is-active',t===i);
+  }
+  function openModal(id){
+    var tpl=document.getElementById(id);if(!tpl)return;
+    var html='';
+    if(tpl.dataset.eyebrow)html+='<span class="pm-eyebrow">'+tpl.dataset.eyebrow+'</span>';
+    if(tpl.dataset.title)html+='<h2>'+tpl.dataset.title+'</h2>';
+    if(tpl.dataset.meta)html+='<p class="pm-meta">'+tpl.dataset.meta+'</p>';
+    var frag=tpl.content.cloneNode(true);
+    var ps=frag.querySelectorAll('p');
+    for(var p=0;p<ps.length;p++)html+=ps[p].outerHTML;
+    textCol.innerHTML=html;textCol.scrollTop=0;
+    imgs=[];thumbs.innerHTML='';
+    var figs=frag.querySelectorAll('figure');
+    figs.forEach(function(fig,i){
+      imgs.push({webp:fig.dataset.webp,jpg:fig.dataset.jpg,alt:fig.dataset.alt||''});
+      var b=document.createElement('button');b.className='pm-thumb';b.type='button';
+      var im=document.createElement('img');im.src=fig.dataset.jpg;im.alt='';im.loading='lazy';
+      b.appendChild(im);
+      b.addEventListener('click',(function(idx){return function(){setMain(idx);};})(i));
+      thumbs.appendChild(b);
+    });
+    setMain(0);
+    overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
+    document.body.style.overflow='hidden';
+  }
+  function close(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  document.addEventListener('click',function(e){
+    var t=e.target.closest('[data-pm]');
+    if(t){e.preventDefault();openModal(t.getAttribute('data-pm'));}
+  });
+  document.getElementById('pm-close').addEventListener('click',close);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)close();});
+  document.getElementById('pm-main').addEventListener('click',function(){
+    if(!mainImg.src)return;zoomImg.src=mainImg.src;zoomImg.alt=mainImg.alt;
+    zoom.classList.add('open');zoom.setAttribute('aria-hidden','false');
+  });
+  zoom.addEventListener('click',function(){zoom.classList.remove('open');zoom.setAttribute('aria-hidden','true');});
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Escape')return;
+    if(zoom.classList.contains('open')){zoom.classList.remove('open');}
+    else if(overlay.classList.contains('open')){close();}
+  });
+})();
+</script>
+
 </body>
 </html>

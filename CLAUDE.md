@@ -241,6 +241,18 @@ All site copy, case study text, and portfolio cards have been corrected to refle
 ### _inbox Workflow
 Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
 
+## Reusable Project Modal (`pm-*`) — added 2026-06-23
+
+A self-contained "project modal" component to showcase small/medium projects **without creating a dedicated case study page** per entry. This is the preferred pattern for projects whose scope doesn't warrant a full `projects/*.html` page (full case-study pages remain for large commissions like Sage, Nadia, Achimota).
+
+**How it works:**
+- A card/element with `data-pm="<template-id>"` (any element — `button.pf-card`, a `kt-feat-img`, a gallery `figure`, an `<a>`) opens a modal populated from a matching hidden `<template>`.
+- The `<template>` carries `data-eyebrow`, `data-title`, `data-meta`, the write-up as `<p>` children, and an image list as `<figure data-webp data-jpg data-alt>` inside a hidden `.pm-srcs` div.
+- JS builds the modal: text column (eyebrow/title/meta/paragraphs) + media column (main image + thumbnail strip). Clicking a thumb swaps the main image; clicking the main image opens a full-screen **zoom** layer. Close via ×, backdrop click, or Esc (Esc closes zoom first, then modal).
+- Component pieces (CSS `.pm-*`, the `#pm-overlay`/`#pm-zoom` markup, the `<template>`, and the IIFE script) are **injected per page** (static site has no shared includes). The injector lives at `C:/Users/Neewoody/.img-tmp/inject_modal.py`. To add the component to a new page: insert the `<style>` before `</head>` and the markup+template+`<script>` before `</body>`; it's idempotent (skips if `pm-overlay` present).
+- **To add a new modal project:** drop a new `<template id="pm-yourslug" ...>` on each page that should surface it, and add a trigger element with `data-pm="pm-yourslug"`. No new page needed.
+- First use: **Prampram Kitchen** (`pm-prampram`), live on `portfolio.html` (work-grid card), `kitchens.html` (featured section), and `tv-units.html` (TV-unit section). Same template duplicated on all three (static-site reality).
+
 ## Image Format Policy
 
 - New projects (new photos, not yet used anywhere else on the site): 
@@ -276,6 +288,8 @@ Raw images can be dropped in `_inbox/` with a description. Claude Code will rena
 **Kokrobite Kitchen (2021)** — Burgundy/wine red high-gloss laminate, black galaxy granite countertops, island with 4 drawers, integrated fridge housing, glazed upper cabinets. Bold colour — portfolio grid only, not featured. Best: `kokrobite-kitchen-hero.jpg`. 2 images. Images in `images/projects/kokrobite-kitchen/`.
 
 **Kukurantumi Kitchen (Eastern Region)** — Dark charcoal concrete-effect laminate, blue-grey veined granite countertops, integrated LG fridge tower, gas hob, matte black sink fittings. Notable: client in Kukurantumi, Eastern Region — 2+ hours from Accra, demonstrates geographic reach. Portfolio grid only, not featured. Best: `kukurantumi-kitchen-hero.jpg`. Images in `images/projects/kukurantumi-kitchen/`.
+
+**Prampram Kitchen + TV Unit (2026)** — Open-plan U-shaped kitchen in warm walnut-grain laminate, grey marble-effect counters with a waterfall peninsula, integrated oven/hob/recessed microwave, under-cabinet lighting; plus a simple floating walnut TV console with wall-mounted open shelf. Commissioned by an estate developer for a newly built spec house in a **Prampram** estate being prepared for sale (kept generic — no estate/developer name by direction). Scope was kitchen + TV unit only. **First use of the reusable Project Modal** (`pm-prampram`) — no dedicated page; surfaced as a card on `portfolio.html` (work grid), a featured section on `kitchens.html`, and a TV-unit section on `tv-units.html`, all opening the modal. Images in `images/projects/prampram-kitchen/` (6, WebP+JPG): `prampram-kitchen-hero` (lead), `-corner`, `-cabinets`, `prampram-tv-unit`, `-tv-unit-shelf`, `-tv-unit-angle`. Selected via contact-sheet review from a 56-photo + 7-video shoot; remaining raw assets stay in `_inbox/Prampram Kitchen/`.
 
 ### Homepage & Service Page Updates (2026-05-11)
 - `index.html` hero updated to `images/projects/oyarifa/oyarifa-master-closed-1.jpg`
