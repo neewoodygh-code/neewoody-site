@@ -312,6 +312,12 @@ A full visual and structural redesign is in progress. Design brief and execution
 
 **Do not add css/styles.css back to index.html.** The new design is self-contained per page.
 
+### Homepage Service Cards + Testimonial Regroup (2026-06-23)
+Two homepage directives from an earlier instruction were reported done but had **never actually been committed** (no commit existed in history; live == origin/main == local all confirmed missing the work). Re-implemented and verified live:
+- **Service cards** now carry real photos via `.svc-img` (added to `.svc-card`): Wardrobes → `oyarifa-master-closed-1.jpg`, Kitchens → `spintex-kitchen-hero.jpg`, Beds → `sage-bed-overview.jpg`, Dining & Living → `judith-set-installed-2.jpg`, Solid Wood → `afromosia-table-installed-1.jpg`, all `loading="lazy"`. The **Commercial card (06) is intentionally left image-free** (different sell).
+- **Testimonial section** changed from a single full-width Ben Schwartz quote to a **3-card row** (`.t-grid` / `.t-card`): Ben Schwartz, Ngminvielu Kuuire, mcdennis appau — each 5-star, with a multicolour Google "G" SVG + "Google review · [date]" badge (`.t-badge`). Stacks to 1 column ≤768px. (No pre-existing badge component existed to reuse, despite the original instruction implying one — built fresh.)
+- **Still outstanding (NOT in this pass):** the original instruction's item 2 (remove Shelving from nav/dropdown, relocate to footer only) was *also* never done — Shelving is still in the desktop "More ▾" dropdown (`index.html`) and mobile nav, and is not in the footer. Flagged to owner; awaiting go-ahead before changing nav.
+
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
