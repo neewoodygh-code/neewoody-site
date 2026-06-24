@@ -149,6 +149,8 @@ All jobs have workshop prep days. Pergolas: air dry, cut rafter tails, pre-stain
 - Other (hand planers, clamps, multitools, circular saws, grinders, sanders etc) — GH₵10,000
 
 ### Tools & Infrastructure
+**CMS posts (admin-uploaded project modals):** `admin.html` (React, X-NWD-Key auth) lets the owner create posts — title, location, category, **multi-page targeting**, write-up, up to 4 images (uploaded via Worker `/api/posts/upload`). `js/cms-posts.js` runs on any page with `<section id="cms-posts" data-page="<slug>">`, fetches `/api/posts?page=<slug>`, and renders cream cards that open a modal (horizontal image strip + write-up + click-to-zoom). The set of targetable pages is the `PAGES` array in `admin.html` (also drives `PAGE_MAP`/filters); labels for the rendered section live in `PAGE_LABELS` in `cms-posts.js`. The Worker filters posts generically by membership in the post's `pages[]`, so **adding a new target page needs no Worker change** — just add it to `PAGES` (admin), `PAGE_LABELS` (cms-posts.js), and drop a `#cms-posts[data-page=…]` section on the page. **Home wired in 2026-06-23:** `index.html` now has a `<section id="cms-posts" data-page="index">` "Recent Work" section + loads `cms-posts.js`; `admin` page option `Home — Recent Work` (slug `index`); the homepage's old hardcoded "Recent Work" cards were renamed to **Featured Projects**. (Note: CMS modals use `.cms-*` styling — functionally equivalent to but visually distinct from the `pm-*` modals; unify later if exact parity is wanted.)
+
 **Dispatch app:** /dispatch.html — crew job management PWA
 **Pricing tool:** /pricing.html — admin only, internal cost calculator with quotes
 **Cutlist generator:** /cutlist.html — parametric wardrobe cutlist for carpenters

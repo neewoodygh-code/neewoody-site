@@ -916,10 +916,10 @@ footer{
   </div>
 </section>
 
-<!-- RECENT WORK -->
+<!-- FEATURED PROJECTS -->
 <section class="work" id="work">
   <div class="work-head">
-    <h2>Recent Work</h2>
+    <h2>Featured Projects</h2>
     <a href="portfolio.html" class="see-all">Full portfolio</a>
   </div>
   <div class="grid-work">
@@ -949,6 +949,9 @@ footer{
     </a>
   </div>
 </section>
+
+<!-- RECENT WORK — CMS-driven (admin uploads via admin.html; renders cards + modals). Hidden until posts target the home page. -->
+<section id="cms-posts" data-page="index" style="display:none;padding:6rem 3rem;background:var(--cream)"></section>
 
 <!-- TESTIMONIAL -->
 <section class="testimonial">
@@ -1043,6 +1046,8 @@ navToggle.addEventListener('click', () => mobileNav.classList.add('open'));
 mobileNavClose.addEventListener('click', () => mobileNav.classList.remove('open'));
 mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
 </script>
+
+<script src="js/cms-posts.js"></script>
 
 </body>
 </html>

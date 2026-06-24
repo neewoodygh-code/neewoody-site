@@ -9,6 +9,7 @@
   var API        = 'https://neewoody-dispatch-api.neewoodygh.workers.dev/api';
 
   var PAGE_LABELS = {
+    'index':         'Recent Work',
     'wardrobes':     'Wardrobes',     'kitchens':      'Kitchens',
     'beds':          'Beds',          'tv-units':      'TV Units',
     'dining-living': 'Dining & Living','shelving':     'Shelving',
