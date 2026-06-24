@@ -108,6 +108,11 @@ a{text-decoration:none}
 .see-all:hover{color:var(--gold);gap:0.9rem}
 .see-all::after{content:'→'}
 .pf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.pf-subhead{grid-column:1/-1;font-family:var(--ui);font-size:0.62rem;font-weight:500;letter-spacing:0.28em;text-transform:uppercase;color:var(--muted);margin:0}
+.pf-grid+.pf-subhead-wrap{margin-top:3rem}
+.pf-subhead-wrap{margin-bottom:1.4rem}
+.pf-subhead-wrap h3{font-family:var(--display);font-size:1.4rem;font-weight:400;color:var(--ink)}
+.pf-subhead-wrap p{font-family:var(--ui);font-size:0.62rem;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-top:0.3rem}
 .pf-card{position:relative;overflow:hidden;background:var(--green);display:block;height:320px}
 .pf-card-plain{position:relative;overflow:hidden;background:var(--green);height:320px}
 .pf-card picture{display:block;width:100%;height:100%}
@@ -345,6 +350,104 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   </div>
   <div class="pf-grid">
 
+    <a href="projects/golf-hills-estate.html" class="pf-card">
+      <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
+        alt="X-frame pine dining table and built-in banquette, Golf Hills Estate, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Dining &amp; Living</p>
+        <p class="pf-card-name">Dining Set &amp; Banquette — Golf Hills Estate</p>
+      </div>
+    </a>
+
+    <a href="projects/french-embassy.html" class="pf-card">
+      <img src="images/projects/french-embassy/afromosia-table-installed-1.jpg"
+        alt="Afromosia live-edge dining table, Ridge, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Solid Wood</p>
+        <p class="pf-card-name">Afromosia Live-Edge Table — Ridge</p>
+      </div>
+    </a>
+
+    <a href="solid-wood.html#khaya-spintex" class="pf-card">
+      <picture>
+        <source type="image/webp" srcset="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-double-sink-hero.webp">
+        <img src="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-double-sink-hero.jpg"
+          alt="Khaya / African mahogany carved-door bathroom vanity, Spintex estate, Accra"
+          loading="lazy" />
+      </picture>
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Solid Wood</p>
+        <p class="pf-card-name">Spintex Vanities — New York Commission</p>
+      </div>
+    </a>
+
+    <a href="projects/judith-east-legon.html" class="pf-card">
+      <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
+        alt="Full Hyedua dining commission, East Legon, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Solid Wood</p>
+        <p class="pf-card-name">Full Dining Commission — East Legon</p>
+      </div>
+    </a>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+        alt="Built-in floor-to-ceiling wardrobes, Oyarifa, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">Built-in Wardrobes — Oyarifa</p>
+      </div>
+    </div>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg"
+        alt="Sliding wardrobe with integrated drawer chest, Cantonments, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">Sliding Wardrobe — Cantonments</p>
+      </div>
+    </div>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/dobro/dobro-wide-interior.jpg"
+        alt="4-bedroom wardrobe commission, Dobro new-build, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Wardrobes</p>
+        <p class="pf-card-name">4-Bedroom Commission — Dobro</p>
+      </div>
+    </div>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
+        alt="L-shaped kitchen, dark laminate, marble countertop, Spintex, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Kitchens</p>
+        <p class="pf-card-name">Custom Kitchen — Spintex</p>
+      </div>
+    </div>
+
+    <div class="pf-card-plain">
+      <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
+        alt="Kitchen with freestanding island, Dansoman, Accra"
+        loading="lazy" />
+      <div class="pf-card-meta">
+        <p class="pf-card-type">Kitchens</p>
+        <p class="pf-card-name">Kitchen with Island — Dansoman</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="pf-subhead-wrap" style="margin-top:3.5rem"><h3>Made to order</h3><p>Tap any piece to explore</p></div>
+  <div class="pf-grid">
+
     <button type="button" class="pf-card pm-trigger" data-pm="pm-prampram" aria-label="Open Kitchen &amp; TV Unit — Prampram (open details)">
       <picture>
         <source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-kitchen-hero.webp">
@@ -474,99 +577,6 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
       </picture>
       <div class="pf-card-meta"><p class="pf-card-type">Outdoor · Lounge Seating</p><p class="pf-card-name">Outdoor Lounge &amp; Patio</p></div>
     </button>
-
-    <a href="projects/golf-hills-estate.html" class="pf-card">
-      <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
-        alt="X-frame pine dining table and built-in banquette, Golf Hills Estate, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Dining &amp; Living</p>
-        <p class="pf-card-name">Dining Set &amp; Banquette — Golf Hills Estate</p>
-      </div>
-    </a>
-
-    <a href="projects/french-embassy.html" class="pf-card">
-      <img src="images/projects/french-embassy/afromosia-table-installed-1.jpg"
-        alt="Afromosia live-edge dining table, Ridge, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Solid Wood</p>
-        <p class="pf-card-name">Afromosia Live-Edge Table — Ridge</p>
-      </div>
-    </a>
-
-    <a href="solid-wood.html#khaya-spintex" class="pf-card">
-      <picture>
-        <source type="image/webp" srcset="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-double-sink-hero.webp">
-        <img src="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-double-sink-hero.jpg"
-          alt="Khaya / African mahogany carved-door bathroom vanity, Spintex estate, Accra"
-          loading="lazy" />
-      </picture>
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Solid Wood</p>
-        <p class="pf-card-name">Spintex Vanities — New York Commission</p>
-      </div>
-    </a>
-
-    <a href="projects/judith-east-legon.html" class="pf-card">
-      <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
-        alt="Full Hyedua dining commission, East Legon, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Solid Wood</p>
-        <p class="pf-card-name">Full Dining Commission — East Legon</p>
-      </div>
-    </a>
-
-    <div class="pf-card-plain">
-      <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
-        alt="Built-in floor-to-ceiling wardrobes, Oyarifa, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Wardrobes</p>
-        <p class="pf-card-name">Built-in Wardrobes — Oyarifa</p>
-      </div>
-    </div>
-
-    <div class="pf-card-plain">
-      <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg"
-        alt="Sliding wardrobe with integrated drawer chest, Cantonments, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Wardrobes</p>
-        <p class="pf-card-name">Sliding Wardrobe — Cantonments</p>
-      </div>
-    </div>
-
-    <div class="pf-card-plain">
-      <img src="images/projects/dobro/dobro-wide-interior.jpg"
-        alt="4-bedroom wardrobe commission, Dobro new-build, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Wardrobes</p>
-        <p class="pf-card-name">4-Bedroom Commission — Dobro</p>
-      </div>
-    </div>
-
-    <div class="pf-card-plain">
-      <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
-        alt="L-shaped kitchen, dark laminate, marble countertop, Spintex, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Kitchens</p>
-        <p class="pf-card-name">Custom Kitchen — Spintex</p>
-      </div>
-    </div>
-
-    <div class="pf-card-plain">
-      <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
-        alt="Kitchen with freestanding island, Dansoman, Accra"
-        loading="lazy" />
-      <div class="pf-card-meta">
-        <p class="pf-card-type">Kitchens</p>
-        <p class="pf-card-name">Kitchen with Island — Dansoman</p>
-      </div>
-    </div>
 
   </div>
 </section>
