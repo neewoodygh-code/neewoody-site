@@ -923,19 +923,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   }, { threshold: 0.05 });
   io.observe(hero);
 })();
-(function(){
-  var btn = document.getElementById('mobile-nav-close');
-  var navToggle = document.getElementById('nav-toggle');
-  var mobileNav = document.getElementById('mobile-nav');
-  if (btn) btn.addEventListener('click', function(){
-    mobileNav.classList.remove('open');
-    document.body.style.overflow = '';
-  });
-  if (navToggle) navToggle.addEventListener('click', function(){
-    mobileNav.classList.toggle('open');
-    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
-  });
-})();
+
 </script>
 <script src="js/main.js"></script>
 <script src="js/cms-posts.js"></script>

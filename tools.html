@@ -302,13 +302,7 @@ a{text-decoration:none}
 
 <script src="js/main.js"></script>
 <script>
-(function(){
-  var t=document.getElementById('nav-toggle'),m=document.getElementById('mobile-nav'),c=document.getElementById('mobile-nav-close');
-  function cl(){m.classList.remove('open');document.body.style.overflow='';}
-  if(t)t.addEventListener('click',function(){m.classList.toggle('open');document.body.style.overflow=m.classList.contains('open')?'hidden':'';});
-  if(c)c.addEventListener('click',cl);
-  document.querySelectorAll('.mobile-nav a').forEach(function(a){a.addEventListener('click',cl);});
-})();
+
 </script>
 </body>
 </html>

@@ -23,13 +23,26 @@ if ('serviceWorker' in navigator) {
   const navToggle = document.querySelector('.nav-toggle');
   const mobileNav = document.querySelector('.mobile-nav');
 
-  if (navToggle && mobileNav) {
+  if (navToggle && mobileNav && !navToggle.dataset.navBound) {
+    navToggle.dataset.navBound = '1';
+
     navToggle.addEventListener('click', function () {
       const isOpen = mobileNav.classList.toggle('open');
       navToggle.classList.toggle('open', isOpen);
       navToggle.setAttribute('aria-expanded', isOpen);
       document.body.style.overflow = isOpen ? 'hidden' : '';
     });
+
+    // Close on the explicit ✕ button
+    const navClose = document.getElementById('mobile-nav-close');
+    if (navClose) {
+      navClose.addEventListener('click', function () {
+        mobileNav.classList.remove('open');
+        navToggle.classList.remove('open');
+        navToggle.setAttribute('aria-expanded', false);
+        document.body.style.overflow = '';
+      });
+    }
 
     // Close on nav link click
     mobileNav.querySelectorAll('a').forEach(function (link) {
