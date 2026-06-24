@@ -451,6 +451,30 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
       <div class="pf-card-meta"><p class="pf-card-type">Bedroom · Wardrobes</p><p class="pf-card-name">Custom Wardrobes</p></div>
     </button>
 
+    <button type="button" class="pf-card pm-trigger" data-pm="pm-commercial" aria-label="Retail &amp; Commercial Fit-out (open details)">
+      <picture>
+        <source type="image/webp" srcset="images/projects/commercial-fitout/commercial-1.webp">
+        <img src="images/projects/commercial-fitout/commercial-1.jpg" alt="Retail fit-out with slatted feature walls and lit glass display counters" loading="lazy" />
+      </picture>
+      <div class="pf-card-meta"><p class="pf-card-type">Commercial · Retail Fit-out</p><p class="pf-card-name">Retail &amp; Commercial Fit-out</p></div>
+    </button>
+
+    <button type="button" class="pf-card pm-trigger" data-pm="pm-reception" aria-label="Reception &amp; Glass-Top Desks (open details)">
+      <picture>
+        <source type="image/webp" srcset="images/projects/reception-desks/reception-1.webp">
+        <img src="images/projects/reception-desks/reception-1.jpg" alt="Reception desk with framed glass top" loading="lazy" />
+      </picture>
+      <div class="pf-card-meta"><p class="pf-card-type">Commercial · Desks</p><p class="pf-card-name">Reception &amp; Glass-Top Desks</p></div>
+    </button>
+
+    <button type="button" class="pf-card pm-trigger" data-pm="pm-outdoor-lounge" aria-label="Outdoor Lounge &amp; Patio (open details)">
+      <picture>
+        <source type="image/webp" srcset="images/projects/outdoor-lounge/outdoor-lounge-1.webp">
+        <img src="images/projects/outdoor-lounge/outdoor-lounge-1.jpg" alt="Outdoor upholstered sofa with live-edge coffee table on a slate patio" loading="lazy" />
+      </picture>
+      <div class="pf-card-meta"><p class="pf-card-type">Outdoor · Lounge Seating</p><p class="pf-card-name">Outdoor Lounge &amp; Patio</p></div>
+    </button>
+
     <a href="projects/golf-hills-estate.html" class="pf-card">
       <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg"
         alt="X-frame pine dining table and built-in banquette, Golf Hills Estate, Accra"
@@ -744,6 +768,48 @@ document.querySelectorAll('.video-thumb').forEach(function(thumb){
     <figure data-webp="images/projects/custom-wardrobes/wardrobe-3.jpg" data-jpg="images/projects/custom-wardrobes/wardrobe-3.jpg" data-alt="Built-in wardrobe with dressing recess"></figure>
     <figure data-webp="images/projects/custom-wardrobes/wardrobe-4.jpg" data-jpg="images/projects/custom-wardrobes/wardrobe-4.jpg" data-alt="Walk-in wardrobe with open shelving"></figure>
     <figure data-webp="images/projects/custom-wardrobes/wardrobe-5.jpg" data-jpg="images/projects/custom-wardrobes/wardrobe-5.jpg" data-alt="Built-in wardrobe run"></figure>
+  </div>
+</template>
+
+<template id="pm-commercial"
+  data-eyebrow="Commercial &middot; Retail"
+  data-title="Retail &amp; Commercial Fit-out"
+  data-meta="Shop interior joinery &middot; Accra">
+  <p>A full retail fit-out &mdash; slatted feature walls with integrated LED, lit glass display counters, and open shelving, on a polished marble floor.</p>
+  <p>Commercial cabinetry and joinery, built in the workshop and installed to spec.</p>
+  <div class="pm-srcs" hidden>
+    <figure data-webp="images/projects/commercial-fitout/commercial-1.jpg" data-jpg="images/projects/commercial-fitout/commercial-1.jpg" data-alt="Retail interior with slatted walls, glass counters, and shelving"></figure>
+    <figure data-webp="images/projects/commercial-fitout/commercial-2.jpg" data-jpg="images/projects/commercial-fitout/commercial-2.jpg" data-alt="Lit display counter and LED slat wall"></figure>
+    <figure data-webp="images/projects/commercial-fitout/commercial-3.jpg" data-jpg="images/projects/commercial-fitout/commercial-3.jpg" data-alt="Glass display counter"></figure>
+    <figure data-webp="images/projects/commercial-fitout/commercial-4.jpg" data-jpg="images/projects/commercial-fitout/commercial-4.jpg" data-alt="Slatted feature wall with display unit"></figure>
+    <figure data-webp="images/projects/commercial-fitout/commercial-5.jpg" data-jpg="images/projects/commercial-fitout/commercial-5.jpg" data-alt="Display counter, angle view"></figure>
+    <figure data-webp="images/projects/commercial-fitout/commercial-6.jpg" data-jpg="images/projects/commercial-fitout/commercial-6.jpg" data-alt="Open shelving and counter run"></figure>
+  </div>
+</template>
+<template id="pm-reception"
+  data-eyebrow="Commercial &middot; Reception"
+  data-title="Reception &amp; Glass-Top Desks"
+  data-meta="Office &amp; reception desks &middot; Accra">
+  <p>Reception and office desks with framed glass tops and a clean two-tone finish &mdash; built for front-of-house and corporate spaces.</p>
+  <div class="pm-srcs" hidden>
+    <figure data-webp="images/projects/reception-desks/reception-1.jpg" data-jpg="images/projects/reception-desks/reception-1.jpg" data-alt="Reception desk with framed glass top"></figure>
+    <figure data-webp="images/projects/reception-desks/reception-2.jpg" data-jpg="images/projects/reception-desks/reception-2.jpg" data-alt="Reception desk, angle"></figure>
+    <figure data-webp="images/projects/reception-desks/reception-3.jpg" data-jpg="images/projects/reception-desks/reception-3.jpg" data-alt="Glass-top desk, side view"></figure>
+    <figure data-webp="images/projects/reception-desks/reception-4.jpg" data-jpg="images/projects/reception-desks/reception-4.jpg" data-alt="Reception desk, full"></figure>
+  </div>
+</template>
+<template id="pm-outdoor-lounge"
+  data-eyebrow="Outdoor &middot; Lounge"
+  data-title="Outdoor Lounge &amp; Patio"
+  data-meta="Patio sofas, armchairs &amp; tables &middot; Accra">
+  <p>Solid-wood outdoor lounge furniture &mdash; upholstered sectional sofas and armchairs, a live-edge coffee table, and a bar table with stools.</p>
+  <p>Built and finished for an open slate patio.</p>
+  <div class="pm-srcs" hidden>
+    <figure data-webp="images/projects/outdoor-lounge/outdoor-lounge-1.jpg" data-jpg="images/projects/outdoor-lounge/outdoor-lounge-1.jpg" data-alt="Outdoor sectional sofa with live-edge coffee table"></figure>
+    <figure data-webp="images/projects/outdoor-lounge/outdoor-lounge-2.jpg" data-jpg="images/projects/outdoor-lounge/outdoor-lounge-2.jpg" data-alt="Upholstered outdoor sectional sofa"></figure>
+    <figure data-webp="images/projects/outdoor-lounge/outdoor-lounge-3.jpg" data-jpg="images/projects/outdoor-lounge/outdoor-lounge-3.jpg" data-alt="Patio bar table and stools"></figure>
+    <figure data-webp="images/projects/outdoor-lounge/outdoor-lounge-4.jpg" data-jpg="images/projects/outdoor-lounge/outdoor-lounge-4.jpg" data-alt="Full outdoor lounge set on a slate patio"></figure>
+    <figure data-webp="images/projects/outdoor-lounge/outdoor-lounge-5.jpg" data-jpg="images/projects/outdoor-lounge/outdoor-lounge-5.jpg" data-alt="Wood-frame upholstered armchairs"></figure>
   </div>
 </template>
 
