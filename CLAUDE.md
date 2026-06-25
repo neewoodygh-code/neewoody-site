@@ -259,25 +259,23 @@ A self-contained "project modal" component to showcase small/medium projects **w
 
 ## Image Format Policy
 
-- New projects (new photos, not yet used anywhere else on the site): 
-  convert to WebP with JPG fallback using <picture> markup, per the 
-  pattern established in images/projects/spintex-newyork-vanities/ 
-  (commit d12c6c5). Hero images target 200-300KB, supporting/detail 
-  images target 80-150KB.
+**Site-wide WebP migration completed (2026-06-25).** All `<img>` tags with .jpg sources across all pages now use `<picture>` elements with WebP `<source>` and JPG fallback. ~150 WebP files generated at q80. JPG originals kept on disk as `<picture>` fallback for older browsers and external cached links.
 
-- Existing/legacy images already in use on the site (plain .jpg, no 
-  <picture> wrapper): leave as-is by default. Do NOT convert as a side 
-  effect of an unrelated task.
+- All new images: convert to WebP with JPG fallback using `<picture>` markup. Hero images target 200-300KB, supporting/detail images target 80-150KB.
 
-- Migrating a legacy image to WebP/<picture> is only done as a deliberate, 
-  scoped task — and only after first identifying every page that 
-  references that image (many project photos are reused across multiple 
-  pages, e.g. homepage service cards pull from individual project 
-  folders). If migrating, update all referencing pages in the same pass 
-  so no image exists inconsistently in both formats across the site.
+- When adding a new image to any page, always use the `<picture>` pattern:
+  ```html
+  <picture>
+    <source srcset="path/to/image.webp" type="image/webp">
+    <img src="path/to/image.jpg" alt="..." loading="lazy">
+  </picture>
+  ```
 
-- No site-wide bulk conversion sweep without an explicit, separate 
-  instruction scoped to that task alone.
+- pm-* modal templates use `data-webp` and `data-jpg` attributes on `<figure>` elements — the JS constructs `<picture>` elements dynamically. Both attributes must be present for new template images.
+
+- The `og:image` meta tag and JSON-LD `image` property in `index.html` still reference `.jpg` (these are metadata URLs consumed by crawlers/social platforms that may not support WebP). Leave as JPG.
+
+- Do NOT delete JPG originals — they serve as `<picture>` fallback and are referenced by external links, social shares, and search engine caches.
 
 ### Kitchen Projects Catalogued (2026-05-11)
 
