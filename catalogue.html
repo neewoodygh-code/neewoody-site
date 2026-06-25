@@ -150,7 +150,8 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 /* ── FEATURE (full-bleed hero + overlay caption) ── */
 .feature{position:relative;color:var(--cream)}
-.feature>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feature>img,.feature>picture{position:absolute;inset:0;width:100%;height:100%}
+.feature>picture img,.feature>img{width:100%;height:100%;object-fit:cover}
 .feature::after{
   content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(11,31,14,0) 38%,rgba(11,31,14,0.82) 100%);
@@ -233,7 +234,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 <!-- ════════════ COVER ════════════ -->
 <section class="page cover">
   <div class="cover-art">
-    <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Floor-to-ceiling fitted wardrobe by Neewoody">
+    <picture>
+      <source srcset="images/projects/oyarifa/oyarifa-master-closed-1.webp" type="image/webp">
+      <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Floor-to-ceiling fitted wardrobe by Neewoody">
+    </picture>
   </div>
   <div class="cover-body">
     <div class="cover-rule"></div>
@@ -270,7 +274,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Oyarifa — feature -->
 <section class="page feature">
-  <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Oyarifa master wardrobe">
+  <picture>
+    <source srcset="images/projects/oyarifa/oyarifa-master-closed-1.webp" type="image/webp">
+    <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Oyarifa master wardrobe">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Oyarifa · 2025</div>
     <h3>Floor-to-Ceiling Built-ins</h3>
@@ -281,8 +288,14 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 <!-- Oyarifa + Adenta interiors -->
 <section class="page duo">
   <div class="imgs">
-    <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg" alt="Oyarifa guest wardrobe interior">
-    <img src="images/projects/adenta/adenta-interior-left.jpg" alt="Adenta wardrobe interior">
+    <picture>
+      <source srcset="images/projects/oyarifa/oyarifa-guest-interior.webp" type="image/webp">
+      <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg" alt="Oyarifa guest wardrobe interior">
+    </picture>
+    <picture>
+      <source srcset="images/projects/adenta/adenta-interior-left.webp" type="image/webp">
+      <img src="images/projects/adenta/adenta-interior-left.jpg" alt="Adenta wardrobe interior">
+    </picture>
   </div>
   <div class="strip">
     <div class="head"><h3>Interiors, considered</h3><span class="yr">Oyarifa · Adenta</span></div>
@@ -292,7 +305,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Zoe Cantonments — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/zoe-cantonments/zoe-front-closed.jpg" alt="Zoe Cantonments wardrobe"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/zoe-cantonments/zoe-front-closed.webp" type="image/webp"><img src="images/projects/zoe-cantonments/zoe-front-closed.jpg" alt="Zoe Cantonments wardrobe"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Zoe, Cantonments</h3><span class="yr">2026</span></div>
     <p class="desc">A freestanding wardrobe in dark walnut-effect laminate — two-panel sliding doors above an integrated four-drawer chest in a 2 + 2 configuration, finished with matte black bar handles.</p>
@@ -307,7 +320,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Dobro — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/dobro/dobro-wide-interior.jpg" alt="Dobro wardrobe interior"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/dobro/dobro-wide-interior.webp" type="image/webp"><img src="images/projects/dobro/dobro-wide-interior.jpg" alt="Dobro wardrobe interior"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Dobro, Nsawam Road</h3><span class="yr">2025</span></div>
     <p class="desc">Four wardrobes across one new-build house — a wide master with six drawers, plus a kids' room and two guest bedrooms. Several units carry built-in drawer organisers with fitted compartments.</p>
@@ -328,25 +341,25 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
   </div>
   <div class="thumbs">
     <div class="card">
-      <div class="ph"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Agbogba wardrobe"></div>
+      <div class="ph"><picture><source srcset="images/projects/agbogba/agbogba-dresser-lit.webp" type="image/webp"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Agbogba wardrobe"></picture></div>
       <div class="nm">Agbogba</div>
       <div class="mt">Oak-effect · 2022</div>
       <div class="ds">Built-in plus freestanding unit with an integrated dresser recess and recessed spotlights.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Dansoman wardrobe"></div>
+      <div class="ph"><picture><source srcset="images/projects/dansoman/dansoman-closed-1.webp" type="image/webp"><img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Dansoman wardrobe"></picture></div>
       <div class="nm">Dansoman</div>
       <div class="mt">Cherry-effect · 2024</div>
       <div class="ds">Freestanding sliding-door wardrobe on aluminium track, with overhead cabinet and internal drawers.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Seyram open wardrobe"></div>
+      <div class="ph"><picture><source srcset="images/projects/seyram-nmai-dzorn/seyram-installed.webp" type="image/webp"><img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Seyram open wardrobe"></picture></div>
       <div class="nm">Seyram, Nmai Dzorn</div>
       <div class="mt">Open walk-in system</div>
       <div class="ds">White melamine open dressing room — four units in facing pairs with an integrated full-length mirror.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Nadia wardrobe"></div>
+      <div class="ph"><picture><source srcset="images/projects/nadia-dome/nadia-wardrobe-front.webp" type="image/webp"><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Nadia wardrobe"></picture></div>
       <div class="nm">Nadia, Dome</div>
       <div class="mt">Distressed walnut · 2025</div>
       <div class="ds">Rustic distressed walnut-effect wardrobe, two hinged doors over three drawers. Part of a full-home commission.</div>
@@ -365,7 +378,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Spintex — feature -->
 <section class="page feature">
-  <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg" alt="Spintex kitchen">
+  <picture>
+    <source srcset="images/projects/spintex-kitchen/spintex-kitchen-hero.webp" type="image/webp">
+    <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg" alt="Spintex kitchen">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Spintex · 2024</div>
     <h3>L-Shaped in Espresso &amp; Gold</h3>
@@ -375,7 +391,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Dansoman kitchen — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/dansoman-kitchen/dansoman-kitchen-island.jpg" alt="Dansoman kitchen island"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/dansoman-kitchen/dansoman-kitchen-island.webp" type="image/webp"><img src="images/projects/dansoman-kitchen/dansoman-kitchen-island.jpg" alt="Dansoman kitchen island"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Dansoman Kitchen</h3><span class="yr">2024</span></div>
     <p class="desc">A large family kitchen in cherry/teak-effect laminate under white engineered quartz, anchored by a freestanding island with an open-shelf end and a seating overhang. Integrated six-burner range and undermount sink.</p>
@@ -396,25 +412,25 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
   </div>
   <div class="thumbs">
     <div class="card">
-      <div class="ph"><img src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg" alt="Tantra Hill kitchen"></div>
+      <div class="ph"><picture><source srcset="images/projects/tantra-kitchen/tantra-kitchen-overview.webp" type="image/webp"><img src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg" alt="Tantra Hill kitchen"></picture></div>
       <div class="nm">Tantra Hill</div>
       <div class="mt">Cream high-gloss</div>
       <div class="ds">Warm beige speckled granite, a central island and an integrated fridge-freezer tower.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg" alt="Danfa kitchen"></div>
+      <div class="ph"><picture><source srcset="images/projects/danfa-kitchen/danfa-kitchen-layout.webp" type="image/webp"><img src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg" alt="Danfa kitchen"></picture></div>
       <div class="nm">Danfa</div>
       <div class="mt">Mediterranean · 2025</div>
       <div class="ds">Warm beech-effect cabinetry, sealed concrete worktops, a Belfast farmhouse sink and brass handles.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg" alt="Kokrobite kitchen"></div>
+      <div class="ph"><picture><source srcset="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.webp" type="image/webp"><img src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg" alt="Kokrobite kitchen"></picture></div>
       <div class="nm">Kokrobite</div>
       <div class="mt">Wine-red gloss · 2021</div>
       <div class="ds">Bold burgundy high-gloss cabinetry over black galaxy granite, with glazed upper cabinets.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg" alt="Kukurantumi kitchen"></div>
+      <div class="ph"><picture><source srcset="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.webp" type="image/webp"><img src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg" alt="Kukurantumi kitchen"></picture></div>
       <div class="nm">Kukurantumi</div>
       <div class="mt">Eastern Region</div>
       <div class="ds">Charcoal concrete-effect laminate with blue-grey veined granite — delivered two hours from Accra.</div>
@@ -433,7 +449,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Dansoman bed — feature -->
 <section class="page feature">
-  <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg" alt="Dansoman bed">
+  <picture>
+    <source srcset="images/projects/dansoman-bed/dansoman-bed-overview.webp" type="image/webp">
+    <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg" alt="Dansoman bed">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Platform Bed</div>
     <h3>Bed &amp; Matching Nightstand</h3>
@@ -449,25 +468,25 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
   </div>
   <div class="thumbs">
     <div class="card">
-      <div class="ph"><img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg" alt="Ridge four-poster bed"></div>
+      <div class="ph"><picture><source srcset="images/projects/ridge-fourposter/ridge-fourposter-overview.webp" type="image/webp"><img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg" alt="Ridge four-poster bed"></picture></div>
       <div class="nm">Ridge Four-Poster</div>
       <div class="mt">Solid timber</div>
       <div class="ds">A clean-lined solid timber four-poster frame, built for a Ridge residence.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/golf-hills-bed/golf-hills-bed-feature.jpg" alt="Golf Hills bed"></div>
+      <div class="ph"><picture><source srcset="images/projects/golf-hills-bed/golf-hills-bed-feature.webp" type="image/webp"><img src="images/projects/golf-hills-bed/golf-hills-bed-feature.jpg" alt="Golf Hills bed"></picture></div>
       <div class="nm">Golf Hills Bed</div>
       <div class="mt">Feature headboard</div>
       <div class="ds">A platform bed with a full feature headboard, built for the Golf Hills estate.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg" alt="Montessori bunk bed"></div>
+      <div class="ph"><picture><source srcset="images/projects/montessori-bunk/montessori-bunk-overview.webp" type="image/webp"><img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg" alt="Montessori bunk bed"></picture></div>
       <div class="nm">Montessori Bunk</div>
       <div class="mt">Children's room</div>
       <div class="ds">A low Montessori-style bunk built to a child-safe height with an open frame.</div>
     </div>
     <div class="card">
-      <div class="ph"><img src="images/projects/platform-iroko/platform-iroko-headboard.jpg" alt="Iroko platform bed"></div>
+      <div class="ph"><picture><source srcset="images/projects/platform-iroko/platform-iroko-headboard.webp" type="image/webp"><img src="images/projects/platform-iroko/platform-iroko-headboard.jpg" alt="Iroko platform bed"></picture></div>
       <div class="nm">Iroko Platform</div>
       <div class="mt">Solid iroko</div>
       <div class="ds">A solid iroko platform bed with a slatted timber headboard.</div>
@@ -486,7 +505,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Judith — feature -->
 <section class="page feature">
-  <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Judith East Legon dining set">
+  <picture>
+    <source srcset="images/projects/judith-east-legon/judith-set-installed-2.webp" type="image/webp">
+    <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Judith East Legon dining set">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Judith, East Legon · 2022</div>
     <h3>A Hyedua Dining Room</h3>
@@ -496,7 +518,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Golf Hills Estate — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Golf Hills dining zone"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/golf-hills-estate/golf-hills-installed-1.webp" type="image/webp"><img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Golf Hills dining zone"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Golf Hills Estate</h3><span class="yr">2021</span></div>
     <p class="desc">A complete kitchen dining zone built and installed as one commission — a stained pine X-frame dining table and matching bench, a built-in L-shaped leatherette banquette with under-seat storage, and a timber-framed wall mirror above.</p>
@@ -520,7 +542,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Nadia wave chest — feature -->
 <section class="page feature">
-  <img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg" alt="Nadia wave-carved chest of drawers">
+  <picture>
+    <source srcset="images/projects/nadia-dome/nadia-wave-chest-1.webp" type="image/webp">
+    <img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg" alt="Nadia wave-carved chest of drawers">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Nadia, Dome · 2025</div>
     <h3>The Wave-Carved Chest</h3>
@@ -530,7 +555,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Ridge Afromosia + Nadia stools — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Afromosia live-edge dining table"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/french-embassy/afromosia-table-installed-1.webp" type="image/webp"><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Afromosia live-edge dining table"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Ridge Residence</h3><span class="yr">2021</span></div>
     <p class="desc">An Afromosia live-edge dining table on solid timber U-frame legs, commissioned by French expatriates on posting in Ghana — the natural edge of the board kept and finished as the defining feature of the piece.</p>
@@ -554,7 +579,10 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Sage Centre — feature -->
 <section class="page feature">
-  <img src="images/projects/sage-centre/sage-hero.jpg" alt="Sage Centre teak fitout">
+  <picture>
+    <source srcset="images/projects/sage-centre/sage-hero.webp" type="image/webp">
+    <img src="images/projects/sage-centre/sage-hero.jpg" alt="Sage Centre teak fitout">
+  </picture>
   <div class="cap">
     <div class="eyebrow">Sage Centre, Wli · 2022–2024</div>
     <h3>A 26-Month Teak Fitout</h3>
@@ -564,7 +592,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- House of Walker — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/house-of-walker/how-hero.jpg" alt="House of Walker installation"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/house-of-walker/how-hero.webp" type="image/webp"><img src="images/projects/house-of-walker/how-hero.jpg" alt="House of Walker installation"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>House of Walker</h3><span class="yr">One Airport Square</span></div>
     <p class="desc">A branded structural carpentry installation built for Johnnie Walker's 200-year celebration at One Airport Square, Accra — designed and fabricated to a brand brief and installed on site for the event.</p>
@@ -579,7 +607,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(-
 
 <!-- Jerksoul — spread -->
 <section class="page spread">
-  <div class="spread-img"><img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul restaurant furniture"></div>
+  <div class="spread-img"><picture><source srcset="images/projects/jerksoul/jerksoul-day-1.webp" type="image/webp"><img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul restaurant furniture"></picture></div>
   <div class="spread-body">
     <div class="head"><h3>Jerksoul Restaurant</h3><span class="yr">2022</span></div>
     <p class="desc">Dining and bar furniture for a rooftop restaurant in Accra — custom pine dining tables with branded glass tops, upholstered cube stools paired to the sets and bar, and a large interior bar counter clad in reclaimed-style timber panels with a solid wood top.</p>
