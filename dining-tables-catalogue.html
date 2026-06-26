@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Neewoody — Dining Tables Catalogue</title>
+<meta name="description" content="Custom dining tables by Neewoody Custom Woodwork — solid hardwood, pine and steel, and commercial restaurant furniture, handcrafted in Accra, Ghana." />
+<link rel="icon" href="images/favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px}
+body{
+  background:#b8b09a;
+  color:var(--ink);
+  font-family:var(--body);
+  -webkit-font-smoothing:antialiased;
+  padding:24px 0;
+}
+img{display:block;max-width:100%}
+
+/* ── PAGE FRAME (A4) ── */
+.page{
+  position:relative;
+  width:210mm;
+  height:297mm;
+  margin:0 auto 24px;
+  background:var(--cream);
+  overflow:hidden;
+  box-shadow:0 8px 40px rgba(0,0,0,0.28);
+  page-break-after:always;
+  break-after:page;
+}
+.page:last-child{margin-bottom:0}
+
+/* ── SHARED TYPE ── */
+.eyebrow{
+  font-family:var(--ui);
+  font-weight:500;
+  font-size:9pt;
+  letter-spacing:0.32em;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+.kicker{
+  font-family:var(--ui);
+  font-weight:400;
+  font-size:8pt;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;color:var(--green)}
+.lead{font-family:var(--body);color:var(--muted);line-height:1.7}
+
+/* ── COVER ── */
+.cover{
+  background:var(--green);
+  color:var(--cream);
+  display:flex;
+  flex-direction:column;
+}
+.cover-art{
+  height:64%;
+  position:relative;
+  overflow:hidden;
+}
+.cover-art img{width:100%;height:100%;object-fit:cover}
+.cover-art::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,31,14,0.12) 0%,rgba(11,31,14,0.55) 100%);
+}
+.cover-body{
+  flex:1;
+  padding:16mm 18mm;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.cover-body .eyebrow{color:var(--gold)}
+.cover-body h1{
+  color:var(--cream);
+  font-size:40pt;
+  letter-spacing:-0.01em;
+  margin:10px 0 14px;
+}
+.cover-body h1 em{font-style:italic;color:var(--gold)}
+.cover-body p{
+  font-family:var(--body);
+  font-size:11pt;
+  line-height:1.7;
+  color:rgba(240,232,208,0.78);
+  max-width:135mm;
+}
+.cover-meta{
+  margin-top:18px;
+  font-family:var(--ui);
+  font-size:8.5pt;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:rgba(240,232,208,0.6);
+}
+.cover-rule{width:46px;height:2px;background:var(--gold);margin:0 0 4px}
+
+/* ── ABOUT ── */
+.pad{padding:18mm}
+.about{display:flex;flex-direction:column;justify-content:center;height:100%}
+.about h2{font-size:26pt;margin:12px 0 18px;max-width:150mm}
+.about .lead{font-size:11.5pt;max-width:150mm;margin-bottom:14px}
+.about-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;margin-top:28px;border-top:1px solid rgba(11,31,14,0.14);
+}
+.about-stats div{padding:18px 0 0}
+.about-stats .n{font-family:var(--display);font-size:26pt;color:var(--gold);line-height:1}
+.about-stats .l{font-family:var(--ui);font-size:8pt;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+/* ── SECTION DIVIDER ── */
+.divider{
+  background:var(--green);color:var(--cream);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:18mm;position:relative;
+}
+.divider .num{
+  font-family:var(--display);
+  font-size:120pt;line-height:0.8;
+  color:rgba(200,146,42,0.16);
+  position:absolute;top:26mm;right:18mm;
+}
+.divider .eyebrow{position:relative}
+.divider h2{color:var(--cream);font-size:38pt;margin:12px 0 16px;position:relative}
+.divider h2 em{color:var(--gold);font-style:italic}
+.divider p{
+  font-family:var(--body);font-size:11pt;line-height:1.7;
+  color:rgba(240,232,208,0.74);max-width:130mm;position:relative;
+}
+.divider .rule{width:46px;height:2px;background:var(--gold);margin-bottom:8px;position:relative}
+
+/* ── FEATURE (full-bleed hero + overlay caption) ── */
+.feature{position:relative;color:var(--cream)}
+.feature>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feature::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,31,14,0) 38%,rgba(11,31,14,0.82) 100%);
+}
+.feature .cap{
+  position:absolute;left:0;right:0;bottom:0;
+  padding:16mm 18mm;z-index:2;
+}
+.feature .cap .eyebrow{color:var(--gold)}
+.feature .cap h3{color:var(--cream);font-size:30pt;margin:8px 0 8px}
+.feature .cap p{font-family:var(--body);font-size:10.5pt;line-height:1.6;color:rgba(240,232,208,0.85);max-width:140mm}
+
+/* ── SPREAD (one big image + spec panel) ── */
+.spread{display:flex;flex-direction:column;height:100%}
+.spread-img{height:62%;overflow:hidden;background:var(--cream-dark)}
+.spread-img img{width:100%;height:100%;object-fit:cover}
+.spread-body{flex:1;padding:12mm 18mm;display:flex;flex-direction:column;justify-content:center}
+.spread-body .head{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.spread-body h3{font-size:22pt}
+.spread-body .yr{font-family:var(--ui);font-size:9pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.spread-body .desc{font-family:var(--body);font-size:10.5pt;line-height:1.65;color:var(--muted);margin:10px 0 0;max-width:150mm}
+.specs{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:7px 28px;
+  margin-top:14px;padding-top:14px;border-top:1px solid rgba(11,31,14,0.14);
+}
+.specs div{display:flex;flex-direction:column;gap:2px}
+.specs dt{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted)}
+.specs dd{font-family:var(--body);font-size:10pt;color:var(--ink)}
+
+/* ── DUO (two stacked images + caption strip) ── */
+.duo{display:flex;flex-direction:column;height:100%}
+.duo .imgs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4mm;padding:14mm 14mm 0}
+.duo .imgs img{width:100%;height:100%;object-fit:cover;background:var(--cream-dark)}
+.duo .strip{padding:10mm 14mm 12mm}
+.duo .strip .head{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
+.duo .strip h3{font-size:20pt}
+.duo .strip .yr{font-family:var(--ui);font-size:9pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold)}
+.duo .strip p{font-family:var(--body);font-size:10pt;line-height:1.6;color:var(--muted);margin-top:8px;max-width:160mm}
+
+/* ── GRID (catalogue thumbnails) ── */
+.grid-pg{padding:16mm 16mm 14mm;display:flex;flex-direction:column;height:100%}
+.grid-pg .pg-head{margin-bottom:10mm}
+.grid-pg .pg-head h3{font-size:18pt;margin-top:6px}
+.thumbs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+.card{display:flex;flex-direction:column}
+.card .ph{height:62mm;overflow:hidden;background:var(--cream-dark)}
+.card .ph img{width:100%;height:100%;object-fit:cover}
+.card .nm{font-family:var(--display);font-size:13pt;color:var(--green);margin-top:8px}
+.card .mt{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-top:3px}
+.card .ds{font-family:var(--body);font-size:9pt;line-height:1.5;color:var(--muted);margin-top:5px}
+
+/* ── BACK COVER ── */
+.back{
+  background:var(--green);color:var(--cream);
+  display:flex;flex-direction:column;justify-content:center;
+  padding:20mm;text-align:left;
+}
+.back .rule{width:46px;height:2px;background:var(--gold);margin-bottom:14px}
+.back h2{color:var(--cream);font-size:30pt;margin-bottom:10px}
+.back h2 em{color:var(--gold);font-style:italic}
+.back p{font-family:var(--body);font-size:11pt;line-height:1.75;color:rgba(240,232,208,0.78);max-width:140mm;margin-bottom:26px}
+.contact{display:grid;grid-template-columns:repeat(2,1fr);gap:18px 32px;max-width:150mm}
+.contact .row .l{font-family:var(--ui);font-size:7.5pt;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.contact .row .v{font-family:var(--body);font-size:11pt;color:var(--cream)}
+.back .sign{margin-top:34px;font-family:var(--ui);font-size:8pt;letter-spacing:0.24em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* ── PRINT ── */
+@page{size:A4;margin:0}
+@media print{
+  body{background:#fff;padding:0}
+  .page{margin:0;box-shadow:none;width:210mm;height:297mm}
+}
+@media screen and (max-width:760px){
+  .page{width:100%;height:auto;min-height:auto;aspect-ratio:210/297}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════ COVER ════════════ -->
+<section class="page cover">
+  <div class="cover-art">
+    <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Hyedua dining table and chairs by Neewoody">
+  </div>
+  <div class="cover-body">
+    <div class="cover-rule"></div>
+    <div class="eyebrow">Dining Tables · Accra, Ghana</div>
+    <h1>Custom<br><em>Dining Tables</em></h1>
+    <p>Solid hardwood, pine and steel, restaurant sets — every table in this catalogue was designed around the room it sits in, built by hand in our Accra workshop and delivered to the client's home.</p>
+    <div class="cover-meta">Neewoody Custom Woodwork</div>
+  </div>
+</section>
+
+<!-- ════════════ ABOUT ════════════ -->
+<section class="page">
+  <div class="pad about">
+    <div class="eyebrow">The Workshop</div>
+    <h2>A table is the centre of the room. We build it that way.</h2>
+    <p class="lead">Every dining table we make starts with a conversation about the space — how many seats, what timber, what finish, how it will be used daily and how it should feel when guests arrive. We draw it, cut it, finish it and install it ourselves.</p>
+    <p class="lead">We work in Ghanaian hardwoods like Afromosia, Hyedua and Guarea, and in pine with welded steel frames for a more industrial feel. For restaurants and hospitality venues, we build at volume — matching sets delivered as a managed project from brief to handover.</p>
+    <p class="lead">The pages that follow show real tables in clients' dining rooms, kitchens and restaurants. No renders, no stock photography — just the work.</p>
+    <div class="about-stats">
+      <div><div class="n">5+</div><div class="l">Ghanaian hardwoods</div></div>
+      <div><div class="n">East&nbsp;Legon</div><div class="l">to the Volta Region</div></div>
+      <div><div class="n">By&nbsp;hand</div><div class="l">Drawn · built · installed</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ 01 · SOLID HARDWOOD ════════════ -->
+<section class="page divider">
+  <div class="num">01</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section One</div>
+  <h2>Solid Hardwood<br><em>Dining Tables</em></h2>
+  <p>Tables milled from single slabs and wide boards of Ghanaian timber — Afromosia, Hyedua, Guarea — with live edges kept or straight edges squared, finished to bring out the natural grain and built on solid wood frames.</p>
+</section>
+
+<!-- Afromosia — feature -->
+<section class="page feature">
+  <img src="images/projects/french-embassy/afromosia-table-installed-5.jpg" alt="Afromosia live-edge dining table">
+  <div class="cap">
+    <div class="eyebrow">Afromosia · Ridge, Accra</div>
+    <h3>Live-Edge Dining Table</h3>
+    <p>A single Afromosia slab, its natural edge kept and finished as the defining feature, set on solid timber U-frame legs. The grain pattern runs unbroken across the full length of the top.</p>
+  </div>
+</section>
+
+<!-- Afromosia — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/french-embassy/afromosia-table-outdoor-1.jpg" alt="Afromosia table freshly finished"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Ridge Residence</h3><span class="yr">2021</span></div>
+    <p class="desc">Commissioned by French expatriates on posting in Ghana for a private home in Ridge. The table was milled from a single Afromosia board, the live edge preserved on both long sides, and finished to a satin sheen that deepens the honey and amber tones of the timber.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Afromosia (live-edge slab)</dd></div>
+      <div><dt>Base</dt><dd>Solid timber U-frame legs</dd></div>
+      <div><dt>Finish</dt><dd>Satin clear coat</dd></div>
+      <div><dt>Client</dt><dd>Private residence, Ridge</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Afromosia duo — installed views -->
+<section class="page duo">
+  <div class="imgs">
+    <img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Afromosia table installed — angle view">
+    <img src="images/projects/french-embassy/afromosia-table-installed-4.jpg" alt="Afromosia table installed — overhead">
+  </div>
+  <div class="strip">
+    <div class="head"><h3>Delivered &amp; installed</h3><span class="yr">Ridge Residence</span></div>
+    <p>The same table photographed after delivery — the Afromosia grain catches the light differently from every seat. U-frame legs are set inboard so chairs can tuck cleanly under the overhang at each end.</p>
+  </div>
+</section>
+
+<!-- Judith — feature -->
+<section class="page feature">
+  <img src="images/projects/judith-east-legon/judith-set-installed-1.jpg" alt="Hyedua dining set installed in East Legon">
+  <div class="cap">
+    <div class="eyebrow">Hyedua · East Legon</div>
+    <h3>A Complete Dining Room</h3>
+    <p>A full Hyedua dining commission — large-format table, six upholstered chairs with linen fabric panels, and a matching console with full-extension drawers and waterfall-edge sides, all finished in rich espresso.</p>
+  </div>
+</section>
+
+<!-- Judith — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Judith dining table close-up"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Judith, East Legon</h3><span class="yr">2022</span></div>
+    <p class="desc">Designed and built as a unified set — the table, chairs and console share the same Hyedua timber, the same espresso finish and the same proportions. The chairs carry linen-upholstered seat cushions and back panels framed in the same hardwood.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Hyedua (solid)</dd></div>
+      <div><dt>Finish</dt><dd>Rich espresso stain</dd></div>
+      <div><dt>Seating</dt><dd>6 upholstered chairs · linen</dd></div>
+      <div><dt>Extras</dt><dd>Console · waterfall-edge sides</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Judith duo — workshop + dusk -->
+<section class="page duo">
+  <div class="imgs">
+    <img src="images/projects/judith-east-legon/judith-table-dusk.jpg" alt="Hyedua dining set in the workshop">
+    <img src="images/projects/judith-east-legon/judith-set-installed-3.jpg" alt="Hyedua dining set — full room view">
+  </div>
+  <div class="strip">
+    <div class="head"><h3>Workshop to dining room</h3><span class="yr">Judith, East Legon</span></div>
+    <p>Left: the table and all six chairs staged in the workshop before delivery, fully assembled and inspected. Right: the same set installed in the client's dining room — the Hyedua grain and espresso finish warm the space.</p>
+  </div>
+</section>
+
+<!-- ════════════ 02 · PINE & STEEL FRAME ════════════ -->
+<section class="page divider">
+  <div class="num">02</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Two</div>
+  <h2>Pine &amp; Steel<br><em>Frame Tables</em></h2>
+  <p>Stained pine tops on welded steel or timber X-frame and trapezoid bases — a more industrial, casual feel for kitchen diners, breakfast nooks and compact dining zones. Matching benches built to the same frame.</p>
+</section>
+
+<!-- Golf Hills — feature -->
+<section class="page feature">
+  <img src="images/projects/golf-hills-estate/golf-hills-installed-6.jpg" alt="Golf Hills dining zone with X-frame table and banquette">
+  <div class="cap">
+    <div class="eyebrow">Golf Hills Estate · 2021</div>
+    <h3>Kitchen Dining Zone</h3>
+    <p>A complete kitchen dining zone — stained pine X-frame table and matching bench, a built-in L-shaped leatherette banquette with under-seat storage, and a timber-framed wall mirror, all built and installed as one commission.</p>
+  </div>
+</section>
+
+<!-- Golf Hills — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Golf Hills X-frame table and banquette"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Golf Hills Estate</h3><span class="yr">2021</span></div>
+    <p class="desc">The X-frame table sits between a matching pine bench and a built-in L-shaped banquette upholstered in dark leatherette, with lift-up seats hiding under-seat storage. The timber-framed wall mirror above extends the room visually. Designed around the footprint of a compact kitchen dining nook.</p>
+    <dl class="specs">
+      <div><dt>Table</dt><dd>Stained pine · X-frame base</dd></div>
+      <div><dt>Bench</dt><dd>Matching pine · X-frame</dd></div>
+      <div><dt>Banquette</dt><dd>L-shaped · under-seat storage</dd></div>
+      <div><dt>Extra</dt><dd>Timber-framed wall mirror</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- Pine workshop duo — freshly built + trapezoid table -->
+<section class="page duo">
+  <div class="imgs">
+    <img src="images/projects/golf-hills-estate/golf-hills-before-1.jpg" alt="X-frame table freshly built before staining">
+    <img src="images/projects/hardwood-tables/hardwood-table-1.jpg" alt="Pine dining table with steel trapezoid legs">
+  </div>
+  <div class="strip">
+    <div class="head"><h3>In the workshop</h3><span class="yr">Built to Order</span></div>
+    <p>Left: the Golf Hills X-frame table and bench freshly assembled before staining — raw pine on welded steel. Right: a pine dining table on black steel trapezoid legs, a popular made-to-order format for compact dining spaces.</p>
+  </div>
+</section>
+
+<!-- ════════════ 03 · COMMERCIAL & RESTAURANT ════════════ -->
+<section class="page divider">
+  <div class="num">03</div>
+  <div class="rule"></div>
+  <div class="eyebrow">Section Three</div>
+  <h2>Commercial &amp;<br><em>Restaurant Dining</em></h2>
+  <p>Volume dining furniture for restaurants, bars and hospitality venues — matching table-and-seating sets built to a brand brief, delivered as managed projects with consistent finish across every piece.</p>
+</section>
+
+<!-- Jerksoul — feature -->
+<section class="page feature">
+  <img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul rooftop restaurant dining furniture">
+  <div class="cap">
+    <div class="eyebrow">Jerksoul Restaurant · Accra</div>
+    <h3>Rooftop Dining Fit-out</h3>
+    <p>Fifteen-plus custom pine dining tables with branded Issacher glass tops, paired with upholstered cube stools — furnished and delivered as a single managed commission for a rooftop restaurant in Accra.</p>
+  </div>
+</section>
+
+<!-- Jerksoul — spread -->
+<section class="page spread">
+  <div class="spread-img"><img src="images/projects/jerksoul/jerksoul-day-2.jpg" alt="Jerksoul dining tables with branded glass tops"></div>
+  <div class="spread-body">
+    <div class="head"><h3>Jerksoul Restaurant</h3><span class="yr">2022</span></div>
+    <p class="desc">Each table carries a branded glass top over a pine base, with the restaurant's Issacher motif etched into the surface. The cube stools are upholstered with cushioned tops for extended seating, and the bar counter is clad in reclaimed-style timber panels with a solid wood top.</p>
+    <dl class="specs">
+      <div><dt>Tables</dt><dd>15+ pine · branded glass tops</dd></div>
+      <div><dt>Seating</dt><dd>Upholstered cube stools</dd></div>
+      <div><dt>Bar</dt><dd>Timber-clad counter · solid top</dd></div>
+      <div><dt>Setting</dt><dd>Rooftop restaurant, Accra</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ════════════ RANGE GRID ════════════ -->
+<section class="page grid-pg">
+  <div class="pg-head">
+    <div class="eyebrow">Dining Tables</div>
+    <h3>Across the range</h3>
+  </div>
+  <div class="thumbs">
+    <div class="card">
+      <div class="ph"><img src="images/projects/french-embassy/afromosia-table-installed-2.jpg" alt="Afromosia live-edge table"></div>
+      <div class="nm">Afromosia Live-Edge</div>
+      <div class="mt">Solid hardwood · Ridge</div>
+      <div class="ds">Single slab with natural edge preserved, on timber U-frame legs. Honey and amber tones.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/judith-east-legon/judith-set-staged.jpg" alt="Hyedua dining set"></div>
+      <div class="nm">Hyedua Six-Seat Set</div>
+      <div class="mt">Solid hardwood · East Legon</div>
+      <div class="ds">Full dining room — table, six upholstered chairs, console — in rich espresso Hyedua.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/golf-hills-estate/golf-hills-installed-3.jpg" alt="Golf Hills X-frame dining set"></div>
+      <div class="nm">X-Frame &amp; Banquette</div>
+      <div class="mt">Pine &amp; steel · Golf Hills</div>
+      <div class="ds">Stained pine X-frame table with matching bench and built-in L-shaped banquette.</div>
+    </div>
+    <div class="card">
+      <div class="ph"><img src="images/projects/jerksoul/jerksoul-day-2.jpg" alt="Jerksoul restaurant tables"></div>
+      <div class="nm">Restaurant Sets</div>
+      <div class="mt">Commercial · Jerksoul</div>
+      <div class="ds">Branded glass-top pine tables and cube stools delivered in volume for a rooftop venue.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════ BACK COVER ════════════ -->
+<section class="page back">
+  <div class="rule"></div>
+  <div class="eyebrow">Commission a Table</div>
+  <h2>Let's build something<br><em>for your dining room.</em></h2>
+  <p>Every table in this catalogue began as a conversation about a room — how many seats, what timber, what kind of meals will be shared around it. If you have a dining room, kitchen nook, or restaurant floor in mind, we'd be glad to talk it through, measure up, and build something to fit.</p>
+  <div class="contact">
+    <div class="row"><div class="l">Email</div><div class="v">neewoodygh@gmail.com</div></div>
+    <div class="row"><div class="l">Telephone</div><div class="v">+233 24 463 3464</div></div>
+    <div class="row"><div class="l">Instagram</div><div class="v">@neewoodygh</div></div>
+    <div class="row"><div class="l">Web</div><div class="v">neewoodygh.com</div></div>
+    <div class="row"><div class="l">Workshop</div><div class="v">Amugi Avenue, Accra, Ghana</div></div>
+    <div class="row"><div class="l">Hours</div><div class="v">Mon–Sat · 08:00–18:00</div></div>
+  </div>
+  <div class="sign">Neewoody Custom Woodwork · Handcrafted in Accra</div>
+</section>
+
+</body>
+</html>
