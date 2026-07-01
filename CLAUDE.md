@@ -65,7 +65,7 @@ Common UI patterns implemented in `/js/main.js`:
 
 - New marketing pages should follow the existing HTML structure: same `<head>` meta/font links, nav, and footer pattern as `index.html`
 - The nav includes a **Services dropdown** with tool badges for the estimator and dispatch — update it in every page when adding new pages
-- Structured data (JSON-LD `LocalBusiness` schema) lives in `index.html` — update there for business info changes
+- Structured data (JSON-LD `LocalBusiness` schema) lives in `index.html` — update there for business info changes. **Corrected 2026-07-01:** the schema `geo` had wrong coordinates (`5.6037, -0.1870`, ~5km off) — fixed to the real workshop GPS `5.56108, -0.21373`; also added `streetAddress: "Amugi Avenue"` and `email: neewoodygh@gmail.com`. Found via a crawler-perspective audit of the live site (WebFetch strips `<script type=ld+json>`, so the schema only appears invisible externally — it renders/validates fine).
 - SEO files (`sitemap.xml`, `robots.txt`) are hand-maintained — update `sitemap.xml` when adding new pages
 - The dispatch React app uses **no bundler** — JSX is transpiled in-browser by Babel standalone; keep it self-contained within `dispatch.html`
 
