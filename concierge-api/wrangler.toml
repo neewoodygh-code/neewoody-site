@@ -9,7 +9,7 @@ compatibility_date = "2026-07-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "concierge"
-database_id = "REPLACE_AFTER_wrangler_d1_create_concierge"
+database_id = "25f1c339-c3f0-4398-89d1-0f3f62b7c89f"
 
 # ── R2: shared media bucket (member photos live under concierge/ prefix)
 [[r2_buckets]]
