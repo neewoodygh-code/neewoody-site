@@ -15,13 +15,13 @@ gtag('config', 'G-ZP77WR6BNH');
 <link rel="icon" href="images/favicon.ico" />
 <link rel="apple-touch-icon" href="images/logo.png" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tools | Neewoody Custom Woodwork — Accra</title>
-<meta name="description" content="Free tools for clients and carpenters. Price your custom wardrobe in minutes, or use our workshop calculators to quote jobs and manage costs." />
+<title>Carpentry Concierge — Free Tools &amp; Membership | Neewoody Custom Woodwork</title>
+<meta name="description" content="Free calculators for homeowners and carpenters, plus Carpentry Concierge — Ghana's members' community for carpenters. Directory, saved cutlists, and workshop tools." />
 <link rel="canonical" href="https://neewoodygh.com/tools.html" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://neewoodygh.com/tools.html" />
-<meta property="og:title" content="Tools — Neewoody Custom Woodwork" />
-<meta property="og:description" content="Free price estimator for clients. Workshop calculators for carpenters." />
+<meta property="og:title" content="Carpentry Concierge — Neewoody Custom Woodwork" />
+<meta property="og:description" content="Free tools for homeowners and carpenters. Members get the directory, saved cutlists, and first access to every new tool." />
 <meta property="og:image" content="https://neewoodygh.com/images/og-image.jpg" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,7 +174,7 @@ a{text-decoration:none}
   <a href="solid-wood.html">Solid Wood</a>
   <a href="portfolio.html">Portfolio</a>
   <a href="contact.html">Contact</a>
-  <a href="tools.html">Tools</a>
+  <a href="tools.html">Concierge</a>
   <div class="mobile-nav-ctas">
     <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
     <a href="contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
@@ -198,7 +198,7 @@ a{text-decoration:none}
         <a href="tv-units.html">TV Units</a>
         <a href="shelving.html">Shelving</a>
         <a href="solid-wood.html">Solid Wood</a>
-        <a href="tools.html">Tools</a>
+        <a href="tools.html">Concierge</a>
       </div>
     </li>
     <li><a href="portfolio.html">Portfolio</a></li>
@@ -212,11 +212,22 @@ a{text-decoration:none}
 
 <main>
 
+<!-- SESSION BAR (guest / member) -->
+<div id="cg-guest" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:var(--cream-dark);border-bottom:1px solid rgba(11,31,14,.08);padding:.6rem clamp(1.5rem,5vw,3rem);margin-top:82px;font-family:var(--ui);font-size:.72rem;letter-spacing:.06em;color:var(--muted)">
+  <span>Already a Concierge member?</span>
+  <a href="concierge/login.html" style="margin-left:auto;font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:.66rem;color:var(--green);border:1px solid rgba(11,31,14,.3);padding:.35rem .8rem">Member login →</a>
+</div>
+<div id="cg-member" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:var(--green);color:var(--cream);padding:.6rem clamp(1.5rem,5vw,3rem);margin-top:82px;font-family:var(--ui);font-size:.72rem;letter-spacing:.06em">
+  <span style="opacity:.85">🛠 Concierge member</span>
+  <a href="concierge/directory.html" style="margin-left:auto;font-weight:500;letter-spacing:.12em;text-transform:uppercase;font-size:.66rem;color:var(--gold)">Go to your member area →</a>
+  <button onclick="cgLogout()" style="font-family:var(--ui);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;background:transparent;color:rgba(240,232,208,.7);border:1px solid rgba(240,232,208,.35);padding:.3rem .7rem;cursor:pointer">Log out</button>
+</div>
+
 <!-- PAGE HEADER -->
-<header class="tl-head">
-  <span class="tl-head-eyebrow">Neewoody Tools</span>
+<header class="tl-head" style="padding-top:6rem">
+  <span class="tl-head-eyebrow">Carpentry Concierge</span>
   <h1>Built for builders.<br>And their clients.</h1>
-  <p>Free calculators for homeowners pricing a project and carpenters running a business. No signup required for the estimator — just open it and go.</p>
+  <p>Free calculators for homeowners pricing a project and carpenters running a business — no signup needed, just open them and go. And for Ghana's carpenters: a paid members' community with a directory, saved work, and first access to every tool we build. <a href="#membership" style="color:var(--gold);border-bottom:1px solid rgba(200,146,42,.4)">See the membership ↓</a></p>
 </header>
 
 <!-- CLIENT TOOL -->
@@ -270,6 +281,42 @@ a{text-decoration:none}
   </div>
 </section>
 
+<!-- MEMBERSHIP -->
+<section id="membership" style="background:var(--cream-dark);padding:6rem clamp(1.5rem,5vw,3rem)">
+  <span class="tl-head-eyebrow">The Membership</span>
+  <h2 style="font-family:var(--display);font-size:clamp(1.8rem,3vw,2.6rem);font-weight:400;line-height:1.15;margin-bottom:1rem">Carpentry Concierge.<br><em style="color:var(--gold)">Members hire members.</em></h2>
+  <p style="font-family:var(--body);font-size:.95rem;line-height:1.85;color:var(--muted);max-width:56ch;margin-bottom:2.5rem">A paid members' community for Ghana's carpenters, run by Neewoody. Join to be found for work, hire trusted trades near you, keep your saved cut lists, and get first access to every tool we build next.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1px;background:rgba(11,31,14,.12);border:1px solid rgba(11,31,14,.12);margin-bottom:2.5rem">
+    <div style="background:var(--cream);padding:1.6rem 1.5rem">
+      <div style="font-family:var(--ui);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Live now</div>
+      <div style="font-family:var(--display);font-size:1.1rem;margin-bottom:.5rem">Members Directory</div>
+      <p style="font-size:.85rem;line-height:1.7;color:var(--muted)">Find and hire carpenters by area and trade — upholstery, spray finishing, glass &amp; aluminium, site work. Your profile makes you findable for jobs and apprenticeships.</p>
+    </div>
+    <div style="background:var(--cream);padding:1.6rem 1.5rem">
+      <div style="font-family:var(--ui);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Live now</div>
+      <div style="font-family:var(--display);font-size:1.1rem;margin-bottom:.5rem">Saved Cut Lists</div>
+      <p style="font-size:.85rem;line-height:1.7;color:var(--muted)">The free cutlist calculator remembers nothing. Members save and reload named cut lists — set a job up once, return to it any time.</p>
+    </div>
+    <div style="background:var(--cream);padding:1.6rem 1.5rem">
+      <div style="font-family:var(--ui);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem">Coming — members first</div>
+      <div style="font-family:var(--display);font-size:1.1rem;margin-bottom:.5rem">The Tool Library</div>
+      <p style="font-size:.85rem;line-height:1.7;color:var(--muted)">Kitchen cutlist · TV-unit cutlist · job pricing calculator · lone-worker safety check-in · job dispatch &amp; crew tracker. Members get each one first.</p>
+    </div>
+    <div style="background:var(--cream);padding:1.6rem 1.5rem">
+      <div style="font-family:var(--ui);font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.7rem">Day one</div>
+      <div style="font-family:var(--display);font-size:1.1rem;margin-bottom:.5rem">The Community</div>
+      <p style="font-size:.85rem;line-height:1.7;color:var(--muted)">A WhatsApp community of vetted working carpenters — collaborate, learn from each other, pass work along. The platform is the toolbox; the group is the workshop floor.</p>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+    <a href="https://wa.me/233244633464?text=FOUNDER" target="_blank" rel="noopener" class="btn-gold">Become a founding member</a>
+    <span style="font-family:var(--ui);font-size:.72rem;color:var(--muted)">GHS 50/month founding rate — first 50 members, locked in. GHS 100 after.</span>
+  </div>
+  <p style="margin-top:1.25rem"><a href="concierge/login.html" class="link-arrow">Already a member? Log in</a></p>
+</section>
+
 </main>
 
 <!-- FOOTER -->
@@ -285,7 +332,7 @@ a{text-decoration:none}
     <a href="portfolio.html">Work</a>
     <a href="wardrobes.html">Services</a>
     <a href="contact.html">Contact</a>
-    <a href="tools.html">Tools</a>
+    <a href="tools.html">Concierge</a>
     <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
     <a href="privacy.html">Privacy Policy</a>
   </nav>
@@ -301,8 +348,19 @@ a{text-decoration:none}
 </a>
 
 <script src="js/main.js"></script>
+<script src="js/concierge.js"></script>
 <script>
-
+// Guest/member session bar (rule: every Concierge-facing page is a login entry
+// point AND a closable session). Marketing pages elsewhere stay static.
+function cgLogout(){
+  if(window.Concierge) Concierge.clearToken();
+  location.reload();
+}
+(function(){
+  var live = window.Concierge && Concierge.tokenAlive();
+  var bar = document.getElementById(live ? 'cg-member' : 'cg-guest');
+  if(bar) bar.style.display = 'flex';
+})();
 </script>
 </body>
 </html>

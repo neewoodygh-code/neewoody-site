@@ -144,7 +144,7 @@ Quotes saved to KV as `nwd-quotes`. Reference format `NWD-001`, `NWD-002`. Statu
 
 ### Site Key Conventions
 - Deployment: push to `main` → Cloudflare Pages auto-deploys. No build system.
-- Nav structure: Home · Wardrobes · Kitchens · Beds · More ▾ · Portfolio · Contact · Tools ▾
+- Nav structure: Home · Wardrobes · Kitchens · Beds · More ▾ (…incl. **Concierge**) · Portfolio · Contact. The former "Tools" nav label was renamed **Concierge** site-wide (2026-07-14); it still points at `tools.html`, which is now the **Concierge hub** — free tools (estimator, cutlist, job pricing) + membership pitch + `wa.me/233244633464?text=FOUNDER` join CTA + guest/member session bar. All page footers carry a Concierge link. Homepage has a "For Carpenters" section (between testimonials and CTA) linking to the hub. Session-aware pages are ONLY `tools.html`, `cutlist.html`, and `/concierge/*` — marketing pages stay static (no concierge.js site-wide).
 - Instagram token: `IG_TOKEN` in Cloudflare Pages dashboard (expires every 60 days — refresh required).
 - Contact form: POSTs to `/api/lead` (Worker saves to KV, sends push to admin).
 - Analytics: GA4 (G-ZP77WR6BNH) + Cloudflare Web Analytics (automatic).

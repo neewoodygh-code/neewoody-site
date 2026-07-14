@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neewoody — Redesign Concept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;
+  z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.6rem 3rem;
+  transition:background 0.4s,backdrop-filter 0.4s;
+}
+nav.scrolled{
+  background:rgba(240,232,208,0.92);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid rgba(11,31,14,0.08);
+}
+.logo{
+  font-family:var(--display);
+  font-size:1.05rem;font-weight:500;
+  color:var(--cream);
+  letter-spacing:0.03em;
+  transition:color 0.4s;
+}
+nav.scrolled .logo{color:var(--ink)}
+.logo-sub{
+  display:block;
+  font-family:var(--ui);
+  font-size:0.6rem;font-weight:300;
+  letter-spacing:0.22em;text-transform:uppercase;
+  opacity:0.65;margin-top:2px;
+}
+.nav-links{display:flex;gap:2.5rem;list-style:none}
+.nav-links a{
+  font-family:var(--ui);
+  font-size:0.72rem;font-weight:400;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(240,232,208,0.8);
+  transition:color 0.3s,opacity 0.3s;
+}
+nav.scrolled .nav-links a{color:var(--muted)}
+.nav-links a:hover{color:var(--gold);opacity:1}
+.nav-cta{
+  font-family:var(--ui);
+  font-size:0.68rem;font-weight:500;
+  letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--green);
+  background:var(--gold);
+  padding:0.55rem 1.2rem;
+  transition:background 0.2s;
+}
+.nav-cta:hover{background:#b07d20}
+
+/* ── HERO ── */
+.hero{
+  position:relative;
+  height:100vh;min-height:560px;
+  overflow:hidden;
+}
+.hero-slide{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  opacity:0;
+}
+.hero-slide img{
+  width:100%;height:100%;
+  object-fit:cover;
+  transform-origin:center center;
+}
+
+/* timing: 7s hold + 1.8s fade = 8.8s per slide, 3 slides = 26.4s cycle */
+.hero-slide:nth-child(1){animation:fade-cycle 26.4s 0s infinite}
+.hero-slide:nth-child(2){animation:fade-cycle 26.4s 8.8s infinite}
+.hero-slide:nth-child(3){animation:fade-cycle 26.4s 17.6s infinite}
+
+/* Ken Burns — different motion per slide */
+.hero-slide:nth-child(1) img{animation:kb-zoom-in 8.8s ease-out 0s infinite}
+.hero-slide:nth-child(2) img{animation:kb-pan-right 8.8s ease-out 0s infinite}
+.hero-slide:nth-child(3) img{animation:kb-zoom-tl 8.8s ease-out 0s infinite}
+
+@keyframes fade-cycle{
+  0%{opacity:0}
+  6%{opacity:1}          /* fade in over ~1.5s */
+  80%{opacity:1}         /* hold */
+  100%{opacity:0}        /* fade out */
+}
+@keyframes kb-zoom-in{
+  0%{transform:scale(1.08)}
+  100%{transform:scale(1.0)}
+}
+@keyframes kb-pan-right{
+  0%{transform:scale(1.06) translateX(-2%)}
+  100%{transform:scale(1.03) translateX(2%)}
+}
+@keyframes kb-zoom-tl{
+  0%{transform:scale(1.1) translate(1%,1%)}
+  100%{transform:scale(1.02) translate(-1%,-1%)}
+}
+
+.hero-scrim{
+  position:absolute;inset:0;
+  background:linear-gradient(
+    170deg,
+    rgba(11,31,14,0.15) 0%,
+    rgba(11,31,14,0.08) 30%,
+    rgba(11,31,14,0.55) 70%,
+    rgba(11,31,14,0.78) 100%
+  );
+  z-index:1;
+}
+.hero-body{
+  position:absolute;
+  bottom:4.5rem;left:3rem;right:3rem;
+  z-index:2;
+  animation:fadeUp 1.1s cubic-bezier(0.16,1,0.3,1) 0.4s both;
+}
+.hero-tag{
+  font-family:var(--ui);
+  font-size:0.65rem;font-weight:400;
+  letter-spacing:0.32em;text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:1.1rem;
+}
+.hero-h1{
+  font-family:var(--display);
+  font-size:clamp(2.6rem,5.5vw,5rem);
+  font-weight:400;line-height:1.08;
+  color:var(--cream);
+  margin-bottom:1.8rem;
+  max-width:14ch;
+}
+.hero-h1 em{font-style:italic;color:var(--gold)}
+.hero-scroll{
+  font-family:var(--ui);
+  font-size:0.68rem;font-weight:400;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:rgba(240,232,208,0.75);
+  display:inline-flex;align-items:center;gap:0.8rem;
+  transition:color 0.2s,gap 0.3s;
+}
+.hero-scroll:hover{color:var(--cream);gap:1.2rem}
+.hero-scroll::after{content:'↓'}
+
+/* ── FEATURED CASE ── */
+.featured{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:88vh;
+  background:var(--green);
+}
+.feat-img-wrap{
+  position:relative;overflow:hidden;
+}
+.feat-img-wrap img{
+  width:100%;height:100%;
+  object-fit:cover;
+  transition:transform 0.9s ease;
+}
+.feat-img-wrap:hover img{transform:scale(1.04)}
+.feat-text{
+  padding:5rem 4.5rem;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.eyebrow{
+  font-family:var(--ui);
+  font-size:0.6rem;font-weight:400;
+  letter-spacing:0.32em;text-transform:uppercase;
+  color:rgba(240,232,208,0.4);
+  margin-bottom:0.5rem;
+}
+.feat-title{
+  font-family:var(--display);
+  font-size:clamp(1.7rem,2.8vw,2.6rem);
+  font-weight:400;line-height:1.2;
+  color:var(--cream);
+  margin-bottom:0.8rem;
+}
+.feat-pull{
+  font-family:var(--display);
+  font-style:italic;
+  font-size:1rem;color:var(--gold);
+  margin-bottom:2rem;
+  line-height:1.5;
+}
+.feat-body{
+  font-family:var(--body);
+  font-size:0.9rem;line-height:1.85;
+  color:rgba(240,232,208,0.68);
+  margin-bottom:2.8rem;
+  max-width:36ch;
+}
+.link-arrow{
+  font-family:var(--ui);
+  font-size:0.68rem;font-weight:500;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--cream);
+  border-bottom:1px solid rgba(200,146,42,0.35);
+  padding-bottom:0.35rem;
+  display:inline-flex;align-items:center;gap:0.6rem;
+  transition:color 0.2s,border-color 0.2s,gap 0.3s;
+}
+.link-arrow:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
+.link-arrow::after{content:'→'}
+.case-strip{
+  grid-column:1/-1;
+  background:rgba(255,255,255,0.04);
+  border-top:1px solid rgba(240,232,208,0.08);
+  padding:1.5rem 3rem;
+  display:flex;align-items:center;gap:3rem;
+}
+.case-stat{display:flex;flex-direction:column;gap:0.2rem}
+.case-stat-num{
+  font-family:var(--display);font-size:1.6rem;font-weight:400;
+  color:var(--gold);
+}
+.case-stat-label{
+  font-family:var(--ui);font-size:0.6rem;font-weight:300;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(240,232,208,0.4);
+}
+.case-strip-div{
+  width:1px;height:2.5rem;
+  background:rgba(240,232,208,0.1);
+}
+
+/* ── SERVICES ── */
+.services{
+  padding:6rem 3rem;
+  background:var(--cream);
+}
+.services-top{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:4rem;margin-bottom:4rem;align-items:end;
+}
+.section-h2{
+  font-family:var(--display);
+  font-size:clamp(2rem,4vw,3.2rem);
+  font-weight:400;line-height:1.15;
+}
+.section-intro{
+  font-family:var(--body);
+  font-size:0.9rem;line-height:1.85;
+  color:var(--muted);max-width:42ch;
+}
+.svc-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1px;
+  background:var(--cream-dark);
+}
+.svc-card{
+  background:var(--cream);
+  padding:2.5rem 2rem;
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+  cursor:default;
+}
+.svc-card::after{
+  content:'';position:absolute;
+  top:0;left:0;width:0;height:2px;
+  background:var(--gold);
+  transition:width 0.4s ease;
+}
+.svc-card:hover{background:var(--cream-dark)}
+.svc-card:hover::after{width:100%}
+.svc-num{
+  font-family:var(--ui);
+  font-size:0.58rem;font-weight:400;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.4rem;
+}
+.svc-name{
+  font-family:var(--display);
+  font-size:1.25rem;font-weight:400;
+  color:var(--ink);margin-bottom:0.65rem;
+  line-height:1.3;
+}
+.svc-desc{
+  font-family:var(--body);
+  font-size:0.82rem;line-height:1.75;
+  color:var(--muted);
+}
+
+/* ── STATEMENT ── */
+.statement{
+  background:var(--cream-dark);
+  padding:7.5rem 3rem;
+  display:flex;align-items:center;justify-content:center;
+}
+.statement-inner{max-width:680px;text-align:center}
+.statement-mark{
+  font-family:var(--display);
+  font-size:4.5rem;line-height:0.6;
+  color:var(--gold);opacity:0.3;
+  display:block;margin-bottom:2rem;
+}
+.statement-p{
+  font-family:var(--display);
+  font-size:clamp(1.2rem,2.2vw,1.75rem);
+  font-weight:400;font-style:italic;
+  line-height:1.65;color:var(--ink);
+}
+.statement-p em{font-style:normal;color:var(--gold)}
+.statement-attr{
+  font-family:var(--ui);
+  font-size:0.62rem;font-weight:400;
+  letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--muted);margin-top:2rem;
+  display:block;
+}
+
+/* ── WORK GRID ── */
+.work{padding:6rem 3rem 0;background:var(--cream)}
+.work-head{
+  display:flex;align-items:baseline;
+  justify-content:space-between;margin-bottom:2.5rem;
+}
+.work-head h2{
+  font-family:var(--display);
+  font-size:clamp(1.4rem,2.5vw,2.2rem);
+  font-weight:400;
+}
+.see-all{
+  font-family:var(--ui);
+  font-size:0.65rem;font-weight:400;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--muted);
+  display:inline-flex;align-items:center;gap:0.5rem;
+  transition:color 0.2s,gap 0.3s;
+}
+.see-all:hover{color:var(--gold);gap:0.9rem}
+.see-all::after{content:'→'}
+.grid-work{
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  grid-template-rows:400px 280px;
+  gap:2px;
+}
+.work-card{
+  position:relative;overflow:hidden;
+  background:var(--green);
+}
+.work-card:first-child{grid-row:span 2}
+.work-card img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform 0.8s ease,filter 0.4s;
+  filter:brightness(0.92);
+}
+.work-card:hover img{transform:scale(1.06);filter:brightness(0.7)}
+.work-meta{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:1.4rem 1.6rem;
+  background:linear-gradient(to top,rgba(11,31,14,0.88),transparent);
+  transform:translateY(5px);
+  transition:transform 0.3s;
+}
+.work-card:hover .work-meta{transform:translateY(0)}
+.work-type{
+  font-family:var(--ui);
+  font-size:0.58rem;font-weight:400;
+  letter-spacing:0.25em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.25rem;
+}
+.work-name{
+  font-family:var(--display);
+  font-size:0.95rem;font-weight:400;
+  color:var(--cream);
+}
+
+/* ── TESTIMONIAL ── */
+.testimonial{
+  background:var(--green);
+  padding:7rem 3rem;text-align:center;
+}
+.t-mark{
+  font-family:var(--display);
+  font-size:5rem;line-height:0.5;
+  color:var(--gold);opacity:0.35;
+  display:block;margin-bottom:2.5rem;
+}
+.t-quote{
+  font-family:var(--display);
+  font-size:clamp(1.05rem,1.9vw,1.45rem);
+  font-weight:400;font-style:italic;
+  color:var(--cream);line-height:1.75;
+  max-width:46ch;margin:0 auto 2.8rem;
+}
+.t-name{
+  font-family:var(--ui);
+  font-size:0.7rem;font-weight:500;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);
+}
+.t-role{
+  display:block;
+  font-family:var(--ui);
+  font-size:0.62rem;font-weight:300;
+  letter-spacing:0.12em;
+  color:rgba(240,232,208,0.4);
+  margin-top:0.35rem;
+}
+
+/* ── CTA ── */
+.cta-section{
+  background:var(--cream);
+  padding:8rem 3rem;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:5rem;align-items:center;
+}
+.cta-h2{
+  font-family:var(--display);
+  font-size:clamp(2rem,4vw,3.5rem);
+  font-weight:400;line-height:1.15;
+}
+.cta-h2 em{font-style:italic;color:var(--gold)}
+.cta-p{
+  font-family:var(--body);
+  font-size:0.9rem;line-height:1.85;
+  color:var(--muted);max-width:38ch;margin-bottom:2.5rem;
+}
+.btn-row{display:flex;gap:0.8rem;flex-wrap:wrap}
+.btn{
+  font-family:var(--ui);
+  font-size:0.7rem;font-weight:500;
+  letter-spacing:0.15em;text-transform:uppercase;
+  padding:0.9rem 1.8rem;
+  display:inline-flex;align-items:center;gap:0.6rem;
+  transition:background 0.25s,color 0.25s;
+}
+.btn-wa{background:var(--gold);color:var(--green)}
+.btn-wa:hover{background:#b07d20}
+.btn-outline{
+  background:transparent;
+  border:1px solid rgba(11,31,14,0.3);
+  color:var(--ink);
+}
+.btn-outline:hover{background:var(--green);color:var(--cream);border-color:var(--green)}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--green);
+  padding:3.5rem 3rem;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;gap:2rem;
+}
+.foot-logo{
+  font-family:var(--display);
+  font-size:1.05rem;font-weight:500;
+  color:var(--cream);letter-spacing:0.03em;
+  display:block;margin-bottom:0.5rem;
+}
+.foot-tagline{
+  font-family:var(--body);
+  font-style:italic;
+  font-size:0.82rem;
+  color:rgba(240,232,208,0.45);
+}
+.foot-nav{
+  display:flex;flex-direction:column;
+  align-items:flex-end;gap:0.7rem;
+}
+.foot-nav a{
+  font-family:var(--ui);
+  font-size:0.65rem;font-weight:300;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:rgba(240,232,208,0.5);
+  transition:color 0.2s;
+}
+.foot-nav a:hover{color:var(--gold)}
+.foot-copy{
+  grid-column:1/-1;
+  border-top:1px solid rgba(240,232,208,0.08);
+  padding-top:1.5rem;margin-top:0.5rem;
+  font-family:var(--ui);
+  font-size:0.6rem;font-weight:300;
+  letter-spacing:0.1em;
+  color:rgba(240,232,208,0.25);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
+  <ul class="nav-links">
+    <li><a href="#">Work</a></li>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">About</a></li>
+  </ul>
+  <a href="https://wa.me/233244633464" class="nav-cta">WhatsApp Us</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-slide">
+    <img src="https://neewoodygh.com/images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+      alt="Custom built-in wardrobes, Oyarifa, Accra" />
+  </div>
+  <div class="hero-slide">
+    <img src="https://neewoodygh.com/images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
+      alt="Full kitchen fit-out, Spintex, Accra" />
+  </div>
+  <div class="hero-slide">
+    <img src="https://neewoodygh.com/images/projects/french-embassy/afromosia-table-installed-1.jpg"
+      alt="Afromosia live-edge dining table, Accra" />
+  </div>
+  <div class="hero-scrim"></div>
+  <div class="hero-body">
+    <p class="hero-tag">Accra, Ghana · Made to Measure</p>
+    <h1 class="hero-h1">Built for the<br><em>space you<br>live in.</em></h1>
+    <a href="#work" class="hero-scroll">See the work</a>
+  </div>
+</section>
+
+<!-- FEATURED CASE STUDY -->
+<div class="featured">
+  <div class="feat-img-wrap">
+    <img
+      src="https://neewoodygh.com/images/projects/french-embassy/afromosia-table-installed-1.jpg"
+      alt="Sage Centre — solid teak dining table, Wli, Volta Region"
+    />
+  </div>
+  <div class="feat-text">
+    <p class="eyebrow">Case Study · Wli, Volta Region · 2022–2024</p>
+    <h2 class="feat-title">Sage Centre — Full Teak Fitout</h2>
+    <p class="feat-pull">26 months. 18 bunk beds. An entire property in solid Ghanaian teak.</p>
+    <p class="feat-body">A US-based NGO needed furniture built to international hospitality standards in a remote location. No off-the-shelf option existed. We designed, built, and delivered everything — from bunk beds and live-edge dining tables to sofas and cabinetry — sourced, made, and finished entirely in Ghana.</p>
+    <a href="https://neewoodygh.com/projects/sage-centre.html" class="link-arrow">Read the case study</a>
+  </div>
+  <div class="case-strip">
+    <div class="case-stat"><span class="case-stat-num">26</span><span class="case-stat-label">Months on site</span></div>
+    <div class="case-strip-div"></div>
+    <div class="case-stat"><span class="case-stat-num">18</span><span class="case-stat-label">Bunk beds built</span></div>
+    <div class="case-strip-div"></div>
+    <div class="case-stat"><span class="case-stat-num">100%</span><span class="case-stat-label">Ghanaian teak</span></div>
+    <div class="case-strip-div"></div>
+    <div class="case-stat"><span class="case-stat-num">International</span><span class="case-stat-label">Client standards met</span></div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services">
+  <div class="services-top">
+    <h2 class="section-h2">Made to measure,<br>built to last.</h2>
+    <p class="section-intro">We don't sell off-the-shelf furniture. Every piece is designed for your exact space, built in our workshop in Accra, and installed by us. No gaps, no compromises, no middlemen.</p>
+  </div>
+  <div class="svc-grid">
+    <div class="svc-card">
+      <p class="svc-num">01</p>
+      <h3 class="svc-name">Custom Wardrobes</h3>
+      <p class="svc-desc">Built-in, floor-to-ceiling, sliding or hinged — designed to use every centimetre of your bedroom.</p>
+    </div>
+    <div class="svc-card">
+      <p class="svc-num">02</p>
+      <h3 class="svc-name">Kitchen Cabinets</h3>
+      <p class="svc-desc">Full kitchen fit-outs designed around your layout, your appliances, and the way you cook.</p>
+    </div>
+    <div class="svc-card">
+      <p class="svc-num">03</p>
+      <h3 class="svc-name">Custom Beds</h3>
+      <p class="svc-desc">Bed frames, platform beds, storage beds — built in solid wood or wrapped, to your size and specification.</p>
+    </div>
+    <div class="svc-card">
+      <p class="svc-num">04</p>
+      <h3 class="svc-name">Dining & Living</h3>
+      <p class="svc-desc">Dining tables, coffee tables, and solid-wood sofas — built to your dimensions in hardwood.</p>
+    </div>
+    <div class="svc-card">
+      <p class="svc-num">05</p>
+      <h3 class="svc-name">Solid Wood</h3>
+      <p class="svc-desc">Teak, mahogany, iroko — specified by you, built by us. No MDF, no laminate. Furniture built to outlast the trends.</p>
+    </div>
+    <div class="svc-card">
+      <p class="svc-num">06</p>
+      <h3 class="svc-name">Commercial</h3>
+      <p class="svc-desc">Restaurants, offices, hospitality — full commercial fit-outs built to spec, on budget, on time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATEMENT -->
+<section class="statement">
+  <div class="statement-inner">
+    <span class="statement-mark">"</span>
+    <p class="statement-p">Every piece is built for your exact space —<br>not a showroom floor. <em>That's the only brief we accept.</em></p>
+    <span class="statement-attr">Neewoody Custom Woodwork · Accra</span>
+  </div>
+</section>
+
+<!-- RECENT WORK -->
+<section class="work" id="work">
+  <div class="work-head">
+    <h2>Recent Work</h2>
+    <a href="https://neewoodygh.com/portfolio.html" class="see-all">Full portfolio</a>
+  </div>
+  <div class="grid-work">
+    <div class="work-card">
+      <img src="https://neewoodygh.com/images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
+        alt="Full kitchen fit-out, Spintex, Accra" />
+      <div class="work-meta">
+        <p class="work-type">Kitchens</p>
+        <p class="work-name">Full Kitchen Fit-out — Spintex, Regimanuel Gray Estate</p>
+      </div>
+    </div>
+    <div class="work-card">
+      <img src="https://neewoodygh.com/images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+        alt="Floor-to-ceiling wardrobes, Oyarifa" />
+      <div class="work-meta">
+        <p class="work-type">Wardrobes</p>
+        <p class="work-name">Floor-to-Ceiling Wardrobes — Oyarifa</p>
+      </div>
+    </div>
+    <div class="work-card">
+      <img src="https://neewoodygh.com/images/projects/judith-east-legon/judith-set-installed-2.jpg"
+        alt="Hyedua dining commission, East Legon" />
+      <div class="work-meta">
+        <p class="work-type">Dining & Living</p>
+        <p class="work-name">Hyedua Commission — East Legon</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL -->
+<section class="testimonial">
+  <span class="t-mark">"</span>
+  <p class="t-quote">Our guests and faculty from across Ghana and the world all complement the custom woodwork — especially the dining tables. Highly recommend if you're looking for something custom that needs to meet high standards.</p>
+  <p class="t-name">Ben Schwartz
+    <span class="t-role">Educational Retreat Centre · Wli, Volta Region · Google Review, December 2024</span>
+  </p>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="cta-h2">Let's talk about<br><em>your project.</em></h2>
+  <div>
+    <p class="cta-p">Send us a WhatsApp or fill in the quote form. Rough ideas are fine — we'll arrange a free site visit and take it from there. No obligation, no pressure.</p>
+    <div class="btn-row">
+      <a href="https://wa.me/233244633464" class="btn btn-wa">WhatsApp Us →</a>
+      <a href="https://neewoodygh.com/contact.html" class="btn btn-outline">Request a Quote</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <a href="#" class="foot-logo">Neewoody</a>
+    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+  </div>
+  <nav class="foot-nav">
+    <a href="#">Work</a>
+    <a href="#">Services</a>
+    <a href="#">Contact</a>
+    <a href="https://instagram.com/neewoodygh">Instagram</a>
+    <a href="#">Privacy Policy</a>
+  </nav>
+  <p class="foot-copy">© 2025 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
+</footer>
+
+<script>
+const nav = document.getElementById('nav');
+const hero = document.querySelector('.hero');
+
+const io = new IntersectionObserver(([e]) => {
+  nav.classList.toggle('scrolled', !e.isIntersecting);
+}, { threshold: 0.05 });
+io.observe(hero);
+</script>
+</body>
+</html>
