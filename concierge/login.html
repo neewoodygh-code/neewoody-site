@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Member Login · Carpentry Concierge</title>
+<link rel="icon" href="../images/favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Lora:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
+  --ink:#1c1c1a; --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
+}
+html{font-size:16px}
+body{
+  min-height:100vh; background:var(--green); color:var(--cream);
+  font-family:var(--body); -webkit-font-smoothing:antialiased;
+  display:flex; align-items:center; justify-content:center; padding:1.5rem;
+  background-image:radial-gradient(120% 90% at 50% -10%, rgba(200,146,42,.14), transparent 60%);
+}
+.card{ width:100%; max-width:400px; }
+.brand{ text-align:center; margin-bottom:2rem; }
+.brand .eyebrow{ font-family:var(--ui); font-size:.62rem; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); }
+.brand h1{ font-family:var(--display); font-weight:500; font-size:1.9rem; margin-top:.5rem; letter-spacing:.01em; }
+.brand p{ color:rgba(240,232,208,.62); font-size:.9rem; margin-top:.5rem; }
+.panel{
+  background:var(--cream); color:var(--ink); border-radius:4px;
+  padding:2rem 1.75rem; box-shadow:0 24px 60px rgba(0,0,0,.35);
+  border-top:3px solid var(--gold);
+}
+label{ display:block; font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:.5rem; }
+.field{ margin-bottom:1.25rem; }
+input{
+  width:100%; font-family:var(--body); font-size:1.05rem; color:var(--ink);
+  padding:.85rem .9rem; border:1px solid rgba(11,31,14,.18); border-radius:3px;
+  background:#fff; transition:border-color .2s;
+}
+input:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
+input#pin{ letter-spacing:.5em; text-align:center; font-size:1.4rem; }
+button.submit{
+  width:100%; font-family:var(--ui); font-weight:500; font-size:.78rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--cream);
+  background:var(--green); border:none; border-radius:3px; padding:1rem;
+  cursor:pointer; transition:background .25s; margin-top:.25rem;
+}
+button.submit:hover{ background:#12300f; }
+button.submit:disabled{ opacity:.6; cursor:default; }
+.msg{ margin-top:1rem; font-size:.85rem; text-align:center; min-height:1.2em; }
+.msg.error{ color:#a52a2a; }
+.help{ text-align:center; margin-top:1.5rem; font-size:.82rem; color:rgba(240,232,208,.6); line-height:1.6; }
+.help a{ color:var(--gold); text-decoration:none; }
+.help a:hover{ text-decoration:underline; }
+.foot{ text-align:center; margin-top:2rem; font-family:var(--ui); font-size:.62rem;
+  letter-spacing:.2em; text-transform:uppercase; color:rgba(240,232,208,.35); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="eyebrow">Neewoody Custom Woodwork</div>
+    <h1>Carpentry Concierge</h1>
+    <p>Members' login</p>
+  </div>
+
+  <form class="panel" id="loginForm" autocomplete="off">
+    <div class="field">
+      <label for="phone">Phone number</label>
+      <input id="phone" name="phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
+    </div>
+    <div class="field">
+      <label for="pin">5-digit PIN</label>
+      <input id="pin" name="pin" type="password" inputmode="numeric" maxlength="5" pattern="\d{5}" placeholder="•••••" required />
+    </div>
+    <button class="submit" id="submitBtn" type="submit">Log in</button>
+    <div class="msg" id="msg"></div>
+  </form>
+
+  <p class="help">
+    Not a member yet? Founding membership is invitation-based.<br>
+    Message us on <a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp</a> to join,
+    or if you've forgotten your PIN.
+  </p>
+  <div class="foot">GHS 50 / month · Accra, Ghana</div>
+</div>
+
+<script src="../js/concierge.js"></script>
+<script>
+(function () {
+  var C = window.Concierge;
+  // Already logged in? Go straight to the directory.
+  if (C.tokenAlive()) { location.replace('directory.html'); return; }
+
+  var form = document.getElementById('loginForm');
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('msg');
+  var phoneEl = document.getElementById('phone');
+  var pinEl = document.getElementById('pin');
+
+  pinEl.addEventListener('input', function () { pinEl.value = pinEl.value.replace(/\D/g, '').slice(0, 5); });
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+
+    var phone = C.normalizePhone(phoneEl.value);
+    if (!phone) { msg.className = 'msg error'; msg.textContent = 'Enter a valid Ghana phone number.'; return; }
+    if (!/^\d{5}$/.test(pinEl.value)) { msg.className = 'msg error'; msg.textContent = 'PIN must be 5 digits.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    try {
+      var data = await C.api('/auth/login', { auth: false, method: 'POST', body: { phone: phone, pin: pinEl.value } });
+      C.setToken(data.token);
+      location.replace('directory.html');
+    } catch (err) {
+      msg.className = 'msg error';
+      msg.textContent = err.message || 'Login failed.';
+      btn.disabled = false; btn.textContent = 'Log in';
+      pinEl.value = ''; pinEl.focus();
+    }
+  });
+})();
+</script>
+</body>
+</html>

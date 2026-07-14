@@ -337,6 +337,35 @@ Two homepage directives from an earlier instruction were reported done but had *
 - **Testimonial section** changed from a single full-width Ben Schwartz quote to a **3-card row** (`.t-grid` / `.t-card`): Ben Schwartz, Ngminvielu Kuuire, mcdennis appau — each 5-star, with a multicolour Google "G" SVG + "Google review · [date]" badge (`.t-badge`). Stacks to 1 column ≤768px. (No pre-existing badge component existed to reuse, despite the original instruction implying one — built fresh.)
 - **Still outstanding (NOT in this pass):** the original instruction's item 2 (remove Shelving from nav/dropdown, relocate to footer only) was *also* never done — Shelving is still in the desktop "More ▾" dropdown (`index.html`) and mobile nav, and is not in the footer. Flagged to owner; awaiting go-ahead before changing nav.
 
+### Carpentry Concierge — Phase 1 (built 2026-07-14)
+
+Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools. **Full build spec: `CONCIERGE_SPEC.md`** (the spec's decisions are final — do not substitute more common patterns without owner sign-off).
+
+**Deliberately isolated architecture (do not merge into dispatch):**
+- **New separate Worker `concierge-api`, living in-repo at `/concierge-api/`** with its own `wrangler.toml`, deployed via `wrangler deploy`. NOT added to the legacy `neewoody-dispatch-api` (which lives only in the CF dashboard). Blast-radius isolation is intentional.
+- **Cloudflare D1** database `concierge` (NOT KV). Schema via migrations: `/concierge-api/migrations/0001_initial.sql` — tables `members` (phone PK), `payments`, `login_attempts`. Specialties are a fixed vocabulary: `furniture, site_construction, upholstery, glass_aluminium, finishing_spray, cnc_machining, other`.
+- **Shared R2** bucket `neewoody-media` under a `concierge/` prefix (no new bucket).
+- Worker code: `/concierge-api/src/index.js` (single file — router, auth, crypto, handlers). Bindings: `DB` (D1), `MEDIA` (R2). Secret: `SESSION_SECRET` (HMAC key, set via `wrangler secret put` — never committed).
+
+**Auth: phone + 5-digit PIN (no email, ever, in Phase 1).**
+- Phone normalized to `233XXXXXXXXX` (accepts `0XX…`, `+233…`, `00233…`); phone is the PK. Exposing phone inside the members-only directory is a **feature** (WhatsApp `wa.me/<phone>` deep links — members hire members).
+- PIN hashed with PBKDF2 (Web Crypto, SHA-256, 100k iters, 16-byte salt), stored `base64(salt):base64(hash)`. Never stored/logged in plaintext.
+- Session = stateless token `base64(phone.expiry).base64(HMAC-SHA-256)`, 30-day expiry, stored in `localStorage`, sent as `Authorization: Bearer`. `requireAuth`/`requireAdmin` middleware.
+- Rate limit: 5 failed PINs per phone per 15 min → 429 (tracked in `login_attempts`; lockout blocks even a correct PIN during the window). The login handler self-prunes each phone's attempt rows older than the 15-min window while it queries them, so `login_attempts` never grows unbounded (added 2026-07-14).
+- **Forgotten-PIN reset is admin-only** (a locked-out member WhatsApps the owner, who resets via the admin dashboard). **BUT** an authenticated member CAN change their own PIN via `PUT /api/me` (optional `pin` field, validated 5 digits, re-hashed) — added 2026-07-14 at owner's direction (the spec omitted it; handing out initial PINs over WhatsApp means the owner has seen every founder's PIN, so members need a way to rotate it). The changed PIN applies at next login; the current session's token stays valid (token is HMAC over phone+expiry, independent of the PIN). Directory profile-edit modal has a "New PIN — optional" field. **No public self-serve registration endpoint** — admin enters founders.
+
+**API routes** (all JSON; CORS restricted to `neewoodygh.com`/`www` + localhost; disallowed origins get the canonical origin, never reflected): `POST /api/auth/login`; member `GET/PUT /api/me`, `GET /api/directory` (approved only, incl. phone); admin `GET/POST /api/admin/members`, `PUT /api/admin/members/:phone` (status/role/is_founder/profile/reset-PIN), `POST /api/admin/payments` (upserts on member+period so re-recording corrects), `GET /api/admin/payments?period=YYYY-MM`. Full table in `/concierge-api/README.md`.
+
+**Frontend** (static, no framework, matches the green/gold/cream editorial system, mobile-first, all `noindex`, deliberately kept out of `sitemap.xml` and site nav):
+- Shared helper `js/concierge.js` (`window.Concierge`: API base = `https://concierge-api.neewoodygh.workers.dev/api`, token storage, `api()` fetch, `requireSession`, phone/WhatsApp helpers, specialty labels).
+- `/concierge/login.html` (phone + PIN → directory), `/concierge/directory.html` (member cards + area/trade filters + WhatsApp + edit-own-profile modal), `/concierge/admin.html` (vanilla JS — add-member, members table with inline status/role/founder/reset-PIN, record + view payments; admin-gated via `/api/me` role check).
+
+**Cutlist gating (free to use, login to persist):** `cutlist.html` calculator stays **fully usable logged-out** (top-of-funnel asset — never gate the calculator). Added a "💾 Save" button in the results header calling `saveCutlist()` — a Phase-1 **stub**: no token → prompt to `/concierge/login.html`; has token → "coming soon" (a `saved_cutlists` table + persistence is a later migration).
+
+**Deploy runbook & first-admin bootstrap:** `/concierge-api/README.md`. The owner must run (their CF account): `wrangler d1 create concierge` → paste `database_id` into `wrangler.toml` → `wrangler d1 migrations apply concierge --remote` → `wrangler secret put SESSION_SECRET` → `wrangler deploy`, then insert the first admin row directly (PIN-hash one-liner in the README). **Status as of build: all code written and verified end-to-end against a local Miniflare D1 (login, member create, directory, profile edit, payments upsert, PIN reset, rate-limit lockout, CORS, 401/403 all pass); NOT yet deployed to Cloudflare** — awaiting the owner's account steps above. `wrangler.toml` `database_id` is still the placeholder until `d1 create` is run.
+
+**Out of scope for Phase 1 (do not build):** email/SMS/OTP, self-service *forgotten*-PIN reset (the unauthenticated "I can't log in" flow — still admin-only; note an *authenticated* member changing their own PIN via `PUT /api/me` IS now in, see above), Paystack/payment APIs, forums/chat/suggestion portal, safety check-in (Phase 2), public self-serve registration, any site framework migration.
+
 ### Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
@@ -346,5 +375,5 @@ Two homepage directives from an earlier instruction were reported done but had *
 6. KV backup — weekly JSON export via Cron Trigger
 7. Pricing — make labour day rates configurable (not hardcoded)
 8. Dispatch — offline support, damage photos, job calendar view
-9. Strategic — client job status page, invoice generator, Carpentry Concierge subscription
+9. Strategic — client job status page, invoice generator. Carpentry Concierge: Phase 1 built (see above, pending Cloudflare deploy); Phase 2 (safety check-in, saved cutlists, richer features) awaiting a separate spec.
 10. Bamboo craft integration — explore for premium/sustainable product line

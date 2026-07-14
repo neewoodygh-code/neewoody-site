@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>Members Directory · Carpentry Concierge</title>
+<link rel="icon" href="../images/favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Lora:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
+  --ink:#1c1c1a; --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
+}
+html{font-size:16px}
+body{ background:var(--cream); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased; }
+img{display:block;max-width:100%}
+button,input,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* header */
+header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; position:sticky; top:0; z-index:50; }
+.top .brand{ line-height:1.15; }
+.top .brand .eyebrow{ font-family:var(--ui); font-size:.55rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); }
+.top .brand .name{ font-family:var(--display); font-size:1.2rem; font-weight:500; }
+.top-actions{ display:flex; align-items:center; gap:.5rem; }
+.tbtn{ font-family:var(--ui); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--cream); background:transparent; border:1px solid rgba(240,232,208,.35);
+  border-radius:3px; padding:.5rem .8rem; cursor:pointer; transition:background .2s,border-color .2s; }
+.tbtn:hover{ background:rgba(240,232,208,.1); border-color:var(--gold); }
+
+/* intro + filters */
+.wrap{ max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem 4rem; }
+.lead{ margin-bottom:1.5rem; }
+.lead h1{ font-family:var(--display); font-weight:500; font-size:1.8rem; }
+.lead p{ color:var(--muted); font-size:.95rem; margin-top:.35rem; }
+.filters{ display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:1.5rem; align-items:center; }
+.filters select, .filters input{ font-size:.9rem; padding:.6rem .7rem; border:1px solid rgba(11,31,14,.2);
+  border-radius:3px; background:#fff; color:var(--ink); }
+.filters .count{ font-family:var(--ui); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--muted); margin-left:auto; }
+
+/* grid */
+.grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.1rem; }
+.mcard{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px; overflow:hidden;
+  display:flex; flex-direction:column; box-shadow:0 6px 18px rgba(11,31,14,.05); }
+.mcard .ph{ aspect-ratio:4/3; background:var(--cream-dark); position:relative; overflow:hidden; }
+.mcard .ph img{ width:100%; height:100%; object-fit:cover; }
+.mcard .ph .initials{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:2.6rem; color:rgba(11,31,14,.28); }
+.mcard .body{ padding:1rem 1.1rem 1.2rem; display:flex; flex-direction:column; flex:1; }
+.mcard h3{ font-family:var(--display); font-weight:500; font-size:1.2rem; line-height:1.2; }
+.mcard .biz{ color:var(--gold); font-family:var(--ui); font-size:.78rem; font-weight:500; letter-spacing:.03em; margin-top:.15rem; }
+.mcard .area{ color:var(--muted); font-size:.85rem; margin-top:.35rem; }
+.mcard .area::before{ content:'📍 '; }
+.chips{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.75rem; }
+.chip{ font-family:var(--ui); font-size:.62rem; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--cream); color:var(--muted); border:1px solid rgba(11,31,14,.1);
+  border-radius:20px; padding:.28rem .6rem; }
+.wa{ margin-top:auto; display:flex; align-items:center; justify-content:center; gap:.5rem;
+  font-family:var(--ui); font-size:.74rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  background:#25D366; color:#062b12; border-radius:3px; padding:.7rem; margin-top:1rem; transition:filter .2s; }
+.wa:hover{ filter:brightness(1.05); }
+.wa svg{ width:16px; height:16px; }
+
+.empty{ text-align:center; color:var(--muted); padding:3rem 1rem; }
+.state{ text-align:center; color:var(--muted); padding:3rem 1rem; font-family:var(--ui); letter-spacing:.05em; }
+
+/* modal (edit own profile) */
+.overlay{ position:fixed; inset:0; background:rgba(11,31,14,.55); display:none; align-items:center;
+  justify-content:center; padding:1.25rem; z-index:100; }
+.overlay.open{ display:flex; }
+.modal{ background:var(--cream); border-radius:5px; width:100%; max-width:460px; max-height:90vh; overflow:auto;
+  border-top:3px solid var(--gold); box-shadow:0 24px 60px rgba(0,0,0,.4); }
+.modal .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(11,31,14,.1); }
+.modal .mhead h2{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
+.modal .x{ background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--muted); line-height:1; }
+.modal form{ padding:1.25rem 1.5rem 1.75rem; }
+.modal label{ display:block; font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin:1rem 0 .4rem; }
+.modal input{ width:100%; font-size:1rem; padding:.7rem .8rem; border:1px solid rgba(11,31,14,.2); border-radius:3px; background:#fff; }
+.spec-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.4rem; margin-top:.4rem; }
+.spec-grid label.cb{ display:flex; align-items:center; gap:.5rem; text-transform:none; letter-spacing:0;
+  font-family:var(--body); font-size:.9rem; color:var(--ink); margin:0; cursor:pointer; }
+.spec-grid input{ width:auto; }
+.save{ width:100%; margin-top:1.5rem; font-family:var(--ui); font-weight:500; font-size:.78rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--cream); background:var(--green);
+  border:none; border-radius:3px; padding:.9rem; cursor:pointer; }
+.save:disabled{ opacity:.6; }
+.modal .mmsg{ text-align:center; font-size:.85rem; margin-top:.9rem; min-height:1.1em; }
+.modal .mmsg.error{ color:#a52a2a; }
+.modal .mmsg.ok{ color:#2e6b2e; }
+
+@media(max-width:560px){
+  .lead h1{ font-size:1.5rem; }
+  .filters .count{ margin-left:0; width:100%; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="eyebrow">Carpentry Concierge</div>
+    <div class="name">Members Directory</div>
+  </div>
+  <div class="top-actions">
+    <button class="tbtn" id="editBtn">My profile</button>
+    <a class="tbtn" id="adminLink" href="admin.html" style="display:none">Admin</a>
+    <button class="tbtn" id="logoutBtn">Log out</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="lead">
+    <h1>Find a fellow carpenter</h1>
+    <p>Members hire members. Filter by area or trade, then message on WhatsApp.</p>
+  </div>
+
+  <div class="filters">
+    <select id="areaFilter"><option value="">All areas</option></select>
+    <select id="specFilter"><option value="">All trades</option></select>
+    <input id="search" type="search" placeholder="Search name or business…" />
+    <span class="count" id="count"></span>
+  </div>
+
+  <div id="grid" class="grid"></div>
+  <div id="state" class="state">Loading members…</div>
+</div>
+
+<!-- Edit own profile -->
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2>My profile</h2><button class="x" id="closeModal" aria-label="Close">×</button></div>
+    <form id="profileForm">
+      <label for="p_name">Name</label>
+      <input id="p_name" required />
+      <label for="p_biz">Business name</label>
+      <input id="p_biz" placeholder="Optional" />
+      <label for="p_area">Area</label>
+      <input id="p_area" placeholder="e.g. Spintex, Tema, Kasoa" />
+      <label for="p_photo">Photo URL</label>
+      <input id="p_photo" placeholder="Optional — https://…" />
+      <label>Specialties</label>
+      <div class="spec-grid" id="specGrid"></div>
+      <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
+      <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
+      <button class="save" id="saveBtn" type="submit">Save changes</button>
+      <div class="mmsg" id="mmsg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/concierge.js"></script>
+<script>
+(function () {
+  var C = window.Concierge;
+  if (!C.requireSession('login.html')) return;
+
+  var WA_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.7-.84-2-.94-.26-.1-.46-.15-.65.15-.19.29-.74.94-.9 1.13-.17.19-.33.22-.62.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.72-1.6-2-.17-.29-.02-.44.13-.59.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.65-1.57-.9-2.15-.24-.57-.48-.49-.65-.5h-.56c-.19 0-.51.07-.77.36-.26.29-1.01.99-1.01 2.4 0 1.42 1.03 2.79 1.18 2.98.15.19 2.03 3.1 4.92 4.35.69.3 1.22.48 1.64.61.69.22 1.31.19 1.81.11.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34zM12 2a10 10 0 00-8.5 15.3L2 22l4.8-1.5A10 10 0 1012 2z"/></svg>';
+
+  var all = [];
+  var me = null;
+
+  var grid = document.getElementById('grid');
+  var stateEl = document.getElementById('state');
+  var areaFilter = document.getElementById('areaFilter');
+  var specFilter = document.getElementById('specFilter');
+  var search = document.getElementById('search');
+  var countEl = document.getElementById('count');
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    C.clearToken(); location.replace('login.html');
+  });
+
+  // populate specialty filter from vocabulary
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.specialtyLabel(k); specFilter.appendChild(o);
+  });
+
+  [areaFilter, specFilter].forEach(function (el) { el.addEventListener('change', render); });
+  search.addEventListener('input', render);
+
+  function initials(name) {
+    return String(name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
+  }
+
+  function card(m) {
+    var el = document.createElement('div'); el.className = 'mcard';
+    var photo = m.photo_url
+      ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="' + C.escapeHtml(m.name) + '" loading="lazy" onerror="this.remove()">'
+      : '<div class="initials">' + C.escapeHtml(initials(m.name)) + '</div>';
+    var chips = (m.specialties || []).map(function (s) {
+      return '<span class="chip">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
+    }).join('');
+    el.innerHTML =
+      '<div class="ph">' + photo + '</div>' +
+      '<div class="body">' +
+        '<h3>' + C.escapeHtml(m.name) + '</h3>' +
+        (m.business_name ? '<div class="biz">' + C.escapeHtml(m.business_name) + '</div>' : '') +
+        (m.area ? '<div class="area">' + C.escapeHtml(m.area) + '</div>' : '') +
+        '<div class="chips">' + chips + '</div>' +
+        '<a class="wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">' + WA_SVG + 'WhatsApp</a>' +
+      '</div>';
+    return el;
+  }
+
+  function render() {
+    var a = areaFilter.value, s = specFilter.value, q = search.value.trim().toLowerCase();
+    var list = all.filter(function (m) {
+      if (a && m.area !== a) return false;
+      if (s && (m.specialties || []).indexOf(s) < 0) return false;
+      if (q) {
+        var hay = (m.name + ' ' + (m.business_name || '')).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    grid.innerHTML = '';
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty">No members match those filters.</div>';
+    } else {
+      list.forEach(function (m) { grid.appendChild(card(m)); });
+    }
+    countEl.textContent = list.length + ' of ' + all.length + ' members';
+  }
+
+  function buildAreaFilter() {
+    var areas = [...new Set(all.map(function (m) { return m.area; }).filter(Boolean))].sort();
+    areas.forEach(function (a) {
+      var o = document.createElement('option'); o.value = a; o.textContent = a; areaFilter.appendChild(o);
+    });
+  }
+
+  // ── edit-profile modal ──
+  var overlay = document.getElementById('overlay');
+  var specGrid = document.getElementById('specGrid');
+  var mmsg = document.getElementById('mmsg');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> ' + C.escapeHtml(C.specialtyLabel(k));
+    specGrid.appendChild(l);
+  });
+  function openModal() {
+    if (!me) return;
+    document.getElementById('p_name').value = me.name || '';
+    document.getElementById('p_biz').value = me.business_name || '';
+    document.getElementById('p_area').value = me.area || '';
+    document.getElementById('p_photo').value = me.photo_url || '';
+    var set = new Set(me.specialties || []);
+    specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
+    document.getElementById('p_pin').value = '';
+    mmsg.textContent = ''; mmsg.className = 'mmsg';
+    overlay.classList.add('open');
+  }
+  function closeModal() { overlay.classList.remove('open'); }
+  document.getElementById('editBtn').addEventListener('click', openModal);
+  document.getElementById('closeModal').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+
+  document.getElementById('p_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
+
+  document.getElementById('profileForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var saveBtn = document.getElementById('saveBtn');
+    var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    if (!specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one specialty.'; return; }
+    var newPin = document.getElementById('p_pin').value;
+    if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
+    saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
+    try {
+      var body = {
+        name: document.getElementById('p_name').value.trim(),
+        business_name: document.getElementById('p_biz').value.trim(),
+        area: document.getElementById('p_area').value.trim(),
+        photo_url: document.getElementById('p_photo').value.trim(),
+        specialties: specs
+      };
+      if (newPin) body.pin = newPin;
+      var r = await C.api('/me', { method: 'PUT', body: body });
+      me = r.member;
+      document.getElementById('p_pin').value = '';
+      mmsg.className = 'mmsg ok'; mmsg.textContent = newPin ? 'Saved — use your new PIN next time you log in.' : 'Saved.';
+      await load(); // refresh directory (own card may have changed)
+      setTimeout(closeModal, newPin ? 1400 : 700);
+    } catch (err) {
+      mmsg.className = 'mmsg error'; mmsg.textContent = err.message || 'Could not save.';
+    } finally { saveBtn.disabled = false; }
+  });
+
+  async function load() {
+    try {
+      var r = await C.api('/directory');
+      all = r.members || [];
+      // reset area filter options
+      areaFilter.innerHTML = '<option value="">All areas</option>';
+      buildAreaFilter();
+      stateEl.style.display = 'none';
+      render();
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      stateEl.textContent = err.message || 'Could not load the directory.';
+    }
+  }
+
+  async function init() {
+    try {
+      var meRes = await C.api('/me');
+      me = meRes.member;
+      if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+    }
+    await load();
+  }
+  init();
+})();
+</script>
+</body>
+</html>

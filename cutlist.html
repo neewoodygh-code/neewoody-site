@@ -761,6 +761,7 @@ select {
   <div class="rhdr">
     <button class="rbtn" onclick="closeR()">← Edit</button>
     <div class="rhdr-title">Parts &amp; Cut List</div>
+    <button class="rbtn" onclick="saveCutlist()" title="Save this cut list to your Concierge account">💾 Save</button>
     <button class="rbtn" onclick="window.print()">⎙ Print</button>
   </div>
   <div class="rbody" id="rbody"></div>
@@ -1675,6 +1676,28 @@ document.addEventListener('click', function(e){
     return;
   }
 });
+
+// ══════════════════════════════════════════════════════
+//  SAVE MY CUT LIST — Concierge gating (Phase 1 stub)
+//  Calculator stays fully usable logged-out; saving is the
+//  member-gated feature. Persistence lands in a later phase.
+// ══════════════════════════════════════════════════════
+function saveCutlist(){
+  var token = null;
+  try { token = localStorage.getItem('nwd-concierge-token'); } catch(e){}
+  if(!token){
+    var go = confirm(
+      'Save your cut lists with Carpentry Concierge.\n\n' +
+      'Concierge members can save and reload named cut lists. ' +
+      'Log in or join (GHS 50/month) to unlock it.\n\n' +
+      'Go to the members’ login now?'
+    );
+    if(go){ window.location.href = '/concierge/login.html'; }
+    return;
+  }
+  // Logged in — saved cut lists are not wired yet (later migration).
+  alert('You’re logged in — saved cut lists are coming soon. Your list is safe to print in the meantime.');
+}
 
 </script>
 </body>

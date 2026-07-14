@@ -1,0 +1,17 @@
+{
+  "name": "concierge-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Carpentry Concierge membership API (Cloudflare Worker + D1). Isolated from neewoody-dispatch-api.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:create": "wrangler d1 create concierge",
+    "db:migrate": "wrangler d1 migrations apply concierge --remote",
+    "db:migrate:local": "wrangler d1 migrations apply concierge --local",
+    "secret:session": "wrangler secret put SESSION_SECRET"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

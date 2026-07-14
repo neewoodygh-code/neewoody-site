@@ -1,0 +1,23 @@
+name = "concierge-api"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+# ── D1: member database ───────────────────────────────────────────────
+# Create it once with:  wrangler d1 create concierge
+# then paste the returned database_id below (it is safe to commit — it is
+# an identifier, not a secret).
+[[d1_databases]]
+binding = "DB"
+database_name = "concierge"
+database_id = "REPLACE_AFTER_wrangler_d1_create_concierge"
+
+# ── R2: shared media bucket (member photos live under concierge/ prefix)
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "neewoody-media"
+
+[observability]
+enabled = true
+
+# SESSION_SECRET is NOT set here. Set it out-of-band and never commit it:
+#   wrangler secret put SESSION_SECRET
