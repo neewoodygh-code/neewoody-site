@@ -92,8 +92,15 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 <script>
 (function () {
   var C = window.Concierge;
-  // Already logged in? Go straight to the directory.
-  if (C.tokenAlive()) { location.replace('directory.html'); return; }
+
+  // Optional ?next= return path (same-site relative paths only — no open redirect)
+  function dest() {
+    var next = new URLSearchParams(location.search).get('next') || '';
+    return /^\/(?!\/)/.test(next) ? next : 'directory.html';
+  }
+
+  // Already logged in? Go straight to the destination.
+  if (C.tokenAlive()) { location.replace(dest()); return; }
 
   var form = document.getElementById('loginForm');
   var btn = document.getElementById('submitBtn');
@@ -115,7 +122,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     try {
       var data = await C.api('/auth/login', { auth: false, method: 'POST', body: { phone: phone, pin: pinEl.value } });
       C.setToken(data.token);
-      location.replace('directory.html');
+      location.replace(dest());
     } catch (err) {
       msg.className = 'msg error';
       msg.textContent = err.message || 'Login failed.';

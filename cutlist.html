@@ -560,11 +560,18 @@ select {
 <!-- ════ CALCULATOR ════ -->
 <div class="calc-wrap">
 
-  <!-- ════ MEMBER BAR (shown only with a live Concierge session) ════ -->
+  <!-- ════ MEMBER BAR (live Concierge session) ════ -->
   <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#0b1f0e;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
     <span style="opacity:.85">🛠 Concierge member</span>
     <button onclick="openCutlists()" style="font-family:inherit;font-size:.8rem;font-weight:600;background:#c8922a;color:#241500;border:none;border-radius:5px;padding:.4rem .8rem;cursor:pointer">📂 My Cutlists</button>
     <a href="concierge/directory.html" style="color:#c8922a;font-size:.8rem;text-decoration:none;margin-left:auto">Directory →</a>
+    <button onclick="memberLogout()" style="font-family:inherit;font-size:.75rem;background:transparent;color:rgba(240,232,208,.75);border:1px solid rgba(240,232,208,.35);border-radius:5px;padding:.35rem .7rem;cursor:pointer">Log out</button>
+  </div>
+
+  <!-- ════ GUEST BAR (no session — login entry point + pitch) ════ -->
+  <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(11,31,14,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
+    <span>💾 Concierge members save &amp; reload their cut lists</span>
+    <a href="concierge/login.html?next=/cutlist.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#0b1f0e;text-decoration:none;border:1px solid rgba(11,31,14,.3);border-radius:5px;padding:.35rem .8rem">Member login →</a>
   </div>
 
   <!-- TABS -->
@@ -1714,7 +1721,12 @@ function promptJoin(){
     'and get first access to new tools (kitchen and TV-unit cutlists are next).\n\n' +
     'Log in or join (GHS 50/month) now?'
   );
-  if(go){ window.location.href = '/concierge/login.html'; }
+  if(go){ window.location.href = '/concierge/login.html?next=/cutlist.html'; }
+}
+
+function memberLogout(){
+  if(window.Concierge) Concierge.clearToken();
+  location.reload();
 }
 
 function collectConfig(){
@@ -1838,12 +1850,10 @@ function restoreConfig(cfg){
   setSP(S.spType); // restores subframe pills + triggers live() → sync + diagram
 }
 
-// Reveal the member bar for logged-in members (harmless no-op otherwise)
+// Reveal the right bar: member bar with a live session, guest login bar without
 (function(){
-  if(memberLoggedIn()){
-    var mb = document.getElementById('member-bar');
-    if(mb) mb.style.display = 'flex';
-  }
+  var bar = document.getElementById(memberLoggedIn() ? 'member-bar' : 'guest-bar');
+  if(bar) bar.style.display = 'flex';
 })();
 
 </script>
