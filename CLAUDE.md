@@ -196,7 +196,7 @@ Membership platform for Ghanaian carpenters, run by Neewoody. The intake's purpo
 - Shared helper `js/concierge.js` (`window.Concierge`: API base, token storage, `api()` fetch, `requireSession`, phone/WhatsApp helpers, specialty labels).
 - `/concierge/login.html` (phone + PIN → directory), `/concierge/directory.html` (member cards + area/trade filters + WhatsApp + edit-own-profile modal), `/concierge/admin.html` (vanilla JS — add-member, members table with inline status/role/founder/reset-PIN, record + view payments; admin-gated via `/api/me`).
 
-**Cutlist gating (free to use, login to persist):** `cutlist.html` calculator stays **fully usable logged-out** (top-of-funnel — never gate the calculator). A "💾 Save" button calls `saveCutlist()` — a Phase-1 **stub**: no token → prompt to `/concierge/login.html`; has token → "coming soon" (a `saved_cutlists` table + persistence is a later migration).
+**Cutlist gating (free to use, login to persist) — persistence LIVE 2026-07-14:** `cutlist.html` calculator stays **fully usable logged-out** (top-of-funnel — never gate the calculator; settled decision, do not re-litigate). Members get real save/load: `saved_cutlists` table (migration `0002`, upsert on member+name, 50/member cap, 64KB config cap), `/api/cutlists` CRUD (list/save/get/delete, own rows only), and on `cutlist.html` a member bar (visible only with a live session) + "📂 My Cutlists" overlay + working "💾 Save" (serializes `S`+`ebState`, always mm internally; `restoreConfig()` writes state back into inputs incl. cm-mode display and re-renders). Logged-out Save → membership pitch + login link. **Tools tiering:** wardrobe cutlist free forever (the funnel); new tools (kitchen cutlist, TV-unit cutlist, …) launch member-first — they are the membership's tool library. Directory (`/concierge/directory.html`) is the member landing page and carries a "Your member tools" strip: open-generator card + coming-soon cards (kitchen/TV-unit cutlists, safety check-in) + benefits line.
 
 **Deploy runbook & first-admin bootstrap:** `/concierge-api/README.md`.
 
@@ -209,7 +209,7 @@ Membership platform for Ghanaian carpenters, run by Neewoody. The intake's purpo
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
 3. Pricing — client-facing quote PDF output
-4. Cutlist — save/load named configurations (Concierge Phase 2 — depends on `saved_cutlists` migration)
+4. ~~Cutlist — save/load named configurations~~ ✅ DONE 2026-07-14 (saved_cutlists + /api/cutlists + UI). Next tools in the member library: kitchen cutlist, TV-unit cutlist (member-first)
 5. Android app — Expo project ID fix for push notifications (use a7e03272-e2ca-4621-b63a-19d80b825084)
 6. KV backup — weekly JSON export via Cron Trigger
 7. Pricing — make labour day rates configurable (not hardcoded)

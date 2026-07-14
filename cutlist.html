@@ -560,6 +560,13 @@ select {
 <!-- ════ CALCULATOR ════ -->
 <div class="calc-wrap">
 
+  <!-- ════ MEMBER BAR (shown only with a live Concierge session) ════ -->
+  <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#0b1f0e;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
+    <span style="opacity:.85">🛠 Concierge member</span>
+    <button onclick="openCutlists()" style="font-family:inherit;font-size:.8rem;font-weight:600;background:#c8922a;color:#241500;border:none;border-radius:5px;padding:.4rem .8rem;cursor:pointer">📂 My Cutlists</button>
+    <a href="concierge/directory.html" style="color:#c8922a;font-size:.8rem;text-decoration:none;margin-left:auto">Directory →</a>
+  </div>
+
   <!-- TABS -->
   <div class="calc-tabs" role="tablist">
     <div class="calc-tab active" role="tab" onclick="swTab('dims',this)">Dimensions</div>
@@ -756,6 +763,17 @@ select {
 
 </div><!-- end calc-wrap -->
 
+<!-- ════ MY CUTLISTS OVERLAY (members) ════ -->
+<div id="mycl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:400;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeCutlists()">
+  <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.35)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e8e2d6">
+      <strong style="font-size:1rem">📂 My Cutlists</strong>
+      <button onclick="closeCutlists()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;color:#8a8375">×</button>
+    </div>
+    <div id="mycl-body" style="padding:1rem 1.25rem 1.25rem;font-size:.9rem;color:#5c564a">Loading…</div>
+  </div>
+</div>
+
 <!-- ════ RESULTS PAGE ════ -->
 <div id="rpage">
   <div class="rhdr">
@@ -839,6 +857,7 @@ select {
 </main>
 
 <script src="js/main.js"></script>
+<script src="js/concierge.js"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
 <script>
@@ -1678,26 +1697,154 @@ document.addEventListener('click', function(e){
 });
 
 // ══════════════════════════════════════════════════════
-//  SAVE MY CUT LIST — Concierge gating (Phase 1 stub)
-//  Calculator stays fully usable logged-out; saving is the
-//  member-gated feature. Persistence lands in a later phase.
+//  SAVE / LOAD MY CUT LIST — Concierge members
+//  Calculator stays fully usable logged-out (never gate it);
+//  persistence is the member benefit. Uses js/concierge.js.
 // ══════════════════════════════════════════════════════
-function saveCutlist(){
-  var token = null;
-  try { token = localStorage.getItem('nwd-concierge-token'); } catch(e){}
-  if(!token){
-    var go = confirm(
-      'Save your cut lists with Carpentry Concierge.\n\n' +
-      'Concierge members can save and reload named cut lists. ' +
-      'Log in or join (GHS 50/month) to unlock it.\n\n' +
-      'Go to the members’ login now?'
-    );
-    if(go){ window.location.href = '/concierge/login.html'; }
-    return;
-  }
-  // Logged in — saved cut lists are not wired yet (later migration).
-  alert('You’re logged in — saved cut lists are coming soon. Your list is safe to print in the meantime.');
+var LASTNAME_KEY = 'nwd-cutlist-lastname';
+
+function memberLoggedIn(){
+  return !!(window.Concierge && Concierge.tokenAlive());
 }
+
+function promptJoin(){
+  var go = confirm(
+    'Save your cut lists with Carpentry Concierge.\n\n' +
+    'Members save and reload named cut lists, appear in the members directory, ' +
+    'and get first access to new tools (kitchen and TV-unit cutlists are next).\n\n' +
+    'Log in or join (GHS 50/month) now?'
+  );
+  if(go){ window.location.href = '/concierge/login.html'; }
+}
+
+function collectConfig(){
+  sync();
+  return { v:1, S:S, ebState:ebState };
+}
+
+function saveCutlist(){
+  if(!memberLoggedIn()){ promptJoin(); return; }
+  var def = '';
+  try { def = localStorage.getItem(LASTNAME_KEY) || ''; } catch(e){}
+  var name = prompt('Name this cut list (re-using a name updates it):', def || 'Wardrobe ' + new Date().toISOString().slice(0,10));
+  if(name == null) return;
+  name = name.trim();
+  if(!name){ alert('Please give it a name.'); return; }
+  Concierge.api('/cutlists', { method:'POST', body:{ name:name, config:collectConfig() } })
+    .then(function(r){
+      try { localStorage.setItem(LASTNAME_KEY, name); } catch(e){}
+      alert(r.updated ? 'Updated "' + name + '".' : 'Saved "' + name + '". Load it any time from 📂 My Cutlists.');
+    })
+    .catch(function(err){
+      if(err.status === 401){ promptJoin(); return; }
+      alert(err.message || 'Could not save — try again.');
+    });
+}
+
+function openCutlists(){
+  if(!memberLoggedIn()){ promptJoin(); return; }
+  var ov = document.getElementById('mycl-overlay');
+  var body = document.getElementById('mycl-body');
+  ov.style.display = 'flex';
+  body.textContent = 'Loading…';
+  Concierge.api('/cutlists')
+    .then(function(r){
+      var list = r.cutlists || [];
+      if(!list.length){
+        body.innerHTML = 'Nothing saved yet.<br><br>Set up a wardrobe, then hit <b>💾 Save</b> on the results page — it will appear here.';
+        return;
+      }
+      body.innerHTML = list.map(function(c){
+        var d = (c.updated_at || '').slice(0, 16).replace('T',' ');
+        return '<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid #efeadd">' +
+          '<div style="flex:1;min-width:0"><div style="font-weight:600;color:#1c1a17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escCl(c.name) + '</div>' +
+          '<div style="font-size:.75rem;color:#8a8375">' + escCl(d) + '</div></div>' +
+          '<button onclick="loadCutlist(' + c.id + ')" style="font-family:inherit;font-size:.78rem;font-weight:600;background:#0b1f0e;color:#f0e8d0;border:none;border-radius:5px;padding:.4rem .75rem;cursor:pointer">Load</button>' +
+          '<button onclick="deleteCutlist(' + c.id + ',this)" data-name="' + escCl(c.name).replace(/"/g,'&quot;') + '" style="font-family:inherit;font-size:.78rem;background:none;border:1px solid #d9d2c2;border-radius:5px;padding:.4rem .6rem;cursor:pointer;color:#8a5a4a">Delete</button>' +
+          '</div>';
+      }).join('');
+    })
+    .catch(function(err){
+      if(err.status === 401){ closeCutlists(); promptJoin(); return; }
+      body.textContent = err.message || 'Could not load your cut lists.';
+    });
+}
+
+function closeCutlists(){ document.getElementById('mycl-overlay').style.display = 'none'; }
+
+function loadCutlist(id){
+  Concierge.api('/cutlists/' + id)
+    .then(function(r){
+      if(!r.cutlist || !r.cutlist.config || !r.cutlist.config.S){ alert('That cut list looks damaged.'); return; }
+      restoreConfig(r.cutlist.config);
+      try { localStorage.setItem(LASTNAME_KEY, r.cutlist.name); } catch(e){}
+      closeCutlists();
+      closeR(); // back to the calculator if results page was open
+      window.scrollTo(0, 0);
+    })
+    .catch(function(err){ alert(err.message || 'Could not load it.'); });
+}
+
+function deleteCutlist(id, btn){
+  var name = btn.getAttribute('data-name') || 'this cut list';
+  if(!confirm('Delete "' + name + '"? This cannot be undone.')) return;
+  Concierge.api('/cutlists/' + id, { method:'DELETE' })
+    .then(function(){ openCutlists(); })
+    .catch(function(err){ alert(err.message || 'Could not delete it.'); });
+}
+
+function escCl(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+function restoreConfig(cfg){
+  var sv = cfg.S;
+  Object.keys(sv).forEach(function(k){ S[k] = sv[k]; });
+  ebState = cfg.ebState || {};
+
+  // unit pills + labels (S dims are always stored in mm)
+  var isCm = S.unit === 'cm';
+  var pm = document.getElementById('upill-mm'), pc = document.getElementById('upill-cm');
+  if(pm) pm.classList.toggle('active', !isCm);
+  if(pc) pc.classList.toggle('active', isCm);
+  var u = isCm ? 'cm' : 'mm';
+  ['lbl-w','lbl-h','lbl-d'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.textContent = el.textContent.replace(/mm|cm/, u);
+  });
+  var hint = document.getElementById('unit-hint');
+  if(hint) hint.textContent = isCm ? 'Enter dimensions in centimetres' : 'Enter dimensions in millimetres';
+
+  function setV(id, v){ var el = document.getElementById(id); if(el) el.value = v; }
+  function setC(id, v){ var el = document.getElementById(id); if(el) el.checked = !!v; }
+  var dim = function(v){ return isCm ? +(v/10).toFixed(1) : v; };
+
+  setV('i-w', dim(S.w)); setV('i-h', dim(S.h)); setV('i-d', dim(S.d));
+  setV('i-thick', S.thick); setV('i-back', S.backType); setV('i-backthick', S.backThick);
+  setV('i-clear', S.clear); setV('i-overlay', S.overlay); setV('i-doorthick', S.doorThick);
+  setV('i-dgap', S.dgap); setV('i-topgap', S.topgap); setV('i-botgap', S.botgap);
+  setV('tk-h', S.tkH); setV('tk-style', S.tkStyle); setV('tk-setback', S.tkSetback);
+  setV('tk-thick', S.tkThick); setV('tk-gap', S.tkGap);
+  setV('tk-mr-mode', S.tkMrMode); setV('tk-mr-qty', S.tkMrQty);
+  setV('mod-units', S.modUnits); setV('mod-join', S.modJoin);
+  setV('sp-l', S.spL); setV('sp-r', S.spR); setV('sp-thick', S.spThick);
+  setV('sp-eh', S.spEH); setV('sp-ed', S.spED); setV('sp-sw', S.spSW);
+  setC('pel-en', S.pelEn); setV('pel-h', S.pelH);
+  setV('i-secs', S.secs.length);
+
+  renderSecs();
+  setSP(S.spType); // restores subframe pills + triggers live() → sync + diagram
+}
+
+// Reveal the member bar for logged-in members (harmless no-op otherwise)
+(function(){
+  if(memberLoggedIn()){
+    var mb = document.getElementById('member-bar');
+    if(mb) mb.style.display = 'flex';
+  }
+})();
 
 </script>
 </body>

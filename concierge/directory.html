@@ -70,6 +70,22 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .empty{ text-align:center; color:var(--muted); padding:3rem 1rem; }
 .state{ text-align:center; color:var(--muted); padding:3rem 1rem; font-family:var(--ui); letter-spacing:.05em; }
 
+/* member tools & benefits */
+.tools-strip{ margin-bottom:2rem; }
+.tools-strip h2{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:.75rem; }
+.tools-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.9rem; }
+.tool-card{ background:var(--green); color:var(--cream); border-radius:5px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.4rem; }
+.tool-card h3{ font-family:var(--display); font-weight:500; font-size:1.1rem; }
+.tool-card p{ font-size:.83rem; color:rgba(240,232,208,.72); line-height:1.5; flex:1; }
+.tool-card .go{ align-self:flex-start; font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; background:var(--gold); color:#241500; border-radius:3px; padding:.5rem .9rem; margin-top:.5rem; transition:filter .2s; }
+.tool-card .go:hover{ filter:brightness(1.08); }
+.tool-card.soon{ background:#fff; color:var(--ink); border:1px dashed rgba(11,31,14,.25); }
+.tool-card.soon h3{ color:var(--ink); }
+.tool-card.soon p{ color:var(--muted); }
+.soon-tag{ align-self:flex-start; font-family:var(--ui); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; background:var(--cream-dark); color:var(--muted); border-radius:20px; padding:.25rem .6rem; }
+.benefits{ font-size:.84rem; color:var(--muted); margin-top:.9rem; line-height:1.7; }
+.benefits b{ color:var(--ink); font-weight:600; }
+
 /* modal (edit own profile) */
 .overlay{ position:fixed; inset:0; background:rgba(11,31,14,.55); display:none; align-items:center;
   justify-content:center; padding:1.25rem; z-index:100; }
@@ -115,6 +131,35 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 </header>
 
 <div class="wrap">
+
+  <!-- Member tools & benefits -->
+  <div class="tools-strip">
+    <h2>Your member tools</h2>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <h3>Wardrobe Cutlist Generator</h3>
+        <p>Parametric cut lists for any wardrobe. As a member, you can <b>save and reload named cut lists</b> — set up a job once, come back to it any time.</p>
+        <a class="go" href="../cutlist.html">Open the generator</a>
+      </div>
+      <div class="tool-card soon">
+        <span class="soon-tag">Coming soon · members first</span>
+        <h3>Kitchen Cutlist</h3>
+        <p>Base and wall cabinet cut lists — same engine, built for kitchen runs. Members get it first.</p>
+      </div>
+      <div class="tool-card soon">
+        <span class="soon-tag">Coming soon · members first</span>
+        <h3>TV Unit Cutlist</h3>
+        <p>Floating consoles and feature-wall media units, parametrised. Members get it first.</p>
+      </div>
+      <div class="tool-card soon">
+        <span class="soon-tag">In development</span>
+        <h3>Safety Check-In</h3>
+        <p>Log a consultation call-out before you go — location, client, expected return. If you're overdue, your emergency contact is alerted. Built for lone workers.</p>
+      </div>
+    </div>
+    <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, WhatsApp direct) · <b>saved cut lists</b> on the generator · <b>founders' WhatsApp community</b> · and first access to every tool above as it lands.</p>
+  </div>
+
   <div class="lead">
     <h1>Find a fellow carpenter</h1>
     <p>Members hire members. Filter by area or trade, then message on WhatsApp.</p>

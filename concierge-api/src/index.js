@@ -56,6 +56,13 @@ async function route(request, env) {
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
   if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
 
+  // ---- member: saved cutlists (free to use, login to persist) ----
+  if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
+  if (path === '/api/cutlists' && method === 'POST') return withAuth(request, env, (m) => saveCutlist(request, env, m));
+  const mCutlist = path.match(/^\/api\/cutlists\/(\d+)$/);
+  if (mCutlist && method === 'GET')    return withAuth(request, env, (m) => getCutlist(env, m, Number(mCutlist[1])));
+  if (mCutlist && method === 'DELETE') return withAuth(request, env, (m) => deleteCutlist(env, m, Number(mCutlist[1])));
+
   // ---- admin: members ----
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
   if (path === '/api/admin/members' && method === 'POST') return withAdmin(request, env, () => adminCreateMember(request, env));
@@ -293,6 +300,76 @@ async function adminListPayments(request, env) {
   return json({ period, payments: results || [] });
 }
 
+// ── saved cutlists ─────────────────────────────────────────────────────
+
+const CUTLIST_MAX_PER_MEMBER = 50;
+const CUTLIST_MAX_CONFIG_BYTES = 64 * 1024; // generous; real configs are a few KB
+const CUTLIST_MAX_NAME_LEN = 80;
+
+async function listCutlists(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, name, created_at, updated_at FROM saved_cutlists
+     WHERE member_phone = ? ORDER BY updated_at DESC`
+  ).bind(member.phone).all();
+  return json({ cutlists: results || [] });
+}
+
+async function saveCutlist(request, env, member) {
+  const body = await readJson(request);
+  const name = String(body.name || '').trim().slice(0, CUTLIST_MAX_NAME_LEN);
+  if (!name) return json({ error: 'name_required' }, 400);
+
+  let configStr;
+  try {
+    configStr = JSON.stringify(body.config);
+  } catch { configStr = null; }
+  if (!configStr || configStr === 'null' || typeof body.config !== 'object') {
+    return json({ error: 'config_required' }, 400);
+  }
+  if (configStr.length > CUTLIST_MAX_CONFIG_BYTES) return json({ error: 'config_too_large' }, 400);
+
+  // count cap only applies to NEW names (re-saving an existing name is an update)
+  const existing = await env.DB.prepare(
+    'SELECT id FROM saved_cutlists WHERE member_phone = ? AND name = ?'
+  ).bind(member.phone, name).first();
+  if (!existing) {
+    const c = await env.DB.prepare(
+      'SELECT COUNT(*) AS c FROM saved_cutlists WHERE member_phone = ?'
+    ).bind(member.phone).first();
+    if (c && c.c >= CUTLIST_MAX_PER_MEMBER) return json({ error: 'too_many_cutlists', limit: CUTLIST_MAX_PER_MEMBER }, 400);
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO saved_cutlists (member_phone, name, config)
+     VALUES (?, ?, ?)
+     ON CONFLICT(member_phone, name)
+     DO UPDATE SET config = excluded.config, updated_at = datetime('now')`
+  ).bind(member.phone, name, configStr).run();
+
+  const row = await env.DB.prepare(
+    'SELECT id, name, created_at, updated_at FROM saved_cutlists WHERE member_phone = ? AND name = ?'
+  ).bind(member.phone, name).first();
+  return json({ cutlist: row, updated: !!existing }, existing ? 200 : 201);
+}
+
+async function getCutlist(env, member, id) {
+  const row = await env.DB.prepare(
+    'SELECT id, name, config, created_at, updated_at FROM saved_cutlists WHERE id = ? AND member_phone = ?'
+  ).bind(id, member.phone).first();
+  if (!row) return json({ error: 'not_found' }, 404);
+  let config;
+  try { config = JSON.parse(row.config); } catch { config = null; }
+  return json({ cutlist: { id: row.id, name: row.name, config, created_at: row.created_at, updated_at: row.updated_at } });
+}
+
+async function deleteCutlist(env, member, id) {
+  const r = await env.DB.prepare(
+    'DELETE FROM saved_cutlists WHERE id = ? AND member_phone = ?'
+  ).bind(id, member.phone).run();
+  if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
+  return json({ deleted: true });
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 //  Auth middleware
 // ═══════════════════════════════════════════════════════════════════════
@@ -440,7 +517,7 @@ function corsHeaders(request) {
   const allow = (ALLOWED_ORIGINS.includes(origin) || isLocal) ? origin : ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
     'Vary': 'Origin',
