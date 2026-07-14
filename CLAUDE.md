@@ -2,15 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+> **Completed project history, catalogued projects (wardrobes/kitchens), the `pm-*` card batch log, and dated change-logs live in [`HISTORY.md`](HISTORY.md).** This file holds current architecture, standing instructions, and active projects. When an archived project becomes relevant again, read `HISTORY.md`.
+
 ## Standing Instructions
 
 1. At the end of every session where decisions were made, scope was clarified, features were built, or anything changed about the business, site, or tools — automatically update this CLAUDE.md file to reflect those changes without being asked.
-
 2. If a correction is made during a session (wrong attribution, wrong scope, wrong technical detail) — update CLAUDE.md immediately, not at the end.
-
-3. Never remove existing context. Only add or correct.
-
+3. Never remove existing context. Only add or correct. (Relocating completed history to `HISTORY.md` is allowed — that preserves context; deleting it is not.)
 4. After updating CLAUDE.md, include it in the same commit as the rest of the session's changes.
+5. **Never touch the `neewoody-dispatch-api` Worker or its `neewoody-dispatch` KV namespace unless the owner explicitly instructs it in that same session.** This includes the Worker's code (`worker.js` in repo, and the live copy in the Cloudflare dashboard), its routes, and any `nwd-*` KV key. Blast-radius isolation is deliberate — dispatch and lead capture are load-bearing. Building *near* it (e.g. the separate `concierge-api` Worker) is fine; modifying *it* is not, absent an explicit go-ahead this session.
 
 ## What this project is
 
@@ -35,11 +35,14 @@ python -m http.server 8080
 - **Marketing pages** (`index.html`, `pricing.html`, `portfolio.html`, category pages): standard static HTML
 - **Product category pages** (`wardrobes.html`, `kitchens.html`, `beds.html`, `shelving.html`, `tv-units.html`, `solid-wood.html`, `dining-living.html`): follow the same layout pattern
 - **Tools** (`wardrobe-estimator.html`, `cutlist.html`): calculator tools, vanilla JS
-- **Dispatch** (`dispatch.html`): React 18 SPA loaded via unpkg CDN with Babel standalone for JSX — this is the internal crew/job management app
-- **Case studies** (`projects/house-of-walker.html`, `projects/sage-centre.html`): project detail pages
+- **Dispatch** (`dispatch.html`): React 18 SPA loaded via unpkg CDN with Babel standalone for JSX — the internal crew/job management app
+- **Case studies** (`projects/*.html`): project detail pages
+- **Concierge** (`concierge/login.html`, `directory.html`, `admin.html`): member platform frontend — see the Carpentry Concierge section
 
 ### Serverless
 - `functions/api/instagram.js` — Cloudflare Worker; fetches latest Instagram media and returns top 6 posts. Cached 15 minutes (`max-age=900`).
+- `functions/api/lead.js` — contact form handler.
+- `concierge-api/` — the Carpentry Concierge Worker (separate; see its section).
 
 ### PWA
 - `sw.js` — Service Worker for Web Push notifications, used exclusively by the Dispatch app
@@ -48,26 +51,20 @@ python -m http.server 8080
 
 ## Design system
 
-All styling is in `/css/styles.css` using CSS custom properties. Key tokens:
-- `--clr-accent`: `#A0784A` (warm wood brown — primary brand colour)
-- `--clr-bg`: `#F7F4EF` (cream)
-- `--clr-dark`: near-black for text
-- Typography: **Playfair Display** (headings) + **DM Sans** (body), loaded from Google Fonts
+**Two systems currently coexist** (mid-migration — see the redesign rollout status in `HISTORY.md`):
 
-Common UI patterns implemented in `/js/main.js`:
-- Mobile nav toggle
-- Scroll-reveal (`.reveal` class → fade-in on IntersectionObserver)
-- Portfolio filter (data-filter attributes)
-- FAQ accordion (single-open state)
-- Instagram feed fetch from `/api/instagram`
+- **Current/new (all new pages: `index.html`, `catalogue.html`, `concierge/*`):** self-contained **inline** CSS, no `css/styles.css` dependency. Tokens: `--green:#0b1f0e` (deep forest green), `--gold:#c8922a` (warm gold accent), `--cream:#f0e8d0` (bg), `--cream-dark:#e8dfc4`, `--ink:#1c1c1a`, `--muted:#6b6557`. Fonts: **Playfair Display** (headings) + **Lora** (body) + **Jost** (UI/labels). **Do not add `css/styles.css` back to `index.html`.**
+- **Legacy (all other pages):** `/css/styles.css` with `--clr-accent:#A0784A` (timber gold), `--clr-bg:#F7F4EF`, `--clr-dark`, Playfair Display + DM Sans.
+
+Common UI patterns in `/js/main.js` (legacy pages): mobile nav toggle, scroll-reveal (`.reveal` → IntersectionObserver fade-in), portfolio filter (data-filter), FAQ accordion (single-open), Instagram feed fetch from `/api/instagram`.
 
 ## Key conventions
 
-- New marketing pages should follow the existing HTML structure: same `<head>` meta/font links, nav, and footer pattern as `index.html`
-- The nav includes a **Services dropdown** with tool badges for the estimator and dispatch — update it in every page when adding new pages
-- Structured data (JSON-LD `LocalBusiness` schema) lives in `index.html` — update there for business info changes. **Corrected 2026-07-01:** the schema `geo` had wrong coordinates (`5.6037, -0.1870`, ~5km off) — fixed to the real workshop GPS `5.56108, -0.21373`; also added `streetAddress: "Amugi Avenue"` and `email: neewoodygh@gmail.com`. Found via a crawler-perspective audit of the live site (WebFetch strips `<script type=ld+json>`, so the schema only appears invisible externally — it renders/validates fine).
-- SEO files (`sitemap.xml`, `robots.txt`) are hand-maintained — update `sitemap.xml` when adding new pages
-- The dispatch React app uses **no bundler** — JSX is transpiled in-browser by Babel standalone; keep it self-contained within `dispatch.html`
+- New marketing pages follow the existing HTML structure: same `<head>` meta/font links, nav, and footer pattern.
+- The nav includes a **Services dropdown** with tool badges — update it in every page when adding new pages.
+- Structured data (JSON-LD `LocalBusiness` schema) lives in `index.html` — update there for business info changes. (Note: WebFetch strips `<script type=ld+json>`, so the schema looks absent to external crawlers but renders/validates fine. Workshop geo is `5.56108, -0.21373`, street `Amugi Avenue`, email `neewoodygh@gmail.com`.)
+- SEO files (`sitemap.xml`, `robots.txt`) are hand-maintained — update `sitemap.xml` when adding new **public** pages (Concierge pages are `noindex` and deliberately excluded).
+- The dispatch React app uses **no bundler** — JSX is transpiled in-browser by Babel standalone; keep it self-contained within `dispatch.html`.
 
 ---
 
@@ -75,16 +72,13 @@ Common UI patterns implemented in `/js/main.js`:
 
 ### The Company
 Neewoody Custom Woodwork — bespoke furniture and carpentry business based in Accra, Ghana.
-Owner: Nuer (admin)
-Workshop: Amugi Avenue, Accra (GPS: 5.56108, -0.21373)
-Email: neewoodygh@gmail.com
-Google Business: 4.8 stars, 14 reviews
+Owner: Nuer (admin). Workshop: Amugi Avenue, Accra (GPS: 5.56108, -0.21373). Email: neewoodygh@gmail.com. Google Business: 4.8 stars, 14 reviews.
 
 ### Target Clients
 - Expat homeowners (East Legon, Cantonments, Airport Residential, Trasacco)
 - NGOs and institutional clients (e.g. Sage Centre — educational retreat centre)
 - Local homeowners and developers
-- Other carpenters (via the cutlist and estimator tools)
+- Other carpenters (via the cutlist and estimator tools, and now Carpentry Concierge)
 
 ### Crew & Day Rates
 - Kevin — Site Supervisor — GH₵200/day
@@ -96,23 +90,9 @@ Google Business: 4.8 stars, 14 reviews
 ### Pricing Logic
 Fully loaded cost model: Materials + Labour + Overhead × Tier Multiplier × Add-on Multipliers
 
-**Monthly Overhead: GH₵6,016**
-- Rent: GH₵1,500
-- Electricity: GH₵1,000
-- Bits & blades: GH₵800
-- Safety consumables: GH₵300
-- Internet: GH₵350
-- Water: GH₵200
-- Airtime: GH₵200
-- Rubbish collection: GH₵240
-- Hosting: GH₵100
-- Capital replacement reserve: GH₵1,326/month
-  (Table saw GH₵179, Routers GH₵208, Spindle moulder GH₵119,
-   Fasteners & drills GH₵208, Bench planer GH₵167,
-   Welding machine GH₵167, Other machinery GH₵278)
+**Monthly Overhead: GH₵6,016** — Rent 1,500 · Electricity 1,000 · Bits & blades 800 · Safety consumables 300 · Internet 350 · Water 200 · Airtime 200 · Rubbish 240 · Hosting 100 · Capital replacement reserve 1,326/mo (Table saw 179, Routers 208, Spindle moulder 119, Fasteners & drills 208, Bench planer 167, Welding machine 167, Other machinery 278).
 
-**Daily Overhead Rate: GH₵274/day** (GH₵6,016 ÷ 22 billable days)
-Applied across total job days (workshop days + site days combined)
+**Daily Overhead Rate: GH₵274/day** (GH₵6,016 ÷ 22 billable days). Applied across total job days (workshop + site combined).
 
 **Pricing Tiers (internal names — never show clients):**
 - Basic Build — just the essentials, functional — ×1.45 — Nuer rate GH₵200/day
@@ -120,260 +100,117 @@ Applied across total job days (workshop days + site days combined)
 - Premium — we take our time — ×1.90 — Nuer rate GH₵600/day
 - Luxury — at your beck and call — ×2.10 — Nuer rate GH₵700/day
 
-**Add-on Multipliers:**
-- Rush: +20%
-- Custom design: +12%
-- CNC/carved: +18%
-- Remote install: +8%
+**Add-on Multipliers:** Rush +20% · Custom design +12% · CNC/carved +18% · Remote install +8%
 
 **Output to client: one encapsulated price only. Never show cost breakdown.**
 
 ### Job Types
-**Cabinetry** — kitchens, wardrobes, office furniture, laminate work
-Default materials: Boards, Back panels, Edge band, Edge banding application, Cutting, Fixtures, Finishing materials, Abrasives, Consumables, Protective packaging
+**Cabinetry** — kitchens, wardrobes, office furniture, laminate work. Default materials: Boards, Back panels, Edge band, Edge banding application, Cutting, Fixtures, Finishing materials, Abrasives, Consumables, Protective packaging.
 
-**Hardwood / General Furniture** — doors, staircases, pergolas, solid wood, dining, beds
-Default materials: Timber, Fixtures, Abrasives, Wood filler/grain filler, Stain, Finishes, Joinery hardware, Consumables, Protective packaging
+**Hardwood / General Furniture** — doors, staircases, pergolas, solid wood, dining, beds. Default materials: Timber, Fixtures, Abrasives, Wood filler/grain filler, Stain, Finishes, Joinery hardware, Consumables, Protective packaging.
 
-Both types share: Logistics (Primary, Secondary with return trip toggle, Tertiary site visits)
-Optional add-ons: Stone material, Stone fabrication, Templates/jigs, Glass
-All jobs have workshop prep days. Pergolas: air dry, cut rafter tails, pre-stain in workshop, then site.
+Both share Logistics (Primary, Secondary with return-trip toggle, Tertiary site visits). Optional add-ons: Stone material, Stone fabrication, Templates/jigs, Glass. All jobs have workshop prep days. Pergolas: air dry, cut rafter tails, pre-stain in workshop, then site.
 
 ### Machinery (Capital Reserve Reference)
-- Table saw — GH₵15,000 replacement
-- Routers — GH₵5,000 (urgent — 2yr lifespan, replace soon)
-- Spindle moulder — GH₵10,000
-- Fasteners & drills — GH₵10,000
-- Bench top planer — GH₵7,000
-- Welding machine — GH₵4,000 (urgent — 2yr lifespan)
-- Other (hand planers, clamps, multitools, circular saws, grinders, sanders etc) — GH₵10,000
+Table saw — GH₵15,000 · Routers — GH₵5,000 (urgent, 2yr lifespan) · Spindle moulder — GH₵10,000 · Fasteners & drills — GH₵10,000 · Bench top planer — GH₵7,000 · Welding machine — GH₵4,000 (urgent, 2yr lifespan) · Other (hand planers, clamps, multitools, circular saws, grinders, sanders) — GH₵10,000.
 
 ### Tools & Infrastructure
-**CMS posts (admin-uploaded project modals):** `admin.html` (React, X-NWD-Key auth) lets the owner create posts — title, location, category, **multi-page targeting**, write-up, up to 4 images (uploaded via Worker `/api/posts/upload`). `js/cms-posts.js` runs on any page with `<section id="cms-posts" data-page="<slug>">`, fetches `/api/posts?page=<slug>`, and renders cream cards that open a modal (horizontal image strip + write-up + click-to-zoom). The set of targetable pages is the `PAGES` array in `admin.html` (also drives `PAGE_MAP`/filters); labels for the rendered section live in `PAGE_LABELS` in `cms-posts.js`. The Worker filters posts generically by membership in the post's `pages[]`, so **adding a new target page needs no Worker change** — just add it to `PAGES` (admin), `PAGE_LABELS` (cms-posts.js), and drop a `#cms-posts[data-page=…]` section on the page. **Home wired in 2026-06-23:** `index.html` now has a `<section id="cms-posts" data-page="index">` "Recent Work" section + loads `cms-posts.js`; `admin` page option `Home — Recent Work` (slug `index`); the homepage's old hardcoded "Recent Work" cards were renamed to **Featured Projects**. **CMS modal unified with `pm-*` (2026-06-23):** `cms-posts.js` now renders its detail modal in the same style/UX as the inline `pm-*` modals — two-column dialog (big main image + thumbnail strip on the left, eyebrow/title/meta/write-up on the right), thumbnail-switches the main image, click-to-zoom, Esc/×/backdrop close. It keeps its own `.cms-*` classes + overlay so it never clashes with the inline `pm-*` component on pages that load both (kitchens/tv-units/solid-wood/portfolio). Post fields map: category→eyebrow, title→h2, location+year→meta, write-up paragraphs (split on newlines)→body.
+**CMS posts (admin-uploaded project modals):** `admin.html` (React, X-NWD-Key auth) lets the owner create posts — title, location, category, **multi-page targeting**, write-up, up to 4 images (uploaded via Worker `/api/posts/upload`). `js/cms-posts.js` runs on any page with `<section id="cms-posts" data-page="<slug>">`, fetches `/api/posts?page=<slug>`, and renders cream cards that open a modal (unified with the `pm-*` two-column style — big main image + thumbnail strip + write-up + click-to-zoom; keeps its own `.cms-*` classes to avoid clashing with inline `pm-*`). Targetable pages are the `PAGES` array in `admin.html`; section labels are `PAGE_LABELS` in `cms-posts.js`. The Worker filters generically by membership in the post's `pages[]`, so **adding a new target page needs no Worker change** — add it to `PAGES` (admin), `PAGE_LABELS` (cms-posts.js), and drop a `#cms-posts[data-page=…]` section on the page. Home is wired (slug `index`, "Recent Work"); the homepage's old hardcoded cards were renamed "Featured Projects". Post fields map: category→eyebrow, title→h2, location+year→meta, write-up paragraphs→body.
 
-**Dispatch app:** /dispatch.html — crew job management PWA
-**Pricing tool:** /pricing.html — admin only, internal cost calculator with quotes
-**Cutlist generator:** /cutlist.html — parametric wardrobe cutlist for carpenters
-**Wardrobe estimator:** /wardrobe-estimator.html — client-facing price range tool
-**Catalogue:** /catalogue.html — print-to-PDF lookbook (2026-06-05). Self-contained single file, fully inline CSS, A4 print-optimised (`@page size:A4`), uses the new green/gold/cream design system (Playfair + Lora + Jost). 6 sections: Wardrobes · Kitchens · Beds · Dining & Living · Solid Wood · Commercial & Institutional. Real project photos only (no placeholders), no pricing. Open in a browser → Save as PDF to send to clients. Listed in sitemap.xml. Not yet linked from site nav.
+**Dispatch app:** `/dispatch.html` — crew job management PWA.
+**Pricing tool:** `/pricing.html` — admin only, internal cost calculator with quotes.
+**Cutlist generator:** `/cutlist.html` — parametric wardrobe cutlist for carpenters.
+**Wardrobe estimator:** `/wardrobe-estimator.html` — client-facing price range tool.
+**Catalogue:** `/catalogue.html` — print-to-PDF lookbook. Self-contained single file, inline CSS, A4 print-optimised (`@page size:A4`), green/gold/cream system. 6 sections (Wardrobes · Kitchens · Beds · Dining & Living · Solid Wood · Commercial & Institutional). Real photos only, no pricing. In sitemap.xml; not yet linked from nav.
 
-**Backend:**
-- Cloudflare Worker: neewoody-dispatch-api
-- KV namespace: neewoody-dispatch
-- API key: nwd-dispatch-2024
-- Allowed KV keys: nwd-crew, nwd-tools, nwd-jobs, nwd-damage, nwd-quotes, nwd-overhead, nwd-leads, nwd-config
-- Worker route: neewoodygh.com/api/*
-- VAPID public key is in dispatch.html — private key is in the Worker — never replace these without forcing all crew to re-subscribe
+**Dispatch backend (⚠ do not modify without explicit instruction — see Standing Instruction 5):**
+- Cloudflare Worker: `neewoody-dispatch-api` (lives only in the CF dashboard; a copy is `worker.js` in repo)
+- KV namespace: `neewoody-dispatch`. API key: `nwd-dispatch-2024`
+- Allowed KV keys: `nwd-crew, nwd-tools, nwd-jobs, nwd-damage, nwd-quotes, nwd-overhead, nwd-leads, nwd-config`
+- Worker route: `neewoodygh.com/api/*`
+- VAPID public key is in `dispatch.html`; private key is in the Worker — never replace these without forcing all crew to re-subscribe.
 
-**Push notifications:**
-- Browser dispatch uses Web Push (VAPID)
-- Native Android app uses Expo push tokens (stored as expo-{crewId} in KV)
-- Worker sends to both channels simultaneously
-- Admin push subscription stored as sub-cr01
+**Push notifications:** Browser dispatch uses Web Push (VAPID); native Android app uses Expo push tokens (stored as `expo-{crewId}` in KV); Worker sends to both simultaneously. Admin push subscription stored as `sub-cr01`.
 
-**Workshop GPS:** 5.56108374374371, -0.21373364856801483 (Amugi Ave, Accra)
-Geofence radius: 100m (adjustable in admin settings)
+**Workshop GPS:** 5.56108374374371, -0.21373364856801483 (Amugi Ave, Accra). Geofence radius: 100m (adjustable in admin settings).
 
 ### Dispatch Job Lifecycle
-Briefed → Pre-departure (checklist locked, items packed) → Departed (GPS gated at workshop) → En route → On site (GPS gated at site) → Return check (all tools accounted for) → Closed
+Briefed → Pre-departure (checklist locked, items packed) → Departed (GPS gated at workshop) → En route → On site (GPS gated at site) → Return check (all tools accounted for) → Closed.
 
-**Crew roles:**
-- Admin (Nuer) — full access, all jobs
-- Supervisor (Kevin) — assigned jobs, can oversee two simultaneous jobs
-- Lead Apprentice — becomes field supervisor on split-crew jobs
-- Work Hand / Trainee — crew view only
-
-**Split crew:** Two jobs can run simultaneously. Lead apprentice is field supervisor on Job B, still reports to Kevin.
+**Crew roles:** Admin (Nuer) — full access · Supervisor (Kevin) — assigned jobs, can oversee two simultaneously · Lead Apprentice — field supervisor on split-crew jobs · Work Hand / Trainee — crew view only. **Split crew:** two jobs run simultaneously; lead apprentice is field supervisor on Job B, still reports to Kevin.
 
 ### Quote Reference System
-Quotes saved to KV as nwd-quotes
-Reference format: NWD-001, NWD-002 etc.
-Statuses: Draft → Sent → Accepted → Declined
-Actual costs tab tracks real expenditure against quoted costs — admin only, crew never see it
-Net profit projection defaults: 15% income tax, 20% idle time reserve
+Quotes saved to KV as `nwd-quotes`. Reference format `NWD-001`, `NWD-002`. Statuses: Draft → Sent → Accepted → Declined. Actual-costs tab tracks real expenditure against quoted — admin only. Net profit projection defaults: 15% income tax, 20% idle-time reserve.
 
 ### Site Key Conventions
-- Deployment: push to main branch → Cloudflare Pages auto-deploys
-- No build system — all files deployed directly
+- Deployment: push to `main` → Cloudflare Pages auto-deploys. No build system.
 - Nav structure: Home · Wardrobes · Kitchens · Beds · More ▾ · Portfolio · Contact · Tools ▾
-- Brand colours: --clr-accent #A0784A (timber gold), --clr-bg #F7F4EF (parchment), --clr-dark #1C1A17
-- Fonts: Playfair Display (headings) + DM Sans (body)
-- Instagram token: set as IG_TOKEN in Cloudflare Pages dashboard (expires every 60 days — refresh required)
-- Contact form: POSTs to /api/lead (Worker saves to KV, sends push to admin)
-- Analytics: GA4 (G-ZP77WR6BNH) + Cloudflare Web Analytics (automatic)
+- Instagram token: `IG_TOKEN` in Cloudflare Pages dashboard (expires every 60 days — refresh required).
+- Contact form: POSTs to `/api/lead` (Worker saves to KV, sends push to admin).
+- Analytics: GA4 (G-ZP77WR6BNH) + Cloudflare Web Analytics (automatic).
 
-### Jerksoul Restaurant — Scope Clarification (2026-05-10)
-The rooftop structure (pergola/polycarbonate roof) visible in Jerksoul photos and videos **belongs to the venue — it was not built by Neewoody**. Neewoody's actual scope was:
-- Custom pine dining tables with branded Issacher glass tops (15+ sets)
-- Upholstered cube stools paired to the dining sets and bar counter
-- Large interior bar counter with reclaimed-style timber panel cladding and solid wood top
+## Reusable Project Modal (`pm-*`)
 
-All site copy, case study text, and portfolio cards have been corrected to reflect this. Do not re-introduce pergola attribution to Neewoody in any future content.
+A self-contained "project modal" component to showcase small/medium projects **without a dedicated case-study page** (full `projects/*.html` pages remain for large commissions like Sage, Nadia, Achimota). The batch-by-batch log of cards built lives in `HISTORY.md`; the mechanism is:
 
-### Project History (Key Commissions)
-- **Nadia Dome (2025):** Full home commission — **five pieces** to one brief: (1) wave-carved Guarea chest of drawers with continuous wave pattern across all drawer fronts, integrated recessed pulls, walnut-toned finish — hero piece, one of the most distinctive in the portfolio; (2) compact kitchenette in russet laminate with dark stone-effect countertop, undermount black sink, pull-out mixer tap, matte black bar handles; (3) **fitted laundry room in light beech-effect laminate** — tall storage columns, overhead cabinets, beige stone-effect counter with undermount sink and open shelving, recessed washing-machine bay (confirmed Neewoody's work, 2026-06-23); (4) three solid wood bar stools with dark velvet upholstered seats and X-cross stretcher base; (5) full-height two-door fitted wardrobe in dark laminate with three drawers below. Kitchen island and main kitchen cabinetry visible in some photos are pre-existing — not Neewoody's work, never claim them. Kitchenette videos: TAbjiBb5Bt0, 4EWuw0lJXQw, MzB3WHXUt9w, _wg_vHSfF-U. Wave chest video: KOX5r2eqUVE. Images in `images/projects/nadia-dome/`. Case study: `projects/nadia-dome.html`. **Image filenames corrected 2026-06-23:** the folder's photos were scrambled (the `nadia-wave-chest-*` files held kitchenette shots; the real wave chest was misnamed `nadia-kitchenette-11/12`; `nadia-kitchenette-3/4/5` were laundry shots). Files were reorganised to truthful names — canonical set: `nadia-wave-chest-1/2` (chest), `nadia-kitchenette-1/2/3` (russet kitchenette), `nadia-laundry-1/2` (laundry room), `nadia-bar-stools`, `nadia-wardrobe-front/angled`. This also auto-corrected downstream refs on `portfolio.html` (Full Home Commission card → now the chest), `solid-wood.html` (Guarea card → chest), `kitchens.html` (kitchenette example), and `catalogue.html`.
-- **Golf Hills Estate (2021):** Stained pine X-frame dining table, matching bench, built-in L-shaped leatherette banquette with under-seat storage, and a timber-framed wall mirror above the banquette. All four pieces built and installed as one kitchen dining zone. Kitchen cabinetry visible in the background of photos is pre-existing and was not part of this commission — never claim it as Neewoody work. Images in `images/projects/golf-hills-estate/`. Case study: `projects/golf-hills-estate.html`. **Note (2026-06-23):** the `golf-hills-before-1/2/3` files are NOT empty-room "before" shots — they show the freshly built, unstained X-frame table/bench outdoors at the workshop. The case-study section was relabelled from "The Space Before / Starting Point" to "In the Workshop / Freshly Built, Before Staining" to match.
-- **Ridge Residence (2021):** Afromosia live-edge dining table with solid timber U-frame legs. Commissioned by French expatriates on posting in Ghana. Private residential client — not a French Embassy commission. Images in `images/projects/french-embassy/`. Case study: `projects/french-embassy.html`. **Added 2026-06-23:** 3 more shots of the same table (`afromosia-table-installed-4/5/6`) sourced from the photo dump's `Hardwood Tables and Benches/Marrine Cantonments` folder (owner confirmed same piece) and added to the solid-wood `pm-afromosia-table` modal.
-- **Judith East Legon (2022):** Full Hyedua dining room commission — large-format dining table, 6 upholstered chairs with linen fabric panels, console unit with full-extension drawers and waterfall edge sides. All three pieces built to one unified brief in the same timber, finished in a rich espresso. Images in `images/projects/judith-east-legon/`. Case study: `projects/judith-east-legon.html`. **Added 2026-06-23:** 3 more shots of the same set (`judith-set-installed-3`, `judith-chairs-detail`, `judith-table-dusk`) sourced from the photo dump's `Odorkor` folder (owner confirmed same pieces — the Odorkor shoot includes the same yellow-wall/shag-rug room) and added to the solid-wood `pm-hyedua-set` modal.
-- **Jerksoul Restaurant (2022):** Bar counter and dining furniture for a rooftop restaurant in Accra. Neewoody scope was dining tables, cube stools, and bar counter only. The rooftop structure/pergola belongs to the venue — never claim it as Neewoody work.
-- **Sage Centre (2022–2024):** 26-month full-property teak fitout for a US-based educational NGO in Wli, Volta Region. Case study: `projects/sage-centre.html`.
-- **House of Walker:** Branded structural carpentry installation for Johnnie Walker's 200-year celebration at One Airport Square, Accra. Case study: `projects/house-of-walker.html`.
-- **Spintex / New York Vanities (2026):** Five solid Khaya (African mahogany) carved-door bathroom vanities for a unit in a Spintex estate development — a direct commission from a New York–based buyer, installation supervised on-site by the estate's developer. Scope: one larger master vanity, three smaller carved-door vanities, one simpler shelf vanity for the powder room. Every door carved in solid Khaya. Images in `images/projects/spintex-newyork-vanities/` (WebP + JPG fallback pairs; hero `spintex-newyork-vanity-double-sink-hero`). No standalone case study page — featured as a "species as hero" section in `solid-wood.html` (anchor `#khaya-spintex`) and a portfolio card in `portfolio.html` linking to that anchor. **Homepage deliberately not updated in this pass** (scope decision). Final approved copy is now live on the page (added in a follow-up commit). This is the **first use of `<picture>`/WebP markup on the site** — all other pages still serve plain `.jpg` via `<img>`.
-- **Achimota Guesthouse — Room Conversion (2026):** Full single-room upgrade to Airbnb standard for a guesthouse owner in Achimota. Scope spanned multiple categories in one commission: queen bed + nightstand, wardrobe, dresser, desk, wall paneling, wall molding, TV unit, glass display cabinets, and wainscotting in the adjoining hallway. **Has its own case study page: `projects/achimota-guesthouse.html`** (built from the `nadia-dome.html` template — hero, stats, 4 piece sections [Bed & Nightstand · Wardrobe/Vanity/Glass Cabinets · TV Unit & Marble Wall · Wall Paneling & Wainscotting], 12-image gallery + lightbox, CTA). Listed in `sitemap.xml`. **Placement (revised 2026-06-23 — replaced the earlier inline portfolio dump):** `portfolio.html` shows a normal case-study card (in the `.pf-feat-card` featured grid) linking to the case study page — the full inline `.ag-project` section was removed. Category pages keep single representative cards linking to the case study page: `beds.html` (`achimota-bed-wardrobe-wide`), `wardrobes.html` (`achimota-wardrobe-vanity-wide`, an `<a class="wd-card">` whose image wrapper is `.no-lb` so the lightbox JS `.wd-card-img:not(.no-lb)` skips it), and `tv-units.html` (expanded TV + paneling feature section, anchor `#achimota`, 5 images, "See the full project" → case study). **Wall paneling/molding has no dedicated category page — by explicit direction it is grouped with TV Units.** Images in `images/projects/achimota-guesthouse/` (WebP + JPG `<picture>` pairs, all in this folder, referenced cross-page by path). Original 8 from the first pass + 4 added 2026-06-23 selected from the shoot extras via contact-sheet review: `achimota-hero-wide` (hero), `achimota-bed-nightstand`, `achimota-glass-cabinet-marble`, `achimota-glass-cabinet-angle`. Copy on the case study page is descriptive/factual from the photos (can be refined). Homepage not updated.
-- **Portfolio featured-grid hierarchy (2026-06-23):** `portfolio.html` `.pf-featured` now has a size tier — Sage Centre is a full-width hero card (`.pf-feat-card.hero`, 600px, `grid-column:1/-1`); the other case studies (House of Walker, Nadia Dome, Jerksoul, Achimota) are medium 2-col cards (480px); basic projects remain the small `.pf-card` work grid below.
-
-### Wardrobe Projects Catalogued
-
-**Agbogba (2022)** — Oak-effect laminate, silver handles. Two pieces, same bedroom: (1) Built-in between two windows — overhead cabinet, hanging rail, shelving tower, drawers; (2) Freestanding full-width with integrated dresser recess, overhead cabinets, recessed spotlights. Best images: `agbogba-dresser-lit.jpg` (hero), `agbogba-builtin-interior.jpg`.
-
-**Dansoman (2024)** — Cherry/mahogany-effect laminate. Freestanding sliding door wardrobe. 2 sliding doors on aluminium track, open top shelf, overhead 2-door cabinet, internal hanging rail and 3 drawers. Best image: `dansoman-closed-1.jpg` (hero).
-
-**Adenta (2024)** — Light ash/white oak laminate. Alcove sliding door wardrobe. No handles (push-to-open). Left: shelf + hanging. Right: 5 shelves + 3 drawers. Best photographed wardrobe in the catalogue. Best images: `adenta-interior-left.jpg`, `adenta-interior-right.jpg`.
-
-**Oyarifa (2025)** — Greige oak-effect laminate, matte black handles. Two floor-to-ceiling built-in wardrobes, same property: (1) Master — wall-to-wall, 4 doors, overhead cabinets, 2 central base drawers, recessed downlight, marble floor; (2) Guest — narrow alcove, overhead cabinet, 6-shelf tower left, hanging + 2 drawers right. Best images: `oyarifa-master-closed-1.jpg` (hero), `oyarifa-guest-interior.jpg`.
-
-**Zoe, Cantonments (2026)** — Dark walnut-effect laminate, matte black handles. Freestanding wardrobe. 2-panel sliding doors above, integrated 4-drawer chest at base (2+2 configuration). Cantonments — premium target market location. Best images: `zoe-front-closed.jpg` (hero), `zoe-angled.jpg`.
-
-**Seyram, Nmai Dzorn** — White melamine. Open wardrobe system. 4 units installed facing each other in pairs — dedicated walk-in dressing room. Multiple shelf configs, base drawers, integrated full-length mirror. Only 1 installed photo exists. Category: Open/Walk-in Systems. Best image: `seyram-installed.jpg`.
-
-**Dobro, Nsawam Road (Dec 2025)** — Cherry-effect laminate, matte black handles. 4 wardrobes across one new-build house: master (wide, 6 drawers 3+3), kids room (narrow, 3 drawers), 2 guest bedrooms (narrow, 3 drawers each). Built-in drawer organisers with compartments in some units. Scope was wardrobes only — no other furniture. Best images: `dobro-wide-closed.jpg` (hero), `dobro-wide-interior.jpg`, `dobro-drawers-open.jpg`, `dobro-interior-cubbies.jpg`.
-
-**Nadia standalone wardrobe, Dome (2025)** — Dark rustic/distressed walnut-effect laminate, matte black handles. Single wardrobe, 2 hinged doors, 3 drawers. Part of Nadia full home commission (see `nadia-dome.html`). Distinct from the dark walnut on Zoe — this is a distressed/rustic grain, darker overall. Best images: `nadia-wardrobe-front.jpg`, `nadia-wardrobe-angled.jpg`.
-
-### _inbox Workflow
-Raw images can be dropped in `_inbox/` with a description. Claude Code will rename, sort into `images/projects/{slug}/`, and commit. See `_inbox/README.md` for full instructions. After sorting, originals remain in `_inbox/` for manual deletion — the 9 currently unsorted files (as of 2026-05-10) are `123508`, `123515`, `123520`, `123528`, `162004`, `171115`, `190624`, `190625`, `194810`.
-
-## Reusable Project Modal (`pm-*`) — added 2026-06-23
-
-A self-contained "project modal" component to showcase small/medium projects **without creating a dedicated case study page** per entry. This is the preferred pattern for projects whose scope doesn't warrant a full `projects/*.html` page (full case-study pages remain for large commissions like Sage, Nadia, Achimota).
-
-**How it works:**
-- A card/element with `data-pm="<template-id>"` (any element — `button.pf-card`, a `kt-feat-img`, a gallery `figure`, an `<a>`) opens a modal populated from a matching hidden `<template>`.
+- A trigger element with `data-pm="<template-id>"` (any element) opens a modal populated from a matching hidden `<template>`.
 - The `<template>` carries `data-eyebrow`, `data-title`, `data-meta`, the write-up as `<p>` children, and an image list as `<figure data-webp data-jpg data-alt>` inside a hidden `.pm-srcs` div.
-- JS builds the modal: text column (eyebrow/title/meta/paragraphs) + media column (main image + thumbnail strip). Clicking a thumb swaps the main image; clicking the main image opens a full-screen **zoom** layer. Close via ×, backdrop click, or Esc (Esc closes zoom first, then modal).
-- Component pieces (CSS `.pm-*`, the `#pm-overlay`/`#pm-zoom` markup, the `<template>`, and the IIFE script) are **injected per page** (static site has no shared includes). The injector lives at `C:/Users/Neewoody/.img-tmp/inject_modal.py`. To add the component to a new page: insert the `<style>` before `</head>` and the markup+template+`<script>` before `</body>`; it's idempotent (skips if `pm-overlay` present).
-- **To add a new modal project:** drop a new `<template id="pm-yourslug" ...>` on each page that should surface it, and add a trigger element with `data-pm="pm-yourslug"`. No new page needed.
-- First use: **Prampram Kitchen** (`pm-prampram`), live on `portfolio.html` (work-grid card), `kitchens.html` (featured section), and `tv-units.html` (TV-unit section). Same template duplicated on all three (static-site reality).
-- Also on **`solid-wood.html`** (2026-06-23): the page now leads with the Khaya/Spintex **spread** (kept — owner likes the layout), and the species cards were **moved below it, reframed to lead with the piece built** (not the wood species — "Live-Edge Dining Table", "Six-Seat Dining Set", "Wave-Carved Chest of Drawers", with the species as a sublabel) and converted to **`pm-trigger` modal cards** (`pm-afromosia-table`, `pm-hyedua-set`, `pm-guarea-chest`). Each modal pulls images from the existing project folders and includes a "See the full case study →" link. Reusable injector for solid-wood: `C:/Users/Neewoody/.img-tmp/inject_solidwood.py` (imports the component from `inject_modal.py`, which now guards its run-loop under `if __name__=="__main__"`).
-- **New cards from the photo dump (2026-06-23):** three new `pm-*` modal cards built from `_inbox/photo dump` categories — **Pergolas** (`pm-pergolas`, on `portfolio.html` work grid; `images/projects/pergolas/`), **Hardwood Tables & Benches** (`pm-hardwood-tables`) and **Barbecue Trolley** (`pm-bbq-trolley`) both on `solid-wood.html` (now a 5-card grid; `images/projects/hardwood-tables/`, `images/projects/barbecue-trolley/`). These are **category/showcase modals** (not single named commissions). **Second batch (2026-06-23):** **Shoe Racks** (`pm-shoe-racks`), **Arbors, Trellises & Fencing** (`pm-arbors`), **Picnic Tables & Benches** (`pm-picnic-tables`) added to `portfolio.html` work grid; **Feature-Wall TV Units & Media Stands** (`pm-tv-stands`) added as a `tv-project` section on `tv-units.html`. Image folders: `images/projects/{tv-stands,shoe-racks,arbors,picnic-tables}/`. **Third batch (2026-06-23):** six more `pm-*` cards on `portfolio.html` work grid — **Console &amp; Entryway Tables** (`pm-entryway`), **Night Stands &amp; Bedside Tables** (`pm-nightstands`), **Office Desks** (`pm-desks`), **Side &amp; Armrest Tables** (`pm-armrest`), **Custom Beds** (`pm-beds`), **Custom Wardrobes** (`pm-wardrobes`). Folders: `images/projects/{entryway-tables,night-stands,office-desks,armrest-tables,custom-beds,custom-wardrobes}/`. **Beds/Wardrobes use deliberately generic captions** (no client/location names) and are framed as range showcases, so there's no misattribution against the named bed/wardrobe projects on `beds.html`/`wardrobes.html`. Portfolio work grid now carries 11 `pm-*` modal cards. **Fourth batch (2026-06-23) — from `gphotos 1` standouts:** **Retail &amp; Commercial Fit-out** (`pm-commercial`), **Reception &amp; Glass-Top Desks** (`pm-reception`), **Outdoor Lounge &amp; Patio** (`pm-outdoor-lounge`). Folders: `images/projects/{commercial-fitout,reception-desks,outdoor-lounge}/`. Portfolio now carries **14** `pm-*` modal cards. Still available in `gphotos 1` but not carded: an octagonal/hexagonal wall-mounted feature table and glass-top sideboards (niche one-offs). The commercial fit-out is the strongest unused material — could be promoted to a featured card or full case study if client/location context is provided. Also: the new afromosia (`afromosia-table-installed-4/5/6`) and Hyedua (`judith-set-installed-3`, `judith-chairs-detail`, `judith-table-dusk`) shots were added to the `french-embassy.html` and `judith-east-legon.html` case-study galleries too.
+- JS builds a two-column modal: text (eyebrow/title/meta/paragraphs) + media (main image + thumbnail strip). Thumbs swap the main image; clicking the main image opens a full-screen **zoom**. Close via ×, backdrop, or Esc (Esc closes zoom first, then modal).
+- Component pieces (CSS `.pm-*`, `#pm-overlay`/`#pm-zoom` markup, the `<template>`, the IIFE script) are **injected per page** (static site, no shared includes). Injector: `C:/Users/Neewoody/.img-tmp/inject_modal.py` (idempotent — skips if `pm-overlay` present); solid-wood variant `inject_solidwood.py`.
+- **To add a new modal project:** drop a `<template id="pm-yourslug" …>` on each page that should surface it + a `data-pm="pm-yourslug"` trigger. No new page needed. `portfolio.html` currently carries 14 `pm-*` cards; also used on `kitchens.html`, `tv-units.html`, `solid-wood.html`.
 
 ## Image Format Policy
 
-- New projects (new photos, not yet used anywhere else on the site): 
-  convert to WebP with JPG fallback using <picture> markup, per the 
-  pattern established in images/projects/spintex-newyork-vanities/ 
-  (commit d12c6c5). Hero images target 200-300KB, supporting/detail 
-  images target 80-150KB.
+- **New projects** (new photos, not yet used anywhere on the site): convert to WebP with JPG fallback using `<picture>` markup, per the pattern in `images/projects/spintex-newyork-vanities/` (commit d12c6c5). Hero images target 200–300KB, supporting/detail 80–150KB.
+- **Existing/legacy images already in use** (plain `.jpg`, no `<picture>`): leave as-is by default. Do NOT convert as a side effect of an unrelated task.
+- **Migrating a legacy image** to WebP/`<picture>` is a deliberate, scoped task only — and only after identifying every page that references it (many project photos are reused across pages). Update all referencing pages in the same pass so no image exists inconsistently in both formats.
+- No site-wide bulk conversion sweep without an explicit, separate instruction scoped to that alone.
 
-- Existing/legacy images already in use on the site (plain .jpg, no 
-  <picture> wrapper): leave as-is by default. Do NOT convert as a side 
-  effect of an unrelated task.
+## _inbox Workflow
+Raw images can be dropped in `_inbox/` with a description. Claude Code renames, sorts into `images/projects/{slug}/`, and commits. See `_inbox/README.md`. Originals remain in `_inbox/` after sorting for manual deletion. (There is a standing backlog of unsorted portfolio photos in `_inbox/` awaiting a cataloguing session.)
 
-- Migrating a legacy image to WebP/<picture> is only done as a deliberate, 
-  scoped task — and only after first identifying every page that 
-  references that image (many project photos are reused across multiple 
-  pages, e.g. homepage service cards pull from individual project 
-  folders). If migrating, update all referencing pages in the same pass 
-  so no image exists inconsistently in both formats across the site.
+## Carpentry Concierge — Phase 1 (built + **deployed live** 2026-07-14)
 
-- No site-wide bulk conversion sweep without an explicit, separate 
-  instruction scoped to that task alone.
+Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools. **Full build spec: `CONCIERGE_SPEC.md`** (its decisions are final — do not substitute more common patterns without owner sign-off).
 
-### Kitchen Projects Catalogued (2026-05-11)
+**Status: LIVE.** Worker deployed at `concierge-api.neewoodygh.workers.dev`; D1 `concierge` created + migrated; `SESSION_SECRET` set; first admin (Nuer, phone `233244633464`, role admin, approved) created. `wrangler.toml` `database_id` is set and committed (`b46b99f`). Frontend pages live on Pages. Verified end-to-end in production (health, login, 401/429). *(Bootstrap gotcha that cost an hour — an argv off-by-one in the PIN-hash generator — is written up in `HISTORY.md` so it isn't repeated.)*
 
-**Spintex — Regimanuel Gray Estate (2024)** — L-shaped kitchen, dark espresso laminate, Calacatta marble-effect countertop with gold veining, black aluminium-framed frosted glass upper cabinets, undermount black sink, integrated hob, matte black handles. Private residential. Best images: `spintex-kitchen-hero.jpg` (hero), `spintex-kitchen-wide.jpg`. Before: `spintex-kitchen-during.jpg`. Images in `images/projects/spintex-kitchen/`.
-
-**Dansoman Kitchen (2024)** — Large kitchen, cherry/teak-effect laminate, white engineered quartz countertops, freestanding island with open shelving end and seating overhang, integrated 6-burner range, undermount sink. Professionally photographed with Neewoody watermark. Best images: `dansoman-kitchen-layout.jpg` (hero), `dansoman-kitchen-island.jpg`. Images in `images/projects/dansoman-kitchen/`.
-
-**Tantra Hill Kitchen (Uncle Jo)** — Cream high-gloss laminate, warm beige speckled granite countertops, central island, integrated Beko fridge-freezer tower, washing machine under counter. Night photography only — weaker image quality. Portfolio grid only, not featured content. Best: `tantra-kitchen-overview.jpg`. Images in `images/projects/tantra-kitchen/`.
-
-**Danfa Kitchen (2025)** — Mediterranean-inspired, client brief. Warm beech-effect laminate, exposed sealed concrete countertops, Belfast farmhouse sink, brass handles, open-grid upper storage cabinet. No finished photos — construction/installation context only. Portfolio grid only, not featured. Best: `danfa-kitchen-layout.jpg`. Images in `images/projects/danfa-kitchen/`.
-
-**Kokrobite Kitchen (2021)** — Burgundy/wine red high-gloss laminate, black galaxy granite countertops, island with 4 drawers, integrated fridge housing, glazed upper cabinets. Bold colour — portfolio grid only, not featured. Best: `kokrobite-kitchen-hero.jpg`. 2 images. Images in `images/projects/kokrobite-kitchen/`.
-
-**Kukurantumi Kitchen (Eastern Region)** — Dark charcoal concrete-effect laminate, blue-grey veined granite countertops, integrated LG fridge tower, gas hob, matte black sink fittings. Notable: client in Kukurantumi, Eastern Region — 2+ hours from Accra, demonstrates geographic reach. Portfolio grid only, not featured. Best: `kukurantumi-kitchen-hero.jpg`. Images in `images/projects/kukurantumi-kitchen/`.
-
-**Prampram Kitchen + TV Unit (2026)** — Open-plan U-shaped kitchen in warm walnut-grain laminate, grey marble-effect counters with a waterfall peninsula, integrated oven/hob/recessed microwave, under-cabinet lighting; plus a simple floating walnut TV console with wall-mounted open shelf. Commissioned by an estate developer for a newly built spec house in a **Prampram** estate being prepared for sale (kept generic — no estate/developer name by direction). Scope was kitchen + TV unit only. **First use of the reusable Project Modal** (`pm-prampram`) — no dedicated page; surfaced as a card on `portfolio.html` (work grid), a featured section on `kitchens.html`, and a TV-unit section on `tv-units.html`, all opening the modal. Images in `images/projects/prampram-kitchen/` (6, WebP+JPG): `prampram-kitchen-hero` (lead), `-corner`, `-cabinets`, `prampram-tv-unit`, `-tv-unit-shelf`, `-tv-unit-angle`. Selected via contact-sheet review from a 56-photo + 7-video shoot; remaining raw assets stay in `_inbox/Prampram Kitchen/`.
-
-### Homepage & Service Page Updates (2026-05-11)
-- `index.html` hero updated to `images/projects/oyarifa/oyarifa-master-closed-1.jpg`
-- Service cards updated: Wardrobes → `oyarifa-master-closed-1.jpg`, Kitchens → `spintex-kitchen-hero.jpg`, Dining → `judith-set-installed-2.jpg`, Solid Wood → `afromosia-table-installed-1.jpg`. Beds and Shelving still have no real photos.
-- `index.html` "Recent Projects" section replaced with 3 real cards: Oyarifa wardrobes, Spintex kitchen, Judith dining.
-- `wardrobes.html` intro split, hinged type card, and alcove type card all updated with real project photos. Recent project image path corrected to `nadia-wardrobe-front.jpg`.
-- `kitchens.html` intro split and type cards updated; 3 placeholder type cards removed; 2 featured project split sections added (Spintex, Dansoman); compact grid section added (Danfa, Kukurantumi).
-- 6 kitchen project cards added to `portfolio.html`.
-
-### Site Content Cleanup (2026-05-11)
-- **portfolio.html:** 12 generic placeholder project cards removed (project-wardrobe-1 through -4, project-kitchen-1 through -3, project-bed-1 through -2, project-shelving-1 through -2, project-other-1). The 12 real named project cards (Sage Centre, House of Walker, Nadia Dome, Jerksoul, Golf Hills Estate, Afromosia Ridge, Judith East Legon, Oyarifa, Zoe Cantonments, Agbogba, Dobro, Seyram) are preserved intact.
-- **dining-living.html:** The "What We Build" product type cards section removed (4 cards: dining-table.jpg, display-unit.jpg, sideboard.jpg, console-table.jpg — all placeholder images). The intro split, featured projects grid, and timber species section are preserved.
-- **solid-wood.html:** The "Solid Wood Pieces We Make" product type cards section removed (4 cards: solid-wood-table.jpg, solid-wood-bed.jpg, solid-wood-bench.jpg, solid-wood-bespoke.jpg — all placeholder images). The intro split and species showcase cards are preserved.
-- **index.html:** Jerksoul case study card layout bug fixed — card was outside the display:grid container. Now all 3 featured case study cards (Sage Centre, House of Walker, Jerksoul) sit inside the same 3-column grid.
-- **projects/house-of-walker.html:** Two broken links to `../sage-centre.html` corrected to `sage-centre.html`. All 9 IMAGE upload instruction comments removed (all images were already uploaded: how-hero.jpg, how-brief.jpg, how-build.jpg, how-during-1.jpg, how-finished-1.jpg, how-during-2.jpg, how-finished-2.jpg, gallery upload guide, how-context.jpg).
-- **projects/sage-centre.html:** Upload instruction comments removed for sage-hero.jpg, sage-brief.jpg, sage-story.jpg, and gallery guide — all images confirmed uploaded.
-
-### Full-Site Redesign (2026-05-20)
-
-A full visual and structural redesign is in progress. Design brief and execution plan are in `REDESIGN-BRIEF.md`. Per-page instruction sets are filed as `REDESIGN-[PAGE].md`.
-
-**New design system (replaces the old --clr-accent / DM Sans tokens):**
-- `--green: #0b1f0e` (deep forest green — primary dark)
-- `--gold: #c8922a` (warm gold — accent only)
-- `--cream: #f0e8d0` (main background)
-- `--cream-dark: #e8dfc4` (secondary background)
-- `--ink: #1c1c1a` (body text)
-- `--muted: #6b6557` (secondary text)
-- Fonts: Playfair Display (headings) + Lora (body) + Jost (UI/labels)
-
-**Redesigned pages (index.html is the reference implementation):**
-- `index.html` — complete. New CSS is fully inline; no `css/styles.css` dependency on this page. Nav colour toggle via IntersectionObserver. Hero: 3-slide Ken Burns crossfade (pure CSS, 26.4s cycle). WhatsApp float is inlined. Removed: "Why Neewoody" feature cards, stats row, badge pills, "How It Works" steps, SEO paragraph dump, 4-column footer.
-
-**Pages still using old design (css/styles.css):** All other pages — will be migrated per the execution plan in REDESIGN-BRIEF.md.
-
-**Do not add css/styles.css back to index.html.** The new design is self-contained per page.
-
-### Homepage Service Cards + Testimonial Regroup (2026-06-23)
-Two homepage directives from an earlier instruction were reported done but had **never actually been committed** (no commit existed in history; live == origin/main == local all confirmed missing the work). Re-implemented and verified live:
-- **Service cards** now carry real photos via `.svc-img` (added to `.svc-card`): Wardrobes → `oyarifa-master-closed-1.jpg`, Kitchens → `spintex-kitchen-hero.jpg`, Beds → `sage-bed-overview.jpg`, Dining & Living → `judith-set-installed-2.jpg`, Solid Wood → `afromosia-table-installed-1.jpg`, all `loading="lazy"`. The **Commercial card (06) is intentionally left image-free** (different sell).
-- **Testimonial section** changed from a single full-width Ben Schwartz quote to a **3-card row** (`.t-grid` / `.t-card`): Ben Schwartz, Ngminvielu Kuuire, mcdennis appau — each 5-star, with a multicolour Google "G" SVG + "Google review · [date]" badge (`.t-badge`). Stacks to 1 column ≤768px. (No pre-existing badge component existed to reuse, despite the original instruction implying one — built fresh.)
-- **Still outstanding (NOT in this pass):** the original instruction's item 2 (remove Shelving from nav/dropdown, relocate to footer only) was *also* never done — Shelving is still in the desktop "More ▾" dropdown (`index.html`) and mobile nav, and is not in the footer. Flagged to owner; awaiting go-ahead before changing nav.
-
-### Carpentry Concierge — Phase 1 (built 2026-07-14)
-
-Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools. **Full build spec: `CONCIERGE_SPEC.md`** (the spec's decisions are final — do not substitute more common patterns without owner sign-off).
-
-**Deliberately isolated architecture (do not merge into dispatch):**
-- **New separate Worker `concierge-api`, living in-repo at `/concierge-api/`** with its own `wrangler.toml`, deployed via `wrangler deploy`. NOT added to the legacy `neewoody-dispatch-api` (which lives only in the CF dashboard). Blast-radius isolation is intentional.
-- **Cloudflare D1** database `concierge` (NOT KV). Schema via migrations: `/concierge-api/migrations/0001_initial.sql` — tables `members` (phone PK), `payments`, `login_attempts`. Specialties are a fixed vocabulary: `furniture, site_construction, upholstery, glass_aluminium, finishing_spray, cnc_machining, other`.
+**Deliberately isolated architecture (do not merge into dispatch — see Standing Instruction 5):**
+- **Separate Worker `concierge-api`, in-repo at `/concierge-api/`** with its own `wrangler.toml`, deployed via `wrangler deploy`. NOT added to `neewoody-dispatch-api`.
+- **Cloudflare D1** database `concierge` (NOT KV). Migrations: `/concierge-api/migrations/0001_initial.sql` — tables `members` (phone PK), `payments`, `login_attempts`. Specialties are a fixed vocabulary: `furniture, site_construction, upholstery, glass_aluminium, finishing_spray, cnc_machining, other`.
 - **Shared R2** bucket `neewoody-media` under a `concierge/` prefix (no new bucket).
-- Worker code: `/concierge-api/src/index.js` (single file — router, auth, crypto, handlers). Bindings: `DB` (D1), `MEDIA` (R2). Secret: `SESSION_SECRET` (HMAC key, set via `wrangler secret put` — never committed).
+- Worker code: `/concierge-api/src/index.js` (single file — router, auth, crypto, handlers). Bindings: `DB` (D1), `MEDIA` (R2). Secret: `SESSION_SECRET` (HMAC key; never committed).
 
 **Auth: phone + 5-digit PIN (no email, ever, in Phase 1).**
 - Phone normalized to `233XXXXXXXXX` (accepts `0XX…`, `+233…`, `00233…`); phone is the PK. Exposing phone inside the members-only directory is a **feature** (WhatsApp `wa.me/<phone>` deep links — members hire members).
 - PIN hashed with PBKDF2 (Web Crypto, SHA-256, 100k iters, 16-byte salt), stored `base64(salt):base64(hash)`. Never stored/logged in plaintext.
-- Session = stateless token `base64(phone.expiry).base64(HMAC-SHA-256)`, 30-day expiry, stored in `localStorage`, sent as `Authorization: Bearer`. `requireAuth`/`requireAdmin` middleware.
-- Rate limit: 5 failed PINs per phone per 15 min → 429 (tracked in `login_attempts`; lockout blocks even a correct PIN during the window). The login handler self-prunes each phone's attempt rows older than the 15-min window while it queries them, so `login_attempts` never grows unbounded (added 2026-07-14).
-- **Forgotten-PIN reset is admin-only** (a locked-out member WhatsApps the owner, who resets via the admin dashboard). **BUT** an authenticated member CAN change their own PIN via `PUT /api/me` (optional `pin` field, validated 5 digits, re-hashed) — added 2026-07-14 at owner's direction (the spec omitted it; handing out initial PINs over WhatsApp means the owner has seen every founder's PIN, so members need a way to rotate it). The changed PIN applies at next login; the current session's token stays valid (token is HMAC over phone+expiry, independent of the PIN). Directory profile-edit modal has a "New PIN — optional" field. **No public self-serve registration endpoint** — admin enters founders.
+- Session = stateless token `base64(phone.expiry).base64(HMAC-SHA-256)`, 30-day expiry, in `localStorage`, sent as `Authorization: Bearer`. `requireAuth`/`requireAdmin` middleware.
+- Rate limit: 5 failed PINs per phone per 15 min → 429 (tracked in `login_attempts`; lockout blocks even a correct PIN during the window). The login handler self-prunes each phone's attempt rows older than the window, so `login_attempts` never grows unbounded.
+- **Forgotten-PIN reset is admin-only** (locked-out member WhatsApps the owner, who resets via the admin dashboard or directly in D1). **BUT** an authenticated member CAN change their own PIN via `PUT /api/me` (optional `pin` field, validated 5 digits, re-hashed). The changed PIN applies at next login; the current session's token stays valid (token is HMAC over phone+expiry, independent of the PIN). Directory profile-edit modal has a "New PIN — optional" field. **No public self-serve registration** — admin enters founders.
 
-**API routes** (all JSON; CORS restricted to `neewoodygh.com`/`www` + localhost; disallowed origins get the canonical origin, never reflected): `POST /api/auth/login`; member `GET/PUT /api/me`, `GET /api/directory` (approved only, incl. phone); admin `GET/POST /api/admin/members`, `PUT /api/admin/members/:phone` (status/role/is_founder/profile/reset-PIN), `POST /api/admin/payments` (upserts on member+period so re-recording corrects), `GET /api/admin/payments?period=YYYY-MM`. Full table in `/concierge-api/README.md`.
+**API routes** (JSON; CORS restricted to `neewoodygh.com`/`www` + localhost; disallowed origins get the canonical origin, never reflected): `POST /api/auth/login`; member `GET/PUT /api/me`, `GET /api/directory` (approved only, incl. phone); admin `GET/POST /api/admin/members`, `PUT /api/admin/members/:phone` (status/role/is_founder/profile/reset-PIN), `POST /api/admin/payments` (upserts on member+period), `GET /api/admin/payments?period=YYYY-MM`. Full table in `/concierge-api/README.md`.
 
-**Frontend** (static, no framework, matches the green/gold/cream editorial system, mobile-first, all `noindex`, deliberately kept out of `sitemap.xml` and site nav):
-- Shared helper `js/concierge.js` (`window.Concierge`: API base = `https://concierge-api.neewoodygh.workers.dev/api`, token storage, `api()` fetch, `requireSession`, phone/WhatsApp helpers, specialty labels).
-- `/concierge/login.html` (phone + PIN → directory), `/concierge/directory.html` (member cards + area/trade filters + WhatsApp + edit-own-profile modal), `/concierge/admin.html` (vanilla JS — add-member, members table with inline status/role/founder/reset-PIN, record + view payments; admin-gated via `/api/me` role check).
+**Frontend** (static, no framework, green/gold/cream system, mobile-first, all `noindex`, out of `sitemap.xml`/nav):
+- Shared helper `js/concierge.js` (`window.Concierge`: API base, token storage, `api()` fetch, `requireSession`, phone/WhatsApp helpers, specialty labels).
+- `/concierge/login.html` (phone + PIN → directory), `/concierge/directory.html` (member cards + area/trade filters + WhatsApp + edit-own-profile modal), `/concierge/admin.html` (vanilla JS — add-member, members table with inline status/role/founder/reset-PIN, record + view payments; admin-gated via `/api/me`).
 
-**Cutlist gating (free to use, login to persist):** `cutlist.html` calculator stays **fully usable logged-out** (top-of-funnel asset — never gate the calculator). Added a "💾 Save" button in the results header calling `saveCutlist()` — a Phase-1 **stub**: no token → prompt to `/concierge/login.html`; has token → "coming soon" (a `saved_cutlists` table + persistence is a later migration).
+**Cutlist gating (free to use, login to persist):** `cutlist.html` calculator stays **fully usable logged-out** (top-of-funnel — never gate the calculator). A "💾 Save" button calls `saveCutlist()` — a Phase-1 **stub**: no token → prompt to `/concierge/login.html`; has token → "coming soon" (a `saved_cutlists` table + persistence is a later migration).
 
-**Deploy runbook & first-admin bootstrap:** `/concierge-api/README.md`. The owner must run (their CF account): `wrangler d1 create concierge` → paste `database_id` into `wrangler.toml` → `wrangler d1 migrations apply concierge --remote` → `wrangler secret put SESSION_SECRET` → `wrangler deploy`, then insert the first admin row directly (PIN-hash one-liner in the README). **Status as of build: all code written and verified end-to-end against a local Miniflare D1 (login, member create, directory, profile edit, payments upsert, PIN reset, rate-limit lockout, CORS, 401/403 all pass); NOT yet deployed to Cloudflare** — awaiting the owner's account steps above. `wrangler.toml` `database_id` is still the placeholder until `d1 create` is run.
+**Deploy runbook & first-admin bootstrap:** `/concierge-api/README.md`.
 
-**Out of scope for Phase 1 (do not build):** email/SMS/OTP, self-service *forgotten*-PIN reset (the unauthenticated "I can't log in" flow — still admin-only; note an *authenticated* member changing their own PIN via `PUT /api/me` IS now in, see above), Paystack/payment APIs, forums/chat/suggestion portal, safety check-in (Phase 2), public self-serve registration, any site framework migration.
+**Out of scope for Phase 1 (do not build):** email/SMS/OTP, self-service *forgotten*-PIN reset (unauthenticated flow — still admin-only; an *authenticated* member changing their own PIN via `PUT /api/me` IS in), Paystack/payment APIs, forums/chat/suggestion portal, safety check-in (Phase 2), public self-serve registration, any site framework migration.
 
-### Known Pending Items (Backlog)
+## Active Pending Decisions
+- **Shelving in nav:** an earlier instruction asked to remove Shelving from the desktop "More ▾" dropdown and mobile nav and relocate it to the footer only. Not yet done — flagged to owner, **awaiting go-ahead before changing nav.**
+
+## Known Pending Items (Backlog)
 1. Estimator — add prominent link from service pages
 2. FAQ schema markup across service pages
 3. Pricing — client-facing quote PDF output
-4. Cutlist — save/load named configurations
+4. Cutlist — save/load named configurations (Concierge Phase 2 — depends on `saved_cutlists` migration)
 5. Android app — Expo project ID fix for push notifications (use a7e03272-e2ca-4621-b63a-19d80b825084)
 6. KV backup — weekly JSON export via Cron Trigger
 7. Pricing — make labour day rates configurable (not hardcoded)
 8. Dispatch — offline support, damage photos, job calendar view
-9. Strategic — client job status page, invoice generator. Carpentry Concierge: Phase 1 built (see above, pending Cloudflare deploy); Phase 2 (safety check-in, saved cutlists, richer features) awaiting a separate spec.
+9. Strategic — client job status page, invoice generator. Carpentry Concierge: Phase 1 built + deployed; Phase 2 (safety check-in, saved cutlists, richer features) awaiting a separate spec.
 10. Bamboo craft integration — explore for premium/sustainable product line
