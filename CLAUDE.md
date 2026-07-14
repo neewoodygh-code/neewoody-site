@@ -171,7 +171,7 @@ Raw images can be dropped in `_inbox/` with a description. Claude Code renames, 
 
 ## Carpentry Concierge — Phase 1 (built + **deployed live** 2026-07-14)
 
-Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools.
+Membership platform for Ghanaian carpenters, run by Neewoody. The intake's purpose is **community** — carpenters collaborating, learning from each other, and getting access to member tools (current and future; the flagship future tool is the Phase 2 safety check-in, whose call-out records double as an investigation starting point if a member is ever harmed on a consultation). Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get the members directory + save-gating on tools as Phase 1.
 
 > **Read `CONCIERGE_CONTEXT.md` AND `CONCIERGE_SPEC.md` before doing anything Concierge-related** (owner's standing instruction). The spec says WHAT to build (its decisions are final — do not substitute more common patterns without owner sign-off); the context doc says WHY and where things stand — it carries binding non-code constraints: the critical path is member acquisition, never code (don't build anything that delays launch); WhatsApp is the community layer (never build chat/forums); Phase 2 waits for 15+ *paying* members; listed trade-offs are deliberate, don't "fix" unasked; announce before any `wrangler --remote`/`deploy`; upgrade triggers are pre-decided.
 

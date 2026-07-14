@@ -5,11 +5,11 @@
 
 Nuer runs Neewoody Custom Woodwork (neewoodygh.com), a bespoke furniture business in Accra. His TikTok (@neewoodygh, ~12.1K followers) has organically become a channel for **Ghanaian carpenters**, not clients — comment sections full of tradespeople venting about shared pain points: clients disputing fair prices, scope disputes, wasted estimate time, comparing handmade work to China Mall imports.
 
-**Carpentry Concierge** is the answer: a paid membership platform for Ghanaian carpenters. Long-term components, in intended build order:
+**Carpentry Concierge** is the answer: a paid membership platform for Ghanaian carpenters. **The purpose of member intake is to build a community — a place where carpenters in Ghana collaborate, learn from each other, and get access to the tools built so far (directory, cutlist, estimator) and every tool built after.** The directory is the first expression of that community, not the whole point. Long-term components, in intended build order:
 
 1. **Members directory** — carpenters find and hire each other (upholsterer in Tema needs a spray finisher for a week, etc.). Carpenters were already improvising this by posting phone numbers in TikTok comments — the demand is observed, not hypothetical. ✅ BUILT (Phase 1).
-2. **Lone-worker safety check-in** (Phase 2) — carpenter logs a call-out (client name, phone, location, expected duration), GPS check-in on arrival, check-out deadline; if overdue, system alerts their emergency contact via SMS + alerts Nuer. Built on the same pattern as the existing Neewoody Dispatch app (GPS depart/arrive/return/close). This is the differentiator — nobody offers this to informal-sector tradespeople in Ghana. **Do not build until ~15+ paid members exist.**
-3. Later: gated tools (cutlist save/load), knowledge sharing, eventually a carpentry academy. The suggestion portal idea from comments = a WhatsApp poll for now, NOT software.
+2. **Lone-worker safety check-in** (Phase 2) — carpenter logs a call-out before going to a consultation (client name, phone, location, expected duration), GPS check-in on arrival, check-out deadline; if overdue, system alerts their emergency contact via SMS + alerts Nuer. Built on the same pattern as the existing Neewoody Dispatch app (GPS depart/arrive/return/close). **The call-out record is the product, not just the alert:** if anything ever happens to a carpenter on a consultation, the record (who they went to see, where, when, expected return) is the starting point for an investigation. Design consequence for Phase 2: call-out records are retained after close (never auto-purged), timestamped, and admin-accessible. This is the differentiator — nobody offers this to informal-sector tradespeople in Ghana. **Do not build until ~15+ paid members exist.**
+3. Later: gated tools (cutlist save/load), structured knowledge sharing, eventually a carpentry academy. (Collaboration and peer learning happen in the WhatsApp community from day one — see below; the academy formalizes it later.) The suggestion portal idea from comments = a WhatsApp poll for now, NOT software.
 
 **The community layer is WhatsApp, deliberately.** Do not build chat, forums, or messaging — Ghanaian tradespeople live on WhatsApp and a custom platform would be a ghost town. The website is the directory + tools; WhatsApp is where members talk.
 
@@ -57,7 +57,7 @@ Nuer runs Neewoody Custom Woodwork (neewoodygh.com), a bespoke furniture busines
 
 ## Phase 2 preview (do not start yet — separate spec will follow)
 
-Safety check-in: `callouts` table (member, client name/phone, location, expected end, status), member-facing create/check-in/check-out flow, **Worker cron trigger** scanning for overdue call-outs every ~15 min, SMS alert to emergency contact + notification to Nuer. Alerting logic behind a provider-swappable interface. Trigger to begin: 15+ paying members.
+Safety check-in: `callouts` table (member, client name/phone, location, expected end, status), member-facing create/check-in/check-out flow, **Worker cron trigger** scanning for overdue call-outs every ~15 min, SMS alert to emergency contact + notification to Nuer. Alerting logic behind a provider-swappable interface. **Records are evidence, not ephemera:** call-outs are retained after close/resolution (no auto-purge), fully timestamped (created / arrived / checked-out / alerted), and admin-queryable — if a member is ever harmed or goes missing on a consultation, the trail is the starting point for an investigation. Trigger to begin: 15+ paying members.
 
 ## The one-line summary
 
