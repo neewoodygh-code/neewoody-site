@@ -171,7 +171,9 @@ Raw images can be dropped in `_inbox/` with a description. Claude Code renames, 
 
 ## Carpentry Concierge — Phase 1 (built + **deployed live** 2026-07-14)
 
-Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools. **Full build spec: `CONCIERGE_SPEC.md`** (its decisions are final — do not substitute more common patterns without owner sign-off).
+Membership platform for Ghanaian carpenters, run by Neewoody. Founding members (~50) register via WhatsApp, pay GHS 50/month by manual Mobile Money (recorded by admin), and get a members directory + save-gating on tools.
+
+> **Read `CONCIERGE_CONTEXT.md` AND `CONCIERGE_SPEC.md` before doing anything Concierge-related** (owner's standing instruction). The spec says WHAT to build (its decisions are final — do not substitute more common patterns without owner sign-off); the context doc says WHY and where things stand — it carries binding non-code constraints: the critical path is member acquisition, never code (don't build anything that delays launch); WhatsApp is the community layer (never build chat/forums); Phase 2 waits for 15+ *paying* members; listed trade-offs are deliberate, don't "fix" unasked; announce before any `wrangler --remote`/`deploy`; upgrade triggers are pre-decided.
 
 **Status: LIVE.** Worker deployed at `concierge-api.neewoodygh.workers.dev`; D1 `concierge` created + migrated; `SESSION_SECRET` set; first admin (Nuer, phone `233244633464`, role admin, approved) created. `wrangler.toml` `database_id` is set and committed (`b46b99f`). Frontend pages live on Pages. Verified end-to-end in production (health, login, 401/429). *(Bootstrap gotcha that cost an hour — an argv off-by-one in the PIN-hash generator — is written up in `HISTORY.md` so it isn't repeated.)*
 
