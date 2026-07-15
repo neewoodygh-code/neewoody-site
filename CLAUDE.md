@@ -38,6 +38,7 @@ python -m http.server 8080
 - **Dispatch** (`dispatch.html`): React 18 SPA loaded via unpkg CDN with Babel standalone for JSX — the internal crew/job management app
 - **Case studies** (`projects/*.html`): project detail pages
 - **Concierge** (`concierge/login.html`, `directory.html`, `admin.html`): member platform frontend — see the Carpentry Concierge section
+- **404 page** (`404.html`): custom not-found page, auto-served by Cloudflare Pages with a real HTTP 404 for unknown URLs (added 2026-07-15 — before this, Pages soft-404'd unknown URLs to `index.html` with a 200). New design system, standard nav/footer, `noindex`, deliberately excluded from `sitemap.xml`. All hrefs/asset paths are **root-absolute** (`/images/…`) because the page is served at any URL depth — keep it that way.
 
 ### Serverless
 - `functions/api/instagram.js` — Cloudflare Worker; fetches latest Instagram media and returns top 6 posts. Cached 15 minutes (`max-age=900`).

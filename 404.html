@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ZP77WR6BNH');
+</script>
+
+<meta charset="UTF-8" />
+<link rel="icon" href="/images/favicon.ico" />
+<link rel="apple-touch-icon" href="/images/logo.png" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Page Not Found — Neewoody Custom Woodwork</title>
+<meta name="description" content="This page doesn't exist. Find your way back to Neewoody Custom Woodwork — bespoke furniture and carpentry in Accra, Ghana." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e;
+  --gold:#c8922a;
+  --cream:#f0e8d0;
+  --cream-dark:#e8dfc4;
+  --ink:#1c1c1a;
+  --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+  --ui:'Jost',sans-serif;
+}
+html{font-size:16px;scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100vh}
+img{display:block;max-width:100%}
+a{text-decoration:none}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;background:rgba(240,232,208,0.95);backdrop-filter:blur(8px);border-bottom:1px solid rgba(11,31,14,0.08);transition:background 0.4s,border-color 0.4s}
+#nav .logo{display:flex;align-items:center;gap:0.65rem;text-decoration:none;flex-shrink:0}
+.logo-img{height:36px;width:auto;display:block}
+.logo-text-wrap{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--ink);letter-spacing:0.03em}
+.logo-sub{display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.22em;text-transform:uppercase;opacity:0.6;margin-top:2px}
+#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
+#nav .nav-links a{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap}
+#nav .nav-links a:hover{color:var(--gold)}
+.nav-more{position:relative}
+.nav-more-trigger{font-family:var(--ui);font-size:0.68rem;font-weight:400;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:0.3rem;transition:color 0.3s;user-select:none;white-space:nowrap}
+.nav-more:hover .nav-more-trigger{color:var(--gold)}
+.nav-dropdown{position:absolute;top:calc(100% + 0.8rem);left:50%;transform:translateX(-50%) translateY(-6px);background:var(--green);border:1px solid rgba(240,232,208,0.08);padding:0.6rem 0;min-width:180px;opacity:0;pointer-events:none;transition:opacity 0.2s,transform 0.2s;z-index:300}
+.nav-more:hover .nav-dropdown{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+.nav-dropdown::before{content:'';position:absolute;bottom:100%;left:0;right:0;height:0.9rem}
+.nav-dropdown a{display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;transition:color 0.2s,background 0.2s}
+.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
+#nav .nav-cta{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--green);background:var(--gold);padding:0.5rem 1.1rem;transition:background 0.2s;white-space:nowrap;flex-shrink:0}
+#nav .nav-cta:hover{background:#b07d20}
+.nav-toggle{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px}
+.nav-toggle span{display:block;width:24px;height:2px;background:var(--ink);transition:background 0.3s}
+.mobile-nav{position:fixed;inset:0;z-index:190;background:var(--green);display:flex;flex-direction:column;justify-content:center;padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.mobile-nav.open{opacity:1;pointer-events:auto}
+.mobile-nav a{font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);font-weight:400;color:rgba(240,232,208,0.75);padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);transition:color 0.2s;display:block}
+.mobile-nav a:hover{color:var(--gold)}
+.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
+.mobile-nav-close{position:absolute;top:1.4rem;right:1.5rem;background:none;border:none;cursor:pointer;font-family:var(--ui);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5)}
+
+/* 404 HERO */
+.nf-hero{flex:1;display:flex;align-items:center;padding:10rem 3rem 6rem}
+.nf-inner{max-width:640px}
+.nf-code{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.32em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;display:block}
+.nf-hero h1{font-family:var(--display);font-size:clamp(2.4rem,6vw,4.2rem);font-weight:400;line-height:1.1;margin-bottom:1.2rem}
+.nf-hero h1 em{font-style:italic;color:var(--gold)}
+.nf-hero p{font-family:var(--body);font-size:1rem;line-height:1.8;color:var(--muted);max-width:48ch;margin-bottom:2.5rem}
+.nf-links{display:flex;flex-direction:column;gap:1rem;align-items:flex-start}
+.link-arrow{font-family:var(--ui);font-size:0.65rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid rgba(200,146,42,0.4);padding-bottom:0.3rem;display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,border-color 0.2s,gap 0.3s}
+.link-arrow:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
+.link-arrow::after{content:'→'}
+.btn-gold{font-family:var(--ui);font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.85rem 1.8rem;background:var(--gold);color:var(--green);display:inline-flex;align-items:center;gap:0.6rem;transition:background 0.25s;margin-bottom:0.8rem}
+.btn-gold:hover{background:#b07d20}
+
+/* FOOTER */
+.redesign-footer{background:var(--green);padding:3.5rem 3rem;display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem}
+.redesign-footer .foot-logo{display:flex;align-items:center;gap:0.6rem;margin-bottom:0.5rem;text-decoration:none}
+.redesign-footer .logo-img{filter:invert(1);height:30px;width:auto}
+.redesign-footer .foot-logo span{font-family:var(--display);font-size:1.05rem;font-weight:500;color:var(--cream);letter-spacing:0.03em}
+.redesign-footer .foot-tagline{font-family:var(--body);font-style:italic;font-size:0.82rem;color:rgba(240,232,208,0.45)}
+.redesign-footer .foot-nav{display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem}
+.redesign-footer .foot-nav a{font-family:var(--ui);font-size:0.65rem;font-weight:300;letter-spacing:0.16em;text-transform:uppercase;color:rgba(240,232,208,0.5);transition:color 0.2s}
+.redesign-footer .foot-nav a:hover{color:var(--gold)}
+.redesign-footer .foot-copy{grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);padding-top:1.5rem;margin-top:0.5rem;font-family:var(--ui);font-size:0.6rem;font-weight:300;letter-spacing:0.1em;color:rgba(240,232,208,0.25)}
+
+@media(max-width:768px){
+  #nav{padding:1.2rem 1.5rem}
+  #nav .nav-links,#nav .nav-cta{display:none}
+  .nav-toggle{display:flex}
+  .nf-hero{padding:8rem 1.5rem 4rem}
+  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
+  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
+  <button class="mobile-nav-close" id="mobile-nav-close">✕ Close</button>
+  <a href="/index.html">Home</a>
+  <a href="/wardrobes.html">Wardrobes</a>
+  <a href="/kitchens.html">Kitchens</a>
+  <a href="/beds.html">Beds</a>
+  <a href="/dining-living.html">Dining &amp; Living</a>
+  <a href="/tv-units.html">TV Units</a>
+  <a href="/shelving.html">Shelving</a>
+  <a href="/solid-wood.html">Solid Wood</a>
+  <a href="/portfolio.html">Portfolio</a>
+  <a href="/contact.html">Contact</a>
+  <a href="/tools.html">Concierge</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20project." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
+    <a href="/contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
+  </div>
+</nav>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="/index.html" class="logo">
+    <img src="/images/logo.png" alt="" class="logo-img" aria-hidden="true">
+    <span class="logo-text-wrap">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/wardrobes.html">Wardrobes</a></li>
+    <li><a href="/kitchens.html">Kitchens</a></li>
+    <li><a href="/beds.html">Beds</a></li>
+    <li class="nav-more">
+      <span class="nav-more-trigger">More ▾</span>
+      <div class="nav-dropdown">
+        <a href="/dining-living.html">Dining &amp; Living</a>
+        <a href="/tv-units.html">TV Units</a>
+        <a href="/shelving.html">Shelving</a>
+        <a href="/solid-wood.html">Solid Wood</a>
+        <a href="/tools.html">Concierge</a>
+      </div>
+    </li>
+    <li><a href="/portfolio.html">Portfolio</a></li>
+    <li><a href="/contact.html">Contact</a></li>
+  </ul>
+  <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20project." class="nav-cta">WhatsApp Us</a>
+  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- 404 HERO -->
+<main class="nf-hero">
+  <div class="nf-inner">
+    <span class="nf-code">404 — Page not found</span>
+    <h1>This one didn't make it<br>off the <em>workbench.</em></h1>
+    <p>The page you're looking for doesn't exist — it may have been moved, renamed, or the link you followed is out of date. No harm done. Here's the way back:</p>
+    <a href="/index.html" class="btn-gold">Back to the homepage →</a>
+    <div class="nf-links">
+      <a href="/portfolio.html" class="link-arrow">See our work</a>
+      <a href="/contact.html" class="link-arrow">Get in touch</a>
+      <a href="/tools.html" class="link-arrow">Carpentry Concierge — free tools &amp; membership</a>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="redesign-footer">
+  <div>
+    <a href="/index.html" class="foot-logo">
+      <img src="/images/logo.png" alt="" class="logo-img" aria-hidden="true">
+      <span>Neewoody</span>
+    </a>
+    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+  </div>
+  <nav class="foot-nav">
+    <a href="/portfolio.html">Work</a>
+    <a href="/wardrobes.html">Services</a>
+    <a href="/contact.html">Contact</a>
+    <a href="/tools.html">Concierge</a>
+    <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
+    <a href="/privacy.html">Privacy Policy</a>
+  </nav>
+  <p class="foot-copy">© 2026 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
+</footer>
+
+<script src="/js/main.js"></script>
+</body>
+</html>
