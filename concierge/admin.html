@@ -111,9 +111,9 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Phone number</label><input id="a_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required></div>
           <div class="field"><label>Name</label><input id="a_name" required></div>
           <div class="field"><label>Business name</label><input id="a_biz" placeholder="Optional"></div>
-          <div class="field"><label>Area</label><input id="a_area" placeholder="e.g. Spintex"></div>
+          <div class="field"><label>Area</label><select id="a_area"></select></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
-          <div class="field"><label>Photo URL</label><input id="a_photo" placeholder="Optional"></div>
+          <div class="field" style="align-self:end"><span style="font-size:.78rem;color:var(--muted)">Photo: upload from the member row after adding.</span></div>
         </div>
         <div style="margin-top:1rem"><label>Specialties</label><div class="spec-grid" id="a_specs"></div></div>
         <div class="form-grid" style="margin-top:1rem">
@@ -196,13 +196,18 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
   function currentPeriod() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
 
-  // specialty checkboxes for the add form
+  // specialty checkboxes for the add form (title = examples, shown on hover)
   var aSpecs = document.getElementById('a_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
+    var ex = C.SPECIALTY_EXAMPLES[k];
+    if (ex) l.title = ex;
     l.innerHTML = '<input type="checkbox" value="' + k + '"> ' + C.escapeHtml(C.specialtyLabel(k));
     aSpecs.appendChild(l);
   });
+
+  // zone dropdown for the add form
+  C.fillZoneSelect(document.getElementById('a_area'), '', '— select area —');
 
   document.getElementById('a_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
   document.getElementById('p_period').value = currentPeriod();
@@ -237,8 +242,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         phone: phone,
         name: document.getElementById('a_name').value.trim(),
         business_name: document.getElementById('a_biz').value.trim(),
-        area: document.getElementById('a_area').value.trim(),
-        photo_url: document.getElementById('a_photo').value.trim(),
+        area: document.getElementById('a_area').value,
         pin: document.getElementById('a_pin').value,
         specialties: specs,
         status: document.getElementById('a_status').value,
@@ -310,9 +314,38 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       if (!/^\d{5}$/.test(np)) { alert('PIN must be exactly 5 digits.'); return; }
       patchMember(m.phone, { pin: np }, pinBtn, 'PIN reset.');
     });
-    actTd.appendChild(founderBtn); actTd.appendChild(pinBtn);
+    var photoBtn = document.createElement('button'); photoBtn.className = 'rowbtn'; photoBtn.style.marginLeft = '.4rem';
+    photoBtn.textContent = m.photo_url ? 'Replace photo' : 'Photo';
+    photoBtn.addEventListener('click', function () { pickPhotoFor(m, photoBtn); });
+    actTd.appendChild(founderBtn); actTd.appendChild(pinBtn); actTd.appendChild(photoBtn);
     return tr;
   }
+
+  // ── member photo upload (compressed client-side, one per member) ──
+  var photoInput = document.createElement('input');
+  photoInput.type = 'file'; photoInput.accept = 'image/*'; photoInput.hidden = true;
+  document.body.appendChild(photoInput);
+  var photoTarget = null;
+
+  function pickPhotoFor(m, btn) {
+    photoTarget = { member: m, btn: btn };
+    photoInput.value = '';
+    photoInput.click();
+  }
+  photoInput.addEventListener('change', async function () {
+    var f = photoInput.files && photoInput.files[0];
+    if (!f || !photoTarget) return;
+    var t = photoTarget; photoTarget = null;
+    t.btn.disabled = true; t.btn.textContent = 'Uploading…';
+    try {
+      var blob = await C.compressImage(f);
+      await C.uploadPhoto('/admin/members/' + encodeURIComponent(t.member.phone) + '/photo', blob);
+      await loadMembers();
+    } catch (err) {
+      alert(err.message || 'Could not upload that photo.');
+      t.btn.disabled = false; t.btn.textContent = 'Photo';
+    }
+  });
 
   function renderMembers() {
     var f = statusFilter.value, q = memSearch.value.trim().toLowerCase();

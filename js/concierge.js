@@ -6,19 +6,89 @@
   'use strict';
 
   // Account subdomain matches the existing dispatch worker's host.
+  // 'nwd-api-override' in localStorage lets a dev session point at a local
+  // `wrangler dev` worker without editing this file.
   var API = 'https://concierge-api.neewoodygh.workers.dev/api';
+  try { API = localStorage.getItem('nwd-api-override') || API; } catch (e) {}
   var TOKEN_KEY = 'nwd-concierge-token';
 
+  // Trade vocabulary (2026-07-15 revision — owner-directed).
+  // 'furniture' was split into cabinet_construction / interior_work /
+  // solid_wood_furniture; glass_aluminium removed; outdoor_structures added.
   var SPECIALTY_LABELS = {
-    furniture: 'Furniture',
-    site_construction: 'Site / Construction',
+    cabinet_construction: 'Cabinet construction',
+    interior_work: 'Interior work',
+    solid_wood_furniture: 'Solid wood furniture',
     upholstery: 'Upholstery',
-    glass_aluminium: 'Glass & Aluminium',
     finishing_spray: 'Finishing / Spray',
+    outdoor_structures: 'Outdoor structures',
+    site_construction: 'Site / Construction',
     cnc_machining: 'CNC / Machining',
     other: 'Other'
   };
   var SPECIALTY_ORDER = Object.keys(SPECIALTY_LABELS);
+
+  // Retired keys — still render on profiles saved before the revision.
+  var LEGACY_SPECIALTY_LABELS = {
+    furniture: 'Furniture',
+    glass_aluminium: 'Glass & Aluminium'
+  };
+
+  // Shown in the trade popovers on the directory and as picker hints.
+  var SPECIALTY_EXAMPLES = {
+    cabinet_construction: 'Kitchens, wardrobes, TV units, office & shop fittings',
+    interior_work: 'Doors & frames, ceilings, wall panelling, partitions, skirting',
+    solid_wood_furniture: 'Dining tables, chairs, beds, coffee tables, consoles',
+    upholstery: 'Sofas, headboards, chair re-covering, cushions',
+    finishing_spray: 'Spray finishing, lacquer, stains, French polish',
+    outdoor_structures: 'Pergolas, gazebos, huts, sheds, decking',
+    site_construction: 'Formwork, shuttering, roofing & trusses, structural carpentry',
+    cnc_machining: 'Carved panels, routed doors, engraving, jigs & templates'
+  };
+
+  // Area vocabulary: Greater Accra zones first, then every other region.
+  var ZONE_GROUPS = [
+    { label: 'Greater Accra', zones: [
+      'Spintex', 'Tema', 'Ashaiman', 'East Legon', 'Madina', 'Adenta',
+      'Ashaley Botwe / Lakeside', 'Achimota', 'Dome / Kwabenya', 'Lapaz / Abeka',
+      'Dansoman', 'Kaneshie', 'Osu / Labadi', 'Teshie / Nungua',
+      'Cantonments / Airport', 'Circle / Adabraka', 'Kasoa', 'Weija / Gbawe',
+      'Amasaman / Pokuase', 'Dodowa / Oyibi', 'Ada / Prampram',
+      'Greater Accra — other'
+    ]},
+    { label: 'Regions', zones: [
+      'Ashanti Region', 'Central Region', 'Eastern Region', 'Western Region',
+      'Western North Region', 'Volta Region', 'Oti Region', 'Bono Region',
+      'Bono East Region', 'Ahafo Region', 'Northern Region', 'Savannah Region',
+      'North East Region', 'Upper East Region', 'Upper West Region'
+    ]}
+  ];
+
+  // Fill a <select> with the zone vocabulary. If currentValue is set but not
+  // in the vocabulary (legacy free-text area), it is kept as an extra option
+  // so an existing profile never silently loses its area.
+  function fillZoneSelect(sel, currentValue, emptyLabel) {
+    sel.innerHTML = '';
+    var empty = document.createElement('option');
+    empty.value = ''; empty.textContent = emptyLabel || '— select area —';
+    sel.appendChild(empty);
+    var known = false;
+    ZONE_GROUPS.forEach(function (g) {
+      var og = document.createElement('optgroup'); og.label = g.label;
+      g.zones.forEach(function (z) {
+        var o = document.createElement('option'); o.value = z; o.textContent = z;
+        if (z === currentValue) known = true;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+    if (currentValue && !known) {
+      var o = document.createElement('option');
+      o.value = currentValue; o.textContent = currentValue + ' (update to a zone)';
+      sel.appendChild(o);
+    }
+    sel.value = currentValue || '';
+  }
 
   function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
   function setToken(t) { try { localStorage.setItem(TOKEN_KEY, t); } catch (e) {} }
@@ -76,7 +146,9 @@
       invalid_phone: 'That phone number is not valid.',
       invalid_specialties: 'Please choose at least one valid specialty.',
       period_must_be_YYYY_MM: 'Period must look like 2026-07.',
-      invalid_amount: 'Amount must be a whole number of Ghana cedis.'
+      invalid_amount: 'Amount must be a whole number of Ghana cedis.',
+      invalid_image: 'That file could not be read as a photo — try a different picture.',
+      photo_too_large: 'That photo is too large even after compression — try a smaller picture.'
     };
     if (code && map[code]) return map[code];
     if (status === 429) return 'Too many attempts. Please wait and try again.';
@@ -122,7 +194,66 @@
     });
   }
 
-  function specialtyLabel(key) { return SPECIALTY_LABELS[key] || key; }
+  function specialtyLabel(key) {
+    return SPECIALTY_LABELS[key] || LEGACY_SPECIALTY_LABELS[key] || key;
+  }
+
+  // ── member photos ──────────────────────────────────────────────────────
+  // Compress on the phone BEFORE upload: a 4MB camera photo becomes a
+  // ~30–60KB 512px square JPEG, so members on mobile data upload almost
+  // nothing and R2 storage stays negligible (50 members ≈ 3MB total).
+  function compressImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        try {
+          var SIZE = 512;
+          var side = Math.min(img.naturalWidth, img.naturalHeight);
+          if (!side) return reject(new Error('invalid_image'));
+          var sx = (img.naturalWidth - side) / 2;
+          var sy = (img.naturalHeight - side) / 2;
+          var canvas = document.createElement('canvas');
+          canvas.width = canvas.height = Math.min(SIZE, side);
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, sx, sy, side, side, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(function (blob) {
+            if (!blob) return reject(new Error('invalid_image'));
+            if (blob.size <= 250 * 1024) return resolve(blob);
+            // very rare (dense noise/pattern) — try harder compression
+            canvas.toBlob(function (blob2) {
+              if (blob2 && blob2.size <= 250 * 1024) resolve(blob2);
+              else reject(new Error('photo_too_large'));
+            }, 'image/jpeg', 0.55);
+          }, 'image/jpeg', 0.82);
+        } catch (e) { reject(new Error('invalid_image')); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('invalid_image')); };
+      img.src = url;
+    });
+  }
+
+  // POST a compressed JPEG blob to a photo endpoint ('/me/photo' or
+  // '/admin/members/<phone>/photo'). Returns parsed JSON like api().
+  async function uploadPhoto(path, blob) {
+    var headers = { 'Content-Type': 'image/jpeg' };
+    var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    var res;
+    try {
+      res = await fetch(API + path, { method: 'POST', headers: headers, body: blob });
+    } catch (e) {
+      throw { status: 0, data: { error: 'network' }, message: 'Network error — check your connection.' };
+    }
+    var data = null;
+    try { data = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      if (res.status === 401) clearToken();
+      throw { status: res.status, data: data || {}, message: errorMessage(res.status, data) };
+    }
+    return data;
+  }
 
   global.Concierge = {
     API: API,
@@ -132,6 +263,10 @@
     normalizePhone: normalizePhone, waLink: waLink, displayPhone: displayPhone,
     escapeHtml: escapeHtml,
     SPECIALTY_LABELS: SPECIALTY_LABELS, SPECIALTY_ORDER: SPECIALTY_ORDER,
-    specialtyLabel: specialtyLabel
+    LEGACY_SPECIALTY_LABELS: LEGACY_SPECIALTY_LABELS,
+    SPECIALTY_EXAMPLES: SPECIALTY_EXAMPLES,
+    ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
+    specialtyLabel: specialtyLabel,
+    compressImage: compressImage, uploadPhoto: uploadPhoto
   };
 })(window);

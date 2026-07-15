@@ -9,10 +9,17 @@
 //  No email, no SMS, no self-service registration/reset (Phase 1).
 // ═══════════════════════════════════════════════════════════════════════
 
+// 2026-07-15 revision: 'furniture' split into cabinet_construction /
+// interior_work / solid_wood_furniture; glass_aluminium retired;
+// outdoor_structures (pergolas, huts, sheds, decking) added. Profiles saved
+// before the revision may still carry retired keys — they render via a
+// legacy label map on the frontend and drop out on the member's next save.
 const SPECIALTIES = [
-  'furniture', 'site_construction', 'upholstery',
-  'glass_aluminium', 'finishing_spray', 'cnc_machining', 'other',
+  'cabinet_construction', 'interior_work', 'solid_wood_furniture',
+  'upholstery', 'finishing_spray', 'outdoor_structures',
+  'site_construction', 'cnc_machining', 'other',
 ];
+const PHOTO_MAX_BYTES = 300 * 1024; // server-side cap; client compresses to ~250KB max
 const TOKEN_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
 const PBKDF2_ITERS   = 100_000;
 const RATE_LIMIT_MAX = 5;                         // failed PINs
@@ -51,9 +58,16 @@ async function route(request, env) {
   if (path === '/api/auth/login' && method === 'POST') return login(request, env);
   if (path === '/api/health' && method === 'GET') return json({ ok: true });
 
+  // Member photos are public GETs (they load in <img> tags, which can't send
+  // Authorization headers). Avatars/logos only — low sensitivity by design.
+  const mMedia = path.match(/^\/api\/media\/members\/(233\d{9})\.jpg$/);
+  if (mMedia && method === 'GET') return servePhoto(env, request, mMedia[1]);
+
   // ---- member ----
   if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => json({ member: sanitize(m) }));
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
+  if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
+  if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
   if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
 
   // ---- member: saved cutlists (free to use, login to persist) ----
@@ -70,6 +84,14 @@ async function route(request, env) {
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
     return withAdmin(request, env, () => adminUpdateMember(request, env, decodeURIComponent(mMember[1])));
+  }
+
+  const mMemberPhoto = path.match(/^\/api\/admin\/members\/([^/]+)\/photo$/);
+  if (mMemberPhoto && method === 'POST') {
+    return withAdmin(request, env, () => adminUploadPhoto(request, env, decodeURIComponent(mMemberPhoto[1])));
+  }
+  if (mMemberPhoto && method === 'DELETE') {
+    return withAdmin(request, env, () => adminDeletePhoto(env, decodeURIComponent(mMemberPhoto[1])));
   }
 
   // ---- admin: payments ----
@@ -368,6 +390,73 @@ async function deleteCutlist(env, member, id) {
   ).bind(id, member.phone).run();
   if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
+}
+
+// ── member photos (R2, concierge/members/ prefix) ──────────────────────
+// One photo per member, keyed by phone; a new upload overwrites the old, so
+// storage is bounded at (member count × ~60KB). The client compresses to a
+// 512px square JPEG before upload; the size cap here is the backstop.
+
+function photoKey(phone) { return `concierge/members/${phone}.jpg`; }
+
+async function uploadPhoto(request, env, phone) {
+  const ct = (request.headers.get('Content-Type') || '').toLowerCase();
+  if (!ct.startsWith('image/jpeg')) return json({ error: 'invalid_image' }, 400);
+  const buf = await request.arrayBuffer();
+  // JPEG magic bytes FF D8 — rejects arbitrary payloads renamed to image/jpeg
+  const head = new Uint8Array(buf.slice(0, 2));
+  if (buf.byteLength < 128 || head[0] !== 0xff || head[1] !== 0xd8) {
+    return json({ error: 'invalid_image' }, 400);
+  }
+  if (buf.byteLength > PHOTO_MAX_BYTES) return json({ error: 'photo_too_large', max_kb: 300 }, 413);
+
+  await env.MEDIA.put(photoKey(phone), buf, { httpMetadata: { contentType: 'image/jpeg' } });
+
+  // Absolute URL on this worker's own origin — a relative /api/… path would
+  // resolve against neewoodygh.com and hit the dispatch worker's route.
+  const url = `${new URL(request.url).origin}/api/media/members/${phone}.jpg?v=${Date.now()}`;
+  await env.DB.prepare('UPDATE members SET photo_url = ? WHERE phone = ?').bind(url, phone).run();
+  const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  return json({ member: sanitize(updated) }, 201);
+}
+
+async function deletePhoto(env, phone) {
+  await env.MEDIA.delete(photoKey(phone));
+  await env.DB.prepare('UPDATE members SET photo_url = NULL WHERE phone = ?').bind(phone).run();
+  const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  return json({ member: sanitize(updated) });
+}
+
+async function adminUploadPhoto(request, env, rawPhone) {
+  const phone = normalizePhone(rawPhone);
+  if (!phone) return json({ error: 'invalid_phone' }, 400);
+  const member = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
+  if (!member) return json({ error: 'member_not_found' }, 404);
+  return uploadPhoto(request, env, phone);
+}
+
+async function adminDeletePhoto(env, rawPhone) {
+  const phone = normalizePhone(rawPhone);
+  if (!phone) return json({ error: 'invalid_phone' }, 400);
+  const member = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
+  if (!member) return json({ error: 'member_not_found' }, 404);
+  return deletePhoto(env, phone);
+}
+
+async function servePhoto(env, request, phone) {
+  const obj = await env.MEDIA.get(photoKey(phone));
+  if (!obj) return json({ error: 'not_found' }, 404);
+  const etag = obj.httpEtag;
+  if (request.headers.get('If-None-Match') === etag) {
+    return new Response(null, { status: 304, headers: { 'ETag': etag } });
+  }
+  return new Response(obj.body, {
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Cache-Control': 'public, max-age=86400',
+      'ETag': etag,
+    },
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════════════

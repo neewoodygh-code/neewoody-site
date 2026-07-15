@@ -83,9 +83,14 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | GET | `/api/me` | member | own record (no pin_hash) |
 | PUT | `/api/me` | member | update name, business_name, area, specialties, photo_url |
 | GET | `/api/directory` | member | approved members incl. phone (for WhatsApp) |
+| POST | `/api/me/photo` | member | raw `image/jpeg` body ≤300KB → R2 `concierge/members/<phone>.jpg`, sets photo_url |
+| DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
+| GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
 | GET | `/api/admin/members` | admin | full list incl. pending |
 | POST | `/api/admin/members` | admin | create member (admin supplies PIN) |
 | PUT | `/api/admin/members/:phone` | admin | status/role/is_founder, profile, reset PIN |
+| POST | `/api/admin/members/:phone/photo` | admin | upload a photo on a member's behalf |
+| DELETE | `/api/admin/members/:phone/photo` | admin | remove a member's photo |
 | POST | `/api/admin/payments` | admin | record MoMo payment (upsert on member+period) |
 | GET | `/api/admin/payments?period=YYYY-MM` | admin | who paid this month |
 
