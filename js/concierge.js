@@ -46,6 +46,15 @@
     cnc_machining: 'Carved panels, routed doors, engraving, jigs & templates'
   };
 
+  // Skill levels — self-set by members in edit-profile (admin can correct).
+  var SKILL_LABELS = {
+    apprentice: 'Apprentice',
+    carpenter: 'Carpenter',
+    master: 'Master Carpenter'
+  };
+  var SKILL_ORDER = Object.keys(SKILL_LABELS);
+  function skillLabel(key) { return SKILL_LABELS[key] || ''; }
+
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
     { label: 'Greater Accra', zones: [
@@ -148,7 +157,11 @@
       period_must_be_YYYY_MM: 'Period must look like 2026-07.',
       invalid_amount: 'Amount must be a whole number of Ghana cedis.',
       invalid_image: 'That file could not be read as a photo — try a different picture.',
-      photo_too_large: 'That photo is too large even after compression — try a smaller picture.'
+      photo_too_large: 'That photo is too large even after compression — try a smaller picture.',
+      invalid_skill_level: 'Choose a valid skill level.',
+      invalid_years: 'Years of experience must be a whole number (0–70).',
+      confirm_mismatch: 'The confirmation phone number did not match — nothing was deleted.',
+      cannot_delete_self: 'You cannot delete your own admin account.'
     };
     if (code && map[code]) return map[code];
     if (status === 429) return 'Too many attempts. Please wait and try again.';
@@ -265,6 +278,7 @@
     SPECIALTY_LABELS: SPECIALTY_LABELS, SPECIALTY_ORDER: SPECIALTY_ORDER,
     LEGACY_SPECIALTY_LABELS: LEGACY_SPECIALTY_LABELS,
     SPECIALTY_EXAMPLES: SPECIALTY_EXAMPLES,
+    SKILL_LABELS: SKILL_LABELS, SKILL_ORDER: SKILL_ORDER, skillLabel: skillLabel,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto

@@ -59,6 +59,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .mcard .body{ flex:1; min-width:0; }
 .mcard h3{ font-family:var(--display); font-weight:500; font-size:1.05rem; line-height:1.2; }
 .mcard .biz{ color:var(--gold); font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.03em; margin-top:.1rem; }
+.lvl{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:500; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--green); border:1px solid rgba(200,146,42,.55); background:rgba(200,146,42,.12);
+  border-radius:3px; padding:.16rem .45rem; margin-top:.3rem; }
 .mcard .area{ color:var(--muted); font-size:.8rem; margin-top:.2rem; }
 .mcard .area::before{ content:'📍 '; }
 .chips{ display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.5rem; }
@@ -206,7 +209,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <p>Run your jobs like a company — brief the crew, track tools out and back, close the job clean. The same system Neewoody runs daily, built for your workshop.</p>
       </div>
     </div>
-    <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, WhatsApp direct) · <b>saved cut lists</b> on the generator · <b>founders' WhatsApp community</b> · and first access to every tool above as it lands.</p>
+    <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, message direct) · <b>saved cut lists</b> on the generator · and first access to every tool above as it lands — jobs board, tutorials and sourcing are on the way.</p>
   </div>
 
   <div class="lead">
@@ -217,6 +220,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <div class="filters">
     <select id="areaFilter"><option value="">All areas</option></select>
     <select id="specFilter"><option value="">All trades</option></select>
+    <select id="lvlFilter"><option value="">All levels</option></select>
     <input id="search" type="search" placeholder="Search name or business…" />
     <span class="count" id="count"></span>
   </div>
@@ -259,6 +263,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <input id="p_biz" placeholder="Optional" />
       <label for="p_area">Area</label>
       <select id="p_area"></select>
+      <label for="p_lvl">Skill level</label>
+      <select id="p_lvl"><option value="">— not set —</option></select>
+      <label for="p_yrs">Years of experience</label>
+      <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
       <label>Trades</label>
       <div class="spec-grid" id="specGrid"></div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
@@ -290,6 +298,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var stateEl = document.getElementById('state');
   var areaFilter = document.getElementById('areaFilter');
   var specFilter = document.getElementById('specFilter');
+  var lvlFilter = document.getElementById('lvlFilter');
   var search = document.getElementById('search');
   var countEl = document.getElementById('count');
   var featuredWrap = document.getElementById('featuredWrap');
@@ -299,12 +308,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     C.clearToken(); location.replace('login.html');
   });
 
-  // populate specialty filter from vocabulary
+  // populate specialty + level filters from vocabulary
   C.SPECIALTY_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.specialtyLabel(k); specFilter.appendChild(o);
   });
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lvlFilter.appendChild(o);
+  });
 
-  [areaFilter, specFilter].forEach(function (el) { el.addEventListener('change', render); });
+  [areaFilter, specFilter, lvlFilter].forEach(function (el) { el.addEventListener('change', render); });
   search.addEventListener('input', render);
   document.getElementById('showAllBtn').addEventListener('click', function () { showAll = true; render(); });
 
@@ -320,11 +332,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var chips = (m.specialties || []).map(function (s) {
       return '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
     }).join('');
+    var lvl = C.skillLabel(m.skill_level);
+    if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
     el.innerHTML =
       '<div class="ph">' + photo + '</div>' +
       '<div class="body">' +
         '<h3>' + C.escapeHtml(m.name) + '</h3>' +
         (m.business_name ? '<div class="biz">' + C.escapeHtml(m.business_name) + '</div>' : '') +
+        (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
         (m.area ? '<div class="area">' + C.escapeHtml(m.area) + '</div>' : '') +
         '<div class="chips">' + chips + '</div>' +
       '</div>' +
@@ -394,14 +409,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   function anyFilterActive() {
-    return !!(areaFilter.value || specFilter.value || search.value.trim());
+    return !!(areaFilter.value || specFilter.value || lvlFilter.value || search.value.trim());
   }
 
   function render() {
-    var a = areaFilter.value, s = specFilter.value, q = search.value.trim().toLowerCase();
+    var a = areaFilter.value, s = specFilter.value, l = lvlFilter.value, q = search.value.trim().toLowerCase();
     var list = all.filter(function (m) {
       if (a && m.area !== a) return false;
       if (s && (m.specialties || []).indexOf(s) < 0) return false;
+      if (l && m.skill_level !== l) return false;
       if (q) {
         var hay = (m.name + ' ' + (m.business_name || '')).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
@@ -500,11 +516,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
   });
 
+  // skill level options (once)
+  var pLvl = document.getElementById('p_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); pLvl.appendChild(o);
+  });
+
   function openModal() {
     if (!me) return;
     document.getElementById('p_name').value = me.name || '';
     document.getElementById('p_biz').value = me.business_name || '';
     C.fillZoneSelect(document.getElementById('p_area'), me.area || '', '— select your area —');
+    pLvl.value = me.skill_level || '';
+    document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
     renderPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
     var set = new Set(me.specialties || []);
@@ -533,6 +557,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         name: document.getElementById('p_name').value.trim(),
         business_name: document.getElementById('p_biz').value.trim(),
         area: document.getElementById('p_area').value,
+        skill_level: pLvl.value,
+        years_experience: document.getElementById('p_yrs').value.trim() === '' ? null : Number(document.getElementById('p_yrs').value),
         specialties: specs
       };
       if (newPin) body.pin = newPin;

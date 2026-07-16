@@ -20,6 +20,10 @@ const SPECIALTIES = [
   'site_construction', 'cnc_machining', 'other',
 ];
 const PHOTO_MAX_BYTES = 300 * 1024; // server-side cap; client compresses to ~250KB max
+
+// Self-set by members in edit-profile (owner decision 2026-07-15);
+// admin can correct a member's level from the admin table.
+const SKILL_LEVELS = ['apprentice', 'carpenter', 'master'];
 const TOKEN_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
 const PBKDF2_ITERS   = 100_000;
 const RATE_LIMIT_MAX = 5;                         // failed PINs
@@ -84,6 +88,9 @@ async function route(request, env) {
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
     return withAdmin(request, env, () => adminUpdateMember(request, env, decodeURIComponent(mMember[1])));
+  }
+  if (mMember && method === 'DELETE') {
+    return withAdmin(request, env, (admin) => adminDeleteMember(request, env, admin, decodeURIComponent(mMember[1])));
   }
 
   const mMemberPhoto = path.match(/^\/api\/admin\/members\/([^/]+)\/photo$/);
@@ -152,6 +159,16 @@ async function updateMe(request, env, member) {
   if ('business_name' in body) fields.business_name = nullableStr(body.business_name);
   if ('area' in body) fields.area = nullableStr(body.area);
   if ('photo_url' in body) fields.photo_url = nullableStr(body.photo_url);
+  if ('skill_level' in body) {
+    const lvl = validateSkillLevel(body.skill_level);
+    if (lvl === false) return json({ error: 'invalid_skill_level' }, 400);
+    fields.skill_level = lvl;
+  }
+  if ('years_experience' in body) {
+    const yrs = validateYears(body.years_experience);
+    if (yrs === false) return json({ error: 'invalid_years' }, 400);
+    fields.years_experience = yrs;
+  }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
     if (!spec) return json({ error: 'invalid_specialties' }, 400);
@@ -177,7 +194,8 @@ async function updateMe(request, env, member) {
 
 async function directory(env) {
   const { results } = await env.DB.prepare(
-    `SELECT name, business_name, area, specialties, photo_url, phone
+    `SELECT name, business_name, area, specialties, photo_url, phone,
+            skill_level, years_experience
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties) })) });
@@ -186,6 +204,7 @@ async function directory(env) {
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
+            skill_level, years_experience,
             role, status, is_founder, joined_at, created_at
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -214,14 +233,20 @@ async function adminCreateMember(request, env) {
   const status = ['pending', 'approved', 'suspended'].includes(body.status) ? body.status : 'pending';
   const is_founder = body.is_founder ? 1 : 0;
   const joined_at = typeof body.joined_at === 'string' && body.joined_at ? body.joined_at : new Date().toISOString();
+  const skill_level = validateSkillLevel(body.skill_level);
+  if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
+  const years_experience = validateYears(body.years_experience);
+  if (years_experience === false) return json({ error: 'invalid_years' }, 400);
 
   await env.DB.prepare(
     `INSERT INTO members
-       (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
+        skill_level, years_experience)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
-    specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at
+    specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
+    skill_level, years_experience
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -257,6 +282,16 @@ async function adminUpdateMember(request, env, rawPhone) {
   if ('business_name' in body) fields.business_name = nullableStr(body.business_name);
   if ('area' in body) fields.area = nullableStr(body.area);
   if ('photo_url' in body) fields.photo_url = nullableStr(body.photo_url);
+  if ('skill_level' in body) {
+    const lvl = validateSkillLevel(body.skill_level);
+    if (lvl === false) return json({ error: 'invalid_skill_level' }, 400);
+    fields.skill_level = lvl;
+  }
+  if ('years_experience' in body) {
+    const yrs = validateYears(body.years_experience);
+    if (yrs === false) return json({ error: 'invalid_years' }, 400);
+    fields.years_experience = yrs;
+  }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
     if (!spec) return json({ error: 'invalid_specialties' }, 400);
@@ -278,6 +313,38 @@ async function adminUpdateMember(request, env, rawPhone) {
 
   const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
   return json({ member: sanitize(updated) });
+}
+
+// Permanent member deletion. Guards, in order:
+//   1. the request body must echo the member's phone in `confirm` (a bare
+//      DELETE without the deliberate echo is rejected — protects against a
+//      stray or replayed call, and backs the two client-side sanity checks);
+//   2. an admin can never delete their own account (lockout protection —
+//      especially the only admin);
+// Deletes the member row plus everything keyed to them: payments (FK would
+// block otherwise — the client confirm dialog warns payment history goes
+// too), saved cutlists, login attempts, and the R2 photo.
+async function adminDeleteMember(request, env, admin, rawPhone) {
+  const phone = normalizePhone(rawPhone);
+  if (!phone) return json({ error: 'invalid_phone' }, 400);
+
+  const body = await readJson(request);
+  if (normalizePhone(body.confirm) !== phone) return json({ error: 'confirm_mismatch' }, 400);
+
+  if (phone === admin.phone) return json({ error: 'cannot_delete_self' }, 400);
+
+  const member = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
+  if (!member) return json({ error: 'member_not_found' }, 404);
+
+  await env.DB.batch([
+    env.DB.prepare('DELETE FROM payments WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
+  ]);
+  await env.MEDIA.delete(photoKey(phone));
+
+  return json({ deleted: true, phone });
 }
 
 async function adminRecordPayment(request, env) {
@@ -566,6 +633,19 @@ function validateSpecialties(input) {
   const clean = [...new Set(arr.map((s) => String(s).trim()).filter((s) => SPECIALTIES.includes(s)))];
   if (!clean.length) return null;
   return JSON.stringify(clean);
+}
+
+// Both return the cleaned value (null allowed = "not set"), or false when
+// the input is present but invalid.
+function validateSkillLevel(v) {
+  if (v == null || v === '') return null;
+  return SKILL_LEVELS.includes(String(v)) ? String(v) : false;
+}
+
+function validateYears(v) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return (Number.isInteger(n) && n >= 0 && n <= 70) ? n : false;
 }
 
 function parseSpec(text) {

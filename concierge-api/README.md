@@ -88,7 +88,8 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
 | GET | `/api/admin/members` | admin | full list incl. pending |
 | POST | `/api/admin/members` | admin | create member (admin supplies PIN) |
-| PUT | `/api/admin/members/:phone` | admin | status/role/is_founder, profile, reset PIN |
+| PUT | `/api/admin/members/:phone` | admin | status/role/is_founder, profile, skill level, reset PIN |
+| DELETE | `/api/admin/members/:phone` | admin | permanent delete (body must echo `{confirm:<phone>}`; self-delete blocked; removes payments/cutlists/attempts/photo) |
 | POST | `/api/admin/members/:phone/photo` | admin | upload a photo on a member's behalf |
 | DELETE | `/api/admin/members/:phone/photo` | admin | remove a member's photo |
 | POST | `/api/admin/payments` | admin | record MoMo payment (upsert on member+period) |
@@ -98,4 +99,6 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 
 - `wrangler.toml` — bindings (fill in `database_id` after `db:create`)
 - `migrations/0001_initial.sql` — members, payments, login_attempts
+- `migrations/0002_saved_cutlists.sql` — saved cutlists
+- `migrations/0003_skill_levels.sql` — members.skill_level + years_experience
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)

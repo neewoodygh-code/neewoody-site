@@ -62,6 +62,8 @@ CREATE TABLE login_attempts (
 
 Specialties list (fixed vocabulary, multi-select — **revised by owner 2026-07-15**): `cabinet_construction`, `interior_work`, `solid_wood_furniture`, `upholstery`, `finishing_spray`, `outdoor_structures`, `site_construction`, `cnc_machining`, `other`. Site/construction carpenters are explicitly in scope. History: the original `furniture` was split into cabinet_construction / interior_work / solid_wood_furniture; `glass_aluminium` was retired; `outdoor_structures` (pergolas, gazebos, huts, sheds, decking — owner's "exterior carpentry framework") was added. **`finishing_spray` is deliberately kept** — "upholsterer hires a spray finisher" is the directory's canonical use case; do not remove it. Legacy keys on old rows render via a fallback label map in `js/concierge.js` and drop out on the member's next profile save.
 
+Skill levels (added 2026-07-15, migration `0003_skill_levels.sql`): `members.skill_level` (`apprentice` | `carpenter` | `master`, label "Master Carpenter") + `members.years_experience` (integer 0–70). Self-set by members in edit-profile (owner decision); admin can correct inline in the admin table and captures both at intake. Directory shows a level badge and filters by level. Both nullable — "not set" is valid.
+
 Area vocabulary (2026-07-15): `area` stays a TEXT column, but the frontend constrains it to a fixed zone list in `js/concierge.js` (`ZONE_GROUPS`): ~22 Greater Accra zones first, then all 15 other regions (a large share of the base is outside Accra — deliberate). Legacy free-text areas are preserved as an extra option in the select until the member re-saves. Maps/GPS are deferred; the agreed later path is an optional per-member pin + "View on map" deep link (no embedded map tiles — pages must stay light on mobile data).
 
 ## API routes (`concierge-api`)
@@ -81,6 +83,7 @@ All responses JSON. CORS restricted to `https://neewoodygh.com` (+ localhost for
 **Authenticated (admin):**
 - `POST /api/admin/members` — create member (registration is admin-entered in Phase 1; founders come in via WhatsApp and the owner registers them). Generates initial PIN? No — admin supplies it, tells member on WhatsApp.
 - `PUT /api/admin/members/:phone` — update status/role/is_founder, reset PIN.
+- `DELETE /api/admin/members/:phone` (2026-07-15) — permanent deletion. Guards: request body must echo `{confirm: <phone>}`; admins cannot delete themselves. Deletes member + payments + saved cutlists + login attempts + R2 photo (batch). The admin UI runs two sanity checks first (type the phone, then final confirm) — four independent gates total.
 - `GET /api/admin/members` — full list incl. pending.
 - `POST /api/admin/payments` — record a MoMo payment `{member_phone, period, amount_ghs, momo_ref}`.
 - `GET /api/admin/payments?period=YYYY-MM` — who has paid this month.

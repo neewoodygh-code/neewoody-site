@@ -71,6 +71,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 .rowbtn{ font-family:var(--ui); font-size:.64rem; letter-spacing:.06em; text-transform:uppercase;
   background:transparent; border:1px solid rgba(11,31,14,.25); border-radius:3px; padding:.35rem .55rem; cursor:pointer; color:var(--ink); }
 .rowbtn:hover{ border-color:var(--gold); }
+.rowbtn.danger{ color:#a52a2a; border-color:rgba(165,42,42,.4); }
+.rowbtn.danger:hover{ border-color:#a52a2a; background:rgba(165,42,42,.06); }
 .table-scroll{ overflow-x:auto; }
 .state{ text-align:center; color:var(--muted); padding:2rem; font-family:var(--ui); letter-spacing:.05em; }
 
@@ -113,6 +115,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Business name</label><input id="a_biz" placeholder="Optional"></div>
           <div class="field"><label>Area</label><select id="a_area"></select></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
+          <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
+          <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
           <div class="field" style="align-self:end"><span style="font-size:.78rem;color:var(--muted)">Photo: upload from the member row after adding.</span></div>
         </div>
         <div style="margin-top:1rem"><label>Specialties</label><div class="spec-grid" id="a_specs"></div></div>
@@ -143,7 +147,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="table-scroll">
         <table>
           <thead><tr>
-            <th>Member</th><th>Area</th><th>Trades</th><th>Status</th><th>Role</th><th>Founder</th><th>Joined</th><th>Actions</th>
+            <th>Member</th><th>Area</th><th>Trades</th><th>Level</th><th>Status</th><th>Role</th><th>Founder</th><th>Joined</th><th>Actions</th>
           </tr></thead>
           <tbody id="memBody"></tbody>
         </table>
@@ -209,6 +213,12 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   // zone dropdown for the add form
   C.fillZoneSelect(document.getElementById('a_area'), '', '— select area —');
 
+  // skill level options for the add form
+  var aLvl = document.getElementById('a_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); aLvl.appendChild(o);
+  });
+
   document.getElementById('a_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
   document.getElementById('p_period').value = currentPeriod();
   document.getElementById('viewPeriod').value = currentPeriod();
@@ -243,6 +253,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         name: document.getElementById('a_name').value.trim(),
         business_name: document.getElementById('a_biz').value.trim(),
         area: document.getElementById('a_area').value,
+        skill_level: aLvl.value,
+        years_experience: document.getElementById('a_yrs').value.trim() === '' ? null : Number(document.getElementById('a_yrs').value),
         pin: document.getElementById('a_pin').value,
         specialties: specs,
         status: document.getElementById('a_status').value,
@@ -276,13 +288,29 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         '<div class="small">' + (m.business_name ? C.escapeHtml(m.business_name) + ' · ' : '') + C.displayPhone(m.phone) + '</div></td>' +
       '<td>' + C.escapeHtml(m.area || '—') + '</td>' +
       '<td class="small">' + C.escapeHtml(trades || '—') + '</td>' +
-      '<td></td><td></td>' +
+      '<td></td><td></td><td></td>' +
       '<td>' + (m.is_founder ? '<span class="pill founder">Founder</span>' : '—') + '</td>' +
       '<td class="small">' + C.escapeHtml((m.joined_at || '').slice(0, 10)) + '</td>' +
       '<td></td>';
 
+    // level select (admin can correct a self-set level)
+    var lvlTd = tr.children[3];
+    var lvlSel = document.createElement('select');
+    var oNone = document.createElement('option'); oNone.value = ''; oNone.textContent = '—'; lvlSel.appendChild(oNone);
+    C.SKILL_ORDER.forEach(function (k) {
+      var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k);
+      if (k === m.skill_level) o.selected = true; lvlSel.appendChild(o);
+    });
+    lvlSel.addEventListener('change', function () { patchMember(m.phone, { skill_level: lvlSel.value }, lvlSel); });
+    lvlTd.appendChild(lvlSel);
+    if (m.years_experience != null) {
+      var yrsNote = document.createElement('div'); yrsNote.className = 'small';
+      yrsNote.textContent = m.years_experience + ' yrs';
+      lvlTd.appendChild(yrsNote);
+    }
+
     // status select
-    var stTd = tr.children[3];
+    var stTd = tr.children[4];
     var stSel = document.createElement('select');
     ['pending', 'approved', 'suspended'].forEach(function (s) {
       var o = document.createElement('option'); o.value = s; o.textContent = s[0].toUpperCase() + s.slice(1);
@@ -292,7 +320,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     stTd.appendChild(stSel);
 
     // role select
-    var roleTd = tr.children[4];
+    var roleTd = tr.children[5];
     var roleSel = document.createElement('select');
     ['member', 'admin'].forEach(function (r) {
       var o = document.createElement('option'); o.value = r; o.textContent = r[0].toUpperCase() + r.slice(1);
@@ -302,7 +330,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     roleTd.appendChild(roleSel);
 
     // actions
-    var actTd = tr.children[7];
+    var actTd = tr.children[8];
     var founderBtn = document.createElement('button'); founderBtn.className = 'rowbtn';
     founderBtn.textContent = m.is_founder ? 'Unset founder' : 'Set founder';
     founderBtn.addEventListener('click', function () { patchMember(m.phone, { is_founder: !m.is_founder }, founderBtn); });
@@ -317,8 +345,39 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     var photoBtn = document.createElement('button'); photoBtn.className = 'rowbtn'; photoBtn.style.marginLeft = '.4rem';
     photoBtn.textContent = m.photo_url ? 'Replace photo' : 'Photo';
     photoBtn.addEventListener('click', function () { pickPhotoFor(m, photoBtn); });
-    actTd.appendChild(founderBtn); actTd.appendChild(pinBtn); actTd.appendChild(photoBtn);
+    var delBtn = document.createElement('button'); delBtn.className = 'rowbtn danger'; delBtn.style.marginLeft = '.4rem';
+    delBtn.textContent = 'Delete';
+    delBtn.addEventListener('click', function () { deleteMember(m, delBtn); });
+    actTd.appendChild(founderBtn); actTd.appendChild(pinBtn); actTd.appendChild(photoBtn); actTd.appendChild(delBtn);
     return tr;
+  }
+
+  // Permanent deletion — two sanity checks before the request goes out, and
+  // the Worker independently requires the phone echoed in the body (plus it
+  // refuses self-deletion), so no single stray click can delete anyone.
+  async function deleteMember(m, btn) {
+    // Check 1: type the member's phone number exactly
+    var typed = prompt(
+      'SANITY CHECK 1 of 2 — deleting "' + m.name + '" permanently.\n\n' +
+      'This cannot be undone. Type their phone number (' + C.displayPhone(m.phone) + ') to continue:'
+    );
+    if (typed == null) return;
+    if (C.normalizePhone(typed) !== m.phone) { alert('Phone number did not match — nothing was deleted.'); return; }
+    // Check 2: final confirm listing exactly what goes
+    var ok = confirm(
+      'SANITY CHECK 2 of 2 — final confirmation.\n\n' +
+      'Permanently delete ' + m.name + (m.business_name ? ' (' + m.business_name + ')' : '') + '?\n\n' +
+      'This removes their profile, login, photo, PAYMENT HISTORY and saved cutlists. There is no undo.'
+    );
+    if (!ok) return;
+    btn.disabled = true; btn.textContent = 'Deleting…';
+    try {
+      await C.api('/admin/members/' + encodeURIComponent(m.phone), { method: 'DELETE', body: { confirm: m.phone } });
+      await loadMembers();
+    } catch (err) {
+      alert(err.message || 'Could not delete the member.');
+      btn.disabled = false; btn.textContent = 'Delete';
+    }
   }
 
   // ── member photo upload (compressed client-side, one per member) ──
