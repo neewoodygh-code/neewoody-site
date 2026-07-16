@@ -55,6 +55,16 @@
   var SKILL_ORDER = Object.keys(SKILL_LABELS);
   function skillLabel(key) { return SKILL_LABELS[key] || ''; }
 
+  // Availability badge — seeker/giver signal on cards + jobs candidate pool.
+  var AVAILABILITY_LABELS = {
+    open_to_work: 'Open to work',
+    hiring: 'Hiring',
+    seeking_apprenticeship: 'Seeking apprenticeship',
+    taking_apprentices: 'Taking apprentices'
+  };
+  var AVAILABILITY_ORDER = Object.keys(AVAILABILITY_LABELS);
+  function availabilityLabel(key) { return AVAILABILITY_LABELS[key] || ''; }
+
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
     { label: 'Greater Accra', zones: [
@@ -161,7 +171,13 @@
       invalid_skill_level: 'Choose a valid skill level.',
       invalid_years: 'Years of experience must be a whole number (0–70).',
       confirm_mismatch: 'The confirmation phone number did not match — nothing was deleted.',
-      cannot_delete_self: 'You cannot delete your own admin account.'
+      cannot_delete_self: 'You cannot delete your own admin account.',
+      invalid_availability: 'Choose a valid availability option.',
+      zone_required: 'Choose the zone where the job is.',
+      invalid_trade: 'Choose a valid trade for the job.',
+      invalid_workers: 'Workers needed must be between 1 and 50.',
+      description_too_long: 'Keep the job details under 1000 characters.',
+      too_many_open_jobs: 'You have too many open jobs — mark some as filled or delete them first.'
     };
     if (code && map[code]) return map[code];
     if (status === 429) return 'Too many attempts. Please wait and try again.';
@@ -279,6 +295,7 @@
     LEGACY_SPECIALTY_LABELS: LEGACY_SPECIALTY_LABELS,
     SPECIALTY_EXAMPLES: SPECIALTY_EXAMPLES,
     SKILL_LABELS: SKILL_LABELS, SKILL_ORDER: SKILL_ORDER, skillLabel: skillLabel,
+    AVAILABILITY_LABELS: AVAILABILITY_LABELS, AVAILABILITY_ORDER: AVAILABILITY_ORDER, availabilityLabel: availabilityLabel,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto

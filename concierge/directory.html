@@ -33,6 +33,66 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   border-radius:3px; padding:.5rem .8rem; cursor:pointer; transition:background .2s,border-color .2s; }
 .tbtn:hover{ background:rgba(240,232,208,.1); border-color:var(--gold); }
 
+/* member-area tabs */
+.tabbar{ position:sticky; top:0; z-index:40; background:var(--green); display:flex; gap:.25rem;
+  padding:0 1rem; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+  border-top:1px solid rgba(240,232,208,.12); }
+.tabbar::-webkit-scrollbar{ display:none; }
+.tab{ font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  color:rgba(240,232,208,.55); background:none; border:none; border-bottom:2px solid transparent;
+  padding:.85rem .9rem; cursor:pointer; white-space:nowrap; transition:color .2s,border-color .2s; }
+.tab:hover{ color:var(--cream); }
+.tab.active{ color:var(--gold); border-bottom-color:var(--gold); }
+.tab .soon{ font-size:.5rem; letter-spacing:.08em; color:rgba(240,232,208,.35); border:1px solid rgba(240,232,208,.2);
+  border-radius:20px; padding:.08rem .3rem; margin-left:.3rem; vertical-align:middle; }
+.tabpanel[hidden]{ display:none; }
+.cs-panel{ text-align:center; padding:4rem 1.5rem; color:var(--muted); }
+.cs-panel h2{ font-family:var(--display); font-weight:500; font-size:1.6rem; color:var(--ink); margin-bottom:.6rem; }
+.cs-panel p{ max-width:46ch; margin:0 auto; line-height:1.7; font-size:.95rem; }
+.cs-tag{ display:inline-block; font-family:var(--ui); font-size:.6rem; letter-spacing:.18em; text-transform:uppercase;
+  background:var(--cream-dark); color:var(--muted); border-radius:20px; padding:.3rem .7rem; margin-bottom:1rem; }
+
+/* badges */
+.bdg-biz{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:500; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--cream); background:var(--green); border-radius:3px;
+  padding:.18rem .45rem; margin-top:.3rem; margin-right:.3rem; }
+.bdg-av{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:500; letter-spacing:.08em;
+  text-transform:uppercase; color:#2e6b2e; border:1px solid rgba(46,107,46,.45); background:rgba(46,107,46,.08);
+  border-radius:3px; padding:.16rem .45rem; margin-top:.3rem; margin-right:.3rem; }
+.bdg-av.giver{ color:#8a6d16; border-color:rgba(200,146,42,.55); background:rgba(200,146,42,.1); }
+
+/* jobs board */
+.jobs-head{ display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.jobs-head .jh-text{ flex:1; min-width:220px; }
+.jobs-head h1{ font-family:var(--display); font-weight:500; font-size:1.8rem; }
+.jobs-head p{ color:var(--muted); font-size:.95rem; margin-top:.35rem; }
+.btn-post{ font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--gold); color:#241500; border:none; border-radius:3px; padding:.75rem 1.2rem; cursor:pointer; transition:filter .2s; }
+.btn-post:hover{ filter:brightness(1.08); }
+.job-card{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px; padding:1rem 1.1rem;
+  margin-bottom:.7rem; box-shadow:0 4px 12px rgba(11,31,14,.04); }
+.job-card.filled{ opacity:.65; }
+.job-title{ font-family:var(--display); font-weight:500; font-size:1.1rem; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.job-status{ font-family:var(--ui); font-size:.56rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  border-radius:20px; padding:.2rem .55rem; }
+.job-status.open{ background:#dcecdc; color:#2e6b2e; }
+.job-status.filled{ background:var(--cream-dark); color:var(--muted); }
+.job-meta{ color:var(--muted); font-size:.82rem; margin-top:.35rem; line-height:1.6; }
+.job-desc{ font-size:.9rem; line-height:1.65; margin-top:.5rem; white-space:pre-line; }
+.job-foot{ display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-top:.75rem; }
+.job-poster{ font-size:.82rem; color:var(--muted); flex:1; min-width:150px; }
+.job-poster b{ color:var(--ink); font-weight:600; }
+.job-wa{ display:inline-flex; align-items:center; gap:.4rem; font-family:var(--ui); font-size:.68rem; font-weight:500;
+  letter-spacing:.1em; text-transform:uppercase; background:#25D366; color:#062b12; border-radius:3px; padding:.5rem .9rem; transition:filter .2s; }
+.job-wa:hover{ filter:brightness(1.05); }
+.job-wa svg{ width:14px; height:14px; }
+.job-own-btn{ font-family:var(--ui); font-size:.62rem; letter-spacing:.06em; text-transform:uppercase;
+  background:transparent; border:1px solid rgba(11,31,14,.25); border-radius:3px; padding:.4rem .6rem; cursor:pointer; color:var(--ink); }
+.job-own-btn:hover{ border-color:var(--gold); }
+.job-own-btn.danger{ color:#a52a2a; border-color:rgba(165,42,42,.4); }
+.jobs-mine-label{ font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin:0 0 .7rem; }
+.modal textarea{ width:100%; font-size:1rem; font-family:var(--body); padding:.7rem .8rem; border:1px solid rgba(11,31,14,.2); border-radius:3px; background:#fff; min-height:90px; resize:vertical; }
+
 /* intro + filters */
 .wrap{ max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem 4rem; }
 .lead{ margin-bottom:1.5rem; }
@@ -172,9 +232,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </header>
 
+<!-- member-area tabs -->
+<nav class="tabbar" id="tabbar" aria-label="Member area">
+  <button class="tab active" data-tab="directory">Directory</button>
+  <button class="tab" data-tab="jobs">Jobs</button>
+  <button class="tab" data-tab="tools">Tools</button>
+  <button class="tab" data-tab="tutorials">Tutorials <span class="soon">soon</span></button>
+  <button class="tab" data-tab="sourcing">Sourcing <span class="soon">soon</span></button>
+</nav>
+
 <div class="wrap">
 
-  <!-- Member tools & benefits -->
+  <!-- TAB: Tools (member tools & benefits) -->
+  <div id="tab-tools" class="tabpanel" hidden>
   <div class="tools-strip">
     <h2>Your member tools</h2>
     <div class="tools-grid">
@@ -209,9 +279,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <p>Run your jobs like a company — brief the crew, track tools out and back, close the job clean. The same system Neewoody runs daily, built for your workshop.</p>
       </div>
     </div>
-    <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, message direct) · <b>saved cut lists</b> on the generator · and first access to every tool above as it lands — jobs board, tutorials and sourcing are on the way.</p>
+    <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, message direct) · <b>the jobs board</b> (post work, get hired) · <b>saved cut lists</b> on the generator · and first access to every tool above as it lands.</p>
+  </div>
   </div>
 
+  <!-- TAB: Directory -->
+  <div id="tab-directory" class="tabpanel">
   <div class="lead">
     <h1>Find a fellow carpenter</h1>
     <p>Members hire members. Select your area or trade, then message on WhatsApp. Tap any trade tag to see what it covers.</p>
@@ -221,6 +294,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     <select id="areaFilter"><option value="">All areas</option></select>
     <select id="specFilter"><option value="">All trades</option></select>
     <select id="lvlFilter"><option value="">All levels</option></select>
+    <select id="availFilter"><option value="">Any availability</option></select>
     <input id="search" type="search" placeholder="Search name or business…" />
     <span class="count" id="count"></span>
   </div>
@@ -237,6 +311,39 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   <div id="grid" class="grid"></div>
   <div id="state" class="state">Loading members…</div>
+  </div>
+
+  <!-- TAB: Jobs -->
+  <div id="tab-jobs" class="tabpanel" hidden>
+    <div class="jobs-head">
+      <div class="jh-text">
+        <h1>Jobs board</h1>
+        <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
+      </div>
+      <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
+    </div>
+    <div id="jobsMine"></div>
+    <div id="jobsList"></div>
+    <div id="jobsState" class="state">Loading jobs…</div>
+  </div>
+
+  <!-- TAB: Tutorials (coming soon) -->
+  <div id="tab-tutorials" class="tabpanel" hidden>
+    <div class="cs-panel">
+      <span class="cs-tag">Coming soon · members first</span>
+      <h2>Tutorials</h2>
+      <p>Skill-building videos for Ghanaian carpenters — indexed by trade and level, from setting out a wardrobe carcass to spray-finish technique. Built for how we actually work here.</p>
+    </div>
+  </div>
+
+  <!-- TAB: Sourcing (coming soon) -->
+  <div id="tab-sourcing" class="tabpanel" hidden>
+    <div class="cs-panel">
+      <span class="cs-tag">Coming soon · members first</span>
+      <h2>Sourcing</h2>
+      <p>Where to find it in Ghana — lazy susan fittings, soft-close hinges, specialty hardware — plus the workarounds when it can't be found, and the stores we trust. Ghana-specific answers Google doesn't have.</p>
+    </div>
+  </div>
 </div>
 
 <!-- trade popover -->
@@ -259,8 +366,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <input type="file" id="photoFile" accept="image/*" hidden>
       <label for="p_name">Name</label>
       <input id="p_name" required />
+      <label for="p_type">Account type</label>
+      <select id="p_type">
+        <option value="">Individual carpenter / apprentice</option>
+        <option value="1">Business — I hire and take on work</option>
+      </select>
       <label for="p_biz">Business name</label>
       <input id="p_biz" placeholder="Optional" />
+      <label for="p_avail">Availability <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— shows as a badge on your card</span></label>
+      <select id="p_avail"><option value="">— not shown —</option></select>
       <label for="p_area">Area</label>
       <select id="p_area"></select>
       <label for="p_lvl">Skill level</label>
@@ -277,7 +391,32 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js"></script>
+<!-- Post a job -->
+<div class="overlay" id="jobOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2>Post a job</h2><button class="x" id="closeJobModal" aria-label="Close">×</button></div>
+    <form id="jobForm">
+      <label for="j_zone">Where is the job?</label>
+      <select id="j_zone" required></select>
+      <label for="j_trade">Trade needed</label>
+      <select id="j_trade"><option value="">Any trade</option></select>
+      <label for="j_lvl">Skill level needed</label>
+      <select id="j_lvl"><option value="">Any level</option></select>
+      <label for="j_workers">How many people?</label>
+      <input id="j_workers" type="number" inputmode="numeric" min="1" max="50" step="1" value="1" />
+      <label for="j_start">When does it start?</label>
+      <input id="j_start" maxlength="40" placeholder="e.g. Monday 20 July, or ASAP" />
+      <label for="j_dur">How long?</label>
+      <input id="j_dur" maxlength="40" placeholder="e.g. 3 days" />
+      <label for="j_desc">Details</label>
+      <textarea id="j_desc" maxlength="1000" placeholder="What's the work? Anything they should bring? Rates are discussed on WhatsApp."></textarea>
+      <button class="save" id="jobSaveBtn" type="submit">Post job</button>
+      <div class="mmsg" id="jmsg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/concierge.js?v=20260716"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -299,6 +438,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var areaFilter = document.getElementById('areaFilter');
   var specFilter = document.getElementById('specFilter');
   var lvlFilter = document.getElementById('lvlFilter');
+  var availFilter = document.getElementById('availFilter');
   var search = document.getElementById('search');
   var countEl = document.getElementById('count');
   var featuredWrap = document.getElementById('featuredWrap');
@@ -315,8 +455,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   C.SKILL_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lvlFilter.appendChild(o);
   });
+  C.AVAILABILITY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); availFilter.appendChild(o);
+  });
 
-  [areaFilter, specFilter, lvlFilter].forEach(function (el) { el.addEventListener('change', render); });
+  [areaFilter, specFilter, lvlFilter, availFilter].forEach(function (el) { el.addEventListener('change', render); });
   search.addEventListener('input', render);
   document.getElementById('showAllBtn').addEventListener('click', function () { showAll = true; render(); });
 
@@ -334,12 +477,16 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     }).join('');
     var lvl = C.skillLabel(m.skill_level);
     if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
+    var av = C.availabilityLabel(m.availability);
+    var avGiver = m.availability === 'hiring' || m.availability === 'taking_apprentices';
     el.innerHTML =
       '<div class="ph">' + photo + '</div>' +
       '<div class="body">' +
         '<h3>' + C.escapeHtml(m.name) + '</h3>' +
         (m.business_name ? '<div class="biz">' + C.escapeHtml(m.business_name) + '</div>' : '') +
+        (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
         (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
+        (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '') +
         (m.area ? '<div class="area">' + C.escapeHtml(m.area) + '</div>' : '') +
         '<div class="chips">' + chips + '</div>' +
       '</div>' +
@@ -409,15 +556,16 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   function anyFilterActive() {
-    return !!(areaFilter.value || specFilter.value || lvlFilter.value || search.value.trim());
+    return !!(areaFilter.value || specFilter.value || lvlFilter.value || availFilter.value || search.value.trim());
   }
 
   function render() {
-    var a = areaFilter.value, s = specFilter.value, l = lvlFilter.value, q = search.value.trim().toLowerCase();
+    var a = areaFilter.value, s = specFilter.value, l = lvlFilter.value, av = availFilter.value, q = search.value.trim().toLowerCase();
     var list = all.filter(function (m) {
       if (a && m.area !== a) return false;
       if (s && (m.specialties || []).indexOf(s) < 0) return false;
       if (l && m.skill_level !== l) return false;
+      if (av && m.availability !== av) return false;
       if (q) {
         var hay = (m.name + ' ' + (m.business_name || '')).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
@@ -516,16 +664,22 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
   });
 
-  // skill level options (once)
+  // skill level + availability options (once)
   var pLvl = document.getElementById('p_lvl');
   C.SKILL_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); pLvl.appendChild(o);
+  });
+  var pAvail = document.getElementById('p_avail');
+  C.AVAILABILITY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); pAvail.appendChild(o);
   });
 
   function openModal() {
     if (!me) return;
     document.getElementById('p_name').value = me.name || '';
     document.getElementById('p_biz').value = me.business_name || '';
+    document.getElementById('p_type').value = me.is_business ? '1' : '';
+    pAvail.value = me.availability || '';
     C.fillZoneSelect(document.getElementById('p_area'), me.area || '', '— select your area —');
     pLvl.value = me.skill_level || '';
     document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
@@ -556,6 +710,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var body = {
         name: document.getElementById('p_name').value.trim(),
         business_name: document.getElementById('p_biz').value.trim(),
+        is_business: document.getElementById('p_type').value === '1',
+        availability: pAvail.value,
         area: document.getElementById('p_area').value,
         skill_level: pLvl.value,
         years_experience: document.getElementById('p_yrs').value.trim() === '' ? null : Number(document.getElementById('p_yrs').value),
@@ -571,6 +727,162 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } catch (err) {
       mmsg.className = 'mmsg error'; mmsg.textContent = err.message || 'Could not save.';
     } finally { saveBtn.disabled = false; }
+  });
+
+  // ── tabs ──
+  var TABS = ['directory', 'jobs', 'tools', 'tutorials', 'sourcing'];
+  var jobsLoaded = false;
+  function showTab(name) {
+    if (TABS.indexOf(name) < 0) name = 'directory';
+    TABS.forEach(function (t) {
+      document.getElementById('tab-' + t).hidden = (t !== name);
+    });
+    document.querySelectorAll('#tabbar .tab').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-tab') === name);
+    });
+    closeSpop();
+    if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
+    if (history.replaceState) history.replaceState(null, '', '#' + name);
+  }
+  document.getElementById('tabbar').addEventListener('click', function (e) {
+    var b = e.target.closest('.tab');
+    if (b) showTab(b.getAttribute('data-tab'));
+  });
+  // NOTE: hash-based tab activation happens at the bottom of this script,
+  // after every section's elements/handlers exist (showTab('jobs') calls
+  // loadJobs, which needs the jobs section fully set up).
+
+  // ── jobs board ──
+  var jobsMineEl = document.getElementById('jobsMine');
+  var jobsListEl = document.getElementById('jobsList');
+  var jobsStateEl = document.getElementById('jobsState');
+
+  function jobTitle(j) {
+    var trade = j.trade ? C.specialtyLabel(j.trade) : 'Any trade';
+    return j.workers + ' × ' + trade + ' — ' + j.zone;
+  }
+
+  function jobCard(j) {
+    var el = document.createElement('div');
+    el.className = 'job-card' + (j.status === 'filled' ? ' filled' : '');
+    var meta = [];
+    if (j.skill_level) meta.push('Level: ' + C.skillLabel(j.skill_level)); else meta.push('Any level');
+    if (j.start_when) meta.push('Starts: ' + j.start_when);
+    if (j.duration) meta.push('Duration: ' + j.duration);
+    meta.push('Posted ' + String(j.created_at || '').slice(0, 10));
+    var poster = '<b>' + C.escapeHtml(j.poster_name) + '</b>' +
+      (j.poster_business ? ' · ' + C.escapeHtml(j.poster_business) : '') +
+      (j.poster_is_business ? ' <span class="bdg-biz" style="margin-top:0">Business</span>' : '');
+    var waText = encodeURIComponent('Hi ' + j.poster_name + ', I saw your job post on Carpentry Concierge (' + jobTitle(j) + ') — I\'m interested.');
+    el.innerHTML =
+      '<div class="job-title">' + C.escapeHtml(jobTitle(j)) +
+        ' <span class="job-status ' + j.status + '">' + j.status + '</span></div>' +
+      '<div class="job-meta">' + C.escapeHtml(meta.join(' · ')) + '</div>' +
+      (j.description ? '<div class="job-desc">' + C.escapeHtml(j.description) + '</div>' : '') +
+      '<div class="job-foot">' +
+        '<span class="job-poster">' + poster + '</span>' +
+        (j.mine
+          ? ''
+          : '<a class="job-wa" href="' + C.waLink(j.poster_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact</a>') +
+      '</div>';
+    if (j.mine) {
+      var foot = el.querySelector('.job-foot');
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'job-own-btn'; toggleBtn.type = 'button';
+      toggleBtn.textContent = j.status === 'open' ? 'Mark filled' : 'Reopen';
+      toggleBtn.addEventListener('click', async function () {
+        toggleBtn.disabled = true;
+        try { await C.api('/jobs/' + j.id, { method: 'PUT', body: { status: j.status === 'open' ? 'filled' : 'open' } }); await loadJobs(); }
+        catch (err) { alert(err.message || 'Could not update the post.'); toggleBtn.disabled = false; }
+      });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'job-own-btn danger'; delBtn.type = 'button'; delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', async function () {
+        if (!confirm('Delete this job post? This cannot be undone.')) return;
+        delBtn.disabled = true;
+        try { await C.api('/jobs/' + j.id, { method: 'DELETE' }); await loadJobs(); }
+        catch (err) { alert(err.message || 'Could not delete the post.'); delBtn.disabled = false; }
+      });
+      foot.appendChild(toggleBtn); foot.appendChild(delBtn);
+    }
+    return el;
+  }
+
+  async function loadJobs() {
+    jobsStateEl.style.display = ''; jobsStateEl.textContent = 'Loading jobs…';
+    try {
+      var r = await C.api('/jobs');
+      var jobs = r.jobs || [];
+      var mine = jobs.filter(function (j) { return j.mine; });
+      var others = jobs.filter(function (j) { return !j.mine; });
+      jobsMineEl.innerHTML = ''; jobsListEl.innerHTML = '';
+      if (mine.length) {
+        var lbl = document.createElement('p'); lbl.className = 'jobs-mine-label'; lbl.textContent = 'Your posts';
+        jobsMineEl.appendChild(lbl);
+        mine.forEach(function (j) { jobsMineEl.appendChild(jobCard(j)); });
+        if (others.length) {
+          var lbl2 = document.createElement('p'); lbl2.className = 'jobs-mine-label'; lbl2.style.marginTop = '1.5rem';
+          lbl2.textContent = 'Open jobs'; jobsMineEl.appendChild(lbl2);
+        }
+      }
+      others.forEach(function (j) { jobsListEl.appendChild(jobCard(j)); });
+      if (!jobs.length) {
+        jobsStateEl.textContent = 'No jobs posted yet — be the first. Post a job and members in that area can contact you on WhatsApp.';
+      } else {
+        jobsStateEl.style.display = 'none';
+      }
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      jobsStateEl.textContent = err.message || 'Could not load the jobs board.';
+    }
+  }
+
+  // post-a-job modal
+  var jobOverlay = document.getElementById('jobOverlay');
+  var jmsg = document.getElementById('jmsg');
+  var jTrade = document.getElementById('j_trade');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.specialtyLabel(k); jTrade.appendChild(o);
+  });
+  var jLvl = document.getElementById('j_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); jLvl.appendChild(o);
+  });
+  document.getElementById('postJobBtn').addEventListener('click', function () {
+    C.fillZoneSelect(document.getElementById('j_zone'), (me && me.area) || '', '— where is the job? —');
+    jTrade.value = ''; jLvl.value = '';
+    document.getElementById('j_workers').value = '1';
+    document.getElementById('j_start').value = '';
+    document.getElementById('j_dur').value = '';
+    document.getElementById('j_desc').value = '';
+    jmsg.textContent = ''; jmsg.className = 'mmsg';
+    jobOverlay.classList.add('open');
+  });
+  document.getElementById('closeJobModal').addEventListener('click', function () { jobOverlay.classList.remove('open'); });
+  jobOverlay.addEventListener('click', function (e) { if (e.target === jobOverlay) jobOverlay.classList.remove('open'); });
+
+  document.getElementById('jobForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('jobSaveBtn');
+    var zone = document.getElementById('j_zone').value;
+    if (!zone) { jmsg.className = 'mmsg error'; jmsg.textContent = 'Choose where the job is.'; return; }
+    btn.disabled = true; jmsg.className = 'mmsg'; jmsg.textContent = 'Posting…';
+    try {
+      await C.api('/jobs', { method: 'POST', body: {
+        zone: zone,
+        trade: jTrade.value,
+        skill_level: jLvl.value,
+        workers: Number(document.getElementById('j_workers').value || 1),
+        start_when: document.getElementById('j_start').value.trim(),
+        duration: document.getElementById('j_dur').value.trim(),
+        description: document.getElementById('j_desc').value.trim()
+      }});
+      jmsg.className = 'mmsg ok'; jmsg.textContent = 'Posted — members can now contact you on WhatsApp.';
+      await loadJobs();
+      setTimeout(function () { jobOverlay.classList.remove('open'); }, 900);
+    } catch (err) {
+      jmsg.className = 'mmsg error'; jmsg.textContent = err.message || 'Could not post the job.';
+    } finally { btn.disabled = false; }
   });
 
   async function load() {
@@ -600,6 +912,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     }
     await load();
   }
+  if (location.hash && TABS.indexOf(location.hash.slice(1)) > 0) showTab(location.hash.slice(1));
   init();
 })();
 </script>

@@ -76,6 +76,19 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 .table-scroll{ overflow-x:auto; }
 .state{ text-align:center; color:var(--muted); padding:2rem; font-family:var(--ui); letter-spacing:.05em; }
 
+/* edit-member modal */
+.overlay{ position:fixed; inset:0; background:rgba(11,31,14,.55); display:none; align-items:center;
+  justify-content:center; padding:1.25rem; z-index:100; }
+.overlay.open{ display:flex; }
+.modal{ background:var(--cream); border-radius:5px; width:100%; max-width:480px; max-height:90vh; overflow:auto;
+  border-top:3px solid var(--gold); box-shadow:0 24px 60px rgba(0,0,0,.4); }
+.modal .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.1rem 1.4rem; border-bottom:1px solid rgba(11,31,14,.1); }
+.modal .mhead h2{ font-family:var(--display); font-weight:500; font-size:1.25rem; }
+.modal .x{ background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--muted); line-height:1; }
+.modal form{ padding:1.1rem 1.4rem 1.5rem; }
+.modal label{ margin-top:.9rem; }
+.modal .spec-grid{ margin-top:.35rem; }
+
 .gate{ max-width:420px; margin:5rem auto; text-align:center; }
 .gate h1{ font-family:var(--display); font-weight:500; font-size:1.6rem; margin-bottom:.75rem; }
 .gate p{ color:var(--muted); }
@@ -117,6 +130,9 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
           <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
+          <div class="field"><label>Account type</label>
+            <select id="a_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
+          <div class="field"><label>Availability badge</label><select id="a_avail"><option value="">— not shown —</option></select></div>
           <div class="field" style="align-self:end"><span style="font-size:.78rem;color:var(--muted)">Photo: upload from the member row after adding.</span></div>
         </div>
         <div style="margin-top:1rem"><label>Specialties</label><div class="spec-grid" id="a_specs"></div></div>
@@ -186,7 +202,27 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
 </div>
 
-<script src="../js/concierge.js"></script>
+<!-- Edit member (full profile — fixes early-member data without recreating accounts) -->
+<div class="overlay" id="editOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2 id="editTitle">Edit member</h2><button class="x" id="closeEdit" aria-label="Close">×</button></div>
+    <form id="editForm">
+      <div class="field"><label>Name</label><input id="e_name" required></div>
+      <div class="field"><label>Business name</label><input id="e_biz" placeholder="Optional"></div>
+      <div class="field"><label>Account type</label>
+        <select id="e_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
+      <div class="field"><label>Availability badge</label><select id="e_avail"><option value="">— not shown —</option></select></div>
+      <div class="field"><label>Area</label><select id="e_area"></select></div>
+      <div class="field"><label>Skill level</label><select id="e_lvl"><option value="">— not set —</option></select></div>
+      <div class="field"><label>Years of experience</label><input id="e_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
+      <div class="field"><label>Trades</label><div class="spec-grid" id="e_specs"></div></div>
+      <div style="margin-top:1.25rem"><button class="btn" id="editSaveBtn" type="submit">Save changes</button></div>
+      <div class="msg" id="emsg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/concierge.js?v=20260716"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -213,10 +249,14 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   // zone dropdown for the add form
   C.fillZoneSelect(document.getElementById('a_area'), '', '— select area —');
 
-  // skill level options for the add form
+  // skill level + availability options for the add form
   var aLvl = document.getElementById('a_lvl');
   C.SKILL_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); aLvl.appendChild(o);
+  });
+  var aAvail = document.getElementById('a_avail');
+  C.AVAILABILITY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); aAvail.appendChild(o);
   });
 
   document.getElementById('a_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
@@ -255,6 +295,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         area: document.getElementById('a_area').value,
         skill_level: aLvl.value,
         years_experience: document.getElementById('a_yrs').value.trim() === '' ? null : Number(document.getElementById('a_yrs').value),
+        is_business: document.getElementById('a_type').value === '1',
+        availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
         specialties: specs,
         status: document.getElementById('a_status').value,
@@ -331,7 +373,11 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
     // actions
     var actTd = tr.children[8];
-    var founderBtn = document.createElement('button'); founderBtn.className = 'rowbtn';
+    var editBtn = document.createElement('button'); editBtn.className = 'rowbtn';
+    editBtn.textContent = 'Edit';
+    editBtn.addEventListener('click', function () { openEdit(m); });
+    actTd.appendChild(editBtn);
+    var founderBtn = document.createElement('button'); founderBtn.className = 'rowbtn'; founderBtn.style.marginLeft = '.4rem';
     founderBtn.textContent = m.is_founder ? 'Unset founder' : 'Set founder';
     founderBtn.addEventListener('click', function () { patchMember(m.phone, { is_founder: !m.is_founder }, founderBtn); });
     var pinBtn = document.createElement('button'); pinBtn.className = 'rowbtn'; pinBtn.style.marginLeft = '.4rem';
@@ -422,6 +468,70 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     if (!list.length) memState.textContent = 'No members match.';
     document.getElementById('memCount').textContent = members.length + ' total';
   }
+
+  // ── edit-member modal (full profile, incl. zone — no recreating accounts) ──
+  var editOverlay = document.getElementById('editOverlay');
+  var emsg = document.getElementById('emsg');
+  var editing = null;
+  var eLvl = document.getElementById('e_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); eLvl.appendChild(o);
+  });
+  var eAvail = document.getElementById('e_avail');
+  C.AVAILABILITY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); eAvail.appendChild(o);
+  });
+  var eSpecs = document.getElementById('e_specs');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    var ex = C.SPECIALTY_EXAMPLES[k]; if (ex) l.title = ex;
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> ' + C.escapeHtml(C.specialtyLabel(k));
+    eSpecs.appendChild(l);
+  });
+
+  function openEdit(m) {
+    editing = m;
+    document.getElementById('editTitle').textContent = 'Edit — ' + m.name + ' (' + C.displayPhone(m.phone) + ')';
+    document.getElementById('e_name').value = m.name || '';
+    document.getElementById('e_biz').value = m.business_name || '';
+    document.getElementById('e_type').value = m.is_business ? '1' : '';
+    eAvail.value = m.availability || '';
+    C.fillZoneSelect(document.getElementById('e_area'), m.area || '', '— select area —');
+    eLvl.value = m.skill_level || '';
+    document.getElementById('e_yrs').value = m.years_experience != null ? m.years_experience : '';
+    var set = new Set(m.specialties || []);
+    eSpecs.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
+    emsg.textContent = ''; emsg.className = 'msg';
+    editOverlay.classList.add('open');
+  }
+  document.getElementById('closeEdit').addEventListener('click', function () { editOverlay.classList.remove('open'); });
+  editOverlay.addEventListener('click', function (e) { if (e.target === editOverlay) editOverlay.classList.remove('open'); });
+
+  document.getElementById('editForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!editing) return;
+    var btn = document.getElementById('editSaveBtn');
+    var specs = [].slice.call(eSpecs.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    if (!specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
+    btn.disabled = true; emsg.className = 'msg'; emsg.textContent = 'Saving…';
+    try {
+      await C.api('/admin/members/' + encodeURIComponent(editing.phone), { method: 'PUT', body: {
+        name: document.getElementById('e_name').value.trim(),
+        business_name: document.getElementById('e_biz').value.trim(),
+        is_business: document.getElementById('e_type').value === '1',
+        availability: eAvail.value,
+        area: document.getElementById('e_area').value,
+        skill_level: eLvl.value,
+        years_experience: document.getElementById('e_yrs').value.trim() === '' ? null : Number(document.getElementById('e_yrs').value),
+        specialties: specs
+      }});
+      emsg.className = 'msg ok'; emsg.textContent = 'Saved.';
+      await loadMembers();
+      setTimeout(function () { editOverlay.classList.remove('open'); }, 600);
+    } catch (err) {
+      emsg.className = 'msg error'; emsg.textContent = err.message || 'Could not save.';
+    } finally { btn.disabled = false; }
+  });
 
   async function patchMember(phone, body, ctrl, okText) {
     if (ctrl) ctrl.disabled = true;

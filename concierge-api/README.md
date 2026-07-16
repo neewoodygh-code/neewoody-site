@@ -86,6 +86,10 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | POST | `/api/me/photo` | member | raw `image/jpeg` body ≤300KB → R2 `concierge/members/<phone>.jpg`, sets photo_url |
 | DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
+| GET | `/api/jobs` | member | open + filled jobs (approved posters) incl. own posts |
+| POST | `/api/jobs` | member | post a job (≤10 open per member; no rate field by design) |
+| PUT | `/api/jobs/:id` | poster/admin | set status open/filled |
+| DELETE | `/api/jobs/:id` | poster/admin | remove post (admin = moderation) |
 | GET | `/api/admin/members` | admin | full list incl. pending |
 | POST | `/api/admin/members` | admin | create member (admin supplies PIN) |
 | PUT | `/api/admin/members/:phone` | admin | status/role/is_founder, profile, skill level, reset PIN |
@@ -101,4 +105,5 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 - `migrations/0001_initial.sql` — members, payments, login_attempts
 - `migrations/0002_saved_cutlists.sql` — saved cutlists
 - `migrations/0003_skill_levels.sql` — members.skill_level + years_experience
+- `migrations/0004_jobs_and_badges.sql` — members.is_business + availability; jobs table
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)

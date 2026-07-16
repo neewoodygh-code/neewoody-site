@@ -24,6 +24,14 @@ const PHOTO_MAX_BYTES = 300 * 1024; // server-side cap; client compresses to ~25
 // Self-set by members in edit-profile (owner decision 2026-07-15);
 // admin can correct a member's level from the admin table.
 const SKILL_LEVELS = ['apprentice', 'carpenter', 'master'];
+
+// Availability badge — the seeker/giver signal on directory cards and the
+// candidate-pool filter for the jobs board.
+const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'taking_apprentices'];
+
+// Jobs board caps (notice board, not a scheduler)
+const JOBS_MAX_OPEN_PER_MEMBER = 10;
+const JOBS_MAX_TEXT = { zone: 60, start_when: 40, duration: 40, description: 1000 };
 const TOKEN_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
 const PBKDF2_ITERS   = 100_000;
 const RATE_LIMIT_MAX = 5;                         // failed PINs
@@ -73,6 +81,13 @@ async function route(request, env) {
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
   if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
+
+  // ---- member: jobs board ----
+  if (path === '/api/jobs' && method === 'GET')  return withAuth(request, env, (m) => listJobs(env, m));
+  if (path === '/api/jobs' && method === 'POST') return withAuth(request, env, (m) => createJob(request, env, m));
+  const mJob = path.match(/^\/api\/jobs\/(\d+)$/);
+  if (mJob && method === 'PUT')    return withAuth(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
+  if (mJob && method === 'DELETE') return withAuth(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
 
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
@@ -169,6 +184,12 @@ async function updateMe(request, env, member) {
     if (yrs === false) return json({ error: 'invalid_years' }, 400);
     fields.years_experience = yrs;
   }
+  if ('is_business' in body) fields.is_business = body.is_business ? 1 : 0;
+  if ('availability' in body) {
+    const av = validateAvailability(body.availability);
+    if (av === false) return json({ error: 'invalid_availability' }, 400);
+    fields.availability = av;
+  }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
     if (!spec) return json({ error: 'invalid_specialties' }, 400);
@@ -195,16 +216,16 @@ async function updateMe(request, env, member) {
 async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone,
-            skill_level, years_experience
+            skill_level, years_experience, is_business, availability
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
-  return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties) })) });
+  return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), is_business: !!r.is_business })) });
 }
 
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
-            skill_level, years_experience,
+            skill_level, years_experience, is_business, availability,
             role, status, is_founder, joined_at, created_at
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -237,16 +258,19 @@ async function adminCreateMember(request, env) {
   if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
   const years_experience = validateYears(body.years_experience);
   if (years_experience === false) return json({ error: 'invalid_years' }, 400);
+  const availability = validateAvailability(body.availability);
+  if (availability === false) return json({ error: 'invalid_availability' }, 400);
+  const is_business = body.is_business ? 1 : 0;
 
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience
+    skill_level, years_experience, is_business, availability
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -291,6 +315,12 @@ async function adminUpdateMember(request, env, rawPhone) {
     const yrs = validateYears(body.years_experience);
     if (yrs === false) return json({ error: 'invalid_years' }, 400);
     fields.years_experience = yrs;
+  }
+  if ('is_business' in body) fields.is_business = body.is_business ? 1 : 0;
+  if ('availability' in body) {
+    const av = validateAvailability(body.availability);
+    if (av === false) return json({ error: 'invalid_availability' }, 400);
+    fields.availability = av;
   }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
@@ -340,6 +370,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM payments WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
   await env.MEDIA.delete(photoKey(phone));
@@ -387,6 +418,90 @@ async function adminListPayments(request, env) {
      WHERE p.period = ? ORDER BY p.recorded_at DESC`
   ).bind(period).all();
   return json({ period, payments: results || [] });
+}
+
+// ── jobs board ─────────────────────────────────────────────────────────
+// A notice board: any approved member posts freely; applications happen on
+// WhatsApp via the poster's wa.me link (never in-platform messaging). No
+// rate field — money is discussed in chat (owner decision, 2026-07-16).
+
+async function listJobs(env, member) {
+  // All open jobs (filled ones stay visible as social proof), plus the
+  // caller's own jobs regardless of status so they can manage them.
+  const { results } = await env.DB.prepare(
+    `SELECT j.id, j.poster_phone, j.zone, j.trade, j.skill_level, j.workers,
+            j.start_when, j.duration, j.description, j.status, j.created_at,
+            m.name AS poster_name, m.business_name AS poster_business, m.is_business AS poster_is_business
+     FROM jobs j JOIN members m ON m.phone = j.poster_phone
+     WHERE j.status IN ('open','filled') AND m.status = 'approved'
+     ORDER BY j.status = 'open' DESC, j.created_at DESC`
+  ).all();
+  return json({
+    jobs: (results || []).map((j) => ({ ...j, poster_is_business: !!j.poster_is_business, mine: j.poster_phone === member.phone })),
+  });
+}
+
+async function createJob(request, env, member) {
+  const body = await readJson(request);
+
+  const zone = nullableStr(body.zone);
+  if (!zone || zone.length > JOBS_MAX_TEXT.zone) return json({ error: 'zone_required' }, 400);
+
+  let trade = nullableStr(body.trade);
+  if (trade && !SPECIALTIES.includes(trade)) return json({ error: 'invalid_trade' }, 400);
+
+  const skill_level = validateSkillLevel(body.skill_level);
+  if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
+
+  const workers = Number(body.workers == null || body.workers === '' ? 1 : body.workers);
+  if (!Number.isInteger(workers) || workers < 1 || workers > 50) return json({ error: 'invalid_workers' }, 400);
+
+  const start_when = nullableStr(body.start_when);
+  if (start_when && start_when.length > JOBS_MAX_TEXT.start_when) return json({ error: 'start_too_long' }, 400);
+  const duration = nullableStr(body.duration);
+  if (duration && duration.length > JOBS_MAX_TEXT.duration) return json({ error: 'duration_too_long' }, 400);
+  const description = nullableStr(body.description);
+  if (description && description.length > JOBS_MAX_TEXT.description) return json({ error: 'description_too_long' }, 400);
+
+  const open = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM jobs WHERE poster_phone = ? AND status = 'open'`
+  ).bind(member.phone).first();
+  if (open && open.c >= JOBS_MAX_OPEN_PER_MEMBER) {
+    return json({ error: 'too_many_open_jobs', limit: JOBS_MAX_OPEN_PER_MEMBER }, 400);
+  }
+
+  const r = await env.DB.prepare(
+    `INSERT INTO jobs (poster_phone, zone, trade, skill_level, workers, start_when, duration, description)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(member.phone, zone, trade, skill_level, workers, start_when, duration, description).run();
+
+  const row = await env.DB.prepare('SELECT * FROM jobs WHERE id = ?').bind(r.meta.last_row_id).first();
+  return json({ job: row }, 201);
+}
+
+// Poster (or admin) marks filled / reopens.
+async function updateJob(request, env, member, id) {
+  const job = await env.DB.prepare('SELECT * FROM jobs WHERE id = ?').bind(id).first();
+  if (!job) return json({ error: 'not_found' }, 404);
+  if (job.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+
+  const body = await readJson(request);
+  if (!['open', 'filled'].includes(body.status)) return json({ error: 'invalid_status' }, 400);
+
+  await env.DB.prepare(
+    `UPDATE jobs SET status = ?, updated_at = datetime('now') WHERE id = ?`
+  ).bind(body.status, id).run();
+  const row = await env.DB.prepare('SELECT * FROM jobs WHERE id = ?').bind(id).first();
+  return json({ job: row });
+}
+
+// Poster (or admin — moderation) removes the post entirely.
+async function deleteJob(env, member, id) {
+  const job = await env.DB.prepare('SELECT poster_phone FROM jobs WHERE id = ?').bind(id).first();
+  if (!job) return json({ error: 'not_found' }, 404);
+  if (job.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+  await env.DB.prepare('DELETE FROM jobs WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
 }
 
 // ── saved cutlists ─────────────────────────────────────────────────────
@@ -648,6 +763,11 @@ function validateYears(v) {
   return (Number.isInteger(n) && n >= 0 && n <= 70) ? n : false;
 }
 
+function validateAvailability(v) {
+  if (v == null || v === '') return null;
+  return AVAILABILITY.includes(String(v)) ? String(v) : false;
+}
+
 function parseSpec(text) {
   try { const a = JSON.parse(text); return Array.isArray(a) ? a : []; } catch { return []; }
 }
@@ -655,7 +775,7 @@ function parseSpec(text) {
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), is_founder: !!m.is_founder };
+  return { ...rest, specialties: parseSpec(m.specialties), is_founder: !!m.is_founder, is_business: !!m.is_business };
 }
 
 async function recordAttempt(env, phone, success) {
