@@ -33,6 +33,11 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
 const JOBS_MAX_TEXT = { zone: 60, start_when: 40, duration: 40, description: 1000 };
 
+// Public client-job anti-spam (no CAPTCHA yet — phone-keyed throttle).
+const CLIENT_JOB_MAX_PENDING_PER_PHONE = 3;   // outstanding unreviewed
+const CLIENT_JOB_WINDOW = "-1 hours";
+const CLIENT_JOB_MAX_PER_WINDOW = 3;          // per contact phone per hour
+
 // Web Push (job alerts). Concierge has its OWN VAPID keypair — secrets
 // VAPID_PUBLIC / VAPID_PRIVATE / VAPID_X / VAPID_Y — completely separate
 // from the dispatch worker's keys.
@@ -75,6 +80,10 @@ async function route(request, env, ctx) {
   // ---- public ----
   if (path === '/api/auth/login' && method === 'POST') return login(request, env);
   if (path === '/api/health' && method === 'GET') return json({ ok: true });
+
+  // Public "Hire a Carpenter" — unauthenticated job request from a client
+  // (homeowner, or a non-member master hiring hands). Lands as `pending`.
+  if (path === '/api/public/jobs' && method === 'POST') return publicPostJob(request, env, ctx);
 
   // Member photos are public GETs (they load in <img> tags, which can't send
   // Authorization headers). Avatars/logos only — low sensitivity by design.
@@ -125,6 +134,12 @@ async function route(request, env, ctx) {
   if (mMemberPhoto && method === 'DELETE') {
     return withAdmin(request, env, () => adminDeletePhoto(env, decodeURIComponent(mMemberPhoto[1])));
   }
+
+  // ---- admin: client job requests (moderation) ----
+  if (path === '/api/admin/client-jobs' && method === 'GET') return withAdmin(request, env, () => adminListClientJobs(env));
+  const mClientJob = path.match(/^\/api\/admin\/client-jobs\/(\d+)$/);
+  if (mClientJob && method === 'PUT')    return withAdmin(request, env, () => adminReviewClientJob(request, env, Number(mClientJob[1]), ctx));
+  if (mClientJob && method === 'DELETE') return withAdmin(request, env, () => adminDeleteClientJob(env, Number(mClientJob[1])));
 
   // ---- admin: payments ----
   if (path === '/api/admin/payments' && method === 'POST') return withAdmin(request, env, () => adminRecordPayment(request, env));
@@ -437,19 +452,52 @@ async function adminListPayments(request, env) {
 // rate field — money is discussed in chat (owner decision, 2026-07-16).
 
 async function listJobs(env, member) {
-  // All open jobs (filled ones stay visible as social proof), plus the
-  // caller's own jobs regardless of status so they can manage them.
-  const { results } = await env.DB.prepare(
+  // Member-posted jobs (open + filled-as-social-proof) from approved members.
+  const memberJobs = await env.DB.prepare(
     `SELECT j.id, j.poster_phone, j.zone, j.trade, j.skill_level, j.workers,
             j.start_when, j.duration, j.description, j.status, j.created_at,
             m.name AS poster_name, m.business_name AS poster_business, m.is_business AS poster_is_business
      FROM jobs j JOIN members m ON m.phone = j.poster_phone
-     WHERE j.status IN ('open','filled') AND m.status = 'approved'
-     ORDER BY j.status = 'open' DESC, j.created_at DESC`
+     WHERE j.status IN ('open','filled') AND m.status = 'approved'`
   ).all();
-  return json({
-    jobs: (results || []).map((j) => ({ ...j, poster_is_business: !!j.poster_is_business, mine: j.poster_phone === member.phone })),
+
+  // Client-posted jobs, but only ones an admin has approved (moderation gate).
+  const clientJobs = await env.DB.prepare(
+    `SELECT id, client_name, client_contact, zone, trade, skill_level, workers,
+            start_when, duration, description, status, created_at
+     FROM client_jobs WHERE status IN ('approved','filled')`
+  ).all();
+
+  const jobs = [];
+  for (const j of (memberJobs.results || [])) {
+    jobs.push({
+      id: j.id, source: 'member',
+      zone: j.zone, trade: j.trade, skill_level: j.skill_level, workers: j.workers,
+      start_when: j.start_when, duration: j.duration, description: j.description,
+      status: j.status, created_at: j.created_at,
+      poster_name: j.poster_name, poster_business: j.poster_business, poster_is_business: !!j.poster_is_business,
+      contact_phone: j.poster_phone,
+      mine: j.poster_phone === member.phone,
+    });
+  }
+  for (const j of (clientJobs.results || [])) {
+    jobs.push({
+      id: j.id, source: 'client',
+      zone: j.zone, trade: j.trade, skill_level: j.skill_level, workers: j.workers,
+      start_when: j.start_when, duration: j.duration, description: j.description,
+      status: j.status === 'approved' ? 'open' : j.status, created_at: j.created_at,
+      poster_name: j.client_name, poster_business: null, poster_is_business: false,
+      contact_phone: j.client_contact,
+      mine: false,
+    });
+  }
+  // Active (open) first, then most recent.
+  jobs.sort((a, b) => {
+    const ao = a.status === 'open' ? 0 : 1, bo = b.status === 'open' ? 0 : 1;
+    if (ao !== bo) return ao - bo;
+    return String(b.created_at || '').localeCompare(String(a.created_at || ''));
   });
+  return json({ jobs });
 }
 
 async function createJob(request, env, member, ctx) {
@@ -489,27 +537,30 @@ async function createJob(request, env, member, ctx) {
   const row = await env.DB.prepare('SELECT * FROM jobs WHERE id = ?').bind(r.meta.last_row_id).first();
 
   // Alert members in the job's zone — after the response, so posting stays fast.
-  const notify = notifyZone(env, row, member).catch((e) => console.error('job alert send failed:', e && e.message));
+  const notify = notifyZone(env, row, { exclude: member.phone }).catch((e) => console.error('job alert send failed:', e && e.message));
   if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
 
   return json({ job: row }, 201);
 }
 
 // Push a "new job in your area" alert to approved members whose area matches
-// the job's zone (excluding the poster). Expired subscriptions are pruned.
-async function notifyZone(env, job, poster) {
+// the job's zone. opts.exclude = a phone to skip (the member poster);
+// opts.client = true for client-posted jobs (tweaks the wording). Expired
+// subscriptions are pruned.
+async function notifyZone(env, job, opts = {}) {
   if (!env.VAPID_PRIVATE) return; // push not configured — never break posting
+  const exclude = opts.exclude || '';
   const { results } = await env.DB.prepare(
     `SELECT s.id, s.sub FROM push_subs s
      JOIN members m ON m.phone = s.member_phone
      WHERE m.area = ? AND m.status = 'approved' AND m.phone != ?
      LIMIT ?`
-  ).bind(job.zone, poster.phone, PUSH_MAX_PER_JOB).all();
+  ).bind(job.zone, exclude, PUSH_MAX_PER_JOB).all();
   if (!results || !results.length) return;
 
   const trade = job.trade ? job.trade.replace(/_/g, ' ') : 'any trade';
-  const title = 'New job in ' + job.zone;
-  const body = job.workers + ' × ' + trade + (job.start_when ? ' · starts ' + job.start_when : '') + ' — tap to view and contact the poster.';
+  const title = (opts.client ? 'New client job in ' : 'New job in ') + job.zone;
+  const body = job.workers + ' × ' + trade + (job.start_when ? ' · starts ' + job.start_when : '') + ' — tap to view and contact.';
 
   for (const row of results) {
     let sub;
@@ -519,6 +570,119 @@ async function notifyZone(env, job, poster) {
       await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
     }
   }
+}
+
+// Alert admins that a client job request is waiting for review.
+async function notifyAdmins(env, clientJob) {
+  if (!env.VAPID_PRIVATE) return;
+  const { results } = await env.DB.prepare(
+    `SELECT s.id, s.sub FROM push_subs s
+     JOIN members m ON m.phone = s.member_phone
+     WHERE m.role = 'admin' AND m.status = 'approved'
+     LIMIT ?`
+  ).bind(PUSH_MAX_PER_JOB).all();
+  if (!results || !results.length) return;
+  const trade = clientJob.trade ? clientJob.trade.replace(/_/g, ' ') : 'any trade';
+  const title = 'New client job request';
+  const body = clientJob.zone + ' · ' + clientJob.workers + ' × ' + trade + ' — review it in admin.';
+  for (const row of results) {
+    let sub;
+    try { sub = JSON.parse(row.sub); } catch { continue; }
+    const status = await sendWebPush(sub, title, body, env, '/concierge/admin.html');
+    if (status === 404 || status === 410) {
+      await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
+    }
+  }
+}
+
+// Public client job request. No account; lands `pending`. Anti-spam is a
+// phone-keyed throttle (a valid Ghana number is required to be contacted
+// anyway). CAPTCHA/Turnstile is a future hardening if abuse appears.
+async function publicPostJob(request, env, ctx) {
+  const body = await readJson(request);
+
+  const name = nullableStr(body.client_name);
+  if (!name || name.length > 80) return json({ error: 'name_required' }, 400);
+
+  const contact = normalizePhone(body.client_contact);
+  if (!contact) return json({ error: 'invalid_phone' }, 400);
+
+  const zone = nullableStr(body.zone);
+  if (!zone || zone.length > JOBS_MAX_TEXT.zone) return json({ error: 'zone_required' }, 400);
+
+  let trade = nullableStr(body.trade);
+  if (trade && !SPECIALTIES.includes(trade)) return json({ error: 'invalid_trade' }, 400);
+
+  const skill_level = validateSkillLevel(body.skill_level);
+  if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
+
+  const workers = Number(body.workers == null || body.workers === '' ? 1 : body.workers);
+  if (!Number.isInteger(workers) || workers < 1 || workers > 50) return json({ error: 'invalid_workers' }, 400);
+
+  const start_when = nullableStr(body.start_when);
+  if (start_when && start_when.length > JOBS_MAX_TEXT.start_when) return json({ error: 'start_too_long' }, 400);
+  const duration = nullableStr(body.duration);
+  if (duration && duration.length > JOBS_MAX_TEXT.duration) return json({ error: 'duration_too_long' }, 400);
+  const description = nullableStr(body.description);
+  if (description && description.length > JOBS_MAX_TEXT.description) return json({ error: 'description_too_long' }, 400);
+
+  const pending = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM client_jobs WHERE client_contact = ? AND status = 'pending'`
+  ).bind(contact).first();
+  if (pending && pending.c >= CLIENT_JOB_MAX_PENDING_PER_PHONE) return json({ error: 'too_many_pending' }, 429);
+
+  const recent = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM client_jobs WHERE client_contact = ? AND created_at >= datetime('now', ?)`
+  ).bind(contact, CLIENT_JOB_WINDOW).first();
+  if (recent && recent.c >= CLIENT_JOB_MAX_PER_WINDOW) return json({ error: 'too_many_recent' }, 429);
+
+  const r = await env.DB.prepare(
+    `INSERT INTO client_jobs (client_name, client_contact, zone, trade, skill_level, workers, start_when, duration, description)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(name, contact, zone, trade, skill_level, workers, start_when, duration, description).run();
+  const row = await env.DB.prepare('SELECT * FROM client_jobs WHERE id = ?').bind(r.meta.last_row_id).first();
+
+  const notify = notifyAdmins(env, row).catch((e) => console.error('admin notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+
+  return json({ ok: true, id: row.id }, 201);
+}
+
+async function adminListClientJobs(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT * FROM client_jobs WHERE status IN ('pending','approved','filled')
+     ORDER BY status = 'pending' DESC, created_at DESC LIMIT 200`
+  ).all();
+  return json({ jobs: results || [] });
+}
+
+async function adminReviewClientJob(request, env, id, ctx) {
+  const job = await env.DB.prepare('SELECT * FROM client_jobs WHERE id = ?').bind(id).first();
+  if (!job) return json({ error: 'not_found' }, 404);
+
+  const body = await readJson(request);
+  const status = String(body.status || '');
+  if (!['pending', 'approved', 'rejected', 'filled'].includes(status)) return json({ error: 'invalid_status' }, 400);
+
+  const firstApproval = status === 'approved' && job.status !== 'approved';
+  await env.DB.prepare(
+    `UPDATE client_jobs SET status = ?, reviewed_at = datetime('now') WHERE id = ?`
+  ).bind(status, id).run();
+
+  // Fire zone alerts only when a request is first published to the board.
+  if (firstApproval) {
+    const notify = notifyZone(env, job, { client: true }).catch((e) => console.error('client job alert failed:', e && e.message));
+    if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+  }
+
+  const updated = await env.DB.prepare('SELECT * FROM client_jobs WHERE id = ?').bind(id).first();
+  return json({ job: updated });
+}
+
+async function adminDeleteClientJob(env, id) {
+  const r = await env.DB.prepare('DELETE FROM client_jobs WHERE id = ?').bind(id).run();
+  if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
+  return json({ deleted: true });
 }
 
 async function savePushSub(request, env, member) {
@@ -714,9 +878,9 @@ async function servePhoto(env, request, phone) {
 // VAPID secrets. Returns the push service's HTTP status (0 on network error)
 // so callers can prune 404/410 (expired) subscriptions.
 
-async function sendWebPush(subscription, title, body, env) {
+async function sendWebPush(subscription, title, body, env, url) {
   try {
-    const payload = JSON.stringify({ title, body, icon: '/images/logo.png', url: '/concierge/directory.html#jobs' });
+    const payload = JSON.stringify({ title, body, icon: '/images/logo.png', url: url || '/concierge/directory.html#jobs' });
     const encrypted = await encryptPushPayload(subscription, payload);
     const auth = await makeVAPIDAuth(subscription.endpoint, env);
     const res = await fetch(subscription.endpoint, {

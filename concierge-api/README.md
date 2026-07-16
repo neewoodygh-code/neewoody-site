@@ -86,6 +86,10 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | POST | `/api/me/photo` | member | raw `image/jpeg` body ≤300KB → R2 `concierge/members/<phone>.jpg`, sets photo_url |
 | DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
+| POST | `/api/public/jobs` | public | client job request from `/hire.html` (lands `pending`; phone-throttled) |
+| GET | `/api/admin/client-jobs` | admin | list client requests (pending first) |
+| PUT | `/api/admin/client-jobs/:id` | admin | approve / reject / mark filled (approve publishes + alerts zone) |
+| DELETE | `/api/admin/client-jobs/:id` | admin | remove a client request |
 | POST | `/api/me/push` | member | save this device's Web Push subscription (job alerts) |
 | DELETE | `/api/me/push` | member | remove a push subscription by `{endpoint}` |
 | GET | `/api/jobs` | member | open + filled jobs (approved posters) incl. own posts |
@@ -109,6 +113,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 - `migrations/0003_skill_levels.sql` — members.skill_level + years_experience
 - `migrations/0004_jobs_and_badges.sql` — members.is_business + availability; jobs table
 - `migrations/0005_push_subs.sql` — push_subs (Web Push job alerts)
+- `migrations/0006_client_jobs.sql` — client_jobs (public "Hire a Carpenter" requests)
 
 Secrets (set via `wrangler secret put`, never committed): `SESSION_SECRET`, and the Concierge VAPID keypair `VAPID_PUBLIC` / `VAPID_PRIVATE` / `VAPID_X` / `VAPID_Y` (separate from dispatch's keys; the public key is also hardcoded in `js/concierge.js`). Local dev reads them from the gitignored `concierge-api/.dev.vars`.
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)

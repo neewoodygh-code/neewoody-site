@@ -177,7 +177,10 @@
       invalid_trade: 'Choose a valid trade for the job.',
       invalid_workers: 'Workers needed must be between 1 and 50.',
       description_too_long: 'Keep the job details under 1000 characters.',
-      too_many_open_jobs: 'You have too many open jobs — mark some as filled or delete them first.'
+      too_many_open_jobs: 'You have too many open jobs — mark some as filled or delete them first.',
+      name_required: 'Please enter your name.',
+      too_many_pending: 'You already have a few requests waiting for review — we\'ll get to them shortly.',
+      too_many_recent: 'You\'ve posted a few requests just now — please try again in a little while.'
     };
     if (code && map[code]) return map[code];
     if (status === 429) return 'Too many attempts. Please wait and try again.';

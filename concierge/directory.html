@@ -60,6 +60,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   text-transform:uppercase; color:#2e6b2e; border:1px solid rgba(46,107,46,.45); background:rgba(46,107,46,.08);
   border-radius:3px; padding:.16rem .45rem; margin-top:.3rem; margin-right:.3rem; }
 .bdg-av.giver{ color:#8a6d16; border-color:rgba(200,146,42,.55); background:rgba(200,146,42,.1); }
+.bdg-client{ display:inline-block; font-family:var(--ui); font-size:.55rem; font-weight:500; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--cream); background:var(--gold); border-radius:3px; padding:.16rem .45rem; }
 
 /* jobs board */
 .jobs-head{ display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
@@ -444,7 +446,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716a"></script>
+<script src="../js/concierge.js?v=20260716b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -798,10 +800,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (j.start_when) meta.push('Starts: ' + j.start_when);
     if (j.duration) meta.push('Duration: ' + j.duration);
     meta.push('Posted ' + String(j.created_at || '').slice(0, 10));
+    var isClient = j.source === 'client';
     var poster = '<b>' + C.escapeHtml(j.poster_name) + '</b>' +
       (j.poster_business ? ' · ' + C.escapeHtml(j.poster_business) : '') +
-      (j.poster_is_business ? ' <span class="bdg-biz" style="margin-top:0">Business</span>' : '');
-    var waText = encodeURIComponent('Hi ' + j.poster_name + ', I saw your job post on Carpentry Concierge (' + jobTitle(j) + ') — I\'m interested.');
+      (j.poster_is_business ? ' <span class="bdg-biz" style="margin-top:0">Business</span>' : '') +
+      (isClient ? ' <span class="bdg-client">Client · direct hire</span>' : '');
+    var waText = encodeURIComponent(isClient
+      ? 'Hello ' + j.poster_name + ', I\'m a carpenter on Carpentry Concierge — I saw your request (' + jobTitle(j) + ') and I can help.'
+      : 'Hi ' + j.poster_name + ', I saw your job post on Carpentry Concierge (' + jobTitle(j) + ') — I\'m interested.');
     el.innerHTML =
       '<div class="job-title">' + C.escapeHtml(jobTitle(j)) +
         ' <span class="job-status ' + j.status + '">' + j.status + '</span></div>' +
@@ -811,9 +817,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         '<span class="job-poster">' + poster + '</span>' +
         (j.mine
           ? ''
-          : '<a class="job-wa" href="' + C.waLink(j.poster_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact</a>') +
+          : '<a class="job-wa" href="' + C.waLink(j.contact_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact</a>') +
       '</div>';
-    if (j.mine) {
+    if (j.mine && j.source === 'member') {
       var foot = el.querySelector('.job-foot');
       var toggleBtn = document.createElement('button');
       toggleBtn.className = 'job-own-btn'; toggleBtn.type = 'button';
@@ -961,7 +967,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 3, date: '2026-07-15', title: 'Show your skill level', body: 'Set your level (Apprentice / Carpenter / Master Carpenter) and years of experience in My profile — it shows as a badge on your card.' },
     { id: 4, date: '2026-07-16', title: 'The Jobs board is live', body: 'Post a job in any zone, or get hired for day work near you — open the Jobs tab. Rates are discussed on WhatsApp.' },
     { id: 5, date: '2026-07-16', title: 'Business & availability badges', body: 'In My profile: set your account type (Business or Individual) and your availability — Open to work, Hiring, Seeking apprenticeship or Taking apprentices. Both show on your card and are searchable.' },
-    { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' }
+    { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' },
+    { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

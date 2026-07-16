@@ -172,6 +172,24 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     </div>
   </div>
 
+  <!-- Client job requests (moderation) -->
+  <div class="panel">
+    <h2>Client job requests <span class="sub" id="cjCount">from the public "Hire a Carpenter" page</span></h2>
+    <div class="pbody">
+      <div class="tools" style="margin-bottom:1rem">
+        <button class="btn ghost" id="cjReload" type="button">Reload</button>
+        <span class="small" style="align-self:center;color:var(--muted)">Approve to publish on the members' Jobs board (fires zone alerts). Reject or delete spam.</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Client</th><th>Job</th><th>Details</th><th>Posted</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="cjBody"></tbody>
+        </table>
+      </div>
+      <div class="state" id="cjState">Loading client requests…</div>
+    </div>
+  </div>
+
   <!-- Payments -->
   <div class="panel">
     <h2>MoMo payments <span class="sub">GHS 50 / month · recorded manually</span></h2>
@@ -222,7 +240,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716a"></script>
+<script src="../js/concierge.js?v=20260716b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -621,12 +639,79 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     }
   }
 
+  // ── client job requests (moderation) ──
+  var cjBody = document.getElementById('cjBody'), cjState = document.getElementById('cjState');
+  document.getElementById('cjReload').addEventListener('click', loadClientJobs);
+
+  function cjRow(j) {
+    var tr = document.createElement('tr');
+    var trade = j.trade ? C.specialtyLabel(j.trade) : 'Any trade';
+    var level = j.skill_level ? C.skillLabel(j.skill_level) : 'Any level';
+    var details = [level];
+    if (j.start_when) details.push('Starts: ' + j.start_when);
+    if (j.duration) details.push('Duration: ' + j.duration);
+    if (j.description) details.push(j.description);
+    tr.innerHTML =
+      '<td><div class="who">' + C.escapeHtml(j.client_name) + '</div>' +
+        '<div class="small"><a href="' + C.waLink(j.client_contact) + '" target="_blank" rel="noopener">' + C.displayPhone(j.client_contact) + '</a></div></td>' +
+      '<td>' + C.escapeHtml(j.workers + ' × ' + trade) + '<div class="small">' + C.escapeHtml(j.zone) + '</div></td>' +
+      '<td class="small" style="white-space:normal;max-width:280px">' + C.escapeHtml(details.join(' · ')) + '</td>' +
+      '<td class="small">' + C.escapeHtml((j.created_at || '').slice(0, 16).replace('T', ' ')) + '</td>' +
+      '<td>' + statusPill(j.status === 'approved' ? 'approved' : (j.status === 'pending' ? 'pending' : 'suspended')) +
+        ' <span class="small">' + C.escapeHtml(j.status) + '</span></td>' +
+      '<td></td>';
+    var actTd = tr.children[5];
+    function actBtn(label, danger, fn) {
+      var b = document.createElement('button');
+      b.className = 'rowbtn' + (danger ? ' danger' : ''); b.style.marginRight = '.35rem';
+      b.textContent = label; b.addEventListener('click', fn); return b;
+    }
+    if (j.status !== 'approved') {
+      actTd.appendChild(actBtn('Approve', false, function () { reviewClientJob(j.id, 'approved'); }));
+    }
+    if (j.status === 'approved') {
+      actTd.appendChild(actBtn('Mark filled', false, function () { reviewClientJob(j.id, 'filled'); }));
+    }
+    if (j.status !== 'rejected') {
+      actTd.appendChild(actBtn('Reject', true, function () { reviewClientJob(j.id, 'rejected'); }));
+    }
+    actTd.appendChild(actBtn('Delete', true, function () {
+      if (confirm('Permanently delete this client request?')) deleteClientJob(j.id);
+    }));
+    return tr;
+  }
+
+  async function reviewClientJob(id, status) {
+    try { await C.api('/admin/client-jobs/' + id, { method: 'PUT', body: { status: status } }); await loadClientJobs(); }
+    catch (err) { alert(err.message || 'Could not update the request.'); }
+  }
+  async function deleteClientJob(id) {
+    try { await C.api('/admin/client-jobs/' + id, { method: 'DELETE' }); await loadClientJobs(); }
+    catch (err) { alert(err.message || 'Could not delete the request.'); }
+  }
+
+  async function loadClientJobs() {
+    cjState.style.display = ''; cjState.textContent = 'Loading client requests…'; cjBody.innerHTML = '';
+    try {
+      var r = await C.api('/admin/client-jobs');
+      var jobs = r.jobs || [];
+      var pending = jobs.filter(function (j) { return j.status === 'pending'; }).length;
+      document.getElementById('cjCount').textContent = pending ? (pending + ' waiting for review') : 'from the public "Hire a Carpenter" page';
+      if (!jobs.length) { cjState.textContent = 'No client requests yet.'; return; }
+      cjState.style.display = 'none';
+      jobs.forEach(function (j) { cjBody.appendChild(cjRow(j)); });
+    } catch (err) {
+      cjState.textContent = err.message || 'Could not load client requests.';
+    }
+  }
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
     await loadMembers();
+    loadClientJobs();
     viewPayments();
   })();
 })();

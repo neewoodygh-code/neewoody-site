@@ -64,6 +64,8 @@ Specialties list (fixed vocabulary, multi-select — **revised by owner 2026-07-
 
 Badges (added 2026-07-16, migration `0004_jobs_and_badges.sql`): `members.is_business` (0/1 — "Business" badge; the intake question is Business vs Individual) and `members.availability` (`open_to_work` | `hiring` | `seeking_apprenticeship` | `taking_apprentices`, nullable — colored chip + directory filter). Both member-self-set in profile edit and admin-editable.
 
+Client-facing "Hire a Carpenter" (added 2026-07-16, migration `0006_client_jobs.sql`) — **supersedes the Phase-1 "no public self-serve" line for job posting (owner-directed).** Public page `/hire.html` (indexed, in sitemap) lets a client (homeowner OR non-member master hiring hands) post a job with NO account. Separate `client_jobs` table (isolated from member `jobs`), every row `pending` until an admin approves. Public `POST /api/public/jobs` (unauthenticated; phone-keyed anti-spam: ≤3 pending and ≤3/hour per contact number; no CAPTCHA yet). Admin `GET /api/admin/client-jobs`, `PUT /api/admin/client-jobs/:id` (status pending|approved|rejected|filled — first approval fires zone alerts + is what publishes it), `DELETE /api/admin/client-jobs/:id`. Approved client jobs merge into the members' `GET /api/jobs` board (`source:'client'`, `contact_phone` = the client's number) badged "Client · direct hire"; members contact via wa.me, admin owns the lifecycle. A Web Push also alerts admins when a request lands. NOT built: client accounts, SMS/OTP, payments, public browsing of the member directory (privacy — deferred, needs member opt-in).
+
 Jobs board (added 2026-07-16, same migration): `jobs` table — poster_phone FK, zone (text, zone vocabulary via frontend), trade (specialty key or NULL = any), skill_level (or NULL = any), workers (1–50), start_when/duration (free text ≤40 — it's a notice board, not a scheduler), description (≤1000), status `open`|`filled`. **No rate field — rates are discussed on WhatsApp (owner decision).** Any approved member posts freely (≤10 open posts each); applications are a prefilled wa.me link to the poster; poster or admin can mark filled/reopen/delete. Deleting a member cascades their jobs.
 
 Skill levels (added 2026-07-15, migration `0003_skill_levels.sql`): `members.skill_level` (`apprentice` | `carpenter` | `master`, label "Master Carpenter") + `members.years_experience` (integer 0–70). Self-set by members in edit-profile (owner decision); admin can correct inline in the admin table and captures both at intake. Directory shows a level badge and filters by level. Both nullable — "not set" is valid.
@@ -76,6 +78,7 @@ All responses JSON. CORS restricted to `https://neewoodygh.com` (+ localhost for
 
 **Public:**
 - `POST /api/auth/login` — `{phone, pin}` → `{token, member}` or 401/429.
+- `POST /api/public/jobs` — unauthenticated client job request (Hire a Carpenter). Lands `pending`; phone-keyed anti-spam. `{ok, id}` or 400/429.
 
 **Authenticated (member):**
 - `GET /api/me` — own member record (never returns pin_hash).
