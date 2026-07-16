@@ -91,6 +91,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .job-own-btn:hover{ border-color:var(--gold); }
 .job-own-btn.danger{ color:#a52a2a; border-color:rgba(165,42,42,.4); }
 .jobs-mine-label{ font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin:0 0 .7rem; }
+.alerts-btn{ font-family:var(--ui); font-size:.64rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+  background:transparent; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px;
+  padding:.5rem .8rem; cursor:pointer; }
+.alerts-btn:hover{ border-color:var(--gold); }
+.alerts-btn.on{ background:var(--green); color:var(--cream); border-color:var(--green); }
+.alerts-note{ font-size:.72rem; color:var(--muted); max-width:230px; text-align:right; min-height:1em; }
+
+/* what's-new modal */
+.wn-entry{ padding:.9rem 0; border-bottom:1px solid rgba(11,31,14,.1); }
+.wn-entry:last-child{ border-bottom:none; }
+.wn-date{ font-family:var(--ui); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); }
+.wn-entry h3{ font-family:var(--display); font-weight:500; font-size:1.05rem; margin:.2rem 0 .3rem; }
+.wn-entry p{ font-size:.88rem; line-height:1.6; color:var(--muted); }
 .modal textarea{ width:100%; font-size:1rem; font-family:var(--body); padding:.7rem .8rem; border:1px solid rgba(11,31,14,.2); border-radius:3px; background:#fff; min-height:90px; resize:vertical; }
 
 /* intro + filters */
@@ -320,7 +333,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <h1>Jobs board</h1>
         <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
       </div>
-      <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
+      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+        <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
+        <button class="alerts-btn" id="alertsBtn" type="button" style="display:none">🔔 Get job alerts for your area</button>
+        <span class="alerts-note" id="alertsNote"></span>
+      </div>
     </div>
     <div id="jobsMine"></div>
     <div id="jobsList"></div>
@@ -391,6 +408,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
+<!-- What's new since your last visit -->
+<div class="overlay" id="wnOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2>What's new</h2><button class="x" id="closeWn" aria-label="Close">×</button></div>
+    <div style="padding:.5rem 1.5rem 1.5rem">
+      <div id="wnList"></div>
+      <button class="save" id="wnGotIt" type="button" style="margin-top:1rem">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- Post a job -->
 <div class="overlay" id="jobOverlay">
   <div class="modal" role="dialog" aria-modal="true">
@@ -416,7 +444,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716"></script>
+<script src="../js/concierge.js?v=20260716a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -885,6 +913,80 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { btn.disabled = false; }
   });
 
+  // ── job alerts (Web Push) ──
+  var alertsBtn = document.getElementById('alertsBtn');
+  var alertsNote = document.getElementById('alertsNote');
+  var alertsOn = false;
+
+  function renderAlertsBtn() {
+    alertsBtn.style.display = '';
+    alertsBtn.classList.toggle('on', alertsOn);
+    alertsBtn.textContent = alertsOn ? '🔔 Job alerts: ON — tap to turn off' : '🔔 Get job alerts for your area';
+    alertsNote.textContent = alertsOn
+      ? 'You\'ll be notified when a job is posted in ' + ((me && me.area) || 'your area') + '.'
+      : '';
+  }
+  async function initAlerts() {
+    if (!C.pushSupported()) return; // button stays hidden
+    try {
+      alertsOn = !!(await C.getPushSub('sw.js'));
+    } catch (e) { return; }
+    renderAlertsBtn();
+  }
+  alertsBtn.addEventListener('click', async function () {
+    alertsBtn.disabled = true;
+    try {
+      if (alertsOn) {
+        await C.disablePush('sw.js');
+        alertsOn = false;
+      } else {
+        await C.enablePush('sw.js');
+        alertsOn = true;
+      }
+      renderAlertsBtn();
+    } catch (err) {
+      alertsNote.textContent = err.message === 'permission_denied'
+        ? 'Notifications are blocked — allow them for this site in your browser settings, then try again.'
+        : 'Could not set up alerts on this device.';
+    } finally { alertsBtn.disabled = false; }
+  });
+
+  // ── what's new since your last visit ──
+  // Append an entry (next id, today's date) whenever a member-facing feature
+  // ships. Members see entries newer than BOTH their join date and the last
+  // entry they dismissed on this device.
+  var CHANGELOG = [
+    { id: 1, date: '2026-07-15', title: 'Trades got more specific', body: 'Open My profile and re-pick your trades — Furniture is now Cabinet construction, Interior work and Solid wood furniture. Pick your area from the new zone list too.' },
+    { id: 2, date: '2026-07-15', title: 'Add your photo', body: 'Upload a photo or business logo from My profile — no links needed. A face on your card makes people far more likely to contact you.' },
+    { id: 3, date: '2026-07-15', title: 'Show your skill level', body: 'Set your level (Apprentice / Carpenter / Master Carpenter) and years of experience in My profile — it shows as a badge on your card.' },
+    { id: 4, date: '2026-07-16', title: 'The Jobs board is live', body: 'Post a job in any zone, or get hired for day work near you — open the Jobs tab. Rates are discussed on WhatsApp.' },
+    { id: 5, date: '2026-07-16', title: 'Business & availability badges', body: 'In My profile: set your account type (Business or Individual) and your availability — Open to work, Hiring, Seeking apprenticeship or Taking apprentices. Both show on your card and are searchable.' },
+    { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' }
+  ];
+  var WN_KEY = 'nwd-changelog-seen';
+
+  function maybeShowWhatsNew() {
+    if (!me) return;
+    var seen = 0;
+    try { seen = Number(localStorage.getItem(WN_KEY)) || 0; } catch (e) {}
+    var joined = String(me.joined_at || '').slice(0, 10);
+    var fresh = CHANGELOG.filter(function (e) { return e.id > seen && e.date > joined; });
+    var latest = CHANGELOG[CHANGELOG.length - 1].id;
+    var markSeen = function () { try { localStorage.setItem(WN_KEY, String(latest)); } catch (e) {} };
+    if (!fresh.length) { markSeen(); return; }
+    var list = document.getElementById('wnList');
+    list.innerHTML = fresh.map(function (e) {
+      return '<div class="wn-entry"><span class="wn-date">' + C.escapeHtml(e.date) + '</span>' +
+        '<h3>' + C.escapeHtml(e.title) + '</h3><p>' + C.escapeHtml(e.body) + '</p></div>';
+    }).join('');
+    var wn = document.getElementById('wnOverlay');
+    var close = function () { wn.classList.remove('open'); markSeen(); };
+    document.getElementById('wnGotIt').onclick = close;
+    document.getElementById('closeWn').onclick = close;
+    wn.addEventListener('click', function (e) { if (e.target === wn) close(); });
+    wn.classList.add('open');
+  }
+
   async function load() {
     try {
       var r = await C.api('/directory');
@@ -911,6 +1013,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       if (err.status === 401) { location.replace('login.html'); return; }
     }
     await load();
+    maybeShowWhatsNew();
+    initAlerts();
   }
   if (location.hash && TABS.indexOf(location.hash.slice(1)) > 0) showTab(location.hash.slice(1));
   init();

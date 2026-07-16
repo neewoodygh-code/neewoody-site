@@ -1,2 +1,5 @@
 # Claude Code local settings (machine-specific)
 .claude/settings.local.json
+
+# Local worker secrets (never commit)
+concierge-api/.dev.vars

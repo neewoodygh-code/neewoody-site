@@ -85,6 +85,7 @@ All responses JSON. CORS restricted to `https://neewoodygh.com` (+ localhost for
 - `GET /api/media/members/<phone>.jpg` — public (loads in `<img>`, which can't send Authorization), `Cache-Control: public, max-age=86400` + ETag/304. Avatars only — low sensitivity by design.
 
 - `GET /api/jobs` — open + filled jobs from approved members (with poster name/business/is_business + `mine` flag) — own jobs always included; `POST /api/jobs` — create (validation per the jobs schema above); `PUT /api/jobs/:id` — status open|filled (poster or admin); `DELETE /api/jobs/:id` — remove (poster or admin — admin path doubles as moderation).
+- `POST /api/me/push` — save this device's Web Push subscription (`{subscription}` from `pushManager.subscribe`; endpoint-unique upsert into `push_subs`, migration 0005); `DELETE /api/me/push` — `{endpoint}` removes it. On job creation the Worker pushes "New job in <zone>" to approved members whose `area` = job zone (excluding the poster), via `ctx.waitUntil`; expired subs (404/410) pruned. Concierge signs with its OWN VAPID keys (secrets `VAPID_PUBLIC/VAPID_PRIVATE/VAPID_X/VAPID_Y`); service worker is `concierge/sw.js`, scope `/concierge/` — the root dispatch `sw.js` must never be touched or merged.
 
 **Authenticated (admin):**
 - `POST /api/admin/members` — create member (registration is admin-entered in Phase 1; founders come in via WhatsApp and the owner registers them). Generates initial PIN? No — admin supplies it, tells member on WhatsApp.

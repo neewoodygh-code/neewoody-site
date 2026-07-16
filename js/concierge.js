@@ -227,6 +227,49 @@
     return SPECIALTY_LABELS[key] || LEGACY_SPECIALTY_LABELS[key] || key;
   }
 
+  // ── job alerts (Web Push) ────────────────────────────────────────────
+  // Concierge's own VAPID public key (separate keypair from dispatch).
+  var VAPID_PUBLIC = 'BEK48elSj71usxsM8HonURgA8qwwirE0m7MUTnm9ltOlNkS8zfJcSAsCcHJBuombdNrDENaOPhnnWxJMBy_mHv4';
+
+  function pushSupported() {
+    return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  }
+  function vapidKeyBytes() {
+    var b64 = VAPID_PUBLIC.replace(/-/g, '+').replace(/_/g, '/');
+    var pad = b64 + '='.repeat((4 - b64.length % 4) % 4);
+    var bin = atob(pad);
+    var arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr;
+  }
+  // Returns the active PushSubscription for this device, or null.
+  async function getPushSub(swPath) {
+    if (!pushSupported()) return null;
+    var reg = await navigator.serviceWorker.register(swPath || 'sw.js');
+    return reg.pushManager.getSubscription();
+  }
+  // Subscribe this device + save on the server. Throws on denial/failure.
+  async function enablePush(swPath) {
+    if (!pushSupported()) throw new Error('push_unsupported');
+    var perm = await Notification.requestPermission();
+    if (perm !== 'granted') throw new Error('permission_denied');
+    var reg = await navigator.serviceWorker.register(swPath || 'sw.js');
+    var ready = await navigator.serviceWorker.ready;
+    var sub = await ready.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: vapidKeyBytes()
+    });
+    await api('/me/push', { method: 'POST', body: { subscription: sub.toJSON() } });
+    return sub;
+  }
+  async function disablePush(swPath) {
+    var sub = await getPushSub(swPath);
+    if (!sub) return;
+    var endpoint = sub.endpoint;
+    try { await sub.unsubscribe(); } catch (e) {}
+    try { await api('/me/push', { method: 'DELETE', body: { endpoint: endpoint } }); } catch (e) {}
+  }
+
   // ── member photos ──────────────────────────────────────────────────────
   // Compress on the phone BEFORE upload: a 4MB camera photo becomes a
   // ~30–60KB 512px square JPEG, so members on mobile data upload almost
@@ -298,6 +341,8 @@
     AVAILABILITY_LABELS: AVAILABILITY_LABELS, AVAILABILITY_ORDER: AVAILABILITY_ORDER, availabilityLabel: availabilityLabel,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
-    compressImage: compressImage, uploadPhoto: uploadPhoto
+    compressImage: compressImage, uploadPhoto: uploadPhoto,
+    pushSupported: pushSupported, getPushSub: getPushSub,
+    enablePush: enablePush, disablePush: disablePush
   };
 })(window);

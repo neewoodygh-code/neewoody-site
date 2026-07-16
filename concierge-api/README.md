@@ -86,6 +86,8 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | POST | `/api/me/photo` | member | raw `image/jpeg` body ≤300KB → R2 `concierge/members/<phone>.jpg`, sets photo_url |
 | DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
+| POST | `/api/me/push` | member | save this device's Web Push subscription (job alerts) |
+| DELETE | `/api/me/push` | member | remove a push subscription by `{endpoint}` |
 | GET | `/api/jobs` | member | open + filled jobs (approved posters) incl. own posts |
 | POST | `/api/jobs` | member | post a job (≤10 open per member; no rate field by design) |
 | PUT | `/api/jobs/:id` | poster/admin | set status open/filled |
@@ -106,4 +108,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 - `migrations/0002_saved_cutlists.sql` — saved cutlists
 - `migrations/0003_skill_levels.sql` — members.skill_level + years_experience
 - `migrations/0004_jobs_and_badges.sql` — members.is_business + availability; jobs table
+- `migrations/0005_push_subs.sql` — push_subs (Web Push job alerts)
+
+Secrets (set via `wrangler secret put`, never committed): `SESSION_SECRET`, and the Concierge VAPID keypair `VAPID_PUBLIC` / `VAPID_PRIVATE` / `VAPID_X` / `VAPID_Y` (separate from dispatch's keys; the public key is also hardcoded in `js/concierge.js`). Local dev reads them from the gitignored `concierge-api/.dev.vars`.
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)

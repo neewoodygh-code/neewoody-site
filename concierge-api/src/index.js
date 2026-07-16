@@ -32,6 +32,12 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 // Jobs board caps (notice board, not a scheduler)
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
 const JOBS_MAX_TEXT = { zone: 60, start_when: 40, duration: 40, description: 1000 };
+
+// Web Push (job alerts). Concierge has its OWN VAPID keypair — secrets
+// VAPID_PUBLIC / VAPID_PRIVATE / VAPID_X / VAPID_Y — completely separate
+// from the dispatch worker's keys.
+const VAPID_SUBJECT = 'mailto:neewoodygh@gmail.com';
+const PUSH_MAX_PER_JOB = 200; // safety cap per job post
 const TOKEN_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
 const PBKDF2_ITERS   = 100_000;
 const RATE_LIMIT_MAX = 5;                         // failed PINs
@@ -44,13 +50,13 @@ const ALLOWED_ORIGINS = [
 
 // ── entrypoint ─────────────────────────────────────────────────────────
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const cors = corsHeaders(request);
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: cors });
     }
     try {
-      const res = await route(request, env);
+      const res = await route(request, env, ctx);
       // fold CORS onto whatever route() produced
       for (const [k, v] of Object.entries(cors)) res.headers.set(k, v);
       return res;
@@ -61,7 +67,7 @@ export default {
 };
 
 // ── router ─────────────────────────────────────────────────────────────
-async function route(request, env) {
+async function route(request, env, ctx) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
   const method = request.method;
@@ -82,9 +88,13 @@ async function route(request, env) {
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
   if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
 
+  // ---- member: job alert subscriptions (Web Push) ----
+  if (path === '/api/me/push' && method === 'POST')   return withAuth(request, env, (m) => savePushSub(request, env, m));
+  if (path === '/api/me/push' && method === 'DELETE') return withAuth(request, env, (m) => deletePushSub(request, env, m));
+
   // ---- member: jobs board ----
   if (path === '/api/jobs' && method === 'GET')  return withAuth(request, env, (m) => listJobs(env, m));
-  if (path === '/api/jobs' && method === 'POST') return withAuth(request, env, (m) => createJob(request, env, m));
+  if (path === '/api/jobs' && method === 'POST') return withAuth(request, env, (m) => createJob(request, env, m, ctx));
   const mJob = path.match(/^\/api\/jobs\/(\d+)$/);
   if (mJob && method === 'PUT')    return withAuth(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
   if (mJob && method === 'DELETE') return withAuth(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
@@ -371,6 +381,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
   await env.MEDIA.delete(photoKey(phone));
@@ -441,7 +452,7 @@ async function listJobs(env, member) {
   });
 }
 
-async function createJob(request, env, member) {
+async function createJob(request, env, member, ctx) {
   const body = await readJson(request);
 
   const zone = nullableStr(body.zone);
@@ -476,7 +487,63 @@ async function createJob(request, env, member) {
   ).bind(member.phone, zone, trade, skill_level, workers, start_when, duration, description).run();
 
   const row = await env.DB.prepare('SELECT * FROM jobs WHERE id = ?').bind(r.meta.last_row_id).first();
+
+  // Alert members in the job's zone — after the response, so posting stays fast.
+  const notify = notifyZone(env, row, member).catch((e) => console.error('job alert send failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+
   return json({ job: row }, 201);
+}
+
+// Push a "new job in your area" alert to approved members whose area matches
+// the job's zone (excluding the poster). Expired subscriptions are pruned.
+async function notifyZone(env, job, poster) {
+  if (!env.VAPID_PRIVATE) return; // push not configured — never break posting
+  const { results } = await env.DB.prepare(
+    `SELECT s.id, s.sub FROM push_subs s
+     JOIN members m ON m.phone = s.member_phone
+     WHERE m.area = ? AND m.status = 'approved' AND m.phone != ?
+     LIMIT ?`
+  ).bind(job.zone, poster.phone, PUSH_MAX_PER_JOB).all();
+  if (!results || !results.length) return;
+
+  const trade = job.trade ? job.trade.replace(/_/g, ' ') : 'any trade';
+  const title = 'New job in ' + job.zone;
+  const body = job.workers + ' × ' + trade + (job.start_when ? ' · starts ' + job.start_when : '') + ' — tap to view and contact the poster.';
+
+  for (const row of results) {
+    let sub;
+    try { sub = JSON.parse(row.sub); } catch { continue; }
+    const status = await sendWebPush(sub, title, body, env);
+    if (status === 404 || status === 410) {
+      await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
+    }
+  }
+}
+
+async function savePushSub(request, env, member) {
+  const body = await readJson(request);
+  const sub = body.subscription;
+  if (!sub || typeof sub.endpoint !== 'string' || !/^https:\/\//.test(sub.endpoint) ||
+      !sub.keys || typeof sub.keys.p256dh !== 'string' || typeof sub.keys.auth !== 'string') {
+    return json({ error: 'invalid_subscription' }, 400);
+  }
+  const subStr = JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth } });
+  if (subStr.length > 4096) return json({ error: 'invalid_subscription' }, 400);
+  await env.DB.prepare(
+    `INSERT INTO push_subs (member_phone, endpoint, sub) VALUES (?, ?, ?)
+     ON CONFLICT(endpoint) DO UPDATE SET member_phone = excluded.member_phone, sub = excluded.sub`
+  ).bind(member.phone, sub.endpoint, subStr).run();
+  return json({ subscribed: true }, 201);
+}
+
+async function deletePushSub(request, env, member) {
+  const body = await readJson(request);
+  const endpoint = String(body.endpoint || '');
+  if (!endpoint) return json({ error: 'endpoint_required' }, 400);
+  await env.DB.prepare('DELETE FROM push_subs WHERE endpoint = ? AND member_phone = ?')
+    .bind(endpoint, member.phone).run();
+  return json({ subscribed: false });
 }
 
 // Poster (or admin) marks filled / reopens.
@@ -639,6 +706,120 @@ async function servePhoto(env, request, phone) {
       'ETag': etag,
     },
   });
+}
+
+// ── Web Push send (RFC 8291 aes128gcm + RFC 8292 VAPID) ────────────────
+// Ported from the proven implementation in the dispatch worker (worker.js);
+// dispatch itself and its keys are untouched — Concierge signs with its own
+// VAPID secrets. Returns the push service's HTTP status (0 on network error)
+// so callers can prune 404/410 (expired) subscriptions.
+
+async function sendWebPush(subscription, title, body, env) {
+  try {
+    const payload = JSON.stringify({ title, body, icon: '/images/logo.png', url: '/concierge/directory.html#jobs' });
+    const encrypted = await encryptPushPayload(subscription, payload);
+    const auth = await makeVAPIDAuth(subscription.endpoint, env);
+    const res = await fetch(subscription.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/octet-stream',
+        'Content-Encoding': 'aes128gcm',
+        'Authorization': auth,
+        'TTL': '86400',
+      },
+      body: encrypted,
+    });
+    return res.status;
+  } catch (e) {
+    console.error('web push failed:', e && e.message);
+    return 0;
+  }
+}
+
+async function makeVAPIDAuth(endpoint, env) {
+  const url = new URL(endpoint);
+  const te = new TextEncoder();
+  const header = b64u(te.encode(JSON.stringify({ typ: 'JWT', alg: 'ES256' })));
+  const payload = b64u(te.encode(JSON.stringify({
+    aud: `${url.protocol}//${url.host}`,
+    exp: Math.floor(Date.now() / 1000) + 43200,
+    sub: VAPID_SUBJECT,
+  })));
+  const key = await crypto.subtle.importKey(
+    'jwk',
+    { kty: 'EC', crv: 'P-256', d: env.VAPID_PRIVATE, x: env.VAPID_X, y: env.VAPID_Y, key_ops: ['sign'] },
+    { name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign']
+  );
+  const sig = await crypto.subtle.sign(
+    { name: 'ECDSA', hash: 'SHA-256' }, key, te.encode(`${header}.${payload}`)
+  );
+  return `vapid t=${header}.${payload}.${b64u(sig)},k=${env.VAPID_PUBLIC}`;
+}
+
+async function encryptPushPayload(subscription, message) {
+  const te = new TextEncoder();
+  const subPub = fromB64u(subscription.keys.p256dh);
+  const authSec = fromB64u(subscription.keys.auth);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+
+  const ephemeral = await crypto.subtle.generateKey(
+    { name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']
+  );
+  const ephPubRaw = new Uint8Array(await crypto.subtle.exportKey('raw', ephemeral.publicKey));
+
+  const subKey = await crypto.subtle.importKey(
+    'raw', subPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []
+  );
+  const sharedBits = await crypto.subtle.deriveBits(
+    { name: 'ECDH', public: subKey }, ephemeral.privateKey, 256
+  );
+
+  const ikmInfo = concatBytes(te.encode('WebPush: info\x00'), subPub, ephPubRaw);
+  const ikmBase = await crypto.subtle.importKey('raw', sharedBits, 'HKDF', false, ['deriveBits']);
+  const ikm = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: authSec, info: ikmInfo }, ikmBase, 256
+  );
+  const ikmKey = await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']);
+
+  const cek = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt, info: te.encode('Content-Encoding: aes128gcm\x00') }, ikmKey, 128
+  );
+  const nonce = await crypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt, info: te.encode('Content-Encoding: nonce\x00') }, ikmKey, 96
+  );
+
+  const aesKey = await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['encrypt']);
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv: nonce }, aesKey,
+    concatBytes(te.encode(message), new Uint8Array([2]))
+  );
+
+  const header = new Uint8Array(21 + 65);
+  header.set(salt, 0);
+  new DataView(header.buffer).setUint32(16, 4096, false);
+  header[20] = 65;
+  header.set(ephPubRaw, 21);
+  return concatBytes(header, new Uint8Array(ciphertext));
+}
+
+function b64u(buf) {
+  const bytes = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+  let str = '';
+  bytes.forEach((b) => { str += String.fromCharCode(b); });
+  return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+function fromB64u(s) {
+  const b64 = String(s).replace(/-/g, '+').replace(/_/g, '/');
+  const bin = atob(b64);
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+}
+function concatBytes(...arrays) {
+  const parts = arrays.map((a) => (a instanceof Uint8Array ? a : new Uint8Array(a)));
+  const total = parts.reduce((n, a) => n + a.length, 0);
+  const out = new Uint8Array(total);
+  let off = 0;
+  for (const a of parts) { out.set(a, off); off += a.length; }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
