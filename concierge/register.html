@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Become a Member · Carpentry Concierge | Neewoody</title>
+<meta name="description" content="Join Carpentry Concierge — Ghana's members' community for carpenters. Register in two minutes: be found for work, hire trusted trades near you, and get first access to every tool." />
+<link rel="canonical" href="https://neewoodygh.com/concierge/register.html" />
+<link rel="icon" href="../images/favicon.ico" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Lora:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --green:#0b1f0e; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
+  --ink:#1c1c1a; --muted:#6b6557;
+  --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
+}
+html{font-size:16px}
+body{
+  min-height:100vh; background:var(--green); color:var(--cream);
+  font-family:var(--body); -webkit-font-smoothing:antialiased;
+  padding:2.5rem 1.5rem;
+  background-image:radial-gradient(120% 60% at 50% -10%, rgba(200,146,42,.14), transparent 60%);
+}
+.card{ width:100%; max-width:520px; margin:0 auto; }
+.brand{ text-align:center; margin-bottom:1.75rem; }
+.brand .eyebrow{ font-family:var(--ui); font-size:.62rem; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); }
+.brand h1{ font-family:var(--display); font-weight:500; font-size:1.9rem; margin-top:.5rem; }
+.brand p{ color:rgba(240,232,208,.65); font-size:.92rem; margin-top:.6rem; line-height:1.6; max-width:42ch; margin-left:auto; margin-right:auto; }
+.panel{
+  background:var(--cream); color:var(--ink); border-radius:5px;
+  padding:1.9rem 1.75rem; box-shadow:0 24px 60px rgba(0,0,0,.35); border-top:3px solid var(--gold);
+}
+label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.13em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:.4rem; }
+label .opt{ text-transform:none; letter-spacing:0; font-family:var(--body); font-size:.8rem; color:var(--muted); }
+.field{ margin-bottom:1.1rem; }
+.row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+input, select{
+  width:100%; font-family:var(--body); font-size:1rem; color:var(--ink);
+  padding:.75rem .8rem; border:1px solid rgba(11,31,14,.18); border-radius:3px; background:#fff; transition:border-color .2s;
+}
+input:focus, select:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
+input.pin{ letter-spacing:.4em; text-align:center; font-size:1.2rem; }
+.hint{ font-size:.76rem; color:var(--muted); margin-top:.35rem; line-height:1.5; }
+.spec-grid{ display:grid; grid-template-columns:1fr; gap:.5rem; margin-top:.3rem; }
+.spec-grid label.cb{ display:flex; align-items:flex-start; gap:.55rem; text-transform:none; letter-spacing:0;
+  font-family:var(--body); font-size:.92rem; color:var(--ink); margin:0; cursor:pointer; }
+.spec-grid label.cb input{ width:auto; margin-top:.2rem; }
+.spec-grid label.cb small{ display:block; color:var(--muted); font-size:.74rem; line-height:1.4; }
+button.submit{
+  width:100%; font-family:var(--ui); font-weight:500; font-size:.8rem; letter-spacing:.15em; text-transform:uppercase;
+  color:var(--green); background:var(--gold); border:none; border-radius:3px; padding:1rem; cursor:pointer; transition:filter .2s; margin-top:.5rem;
+}
+button.submit:hover{ filter:brightness(1.06); }
+button.submit:disabled{ opacity:.6; cursor:default; }
+.msg{ margin-top:1rem; font-size:.88rem; text-align:center; min-height:1.2em; }
+.msg.error{ color:#a52a2a; }
+.terms{ font-size:.76rem; color:var(--muted); margin-top:1rem; line-height:1.6; text-align:center; }
+.help{ text-align:center; margin-top:1.5rem; font-size:.84rem; color:rgba(240,232,208,.62); }
+.help a{ color:var(--gold); text-decoration:none; }
+.help a:hover{ text-decoration:underline; }
+
+.done{ display:none; }
+.done.show{ display:block; }
+.done .panel{ text-align:center; }
+.done .tick{ width:56px; height:56px; border-radius:50%; background:var(--green); color:var(--gold);
+  display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1.1rem; }
+.done h2{ font-family:var(--display); font-weight:500; font-size:1.5rem; margin-bottom:.6rem; }
+.done p{ color:var(--muted); line-height:1.7; margin-bottom:1.2rem; }
+.done .go{ display:inline-block; font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.7rem 1.4rem; }
+@media(max-width:520px){ .row{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="eyebrow">Neewoody Custom Woodwork</div>
+    <h1>Join Carpentry Concierge</h1>
+    <p>Register in two minutes. Be found for work, hire trusted carpenters near you, and get first access to every tool we build.</p>
+  </div>
+
+  <form class="panel" id="regForm" autocomplete="off">
+    <div class="field">
+      <label for="r_name">Your name</label>
+      <input id="r_name" maxlength="80" required />
+    </div>
+    <div class="field">
+      <label for="r_phone">Phone number <span class="opt">— this is how you log in and how members reach you</span></label>
+      <input id="r_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="r_pin">Choose a 5-digit PIN</label>
+        <input id="r_pin" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+      </div>
+      <div class="field">
+        <label for="r_pin2">Confirm PIN</label>
+        <input id="r_pin2" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+      </div>
+    </div>
+    <div class="field">
+      <label for="r_type">Account type</label>
+      <select id="r_type">
+        <option value="">Individual carpenter / apprentice</option>
+        <option value="1">Business — I hire and take on work</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="r_biz">Business name <span class="opt">— optional</span></label>
+      <input id="r_biz" maxlength="80" placeholder="Optional" />
+    </div>
+    <div class="field">
+      <label for="r_area">Your area</label>
+      <select id="r_area" required></select>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label for="r_lvl">Skill level <span class="opt">— optional</span></label>
+        <select id="r_lvl"><option value="">— not set —</option></select>
+      </div>
+      <div class="field">
+        <label for="r_yrs">Years of experience <span class="opt">— optional</span></label>
+        <input id="r_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="e.g. 8" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
+      <select id="r_avail"><option value="">— not shown —</option></select>
+    </div>
+    <div class="field">
+      <label>Your trades <span class="opt">— pick all that apply</span></label>
+      <div class="spec-grid" id="r_specs"></div>
+    </div>
+    <button class="submit" id="regBtn" type="submit">Submit my application</button>
+    <div class="msg" id="regMsg"></div>
+    <p class="terms">Membership is GHS 50/month. We review every application before approving — once you're approved, log in with your phone and PIN. We'll be in touch on WhatsApp.</p>
+  </form>
+
+  <div class="done" id="regDone">
+    <div class="panel">
+      <div class="tick">✓</div>
+      <h2>Application received.</h2>
+      <p>Thanks for registering. We review every application personally — once you're approved you'll be able to log in with your phone and PIN, and we'll reach out on WhatsApp.</p>
+      <a class="go" href="login.html">Go to login</a>
+    </div>
+  </div>
+
+  <p class="help">Already a member? <a href="login.html">Log in →</a></p>
+</div>
+
+<script src="../js/concierge.js?v=20260716c"></script>
+<script>
+(function () {
+  var C = window.Concierge;
+  if (C.tokenAlive()) { location.replace('directory.html'); return; }
+
+  var form = document.getElementById('regForm');
+  var btn = document.getElementById('regBtn');
+  var msg = document.getElementById('regMsg');
+
+  // Populate area / level / availability / trades from the shared vocabulary.
+  C.fillZoneSelect(document.getElementById('r_area'), '', '— select your area —');
+  var lvl = document.getElementById('r_lvl');
+  C.SKILL_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lvl.appendChild(o); });
+  var avail = document.getElementById('r_avail');
+  C.AVAILABILITY_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); avail.appendChild(o); });
+  var specGrid = document.getElementById('r_specs');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    var ex = C.SPECIALTY_EXAMPLES[k];
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.specialtyLabel(k)) +
+      (ex ? '<small>' + C.escapeHtml(ex) + '</small>' : '') + '</span>';
+    specGrid.appendChild(l);
+  });
+
+  function digitsOnly(el, n) { el.addEventListener('input', function () { el.value = el.value.replace(/\D/g, '').slice(0, n); }); }
+  digitsOnly(document.getElementById('r_pin'), 5);
+  digitsOnly(document.getElementById('r_pin2'), 5);
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+    var name = document.getElementById('r_name').value.trim();
+    var phone = C.normalizePhone(document.getElementById('r_phone').value);
+    var pin = document.getElementById('r_pin').value;
+    var pin2 = document.getElementById('r_pin2').value;
+    var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var area = document.getElementById('r_area').value;
+
+    if (!name) { return showErr('Please enter your name.'); }
+    if (!phone) { return showErr('Enter a valid Ghana phone number.'); }
+    if (!/^\d{5}$/.test(pin)) { return showErr('Your PIN must be exactly 5 digits.'); }
+    if (pin !== pin2) { return showErr('The two PINs don\'t match — please re-enter them.'); }
+    if (!area) { return showErr('Choose your area.'); }
+    if (!specs.length) { return showErr('Choose at least one trade.'); }
+
+    btn.disabled = true; btn.textContent = 'Submitting…';
+    try {
+      await C.api('/public/register', { auth: false, method: 'POST', body: {
+        name: name,
+        phone: phone,
+        pin: pin,
+        business_name: document.getElementById('r_biz').value.trim(),
+        is_business: document.getElementById('r_type').value === '1',
+        area: area,
+        skill_level: lvl.value,
+        years_experience: document.getElementById('r_yrs').value.trim() === '' ? null : Number(document.getElementById('r_yrs').value),
+        availability: avail.value,
+        specialties: specs
+      }});
+      form.style.display = 'none';
+      document.getElementById('regDone').classList.add('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      showErr(err.message || 'Could not submit — please try again.');
+      btn.disabled = false; btn.textContent = 'Submit my application';
+    }
+  });
+
+  function showErr(t) { msg.className = 'msg error'; msg.textContent = t; }
+})();
+</script>
+</body>
+</html>

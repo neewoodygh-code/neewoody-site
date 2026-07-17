@@ -180,7 +180,9 @@
       too_many_open_jobs: 'You have too many open jobs — mark some as filled or delete them first.',
       name_required: 'Please enter your name.',
       too_many_pending: 'You already have a few requests waiting for review — we\'ll get to them shortly.',
-      too_many_recent: 'You\'ve posted a few requests just now — please try again in a little while.'
+      too_many_recent: 'You\'ve posted a few requests just now — please try again in a little while.',
+      pending_review: 'Your membership is still being reviewed. You\'ll be able to log in once it\'s approved — we\'ll be in touch on WhatsApp.',
+      account_suspended: 'This account is suspended. Please contact Neewoody on WhatsApp.'
     };
     if (code && map[code]) return map[code];
     if (status === 429) return 'Too many attempts. Please wait and try again.';

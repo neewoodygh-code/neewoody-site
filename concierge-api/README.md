@@ -79,7 +79,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| POST | `/api/auth/login` | public | `{phone,pin}` → `{token,member}` (401 / 429) |
+| POST | `/api/auth/login` | public | `{phone,pin}` → `{token,member}` (401 / 429; 403 `pending_review`/`account_suspended` if not approved) |
 | GET | `/api/me` | member | own record (no pin_hash) |
 | PUT | `/api/me` | member | update name, business_name, area, specialties, photo_url |
 | GET | `/api/directory` | member | approved members incl. phone (for WhatsApp) |
@@ -87,6 +87,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
 | POST | `/api/public/jobs` | public | client job request from `/hire.html` (lands `pending`; phone-throttled) |
+| POST | `/api/public/register` | public | self-service member registration from `/concierge/register.html` (lands `pending`; role/status/is_founder hardcoded) |
 | GET | `/api/admin/client-jobs` | admin | list client requests (pending first) |
 | PUT | `/api/admin/client-jobs/:id` | admin | approve / reject / mark filled (approve publishes + alerts zone) |
 | DELETE | `/api/admin/client-jobs/:id` | admin | remove a client request |

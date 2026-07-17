@@ -79,6 +79,7 @@ All responses JSON. CORS restricted to `https://neewoodygh.com` (+ localhost for
 **Public:**
 - `POST /api/auth/login` — `{phone, pin}` → `{token, member}` or 401/429.
 - `POST /api/public/jobs` — unauthenticated client job request (Hire a Carpenter). Lands `pending`; phone-keyed anti-spam. `{ok, id}` or 400/429.
+- `POST /api/public/register` — unauthenticated self-service member registration. Applicant supplies profile + own PIN; lands `pending` (role/status/is_founder hardcoded server-side). `{ok}` or 400/409. Pushes an alert to admins.
 
 **Authenticated (member):**
 - `GET /api/me` — own member record (never returns pin_hash).
@@ -98,7 +99,7 @@ All responses JSON. CORS restricted to `https://neewoodygh.com` (+ localhost for
 - `POST /api/admin/payments` — record a MoMo payment `{member_phone, period, amount_ghs, momo_ref}`.
 - `GET /api/admin/payments?period=YYYY-MM` — who has paid this month.
 
-No self-serve public registration endpoint in Phase 1. Do not build one.
+No self-serve public registration endpoint in Phase 1. Do not build one. **~~SUPERSEDED 2026-07-16 (owner-directed, at 20 members — intake got tedious):~~ self-service registration IS built — but with the vetting gate preserved.** `POST /api/public/register` (unauthenticated) lets an applicant fill their own full profile + choose their own 5-digit PIN; it lands `status='pending'`, `role='member'`, `is_founder=0` (those three are hardcoded server-side, never read from the body — a public caller can never mint an admin/approved/founder row). Admin reviews & approves in the existing members table (which shows pending count). **Login now requires `status='approved'`** — pending applicants get a 403 `pending_review`, suspended get `account_suspended` (checked only after a correct PIN). Payment stays manual for now (owner deferred MoMo/Paystack — see context doc). Page: `/concierge/register.html`.
 
 ## Frontend pages (on existing Pages site)
 
@@ -118,7 +119,7 @@ No self-serve public registration endpoint in Phase 1. Do not build one.
 - Paystack or any payment API (payments are manual MoMo, recorded by admin).
 - Suggestion portal, forums, chat, comments.
 - Safety check-in system (Phase 2 — separate spec will follow).
-- Public self-serve registration.
+- ~~Public self-serve registration.~~ **NOW BUILT (2026-07-16) with a vetting gate — see the auth section note above.**
 - Any framework migration of the existing site.
 
 ## Definition of done (Phase 1)

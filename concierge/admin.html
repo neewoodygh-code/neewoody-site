@@ -240,7 +240,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716b"></script>
+<script src="../js/concierge.js?v=20260716c"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -484,7 +484,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     list.forEach(function (m) { memBody.appendChild(memberRow(m)); });
     memState.style.display = list.length ? 'none' : '';
     if (!list.length) memState.textContent = 'No members match.';
-    document.getElementById('memCount').textContent = members.length + ' total';
+    var pendingN = members.filter(function (m) { return m.status === 'pending'; }).length;
+    document.getElementById('memCount').textContent = members.length + ' total' + (pendingN ? ' · ' + pendingN + ' pending review' : '');
   }
 
   // ── edit-member modal (full profile, incl. zone — no recreating accounts) ──

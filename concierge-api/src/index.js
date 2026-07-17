@@ -85,6 +85,11 @@ async function route(request, env, ctx) {
   // (homeowner, or a non-member master hiring hands). Lands as `pending`.
   if (path === '/api/public/jobs' && method === 'POST') return publicPostJob(request, env, ctx);
 
+  // Public self-service membership registration. Applicant fills their own
+  // profile + PIN; lands as `pending` (role member, never founder/admin) for
+  // owner vetting. Removes the admin data-entry tedium; keeps the trust gate.
+  if (path === '/api/public/register' && method === 'POST') return publicRegister(request, env, ctx);
+
   // Member photos are public GETs (they load in <img> tags, which can't send
   // Authorization headers). Avatars/logos only — low sensitivity by design.
   const mMedia = path.match(/^\/api\/media\/members\/(233\d{9})\.jpg$/);
@@ -183,6 +188,13 @@ async function login(request, env) {
   const ok = await verifyPin(pin, member.pin_hash);
   await recordAttempt(env, phone, ok);
   if (!ok) return fail();
+
+  // Only approved members get in. Self-registered applicants sit at `pending`
+  // until an admin vets them; suspended members are blocked. (Checked AFTER a
+  // correct PIN, so status is only ever revealed to the account's real owner.)
+  if (member.status !== 'approved') {
+    return json({ error: member.status === 'suspended' ? 'account_suspended' : 'pending_review' }, 403);
+  }
 
   const token = await signToken(phone, env);
   return json({ token, member: sanitize(member) });
@@ -572,8 +584,9 @@ async function notifyZone(env, job, opts = {}) {
   }
 }
 
-// Alert admins that a client job request is waiting for review.
-async function notifyAdmins(env, clientJob) {
+// Push a message to every admin's subscribed devices (client job requests,
+// new member applications, …). Opens `url` on tap. Prunes dead subs.
+async function pushToAdmins(env, title, body, url) {
   if (!env.VAPID_PRIVATE) return;
   const { results } = await env.DB.prepare(
     `SELECT s.id, s.sub FROM push_subs s
@@ -582,13 +595,10 @@ async function notifyAdmins(env, clientJob) {
      LIMIT ?`
   ).bind(PUSH_MAX_PER_JOB).all();
   if (!results || !results.length) return;
-  const trade = clientJob.trade ? clientJob.trade.replace(/_/g, ' ') : 'any trade';
-  const title = 'New client job request';
-  const body = clientJob.zone + ' · ' + clientJob.workers + ' × ' + trade + ' — review it in admin.';
   for (const row of results) {
     let sub;
     try { sub = JSON.parse(row.sub); } catch { continue; }
-    const status = await sendWebPush(sub, title, body, env, '/concierge/admin.html');
+    const status = await sendWebPush(sub, title, body, env, url || '/concierge/admin.html');
     if (status === 404 || status === 410) {
       await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
     }
@@ -642,10 +652,59 @@ async function publicPostJob(request, env, ctx) {
   ).bind(name, contact, zone, trade, skill_level, workers, start_when, duration, description).run();
   const row = await env.DB.prepare('SELECT * FROM client_jobs WHERE id = ?').bind(r.meta.last_row_id).first();
 
-  const notify = notifyAdmins(env, row).catch((e) => console.error('admin notify failed:', e && e.message));
+  const trade2 = row.trade ? row.trade.replace(/_/g, ' ') : 'any trade';
+  const notify = pushToAdmins(env, 'New client job request',
+    row.zone + ' · ' + row.workers + ' × ' + trade2 + ' — review it in admin.').catch((e) => console.error('admin notify failed:', e && e.message));
   if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
 
   return json({ ok: true, id: row.id }, 201);
+}
+
+// Public self-service registration. Security-sensitive fields (role, status,
+// is_founder) are HARDCODED here — never read from the body — so a public
+// caller can only ever create a pending, non-founder member.
+async function publicRegister(request, env, ctx) {
+  const body = await readJson(request);
+
+  const phone = normalizePhone(body.phone);
+  if (!phone) return json({ error: 'invalid_phone' }, 400);
+
+  const name = String(body.name || '').trim();
+  if (!name || name.length > 80) return json({ error: 'name_required' }, 400);
+
+  const pin = String(body.pin || '');
+  if (!/^\d{5}$/.test(pin)) return json({ error: 'pin_must_be_5_digits' }, 400);
+
+  const specialties = validateSpecialties(body.specialties);
+  if (!specialties) return json({ error: 'invalid_specialties' }, 400);
+
+  const skill_level = validateSkillLevel(body.skill_level);
+  if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
+  const years_experience = validateYears(body.years_experience);
+  if (years_experience === false) return json({ error: 'invalid_years' }, 400);
+  const availability = validateAvailability(body.availability);
+  if (availability === false) return json({ error: 'invalid_availability' }, 400);
+
+  const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
+  if (existing) return json({ error: 'member_exists' }, 409);
+
+  const pin_hash = await hashPin(pin);
+  await env.DB.prepare(
+    `INSERT INTO members
+       (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
+        skill_level, years_experience, is_business, availability)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?)`
+  ).bind(
+    phone, name, nullableStr(body.business_name), nullableStr(body.area),
+    specialties, pin_hash, new Date().toISOString(),
+    skill_level, years_experience, body.is_business ? 1 : 0, availability
+  ).run();
+
+  const notify = pushToAdmins(env, 'New member application',
+    name + ' · ' + (nullableStr(body.area) || 'no area given') + ' — review & approve in admin.').catch((e) => console.error('admin notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+
+  return json({ ok: true }, 201);
 }
 
 async function adminListClientJobs(env) {
