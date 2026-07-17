@@ -596,7 +596,8 @@ function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, on
   return (
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
       <Hdr title={session.workshopName} sub="Job Pricing"
-        right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
+        right={<div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
+          <a href="/concierge/directory.html" style={{color:S.muted,fontSize:'.75rem',fontFamily:FB,textDecoration:'none',padding:'5px 8px',border:`1px solid ${S.border}`}} title="Back to your member area">← Member area</a>
           <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
           <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1px solid ${S.border}`,borderRadius:0,color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
           <button onClick={onLogout} style={{background:'transparent',border:'none',color:S.muted,fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
