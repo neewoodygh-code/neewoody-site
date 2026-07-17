@@ -113,6 +113,12 @@ async function route(request, env, ctx) {
   if (mJob && method === 'PUT')    return withAuth(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
   if (mJob && method === 'DELETE') return withAuth(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
 
+  // ---- member: pricing tool (per-member config + quotes) ----
+  if (path === '/api/pricing/config' && method === 'GET') return withAuth(request, env, (m) => getPricingConfig(env, m));
+  if (path === '/api/pricing/config' && method === 'PUT') return withAuth(request, env, (m) => savePricingConfig(request, env, m));
+  if (path === '/api/pricing/quotes' && method === 'GET') return withAuth(request, env, (m) => getQuotes(env, m));
+  if (path === '/api/pricing/quotes' && method === 'PUT') return withAuth(request, env, (m) => saveQuotes(request, env, m));
+
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
   if (path === '/api/cutlists' && method === 'POST') return withAuth(request, env, (m) => saveCutlist(request, env, m));
@@ -409,6 +415,8 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
   await env.MEDIA.delete(photoKey(phone));
@@ -792,6 +800,63 @@ async function deleteJob(env, member, id) {
   if (job.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
   await env.DB.prepare('DELETE FROM jobs WHERE id = ?').bind(id).run();
   return json({ deleted: true });
+}
+
+// ── pricing tool (per-member config + quotes) ──────────────────────────
+const PRICING_CONFIG_MAX_BYTES = 128 * 1024;
+const QUOTE_MAX_PER_MEMBER = 200;
+const QUOTE_MAX_BYTES = 128 * 1024;
+const QUOTE_NAME_MAX = 100;
+const QUOTE_STATUSES = ['draft', 'sent', 'accepted', 'declined'];
+
+function safeJsonStr(v, max) {
+  let s; try { s = JSON.stringify(v); } catch { return null; }
+  if (!s || s === 'null' || typeof v !== 'object') return null;
+  if (s.length > max) return 'TOO_LARGE';
+  return s;
+}
+
+async function getPricingConfig(env, member) {
+  const row = await env.DB.prepare('SELECT config, updated_at FROM pricing_configs WHERE member_phone = ?').bind(member.phone).first();
+  if (!row) return json({ config: null });
+  let config; try { config = JSON.parse(row.config); } catch { config = null; }
+  return json({ config, updated_at: row.updated_at });
+}
+
+async function savePricingConfig(request, env, member) {
+  const body = await readJson(request);
+  const s = safeJsonStr(body.config, PRICING_CONFIG_MAX_BYTES);
+  if (s === null) return json({ error: 'config_required' }, 400);
+  if (s === 'TOO_LARGE') return json({ error: 'config_too_large' }, 400);
+  await env.DB.prepare(
+    `INSERT INTO pricing_configs (member_phone, config) VALUES (?, ?)
+     ON CONFLICT(member_phone) DO UPDATE SET config = excluded.config, updated_at = datetime('now')`
+  ).bind(member.phone, s).run();
+  return json({ ok: true });
+}
+
+// Quotes are stored as one bulk JSON array per member (matches the tool's
+// load-all / save-all model). Cap the whole blob.
+const QUOTES_BLOB_MAX_BYTES = 512 * 1024;
+
+async function getQuotes(env, member) {
+  const row = await env.DB.prepare('SELECT quotes FROM pricing_configs WHERE member_phone = ?').bind(member.phone).first();
+  let quotes = [];
+  if (row && row.quotes) { try { const a = JSON.parse(row.quotes); if (Array.isArray(a)) quotes = a; } catch {} }
+  return json({ quotes });
+}
+
+async function saveQuotes(request, env, member) {
+  const body = await readJson(request);
+  const arr = Array.isArray(body) ? body : body.quotes;
+  if (!Array.isArray(arr)) return json({ error: 'quotes_required' }, 400);
+  const s = JSON.stringify(arr);
+  if (s.length > QUOTES_BLOB_MAX_BYTES) return json({ error: 'quotes_too_large' }, 400);
+  await env.DB.prepare(
+    `INSERT INTO pricing_configs (member_phone, config, quotes) VALUES (?, '{}', ?)
+     ON CONFLICT(member_phone) DO UPDATE SET quotes = excluded.quotes, updated_at = datetime('now')`
+  ).bind(member.phone, s).run();
+  return json({ ok: true });
 }
 
 // ── saved cutlists ─────────────────────────────────────────────────────

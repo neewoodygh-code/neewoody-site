@@ -35,8 +35,14 @@
 const { useState, useEffect, useMemo, useRef } = React;
 
 // ── Config ────────────────────────────────────────────────────────────
-const API         = 'https://neewoody-dispatch-api.neewoodygh.workers.dev/api';
+// Member pricing tool: multi-tenant on concierge-api/D1, gated by the
+// Concierge member session (NOT the dispatch worker / carp accounts).
+let API = 'https://concierge-api.neewoodygh.workers.dev/api';
+try { API = localStorage.getItem('nwd-api-override') || API; } catch (e) {}
 const SESSION_KEY = 'nwd-carp-session';
+const CONCIERGE_TOKEN_KEY = 'nwd-concierge-token';
+const LOGIN_URL = '/concierge/login.html?next=/carpenter-pricing.html';
+const getToken = () => { try { return localStorage.getItem(CONCIERGE_TOKEN_KEY) || ''; } catch (e) { return ''; } };
 
 // ── Constants ─────────────────────────────────────────────────────────
 const DEFAULT_OVERHEAD = {
@@ -145,18 +151,20 @@ const setSession   = s  => localStorage.setItem(SESSION_KEY, JSON.stringify(s));
 const clearSession = () => localStorage.removeItem(SESSION_KEY);
 
 // ── API ───────────────────────────────────────────────────────────────
-async function carpFetch(path, method='GET', body, sess) {
-  const s = sess || getSession();
+async function carpFetch(path, method='GET', body) {
   const r = await fetch(`${API}${path}`, {
     method,
     headers: {
-      'X-Carp-Id':  s.carpId,
-      'X-Carp-Pin': s.pin,
-      ...(body ? { 'Content-Type':'application/json' } : {}),
+      'Authorization': 'Bearer ' + getToken(),
+      ...(body != null ? { 'Content-Type':'application/json' } : {}),
     },
-    ...(body ? { body: JSON.stringify(body) } : {}),
+    ...(body != null ? { body: JSON.stringify(body) } : {}),
   });
-  if (r.status === 401) throw new Error('Unauthorized');
+  if (r.status === 401) {
+    try { localStorage.removeItem(CONCIERGE_TOKEN_KEY); } catch (e) {}
+    location.replace(LOGIN_URL);
+    throw new Error('Unauthorized');
+  }
   return r.json();
 }
 
@@ -1083,37 +1091,35 @@ function App() {
   const [overheadCfg, setOverheadCfg] = useState(null);
   const [activeId,    setActiveId]    = useState(null);
 
-  function persistSession(carpId, workshopName, pin) {
-    const s = { carpId, workshopName, pin };
-    setSession_(s);
-    setSession(s);
-  }
   function logout() {
-    clearSession();
-    setSession_(null);
-    setQuotes([]);
-    setOverheadCfg(null);
-    setScreen('welcome');
+    try { localStorage.removeItem(CONCIERGE_TOKEN_KEY); } catch (e) {}
+    location.replace('/concierge/login.html');
   }
 
-  async function loadData(sess) {
+  // Load the member (for the workshop name / quote refs) + their saved config
+  // and quotes from concierge-api. A 401 inside carpFetch redirects to login.
+  async function loadData() {
     try {
-      const [cfgRes, qRes] = await Promise.all([
-        carpFetch('/carp/config', 'GET', null, sess),
-        carpFetch('/carp/quotes', 'GET', null, sess),
+      const [meRes, cfgRes, qRes] = await Promise.all([
+        carpFetch('/me', 'GET'),
+        carpFetch('/pricing/config', 'GET'),
+        carpFetch('/pricing/quotes', 'GET'),
       ]);
+      const m = (meRes && meRes.member) || {};
+      setSession_({ carpId: m.phone, workshopName: (m.business_name || m.name || 'My Workshop'), pin: '' });
       setOverheadCfg(cfgRes.config || null);
       setQuotes(qRes.quotes || []);
-      return true;
-    } catch { return false; }
+      return { ok: true, hasConfig: !!cfgRes.config };
+    } catch (e) { return { ok: false }; }
   }
 
   useEffect(() => {
-    const saved = getSession();
-    if (!saved) { setScreen('welcome'); return; }
-    loadData(saved).then(ok => {
-      if (ok) { setSession_(saved); setScreen('dashboard'); }
-      else    { clearSession(); setScreen('welcome'); }
+    if (!getToken()) { location.replace(LOGIN_URL); return; }
+    loadData().then(res => {
+      if (!res.ok) return; // carpFetch already redirected on 401
+      // First tab in (no saved config yet) → land on Settings so they set
+      // their own overhead, crew rates and margins before pricing anything.
+      setScreen(res.hasConfig ? 'dashboard' : 'settings');
     });
   }, []);
 
@@ -1124,11 +1130,11 @@ function App() {
 
   const saveQuotes = async updated => {
     setQuotes(updated);
-    await carpFetch('/carp/quotes', 'PUT', updated);
+    await carpFetch('/pricing/quotes', 'PUT', updated);
   };
   const saveOverhead = async cfg => {
     setOverheadCfg(cfg);
-    await carpFetch('/carp/config', 'PUT', cfg);
+    await carpFetch('/pricing/config', 'PUT', { config: cfg });
   };
 
   const createNew = () => {

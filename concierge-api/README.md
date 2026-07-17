@@ -93,6 +93,8 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | DELETE | `/api/admin/client-jobs/:id` | admin | remove a client request |
 | POST | `/api/me/push` | member | save this device's Web Push subscription (job alerts) |
 | DELETE | `/api/me/push` | member | remove a push subscription by `{endpoint}` |
+| GET/PUT | `/api/pricing/config` | member | this member's own pricing config (overhead/rates/tiers) |
+| GET/PUT | `/api/pricing/quotes` | member | this member's quotes (bulk JSON array) |
 | GET | `/api/jobs` | member | open + filled jobs (approved posters) incl. own posts |
 | POST | `/api/jobs` | member | post a job (≤10 open per member; no rate field by design) |
 | PUT | `/api/jobs/:id` | poster/admin | set status open/filled |
@@ -115,6 +117,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 - `migrations/0004_jobs_and_badges.sql` — members.is_business + availability; jobs table
 - `migrations/0005_push_subs.sql` — push_subs (Web Push job alerts)
 - `migrations/0006_client_jobs.sql` — client_jobs (public "Hire a Carpenter" requests)
+- `migrations/0007_pricing.sql` + `0008_pricing_quotes_blob.sql` — pricing_configs (per-member pricing tool config + quotes blob)
 
 Secrets (set via `wrangler secret put`, never committed): `SESSION_SECRET`, and the Concierge VAPID keypair `VAPID_PUBLIC` / `VAPID_PRIVATE` / `VAPID_X` / `VAPID_Y` (separate from dispatch's keys; the public key is also hardcoded in `js/concierge.js`). Local dev reads them from the gitignored `concierge-api/.dev.vars`.
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)
