@@ -163,7 +163,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="table-scroll">
         <table>
           <thead><tr>
-            <th>Member</th><th>Area</th><th>Trades</th><th>Level</th><th>Status</th><th>Role</th><th>Founder</th><th>Joined</th><th>Actions</th>
+            <th>Member</th><th>Area</th><th>Trades</th><th>Level</th><th>Status</th><th>Role</th><th>Founder</th><th>Joined</th><th>Last seen</th><th>Actions</th>
           </tr></thead>
           <tbody id="memBody"></tbody>
         </table>
@@ -192,13 +192,13 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
   <!-- Payments -->
   <div class="panel">
-    <h2>MoMo payments <span class="sub">GHS 50 / month · recorded manually</span></h2>
+    <h2>MoMo payments <span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
     <div class="pbody">
       <form id="payForm" class="tools" style="margin-bottom:1.25rem">
         <div class="field" style="flex:2; min-width:200px"><label>Member</label>
           <select id="p_member" required><option value="">Select member…</option></select></div>
         <div class="field" style="max-width:130px"><label>Period</label><input id="p_period" placeholder="2026-07" required></div>
-        <div class="field" style="max-width:120px"><label>Amount (GHS)</label><input id="p_amount" inputmode="numeric" value="50" required></div>
+        <div class="field" style="max-width:120px"><label>Amount (GHS)</label><input id="p_amount" inputmode="numeric" value="100" required></div>
         <div class="field" style="max-width:170px"><label>MoMo ref</label><input id="p_ref" placeholder="Optional"></div>
         <button class="btn gold" id="payBtn" type="submit">Record</button>
       </form>
@@ -340,6 +340,16 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
   function statusPill(s) { return '<span class="pill ' + s + '">' + s + '</span>'; }
 
+  function lastSeenLabel(iso) {
+    if (!iso) return '<span style="color:#a52a2a">never</span>';
+    var d = new Date(iso.replace(' ', 'T') + 'Z');
+    var days = Math.floor((Date.now() - d.getTime()) / 86400000);
+    if (isNaN(days)) return C.escapeHtml(iso.slice(0, 10));
+    var txt = days <= 0 ? 'today' : days === 1 ? 'yesterday' : days + 'd ago';
+    var col = days <= 7 ? '#2e6b2e' : days <= 30 ? 'var(--muted)' : '#a52a2a';
+    return '<span style="color:' + col + '">' + txt + '</span>';
+  }
+
   function memberRow(m) {
     var tr = document.createElement('tr');
     var trades = (m.specialties || []).map(function (s) { return C.specialtyLabel(s); }).join(', ');
@@ -351,6 +361,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       '<td></td><td></td><td></td>' +
       '<td>' + (m.is_founder ? '<span class="pill founder">Founder</span>' : '—') + '</td>' +
       '<td class="small">' + C.escapeHtml((m.joined_at || '').slice(0, 10)) + '</td>' +
+      '<td class="small">' + lastSeenLabel(m.last_login) + '</td>' +
       '<td></td>';
 
     // level select (admin can correct a self-set level)
@@ -390,7 +401,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     roleTd.appendChild(roleSel);
 
     // actions
-    var actTd = tr.children[8];
+    var actTd = tr.children[9];
     var editBtn = document.createElement('button'); editBtn.className = 'rowbtn';
     editBtn.textContent = 'Edit';
     editBtn.addEventListener('click', function () { openEdit(m); });
@@ -485,7 +496,14 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     memState.style.display = list.length ? 'none' : '';
     if (!list.length) memState.textContent = 'No members match.';
     var pendingN = members.filter(function (m) { return m.status === 'pending'; }).length;
-    document.getElementById('memCount').textContent = members.length + ' total' + (pendingN ? ' · ' + pendingN + ' pending review' : '');
+    var cutoff = Date.now() - 30 * 86400000;
+    var activeN = members.filter(function (m) {
+      if (!m.last_login) return false;
+      var t = new Date(m.last_login.replace(' ', 'T') + 'Z').getTime();
+      return !isNaN(t) && t >= cutoff;
+    }).length;
+    document.getElementById('memCount').textContent =
+      members.length + ' total · ' + activeN + ' active (30d)' + (pendingN ? ' · ' + pendingN + ' pending review' : '');
   }
 
   // ── edit-member modal (full profile, incl. zone — no recreating accounts) ──
@@ -618,11 +636,16 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   async function viewPayments() {
     var period = document.getElementById('viewPeriod').value.trim();
     var payBody = document.getElementById('payBody'), payState = document.getElementById('payState');
+    var summary = document.getElementById('paySummary');
     if (!/^\d{4}-\d{2}$/.test(period)) { payState.textContent = 'Enter a period like 2026-07.'; payState.style.display = ''; return; }
     payState.style.display = ''; payState.textContent = 'Loading…'; payBody.innerHTML = '';
     try {
       var r = await C.api('/admin/payments?period=' + encodeURIComponent(period));
       var rows = r.payments || [];
+      // Counter: how many members paid this period + total collected.
+      var total = rows.reduce(function (s, p) { return s + (+p.amount_ghs || 0); }, 0);
+      var approved = members.filter(function (m) { return m.status === 'approved'; }).length;
+      summary.textContent = rows.length + ' of ' + approved + ' members paid · GHS ' + total.toLocaleString() + ' collected · ' + period;
       if (!rows.length) { payState.textContent = 'No payments recorded for ' + period + '.'; return; }
       payState.style.display = 'none';
       rows.forEach(function (p) {

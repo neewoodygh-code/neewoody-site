@@ -202,6 +202,9 @@ async function login(request, env) {
     return json({ error: member.status === 'suspended' ? 'account_suspended' : 'pending_review' }, 403);
   }
 
+  // Record last successful login (activity visibility for the admin).
+  await env.DB.prepare(`UPDATE members SET last_login = datetime('now') WHERE phone = ?`).bind(phone).run();
+
   const token = await signToken(phone, env);
   return json({ token, member: sanitize(member) });
 }
@@ -269,7 +272,7 @@ async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
             skill_level, years_experience, is_business, availability,
-            role, status, is_founder, joined_at, created_at
+            role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
   return json({ members: (results || []).map(sanitize) });

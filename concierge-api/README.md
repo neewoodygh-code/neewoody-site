@@ -118,6 +118,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 - `migrations/0005_push_subs.sql` — push_subs (Web Push job alerts)
 - `migrations/0006_client_jobs.sql` — client_jobs (public "Hire a Carpenter" requests)
 - `migrations/0007_pricing.sql` + `0008_pricing_quotes_blob.sql` — pricing_configs (per-member pricing tool config + quotes blob)
+- `migrations/0009_last_login.sql` — members.last_login (activity visibility; set on each successful login)
 
 Secrets (set via `wrangler secret put`, never committed): `SESSION_SECRET`, and the Concierge VAPID keypair `VAPID_PUBLIC` / `VAPID_PRIVATE` / `VAPID_X` / `VAPID_Y` (separate from dispatch's keys; the public key is also hardcoded in `js/concierge.js`). Local dev reads them from the gitignored `concierge-api/.dev.vars`.
 - `src/index.js` — the whole Worker (router, auth, crypto, handlers)

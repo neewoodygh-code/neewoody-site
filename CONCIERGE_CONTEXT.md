@@ -122,6 +122,15 @@ At 20 members the **admin data-entry for intake became the bottleneck**, so the 
 - **Frontend:** `/concierge/register.html` (login-style, indexed, in sitemap) — full profile form using the shared zone/trade/level/availability vocab + `Concierge.api('/public/register', {auth:false})`. Login page links to it; the Concierge hub (`tools.html`) CTA changed from "Become a founding member" (wa.me FOUNDER) to "Register as a member" → register.html, with the WhatsApp route kept as a secondary option.
 - **Still no self-service PIN reset** (that remains admin-only, unchanged) and no email/SMS — an approved applicant just logs in; the owner WhatsApps them (he has their number) since there's no notification channel to the member.
 
+## Activation & admin visibility ✅ BUILT 2026-07-16 (owner-directed — "shift from building to filling")
+
+After the feature sprint, the owner asked to implement the contained activation/visibility recommendations (the big ones — quote-sharing, safety check-in, payment automation, full Sourcing/Tutorials authoring — are **consciously deferred**, each a separate build; some spec-gated). Shipped:
+- **Member activity visibility (admin):** `members.last_login` (migration 0009) set on each successful login. Admin members table has a colour-coded **"Last seen"** column (green ≤7d, muted ≤30d, red >30d / "never"), and the panel header shows **"N total · N active (30d) · N pending review"**. This is the retention signal to see who to nudge before payment churn matters.
+- **"Who paid" counter (admin):** the MoMo payments panel header now shows **"N of M members paid · GHS X collected · <period>"** when a period is viewed.
+- **Default payment amount 50 → 100** in the admin record-payment form (owner-directed). **Note:** the customer-facing founding-rate copy ("GHS 50/month, first 50 locked, GHS 100 after") on register.html/login.html/tools.html was left UNCHANGED — flagged to owner in case they meant the standard rate too.
+- **Density counts (directory):** the area filter now shows member counts per zone — "Spintex (5)" — so members see where the density actually is (honest expectations; the cold-start problem at ~20 members).
+- **Profile-completion nudge (directory):** a member missing a photo / skill level / availability / trades sees a dismissible (per-session) banner prompting them to complete it (more complete profiles get contacted far more) — opens the edit modal.
+
 ## Member Job Pricing Tool ✅ BUILT 2026-07-16 (owner-directed) — multi-tenant, on concierge-api/D1
 
 `carpenter-pricing.html` (a complete React cost-to-quote engine) was previously wired to the **dispatch worker** (`/carp/*` on `neewoody-dispatch-api`) with its own parallel accounts — i.e. it leaned on the Standing-Instruction-5 worker. **Rewired 2026-07-16 to the Concierge membership + concierge-api/D1** (the roadmap's "member versions are new multi-tenant builds on concierge-api/D1, never the dispatch instances"). The dispatch worker was NOT touched — only the frontend stopped calling it; any old `/carp` data there is left untouched.

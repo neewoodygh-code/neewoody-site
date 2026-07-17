@@ -63,6 +63,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .bdg-client{ display:inline-block; font-family:var(--ui); font-size:.55rem; font-weight:500; letter-spacing:.08em;
   text-transform:uppercase; color:var(--cream); background:var(--gold); border-radius:3px; padding:.16rem .45rem; }
 
+/* profile-completion nudge */
+.pnudge{ background:var(--green); color:var(--cream); border-radius:5px; padding:1rem 1.2rem; margin-bottom:1.25rem;
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.pnudge p{ flex:1; min-width:200px; font-size:.9rem; line-height:1.55; color:rgba(240,232,208,.85); }
+.pnudge p b{ color:var(--gold); font-weight:600; }
+.pnudge button{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--gold); color:var(--green); border:none; border-radius:3px; padding:.6rem 1rem; cursor:pointer; white-space:nowrap; }
+.pnudge .x{ background:transparent; color:rgba(240,232,208,.55); border:1px solid rgba(240,232,208,.3); }
+
 /* jobs board */
 .jobs-head{ display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
 .jobs-head .jh-text{ flex:1; min-width:220px; }
@@ -300,6 +309,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   <!-- TAB: Directory -->
   <div id="tab-directory" class="tabpanel">
+  <div id="profileNudge" class="pnudge" style="display:none"></div>
   <div class="lead">
     <h1>Find a fellow carpenter</h1>
     <p>Members hire members. Select your area or trade, then message on WhatsApp. Tap any trade tag to see what it covers.</p>
@@ -626,9 +636,37 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   function buildAreaFilter() {
-    var areas = [...new Set(all.map(function (m) { return m.area; }).filter(Boolean))].sort();
-    areas.forEach(function (a) {
-      var o = document.createElement('option'); o.value = a; o.textContent = a; areaFilter.appendChild(o);
+    // Show how many members are in each area — sets honest expectations and
+    // nudges people toward the zones that actually have density.
+    var counts = {};
+    all.forEach(function (m) { if (m.area) counts[m.area] = (counts[m.area] || 0) + 1; });
+    Object.keys(counts).sort().forEach(function (a) {
+      var o = document.createElement('option'); o.value = a; o.textContent = a + ' (' + counts[a] + ')'; areaFilter.appendChild(o);
+    });
+  }
+
+  // ── profile-completion nudge ──
+  // A complete profile gets far more contacts; nudge members to fill the gaps.
+  function renderNudge() {
+    var el = document.getElementById('profileNudge');
+    if (!el || !me) { if (el) el.style.display = 'none'; return; }
+    try { if (sessionStorage.getItem('nwd-nudge-dismissed')) { el.style.display = 'none'; return; } } catch (e) {}
+    var missing = [];
+    if (!me.photo_url) missing.push('add a photo');
+    if (!me.skill_level) missing.push('set your skill level');
+    if (!me.availability) missing.push('set your availability');
+    if (!(me.specialties || []).length) missing.push('pick your trades');
+    if (!missing.length) { el.style.display = 'none'; return; }
+    el.innerHTML =
+      '<p>Your profile is <b>' + missing.length + ' step' + (missing.length > 1 ? 's' : '') + '</b> from complete — members with a photo, level and availability get contacted far more. Still to do: ' +
+      C.escapeHtml(missing.join(', ')) + '.</p>' +
+      '<button type="button" id="nudgeGo">Complete my profile</button>' +
+      '<button type="button" class="x" id="nudgeX">Later</button>';
+    el.style.display = 'flex';
+    document.getElementById('nudgeGo').addEventListener('click', openModal);
+    document.getElementById('nudgeX').addEventListener('click', function () {
+      try { sessionStorage.setItem('nwd-nudge-dismissed', '1'); } catch (e) {}
+      el.style.display = 'none';
     });
   }
 
@@ -1006,6 +1044,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       areaFilter.value = cur;
       stateEl.style.display = 'none';
       render();
+      renderNudge();
     } catch (err) {
       if (err.status === 401) { location.replace('login.html'); return; }
       stateEl.textContent = err.message || 'Could not load the directory.';
@@ -1021,6 +1060,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       if (err.status === 401) { location.replace('login.html'); return; }
     }
     await load();
+    renderNudge();
     maybeShowWhatsNew();
     initAlerts();
   }
