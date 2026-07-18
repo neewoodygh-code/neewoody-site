@@ -60,6 +60,8 @@ const DEFAULT_OVERHEAD = {
   billableDays: 20,
   ownerRate: 200,
   labourRates: { supervisor:200, lead:150, hand:100, trainee:50 },
+  tierMults: { basic:1.35, standard:1.55, premium:1.80, luxury:2.00 },
+  addOnPcts: { rush:20, customDesign:12, cnc:18, remoteInstall:8 },
   running: [
     { id:'r01', name:'Workshop rent / space', amount:500,  hint:'Monthly rent or equivalent if owned' },
     { id:'r02', name:'Electricity',           amount:200,  hint:'Workshop power — lights, machines, charging' },
@@ -98,6 +100,12 @@ const ADDONS = [
   { id:'cnc',          label:'CNC / carved',  pct:18 },
   { id:'remoteInstall',label:'Remote install', pct:8 },
 ];
+
+// Effective per-member multipliers: the member's saved config wins, else the
+// defaults above. Lets each carpenter price to their own market instead of
+// inheriting one fixed set of margins.
+const tierMultFor = (cfg, id) => { const d = TIERS.find(t => t.id === id); const dv = d ? d.mult : 1; return (cfg && cfg.tierMults && cfg.tierMults[id] != null) ? +cfg.tierMults[id] : dv; };
+const addOnPctFor = (cfg, id) => { const d = ADDONS.find(a => a.id === id); const dv = d ? d.pct : 0; return (cfg && cfg.addOnPcts && cfg.addOnPcts[id] != null) ? +cfg.addOnPcts[id] : dv; };
 
 const LABOUR_RATES = { supervisor:200, lead:150, hand:100, trainee:50 };
 const LABOUR_ROLES = [
@@ -216,11 +224,12 @@ function calcQuote(q, overheadCfg) {
   const logistics= (+log.primary||0) + (+log.secondary||0)*(log.secondaryReturn?2:1) + (+log.siteVisits||0)*(+log.siteVisitCost||0);
   const rawCost  = overhead + labour + matAmt + logistics;
   let addOnMult  = 1;
-  Object.entries(q.addOns||{}).forEach(([id,on])=>{if(on){const a=ADDONS.find(x=>x.id===id);if(a)addOnMult*=1+(a.pct/100);}});
-  const quotedPrice  = rawCost * tier.mult * addOnMult;
+  Object.entries(q.addOns||{}).forEach(([id,on])=>{ if(on) addOnMult *= 1 + (addOnPctFor(overheadCfg,id)/100); });
+  const tMult        = tierMultFor(overheadCfg, tier.id);
+  const quotedPrice  = rawCost * tMult * addOnMult;
   const grossMargin  = quotedPrice - rawCost;
   const marginPct    = quotedPrice>0?(grossMargin/quotedPrice)*100:0;
-  return { overhead, labour, matAmt, logistics, rawCost, tier, addOnMult, quotedPrice, grossMargin, marginPct, dayRate, effectiveDays };
+  return { overhead, labour, matAmt, logistics, rawCost, tier, tierMult:tMult, addOnMult, quotedPrice, grossMargin, marginPct, dayRate, effectiveDays };
 }
 
 function calcActual(exp=[]) {
@@ -469,6 +478,8 @@ function OverheadSettings({ cfg, onSave, onBack }) {
     billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
     ownerRate:    cfg?.ownerRate    ?? DEFAULT_OVERHEAD.ownerRate,
     labourRates:  cfg?.labourRates  ? {...cfg.labourRates} : {...DEFAULT_OVERHEAD.labourRates},
+    tierMults:    cfg?.tierMults    ? {...cfg.tierMults}   : {...DEFAULT_OVERHEAD.tierMults},
+    addOnPcts:    cfg?.addOnPcts    ? {...cfg.addOnPcts}   : {...DEFAULT_OVERHEAD.addOnPcts},
     running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
     capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
   }));
@@ -480,7 +491,9 @@ function OverheadSettings({ cfg, onSave, onBack }) {
   const addCap   = ()     => setC(p=>({...p, capital:[...p.capital,{id:uid(),name:'',cost:0,lifeYears:3}]}));
   const remRun   = id     => setC(p=>({...p, running:p.running.filter(r=>r.id!==id)}));
   const remCap   = id     => setC(p=>({...p, capital:p.capital.filter(x=>x.id!==id)}));
-  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, labourRates:{...DEFAULT_OVERHEAD.labourRates}, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
+  const updTier  = (id,v) => setC(p=>({...p, tierMults:{...p.tierMults,[id]:v}}));
+  const updAddOn = (id,v) => setC(p=>({...p, addOnPcts:{...p.addOnPcts,[id]:v}}));
+  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, labourRates:{...DEFAULT_OVERHEAD.labourRates}, tierMults:{...DEFAULT_OVERHEAD.tierMults}, addOnPcts:{...DEFAULT_OVERHEAD.addOnPcts}, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
 
   const runTotal    = c.running.reduce((s,r)=>s+(+r.amount||0), 0);
   const capMonthly  = c.capital.reduce((s,x)=>s+(+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12), 0);
@@ -590,6 +603,38 @@ function OverheadSettings({ cfg, onSave, onBack }) {
             <Btn ch="+ Add tool" onClick={addCap} size="sm" outline/>
             <span style={{fontFamily:FM,fontSize:'.82rem',fontWeight:600,color:S.dark}}>{GHS(Math.round(capMonthly))}/mo</span>
           </div>
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Build tier multipliers</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>How much you charge above cost at each tier — 1.50 means cost + 50%. Set these to your own market; what one workshop can charge, another can't.</div>
+          {TIERS.map(t=>(
+            <div key={t.id} style={{display:'grid',gridTemplateColumns:'1fr 96px',gap:8,alignItems:'center',marginBottom:8}}>
+              <div>
+                <div style={{fontSize:'.88rem',fontFamily:FB,fontWeight:600,color:S.dark}}>{t.label}</div>
+                <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB}}>{t.sub}</div>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>×</span>
+                <NumInp value={c.tierMults?.[t.id] ?? DEFAULT_OVERHEAD.tierMults[t.id]} step="0.01" onChange={e=>updTier(t.id,+e.target.value||0)}/>
+              </div>
+            </div>
+          ))}
+        </div>} style={{marginBottom:14}}/>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Add-on charges</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>The extra percentage you add when a job needs one of these.</div>
+          {ADDONS.map(a=>(
+            <div key={a.id} style={{display:'grid',gridTemplateColumns:'1fr 96px',gap:8,alignItems:'center',marginBottom:8}}>
+              <span style={{fontSize:'.88rem',fontFamily:FB,color:S.dark}}>{a.label}</span>
+              <div style={{display:'flex',alignItems:'center',gap:6}}>
+                <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>+</span>
+                <NumInp value={c.addOnPcts?.[a.id] ?? DEFAULT_OVERHEAD.addOnPcts[a.id]} onChange={e=>updAddOn(a.id,+e.target.value||0)}/>
+                <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>%</span>
+              </div>
+            </div>
+          ))}
         </div>} style={{marginBottom:14}}/>
 
         <div style={{padding:'12px 14px',background:S.accentLt,border:`1px solid ${S.border}`,borderRadius:0,fontSize:'.75rem',color:S.mid,fontFamily:FB,lineHeight:1.7}}>
@@ -760,7 +805,7 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
                   <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:q.tierId===t.id?'#fff':S.dark}}>{t.label}</div>
                   <div style={{fontSize:'.75rem',color:q.tierId===t.id?'rgba(255,255,255,.65)':S.muted,fontFamily:FB,marginTop:2}}>{t.sub}</div>
                 </div>
-                <div style={{fontFamily:FM,fontSize:'.82rem',color:q.tierId===t.id?'rgba(255,255,255,.7)':S.muted,fontWeight:600}}>×{t.mult}</div>
+                <div style={{fontFamily:FM,fontSize:'.82rem',color:q.tierId===t.id?'rgba(255,255,255,.7)':S.muted,fontWeight:600}}>×{tierMultFor(overheadCfg,t.id)}</div>
               </div>
             </button>
           ))}
@@ -774,7 +819,7 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
             <button key={a.id} onClick={()=>upd({addOns:{...q.addOns,[a.id]:!q.addOns?.[a.id]}})}
               style={{background:q.addOns?.[a.id]?S.accentLt:S.bgAlt,border:`1px solid ${q.addOns?.[a.id]?S.accent:S.border}`,borderRadius:0,padding:'9px 12px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}>
               <div style={{fontFamily:FB,fontSize:'.85rem',fontWeight:600,color:q.addOns?.[a.id]?S.accentDk:S.dark}}>{a.label}</div>
-              <div style={{fontSize:'.72rem',color:q.addOns?.[a.id]?S.accent:S.muted,fontFamily:FM}}>+{a.pct}%</div>
+              <div style={{fontSize:'.72rem',color:q.addOns?.[a.id]?S.accent:S.muted,fontFamily:FM}}>+{addOnPctFor(overheadCfg,a.id)}%</div>
             </button>
           ))}
         </div>
@@ -1054,7 +1099,7 @@ function SummaryTab({ q, calc, session, onStatusChange, onSave }) {
       </div>}/>
       <Card ch={<div>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Pricing</div>
-        <Row label={`Tier: ${calc.tier.label}`} value={`×${calc.tier.mult}`}/>
+        <Row label={`Tier: ${calc.tier.label}`} value={`×${calc.tierMult}`}/>
         {activeAddOns.map(a=><Row key={a.id} label={a.label} value={`+${a.pct}%`} indent/>)}
         {activeAddOns.length>0&&<Row label="Combined add-on multiplier" value={`×${calc.addOnMult.toFixed(3)}`}/>}
         <div style={{borderTop:`1.5px solid ${S.accent}`,marginTop:12,paddingTop:12}}>
