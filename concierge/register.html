@@ -62,6 +62,20 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 .help a{ color:var(--gold); text-decoration:none; }
 .help a:hover{ text-decoration:underline; }
 
+/* multi-step wizard */
+.steps-ind{ display:flex; gap:.4rem; margin-bottom:.9rem; }
+.steps-ind .seg{ flex:1; height:4px; border-radius:2px; background:rgba(11,31,14,.14); transition:background .25s; }
+.steps-ind .seg.on{ background:var(--gold); }
+.step-label{ font-family:var(--ui); font-size:.64rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:1.1rem; }
+.step{ display:none; }
+.step.active{ display:block; }
+.wiz-nav{ display:flex; gap:.7rem; align-items:stretch; margin-top:1.5rem; }
+.wiz-nav .submit{ margin-top:0; flex:1; }
+.wiz-nav .back{ margin-top:0; flex:0 0 auto; width:auto; padding:1rem 1.15rem; background:transparent; color:var(--muted);
+  border:1px solid rgba(11,31,14,.25); font-family:var(--ui); font-weight:500; font-size:.78rem; letter-spacing:.1em;
+  text-transform:uppercase; border-radius:3px; cursor:pointer; transition:border-color .2s,color .2s; }
+.wiz-nav .back:hover{ border-color:var(--gold); color:var(--ink); }
+
 .done{ display:none; }
 .done.show{ display:block; }
 .done .panel{ text-align:center; }
@@ -83,60 +97,83 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   </div>
 
   <form class="panel" id="regForm" autocomplete="off">
-    <div class="field">
-      <label for="r_name">Your name</label>
-      <input id="r_name" maxlength="80" required />
-    </div>
-    <div class="field">
-      <label for="r_phone">Phone number <span class="opt">— this is how you log in and how members reach you</span></label>
-      <input id="r_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
-    </div>
-    <div class="row">
+    <div class="steps-ind"><span class="seg on"></span><span class="seg"></span><span class="seg"></span></div>
+    <div class="step-label" id="stepLabel">Step 1 of 3 · You</div>
+
+    <!-- Step 1: You -->
+    <div class="step active" data-step="1">
       <div class="field">
-        <label for="r_pin">Choose a 5-digit PIN</label>
-        <input id="r_pin" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+        <label for="r_name">Your name</label>
+        <input id="r_name" maxlength="80" required />
       </div>
       <div class="field">
-        <label for="r_pin2">Confirm PIN</label>
-        <input id="r_pin2" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+        <label for="r_phone">Phone number <span class="opt">— this is how you log in and how members reach you</span></label>
+        <input id="r_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
       </div>
+      <div class="row">
+        <div class="field">
+          <label for="r_pin">Choose a 5-digit PIN</label>
+          <input id="r_pin" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+        </div>
+        <div class="field">
+          <label for="r_pin2">Confirm PIN</label>
+          <input id="r_pin2" class="pin" type="password" inputmode="numeric" maxlength="5" placeholder="•••••" required />
+        </div>
+      </div>
+      <div class="wiz-nav"><button type="button" class="submit next" data-next="2">Continue →</button></div>
     </div>
-    <div class="field">
-      <label for="r_type">Account type</label>
-      <select id="r_type">
-        <option value="">Individual carpenter / apprentice</option>
-        <option value="1">Business — I hire and take on work</option>
-      </select>
-    </div>
-    <div class="field">
-      <label for="r_biz">Business name <span class="opt">— optional</span></label>
-      <input id="r_biz" maxlength="80" placeholder="Optional" />
-    </div>
-    <div class="field">
-      <label for="r_area">Your area</label>
-      <select id="r_area" required></select>
-    </div>
-    <div class="row">
+
+    <!-- Step 2: Your work -->
+    <div class="step" data-step="2">
       <div class="field">
-        <label for="r_lvl">Skill level <span class="opt">— optional</span></label>
-        <select id="r_lvl"><option value="">— not set —</option></select>
+        <label for="r_type">Account type</label>
+        <select id="r_type">
+          <option value="">Individual carpenter / apprentice</option>
+          <option value="1">Business — I hire and take on work</option>
+        </select>
       </div>
       <div class="field">
-        <label for="r_yrs">Years of experience <span class="opt">— optional</span></label>
-        <input id="r_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="e.g. 8" />
+        <label for="r_biz">Business name <span class="opt">— optional</span></label>
+        <input id="r_biz" maxlength="80" placeholder="Optional" />
+      </div>
+      <div class="field">
+        <label for="r_area">Your area</label>
+        <select id="r_area" required></select>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="r_lvl">Skill level <span class="opt">— optional</span></label>
+          <select id="r_lvl"><option value="">— not set —</option></select>
+        </div>
+        <div class="field">
+          <label for="r_yrs">Years of experience <span class="opt">— optional</span></label>
+          <input id="r_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="e.g. 8" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
+        <select id="r_avail"><option value="">— not shown —</option></select>
+      </div>
+      <div class="wiz-nav">
+        <button type="button" class="back" data-back="1">← Back</button>
+        <button type="button" class="submit next" data-next="3">Continue →</button>
       </div>
     </div>
-    <div class="field">
-      <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
-      <select id="r_avail"><option value="">— not shown —</option></select>
+
+    <!-- Step 3: Your trades -->
+    <div class="step" data-step="3">
+      <div class="field">
+        <label>Your trades <span class="opt">— pick all that apply</span></label>
+        <div class="spec-grid" id="r_specs"></div>
+      </div>
+      <div class="wiz-nav">
+        <button type="button" class="back" data-back="2">← Back</button>
+        <button class="submit" id="regBtn" type="submit">Submit my application</button>
+      </div>
     </div>
-    <div class="field">
-      <label>Your trades <span class="opt">— pick all that apply</span></label>
-      <div class="spec-grid" id="r_specs"></div>
-    </div>
-    <button class="submit" id="regBtn" type="submit">Submit my application</button>
+
     <div class="msg" id="regMsg"></div>
-    <p class="terms">Membership is GHS 50/month. We review every application before approving — once you're approved, log in with your phone and PIN. We'll be in touch on WhatsApp.</p>
+    <p class="terms">Membership is GHS 100/month — founding members (the first 50) lock in GHS 50/month. We review every application before approving; once you're approved, log in with your phone and PIN. We'll be in touch on WhatsApp.</p>
   </form>
 
   <div class="done" id="regDone">
@@ -179,6 +216,48 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   function digitsOnly(el, n) { el.addEventListener('input', function () { el.value = el.value.replace(/\D/g, '').slice(0, n); }); }
   digitsOnly(document.getElementById('r_pin'), 5);
   digitsOnly(document.getElementById('r_pin2'), 5);
+
+  // ── multi-step wizard: You → Your work → Your trades ──
+  var steps = [].slice.call(form.querySelectorAll('.step'));
+  var segs = [].slice.call(form.querySelectorAll('.steps-ind .seg'));
+  var stepLabel = document.getElementById('stepLabel');
+  var STEP_NAMES = { 1: 'You', 2: 'Your work', 3: 'Your trades' };
+  var current = 1;
+  function goStep(n) {
+    current = n;
+    steps.forEach(function (s) { s.classList.toggle('active', +s.getAttribute('data-step') === n); });
+    segs.forEach(function (s, i) { s.classList.toggle('on', i < n); });
+    stepLabel.textContent = 'Step ' + n + ' of 3 · ' + STEP_NAMES[n];
+    msg.className = 'msg'; msg.textContent = '';
+    var top = document.querySelector('.brand'); if (top) top.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function validateStep(n) {
+    if (n === 1) {
+      if (!document.getElementById('r_name').value.trim()) { showErr('Please enter your name.'); return false; }
+      if (!C.normalizePhone(document.getElementById('r_phone').value)) { showErr('Enter a valid Ghana phone number.'); return false; }
+      var p1 = document.getElementById('r_pin').value, p2 = document.getElementById('r_pin2').value;
+      if (!/^\d{5}$/.test(p1)) { showErr('Your PIN must be exactly 5 digits.'); return false; }
+      if (p1 !== p2) { showErr('The two PINs don\'t match — please re-enter them.'); return false; }
+    }
+    if (n === 2) {
+      if (!document.getElementById('r_area').value) { showErr('Choose your area.'); return false; }
+    }
+    return true;
+  }
+  form.querySelectorAll('[data-next]').forEach(function (b) {
+    b.addEventListener('click', function () { var n = +b.getAttribute('data-next'); if (validateStep(n - 1)) goStep(n); });
+  });
+  form.querySelectorAll('[data-back]').forEach(function (b) {
+    b.addEventListener('click', function () { goStep(+b.getAttribute('data-back')); });
+  });
+  // Enter advances to the next step instead of submitting the form early
+  form.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && current < 3 && e.target.tagName === 'INPUT') {
+      e.preventDefault();
+      var nb = steps[current - 1].querySelector('[data-next]');
+      if (nb) nb.click();
+    }
+  });
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
