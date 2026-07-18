@@ -133,7 +133,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 @media(min-width:680px){ .grid{ grid-template-columns:1fr 1fr; } }
 @media(min-width:1020px){ .grid{ grid-template-columns:1fr 1fr 1fr; } }
 .mcard{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px;
-  padding:.8rem; display:flex; gap:.8rem; align-items:flex-start;
+  padding:.8rem; display:flex; gap:.8rem; align-items:flex-start; min-height:164px;
   box-shadow:0 4px 12px rgba(11,31,14,.04); }
 .mcard .ph{ width:64px; height:64px; border-radius:5px; background:var(--cream-dark);
   position:relative; overflow:hidden; flex-shrink:0; }
@@ -148,15 +148,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   border-radius:3px; padding:.16rem .45rem; margin-top:.3rem; }
 .mcard .area{ color:var(--muted); font-size:.8rem; margin-top:.2rem; }
 .mcard .area::before{ content:'📍 '; }
-.chips{ display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.5rem; }
+.chips{ display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.5rem; max-height:51px; overflow:hidden; }
 .chip{ font-family:var(--ui); font-size:.58rem; letter-spacing:.05em; text-transform:uppercase;
   background:var(--cream); color:var(--muted); border:1px solid rgba(11,31,14,.1);
   border-radius:20px; padding:.24rem .55rem; cursor:pointer; transition:border-color .15s,color .15s; }
 .chip:hover, .chip.active{ border-color:var(--gold); color:var(--ink); }
-.wa{ width:42px; height:42px; border-radius:50%; background:#25D366; color:#062b12;
+.wa{ width:42px; height:42px; border-radius:50%; background:#25D366; color:#fff;
   display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:filter .2s; }
 .wa:hover{ filter:brightness(1.06); }
-.wa svg{ width:20px; height:20px; }
+.wa svg{ width:22px; height:22px; }
 
 /* trade popover (tap on mobile, hover on desktop) */
 .spop{ position:fixed; z-index:120; max-width:250px; background:var(--green); color:var(--cream);
@@ -462,7 +462,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var C = window.Concierge;
   if (!C.requireSession('login.html')) return;
 
-  var WA_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.15-1.7-.84-2-.94-.26-.1-.46-.15-.65.15-.19.29-.74.94-.9 1.13-.17.19-.33.22-.62.07-.29-.15-1.22-.45-2.32-1.43-.86-.77-1.44-1.72-1.6-2-.17-.29-.02-.44.13-.59.13-.13.29-.34.44-.51.15-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.65-1.57-.9-2.15-.24-.57-.48-.49-.65-.5h-.56c-.19 0-.51.07-.77.36-.26.29-1.01.99-1.01 2.4 0 1.42 1.03 2.79 1.18 2.98.15.19 2.03 3.1 4.92 4.35.69.3 1.22.48 1.64.61.69.22 1.31.19 1.81.11.55-.08 1.7-.69 1.94-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34zM12 2a10 10 0 00-8.5 15.3L2 22l4.8-1.5A10 10 0 1012 2z"/></svg>';
+  var WA_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.885-9.885 9.885m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>';
 
   // Below this many members, the directory just shows everyone; above it,
   // the page opens with featured members + a "select your area" prompt so a
