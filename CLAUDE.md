@@ -170,7 +170,7 @@ A self-contained "project modal" component to showcase small/medium projects **w
 - No site-wide bulk conversion sweep without an explicit, separate instruction scoped to that alone.
 
 ## _inbox Workflow
-Raw images can be dropped in `_inbox/` with a description. Claude Code renames, sorts into `images/projects/{slug}/`, and commits. See `_inbox/README.md`. Originals remain in `_inbox/` after sorting for manual deletion. (There is a standing backlog of unsorted portfolio photos in `_inbox/` awaiting a cataloguing session.)
+Raw images can be dropped in `_inbox/` with a description. Claude Code renames, sorts into `images/projects/{slug}/`, and commits. See `_inbox/README.md`. Originals remain in `_inbox/` after sorting for manual deletion. (There is a standing backlog of unsorted portfolio photos in `_inbox/` awaiting a cataloguing session.) **`_inbox/` is gitignored** (2026-07-18) — it is a local staging area only; the sorted/converted outputs in `images/projects/` are what get tracked, so `_inbox` originals never enter git.
 
 ## Carpentry Concierge — Phase 1 (built + **deployed live** 2026-07-14)
 
