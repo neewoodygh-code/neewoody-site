@@ -660,8 +660,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       var rows = r.payments || [];
       // Counter: how many members paid this period + total collected.
       var total = rows.reduce(function (s, p) { return s + (+p.amount_ghs || 0); }, 0);
-      var approved = members.filter(function (m) { return m.status === 'approved'; }).length;
-      summary.textContent = rows.length + ' of ' + approved + ' members paid · GHS ' + total.toLocaleString() + ' collected · ' + period;
+      var approved = members.filter(function (m) { return m.status === 'approved' && m.role !== 'admin'; }).length;
+      summary.textContent = rows.length + ' of ' + approved + ' paying members paid · GHS ' + total.toLocaleString() + ' collected · ' + period;
       if (!rows.length) { payState.textContent = 'No payments recorded for ' + period + '.'; return; }
       payState.style.display = 'none';
       rows.forEach(function (p) {
@@ -693,9 +693,9 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       var r = await C.api('/admin/payments?period=' + encodeURIComponent(period));
       var paid = {};
       (r.payments || []).forEach(function (p) { paid[p.member_phone] = true; });
-      var approved = members.filter(function (m) { return m.status === 'approved'; });
+      var approved = members.filter(function (m) { return m.status === 'approved' && m.role !== 'admin'; });
       var unpaid = approved.filter(function (m) { return !paid[m.phone]; });
-      head.textContent = unpaid.length + ' of ' + approved.length + ' approved members have not paid for ' + period;
+      head.textContent = unpaid.length + ' of ' + approved.length + ' paying members have not paid for ' + period;
       if (!unpaid.length) {
         state.style.display = ''; state.textContent = approved.length ? 'Everyone approved has paid for ' + period + '.' : 'No approved members yet.';
         return;
