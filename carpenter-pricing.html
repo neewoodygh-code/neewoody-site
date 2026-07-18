@@ -989,7 +989,30 @@ function ClientCopy({ q, calc, session, onClose }) {
 
         <SecHdr ch="Materials"/>
         {itemize
-          ? <div>{mats.map(m=><CRow key={m.id} label={m.name} value={GHS(matTotal(m))} indent/>)}<CRow label="Materials subtotal" value={GHS(calc.matAmt)} strong/></div>
+          ? <div>
+              {mats.map(function (m) {
+                var subs = (m.subItems && m.subItems.length) ? m.subItems : null;
+                return (
+                  <div key={m.id} style={{padding:'6px 0',borderBottom:`1px solid ${S.border}`}}>
+                    <div style={{display:'flex',justifyContent:'space-between'}}>
+                      <span style={{fontSize:'.85rem',fontFamily:FB,color:S.mid,paddingLeft:10}}>{m.name}</span>
+                      <span style={{fontSize:'.85rem',fontFamily:FM,color:S.dark}}>{GHS(matTotal(m))}</span>
+                    </div>
+                    {subs
+                      ? subs.map(function (si) {
+                          return (
+                            <div key={si.id} style={{display:'flex',justifyContent:'space-between',paddingLeft:20,marginTop:2}}>
+                              <span style={{fontSize:'.72rem',fontFamily:FB,color:S.muted}}>{(si.name||'Item')} · {(si.qty||0)} × {GHS(si.unitPrice||0)}</span>
+                              <span style={{fontSize:'.72rem',fontFamily:FM,color:S.muted}}>{GHS((si.qty||0)*(si.unitPrice||0))}</span>
+                            </div>
+                          );
+                        })
+                      : <div style={{paddingLeft:20,marginTop:2,fontSize:'.72rem',fontFamily:FM,color:S.muted}}>{(m.qty||0)} × {GHS(m.unitPrice||0)} each</div>}
+                  </div>
+                );
+              })}
+              <CRow label="Materials subtotal" value={GHS(calc.matAmt)} strong/>
+            </div>
           : <CRow label="Materials" value={GHS(calc.matAmt)} strong/>}
 
         <SecHdr ch="Workmanship"/>
