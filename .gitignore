@@ -3,3 +3,6 @@
 
 # Local worker secrets (never commit)
 concierge-api/.dev.vars
+
+# Deliberately local design mockup (see commit b1d6b3a — stays untracked)
+neewoody-redesign-concept.html
