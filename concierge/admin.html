@@ -207,6 +207,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="tools" style="margin-bottom:1rem">
         <div class="field" style="max-width:160px"><label>View period</label><input id="viewPeriod" placeholder="2026-07"></div>
         <button class="btn ghost" id="viewBtn" type="button">Show who paid</button>
+        <button class="btn ghost" id="unpaidBtn" type="button">Show unpaid</button>
       </div>
       <div class="table-scroll">
         <table>
@@ -215,6 +216,17 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         </table>
       </div>
       <div class="state" id="payState"></div>
+
+      <div id="unpaidWrap" style="display:none; margin-top:1.75rem">
+        <h3 id="unpaidHead" style="font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-bottom:.7rem"></h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Member</th><th>Area</th><th>Joined</th><th>Chase</th></tr></thead>
+            <tbody id="unpaidBody"></tbody>
+          </table>
+        </div>
+        <div class="state" id="unpaidState"></div>
+      </div>
     </div>
   </div>
 
@@ -626,7 +638,10 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       }});
       msg.className = 'msg ok'; msg.textContent = 'Payment recorded.';
       document.getElementById('p_ref').value = '';
-      if (document.getElementById('viewPeriod').value.trim() === period) viewPayments();
+      if (document.getElementById('viewPeriod').value.trim() === period) {
+        viewPayments();
+        if (document.getElementById('unpaidWrap').style.display !== 'none') viewUnpaid();
+      }
     } catch (err) {
       msg.className = 'msg error'; msg.textContent = err.message || 'Could not record payment.';
     } finally { btn.disabled = false; }
@@ -661,6 +676,43 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       });
     } catch (err) {
       payState.textContent = err.message || 'Could not load payments.';
+    }
+  }
+
+  // ── who hasn't paid: approved members with no payment row for the period ──
+  document.getElementById('unpaidBtn').addEventListener('click', viewUnpaid);
+
+  async function viewUnpaid() {
+    var period = document.getElementById('viewPeriod').value.trim();
+    var wrap = document.getElementById('unpaidWrap'), body = document.getElementById('unpaidBody');
+    var head = document.getElementById('unpaidHead'), state = document.getElementById('unpaidState');
+    wrap.style.display = ''; body.innerHTML = ''; head.textContent = '';
+    if (!/^\d{4}-\d{2}$/.test(period)) { state.style.display = ''; state.textContent = 'Enter a period like 2026-07.'; return; }
+    state.style.display = ''; state.textContent = 'Loading…';
+    try {
+      var r = await C.api('/admin/payments?period=' + encodeURIComponent(period));
+      var paid = {};
+      (r.payments || []).forEach(function (p) { paid[p.member_phone] = true; });
+      var approved = members.filter(function (m) { return m.status === 'approved'; });
+      var unpaid = approved.filter(function (m) { return !paid[m.phone]; });
+      head.textContent = unpaid.length + ' of ' + approved.length + ' approved members have not paid for ' + period;
+      if (!unpaid.length) {
+        state.style.display = ''; state.textContent = approved.length ? 'Everyone approved has paid for ' + period + '.' : 'No approved members yet.';
+        return;
+      }
+      state.style.display = 'none';
+      unpaid.forEach(function (m) {
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><div class="who">' + C.escapeHtml(m.name) + '</div>' +
+            '<div class="small">' + (m.business_name ? C.escapeHtml(m.business_name) + ' · ' : '') + C.displayPhone(m.phone) + '</div></td>' +
+          '<td class="small">' + C.escapeHtml(m.area || '—') + '</td>' +
+          '<td class="small">' + C.escapeHtml((m.joined_at || '').slice(0, 10)) + '</td>' +
+          '<td><a class="rowbtn" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">WhatsApp</a></td>';
+        body.appendChild(tr);
+      });
+    } catch (err) {
+      state.style.display = ''; state.textContent = err.message || 'Could not load.';
     }
   }
 
