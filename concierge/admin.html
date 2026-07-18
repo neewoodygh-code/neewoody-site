@@ -163,7 +163,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="table-scroll">
         <table>
           <thead><tr>
-            <th>Member</th><th>Area</th><th>Trades</th><th>Level</th><th>Status</th><th>Role</th><th>Founder</th><th>Joined</th><th>Last seen</th><th>Actions</th>
+            <th>Member</th><th>Status</th><th>Area</th><th>Trades</th><th>Level</th><th>Role</th><th>Founder</th><th>Joined</th><th>Last seen</th><th>Actions</th>
           </tr></thead>
           <tbody id="memBody"></tbody>
         </table>
@@ -356,16 +356,17 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     tr.innerHTML =
       '<td><div class="who">' + C.escapeHtml(m.name) + '</div>' +
         '<div class="small">' + (m.business_name ? C.escapeHtml(m.business_name) + ' · ' : '') + C.displayPhone(m.phone) + '</div></td>' +
+      '<td></td>' +
       '<td>' + C.escapeHtml(m.area || '—') + '</td>' +
       '<td class="small">' + C.escapeHtml(trades || '—') + '</td>' +
-      '<td></td><td></td><td></td>' +
+      '<td></td><td></td>' +
       '<td>' + (m.is_founder ? '<span class="pill founder">Founder</span>' : '—') + '</td>' +
       '<td class="small">' + C.escapeHtml((m.joined_at || '').slice(0, 10)) + '</td>' +
       '<td class="small">' + lastSeenLabel(m.last_login) + '</td>' +
       '<td></td>';
 
     // level select (admin can correct a self-set level)
-    var lvlTd = tr.children[3];
+    var lvlTd = tr.children[4];
     var lvlSel = document.createElement('select');
     var oNone = document.createElement('option'); oNone.value = ''; oNone.textContent = '—'; lvlSel.appendChild(oNone);
     C.SKILL_ORDER.forEach(function (k) {
@@ -381,7 +382,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     }
 
     // status select
-    var stTd = tr.children[4];
+    var stTd = tr.children[1];
     var stSel = document.createElement('select');
     ['pending', 'approved', 'suspended'].forEach(function (s) {
       var o = document.createElement('option'); o.value = s; o.textContent = s[0].toUpperCase() + s.slice(1);
