@@ -117,6 +117,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .wn-entry p{ font-size:.88rem; line-height:1.6; color:var(--muted); }
 .modal textarea{ width:100%; font-size:1rem; font-family:var(--body); padding:.7rem .8rem; border:1px solid rgba(11,31,14,.2); border-radius:3px; background:#fff; min-height:90px; resize:vertical; }
 
+/* breadcrumb */
+.crumbs{ display:flex; align-items:center; gap:.5rem; font-family:var(--ui); font-size:.68rem; letter-spacing:.06em;
+  color:var(--muted); margin-bottom:1.25rem; }
+.crumbs a{ color:var(--muted); text-decoration:none; }
+.crumbs a:hover{ color:var(--gold); }
+.crumbs b{ color:var(--ink); font-weight:500; }
+.crumbs span{ color:rgba(11,31,14,.3); }
+
 /* intro + filters */
 .wrap{ max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem 4rem; }
 .lead{ margin-bottom:1.5rem; }
@@ -128,35 +136,37 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .filters .count{ font-family:var(--ui); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
   color:var(--muted); margin-left:auto; }
 
-/* compact member cards — small photo left, details right */
-.grid{ display:grid; grid-template-columns:1fr; gap:.7rem; }
-@media(min-width:680px){ .grid{ grid-template-columns:1fr 1fr; } }
-@media(min-width:1020px){ .grid{ grid-template-columns:1fr 1fr 1fr; } }
+/* compact member cards — click any card to reveal the full profile */
+.grid{ display:grid; grid-template-columns:1fr; gap:.6rem; }
+@media(min-width:560px){ .grid{ grid-template-columns:1fr 1fr; } }
+@media(min-width:900px){ .grid{ grid-template-columns:1fr 1fr 1fr; } }
 .mcard{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px;
-  padding:.8rem; display:flex; gap:.8rem; align-items:flex-start; min-height:164px;
-  box-shadow:0 4px 12px rgba(11,31,14,.04); }
-.mcard .ph{ width:64px; height:64px; border-radius:5px; background:var(--cream-dark);
+  padding:.65rem .75rem; display:flex; gap:.7rem; align-items:center; cursor:pointer;
+  box-shadow:0 3px 10px rgba(11,31,14,.04); transition:border-color .15s, box-shadow .15s; }
+.mcard:hover, .mcard:focus-visible{ border-color:var(--gold); box-shadow:0 6px 16px rgba(11,31,14,.09); outline:none; }
+.mcard .ph{ width:48px; height:48px; border-radius:50%; background:var(--cream-dark);
   position:relative; overflow:hidden; flex-shrink:0; }
 .mcard .ph img{ width:100%; height:100%; object-fit:cover; }
 .mcard .ph .initials{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:var(--display); font-size:1.35rem; color:rgba(11,31,14,.3); }
+  font-family:var(--display); font-size:1.1rem; color:rgba(11,31,14,.3); }
 .mcard .body{ flex:1; min-width:0; }
-.mcard h3{ font-family:var(--display); font-weight:500; font-size:1.05rem; line-height:1.2; }
-.mcard .biz{ color:var(--gold); font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.03em; margin-top:.1rem; }
+.mcard h3{ font-family:var(--display); font-weight:500; font-size:1rem; line-height:1.25;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mcard .biz-dot{ color:var(--gold); font-size:.7rem; vertical-align:middle; margin-left:.15rem; }
+.mcard .meta{ color:var(--muted); font-size:.78rem; margin-top:.15rem;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .lvl{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:500; letter-spacing:.08em;
   text-transform:uppercase; color:var(--green); border:1px solid rgba(200,146,42,.55); background:rgba(200,146,42,.12);
-  border-radius:3px; padding:.16rem .45rem; margin-top:.3rem; }
-.mcard .area{ color:var(--muted); font-size:.8rem; margin-top:.2rem; }
-.mcard .area::before{ content:'📍 '; }
-.chips{ display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.5rem; max-height:51px; overflow:hidden; }
-.chip{ font-family:var(--ui); font-size:.58rem; letter-spacing:.05em; text-transform:uppercase;
+  border-radius:3px; padding:.16rem .45rem; }
+.chips{ display:flex; flex-wrap:wrap; gap:.35rem; margin-top:.4rem; }
+.chip{ font-family:var(--ui); font-size:.6rem; letter-spacing:.05em; text-transform:uppercase;
   background:var(--cream); color:var(--muted); border:1px solid rgba(11,31,14,.1);
-  border-radius:20px; padding:.24rem .55rem; cursor:pointer; transition:border-color .15s,color .15s; }
+  border-radius:20px; padding:.26rem .6rem; cursor:pointer; transition:border-color .15s,color .15s; }
 .chip:hover, .chip.active{ border-color:var(--gold); color:var(--ink); }
-.wa{ width:42px; height:42px; border-radius:50%; background:#25D366; color:#fff;
+.wa{ width:38px; height:38px; border-radius:50%; background:#25D366; color:#fff;
   display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:filter .2s; }
 .wa:hover{ filter:brightness(1.06); }
-.wa svg{ width:22px; height:22px; }
+.wa svg{ width:20px; height:20px; }
 
 /* trade popover (tap on mobile, hover on desktop) */
 .spop{ position:fixed; z-index:120; max-width:250px; background:var(--green); color:var(--cream);
@@ -184,8 +194,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 /* member tools & benefits */
 .tools-strip{ margin-bottom:2rem; }
 .tools-strip h2{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); margin-bottom:.75rem; }
-.tools-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:.9rem; }
-.tool-card{ background:var(--green); color:var(--cream); border-radius:5px; padding:1.1rem 1.2rem; display:flex; flex-direction:column; gap:.4rem; }
+.tools-grid{ display:grid; grid-template-columns:1fr; gap:.7rem; }
+@media(min-width:640px){ .tools-grid{ grid-template-columns:1fr 1fr; } }
+@media(min-width:960px){ .tools-grid{ grid-template-columns:1fr 1fr 1fr; } }
+.tool-card{ background:var(--green); color:var(--cream); border-radius:5px; padding:.95rem 1rem; display:flex; flex-direction:column; gap:.35rem; }
 .tool-card h3{ font-family:var(--display); font-weight:500; font-size:1.1rem; }
 .tool-card p{ font-size:.83rem; color:rgba(240,232,208,.72); line-height:1.5; flex:1; }
 .tool-card .go{ align-self:flex-start; font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; background:var(--gold); color:#241500; border-radius:3px; padding:.5rem .9rem; margin-top:.5rem; transition:filter .2s; }
@@ -237,6 +249,25 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .modal .mmsg.error{ color:#a52a2a; }
 .modal .mmsg.ok{ color:#2e6b2e; }
 
+/* member detail modal (opened by tapping a card) */
+.md-top{ display:flex; gap:1rem; align-items:flex-start; }
+.md-photo{ width:76px; height:76px; border-radius:50%; background:var(--cream-dark); overflow:hidden;
+  position:relative; flex-shrink:0; border:1px solid rgba(11,31,14,.12); }
+.md-photo img{ width:100%; height:100%; object-fit:cover; }
+.md-photo.initials{ display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:1.7rem; color:rgba(11,31,14,.3); }
+.md-biz{ color:var(--gold); font-family:var(--ui); font-size:.85rem; font-weight:500; margin-bottom:.4rem; }
+.md-none{ color:var(--muted); font-size:.85rem; font-style:italic; }
+.md-area{ color:var(--muted); font-size:.9rem; margin-top:.75rem; }
+.md-area::before{ content:'📍 '; }
+.md-label{ font-family:var(--ui); font-size:.62rem; font-weight:500; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); margin:1.1rem 0 .5rem; }
+.md-wa{ display:flex; align-items:center; justify-content:center; gap:.5rem; margin-top:1.5rem;
+  font-family:var(--ui); font-size:.76rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  background:#25D366; color:#fff; border-radius:4px; padding:.9rem; transition:filter .2s; }
+.md-wa svg{ width:20px; height:20px; }
+.md-wa:hover{ filter:brightness(1.05); }
+
 @media(max-width:560px){
   .lead h1{ font-size:1.5rem; }
   .filters .count{ margin-left:0; width:100%; }
@@ -266,6 +297,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 </nav>
 
 <div class="wrap">
+
+  <nav class="crumbs" aria-label="Breadcrumb">
+    <a href="../tools.html">Concierge</a><span aria-hidden="true">›</span><b id="crumbCurrent">Directory</b>
+  </nav>
 
   <!-- TAB: Tools (member tools & benefits) -->
   <div id="tab-tools" class="tabpanel" hidden>
@@ -420,6 +455,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
+<!-- Member detail (opened by tapping a card) -->
+<div class="overlay" id="memOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2 id="memName">Member</h2><button class="x" id="closeMem" aria-label="Close">×</button></div>
+    <div style="padding:1.25rem 1.5rem 1.75rem" id="memBody"></div>
+  </div>
+</div>
+
 <!-- What's new since your last visit -->
 <div class="overlay" id="wnOverlay">
   <div class="modal" role="dialog" aria-modal="true">
@@ -507,32 +550,63 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     return String(name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
   }
 
+  // Compact card: photo · name · (level · area) · WhatsApp. Everything else
+  // (business, availability, full trade list, years) lives in the detail
+  // modal, opened by tapping the card — keeps every card the same small size.
   function card(m) {
     var el = document.createElement('div'); el.className = 'mcard';
+    el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'View ' + (m.name || 'member') + '’s profile');
     var photo = m.photo_url
-      ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="' + C.escapeHtml(m.name) + '" loading="lazy" onerror="this.remove()">'
+      ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.remove()">'
       : '<div class="initials">' + C.escapeHtml(initials(m.name)) + '</div>';
-    var chips = (m.specialties || []).map(function (s) {
-      return '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
-    }).join('');
+    var meta = [C.skillLabel(m.skill_level), m.area].filter(Boolean).map(C.escapeHtml).join(' · ');
+    el.innerHTML =
+      '<div class="ph">' + photo + '</div>' +
+      '<div class="body">' +
+        '<h3>' + C.escapeHtml(m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
+        (meta ? '<div class="meta">' + meta + '</div>' : '') +
+      '</div>' +
+      '<a class="wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
+    el.addEventListener('click', function () { openMember(m); });
+    el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMember(m); } });
+    el.querySelector('.wa').addEventListener('click', function (e) { e.stopPropagation(); });
+    return el;
+  }
+
+  // ── member detail modal ──
+  var memOverlay = document.getElementById('memOverlay');
+  function openMember(m) {
+    document.getElementById('memName').textContent = m.name || 'Member';
+    var photo = m.photo_url
+      ? '<div class="md-photo"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" onerror="this.parentNode.className=\'md-photo initials\';this.remove()"></div>'
+      : '<div class="md-photo initials">' + C.escapeHtml(initials(m.name)) + '</div>';
     var lvl = C.skillLabel(m.skill_level);
     if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
     var av = C.availabilityLabel(m.availability);
     var avGiver = m.availability === 'hiring' || m.availability === 'taking_apprentices';
-    el.innerHTML =
-      '<div class="ph">' + photo + '</div>' +
-      '<div class="body">' +
-        '<h3>' + C.escapeHtml(m.name) + '</h3>' +
-        (m.business_name ? '<div class="biz">' + C.escapeHtml(m.business_name) + '</div>' : '') +
-        (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
-        (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
-        (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '') +
-        (m.area ? '<div class="area">' + C.escapeHtml(m.area) + '</div>' : '') +
-        '<div class="chips">' + chips + '</div>' +
+    var badges =
+      (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
+      (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
+      (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '');
+    var chips = (m.specialties || []).map(function (s) {
+      return '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
+    }).join('');
+    document.getElementById('memBody').innerHTML =
+      '<div class="md-top">' + photo +
+        '<div style="flex:1;min-width:0">' +
+          (m.business_name ? '<div class="md-biz">' + C.escapeHtml(m.business_name) + '</div>' : '') +
+          (badges || '<span class="md-none">Profile still being filled in.</span>') +
+        '</div>' +
       '</div>' +
-      '<a class="wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
-    return el;
+      (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
+      (chips ? '<div class="md-label">Trades</div><div class="chips">' + chips + '</div>' : '') +
+      '<a class="md-wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">' + WA_SVG + ' Message on WhatsApp</a>';
+    memOverlay.classList.add('open');
   }
+  function closeMem() { memOverlay.classList.remove('open'); }
+  document.getElementById('closeMem').addEventListener('click', closeMem);
+  memOverlay.addEventListener('click', function (e) { if (e.target === memOverlay) closeMem(); });
 
   // ── trade popover: tap anywhere (incl. mobile), hover on desktop ──
   var spop = document.getElementById('spop');
@@ -563,7 +637,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     else if (!spop.contains(e.target)) closeSpop();
   });
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeSpop();
+    if (e.key === 'Escape') { closeSpop(); if (memOverlay.classList.contains('open')) closeMem(); }
     if (e.key === 'Enter' && document.activeElement && document.activeElement.matches && document.activeElement.matches('.chip[data-spec]')) {
       openSpop(document.activeElement);
     }
@@ -805,9 +879,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     TABS.forEach(function (t) {
       document.getElementById('tab-' + t).hidden = (t !== name);
     });
+    var activeTab = null;
     document.querySelectorAll('#tabbar .tab').forEach(function (b) {
-      b.classList.toggle('active', b.getAttribute('data-tab') === name);
+      var on = b.getAttribute('data-tab') === name;
+      b.classList.toggle('active', on);
+      if (on) activeTab = b;
     });
+    // breadcrumb reflects the active section (strip any "soon" pill text)
+    if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     closeSpop();
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
@@ -1007,7 +1086,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 5, date: '2026-07-16', title: 'Business & availability badges', body: 'In My profile: set your account type (Business or Individual) and your availability — Open to work, Hiring, Seeking apprenticeship or Taking apprentices. Both show on your card and are searchable.' },
     { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' },
     { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' },
-    { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' }
+    { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
+    { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
