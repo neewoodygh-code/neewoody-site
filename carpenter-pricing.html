@@ -25,6 +25,16 @@
     ::-webkit-scrollbar-thumb{background:var(--border);}
     input[type=number]::-webkit-inner-spin-button{opacity:.4;}
   </style>
+  <style>
+    @media print {
+      body * { visibility: hidden !important; }
+      .cc-overlay { position: static !important; overflow: visible !important; background: transparent !important; padding: 0 !important; }
+      #client-copy, #client-copy * { visibility: visible !important; }
+      #client-copy { position: static !important; margin: 0 !important; max-width: 100% !important; }
+      .no-print { display: none !important; }
+      @page { margin: 14mm; }
+    }
+  </style>
 </head>
 <body>
 <div id="root"></div>
@@ -688,7 +698,7 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
         {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg}/>}
         {tab==='materials' && <MaterialsTab q={q} upd={upd}/>}
         {tab==='logistics' && <LogisticsTab q={q} upd={upd}/>}
-        {tab==='summary'   && <SummaryTab q={q} calc={calc} onStatusChange={s=>upd({status:s})} onSave={save}/>}
+        {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} onStatusChange={s=>upd({status:s})} onSave={save}/>}
         {tab==='costs'     && <CostsTab q={q} upd={upd} calc={calc}/>}
         {tab==='notes'     && <div><Lbl ch="Notes"/><CtrlTA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
       </div>
@@ -933,8 +943,73 @@ function LogisticsTab({ q, upd }) {
   );
 }
 
+// ── Client Copy ───────────────────────────────────────────────────────
+// A customer-facing breakdown. Ghanaian clients want to see what they pay
+// for, so we itemise — but we protect the carpenter: materials (itemised or
+// a single subtotal, their choice), then workmanship split into Labour,
+// Expenses (overhead + logistics, encapsulated — no tool-wear line items a
+// layman would balk at) and a Service charge (the margin). Tier multiplier,
+// gross-margin %, net-profit projection and day-rate never appear here.
+function ClientCopy({ q, calc, session, onClose }) {
+  const [itemize, setItemize] = useState(true);
+  const mats       = [...(q.materials||[]), ...(q.optionals||[])].filter(m=>m.on && matTotal(m)>0);
+  const expenses   = calc.overhead + calc.logistics;
+  const workmanship= calc.quotedPrice - calc.matAmt;
+  const CRow = ({label,value,strong,indent}) => (
+    <div style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:`1px solid ${S.border}`,paddingLeft:indent?10:0}}>
+      <span style={{fontSize:'.85rem',fontFamily:FB,color:S.mid,fontWeight:strong?600:400}}>{label}</span>
+      <span style={{fontSize:'.85rem',fontFamily:FM,color:S.dark,fontWeight:strong?600:400}}>{value}</span>
+    </div>
+  );
+  const SecHdr = ({ch}) => <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',margin:'16px 0 4px'}}>{ch}</div>;
+  return (
+    <div className="cc-overlay" style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
+      <div className="no-print" style={{maxWidth:480,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
+        <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',color:'#fff',fontFamily:FB,fontSize:'.8rem'}}>
+          <input type="checkbox" checked={itemize} onChange={e=>setItemize(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>
+          Itemise materials
+        </label>
+        <div style={{display:'flex',gap:8}}>
+          <Btn ch="Print / Save PDF" onClick={()=>window.print()} color={S.accent} size="sm"/>
+          <Btn ch="Close" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.5)'}}/>
+        </div>
+      </div>
+      <div id="client-copy" style={{maxWidth:480,margin:'0 auto',background:'#fff',padding:'24px 26px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',borderBottom:`1px solid ${S.border}`,paddingBottom:12}}>
+          <div>
+            <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{session?.workshopName||'My Workshop'}</div>
+            <div style={{fontSize:'.82rem',color:S.mid,fontFamily:FB,marginTop:2}}>Quote for {q.client||'—'}</div>
+          </div>
+          <div style={{textAlign:'right',fontFamily:FM,fontSize:'.72rem',color:S.muted}}>
+            <div>{q.refId}</div>
+            <div style={{marginTop:2}}>{q.createdAt?fmtDate(q.createdAt):''}</div>
+          </div>
+        </div>
+
+        <SecHdr ch="Materials"/>
+        {itemize
+          ? <div>{mats.map(m=><CRow key={m.id} label={m.name} value={GHS(matTotal(m))} indent/>)}<CRow label="Materials subtotal" value={GHS(calc.matAmt)} strong/></div>
+          : <CRow label="Materials" value={GHS(calc.matAmt)} strong/>}
+
+        <SecHdr ch="Workmanship"/>
+        <CRow label="Labour"         value={GHS(calc.labour)} indent/>
+        <CRow label="Expenses"       value={GHS(expenses)} indent/>
+        <CRow label="Service charge" value={GHS(calc.grossMargin)} indent/>
+        <CRow label="Workmanship subtotal" value={GHS(workmanship)} strong/>
+
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',borderTop:`2px solid ${S.accent}`,marginTop:14,paddingTop:12}}>
+          <span style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.dark}}>Total</span>
+          <span style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:S.accent}}>{GHS(calc.quotedPrice)}</span>
+        </div>
+        <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB,marginTop:14,lineHeight:1.5}}>Prepared by {session?.workshopName||'My Workshop'} · {q.refId}</div>
+      </div>
+    </div>
+  );
+}
+
 // ── Summary Tab ───────────────────────────────────────────────────────
-function SummaryTab({ q, calc, onStatusChange, onSave }) {
+function SummaryTab({ q, calc, session, onStatusChange, onSave }) {
+  const [showClient, setShowClient] = useState(false);
   const totalDays   = (q.workshopDays||0)+(q.siteDays||0);
   const activeAddOns= ADDONS.filter(a=>q.addOns?.[a.id]);
   const taxRate     = q.taxRate??15;
@@ -984,6 +1059,11 @@ function SummaryTab({ q, calc, onStatusChange, onSave }) {
         </div>
       </div>}/>
       <Card ch={<div>
+        <Lbl ch="Customer copy"/>
+        <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>A client-facing breakdown — materials plus workmanship (labour, expenses, service charge). Your overhead, tier multiplier and margin stay hidden. Print it or save as PDF.</div>
+        <Btn ch="Open client copy →" onClick={()=>setShowClient(true)} full outline color={S.dark}/>
+      </div>}/>
+      <Card ch={<div>
         <Lbl ch="Quote status"/>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
           {Object.entries(STATUS_META).map(([s,m])=>(
@@ -992,6 +1072,7 @@ function SummaryTab({ q, calc, onStatusChange, onSave }) {
         </div>
         <Btn ch="Save quote" onClick={onSave} full color={S.accent}/>
       </div>}/>
+      {showClient && <ClientCopy q={q} calc={calc} session={session} onClose={()=>setShowClient(false)}/>}
     </div>
   );
 }
