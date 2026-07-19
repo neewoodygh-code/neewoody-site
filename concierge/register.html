@@ -37,11 +37,12 @@ label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; 
 label .opt{ text-transform:none; letter-spacing:0; font-family:var(--body); font-size:.8rem; color:var(--muted); }
 .field{ margin-bottom:1.1rem; }
 .row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-input, select{
+input, select, textarea{
   width:100%; font-family:var(--body); font-size:1rem; color:var(--ink);
   padding:.75rem .8rem; border:1px solid rgba(11,31,14,.18); border-radius:3px; background:#fff; transition:border-color .2s;
 }
-input:focus, select:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
+textarea{ resize:vertical; min-height:88px; line-height:1.5; }
+input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
 input.pin{ letter-spacing:.4em; text-align:center; font-size:1.2rem; }
 .hint{ font-size:.76rem; color:var(--muted); margin-top:.35rem; line-height:1.5; }
 .spec-grid{ display:grid; grid-template-columns:1fr; gap:.5rem; margin-top:.3rem; }
@@ -154,6 +155,10 @@ button.submit:disabled{ opacity:.6; cursor:default; }
           <input id="r_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="e.g. 8" />
         </div>
       </div>
+      <div class="field" id="r_vendorFields">
+        <label for="r_stock">Storefront <span class="opt">— what you sell (one item per line)</span></label>
+        <textarea id="r_stock" placeholder="e.g. Fluted wall panels&#10;Charcoal / acoustic board&#10;LED strip lighting & profiles"></textarea>
+      </div>
       <div class="field">
         <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
         <select id="r_avail"><option value="">— not shown —</option></select>
@@ -192,7 +197,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260719a"></script>
+<script src="../js/concierge.js?v=20260719b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -212,8 +217,13 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   var rType = document.getElementById('r_member_type');
   C.MEMBER_TYPE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); rType.appendChild(o); });
   var rCarpFields = document.getElementById('r_carpFields');
-  function syncRCarp() { rCarpFields.style.display = rType.value === 'carpenter' ? '' : 'none'; }
-  rType.addEventListener('change', syncRCarp); syncRCarp();
+  var rVendorFields = document.getElementById('r_vendorFields');
+  function syncRType() {
+    var isCarp = rType.value === 'carpenter';
+    rCarpFields.style.display = isCarp ? '' : 'none';
+    rVendorFields.style.display = isCarp ? 'none' : '';
+  }
+  rType.addEventListener('change', syncRType); syncRType();
   var specGrid = document.getElementById('r_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -284,7 +294,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     if (!/^\d{5}$/.test(pin)) { return showErr('Your PIN must be exactly 5 digits.'); }
     if (pin !== pin2) { return showErr('The two PINs don\'t match — please re-enter them.'); }
     if (!area) { return showErr('Choose your area.'); }
-    if (!specs.length) { return showErr('Choose at least one trade.'); }
+    if (rType.value === 'carpenter' && !specs.length) { return showErr('Choose at least one trade.'); }
 
     btn.disabled = true; btn.textContent = 'Submitting…';
     try {
@@ -295,6 +305,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         business_name: document.getElementById('r_biz').value.trim(),
         is_business: document.getElementById('r_type').value === '1',
         member_type: rType.value,
+        stock: rType.value === 'vendor' ? document.getElementById('r_stock').value.trim() : '',
         area: area,
         skill_level: rType.value === 'carpenter' ? lvl.value : '',
         years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,

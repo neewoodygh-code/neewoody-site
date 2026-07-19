@@ -39,8 +39,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1rem 1.5rem;
 
 label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.12em;
   text-transform:uppercase; color:var(--muted); margin-bottom:.35rem; }
-input,select{ width:100%; font-size:.95rem; padding:.6rem .7rem; border:1px solid rgba(11,31,14,.2);
+input,select,textarea{ width:100%; font-size:.95rem; padding:.6rem .7rem; border:1px solid rgba(11,31,14,.2);
   border-radius:3px; background:#fff; color:var(--ink); }
+textarea{ font-family:var(--body); resize:vertical; min-height:70px; line-height:1.5; }
 .form-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
 .field{ margin-bottom:0; }
 .spec-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:.35rem; }
@@ -137,6 +138,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field" style="align-self:end"><span style="font-size:.78rem;color:var(--muted)">Photo: upload from the member row after adding.</span></div>
         </div>
         <div style="margin-top:1rem"><label>Specialties</label><div class="spec-grid" id="a_specs"></div></div>
+        <div style="margin-top:1rem"><label>Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— what a vendor sells (optional)</span></label><textarea id="a_stock" placeholder="One item per line"></textarea></div>
         <div class="form-grid" style="margin-top:1rem">
           <div class="field"><label>Status</label>
             <select id="a_status"><option value="approved">Approved</option><option value="pending">Pending</option><option value="suspended">Suspended</option></select></div>
@@ -248,13 +250,14 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Skill level</label><select id="e_lvl"><option value="">— not set —</option></select></div>
       <div class="field"><label>Years of experience</label><input id="e_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
       <div class="field"><label>Trades</label><div class="spec-grid" id="e_specs"></div></div>
+      <div class="field"><label>Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— vendor's stock (optional)</span></label><textarea id="e_stock" placeholder="One item per line"></textarea></div>
       <div style="margin-top:1.25rem"><button class="btn" id="editSaveBtn" type="submit">Save changes</button></div>
       <div class="msg" id="emsg"></div>
     </form>
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719a"></script>
+<script src="../js/concierge.js?v=20260719b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -333,6 +336,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         years_experience: document.getElementById('a_yrs').value.trim() === '' ? null : Number(document.getElementById('a_yrs').value),
         is_business: document.getElementById('a_type').value === '1',
         member_type: aMemberType.value,
+        stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
         specialties: specs,
@@ -371,11 +375,12 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
   function memberRow(m) {
     var tr = document.createElement('tr');
+    var ib = C.identityBadge(m);
     var trades = (m.specialties || []).map(function (s) { return C.specialtyLabel(s); }).join(', ');
     tr.innerHTML =
       '<td><div class="who">' + C.escapeHtml(m.name) +
-          (m.member_type && m.member_type !== 'carpenter'
-            ? ' <span class="pill" style="background:' + C.memberTypeColor(m.member_type).bg + ';color:' + C.memberTypeColor(m.member_type).fg + '">' + C.escapeHtml(C.memberTypeLabel(m.member_type)) + '</span>'
+          (ib.key !== 'carpenter'
+            ? ' <span class="pill" style="background:' + ib.bg + ';color:' + ib.fg + '">' + C.escapeHtml(ib.label) + '</span>'
             : '') + '</div>' +
         '<div class="small">' + (m.business_name ? C.escapeHtml(m.business_name) + ' · ' : '') + C.displayPhone(m.phone) + '</div></td>' +
       '<td></td>' +
@@ -564,6 +569,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eLvl.value = m.skill_level || '';
     document.getElementById('e_yrs').value = m.years_experience != null ? m.years_experience : '';
     eMemberType.value = m.member_type || 'carpenter';
+    document.getElementById('e_stock').value = m.stock || '';
     var set = new Set(m.specialties || []);
     eSpecs.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
     emsg.textContent = ''; emsg.className = 'msg';
@@ -585,6 +591,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         business_name: document.getElementById('e_biz').value.trim(),
         is_business: document.getElementById('e_type').value === '1',
         member_type: eMemberType.value,
+        stock: document.getElementById('e_stock').value.trim(),
         availability: eAvail.value,
         area: document.getElementById('e_area').value,
         skill_level: eLvl.value,

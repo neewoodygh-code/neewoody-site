@@ -18,8 +18,7 @@ const SPECIALTIES = [
   'cabinet_construction', 'interior_work', 'solid_wood_furniture',
   'upholstery', 'finishing_spray', 'outdoor_structures',
   'site_construction', 'cnc_machining',
-  // interior-design / vendor offerings (added 2026-07-19)
-  'interior_design', 'wall_paneling', 'lighting', 'deco_supply',
+  'interior_design', // service specialty (both types); carries its own card badge
   'other',
 ];
 const PHOTO_MAX_BYTES = 300 * 1024; // server-side cap; client compresses to ~250KB max
@@ -34,7 +33,8 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 
 // Member identity type — drives the card badge and whether the carpenter skill
 // ladder (apprentice→master) applies. Vendors/interior designers aren't graded.
-const MEMBER_TYPES = ['carpenter', 'interior_designer', 'vendor'];
+const MEMBER_TYPES = ['carpenter', 'vendor'];
+const STOCK_MAX = 1000; // vendor Storefront free-text cap
 
 // Jobs board caps (notice board, not a scheduler)
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
@@ -254,6 +254,7 @@ async function updateMe(request, env, member) {
     if (mt === false) return json({ error: 'invalid_member_type' }, 400);
     fields.member_type = mt || 'carpenter';
   }
+  if ('stock' in body) fields.stock = stockVal(body.stock);
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
   // the owner no longer knows a member's PIN after handing out the initial one.
@@ -275,7 +276,7 @@ async function updateMe(request, env, member) {
 async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone,
-            skill_level, years_experience, is_business, availability, member_type
+            skill_level, years_experience, is_business, availability, member_type, stock
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), is_business: !!r.is_business })) });
@@ -284,7 +285,7 @@ async function directory(env) {
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
-            skill_level, years_experience, is_business, availability, member_type,
+            skill_level, years_experience, is_business, availability, member_type, stock,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -326,12 +327,12 @@ async function adminCreateMember(request, env) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability, member_type || 'carpenter'
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock)
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -393,6 +394,7 @@ async function adminUpdateMember(request, env, rawPhone) {
     if (mt === false) return json({ error: 'invalid_member_type' }, 400);
     fields.member_type = mt || 'carpenter';
   }
+  if ('stock' in body) fields.stock = stockVal(body.stock);
 
   // PIN reset (admin-only path — the only reset mechanism in Phase 1)
   if ('pin' in body && body.pin != null && body.pin !== '') {
@@ -739,12 +741,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter'
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock)
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1301,6 +1303,13 @@ function nullableStr(v) {
   if (v == null) return null;
   const s = String(v).trim();
   return s === '' ? null : s;
+}
+
+// Vendor Storefront free-text (what they sell) — trimmed + length-capped.
+function stockVal(v) {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s === '' ? null : s.slice(0, STOCK_MAX);
 }
 
 async function readJson(request) {

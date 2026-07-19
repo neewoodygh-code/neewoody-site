@@ -25,9 +25,6 @@
     site_construction: 'Site / Construction',
     cnc_machining: 'CNC / Machining',
     interior_design: 'Interior design',
-    wall_paneling: 'Wall panelling',
-    lighting: 'Lighting',
-    deco_supply: 'Décor supply',
     other: 'Other'
   };
   var SPECIALTY_ORDER = Object.keys(SPECIALTY_LABELS);
@@ -48,10 +45,7 @@
     outdoor_structures: 'Pergolas, gazebos, huts, sheds, decking',
     site_construction: 'Formwork, shuttering, roofing & trusses, structural carpentry',
     cnc_machining: 'Carved panels, routed doors, engraving, jigs & templates',
-    interior_design: 'Space planning, concept & mood boards, finishes selection',
-    wall_paneling: 'Fluted & slat panels, acoustic/charcoal board, wall cladding',
-    lighting: 'Strip/LED lighting, profiles, ambient & feature lighting',
-    deco_supply: 'Supplying décor panels, fittings, lighting & accessories'
+    interior_design: 'Space planning, concept & mood boards, finishes & materials selection'
   };
 
   // Skill levels — self-set by members in edit-profile (admin can correct).
@@ -73,30 +67,37 @@
   var AVAILABILITY_ORDER = Object.keys(AVAILABILITY_LABELS);
   function availabilityLabel(key) { return AVAILABILITY_LABELS[key] || ''; }
 
-  // Member identity type — the primary "what is this person" signal. Drives the
-  // at-a-glance badge on profile cards; carpenters also carry a skill level,
-  // designers/vendors don't (their type IS their identity).
-  var MEMBER_TYPE_LABELS = {
-    carpenter: 'Carpenter',
-    interior_designer: 'Interior Designer',
-    vendor: 'Vendor / Supplier'
-  };
+  // Member identity type — two choices at intake: carpenter (artisan) or vendor.
+  // Carpenters carry a skill level + trade specialties; vendors list what they
+  // sell in their Storefront. "Interior design" is a specialty (see below) with
+  // its own badge, available to either type.
+  var MEMBER_TYPE_LABELS = { carpenter: 'Carpenter', vendor: 'Vendor / Supplier' };
   var MEMBER_TYPE_ORDER = Object.keys(MEMBER_TYPE_LABELS);
   function memberTypeLabel(key) { return MEMBER_TYPE_LABELS[key] || MEMBER_TYPE_LABELS.carpenter; }
-  // Small filled glyphs (Material set) for the corner badge — fill=currentColor.
-  var MEMBER_TYPE_ICONS = {
-    carpenter: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>',
-    interior_designer: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 10c-.55 0-1 .45-1 1v3H4v-3c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-5c0-.55-.45-1-1-1zm-2-3H5c-1.1 0-2 .9-2 2v1.15c1.16.41 2 1.51 2 2.82V16h14v-2.03c0-1.3.84-2.4 2-2.82V9c0-1.1-.9-2-2-2z"/></svg>',
-    vendor: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>'
-  };
-  function memberTypeIcon(key) { return MEMBER_TYPE_ICONS[key] || MEMBER_TYPE_ICONS.carpenter; }
-  // Badge colours: carpenter=green, designer=gold, vendor=timber bronze.
+  // Small filled glyphs (Material set) — fill=currentColor.
+  var ICON_CARPENTER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>';
+  var ICON_VENDOR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>';
+  var ICON_INTERIOR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 10c-.55 0-1 .45-1 1v3H4v-3c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-5c0-.55-.45-1-1-1zm-2-3H5c-1.1 0-2 .9-2 2v1.15c1.16.41 2 1.51 2 2.82V16h14v-2.03c0-1.3.84-2.4 2-2.82V9c0-1.1-.9-2-2-2z"/></svg>';
+  var MEMBER_TYPE_ICONS = { carpenter: ICON_CARPENTER, vendor: ICON_VENDOR };
+  function memberTypeIcon(key) { return MEMBER_TYPE_ICONS[key] || ICON_CARPENTER; }
   var MEMBER_TYPE_COLORS = {
     carpenter: { bg: '#0b1f0e', fg: '#f0e8d0' },
-    interior_designer: { bg: '#c8922a', fg: '#241500' },
-    vendor: { bg: '#8a5a2a', fg: '#f0e8d0' }
+    vendor:    { bg: '#8a5a2a', fg: '#f0e8d0' }
   };
   function memberTypeColor(key) { return MEMBER_TYPE_COLORS[key] || MEMBER_TYPE_COLORS.carpenter; }
+
+  // The at-a-glance card badge. The interior_design specialty wins (its own gold
+  // armchair badge — a clearer identity than a generic type); otherwise the
+  // member type. Returns { key, label, icon, bg, fg }.
+  function identityBadge(m) {
+    var specs = (m && m.specialties) || [];
+    if (specs.indexOf('interior_design') >= 0) {
+      return { key: 'interior_design', label: 'Interior Designer', icon: ICON_INTERIOR, bg: '#c8922a', fg: '#241500' };
+    }
+    var t = (m && m.member_type) || 'carpenter';
+    var c = memberTypeColor(t);
+    return { key: t, label: memberTypeLabel(t), icon: memberTypeIcon(t), bg: c.bg, fg: c.fg };
+  }
 
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
@@ -380,6 +381,7 @@
     MEMBER_TYPE_LABELS: MEMBER_TYPE_LABELS, MEMBER_TYPE_ORDER: MEMBER_TYPE_ORDER, memberTypeLabel: memberTypeLabel,
     MEMBER_TYPE_ICONS: MEMBER_TYPE_ICONS, memberTypeIcon: memberTypeIcon,
     MEMBER_TYPE_COLORS: MEMBER_TYPE_COLORS, memberTypeColor: memberTypeColor,
+    identityBadge: identityBadge,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto,

@@ -277,6 +277,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:#25D366; color:#fff; border-radius:4px; padding:.9rem; transition:filter .2s; }
 .md-wa svg{ width:20px; height:20px; }
 .md-wa:hover{ filter:brightness(1.05); }
+.md-stock{ font-size:.9rem; line-height:1.6; color:var(--ink); white-space:pre-line; }
 
 @media(max-width:560px){
   .lead h1{ font-size:1.5rem; }
@@ -460,6 +461,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <label for="p_yrs">Years of experience</label>
         <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
       </div>
+      <div id="vendorFields">
+        <label for="p_stock">Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— what you sell (one item per line)</span></label>
+        <textarea id="p_stock" rows="4" placeholder="e.g. Fluted wall panels&#10;Charcoal / acoustic board&#10;LED strip lighting & profiles&#10;Cornices & skirting"></textarea>
+      </div>
       <label>Trades</label>
       <div class="spec-grid" id="specGrid"></div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
@@ -514,7 +519,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719a"></script>
+<script src="../js/concierge.js?v=20260719b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -574,9 +579,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   // modal, opened by tapping the card — keeps every card the same small size.
   // Colored icon-disc identifying the member's type (carpenter/designer/vendor).
   function typeBadge(m, cls) {
-    var t = m.member_type || 'carpenter';
-    var c = C.memberTypeColor(t);
-    return '<span class="' + cls + '" style="background:' + c.bg + ';color:' + c.fg + '" title="' + C.escapeHtml(C.memberTypeLabel(t)) + '">' + C.memberTypeIcon(t) + '</span>';
+    var b = C.identityBadge(m);
+    return '<span class="' + cls + '" style="background:' + b.bg + ';color:' + b.fg + '" title="' + C.escapeHtml(b.label) + '">' + b.icon + '</span>';
   }
 
   function card(m) {
@@ -586,8 +590,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var photo = m.photo_url
       ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.remove()">'
       : '<div class="initials">' + C.escapeHtml(initials(m.name)) + '</div>';
-    // Carpenters lead their meta with skill level; designers/vendors with their type.
-    var typeLead = m.member_type && m.member_type !== 'carpenter' ? C.memberTypeLabel(m.member_type) : C.skillLabel(m.skill_level);
+    // Carpenters lead their meta with skill level; vendors/designers with their identity.
+    var ib = C.identityBadge(m);
+    var typeLead = ib.key === 'carpenter' ? C.skillLabel(m.skill_level) : ib.label;
     var meta = [typeLead, m.area].filter(Boolean).map(C.escapeHtml).join(' · ');
     el.innerHTML =
       '<div class="ph-wrap"><div class="ph">' + photo + '</div>' + typeBadge(m, 'type-badge') + '</div>' +
@@ -606,19 +611,18 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var memOverlay = document.getElementById('memOverlay');
   function openMember(m) {
     document.getElementById('memName').textContent = m.name || 'Member';
-    var mt = m.member_type || 'carpenter';
-    var mtColor = C.memberTypeColor(mt);
+    var ib = C.identityBadge(m);
     var photoInner = m.photo_url
       ? '<div class="md-photo"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" onerror="this.parentNode.className=\'md-photo initials\';this.remove()"></div>'
       : '<div class="md-photo initials">' + C.escapeHtml(initials(m.name)) + '</div>';
     var photo = '<div style="position:relative;flex-shrink:0">' + photoInner + typeBadge(m, 'md-badge') + '</div>';
-    // Skill level only applies to carpenters; designers/vendors lead with type.
-    var lvl = mt === 'carpenter' ? C.skillLabel(m.skill_level) : '';
+    // Skill level only applies to carpenters.
+    var lvl = (m.member_type || 'carpenter') === 'carpenter' ? C.skillLabel(m.skill_level) : '';
     if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
     var av = C.availabilityLabel(m.availability);
     var avGiver = m.availability === 'hiring' || m.availability === 'taking_apprentices';
     var badges =
-      '<span class="type-pill" style="background:' + mtColor.bg + ';color:' + mtColor.fg + '">' + C.escapeHtml(C.memberTypeLabel(mt)) + '</span>' +
+      '<span class="type-pill" style="background:' + ib.bg + ';color:' + ib.fg + '">' + C.escapeHtml(ib.label) + '</span>' +
       (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
       (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
       (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '');
@@ -634,6 +638,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       '</div>' +
       (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
       (chips ? '<div class="md-label">Trades</div><div class="chips">' + chips + '</div>' : '') +
+      (m.stock ? '<div class="md-label">Storefront</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       '<a class="md-wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">' + WA_SVG + ' Message on WhatsApp</a>';
     memOverlay.classList.add('open');
   }
@@ -855,8 +860,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); pMemberType.appendChild(o);
   });
   var carpFields = document.getElementById('carpFields');
-  function syncCarpFields() { carpFields.style.display = pMemberType.value === 'carpenter' ? '' : 'none'; }
-  pMemberType.addEventListener('change', syncCarpFields);
+  var vendorFields = document.getElementById('vendorFields');
+  function syncTypeFields() {
+    var isCarp = pMemberType.value === 'carpenter';
+    carpFields.style.display = isCarp ? '' : 'none';
+    vendorFields.style.display = isCarp ? 'none' : '';
+  }
+  pMemberType.addEventListener('change', syncTypeFields);
 
   function openModal() {
     if (!me) return;
@@ -868,7 +878,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     pLvl.value = me.skill_level || '';
     document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
     pMemberType.value = me.member_type || 'carpenter';
-    syncCarpFields();
+    document.getElementById('p_stock').value = me.stock || '';
+    syncTypeFields();
     renderPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
     var set = new Set(me.specialties || []);
@@ -888,7 +899,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     e.preventDefault();
     var saveBtn = document.getElementById('saveBtn');
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (!specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    if (pMemberType.value === 'carpenter' && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
     var newPin = document.getElementById('p_pin').value;
     if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
     saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
@@ -898,6 +909,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         business_name: document.getElementById('p_biz').value.trim(),
         is_business: document.getElementById('p_type').value === '1',
         member_type: pMemberType.value,
+        stock: pMemberType.value === 'vendor' ? document.getElementById('p_stock').value.trim() : '',
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
         skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',
@@ -1133,7 +1145,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' },
     { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
     { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
-    { id: 10, date: '2026-07-19', title: 'Interior designers & vendors welcome', body: 'The directory now covers more than carpenters. Open My profile and set "What are you?" — Carpenter, Interior Designer or Vendor / Supplier. A small badge on your card shows it at a glance, and new trades were added (interior design, wall panelling, lighting, décor supply). Filter by type to find exactly who you need.' }
+    { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Supplier. Vendors get a Storefront to list what they sell (panels, boards, lighting…). Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
