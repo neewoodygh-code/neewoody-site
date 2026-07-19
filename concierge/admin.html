@@ -333,7 +333,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     var phone = C.normalizePhone(document.getElementById('a_phone').value);
     if (!phone) { msg.className = 'msg error'; msg.textContent = 'Enter a valid Ghana phone number.'; return; }
     if (!/^\d{5}$/.test(document.getElementById('a_pin').value)) { msg.className = 'msg error'; msg.textContent = 'PIN must be 5 digits.'; return; }
-    if (!specs.length) { msg.className = 'msg error'; msg.textContent = 'Choose at least one specialty.'; return; }
+    if (aMemberType.value !== 'vendor' && !specs.length) { msg.className = 'msg error'; msg.textContent = 'Choose at least one specialty.'; return; }
     if (document.getElementById('a_hide_phone').checked && !document.getElementById('a_biz_phone').value.trim()) { msg.className = 'msg error'; msg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Adding…';
     try {
@@ -352,7 +352,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
-        specialties: specs,
+        specialties: aMemberType.value === 'vendor' ? [] : specs,
         status: document.getElementById('a_status').value,
         role: document.getElementById('a_role').value,
         is_founder: document.getElementById('a_founder').value === '1'
@@ -609,7 +609,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     if (!editing) return;
     var btn = document.getElementById('editSaveBtn');
     var specs = [].slice.call(eSpecs.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (!specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
+    if (eMemberType.value !== 'vendor' && !specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
     if (document.getElementById('e_hide_phone').checked && !document.getElementById('e_biz_phone').value.trim()) { emsg.className = 'msg error'; emsg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; emsg.className = 'msg'; emsg.textContent = 'Saving…';
     try {
@@ -627,7 +627,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         area: document.getElementById('e_area').value,
         skill_level: eLvl.value,
         years_experience: document.getElementById('e_yrs').value.trim() === '' ? null : Number(document.getElementById('e_yrs').value),
-        specialties: specs
+        specialties: eMemberType.value === 'vendor' ? [] : specs
       }});
       emsg.className = 'msg ok'; emsg.textContent = 'Saved.';
       await loadMembers();

@@ -269,13 +269,19 @@ async function updateMe(request, env, member) {
   }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
-    if (!spec) return json({ error: 'invalid_specialties' }, 400);
+    if (spec === null) return json({ error: 'invalid_specialties' }, 400);
     fields.specialties = spec;
   }
   if ('member_type' in body) {
     const mt = validateMemberType(body.member_type);
     if (mt === false) return json({ error: 'invalid_member_type' }, 400);
     fields.member_type = mt || 'carpenter';
+  }
+  // A carpenter must keep at least one trade; vendors carry none.
+  {
+    const effType = ('member_type' in fields ? fields.member_type : member.member_type) || 'carpenter';
+    const effSpec = ('specialties' in fields ? fields.specialties : member.specialties) || '[]';
+    if (effType === 'carpenter' && JSON.parse(effSpec).length === 0) return json({ error: 'invalid_specialties' }, 400);
   }
   if ('stock' in body) fields.stock = stockVal(body.stock);
   if ('location_lat' in body || 'location_lng' in body) {
@@ -370,7 +376,7 @@ async function adminCreateMember(request, env) {
   if (!/^\d{5}$/.test(pin)) return json({ error: 'pin_must_be_5_digits' }, 400);
 
   const specialties = validateSpecialties(body.specialties);
-  if (!specialties) return json({ error: 'invalid_specialties' }, 400);
+  if (specialties === null) return json({ error: 'invalid_specialties' }, 400);
 
   const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (existing) return json({ error: 'member_exists' }, 409);
@@ -389,6 +395,8 @@ async function adminCreateMember(request, env) {
   const is_business = body.is_business ? 1 : 0;
   const member_type = validateMemberType(body.member_type);
   if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
+  // Carpenters must carry at least one trade; vendors carry none.
+  if ((member_type || 'carpenter') === 'carpenter' && JSON.parse(specialties).length === 0) return json({ error: 'invalid_specialties' }, 400);
   const vendor_scale = validateVendorScale(body.vendor_scale);
   if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
   const vendor_categories = validateVendorCategories(body.vendor_categories);
@@ -460,13 +468,19 @@ async function adminUpdateMember(request, env, rawPhone) {
   }
   if ('specialties' in body) {
     const spec = validateSpecialties(body.specialties);
-    if (!spec) return json({ error: 'invalid_specialties' }, 400);
+    if (spec === null) return json({ error: 'invalid_specialties' }, 400);
     fields.specialties = spec;
   }
   if ('member_type' in body) {
     const mt = validateMemberType(body.member_type);
     if (mt === false) return json({ error: 'invalid_member_type' }, 400);
     fields.member_type = mt || 'carpenter';
+  }
+  // A carpenter must keep at least one trade; vendors carry none.
+  {
+    const effType = ('member_type' in fields ? fields.member_type : member.member_type) || 'carpenter';
+    const effSpec = ('specialties' in fields ? fields.specialties : member.specialties) || '[]';
+    if (effType === 'carpenter' && JSON.parse(effSpec).length === 0) return json({ error: 'invalid_specialties' }, 400);
   }
   if ('stock' in body) fields.stock = stockVal(body.stock);
   if ('vendor_scale' in body) {
@@ -824,7 +838,7 @@ async function publicRegister(request, env, ctx) {
   if (!/^\d{5}$/.test(pin)) return json({ error: 'pin_must_be_5_digits' }, 400);
 
   const specialties = validateSpecialties(body.specialties);
-  if (!specialties) return json({ error: 'invalid_specialties' }, 400);
+  if (specialties === null) return json({ error: 'invalid_specialties' }, 400);
 
   const skill_level = validateSkillLevel(body.skill_level);
   if (skill_level === false) return json({ error: 'invalid_skill_level' }, 400);
@@ -834,6 +848,8 @@ async function publicRegister(request, env, ctx) {
   if (availability === false) return json({ error: 'invalid_availability' }, 400);
   const member_type = validateMemberType(body.member_type);
   if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
+  // Carpenters must carry at least one trade; vendors carry none.
+  if ((member_type || 'carpenter') === 'carpenter' && JSON.parse(specialties).length === 0) return json({ error: 'invalid_specialties' }, 400);
   const vendor_scale = validateVendorScale(body.vendor_scale);
   if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
   const vendor_categories = validateVendorCategories(body.vendor_categories);
@@ -1460,14 +1476,17 @@ function normalizePhone(raw) {
   return null;
 }
 
+// Returns a cleaned JSON array string ('[]' when none/empty — valid, since
+// only carpenters require ≥1 trade; vendors carry none). null = malformed input.
+// Callers enforce the carpenter "at least one" rule where member_type is known.
 function validateSpecialties(input) {
+  if (input == null) return '[]';
   let arr = input;
   if (typeof input === 'string') {
     try { arr = JSON.parse(input); } catch { arr = input.split(',').map((s) => s.trim()); }
   }
   if (!Array.isArray(arr)) return null;
   const clean = [...new Set(arr.map((s) => String(s).trim()).filter((s) => SPECIALTIES.includes(s)))];
-  if (!clean.length) return null;
   return JSON.stringify(clean);
 }
 
