@@ -97,6 +97,14 @@ const ALLOWED_ORIGINS = [
   'https://www.neewoodygh.com',
 ];
 
+// Paystack (owner provisions PAYSTACK_SECRET as a Worker secret; CC never sees
+// it). Hosted-checkout flow: init server-side → redirect → signed webhook
+// confirms. One-time-per-period billing (no auto-renew v1).
+const PAYSTACK_BASE = 'https://api.paystack.co';
+const MONTHLY_FEE_GHS = 50;
+const FOUNDER_FEE_GHS = 100;
+const PAY_CALLBACK_URL = 'https://neewoodygh.com/concierge/directory.html?pay=return';
+
 // ── entrypoint ─────────────────────────────────────────────────────────
 export default {
   async fetch(request, env, ctx) {
@@ -125,6 +133,9 @@ async function route(request, env, ctx) {
   if (path === '/api/auth/login' && method === 'POST') return login(request, env);
   if (path === '/api/health' && method === 'GET') return json({ ok: true });
 
+  // Paystack webhook (server-to-server; verified by HMAC signature, not auth).
+  if (path === '/api/pay/webhook' && method === 'POST') return payWebhook(request, env, ctx);
+
   // Public "Hire a Carpenter" — unauthenticated job request from a client
   // (homeowner, or a non-member master hiring hands). Lands as `pending`.
   if (path === '/api/public/jobs' && method === 'POST') return publicPostJob(request, env, ctx);
@@ -142,7 +153,8 @@ async function route(request, env, ctx) {
   if (mStoreImg && method === 'GET') return serveStorefrontPhoto(env, request, mStoreImg[1], Number(mStoreImg[2]));
 
   // ---- member ----
-  if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => json({ member: sanitize(m) }));
+  if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => getMe(env, m));
+  if (path === '/api/pay/init' && method === 'POST') return withAuth(request, env, (m) => payInit(request, env, m));
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
@@ -655,6 +667,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
 
   await env.DB.batch([
     env.DB.prepare('DELETE FROM payments WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM payment_intents WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
@@ -1473,6 +1486,108 @@ async function adminDeleteService(env, id) {
   if (!svc) return json({ error: 'not_found' }, 404);
   await env.DB.prepare('DELETE FROM service_catalog WHERE id = ?').bind(id).run();
   return json({ deleted: true });
+}
+
+// ── payments (Paystack, hosted checkout, one-time per period) ──────────
+// The SECRET key is a Worker secret the OWNER provisions; this code never sees
+// it in source. Flow: /api/pay/init (server initialises + returns Paystack's
+// hosted URL) → member pays → signed webhook confirms → payments row written.
+
+function currentPeriod() { return new Date().toISOString().slice(0, 7); } // YYYY-MM
+function memberEmail(phone) { return phone + '@members.neewoodygh.com'; } // Paystack requires an email; members are phone-only
+
+async function hmacSha512Hex(key, msg) {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', k, enc.encode(msg));
+  return [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Membership standing for the CURRENT period. Admins + lifetime founders are
+// exempt (never billed); everyone else is paid iff a payments row exists.
+async function membershipStatus(env, m) {
+  const period = currentPeriod();
+  if (m.role === 'admin') return { paid: true, exempt: 'admin', period };
+  if (m.is_founder) return { paid: true, exempt: 'founder', period };
+  const row = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(m.phone, period).first();
+  return { paid: !!row, period, amount_due: MONTHLY_FEE_GHS, configured: !!env.PAYSTACK_SECRET };
+}
+
+async function getMe(env, m) {
+  return json({ member: sanitize(m), membership: await membershipStatus(env, m) });
+}
+
+async function payInit(request, env, member) {
+  if (!env.PAYSTACK_SECRET) return json({ error: 'payments_not_configured' }, 503);
+  if (member.role === 'admin' || member.is_founder) return json({ error: 'no_payment_due' }, 400);
+
+  const period = currentPeriod();
+  const existing = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(member.phone, period).first();
+  if (existing) return json({ error: 'already_paid', period }, 409);
+
+  const amount = MONTHLY_FEE_GHS;
+  const reference = 'NWD-' + member.phone + '-' + period + '-' + Math.random().toString(36).slice(2, 8);
+  await env.DB.prepare(
+    `INSERT INTO payment_intents (reference, member_phone, period, amount_ghs, kind) VALUES (?, ?, ?, ?, 'monthly')`
+  ).bind(reference, member.phone, period, amount).run();
+
+  let res;
+  try {
+    res = await fetch(PAYSTACK_BASE + '/transaction/initialize', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + env.PAYSTACK_SECRET, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: memberEmail(member.phone),
+        amount: amount * 100, // pesewas
+        currency: 'GHS',
+        reference: reference,
+        callback_url: PAY_CALLBACK_URL,
+        channels: ['mobile_money', 'card'],
+        metadata: { phone: member.phone, period: period, name: member.name || '' },
+      }),
+    });
+  } catch (e) {
+    return json({ error: 'paystack_unreachable' }, 502);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.status || !data.data || !data.data.authorization_url) {
+    return json({ error: 'paystack_init_failed', detail: (data && data.message) || null }, 502);
+  }
+  return json({ authorization_url: data.data.authorization_url, reference });
+}
+
+async function payWebhook(request, env, ctx) {
+  const raw = await request.text();
+  if (!env.PAYSTACK_SECRET) return json({ error: 'not_configured' }, 503);
+  const sig = request.headers.get('x-paystack-signature') || '';
+  const expected = await hmacSha512Hex(env.PAYSTACK_SECRET, raw);
+  if (sig !== expected) return json({ error: 'bad_signature' }, 401);
+
+  let body;
+  try { body = JSON.parse(raw); } catch { return json({ error: 'bad_body' }, 400); }
+  if (!body || body.event !== 'charge.success' || !body.data) return json({ ok: true });
+
+  const reference = String(body.data.reference || '');
+  const intent = await env.DB.prepare('SELECT * FROM payment_intents WHERE reference = ?').bind(reference).first();
+  if (!intent || intent.status === 'paid') return json({ ok: true }); // unknown or already handled
+
+  await env.DB.prepare(`UPDATE payment_intents SET status = 'paid', paid_at = datetime('now') WHERE reference = ?`).bind(reference).run();
+  // Write the canonical payment row (same table admin views use); upsert per period.
+  await env.DB.prepare(
+    `INSERT INTO payments (member_phone, period, amount_ghs, momo_ref)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(member_phone, period)
+     DO UPDATE SET amount_ghs = excluded.amount_ghs, momo_ref = excluded.momo_ref, recorded_at = datetime('now')`
+  ).bind(intent.member_phone, intent.period, intent.amount_ghs, reference).run();
+
+  const notif = notifyMember(env, intent.member_phone, {
+    type: 'payment', title: 'Payment received',
+    body: 'Your GHS ' + intent.amount_ghs + ' membership for ' + intent.period + ' is confirmed. Thank you!',
+    link: '#directory',
+  }).catch((e) => console.error('payment notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notif);
+
+  return json({ ok: true });
 }
 
 // ── pricing tool (per-member config + quotes) ──────────────────────────

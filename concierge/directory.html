@@ -100,6 +100,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:var(--gold); color:var(--green); border:none; border-radius:3px; padding:.6rem 1rem; cursor:pointer; white-space:nowrap; }
 .pnudge .x{ background:transparent; color:rgba(240,232,208,.55); border:1px solid rgba(240,232,208,.3); }
 
+/* membership / dues bar */
+.mbar{ border-radius:5px; padding:.9rem 1.15rem; margin-bottom:1.1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.mbar.due{ background:#f6ecc9; border:1px solid rgba(200,146,42,.5); }
+.mbar.ok{ background:#dcecdc; border:1px solid rgba(46,107,46,.35); }
+.mbar.info{ background:var(--cream-dark); border:1px solid rgba(11,31,14,.15); }
+.mbar p{ flex:1; min-width:200px; font-size:.9rem; line-height:1.5; color:var(--ink); }
+.mbar p b{ color:var(--green); }
+.mbar button{ font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  background:var(--green); color:var(--cream); border:none; border-radius:4px; padding:.6rem 1.1rem; cursor:pointer; white-space:nowrap; }
+.mbar button:disabled{ opacity:.6; cursor:default; }
+
 /* jobs board */
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
@@ -390,6 +401,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 </nav>
 
 <div class="wrap">
+
+  <div id="membershipBar" class="mbar" style="display:none"></div>
 
   <nav class="crumbs" aria-label="Breadcrumb">
     <a href="../tools.html">Concierge</a><span aria-hidden="true">›</span><b id="crumbCurrent">Directory</b>
@@ -2070,7 +2083,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 17, date: '2026-07-19', title: 'Couriers & delivery runs', body: 'New member type: Courier / Delivery. Couriers set coverage zones and get pinged for buy-for-me requests there. Not a courier? In My profile tick "I also do deliveries & errands" and set your zones to get the same pings.' },
     { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' },
     { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' },
-    { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' }
+    { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' },
+    { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -2112,6 +2126,54 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       if (err.status === 401) { location.replace('login.html'); return; }
       stateEl.textContent = err.message || 'Could not load the directory.';
     }
+  }
+
+  // ── membership / dues (Paystack hosted checkout) ──
+  var membership = null;
+  var payBar = document.getElementById('membershipBar');
+  function monthName(period) { try { return new Date(period + '-01T00:00:00').toLocaleDateString(undefined, { month: 'long', year: 'numeric' }); } catch (e) { return period; } }
+  function renderMembershipBar() {
+    if (!membership || membership.exempt || membership.paid) { payBar.style.display = 'none'; return; }
+    if (!membership.configured) {
+      payBar.className = 'mbar info'; payBar.style.display = 'flex';
+      payBar.innerHTML = '<p>Online payment is coming soon. For now, pay your GHS ' + (membership.amount_due || 50) + ' membership via Mobile Money as usual.</p>';
+      return;
+    }
+    payBar.className = 'mbar due'; payBar.style.display = 'flex';
+    payBar.innerHTML = '<p>Your <b>GHS ' + (membership.amount_due || 50) + '</b> membership for <b>' + C.escapeHtml(monthName(membership.period)) + '</b> is due.</p><button type="button" id="payNowBtn">Pay now</button>';
+    document.getElementById('payNowBtn').addEventListener('click', payNow);
+  }
+  async function refreshMembership() {
+    try { var r = await C.api('/me'); me = r.member; membership = r.membership; renderMembershipBar(); } catch (e) {}
+  }
+  async function payNow() {
+    var btn = document.getElementById('payNowBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Starting…'; }
+    try {
+      var r = await C.api('/pay/init', { method: 'POST', body: {} });
+      if (r.authorization_url) { window.location.href = r.authorization_url; return; }
+      alert('Could not start payment — please try again.');
+    } catch (err) {
+      if (err.message === 'already_paid') { await refreshMembership(); }
+      else if (err.message === 'payments_not_configured') { membership.configured = false; renderMembershipBar(); }
+      else alert(err.message || 'Could not start payment.');
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Pay now'; }
+  }
+  async function handlePayReturn() {
+    if (!/[?&]pay=return/.test(location.search)) return;
+    try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+    payBar.className = 'mbar info'; payBar.style.display = 'flex'; payBar.innerHTML = '<p>Confirming your payment… this can take a few seconds.</p>';
+    for (var i = 0; i < 5; i++) {
+      await new Promise(function (res) { setTimeout(res, i === 0 ? 1500 : 2500); });
+      await refreshMembership();
+      if (membership && membership.paid) {
+        payBar.className = 'mbar ok'; payBar.style.display = 'flex';
+        payBar.innerHTML = '<p>Payment received — your membership is active. Thank you!</p>';
+        setTimeout(renderMembershipBar, 5000); return;
+      }
+    }
+    payBar.className = 'mbar info'; payBar.style.display = 'flex';
+    payBar.innerHTML = '<p>We haven\'t confirmed your payment yet — if it went through, it\'ll update shortly. Check back in a minute.</p>';
   }
 
   // ── notifications (in-app bell) ──
@@ -2165,6 +2227,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     try {
       var meRes = await C.api('/me');
       me = meRes.member;
+      membership = meRes.membership || null;
       try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
       if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
       if (me && me.member_type === 'vendor') {
@@ -2177,6 +2240,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     }
     await load();
     renderNudge();
+    renderMembershipBar();
+    handlePayReturn();
     maybeShowWhatsNew();
     initAlerts();
     fetchNotifs();
