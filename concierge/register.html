@@ -126,9 +126,13 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     <!-- Step 2: Your work -->
     <div class="step" data-step="2">
       <div class="field">
+        <label for="r_member_type">What are you?</label>
+        <select id="r_member_type"></select>
+      </div>
+      <div class="field">
         <label for="r_type">Account type</label>
         <select id="r_type">
-          <option value="">Individual carpenter / apprentice</option>
+          <option value="">Individual — just me</option>
           <option value="1">Business — I hire and take on work</option>
         </select>
       </div>
@@ -140,7 +144,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         <label for="r_area">Your area</label>
         <select id="r_area" required></select>
       </div>
-      <div class="row">
+      <div class="row" id="r_carpFields">
         <div class="field">
           <label for="r_lvl">Skill level <span class="opt">— optional</span></label>
           <select id="r_lvl"><option value="">— not set —</option></select>
@@ -188,7 +192,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260716c"></script>
+<script src="../js/concierge.js?v=20260719a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -204,6 +208,12 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   C.SKILL_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lvl.appendChild(o); });
   var avail = document.getElementById('r_avail');
   C.AVAILABILITY_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); avail.appendChild(o); });
+  // member type — skill level only applies to carpenters
+  var rType = document.getElementById('r_member_type');
+  C.MEMBER_TYPE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); rType.appendChild(o); });
+  var rCarpFields = document.getElementById('r_carpFields');
+  function syncRCarp() { rCarpFields.style.display = rType.value === 'carpenter' ? '' : 'none'; }
+  rType.addEventListener('change', syncRCarp); syncRCarp();
   var specGrid = document.getElementById('r_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -284,9 +294,10 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         pin: pin,
         business_name: document.getElementById('r_biz').value.trim(),
         is_business: document.getElementById('r_type').value === '1',
+        member_type: rType.value,
         area: area,
-        skill_level: lvl.value,
-        years_experience: document.getElementById('r_yrs').value.trim() === '' ? null : Number(document.getElementById('r_yrs').value),
+        skill_level: rType.value === 'carpenter' ? lvl.value : '',
+        years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,
         availability: avail.value,
         specialties: specs
       }});

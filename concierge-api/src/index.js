@@ -17,7 +17,10 @@
 const SPECIALTIES = [
   'cabinet_construction', 'interior_work', 'solid_wood_furniture',
   'upholstery', 'finishing_spray', 'outdoor_structures',
-  'site_construction', 'cnc_machining', 'other',
+  'site_construction', 'cnc_machining',
+  // interior-design / vendor offerings (added 2026-07-19)
+  'interior_design', 'wall_paneling', 'lighting', 'deco_supply',
+  'other',
 ];
 const PHOTO_MAX_BYTES = 300 * 1024; // server-side cap; client compresses to ~250KB max
 
@@ -28,6 +31,10 @@ const SKILL_LEVELS = ['apprentice', 'carpenter', 'master'];
 // Availability badge — the seeker/giver signal on directory cards and the
 // candidate-pool filter for the jobs board.
 const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'taking_apprentices'];
+
+// Member identity type — drives the card badge and whether the carpenter skill
+// ladder (apprentice→master) applies. Vendors/interior designers aren't graded.
+const MEMBER_TYPES = ['carpenter', 'interior_designer', 'vendor'];
 
 // Jobs board caps (notice board, not a scheduler)
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
@@ -242,6 +249,11 @@ async function updateMe(request, env, member) {
     if (!spec) return json({ error: 'invalid_specialties' }, 400);
     fields.specialties = spec;
   }
+  if ('member_type' in body) {
+    const mt = validateMemberType(body.member_type);
+    if (mt === false) return json({ error: 'invalid_member_type' }, 400);
+    fields.member_type = mt || 'carpenter';
+  }
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
   // the owner no longer knows a member's PIN after handing out the initial one.
@@ -263,7 +275,7 @@ async function updateMe(request, env, member) {
 async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone,
-            skill_level, years_experience, is_business, availability
+            skill_level, years_experience, is_business, availability, member_type
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), is_business: !!r.is_business })) });
@@ -272,7 +284,7 @@ async function directory(env) {
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
-            skill_level, years_experience, is_business, availability,
+            skill_level, years_experience, is_business, availability, member_type,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -308,16 +320,18 @@ async function adminCreateMember(request, env) {
   const availability = validateAvailability(body.availability);
   if (availability === false) return json({ error: 'invalid_availability' }, 400);
   const is_business = body.is_business ? 1 : 0;
+  const member_type = validateMemberType(body.member_type);
+  if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
 
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter'
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -373,6 +387,11 @@ async function adminUpdateMember(request, env, rawPhone) {
     const spec = validateSpecialties(body.specialties);
     if (!spec) return json({ error: 'invalid_specialties' }, 400);
     fields.specialties = spec;
+  }
+  if ('member_type' in body) {
+    const mt = validateMemberType(body.member_type);
+    if (mt === false) return json({ error: 'invalid_member_type' }, 400);
+    fields.member_type = mt || 'carpenter';
   }
 
   // PIN reset (admin-only path — the only reset mechanism in Phase 1)
@@ -710,6 +729,8 @@ async function publicRegister(request, env, ctx) {
   if (years_experience === false) return json({ error: 'invalid_years' }, 400);
   const availability = validateAvailability(body.availability);
   if (availability === false) return json({ error: 'invalid_availability' }, 400);
+  const member_type = validateMemberType(body.member_type);
+  if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
 
   const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (existing) return json({ error: 'member_exists' }, 409);
@@ -718,12 +739,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter'
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1253,6 +1274,12 @@ function validateYears(v) {
 function validateAvailability(v) {
   if (v == null || v === '') return null;
   return AVAILABILITY.includes(String(v)) ? String(v) : false;
+}
+
+// null = not provided (caller defaults to 'carpenter'); false = invalid.
+function validateMemberType(v) {
+  if (v == null || v === '') return null;
+  return MEMBER_TYPES.includes(String(v)) ? String(v) : false;
 }
 
 function parseSpec(text) {

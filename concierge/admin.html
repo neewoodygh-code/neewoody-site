@@ -127,6 +127,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Name</label><input id="a_name" required></div>
           <div class="field"><label>Business name</label><input id="a_biz" placeholder="Optional"></div>
           <div class="field"><label>Area</label><select id="a_area"></select></div>
+          <div class="field"><label>Member type</label><select id="a_member_type"></select></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
           <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
@@ -239,6 +240,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     <form id="editForm">
       <div class="field"><label>Name</label><input id="e_name" required></div>
       <div class="field"><label>Business name</label><input id="e_biz" placeholder="Optional"></div>
+      <div class="field"><label>Member type</label><select id="e_member_type"></select></div>
       <div class="field"><label>Account type</label>
         <select id="e_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
       <div class="field"><label>Availability badge</label><select id="e_avail"><option value="">— not shown —</option></select></div>
@@ -252,7 +254,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716c"></script>
+<script src="../js/concierge.js?v=20260719a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -287,6 +289,10 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   var aAvail = document.getElementById('a_avail');
   C.AVAILABILITY_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); aAvail.appendChild(o);
+  });
+  var aMemberType = document.getElementById('a_member_type');
+  C.MEMBER_TYPE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); aMemberType.appendChild(o);
   });
 
   document.getElementById('a_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
@@ -326,6 +332,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         skill_level: aLvl.value,
         years_experience: document.getElementById('a_yrs').value.trim() === '' ? null : Number(document.getElementById('a_yrs').value),
         is_business: document.getElementById('a_type').value === '1',
+        member_type: aMemberType.value,
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
         specialties: specs,
@@ -366,7 +373,10 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     var tr = document.createElement('tr');
     var trades = (m.specialties || []).map(function (s) { return C.specialtyLabel(s); }).join(', ');
     tr.innerHTML =
-      '<td><div class="who">' + C.escapeHtml(m.name) + '</div>' +
+      '<td><div class="who">' + C.escapeHtml(m.name) +
+          (m.member_type && m.member_type !== 'carpenter'
+            ? ' <span class="pill" style="background:' + C.memberTypeColor(m.member_type).bg + ';color:' + C.memberTypeColor(m.member_type).fg + '">' + C.escapeHtml(C.memberTypeLabel(m.member_type)) + '</span>'
+            : '') + '</div>' +
         '<div class="small">' + (m.business_name ? C.escapeHtml(m.business_name) + ' · ' : '') + C.displayPhone(m.phone) + '</div></td>' +
       '<td></td>' +
       '<td>' + C.escapeHtml(m.area || '—') + '</td>' +
@@ -531,6 +541,10 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   C.AVAILABILITY_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); eAvail.appendChild(o);
   });
+  var eMemberType = document.getElementById('e_member_type');
+  C.MEMBER_TYPE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); eMemberType.appendChild(o);
+  });
   var eSpecs = document.getElementById('e_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -549,6 +563,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     C.fillZoneSelect(document.getElementById('e_area'), m.area || '', '— select area —');
     eLvl.value = m.skill_level || '';
     document.getElementById('e_yrs').value = m.years_experience != null ? m.years_experience : '';
+    eMemberType.value = m.member_type || 'carpenter';
     var set = new Set(m.specialties || []);
     eSpecs.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
     emsg.textContent = ''; emsg.className = 'msg';
@@ -569,6 +584,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         name: document.getElementById('e_name').value.trim(),
         business_name: document.getElementById('e_biz').value.trim(),
         is_business: document.getElementById('e_type').value === '1',
+        member_type: eMemberType.value,
         availability: eAvail.value,
         area: document.getElementById('e_area').value,
         skill_level: eLvl.value,

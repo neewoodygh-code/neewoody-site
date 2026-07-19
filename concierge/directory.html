@@ -149,6 +149,16 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .mcard .ph img{ width:100%; height:100%; object-fit:cover; }
 .mcard .ph .initials{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--display); font-size:1.1rem; color:rgba(11,31,14,.3); }
+/* member-type identity badge on the photo corner */
+.ph-wrap{ position:relative; flex-shrink:0; }
+.type-badge{ position:absolute; right:-3px; bottom:-3px; width:18px; height:18px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; border:2px solid #fff; }
+.type-badge svg{ width:11px; height:11px; display:block; }
+.md-badge{ position:absolute; right:-2px; bottom:-2px; width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; border:2px solid var(--cream); }
+.md-badge svg{ width:15px; height:15px; display:block; }
+.type-pill{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:500; letter-spacing:.08em;
+  text-transform:uppercase; border-radius:3px; padding:.16rem .5rem; margin-right:.3rem; }
 .mcard .body{ flex:1; min-width:0; }
 .mcard h3{ font-family:var(--display); font-weight:500; font-size:1rem; line-height:1.25;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -355,6 +365,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     <select id="specFilter"><option value="">All trades</option></select>
     <select id="lvlFilter"><option value="">All levels</option></select>
     <select id="availFilter"><option value="">Any availability</option></select>
+    <select id="typeFilter"><option value="">All types</option></select>
     <input id="search" type="search" placeholder="Search name or business…" />
     <span class="count" id="count"></span>
   </div>
@@ -430,6 +441,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <input type="file" id="photoFile" accept="image/*" hidden>
       <label for="p_name">Name</label>
       <input id="p_name" required />
+      <label for="p_member_type">What are you?</label>
+      <select id="p_member_type"></select>
       <label for="p_type">Account type</label>
       <select id="p_type">
         <option value="">Individual carpenter / apprentice</option>
@@ -441,10 +454,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <select id="p_avail"><option value="">— not shown —</option></select>
       <label for="p_area">Area</label>
       <select id="p_area"></select>
-      <label for="p_lvl">Skill level</label>
-      <select id="p_lvl"><option value="">— not set —</option></select>
-      <label for="p_yrs">Years of experience</label>
-      <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
+      <div id="carpFields">
+        <label for="p_lvl">Skill level</label>
+        <select id="p_lvl"><option value="">— not set —</option></select>
+        <label for="p_yrs">Years of experience</label>
+        <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
+      </div>
       <label>Trades</label>
       <div class="spec-grid" id="specGrid"></div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
@@ -499,7 +514,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260716c"></script>
+<script src="../js/concierge.js?v=20260719a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -522,6 +537,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var specFilter = document.getElementById('specFilter');
   var lvlFilter = document.getElementById('lvlFilter');
   var availFilter = document.getElementById('availFilter');
+  var typeFilter = document.getElementById('typeFilter');
   var search = document.getElementById('search');
   var countEl = document.getElementById('count');
   var featuredWrap = document.getElementById('featuredWrap');
@@ -541,8 +557,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   C.AVAILABILITY_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); availFilter.appendChild(o);
   });
+  C.MEMBER_TYPE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); typeFilter.appendChild(o);
+  });
 
-  [areaFilter, specFilter, lvlFilter, availFilter].forEach(function (el) { el.addEventListener('change', render); });
+  [areaFilter, specFilter, lvlFilter, availFilter, typeFilter].forEach(function (el) { el.addEventListener('change', render); });
   search.addEventListener('input', render);
   document.getElementById('showAllBtn').addEventListener('click', function () { showAll = true; render(); });
 
@@ -553,6 +572,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   // Compact card: photo · name · (level · area) · WhatsApp. Everything else
   // (business, availability, full trade list, years) lives in the detail
   // modal, opened by tapping the card — keeps every card the same small size.
+  // Colored icon-disc identifying the member's type (carpenter/designer/vendor).
+  function typeBadge(m, cls) {
+    var t = m.member_type || 'carpenter';
+    var c = C.memberTypeColor(t);
+    return '<span class="' + cls + '" style="background:' + c.bg + ';color:' + c.fg + '" title="' + C.escapeHtml(C.memberTypeLabel(t)) + '">' + C.memberTypeIcon(t) + '</span>';
+  }
+
   function card(m) {
     var el = document.createElement('div'); el.className = 'mcard';
     el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0');
@@ -560,9 +586,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var photo = m.photo_url
       ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.remove()">'
       : '<div class="initials">' + C.escapeHtml(initials(m.name)) + '</div>';
-    var meta = [C.skillLabel(m.skill_level), m.area].filter(Boolean).map(C.escapeHtml).join(' · ');
+    // Carpenters lead their meta with skill level; designers/vendors with their type.
+    var typeLead = m.member_type && m.member_type !== 'carpenter' ? C.memberTypeLabel(m.member_type) : C.skillLabel(m.skill_level);
+    var meta = [typeLead, m.area].filter(Boolean).map(C.escapeHtml).join(' · ');
     el.innerHTML =
-      '<div class="ph">' + photo + '</div>' +
+      '<div class="ph-wrap"><div class="ph">' + photo + '</div>' + typeBadge(m, 'type-badge') + '</div>' +
       '<div class="body">' +
         '<h3>' + C.escapeHtml(m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
         (meta ? '<div class="meta">' + meta + '</div>' : '') +
@@ -578,14 +606,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var memOverlay = document.getElementById('memOverlay');
   function openMember(m) {
     document.getElementById('memName').textContent = m.name || 'Member';
-    var photo = m.photo_url
+    var mt = m.member_type || 'carpenter';
+    var mtColor = C.memberTypeColor(mt);
+    var photoInner = m.photo_url
       ? '<div class="md-photo"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" onerror="this.parentNode.className=\'md-photo initials\';this.remove()"></div>'
       : '<div class="md-photo initials">' + C.escapeHtml(initials(m.name)) + '</div>';
-    var lvl = C.skillLabel(m.skill_level);
+    var photo = '<div style="position:relative;flex-shrink:0">' + photoInner + typeBadge(m, 'md-badge') + '</div>';
+    // Skill level only applies to carpenters; designers/vendors lead with type.
+    var lvl = mt === 'carpenter' ? C.skillLabel(m.skill_level) : '';
     if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
     var av = C.availabilityLabel(m.availability);
     var avGiver = m.availability === 'hiring' || m.availability === 'taking_apprentices';
     var badges =
+      '<span class="type-pill" style="background:' + mtColor.bg + ';color:' + mtColor.fg + '">' + C.escapeHtml(C.memberTypeLabel(mt)) + '</span>' +
       (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
       (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
       (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '');
@@ -670,16 +703,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   function anyFilterActive() {
-    return !!(areaFilter.value || specFilter.value || lvlFilter.value || availFilter.value || search.value.trim());
+    return !!(areaFilter.value || specFilter.value || lvlFilter.value || availFilter.value || typeFilter.value || search.value.trim());
   }
 
   function render() {
-    var a = areaFilter.value, s = specFilter.value, l = lvlFilter.value, av = availFilter.value, q = search.value.trim().toLowerCase();
+    var a = areaFilter.value, s = specFilter.value, l = lvlFilter.value, av = availFilter.value, tp = typeFilter.value, q = search.value.trim().toLowerCase();
     var list = all.filter(function (m) {
       if (a && m.area !== a) return false;
       if (s && (m.specialties || []).indexOf(s) < 0) return false;
       if (l && m.skill_level !== l) return false;
       if (av && m.availability !== av) return false;
+      if (tp && (m.member_type || 'carpenter') !== tp) return false;
       if (q) {
         var hay = (m.name + ' ' + (m.business_name || '')).toLowerCase();
         if (hay.indexOf(q) < 0) return false;
@@ -727,7 +761,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     try { if (sessionStorage.getItem('nwd-nudge-dismissed')) { el.style.display = 'none'; return; } } catch (e) {}
     var missing = [];
     if (!me.photo_url) missing.push('add a photo');
-    if (!me.skill_level) missing.push('set your skill level');
+    if ((me.member_type || 'carpenter') === 'carpenter' && !me.skill_level) missing.push('set your skill level');
     if (!me.availability) missing.push('set your availability');
     if (!(me.specialties || []).length) missing.push('pick your trades');
     if (!missing.length) { el.style.display = 'none'; return; }
@@ -815,6 +849,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   C.AVAILABILITY_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); pAvail.appendChild(o);
   });
+  // member type + show skill fields only for carpenters
+  var pMemberType = document.getElementById('p_member_type');
+  C.MEMBER_TYPE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); pMemberType.appendChild(o);
+  });
+  var carpFields = document.getElementById('carpFields');
+  function syncCarpFields() { carpFields.style.display = pMemberType.value === 'carpenter' ? '' : 'none'; }
+  pMemberType.addEventListener('change', syncCarpFields);
 
   function openModal() {
     if (!me) return;
@@ -825,6 +867,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     C.fillZoneSelect(document.getElementById('p_area'), me.area || '', '— select your area —');
     pLvl.value = me.skill_level || '';
     document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
+    pMemberType.value = me.member_type || 'carpenter';
+    syncCarpFields();
     renderPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
     var set = new Set(me.specialties || []);
@@ -853,10 +897,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         name: document.getElementById('p_name').value.trim(),
         business_name: document.getElementById('p_biz').value.trim(),
         is_business: document.getElementById('p_type').value === '1',
+        member_type: pMemberType.value,
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
-        skill_level: pLvl.value,
-        years_experience: document.getElementById('p_yrs').value.trim() === '' ? null : Number(document.getElementById('p_yrs').value),
+        skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',
+        years_experience: pMemberType.value === 'carpenter' && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
         specialties: specs
       };
       if (newPin) body.pin = newPin;
@@ -1087,7 +1132,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' },
     { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' },
     { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
-    { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' }
+    { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
+    { id: 10, date: '2026-07-19', title: 'Interior designers & vendors welcome', body: 'The directory now covers more than carpenters. Open My profile and set "What are you?" — Carpenter, Interior Designer or Vendor / Supplier. A small badge on your card shows it at a glance, and new trades were added (interior design, wall panelling, lighting, décor supply). Filter by type to find exactly who you need.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
