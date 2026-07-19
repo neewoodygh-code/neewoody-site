@@ -71,7 +71,7 @@
   // Carpenters carry a skill level + trade specialties; vendors list what they
   // sell in their Storefront. "Interior design" is a specialty (see below) with
   // its own badge, available to either type.
-  var MEMBER_TYPE_LABELS = { carpenter: 'Carpenter', vendor: 'Vendor / Supplier' };
+  var MEMBER_TYPE_LABELS = { carpenter: 'Carpenter', vendor: 'Vendor / Service Provider' };
   var MEMBER_TYPE_ORDER = Object.keys(MEMBER_TYPE_LABELS);
   function memberTypeLabel(key) { return MEMBER_TYPE_LABELS[key] || MEMBER_TYPE_LABELS.carpenter; }
   // Small filled glyphs (Material set) — fill=currentColor.
