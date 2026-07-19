@@ -663,7 +663,10 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       // pending/suspended member must never push the count past the total
       // (that was the "32 of 31" bug).
       var payable = {};
-      members.forEach(function (m) { if (m.status === 'approved' && m.role !== 'admin') payable[m.phone] = true; });
+      // Monthly dues population = approved, non-admin, NON-founder. Founders
+      // paid a one-time GHS 100 for lifetime membership, so they never owe
+      // monthly and must not be counted or chased.
+      members.forEach(function (m) { if (m.status === 'approved' && m.role !== 'admin' && !m.is_founder) payable[m.phone] = true; });
       var approved = Object.keys(payable).length;
       var paidCount = rows.filter(function (p) { return payable[p.member_phone]; }).length;
       var total = rows.reduce(function (s, p) { return s + (+p.amount_ghs || 0); }, 0);
@@ -732,9 +735,11 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       var r = await C.api('/admin/payments?period=' + encodeURIComponent(period));
       var paid = {};
       (r.payments || []).forEach(function (p) { paid[p.member_phone] = true; });
-      var approved = members.filter(function (m) { return m.status === 'approved' && m.role !== 'admin'; });
+      // Non-admin, non-founder approved members are the only monthly payers;
+      // lifetime founders paid once and are never "unpaid".
+      var approved = members.filter(function (m) { return m.status === 'approved' && m.role !== 'admin' && !m.is_founder; });
       var unpaid = approved.filter(function (m) { return !paid[m.phone]; });
-      head.textContent = unpaid.length + ' of ' + approved.length + ' paying members have not paid for ' + period;
+      head.textContent = unpaid.length + ' of ' + approved.length + ' monthly members have not paid for ' + period;
       if (!unpaid.length) {
         state.style.display = ''; state.textContent = approved.length ? 'Everyone approved has paid for ' + period + '.' : 'No approved members yet.';
         return;
