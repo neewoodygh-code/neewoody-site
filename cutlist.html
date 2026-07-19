@@ -17,13 +17,26 @@ gtag('config', 'G-ZP77WR6BNH');
 </script>
 
 <link rel="stylesheet" href="css/styles.css" />
-<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
 /* ══════════════════════════════════════════
    CUTLIST PAGE — mapped to site palette
    ══════════════════════════════════════════ */
 :root {
+  /* ── Green/gold/cream re-skin (2026-07-18): override the legacy palette +
+     body font so this page matches the rest of the Concierge system.
+     Headings stay Playfair (--font-display); cards stay white (--clr-surface);
+     text stays ink (--clr-dark). Cascades through the --clr-* remaps below. ── */
+  --clr-bg:        #f0e8d0;
+  --clr-bg-alt:    #e8dfc4;
+  --clr-accent:    #c8922a;
+  --clr-accent-dk: #b07d20;
+  --clr-accent-lt: rgba(200,146,42,.14);
+  --clr-border:    #d4c9b0;
+  --clr-muted:     #6b6557;
+  --font-body:     'Jost', system-ui, sans-serif;
+  --green:         #0b1f0e;
   --mono: 'Roboto Mono', monospace;
   /* Remap calculator vars to site palette */
   --bg:   var(--clr-bg);
@@ -63,7 +76,7 @@ gtag('config', 'G-ZP77WR6BNH');
 
 /* ── CARPENTER HERO ── */
 .carpenter-hero {
-  background: var(--clr-dark);
+  background: var(--green);
   color: #fff;
   padding: 4rem 0 3rem;
   position: relative;
@@ -72,7 +85,7 @@ gtag('config', 'G-ZP77WR6BNH');
 .carpenter-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, #2A2520, #1C1A17);
+  background: linear-gradient(135deg, #123018, #0b1f0e);
 }
 .carpenter-hero-accent {
   position: absolute; top: 0; right: 0;
