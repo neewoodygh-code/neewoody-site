@@ -277,6 +277,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:#25D366; color:#fff; border-radius:4px; padding:.9rem; transition:filter .2s; }
 .md-wa svg{ width:20px; height:20px; }
 .md-wa:hover{ filter:brightness(1.05); }
+.md-contact{ display:flex; gap:.6rem; margin-top:1.5rem; }
+.md-contact .md-wa{ flex:1; margin-top:0; }
+.md-call{ flex:1; display:flex; align-items:center; justify-content:center; gap:.5rem; font-family:var(--ui);
+  font-size:.76rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:var(--green);
+  background:transparent; border:1px solid var(--green); border-radius:4px; padding:.9rem; }
+.md-call:hover{ background:rgba(11,31,14,.06); }
 .md-stock{ font-size:.9rem; line-height:1.6; color:var(--ink); white-space:pre-line; }
 
 /* vendor storefront — browse (in detail modal) + manage (own tab) */
@@ -444,6 +450,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     </div>
     <div class="filters">
       <select id="srcAreaFilter"><option value="">All areas</option></select>
+      <select id="srcCatFilter"><option value="">All categories</option></select>
       <input id="srcSearch" type="search" placeholder="Search shop or company…" />
       <span class="count" id="srcCount"></span>
     </div>
@@ -514,6 +521,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <input id="p_biz" placeholder="Optional" />
       <label for="p_avail">Availability <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— shows as a badge on your card</span></label>
       <select id="p_avail"><option value="">— not shown —</option></select>
+      <label for="p_biz_phone">Business / call number <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown to others instead of your login number</span></label>
+      <input id="p_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
       <label for="p_area">Area</label>
       <select id="p_area"></select>
       <div id="carpFields">
@@ -525,11 +534,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <div id="vendorFields">
         <label for="p_vendor_scale">Shop size</label>
         <select id="p_vendor_scale"><option value="">— not set —</option></select>
+        <label>What you sell <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— powers the Sourcing filters</span></label>
+        <div class="spec-grid" id="catGrid"></div>
         <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
         <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
       </div>
-      <label>Trades</label>
-      <div class="spec-grid" id="specGrid"></div>
+      <div id="tradesWrap">
+        <label>Trades</label>
+        <div class="spec-grid" id="specGrid"></div>
+      </div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
       <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
       <button class="save" id="saveBtn" type="submit">Save changes</button>
@@ -609,7 +622,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719e"></script>
+<script src="../js/concierge.js?v=20260719f"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -692,7 +705,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         '<h3>' + C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
         (meta ? '<div class="meta">' + meta + '</div>' : '') +
       '</div>' +
-      '<a class="wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
+      '<a class="wa" href="' + C.waLink(C.contactPhone(m)) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
     el.addEventListener('click', function () { openMember(m); });
     el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMember(m); } });
     el.querySelector('.wa').addEventListener('click', function (e) { e.stopPropagation(); });
@@ -721,9 +734,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
       (scale ? '<span class="lvl">' + C.escapeHtml(scale) + '</span>' : '') +
       (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '');
-    var chips = (m.specialties || []).map(function (s) {
-      return '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
+    var cph = C.contactPhone(m);
+    // Vendors show product categories (plain); carpenters show trades (tap-to-explain).
+    var chipKeys = isVendor ? (m.vendor_categories || []) : (m.specialties || []);
+    var chips = chipKeys.map(function (s) {
+      return isVendor
+        ? '<span class="chip">' + C.escapeHtml(C.vendorCategoryLabel(s)) + '</span>'
+        : '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
     }).join('');
+    var chipsTitle = isVendor ? 'What they sell' : 'Trades';
     document.getElementById('memBody').innerHTML =
       '<div class="md-top">' + photo +
         '<div style="flex:1;min-width:0">' +
@@ -732,21 +751,25 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         '</div>' +
       '</div>' +
       (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
-      (chips ? '<div class="md-label">Trades</div><div class="chips">' + chips + '</div>' : '') +
+      (chips ? '<div class="md-label">' + chipsTitle + '</div><div class="chips">' + chips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
         ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
           '<div><a class="sf-dir" href="' + C.mapsDirLink(m.location_lat, m.location_lng) + '" target="_blank" rel="noopener">Directions</a></div>'
         : '') +
       (isVendor ? '<div class="md-label">Storefront</div><div id="memStore" class="sf-note">Loading items…</div>' : '') +
-      '<a class="md-wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">' + WA_SVG + ' Message on WhatsApp</a>';
+      '<div class="md-contact">' +
+        '<a class="md-wa" href="' + C.waLink(cph) + '" target="_blank" rel="noopener">' + WA_SVG + ' WhatsApp</a>' +
+        '<a class="md-call" href="' + C.telLink(cph) + '">Call</a>' +
+      '</div>' +
+      (m.business_phone ? '<div class="sf-note" style="text-align:center;margin-top:.45rem">Business line · ' + C.escapeHtml(C.displayPhone(m.business_phone)) + '</div>' : '');
     memOverlay.classList.add('open');
     if (isVendor) loadMemberStore(m);
   }
   // Browse a vendor's storefront items inside their detail modal.
   function storeItemCard(m, it) {
     var img = it.image ? '<img src="' + C.escapeHtml(it.image) + '" alt="" loading="lazy">' : '<span class="noimg">No photo</span>';
-    var wa = C.waLink(m.phone) + '?text=' + encodeURIComponent('Hi ' + C.companyName(m) + ', I\'m interested in "' + it.name + '" from your Carpentry Concierge storefront.');
+    var wa = C.waLink(C.contactPhone(m)) + '?text=' + encodeURIComponent('Hi ' + C.companyName(m) + ', I\'m interested in "' + it.name + '" from your Carpentry Concierge storefront.');
     return '<div class="sf-item"><div class="sf-img">' + img + '</div><div class="sf-body">' +
       '<div class="sf-name">' + C.escapeHtml(it.name) + '</div>' +
       (it.price ? '<div class="sf-price">' + C.escapeHtml(it.price) + '</div>' : '') +
@@ -914,6 +937,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (ex ? '<small>' + C.escapeHtml(ex) + '</small>' : '') + '</span>';
     specGrid.appendChild(l);
   });
+  var catGrid = document.getElementById('catGrid');
+  C.VENDOR_CATEGORY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
+    catGrid.appendChild(l);
+  });
 
   // photo upload / remove
   var pprev = document.getElementById('pprev');
@@ -988,6 +1017,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   function syncTypeFields() {
     var isCarp = pMemberType.value === 'carpenter';
     carpFields.style.display = isCarp ? '' : 'none';
+    document.getElementById('tradesWrap').style.display = isCarp ? '' : 'none';
     vendorFields.style.display = isCarp ? 'none' : '';
   }
   pMemberType.addEventListener('change', syncTypeFields);
@@ -1009,6 +1039,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     pmsg.textContent = ''; pmsg.className = 'pmsg';
     var set = new Set(me.specialties || []);
     specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
+    document.getElementById('p_biz_phone').value = me.business_phone || '';
+    var catSet = new Set(me.vendor_categories || []);
+    catGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = catSet.has(cb.value); });
     document.getElementById('p_pin').value = '';
     mmsg.textContent = ''; mmsg.className = 'mmsg';
     overlay.classList.add('open');
@@ -1023,8 +1056,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   document.getElementById('profileForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var saveBtn = document.getElementById('saveBtn');
+    var isVendorEdit = pMemberType.value === 'vendor';
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (pMemberType.value === 'carpenter' && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    if (!isVendorEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
     var newPin = document.getElementById('p_pin').value;
     if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
     saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
@@ -1034,13 +1069,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         business_name: document.getElementById('p_biz').value.trim(),
         is_business: document.getElementById('p_type').value === '1',
         member_type: pMemberType.value,
-        stock: pMemberType.value === 'vendor' ? document.getElementById('p_stock').value.trim() : '',
-        vendor_scale: pMemberType.value === 'vendor' ? pVendorScale.value : '',
+        stock: isVendorEdit ? document.getElementById('p_stock').value.trim() : '',
+        vendor_scale: isVendorEdit ? pVendorScale.value : '',
+        vendor_categories: isVendorEdit ? cats : [],
+        business_phone: document.getElementById('p_biz_phone').value.trim(),
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
         skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',
         years_experience: pMemberType.value === 'carpenter' && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
-        specialties: specs
+        specialties: isVendorEdit ? [] : specs
       };
       if (newPin) body.pin = newPin;
       var r = await C.api('/me', { method: 'PUT', body: body });
@@ -1069,9 +1106,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
   function renderSourcing() {
     var vendors = all.filter(function (m) { return m.member_type === 'vendor'; });
-    var a = srcAreaFilter.value, q = srcSearch.value.trim().toLowerCase();
+    var a = srcAreaFilter.value, cat = srcCatFilter.value, q = srcSearch.value.trim().toLowerCase();
     var list = vendors.filter(function (m) {
       if (a && m.area !== a) return false;
+      if (cat && (m.vendor_categories || []).indexOf(cat) < 0) return false;
       if (q) { var hay = (C.companyName(m) + ' ' + (m.name || '') + ' ' + (m.stock || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
       return true;
     });
@@ -1082,7 +1120,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     srcState.style.display = 'none';
     srcCount.textContent = list.length + ' of ' + vendors.length + ' vendors';
   }
+  var srcCatFilter = document.getElementById('srcCatFilter');
+  C.VENDOR_CATEGORY_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorCategoryLabel(k); srcCatFilter.appendChild(o); });
   srcAreaFilter.addEventListener('change', renderSourcing);
+  srcCatFilter.addEventListener('change', renderSourcing);
   srcSearch.addEventListener('input', renderSourcing);
 
   // ── My Storefront: a vendor manages their items, blurb & shop location ──
@@ -1431,7 +1472,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
     { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
     { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' },
-    { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' }
+    { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' },
+    { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

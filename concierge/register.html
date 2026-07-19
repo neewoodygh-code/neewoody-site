@@ -169,17 +169,25 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
         <select id="r_avail"><option value="">— not shown —</option></select>
       </div>
+      <div class="field">
+        <label for="r_biz_phone">Business / call number <span class="opt">— optional; shown instead of your login number</span></label>
+        <input id="r_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
+      </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="1">← Back</button>
         <button type="button" class="submit next" data-next="3">Continue →</button>
       </div>
     </div>
 
-    <!-- Step 3: Your trades -->
+    <!-- Step 3: Trades (carpenters) / What you sell (vendors) -->
     <div class="step" data-step="3">
-      <div class="field">
+      <div class="field" id="r_tradesWrap">
         <label>Your trades <span class="opt">— pick all that apply</span></label>
         <div class="spec-grid" id="r_specs"></div>
+      </div>
+      <div class="field" id="r_catsWrap">
+        <label>What you sell <span class="opt">— pick all that apply</span></label>
+        <div class="spec-grid" id="r_cats"></div>
       </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="2">← Back</button>
@@ -203,7 +211,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260719e"></script>
+<script src="../js/concierge.js?v=20260719f"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -226,12 +234,22 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   C.VENDOR_SCALE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); rScale.appendChild(o); });
   var rCarpFields = document.getElementById('r_carpFields');
   var rVendorFields = document.getElementById('r_vendorFields');
+  var rTradesWrap = document.getElementById('r_tradesWrap');
+  var rCatsWrap = document.getElementById('r_catsWrap');
   function syncRType() {
     var isCarp = rType.value === 'carpenter';
     rCarpFields.style.display = isCarp ? '' : 'none';
     rVendorFields.style.display = isCarp ? 'none' : '';
+    rTradesWrap.style.display = isCarp ? '' : 'none';
+    rCatsWrap.style.display = isCarp ? 'none' : '';
   }
   rType.addEventListener('change', syncRType); syncRType();
+  var catGrid = document.getElementById('r_cats');
+  C.VENDOR_CATEGORY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
+    catGrid.appendChild(l);
+  });
   var specGrid = document.getElementById('r_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -294,7 +312,9 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     var phone = C.normalizePhone(document.getElementById('r_phone').value);
     var pin = document.getElementById('r_pin').value;
     var pin2 = document.getElementById('r_pin2').value;
+    var isVendorReg = rType.value === 'vendor';
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var area = document.getElementById('r_area').value;
 
     if (!name) { return showErr('Please enter your name.'); }
@@ -313,13 +333,15 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         business_name: document.getElementById('r_biz').value.trim(),
         is_business: document.getElementById('r_type').value === '1',
         member_type: rType.value,
-        stock: rType.value === 'vendor' ? document.getElementById('r_stock').value.trim() : '',
-        vendor_scale: rType.value === 'vendor' ? rScale.value : '',
+        stock: isVendorReg ? document.getElementById('r_stock').value.trim() : '',
+        vendor_scale: isVendorReg ? rScale.value : '',
+        vendor_categories: isVendorReg ? cats : [],
+        business_phone: document.getElementById('r_biz_phone').value.trim(),
         area: area,
         skill_level: rType.value === 'carpenter' ? lvl.value : '',
         years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,
         availability: avail.value,
-        specialties: specs
+        specialties: isVendorReg ? [] : specs
       }});
       form.style.display = 'none';
       document.getElementById('regDone').classList.add('show');

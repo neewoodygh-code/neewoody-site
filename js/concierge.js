@@ -91,7 +91,8 @@
   // member type. Returns { key, label, icon, bg, fg }.
   function identityBadge(m) {
     var specs = (m && m.specialties) || [];
-    if (specs.indexOf('interior_design') >= 0) {
+    var cats = (m && m.vendor_categories) || [];
+    if (specs.indexOf('interior_design') >= 0 || cats.indexOf('interior_design') >= 0) {
       return { key: 'interior_design', label: 'Interior Designer', icon: ICON_INTERIOR, bg: '#c8922a', fg: '#241500' };
     }
     var t = (m && m.member_type) || 'carpenter';
@@ -107,11 +108,32 @@
     return 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + lat + ',' + lng;
   }
   function mapsDirLink(lat, lng) { return 'https://www.google.com/maps?q=' + lat + ',' + lng; }
+  // Contact number for business: a member's alternate business_phone if set,
+  // else their personal (login) number. Used by all contact CTAs.
+  function contactPhone(m) { return (m && m.business_phone) || (m && m.phone) || ''; }
+  function telLink(phone) { return 'tel:+' + String(phone).replace(/[^\d]/g, ''); }
 
   // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
   var VENDOR_SCALE_LABELS = { stall: 'Stall', shop: 'Shop', showroom: 'Showroom', warehouse: 'Warehouse' };
   var VENDOR_SCALE_ORDER = Object.keys(VENDOR_SCALE_LABELS);
   function vendorScaleLabel(k) { return VENDOR_SCALE_LABELS[k] || ''; }
+
+  // Vendor product categories — what they sell (Sourcing filter + profile chips).
+  var VENDOR_CATEGORY_LABELS = {
+    materials: 'Materials',
+    hardware: 'Hardware & fittings',
+    tools_machinery: 'Tools & machinery',
+    tooling_consumables: 'Tooling & consumables',
+    finishes: 'Finishes & adhesives',
+    interior_decor: 'Interior & décor',
+    lighting: 'Lighting & electrical',
+    glass_alu_stone: 'Glass, aluminium & stone',
+    upholstery_supplies: 'Upholstery supplies',
+    interior_design: 'Interior design & installation',
+    other: 'Other'
+  };
+  var VENDOR_CATEGORY_ORDER = Object.keys(VENDOR_CATEGORY_LABELS);
+  function vendorCategoryLabel(k) { return VENDOR_CATEGORY_LABELS[k] || k; }
 
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
@@ -398,6 +420,8 @@
     identityBadge: identityBadge, companyName: companyName,
     mapEmbedUrl: mapEmbedUrl, mapsDirLink: mapsDirLink,
     VENDOR_SCALE_LABELS: VENDOR_SCALE_LABELS, VENDOR_SCALE_ORDER: VENDOR_SCALE_ORDER, vendorScaleLabel: vendorScaleLabel,
+    VENDOR_CATEGORY_LABELS: VENDOR_CATEGORY_LABELS, VENDOR_CATEGORY_ORDER: VENDOR_CATEGORY_ORDER, vendorCategoryLabel: vendorCategoryLabel,
+    contactPhone: contactPhone, telLink: telLink,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto,
