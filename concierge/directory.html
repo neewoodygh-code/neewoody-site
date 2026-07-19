@@ -279,6 +279,29 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .md-wa:hover{ filter:brightness(1.05); }
 .md-stock{ font-size:.9rem; line-height:1.6; color:var(--ink); white-space:pre-line; }
 
+/* vendor storefront — browse (in detail modal) + manage (own tab) */
+.sf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
+@media(min-width:680px){ .sf-grid{ grid-template-columns:1fr 1fr 1fr; } }
+.sf-item{ background:#fff; border:1px solid rgba(11,31,14,.1); border-radius:5px; overflow:hidden; display:flex; flex-direction:column; }
+.sf-img{ aspect-ratio:4/3; background:var(--cream-dark); position:relative; overflow:hidden; }
+.sf-img img{ width:100%; height:100%; object-fit:cover; }
+.sf-img .noimg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:rgba(11,31,14,.35);
+  font-family:var(--ui); font-size:.62rem; letter-spacing:.12em; text-transform:uppercase; }
+.sf-body{ padding:.6rem .75rem; flex:1; display:flex; flex-direction:column; gap:.15rem; }
+.sf-name{ font-family:var(--display); font-weight:500; font-size:.98rem; line-height:1.2; }
+.sf-price{ color:var(--gold); font-family:var(--ui); font-size:.8rem; font-weight:500; }
+.sf-desc{ color:var(--muted); font-size:.8rem; line-height:1.5; }
+.sf-actions{ display:flex; gap:.4rem; flex-wrap:wrap; padding:0 .75rem .7rem; }
+.sf-map{ width:100%; aspect-ratio:16/9; border:1px solid rgba(11,31,14,.12); border-radius:5px; display:block; }
+.sf-dir{ display:inline-block; margin-top:.5rem; font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.45rem .8rem; }
+.sf-dir:hover{ border-color:var(--gold); }
+.sf-mgr-item{ display:flex; gap:.7rem; align-items:center; background:#fff; border:1px solid rgba(11,31,14,.1);
+  border-radius:5px; padding:.6rem .7rem; margin-bottom:.6rem; }
+.sf-mgr-item .thumb{ width:56px; height:56px; border-radius:4px; background:var(--cream-dark); overflow:hidden; flex-shrink:0; position:relative; }
+.sf-mgr-item .thumb img{ width:100%; height:100%; object-fit:cover; }
+.sf-note{ font-size:.82rem; color:var(--muted); line-height:1.6; }
+
 @media(max-width:560px){
   .lead h1{ font-size:1.5rem; }
   .filters .count{ margin-left:0; width:100%; }
@@ -302,9 +325,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 <nav class="tabbar" id="tabbar" aria-label="Member area">
   <button class="tab active" data-tab="directory">Directory</button>
   <button class="tab" data-tab="jobs">Jobs</button>
+  <button class="tab" data-tab="storefront" id="storefrontTab" hidden>My Storefront</button>
   <button class="tab" data-tab="tools">Tools</button>
+  <button class="tab" data-tab="sourcing">Sourcing</button>
   <button class="tab" data-tab="tutorials">Tutorials <span class="soon">soon</span></button>
-  <button class="tab" data-tab="sourcing">Sourcing <span class="soon">soon</span></button>
 </nav>
 
 <div class="wrap">
@@ -412,12 +436,49 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     </div>
   </div>
 
-  <!-- TAB: Sourcing (coming soon) -->
+  <!-- TAB: Sourcing (vendors & service providers) -->
   <div id="tab-sourcing" class="tabpanel" hidden>
-    <div class="cs-panel">
-      <span class="cs-tag">Coming soon · members first</span>
-      <h2>Sourcing</h2>
-      <p>Where to find it in Ghana — lazy susan fittings, soft-close hinges, specialty hardware — plus the workarounds when it can't be found, and the stores we trust. Ghana-specific answers Google doesn't have.</p>
+    <div class="lead">
+      <h1>Sourcing</h1>
+      <p>Vendors &amp; service providers — panels, boards, lighting, fittings, interior design and more. Tap a shop to see what they stock and message them on WhatsApp.</p>
+    </div>
+    <div class="filters">
+      <select id="srcAreaFilter"><option value="">All areas</option></select>
+      <input id="srcSearch" type="search" placeholder="Search shop or company…" />
+      <span class="count" id="srcCount"></span>
+    </div>
+    <div id="srcGrid" class="grid"></div>
+    <div id="srcState" class="state"></div>
+  </div>
+
+  <!-- TAB: My Storefront (vendors manage their own items) -->
+  <div id="tab-storefront" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>My Storefront</h1>
+      <p>List what you sell — it appears under Sourcing for every member to browse. Add a photo and (optionally) a price, and set your shop location so buyers can find you.</p>
+    </div>
+
+    <div class="tools-strip">
+      <h2>About your shop</h2>
+      <textarea id="sf_blurb" rows="3" placeholder="A short line about your shop — brands you carry, delivery, opening hours…" style="width:100%;font-family:var(--body);font-size:.95rem;padding:.7rem .8rem;border:1px solid rgba(11,31,14,.2);border-radius:4px;resize:vertical;min-height:70px;line-height:1.5"></textarea>
+      <div style="margin-top:.6rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap"><button class="btn-post" id="sfBlurbSave" type="button">Save blurb</button> <span class="sf-note" id="sfBlurbMsg"></span></div>
+    </div>
+
+    <div class="tools-strip">
+      <h2>Shop location</h2>
+      <div id="sfLocMapWrap" style="margin-bottom:.6rem"></div>
+      <div id="sfLocState" class="sf-note">No location set yet.</div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem">
+        <button class="btn-post" id="sfLocBtn" type="button">📍 Use my current location</button>
+        <button class="alerts-btn" id="sfLocClear" type="button" style="display:none">Clear</button>
+      </div>
+      <div class="sf-note" id="sfLocMsg" style="margin-top:.4rem"></div>
+    </div>
+
+    <div class="tools-strip">
+      <h2>Items <span class="sf-note" id="sfItemCount"></span></h2>
+      <div id="sfItems"></div>
+      <button class="btn-post" id="sfAddBtn" type="button">+ Add item</button>
     </div>
   </div>
 </div>
@@ -462,8 +523,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
       </div>
       <div id="vendorFields">
-        <label for="p_stock">Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— what you sell (one item per line)</span></label>
-        <textarea id="p_stock" rows="4" placeholder="e.g. Fluted wall panels&#10;Charcoal / acoustic board&#10;LED strip lighting & profiles&#10;Cornices & skirting"></textarea>
+        <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
+        <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
       </div>
       <label>Trades</label>
       <div class="spec-grid" id="specGrid"></div>
@@ -519,7 +580,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719c"></script>
+<!-- Storefront item editor (vendors) -->
+<div class="overlay" id="sfOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2 id="sfFormTitle">Add item</h2><button class="x" id="sfClose" aria-label="Close">×</button></div>
+    <form id="sfForm">
+      <label for="sf_name">Item name</label>
+      <input id="sf_name" maxlength="80" required />
+      <label for="sf_price">Price <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <input id="sf_price" maxlength="40" placeholder="e.g. GHS 120 / sheet · From GHS 500" />
+      <label for="sf_desc">Description <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <textarea id="sf_desc" rows="3" maxlength="500" placeholder="Size, colour, material, what's included…"></textarea>
+      <label>Photo</label>
+      <div class="photo-row">
+        <div class="pprev" id="sfPrev" style="border-radius:4px"></div>
+        <div class="photo-btns">
+          <button class="pbtn" id="sfPhotoBtn" type="button">Upload photo</button>
+          <button class="pbtn" id="sfPhotoRemove" type="button" style="display:none">Remove photo</button>
+        </div>
+      </div>
+      <div class="pmsg" id="sfPhotoMsg"></div>
+      <input type="file" id="sfPhotoFile" accept="image/*" hidden>
+      <button class="save" id="sfSave" type="submit">Save item</button>
+      <div class="mmsg" id="sfMsg"></div>
+    </form>
+  </div>
+</div>
+
+<script src="../js/concierge.js?v=20260719d"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -597,7 +685,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     el.innerHTML =
       '<div class="ph-wrap"><div class="ph">' + photo + '</div>' + typeBadge(m, 'type-badge') + '</div>' +
       '<div class="body">' +
-        '<h3>' + C.escapeHtml(m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
+        '<h3>' + C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
         (meta ? '<div class="meta">' + meta + '</div>' : '') +
       '</div>' +
       '<a class="wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
@@ -610,7 +698,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   // ── member detail modal ──
   var memOverlay = document.getElementById('memOverlay');
   function openMember(m) {
-    document.getElementById('memName').textContent = m.name || 'Member';
+    var isVendor = m.member_type === 'vendor';
+    document.getElementById('memName').textContent = isVendor ? C.companyName(m) : (m.name || 'Member');
     var ib = C.identityBadge(m);
     var photoInner = m.photo_url
       ? '<div class="md-photo"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" onerror="this.parentNode.className=\'md-photo initials\';this.remove()"></div>'
@@ -638,9 +727,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       '</div>' +
       (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
       (chips ? '<div class="md-label">Trades</div><div class="chips">' + chips + '</div>' : '') +
-      (m.stock ? '<div class="md-label">Storefront</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
+      (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
+      ((m.location_lat != null && m.location_lng != null)
+        ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
+          '<div><a class="sf-dir" href="' + C.mapsDirLink(m.location_lat, m.location_lng) + '" target="_blank" rel="noopener">Directions</a></div>'
+        : '') +
+      (isVendor ? '<div class="md-label">Storefront</div><div id="memStore" class="sf-note">Loading items…</div>' : '') +
       '<a class="md-wa" href="' + C.waLink(m.phone) + '" target="_blank" rel="noopener">' + WA_SVG + ' Message on WhatsApp</a>';
     memOverlay.classList.add('open');
+    if (isVendor) loadMemberStore(m);
+  }
+  // Browse a vendor's storefront items inside their detail modal.
+  function storeItemCard(m, it) {
+    var img = it.image ? '<img src="' + C.escapeHtml(it.image) + '" alt="" loading="lazy">' : '<span class="noimg">No photo</span>';
+    var wa = C.waLink(m.phone) + '?text=' + encodeURIComponent('Hi ' + C.companyName(m) + ', I\'m interested in "' + it.name + '" from your Carpentry Concierge storefront.');
+    return '<div class="sf-item"><div class="sf-img">' + img + '</div><div class="sf-body">' +
+      '<div class="sf-name">' + C.escapeHtml(it.name) + '</div>' +
+      (it.price ? '<div class="sf-price">' + C.escapeHtml(it.price) + '</div>' : '') +
+      (it.description ? '<div class="sf-desc">' + C.escapeHtml(it.description) + '</div>' : '') +
+      '</div><div class="sf-actions"><a class="sf-dir" href="' + wa + '" target="_blank" rel="noopener">Ask about this</a></div></div>';
+  }
+  async function loadMemberStore(m) {
+    var el = document.getElementById('memStore'); if (!el) return;
+    try {
+      var r = await C.api('/storefront/' + encodeURIComponent(m.phone));
+      var items = r.items || [];
+      if (!items.length) { el.className = 'sf-note'; el.textContent = 'No items listed yet.'; return; }
+      el.className = ''; el.innerHTML = '<div class="sf-grid">' + items.map(function (it) { return storeItemCard(m, it); }).join('') + '</div>';
+    } catch (e) { el.className = 'sf-note'; el.textContent = 'Could not load items.'; }
   }
   function closeMem() { memOverlay.classList.remove('open'); }
   document.getElementById('closeMem').addEventListener('click', closeMem);
@@ -928,11 +1042,168 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { saveBtn.disabled = false; }
   });
 
+  // ── Sourcing: browse vendors & service providers (reuses the compact card) ──
+  var srcAreaFilter = document.getElementById('srcAreaFilter');
+  var srcSearch = document.getElementById('srcSearch');
+  var srcGrid = document.getElementById('srcGrid');
+  var srcCount = document.getElementById('srcCount');
+  var srcState = document.getElementById('srcState');
+  function buildSrcAreaFilter() {
+    var counts = {}, cur = srcAreaFilter.value;
+    all.forEach(function (m) { if (m.member_type === 'vendor' && m.area) counts[m.area] = (counts[m.area] || 0) + 1; });
+    srcAreaFilter.innerHTML = '<option value="">All areas</option>';
+    Object.keys(counts).sort().forEach(function (a) { var o = document.createElement('option'); o.value = a; o.textContent = a + ' (' + counts[a] + ')'; srcAreaFilter.appendChild(o); });
+    srcAreaFilter.value = cur;
+  }
+  function renderSourcing() {
+    var vendors = all.filter(function (m) { return m.member_type === 'vendor'; });
+    var a = srcAreaFilter.value, q = srcSearch.value.trim().toLowerCase();
+    var list = vendors.filter(function (m) {
+      if (a && m.area !== a) return false;
+      if (q) { var hay = (C.companyName(m) + ' ' + (m.name || '') + ' ' + (m.stock || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
+      return true;
+    });
+    srcGrid.innerHTML = '';
+    if (!vendors.length) { srcState.style.display = ''; srcState.textContent = 'No vendors yet — they appear here once vendors join and list their storefront.'; srcCount.textContent = ''; return; }
+    if (!list.length) { srcGrid.innerHTML = '<div class="empty">No vendors match.</div>'; }
+    else { list.forEach(function (m) { srcGrid.appendChild(card(m)); }); }
+    srcState.style.display = 'none';
+    srcCount.textContent = list.length + ' of ' + vendors.length + ' vendors';
+  }
+  srcAreaFilter.addEventListener('change', renderSourcing);
+  srcSearch.addEventListener('input', renderSourcing);
+
+  // ── My Storefront: a vendor manages their items, blurb & shop location ──
+  var sfOverlay = document.getElementById('sfOverlay');
+  var sfItemsEl = document.getElementById('sfItems');
+  var sfMsg = document.getElementById('sfMsg');
+  var sfCurrentId = null, sfLoaded = false, myItems = [];
+
+  async function loadStorefront() {
+    document.getElementById('sf_blurb').value = (me && me.stock) || '';
+    renderSfLocation();
+    try { var r = await C.api('/me/storefront'); myItems = r.items || []; renderMyItems(); }
+    catch (e) { sfItemsEl.innerHTML = '<div class="sf-note">Could not load your items.</div>'; }
+  }
+  function renderMyItems() {
+    document.getElementById('sfItemCount').textContent = myItems.length + ' / 12';
+    sfItemsEl.innerHTML = '';
+    if (!myItems.length) sfItemsEl.innerHTML = '<div class="sf-note">No items yet. Add what you sell so buyers can find it under Sourcing.</div>';
+    myItems.forEach(function (it) {
+      var el = document.createElement('div'); el.className = 'sf-mgr-item';
+      el.innerHTML =
+        '<div class="thumb">' + (it.image ? '<img src="' + C.escapeHtml(it.image) + '" alt="">' : '') + '</div>' +
+        '<div style="flex:1;min-width:0"><div class="sf-name">' + C.escapeHtml(it.name) + '</div>' +
+          (it.price ? '<div class="sf-price">' + C.escapeHtml(it.price) + '</div>' : '') + '</div>';
+      var acts = document.createElement('div');
+      var edit = document.createElement('button'); edit.className = 'job-own-btn'; edit.type = 'button'; edit.textContent = 'Edit';
+      edit.addEventListener('click', function () { openItem(it); });
+      var del = document.createElement('button'); del.className = 'job-own-btn danger'; del.type = 'button'; del.textContent = 'Delete'; del.style.marginLeft = '.4rem';
+      del.addEventListener('click', function () { deleteItem(it); });
+      acts.appendChild(edit); acts.appendChild(del); el.appendChild(acts);
+      sfItemsEl.appendChild(el);
+    });
+    document.getElementById('sfAddBtn').style.display = myItems.length >= 12 ? 'none' : '';
+  }
+
+  document.getElementById('sfBlurbSave').addEventListener('click', async function () {
+    var msg = document.getElementById('sfBlurbMsg'); msg.textContent = 'Saving…';
+    try { var r = await C.api('/me', { method: 'PUT', body: { stock: document.getElementById('sf_blurb').value.trim() } }); me = r.member; msg.textContent = 'Saved.'; }
+    catch (e) { msg.textContent = e.message || 'Could not save.'; }
+  });
+
+  function renderSfLocation() {
+    var wrap = document.getElementById('sfLocMapWrap'), st = document.getElementById('sfLocState'), clr = document.getElementById('sfLocClear');
+    if (me && me.location_lat != null && me.location_lng != null) {
+      wrap.innerHTML = '<iframe class="sf-map" loading="lazy" title="Your shop" src="' + C.mapEmbedUrl(me.location_lat, me.location_lng) + '"></iframe>';
+      st.textContent = 'Location set — buyers can get directions to your shop.'; clr.style.display = '';
+    } else { wrap.innerHTML = ''; st.textContent = 'No location set yet.'; clr.style.display = 'none'; }
+  }
+  document.getElementById('sfLocBtn').addEventListener('click', function () {
+    var msg = document.getElementById('sfLocMsg');
+    if (!navigator.geolocation) { msg.textContent = 'This device can\'t share location.'; return; }
+    msg.textContent = 'Getting your location…';
+    navigator.geolocation.getCurrentPosition(async function (pos) {
+      try { var r = await C.api('/me', { method: 'PUT', body: { location_lat: pos.coords.latitude, location_lng: pos.coords.longitude } }); me = r.member; renderSfLocation(); msg.textContent = 'Location saved.'; }
+      catch (e) { msg.textContent = e.message || 'Could not save location.'; }
+    }, function () { msg.textContent = 'Couldn\'t get your location — allow location access, then try again.'; }, { enableHighAccuracy: true, timeout: 10000 });
+  });
+  document.getElementById('sfLocClear').addEventListener('click', async function () {
+    try { var r = await C.api('/me', { method: 'PUT', body: { location_lat: '', location_lng: '' } }); me = r.member; renderSfLocation(); document.getElementById('sfLocMsg').textContent = 'Location cleared.'; }
+    catch (e) { document.getElementById('sfLocMsg').textContent = e.message || 'Could not clear.'; }
+  });
+
+  function renderSfPrev(imgUrl) {
+    var prev = document.getElementById('sfPrev'), rem = document.getElementById('sfPhotoRemove');
+    prev.innerHTML = imgUrl ? '<img src="' + C.escapeHtml(imgUrl) + '" alt="">' : '<div class="initials">+</div>';
+    rem.style.display = imgUrl ? '' : 'none';
+  }
+  function openItem(it) {
+    sfCurrentId = it ? it.id : null;
+    document.getElementById('sfFormTitle').textContent = it ? 'Edit item' : 'Add item';
+    document.getElementById('sf_name').value = it ? it.name : '';
+    document.getElementById('sf_price').value = it && it.price ? it.price : '';
+    document.getElementById('sf_desc').value = it && it.description ? it.description : '';
+    renderSfPrev(it && it.image);
+    document.getElementById('sfPhotoMsg').textContent = it ? '' : 'Save the item first, then add a photo.';
+    document.getElementById('sfPhotoMsg').className = 'pmsg';
+    sfMsg.textContent = ''; sfMsg.className = 'mmsg';
+    sfOverlay.classList.add('open');
+  }
+  document.getElementById('sfAddBtn').addEventListener('click', function () { openItem(null); });
+  document.getElementById('sfClose').addEventListener('click', function () { sfOverlay.classList.remove('open'); });
+  sfOverlay.addEventListener('click', function (e) { if (e.target === sfOverlay) sfOverlay.classList.remove('open'); });
+
+  document.getElementById('sfForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var name = document.getElementById('sf_name').value.trim();
+    if (!name) { sfMsg.className = 'mmsg error'; sfMsg.textContent = 'Enter an item name.'; return; }
+    var body = { name: name, price: document.getElementById('sf_price').value.trim(), description: document.getElementById('sf_desc').value.trim() };
+    var btn = document.getElementById('sfSave'); btn.disabled = true; sfMsg.className = 'mmsg'; sfMsg.textContent = 'Saving…';
+    try {
+      if (sfCurrentId) { await C.api('/me/storefront/' + sfCurrentId, { method: 'PUT', body: body }); }
+      else { var r = await C.api('/me/storefront', { method: 'POST', body: body }); sfCurrentId = r.item.id; document.getElementById('sfFormTitle').textContent = 'Edit item'; }
+      sfMsg.className = 'mmsg ok'; sfMsg.textContent = 'Saved — add or change the photo below.';
+      document.getElementById('sfPhotoMsg').textContent = '';
+      await loadStorefront();
+    } catch (err) { sfMsg.className = 'mmsg error'; sfMsg.textContent = err.message || 'Could not save.'; }
+    finally { btn.disabled = false; }
+  });
+
+  document.getElementById('sfPhotoBtn').addEventListener('click', function () {
+    if (!sfCurrentId) { document.getElementById('sfPhotoMsg').textContent = 'Save the item first.'; return; }
+    document.getElementById('sfPhotoFile').click();
+  });
+  document.getElementById('sfPhotoFile').addEventListener('change', async function () {
+    var f = this.files && this.files[0]; this.value = '';
+    if (!f || !sfCurrentId) return;
+    var pmsg = document.getElementById('sfPhotoMsg'); pmsg.className = 'pmsg'; pmsg.textContent = 'Compressing…';
+    try {
+      var blob = await C.compressImage(f);
+      pmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
+      var r = await C.uploadPhoto('/me/storefront/' + sfCurrentId + '/photo', blob);
+      renderSfPrev(r.item.image); pmsg.className = 'pmsg ok'; pmsg.textContent = 'Photo added.';
+      await loadStorefront();
+    } catch (err) { pmsg.className = 'pmsg error'; pmsg.textContent = err.message || 'Could not upload.'; }
+  });
+  document.getElementById('sfPhotoRemove').addEventListener('click', async function () {
+    if (!sfCurrentId) return;
+    try { await C.api('/me/storefront/' + sfCurrentId + '/photo', { method: 'DELETE' }); renderSfPrev(null); document.getElementById('sfPhotoMsg').textContent = 'Photo removed.'; await loadStorefront(); }
+    catch (e) { document.getElementById('sfPhotoMsg').textContent = e.message || 'Could not remove.'; }
+  });
+  async function deleteItem(it) {
+    if (!confirm('Delete "' + it.name + '" from your storefront?')) return;
+    try { await C.api('/me/storefront/' + it.id, { method: 'DELETE' }); await loadStorefront(); }
+    catch (e) { alert(e.message || 'Could not delete.'); }
+  }
+
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'tools', 'tutorials', 'sourcing'];
+  var TABS = ['directory', 'jobs', 'storefront', 'tools', 'sourcing', 'tutorials'];
   var jobsLoaded = false;
   function showTab(name) {
     if (TABS.indexOf(name) < 0) name = 'directory';
+    // Storefront management is vendor-only
+    if (name === 'storefront' && !(me && me.member_type === 'vendor')) name = 'directory';
     TABS.forEach(function (t) {
       document.getElementById('tab-' + t).hidden = (t !== name);
     });
@@ -946,6 +1217,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     closeSpop();
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
+    if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
+    if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
   }
   document.getElementById('tabbar').addEventListener('click', function (e) {
@@ -1145,7 +1418,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' },
     { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
     { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
-    { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Vendors get a Storefront to list what they sell (panels, boards, lighting…). Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' }
+    { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' },
+    { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -1194,6 +1468,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var meRes = await C.api('/me');
       me = meRes.member;
       if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
+      if (me && me.member_type === 'vendor') document.getElementById('storefrontTab').hidden = false;
     } catch (err) {
       if (err.status === 401) { location.replace('login.html'); return; }
     }

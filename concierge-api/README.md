@@ -85,6 +85,12 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | GET | `/api/directory` | member | approved members incl. phone (for WhatsApp) |
 | POST | `/api/me/photo` | member | raw `image/jpeg` body ≤300KB → R2 `concierge/members/<phone>.jpg`, sets photo_url |
 | DELETE | `/api/me/photo` | member | remove own photo (R2 object + photo_url) |
+| GET | `/api/me/storefront` | member | own vendor storefront items |
+| POST | `/api/me/storefront` | member | add item `{name, price?, description?}` (≤12/member) |
+| PUT / DELETE | `/api/me/storefront/:id` | member | edit / delete own item (delete removes R2 image) |
+| POST / DELETE | `/api/me/storefront/:id/photo` | member | item image (raw `image/jpeg` ≤300KB → R2 `concierge/storefront/<phone>/<id>.jpg`) |
+| GET | `/api/storefront/:phone` | member | an approved vendor's storefront items (Sourcing) |
+| GET | `/api/media/storefront/<phone>/<id>.jpg` | public | serve item image |
 | GET | `/api/media/members/<phone>.jpg` | public | serve member photo (cached 1 day, ETag/304) |
 | POST | `/api/public/jobs` | public | client job request from `/hire.html` (lands `pending`; phone-throttled) |
 | POST | `/api/public/register` | public | self-service member registration from `/concierge/register.html` (lands `pending`; role/status/is_founder hardcoded) |

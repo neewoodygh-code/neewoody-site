@@ -138,7 +138,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field" style="align-self:end"><span style="font-size:.78rem;color:var(--muted)">Photo: upload from the member row after adding.</span></div>
         </div>
         <div style="margin-top:1rem"><label>Specialties</label><div class="spec-grid" id="a_specs"></div></div>
-        <div style="margin-top:1rem"><label>Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— what a vendor sells (optional)</span></label><textarea id="a_stock" placeholder="One item per line"></textarea></div>
+        <div style="margin-top:1rem"><label>Shop blurb <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— vendor's short "about" line (optional)</span></label><textarea id="a_stock" placeholder="Short blurb about the shop"></textarea></div>
         <div class="form-grid" style="margin-top:1rem">
           <div class="field"><label>Status</label>
             <select id="a_status"><option value="approved">Approved</option><option value="pending">Pending</option><option value="suspended">Suspended</option></select></div>
@@ -250,14 +250,14 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Skill level</label><select id="e_lvl"><option value="">— not set —</option></select></div>
       <div class="field"><label>Years of experience</label><input id="e_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
       <div class="field"><label>Trades</label><div class="spec-grid" id="e_specs"></div></div>
-      <div class="field"><label>Storefront <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— vendor's stock (optional)</span></label><textarea id="e_stock" placeholder="One item per line"></textarea></div>
+      <div class="field"><label>Shop blurb <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— vendor's short "about" line (optional)</span></label><textarea id="e_stock" placeholder="Short blurb about the shop"></textarea></div>
       <div style="margin-top:1.25rem"><button class="btn" id="editSaveBtn" type="submit">Save changes</button></div>
       <div class="msg" id="emsg"></div>
     </form>
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719c"></script>
+<script src="../js/concierge.js?v=20260719d"></script>
 <script>
 (function () {
   var C = window.Concierge;

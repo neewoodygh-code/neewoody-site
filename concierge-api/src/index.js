@@ -101,6 +101,8 @@ async function route(request, env, ctx) {
   // Authorization headers). Avatars/logos only — low sensitivity by design.
   const mMedia = path.match(/^\/api\/media\/members\/(233\d{9})\.jpg$/);
   if (mMedia && method === 'GET') return servePhoto(env, request, mMedia[1]);
+  const mStoreImg = path.match(/^\/api\/media\/storefront\/(233\d{9})\/(\d+)\.jpg$/);
+  if (mStoreImg && method === 'GET') return serveStorefrontPhoto(env, request, mStoreImg[1], Number(mStoreImg[2]));
 
   // ---- member ----
   if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => json({ member: sanitize(m) }));
@@ -108,6 +110,19 @@ async function route(request, env, ctx) {
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
   if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
+
+  // ---- member: storefront (vendor items) ----
+  if (path === '/api/me/storefront' && method === 'GET')  return withAuth(request, env, (m) => listMyStorefront(env, m.phone));
+  if (path === '/api/me/storefront' && method === 'POST') return withAuth(request, env, (m) => createStorefrontItem(request, env, m.phone));
+  const mSItem = path.match(/^\/api\/me\/storefront\/(\d+)$/);
+  if (mSItem && method === 'PUT')    return withAuth(request, env, (m) => updateStorefrontItem(request, env, m.phone, Number(mSItem[1])));
+  if (mSItem && method === 'DELETE') return withAuth(request, env, (m) => deleteStorefrontItem(env, m.phone, Number(mSItem[1])));
+  const mSItemPhoto = path.match(/^\/api\/me\/storefront\/(\d+)\/photo$/);
+  if (mSItemPhoto && method === 'POST')   return withAuth(request, env, (m) => uploadStorefrontPhoto(request, env, m.phone, Number(mSItemPhoto[1])));
+  if (mSItemPhoto && method === 'DELETE') return withAuth(request, env, (m) => deleteStorefrontPhoto(env, m.phone, Number(mSItemPhoto[1])));
+  // a specific approved vendor's storefront (members browsing Sourcing)
+  const mVendorStore = path.match(/^\/api\/storefront\/(233\d{9})$/);
+  if (mVendorStore && method === 'GET') return withAuth(request, env, () => getVendorStorefront(env, mVendorStore[1]));
 
   // ---- member: job alert subscriptions (Web Push) ----
   if (path === '/api/me/push' && method === 'POST')   return withAuth(request, env, (m) => savePushSub(request, env, m));
@@ -255,6 +270,15 @@ async function updateMe(request, env, member) {
     fields.member_type = mt || 'carpenter';
   }
   if ('stock' in body) fields.stock = stockVal(body.stock);
+  if ('location_lat' in body || 'location_lng' in body) {
+    const lat = body.location_lat, lng = body.location_lng;
+    if (lat == null || lat === '' || lng == null || lng === '') { fields.location_lat = null; fields.location_lng = null; }
+    else {
+      const la = Number(lat), lo = Number(lng);
+      if (!isFinite(la) || !isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) return json({ error: 'invalid_location' }, 400);
+      fields.location_lat = la; fields.location_lng = lo;
+    }
+  }
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
   // the owner no longer knows a member's PIN after handing out the initial one.
@@ -276,7 +300,8 @@ async function updateMe(request, env, member) {
 async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone,
-            skill_level, years_experience, is_business, availability, member_type, stock
+            skill_level, years_experience, is_business, availability, member_type, stock,
+            location_lat, location_lng
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), is_business: !!r.is_business })) });
@@ -442,9 +467,15 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM storefront_items WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
   await env.MEDIA.delete(photoKey(phone));
+  // Remove all storefront item images for this member (R2 prefix delete).
+  try {
+    const listed = await env.MEDIA.list({ prefix: `concierge/storefront/${phone}/` });
+    await Promise.all((listed.objects || []).map((o) => env.MEDIA.delete(o.key)));
+  } catch (e) { console.error('storefront image cleanup failed:', e && e.message); }
 
   return json({ deleted: true, phone });
 }
@@ -1035,6 +1066,106 @@ async function servePhoto(env, request, phone) {
       'ETag': etag,
     },
   });
+}
+
+// ── vendor storefront (structured items + one R2 image each) ────────────
+// Vendors list what they sell; carpenters don't use this. Bounded per member.
+// image_key stores the display URL (?v=timestamp for cache-busting on re-upload),
+// like photo_url; the R2 object key is derived from phone+id.
+const STOREFRONT_MAX = 12;
+const ITEM_NAME_MAX = 80, ITEM_DESC_MAX = 500, ITEM_PRICE_MAX = 40;
+function storeImgKey(phone, id) { return `concierge/storefront/${phone}/${id}.jpg`; }
+function storefrontRow(r) {
+  return { id: r.id, name: r.name, description: r.description, price: r.price, image: r.image_key || null };
+}
+function itemFields(body) {
+  const name = String(body.name || '').trim();
+  if (!name) return { error: 'name_required' };
+  return {
+    name: name.slice(0, ITEM_NAME_MAX),
+    description: body.description == null ? null : (String(body.description).trim().slice(0, ITEM_DESC_MAX) || null),
+    price: body.price == null ? null : (String(body.price).trim().slice(0, ITEM_PRICE_MAX) || null),
+  };
+}
+
+async function listMyStorefront(env, phone) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, name, description, price, image_key FROM storefront_items
+     WHERE member_phone = ? ORDER BY sort, id`
+  ).bind(phone).all();
+  return json({ items: (results || []).map(storefrontRow) });
+}
+
+async function getVendorStorefront(env, phone) {
+  const m = await env.DB.prepare('SELECT status FROM members WHERE phone = ?').bind(phone).first();
+  if (!m || m.status !== 'approved') return json({ error: 'not_found' }, 404);
+  const { results } = await env.DB.prepare(
+    `SELECT id, name, description, price, image_key FROM storefront_items
+     WHERE member_phone = ? ORDER BY sort, id`
+  ).bind(phone).all();
+  return json({ items: (results || []).map(storefrontRow) });
+}
+
+async function createStorefrontItem(request, env, phone) {
+  const body = await readJson(request);
+  const f = itemFields(body);
+  if (f.error) return json({ error: f.error }, 400);
+  const c = await env.DB.prepare('SELECT COUNT(*) AS n FROM storefront_items WHERE member_phone = ?').bind(phone).first();
+  if ((c && c.n) >= STOREFRONT_MAX) return json({ error: 'too_many_items', max: STOREFRONT_MAX }, 409);
+  const r = await env.DB.prepare(
+    'INSERT INTO storefront_items (member_phone, name, description, price) VALUES (?, ?, ?, ?)'
+  ).bind(phone, f.name, f.description, f.price).run();
+  const row = await env.DB.prepare('SELECT id, name, description, price, image_key FROM storefront_items WHERE id = ?').bind(r.meta.last_row_id).first();
+  return json({ item: storefrontRow(row) }, 201);
+}
+
+async function updateStorefrontItem(request, env, phone, id) {
+  const owned = await env.DB.prepare('SELECT id FROM storefront_items WHERE id = ? AND member_phone = ?').bind(id, phone).first();
+  if (!owned) return json({ error: 'not_found' }, 404);
+  const f = itemFields(await readJson(request));
+  if (f.error) return json({ error: f.error }, 400);
+  await env.DB.prepare('UPDATE storefront_items SET name = ?, description = ?, price = ? WHERE id = ? AND member_phone = ?')
+    .bind(f.name, f.description, f.price, id, phone).run();
+  const row = await env.DB.prepare('SELECT id, name, description, price, image_key FROM storefront_items WHERE id = ?').bind(id).first();
+  return json({ item: storefrontRow(row) });
+}
+
+async function deleteStorefrontItem(env, phone, id) {
+  const owned = await env.DB.prepare('SELECT id FROM storefront_items WHERE id = ? AND member_phone = ?').bind(id, phone).first();
+  if (!owned) return json({ error: 'not_found' }, 404);
+  await env.MEDIA.delete(storeImgKey(phone, id)).catch(() => {});
+  await env.DB.prepare('DELETE FROM storefront_items WHERE id = ? AND member_phone = ?').bind(id, phone).run();
+  return json({ ok: true });
+}
+
+async function uploadStorefrontPhoto(request, env, phone, id) {
+  const owned = await env.DB.prepare('SELECT id FROM storefront_items WHERE id = ? AND member_phone = ?').bind(id, phone).first();
+  if (!owned) return json({ error: 'not_found' }, 404);
+  const ct = (request.headers.get('Content-Type') || '').toLowerCase();
+  if (!ct.startsWith('image/jpeg')) return json({ error: 'invalid_image' }, 400);
+  const buf = await request.arrayBuffer();
+  const head = new Uint8Array(buf.slice(0, 2));
+  if (buf.byteLength < 128 || head[0] !== 0xff || head[1] !== 0xd8) return json({ error: 'invalid_image' }, 400);
+  if (buf.byteLength > PHOTO_MAX_BYTES) return json({ error: 'photo_too_large', max_kb: 300 }, 413);
+  await env.MEDIA.put(storeImgKey(phone, id), buf, { httpMetadata: { contentType: 'image/jpeg' } });
+  const url = `${new URL(request.url).origin}/api/media/storefront/${phone}/${id}.jpg?v=${Date.now()}`;
+  await env.DB.prepare('UPDATE storefront_items SET image_key = ? WHERE id = ? AND member_phone = ?').bind(url, id, phone).run();
+  const row = await env.DB.prepare('SELECT id, name, description, price, image_key FROM storefront_items WHERE id = ?').bind(id).first();
+  return json({ item: storefrontRow(row) }, 201);
+}
+
+async function deleteStorefrontPhoto(env, phone, id) {
+  await env.MEDIA.delete(storeImgKey(phone, id)).catch(() => {});
+  await env.DB.prepare('UPDATE storefront_items SET image_key = NULL WHERE id = ? AND member_phone = ?').bind(id, phone).run();
+  return json({ ok: true });
+}
+
+async function serveStorefrontPhoto(env, request, phone, id) {
+  const obj = await env.MEDIA.get(storeImgKey(phone, id));
+  if (!obj) return json({ error: 'not_found' }, 404);
+  const etag = obj.httpEtag;
+  if (request.headers.get('If-None-Match') === etag) return new Response(null, { status: 304, headers: { 'ETag': etag } });
+  return new Response(obj.body, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400', 'ETag': etag } });
 }
 
 // ── Web Push send (RFC 8291 aes128gcm + RFC 8292 VAPID) ────────────────

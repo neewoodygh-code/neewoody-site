@@ -99,6 +99,15 @@
     return { key: t, label: memberTypeLabel(t), icon: memberTypeIcon(t), bg: c.bg, fg: c.fg };
   }
 
+  // Vendors headline with their company name; everyone else with their own name.
+  function companyName(m) { return (m && (m.business_name || m.name)) || 'Member'; }
+  // Keyless map: an OpenStreetMap embed iframe URL + a Google Maps directions link.
+  function mapEmbedUrl(lat, lng) {
+    var d = 0.008, bbox = [lng - d, lat - d, lng + d, lat + d].join(',');
+    return 'https://www.openstreetmap.org/export/embed.html?bbox=' + encodeURIComponent(bbox) + '&layer=mapnik&marker=' + lat + ',' + lng;
+  }
+  function mapsDirLink(lat, lng) { return 'https://www.google.com/maps?q=' + lat + ',' + lng; }
+
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
     { label: 'Greater Accra', zones: [
@@ -381,7 +390,8 @@
     MEMBER_TYPE_LABELS: MEMBER_TYPE_LABELS, MEMBER_TYPE_ORDER: MEMBER_TYPE_ORDER, memberTypeLabel: memberTypeLabel,
     MEMBER_TYPE_ICONS: MEMBER_TYPE_ICONS, memberTypeIcon: memberTypeIcon,
     MEMBER_TYPE_COLORS: MEMBER_TYPE_COLORS, memberTypeColor: memberTypeColor,
-    identityBadge: identityBadge,
+    identityBadge: identityBadge, companyName: companyName,
+    mapEmbedUrl: mapEmbedUrl, mapsDirLink: mapsDirLink,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto,
