@@ -74,14 +74,18 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 .rowbtn:hover{ border-color:var(--gold); }
 .rowbtn.danger{ color:#a52a2a; border-color:rgba(165,42,42,.4); }
 .rowbtn.danger:hover{ border-color:#a52a2a; background:rgba(165,42,42,.06); }
-.table-scroll{ overflow-x:auto; }
-/* Pin identity (first col) + Actions (last col) so you never lose a row's
-   position or its Edit button while a wide table scrolls sideways. */
+/* Bounded, self-scrolling viewport: the horizontal scrollbar sits at the bottom
+   of THIS box (always on screen) instead of far down a long table, and the
+   header + identity/Actions columns stay pinned — so you never lose the row
+   you're editing while scrolling sideways. */
+.table-scroll{ overflow:auto; max-height:72vh; }
+.table-scroll table td{ background:#fff; }
+.table-scroll table thead th{ position:sticky; top:0; z-index:2; background:var(--cream-dark); }
 .table-scroll table th:first-child, .table-scroll table td:first-child{
-  position:sticky; left:0; z-index:2; background:#fff; box-shadow:1px 0 0 rgba(11,31,14,.1); }
+  position:sticky; left:0; z-index:2; box-shadow:1px 0 0 rgba(11,31,14,.1); }
 .table-scroll table th:last-child, .table-scroll table td:last-child{
-  position:sticky; right:0; z-index:2; background:#fff; box-shadow:-1px 0 0 rgba(11,31,14,.1); }
-.table-scroll table thead th:first-child, .table-scroll table thead th:last-child{ z-index:3; }
+  position:sticky; right:0; z-index:2; box-shadow:-1px 0 0 rgba(11,31,14,.1); }
+.table-scroll table thead th:first-child, .table-scroll table thead th:last-child{ z-index:4; }
 .state{ text-align:center; color:var(--muted); padding:2rem; font-family:var(--ui); letter-spacing:.05em; }
 
 /* edit-member modal */

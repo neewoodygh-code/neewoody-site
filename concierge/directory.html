@@ -323,6 +323,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:transparent; border:1px solid var(--green); border-radius:4px; padding:.9rem; }
 .md-call:hover{ background:rgba(11,31,14,.06); }
 .md-stock{ font-size:.9rem; line-height:1.6; color:var(--ink); white-space:pre-line; }
+.soc-links{ display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.4rem; }
+.soc-link{ font-family:var(--ui); font-size:.74rem; letter-spacing:.02em; text-decoration:none; color:var(--green);
+  border:1px solid rgba(11,31,14,.2); border-radius:5px; padding:.35rem .6rem; }
+.soc-link:hover{ border-color:var(--gold); background:var(--cream); }
 
 /* vendor storefront — browse (in detail modal) + manage (own tab) */
 .sf-grid{ display:grid; grid-template-columns:1fr 1fr; gap:.7rem; }
@@ -620,6 +624,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       </label>
       <label for="p_area">Area</label>
       <select id="p_area"></select>
+      <label>Links <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— your website &amp; socials; shown on your profile so people can see your work</span></label>
+      <input id="soc_website" type="url" inputmode="url" placeholder="Website — https://…" style="margin-bottom:.4rem" />
+      <input id="soc_instagram" type="url" inputmode="url" placeholder="Instagram link" style="margin-bottom:.4rem" />
+      <input id="soc_tiktok" type="url" inputmode="url" placeholder="TikTok link" style="margin-bottom:.4rem" />
+      <input id="soc_facebook" type="url" inputmode="url" placeholder="Facebook link" style="margin-bottom:.4rem" />
+      <input id="soc_youtube" type="url" inputmode="url" placeholder="YouTube link" style="margin-bottom:.4rem" />
+      <input id="soc_linkedin" type="url" inputmode="url" placeholder="LinkedIn link" />
       <div id="carpFields">
         <label for="p_lvl">Skill level</label>
         <select id="p_lvl"><option value="">— not set —</option></select>
@@ -803,6 +814,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   var all = [];
   var me = null;
+  // Member social links / website (fixed platform set; matches the worker).
+  var SOCIAL_KEYS = ['website', 'instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'];
+  var SOCIAL_META = { website: ['🌐', 'Website'], instagram: ['📸', 'Instagram'], tiktok: ['🎵', 'TikTok'], facebook: ['📘', 'Facebook'], youtube: ['▶️', 'YouTube'], linkedin: ['in', 'LinkedIn'] };
   var showAll = false;
 
   var grid = document.getElementById('grid');
@@ -928,6 +942,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     // Offered services (side skills), excluding deliveries (shown as coverage above).
     var offChips = (m.side_hustles || []).filter(function (s) { return s !== 'deliveries_errands'; })
       .map(function (s) { return '<span class="chip">' + C.escapeHtml(serviceLabelFor(s)) + '</span>'; }).join('');
+    // Social links / website (server-validated to http(s) only).
+    var soc = m.socials || {};
+    var socialChips = SOCIAL_KEYS.filter(function (k) { return soc[k]; }).map(function (k) {
+      return '<a class="soc-link" href="' + C.escapeHtml(soc[k]) + '" target="_blank" rel="noopener nofollow">' + SOCIAL_META[k][0] + ' ' + SOCIAL_META[k][1] + '</a>';
+    }).join('');
     document.getElementById('memBody').innerHTML =
       '<div class="md-top">' + photo +
         '<div style="flex:1;min-width:0">' +
@@ -940,6 +959,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (svcChips ? '<div class="md-label">What they do</div><div class="chips">' + svcChips + '</div>' : '') +
       (coverChips ? '<div class="md-label">' + (m.member_type === 'courier' ? 'Delivery coverage' : 'Also delivers · covers') + '</div><div class="chips">' + coverChips + '</div>' : '') +
       (offChips ? '<div class="md-label">Also offers</div><div class="chips">' + offChips + '</div>' : '') +
+      (socialChips ? '<div class="md-label">Links</div><div class="soc-links">' + socialChips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
         ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
@@ -1293,6 +1313,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     pVendorScale.value = me.vendor_scale || '';
     buildServicesGrid(me.side_hustles || []);
     document.getElementById('p_suggest').value = ''; document.getElementById('p_suggest_msg').textContent = '';
+    (function () { var soc = me.socials || {}; SOCIAL_KEYS.forEach(function (k) { document.getElementById('soc_' + k).value = soc[k] || ''; }); })();
     coverZonesWrap.innerHTML = '';
     (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
@@ -1329,6 +1350,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     if (isCarpEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
     var sideHustles = [].slice.call(servicesGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var socials = {}; SOCIAL_KEYS.forEach(function (k) { var v = document.getElementById('soc_' + k).value.trim(); if (v) socials[k] = v; });
     var deliveryOn = isCourierEdit || sideHustles.indexOf('deliveries_errands') >= 0;
     var coverZones = deliveryOn ? [].slice.call(coverZonesWrap.querySelectorAll('select')).map(function (s) { return s.value; }).filter(Boolean) : [];
     coverZones = coverZones.filter(function (z, i) { return coverZones.indexOf(z) === i; });
@@ -1351,6 +1373,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         services_other: isVendorEdit ? document.getElementById('p_services_other').value.trim() : '',
         coverage_zones: coverZones,
         side_hustles: sideHustles,
+        socials: socials,
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         availability: pAvail.value,
@@ -2046,7 +2069,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 16, date: '2026-07-19', title: 'Notifications bell', body: 'A 🔔 bell now sits top-right. It collects your alerts — new buy requests in your zone, orders on your storefront, and when a vendor accepts your order — even if you never turned on push notifications.' },
     { id: 17, date: '2026-07-19', title: 'Couriers & delivery runs', body: 'New member type: Courier / Delivery. Couriers set coverage zones and get pinged for buy-for-me requests there. Not a courier? In My profile tick "I also do deliveries & errands" and set your zones to get the same pings.' },
     { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' },
-    { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' }
+    { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' },
+    { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

@@ -41,6 +41,9 @@ const STOCK_MAX = 1000; // vendor Storefront free-text cap
 const COVERAGE_MAX_ZONES = 12;
 const ZONE_NAME_MAX = 60;
 const SERVICE_LABEL_MAX = 40;
+// Member social links / website — fixed platform set, stored as JSON {key:url}.
+const SOCIAL_KEYS = ['website', 'instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'];
+const SOCIAL_URL_MAX = 200;
 // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
 const VENDOR_SCALES = ['stall', 'shop', 'showroom', 'warehouse'];
 // Vendor product categories (what they sell) — Sourcing filter vocabulary.
@@ -372,6 +375,11 @@ async function updateMe(request, env, member) {
     if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
     fields.side_hustles = sh;
   }
+  if ('socials' in body) {
+    const sc = validateSocials(body.socials);
+    if (sc === false) return json({ error: 'invalid_socials' }, 400);
+    fields.socials = sc;
+  }
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -408,7 +416,7 @@ async function directory(env) {
     `SELECT name, business_name, area, specialties, photo_url, phone, hide_phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
             location_lat, location_lng, vendor_scale, vendor_categories, vendor_services, services_other,
-            coverage_zones, side_hustles, business_phone
+            coverage_zones, side_hustles, socials, business_phone
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({
@@ -422,6 +430,7 @@ async function directory(env) {
     vendor_services: parseSpec(r.vendor_services),
     coverage_zones: parseSpec(r.coverage_zones),
     side_hustles: parseSpec(r.side_hustles),
+    socials: parseSocials(r.socials),
     is_business: !!r.is_business,
   })) });
 }
@@ -588,6 +597,11 @@ async function adminUpdateMember(request, env, rawPhone) {
     const sh = validateSideHustles(body.side_hustles, await approvedServiceSlugs(env));
     if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
     fields.side_hustles = sh;
+  }
+  if ('socials' in body) {
+    const sc = validateSocials(body.socials);
+    if (sc === false) return json({ error: 'invalid_socials' }, 400);
+    fields.socials = sc;
   }
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
@@ -2061,6 +2075,27 @@ function slugifyService(label) {
   return String(label || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
 }
 
+// Social links — JSON object {platform: url} over the fixed key set. Values are
+// normalised to https:// and must look like a URL; malformed entries are dropped
+// (never fails the whole save). Only http(s) — blocks javascript:/data: URIs.
+// Returns a JSON string ('{}' if none), or false if the input isn't an object.
+function validateSocials(input) {
+  if (input == null) return '{}';
+  if (typeof input !== 'object' || Array.isArray(input)) return false;
+  const out = {};
+  for (const k of SOCIAL_KEYS) {
+    let v = input[k];
+    if (v == null) continue;
+    v = String(v).trim();
+    if (!v) continue;
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+    if (v.length > SOCIAL_URL_MAX) continue;
+    if (!/^https?:\/\/[^\s.]+\.[^\s]{2,}/i.test(v)) continue; // must look like http(s)://host.tld…
+    out[k] = v;
+  }
+  return JSON.stringify(out);
+}
+
 // Optional business/call number. null = cleared; false = invalid; else 233…
 function bizPhone(v) {
   if (v == null || v === '') return null;
@@ -2071,11 +2106,14 @@ function bizPhone(v) {
 function parseSpec(text) {
   try { const a = JSON.parse(text); return Array.isArray(a) ? a : []; } catch { return []; }
 }
+function parseSocials(text) {
+  try { const o = JSON.parse(text); return (o && typeof o === 'object' && !Array.isArray(o)) ? o : {}; } catch { return {}; }
+}
 
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), coverage_zones: parseSpec(m.coverage_zones), side_hustles: parseSpec(m.side_hustles), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
+  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), coverage_zones: parseSpec(m.coverage_zones), side_hustles: parseSpec(m.side_hustles), socials: parseSocials(m.socials), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
 }
 
 async function recordAttempt(env, phone, success) {
