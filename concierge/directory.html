@@ -73,10 +73,6 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .pnudge .x{ background:transparent; color:rgba(240,232,208,.55); border:1px solid rgba(240,232,208,.3); }
 
 /* jobs board */
-.subseg{ display:inline-flex; background:var(--cream-dark); border-radius:6px; padding:.25rem; gap:.25rem; margin-bottom:1.5rem; }
-.subseg-btn{ font-family:var(--ui); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; font-weight:500;
-  border:none; background:transparent; color:var(--muted); padding:.55rem 1.1rem; border-radius:4px; cursor:pointer; transition:background .15s,color .15s; }
-.subseg-btn.active{ background:var(--green); color:var(--cream); }
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
 .buy-additem:hover{ border-color:var(--gold); }
@@ -345,7 +341,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 <!-- member-area tabs -->
 <nav class="tabbar" id="tabbar" aria-label="Member area">
   <button class="tab active" data-tab="directory">Directory</button>
-  <button class="tab" data-tab="jobs">Jobs / Services</button>
+  <button class="tab" data-tab="jobs">Jobs</button>
+  <button class="tab" data-tab="services">Services</button>
   <button class="tab" data-tab="storefront" id="storefrontTab" hidden>My Storefront</button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
@@ -432,42 +429,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   <!-- TAB: Jobs -->
   <div id="tab-jobs" class="tabpanel" hidden>
-    <div class="subseg" role="tablist">
-      <button class="subseg-btn active" data-sub="jobs" type="button" role="tab">Jobs</button>
-      <button class="subseg-btn" data-sub="services" type="button" role="tab">Services</button>
-    </div>
-
-    <!-- SUB: Jobs -->
-    <div id="sub-jobs">
-      <div class="jobs-head">
-        <div class="jh-text">
-          <h1>Jobs board</h1>
-          <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
-          <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
-          <button class="alerts-btn" id="alertsBtn" type="button" style="display:none">🔔 Get alerts for your area</button>
-          <span class="alerts-note" id="alertsNote"></span>
-        </div>
+    <div class="jobs-head">
+      <div class="jh-text">
+        <h1>Jobs board</h1>
+        <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
       </div>
-      <div id="jobsMine"></div>
-      <div id="jobsList"></div>
-      <div id="jobsState" class="state">Loading jobs…</div>
-    </div>
-
-    <!-- SUB: Services · Buy for me -->
-    <div id="sub-services" hidden>
-      <div class="jobs-head">
-        <div class="jh-text">
-          <h1>Buy for me</h1>
-          <p>Need materials picked up? Post what you need and a member nearby can buy it and deliver it to you. Agree the budget, their fee, and how you'll pay — MoMo up front or on delivery — on WhatsApp, and keep the receipts.</p>
-        </div>
-        <button class="btn-post" id="postBuyBtn" type="button">+ Request a buy</button>
+      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+        <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
+        <button class="alerts-btn" id="alertsBtn" type="button" style="display:none">🔔 Get alerts for your area</button>
+        <span class="alerts-note" id="alertsNote"></span>
       </div>
-      <div id="buyMine"></div>
-      <div id="buyList"></div>
-      <div id="buyState" class="state">Loading requests…</div>
     </div>
+    <div id="jobsMine"></div>
+    <div id="jobsList"></div>
+    <div id="jobsState" class="state">Loading jobs…</div>
+  </div>
+
+  <!-- TAB: Services · Buy for me -->
+  <div id="tab-services" class="tabpanel" hidden>
+    <div class="jobs-head">
+      <div class="jh-text">
+        <h1>Buy for me</h1>
+        <p>Need materials picked up? Post what you need and a member nearby can buy it and deliver it to you. Agree the budget, their fee, and how you'll pay — MoMo up front or on delivery — on WhatsApp, and keep the receipts.</p>
+      </div>
+      <button class="btn-post" id="postBuyBtn" type="button">+ Request a buy</button>
+    </div>
+    <div id="buyMine"></div>
+    <div id="buyList"></div>
+    <div id="buyState" class="state">Loading requests…</div>
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
@@ -1363,8 +1352,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'storefront', 'tools', 'sourcing', 'tutorials'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'tools', 'sourcing', 'tutorials'];
   var jobsLoaded = false;
+  var buyLoaded = false;
   function showTab(name) {
     if (TABS.indexOf(name) < 0) name = 'directory';
     // Storefront management is vendor-only
@@ -1382,6 +1372,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     closeSpop();
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
+    if (name === 'services' && !buyLoaded) { buyLoaded = true; loadBuy(); }
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
@@ -1529,17 +1520,6 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } catch (err) {
       jmsg.className = 'mmsg error'; jmsg.textContent = err.message || 'Could not post the job.';
     } finally { btn.disabled = false; }
-  });
-
-  // ── Jobs / Services segmented toggle ──
-  var buyLoaded = false;
-  document.querySelector('#tab-jobs .subseg').addEventListener('click', function (e) {
-    var b = e.target.closest('.subseg-btn'); if (!b) return;
-    var sub = b.getAttribute('data-sub');
-    document.querySelectorAll('#tab-jobs .subseg-btn').forEach(function (x) { x.classList.toggle('active', x === b); });
-    document.getElementById('sub-jobs').hidden = sub !== 'jobs';
-    document.getElementById('sub-services').hidden = sub !== 'services';
-    if (sub === 'services' && !buyLoaded) { buyLoaded = true; loadBuy(); }
   });
 
   // ── "Buy for me" board ──
@@ -1741,7 +1721,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
     { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' },
     { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' },
-    { id: 15, date: '2026-07-19', title: 'New: Buy for me', body: 'The Jobs tab is now Jobs / Services. Under Services, tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' }
+    { id: 15, date: '2026-07-19', title: 'New: Services · Buy for me', body: 'There\'s a new Services tab. Tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
