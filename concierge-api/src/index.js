@@ -155,6 +155,7 @@ async function route(request, env, ctx) {
   // ---- admin: payments ----
   if (path === '/api/admin/payments' && method === 'POST') return withAdmin(request, env, () => adminRecordPayment(request, env));
   if (path === '/api/admin/payments' && method === 'GET')  return withAdmin(request, env, () => adminListPayments(request, env));
+  if (path === '/api/admin/payments' && method === 'DELETE') return withAdmin(request, env, () => adminDeletePayment(request, env));
 
   return json({ error: 'not_found' }, 404);
 }
@@ -467,6 +468,20 @@ async function adminListPayments(request, env) {
      WHERE p.period = ? ORDER BY p.recorded_at DESC`
   ).bind(period).all();
   return json({ period, payments: results || [] });
+}
+
+// Reverse a wrongly-recorded payment (member + period). Idempotent: deleting
+// a row that isn't there returns deleted:0 rather than erroring.
+async function adminDeletePayment(request, env) {
+  const body = await readJson(request);
+  const phone = normalizePhone(body.member_phone);
+  const period = String(body.period || '');
+  if (!phone) return json({ error: 'invalid_phone' }, 400);
+  if (!/^\d{4}-\d{2}$/.test(period)) return json({ error: 'period_must_be_YYYY_MM' }, 400);
+  const res = await env.DB.prepare(
+    'DELETE FROM payments WHERE member_phone = ? AND period = ?'
+  ).bind(phone, period).run();
+  return json({ ok: true, deleted: (res.meta && res.meta.changes) || 0 });
 }
 
 // ── jobs board ─────────────────────────────────────────────────────────

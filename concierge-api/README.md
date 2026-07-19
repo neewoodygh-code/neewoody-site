@@ -107,6 +107,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | DELETE | `/api/admin/members/:phone/photo` | admin | remove a member's photo |
 | POST | `/api/admin/payments` | admin | record MoMo payment (upsert on member+period) |
 | GET | `/api/admin/payments?period=YYYY-MM` | admin | who paid this month |
+| DELETE | `/api/admin/payments` | admin | reverse a payment (body `{member_phone, period}`; idempotent) |
 
 ## Files
 

@@ -211,7 +211,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       </div>
       <div class="table-scroll">
         <table>
-          <thead><tr><th>Member</th><th>Business</th><th>Amount</th><th>MoMo ref</th><th>Recorded</th></tr></thead>
+          <thead><tr><th>Member</th><th>Business</th><th>Amount</th><th>MoMo ref</th><th>Recorded</th><th>Actions</th></tr></thead>
           <tbody id="payBody"></tbody>
         </table>
       </div>
@@ -658,10 +658,18 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     try {
       var r = await C.api('/admin/payments?period=' + encodeURIComponent(period));
       var rows = r.payments || [];
-      // Counter: how many members paid this period + total collected.
+      // Denominator = approved non-admin members. The numerator must count only
+      // those same members who paid — a payment recorded against an admin or a
+      // pending/suspended member must never push the count past the total
+      // (that was the "32 of 31" bug).
+      var payable = {};
+      members.forEach(function (m) { if (m.status === 'approved' && m.role !== 'admin') payable[m.phone] = true; });
+      var approved = Object.keys(payable).length;
+      var paidCount = rows.filter(function (p) { return payable[p.member_phone]; }).length;
       var total = rows.reduce(function (s, p) { return s + (+p.amount_ghs || 0); }, 0);
-      var approved = members.filter(function (m) { return m.status === 'approved' && m.role !== 'admin'; }).length;
-      summary.textContent = rows.length + ' of ' + approved + ' paying members paid · GHS ' + total.toLocaleString() + ' collected · ' + period;
+      var extra = rows.length - paidCount; // payments for admins / non-approved
+      summary.textContent = paidCount + ' of ' + approved + ' paying members paid · GHS ' + total.toLocaleString() + ' collected'
+        + (extra > 0 ? ' · ' + extra + ' other payment' + (extra > 1 ? 's' : '') : '') + ' · ' + period;
       if (!rows.length) { payState.textContent = 'No payments recorded for ' + period + '.'; return; }
       payState.style.display = 'none';
       rows.forEach(function (p) {
@@ -671,11 +679,42 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           '<td class="small">' + C.escapeHtml(p.business_name || '—') + '</td>' +
           '<td>GHS ' + C.escapeHtml(String(p.amount_ghs)) + '</td>' +
           '<td class="small">' + C.escapeHtml(p.momo_ref || '—') + '</td>' +
-          '<td class="small">' + C.escapeHtml((p.recorded_at || '').slice(0, 16).replace('T', ' ')) + '</td>';
+          '<td class="small">' + C.escapeHtml((p.recorded_at || '').slice(0, 16).replace('T', ' ')) + '</td>' +
+          '<td></td>';
+        var actTd = tr.children[5];
+        var editBtn = document.createElement('button'); editBtn.className = 'rowbtn'; editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', function () { editPayment(p); });
+        var delBtn = document.createElement('button'); delBtn.className = 'rowbtn danger'; delBtn.style.marginLeft = '.4rem'; delBtn.textContent = 'Reverse';
+        delBtn.addEventListener('click', function () { deletePayment(p, delBtn); });
+        actTd.appendChild(editBtn); actTd.appendChild(delBtn);
         payBody.appendChild(tr);
       });
     } catch (err) {
       payState.textContent = err.message || 'Could not load payments.';
+    }
+  }
+
+  // Edit = re-open this payment in the record form; pressing Record upserts
+  // (same member+period) so the amount/ref is corrected rather than duplicated.
+  function editPayment(p) {
+    document.getElementById('p_member').value = p.member_phone;
+    document.getElementById('p_period').value = p.period;
+    document.getElementById('p_amount').value = p.amount_ghs;
+    document.getElementById('p_ref').value = p.momo_ref || '';
+    var msg = document.getElementById('payMsg');
+    msg.className = 'msg'; msg.textContent = 'Editing ' + p.name + ' — change the amount or ref above, then press Record to update.';
+    document.getElementById('payForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function deletePayment(p, btn) {
+    if (!confirm('Reverse ' + p.name + '’s payment for ' + p.period + ' (GHS ' + p.amount_ghs + ')?\n\nThis removes the record — use it if you recorded someone who hadn’t actually paid.')) return;
+    btn.disabled = true;
+    try {
+      await C.api('/admin/payments', { method: 'DELETE', body: { member_phone: p.member_phone, period: p.period } });
+      viewPayments();
+      if (document.getElementById('unpaidWrap').style.display !== 'none') viewUnpaid();
+    } catch (err) {
+      alert(err.message || 'Could not reverse the payment.'); btn.disabled = false;
     }
   }
 
