@@ -239,7 +239,7 @@ function calcActual(exp=[]) {
 // ── Design tokens ─────────────────────────────────────────────────────
 const S  = {
   bg:'#f0e8d0', bgAlt:'#e8dfc4', surface:'#f0e8d0',
-  dark:'#1c1c1a', mid:'#4A4540', muted:'#6b6557',
+  dark:'#1c1c1a', mid:'#4A4540', muted:'#6b6557', green:'#0b1f0e', cream:'#f0e8d0',
   accent:'#c8922a', accentDk:'#b07d20', accentLt:'rgba(200,146,42,.12)',
   border:'#d4c9b0', borderDk:'#c4b898',
   ok:'#5a8a5a', err:'#b04030', warn:'#8a6020',
@@ -280,16 +280,24 @@ const CtrlTA=({value,onChange,placeholder,rows=3,style:st={}})=>(
     style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:0,color:S.dark,padding:'7px 10px',fontFamily:FB,fontSize:'.88rem',outline:'none',width:'100%',resize:'vertical',...st}}/>
 );
 const Lbl=({ch})=><div style={{fontSize:'.65rem',letterSpacing:'.12em',color:S.muted,textTransform:'uppercase',marginBottom:5,fontFamily:FM,fontWeight:500}}>{ch}</div>;
-const Hdr=({title,sub,onBack,right})=>(
-  <div style={{padding:'13px 18px',borderBottom:`1.5px solid ${S.border}`,background:S.surface,flexShrink:0,display:'flex',justifyContent:'space-between',alignItems:'center',position:'sticky',top:0,zIndex:10,boxShadow:'0 1px 4px rgba(28,26,23,.06)'}}>
-    <div style={{display:'flex',alignItems:'center',gap:10}}>
-      {onBack&&<button onClick={onBack} style={{background:'transparent',border:'none',color:S.muted,cursor:'pointer',fontSize:'.82rem',fontFamily:FB}}>← back</button>}
-      <div>
-        <div style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.dark}}>{title}</div>
-        {sub&&<div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{sub}</div>}
+const Hdr=({title,sub,onBack,right,crumb})=>(
+  <div style={{flexShrink:0,position:'sticky',top:0,zIndex:10}}>
+    <div style={{padding:'11px 18px',background:S.green,display:'flex',justifyContent:'space-between',alignItems:'center',gap:12,boxShadow:'0 1px 4px rgba(28,26,23,.15)'}}>
+      <div style={{display:'flex',alignItems:'center',gap:12,minWidth:0}}>
+        {onBack&&<button onClick={onBack} style={{background:'transparent',border:'none',color:'rgba(240,232,208,.82)',cursor:'pointer',fontSize:'.82rem',fontFamily:FB}}>← back</button>}
+        <div style={{minWidth:0}}>
+          <div style={{fontFamily:FB,fontSize:'.55rem',fontWeight:500,letterSpacing:'.24em',textTransform:'uppercase',color:S.accent}}>Carpentry Concierge</div>
+          <div style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.cream,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{title}</div>
+          {sub&&<div style={{fontSize:'.72rem',color:'rgba(240,232,208,.6)',fontFamily:FM,marginTop:1,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{sub}</div>}
+        </div>
       </div>
+      {right||<div/>}
     </div>
-    {right||<div/>}
+    {crumb&&<div style={{padding:'7px 18px',background:S.surface,borderBottom:`1px solid ${S.border}`,fontFamily:FB,fontSize:'.7rem',letterSpacing:'.04em',display:'flex',gap:6,alignItems:'center'}}>
+      <a href="/concierge/directory.html" style={{color:S.muted,textDecoration:'none'}}>Concierge</a><span style={{color:S.borderDk}}>›</span>
+      <a href="/concierge/directory.html#tools" style={{color:S.muted,textDecoration:'none'}}>Tools</a><span style={{color:S.borderDk}}>›</span>
+      <span style={{color:S.dark,fontWeight:600}}>{crumb}</span>
+    </div>}
   </div>
 );
 const MarginBar=({pct,label='Gross margin'})=>{
@@ -504,9 +512,9 @@ function OverheadSettings({ cfg, onSave, onBack }) {
 
   return (
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
-      <Hdr title="Overhead Settings" sub="Your monthly costs → daily rate" onBack={onBack}
+      <Hdr title="Overhead Settings" sub="Your monthly costs → daily rate" onBack={onBack} crumb="Job Pricing"
         right={<div style={{display:'flex',gap:8}}>
-          <Btn ch="Reset defaults" onClick={reset} size="sm" outline/>
+          <Btn ch="Reset defaults" onClick={reset} size="sm" outline color={S.cream}/>
           <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
         </div>}/>
       <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
@@ -651,12 +659,11 @@ function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, on
   const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
   return (
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
-      <Hdr title={session.workshopName} sub="Job Pricing"
+      <Hdr title={session.workshopName} sub="Job Pricing" crumb="Job Pricing"
         right={<div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-          <a href="/concierge/directory.html" style={{color:S.muted,fontSize:'.75rem',fontFamily:FB,textDecoration:'none',padding:'5px 8px',border:`1px solid ${S.border}`}} title="Back to your member area">← Member area</a>
           <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
-          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:`1px solid ${S.border}`,borderRadius:0,color:S.muted,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
-          <button onClick={onLogout} style={{background:'transparent',border:'none',color:S.muted,fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
+          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:0,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
+          <button onClick={onLogout} style={{background:'transparent',border:'none',color:'rgba(240,232,208,.8)',fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
         </div>}/>
       <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
         {['all',...Object.keys(STATUS_META)].map(f=>(
@@ -732,9 +739,9 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
   ];
   return(
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
-      <Hdr title={q.refId} sub={q.client||'New quote'} onBack={onBack}
+      <Hdr title={q.refId} sub={q.client||'New quote'} onBack={onBack} crumb="Job Pricing"
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
-          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:0}}>{sm.label}</span>
+          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:S.cream,padding:'3px 8px',borderRadius:0}}>{sm.label}</span>
           <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
         </div>}/>
       <div style={{display:'flex',borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
