@@ -71,18 +71,20 @@
   // Carpenters carry a skill level + trade specialties; vendors list what they
   // sell in their Storefront. "Interior design" is a specialty (see below) with
   // its own badge, available to either type.
-  var MEMBER_TYPE_LABELS = { carpenter: 'Carpenter', vendor: 'Vendor / Service Provider' };
+  var MEMBER_TYPE_LABELS = { carpenter: 'Carpenter', vendor: 'Vendor / Service Provider', courier: 'Courier / Delivery' };
   var MEMBER_TYPE_ORDER = Object.keys(MEMBER_TYPE_LABELS);
   function memberTypeLabel(key) { return MEMBER_TYPE_LABELS[key] || MEMBER_TYPE_LABELS.carpenter; }
   // Small filled glyphs (Material set) — fill=currentColor.
   var ICON_CARPENTER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>';
   var ICON_VENDOR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>';
   var ICON_INTERIOR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21 10c-.55 0-1 .45-1 1v3H4v-3c0-.55-.45-1-1-1s-1 .45-1 1v5c0 .55.45 1 1 1h18c.55 0 1-.45 1-1v-5c0-.55-.45-1-1-1zm-2-3H5c-1.1 0-2 .9-2 2v1.15c1.16.41 2 1.51 2 2.82V16h14v-2.03c0-1.3.84-2.4 2-2.82V9c0-1.1-.9-2-2-2z"/></svg>';
-  var MEMBER_TYPE_ICONS = { carpenter: ICON_CARPENTER, vendor: ICON_VENDOR };
+  var ICON_COURIER = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 7h-3V5c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2 0 1.66 1.34 3 3 3s3-1.34 3-3h4c0 1.66 1.34 3 3 3s3-1.34 3-3h1c.55 0 1-.45 1-1v-4.34c0-.43-.14-.85-.4-1.19L20.2 7.4c-.28-.25-.66-.4-1.05-.4H19zM7 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm12 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM16 12V8.5h2.5l2 2.5H16z"/></svg>';
+  var MEMBER_TYPE_ICONS = { carpenter: ICON_CARPENTER, vendor: ICON_VENDOR, courier: ICON_COURIER };
   function memberTypeIcon(key) { return MEMBER_TYPE_ICONS[key] || ICON_CARPENTER; }
   var MEMBER_TYPE_COLORS = {
     carpenter: { bg: '#0b1f0e', fg: '#f0e8d0' },
-    vendor:    { bg: '#8a5a2a', fg: '#f0e8d0' }
+    vendor:    { bg: '#8a5a2a', fg: '#f0e8d0' },
+    courier:   { bg: '#2a5a6b', fg: '#f0e8d0' }
   };
   function memberTypeColor(key) { return MEMBER_TYPE_COLORS[key] || MEMBER_TYPE_COLORS.carpenter; }
 
@@ -156,6 +158,13 @@
   var VENDOR_SERVICE_ORDER = Object.keys(VENDOR_SERVICE_LABELS);
   function vendorServiceLabel(k) { return VENDOR_SERVICE_LABELS[k] || k; }
   var VENDOR_SERVICES_MAX = 5;
+
+  // Side hustles — extra gigs any member can opt into. 'deliveries_errands'
+  // subscribes them to buy-for-me pings (the courier pool). Extensible list.
+  var SIDE_HUSTLE_LABELS = { deliveries_errands: 'Deliveries & errands (buy-for-me runs)' };
+  var SIDE_HUSTLE_ORDER = Object.keys(SIDE_HUSTLE_LABELS);
+  function sideHustleLabel(k) { return SIDE_HUSTLE_LABELS[k] || k; }
+  var COVERAGE_MAX_ZONES = 12;
 
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
@@ -444,6 +453,7 @@
     VENDOR_SCALE_LABELS: VENDOR_SCALE_LABELS, VENDOR_SCALE_ORDER: VENDOR_SCALE_ORDER, vendorScaleLabel: vendorScaleLabel,
     VENDOR_CATEGORY_LABELS: VENDOR_CATEGORY_LABELS, VENDOR_CATEGORY_ORDER: VENDOR_CATEGORY_ORDER, vendorCategoryLabel: vendorCategoryLabel,
     VENDOR_SERVICE_LABELS: VENDOR_SERVICE_LABELS, VENDOR_SERVICE_ORDER: VENDOR_SERVICE_ORDER, vendorServiceLabel: vendorServiceLabel, VENDOR_SERVICES_MAX: VENDOR_SERVICES_MAX,
+    SIDE_HUSTLE_LABELS: SIDE_HUSTLE_LABELS, SIDE_HUSTLE_ORDER: SIDE_HUSTLE_ORDER, sideHustleLabel: sideHustleLabel, COVERAGE_MAX_ZONES: COVERAGE_MAX_ZONES,
     contactPhone: contactPhone, telLink: telLink,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,

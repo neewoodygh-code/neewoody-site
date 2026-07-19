@@ -33,6 +33,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   border-radius:3px; padding:.5rem .8rem; cursor:pointer; transition:background .2s,border-color .2s; }
 .tbtn:hover{ background:rgba(240,232,208,.1); border-color:var(--gold); }
 
+/* notifications bell */
+.notif-wrap{ position:relative; }
+.notif-btn{ font-size:.95rem; padding:.4rem .55rem; line-height:1; position:relative; }
+.notif-badge{ position:absolute; top:-6px; right:-6px; min-width:17px; height:17px; padding:0 4px;
+  background:var(--gold); color:#241500; border-radius:9px; font-family:var(--ui); font-size:.62rem; font-weight:600;
+  display:flex; align-items:center; justify-content:center; }
+.notif-panel{ position:absolute; right:0; top:calc(100% + .5rem); width:min(340px,86vw); background:#fff; color:var(--ink);
+  border:1px solid rgba(11,31,14,.12); border-radius:6px; box-shadow:0 18px 44px rgba(0,0,0,.28); z-index:60; overflow:hidden; }
+.notif-head{ display:flex; align-items:center; justify-content:space-between; padding:.7rem .9rem; border-bottom:1px solid rgba(11,31,14,.1);
+  font-family:var(--ui); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.notif-readall{ font-family:var(--ui); font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; color:var(--green);
+  background:transparent; border:none; cursor:pointer; }
+.notif-readall:hover{ color:var(--gold); }
+.notif-list{ max-height:min(420px,64vh); overflow-y:auto; }
+.notif-item{ display:block; width:100%; text-align:left; padding:.7rem .9rem; border-bottom:1px solid rgba(11,31,14,.06);
+  background:transparent; border-left:3px solid transparent; cursor:pointer; }
+.notif-item:hover{ background:var(--cream); }
+.notif-item.unread{ border-left-color:var(--gold); background:rgba(200,146,42,.06); }
+.notif-item .n-title{ font-weight:600; font-size:.9rem; }
+.notif-item .n-body{ font-size:.82rem; color:var(--muted); margin-top:.15rem; line-height:1.4; }
+.notif-item .n-time{ font-size:.68rem; color:var(--muted); margin-top:.25rem; font-family:var(--ui); letter-spacing:.04em; }
+.notif-empty{ padding:1.5rem .9rem; text-align:center; color:var(--muted); font-size:.85rem; }
+.tab-count{ display:inline-block; min-width:16px; padding:0 4px; margin-left:.3rem; background:var(--gold); color:#241500;
+  border-radius:8px; font-size:.6rem; font-weight:700; line-height:16px; text-align:center; vertical-align:middle; }
+.sf-order{ font-family:var(--ui); font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; background:var(--green);
+  color:var(--cream); border:none; border-radius:3px; padding:.4rem .7rem; cursor:pointer; margin-left:.4rem; }
+.sf-order:hover{ background:#12300f; }
+
 /* member-area tabs */
 .tabbar{ position:sticky; top:0; z-index:40; background:var(--green); display:flex; gap:.25rem;
   padding:0 1rem; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
@@ -332,6 +360,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     <div class="name">Members Directory</div>
   </div>
   <div class="top-actions">
+    <div class="notif-wrap">
+      <button class="tbtn notif-btn" id="notifBtn" aria-label="Notifications" aria-haspopup="true">🔔<span class="notif-badge" id="notifBadge" hidden>0</span></button>
+      <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-head"><span>Notifications</span><button class="notif-readall" id="notifReadAll" type="button">Mark all read</button></div>
+        <div class="notif-list" id="notifList"><div class="notif-empty">No notifications yet.</div></div>
+      </div>
+    </div>
     <button class="tbtn" id="editBtn">My profile</button>
     <a class="tbtn" id="adminLink" href="admin.html" style="display:none">Admin</a>
     <button class="tbtn" id="logoutBtn">Log out</button>
@@ -344,6 +379,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="jobs">Jobs</button>
   <button class="tab" data-tab="services">Services</button>
   <button class="tab" data-tab="storefront" id="storefrontTab" hidden>My Storefront</button>
+  <button class="tab" data-tab="orders" id="ordersTab" hidden>Orders <span class="tab-count" id="ordersCount" hidden>0</span></button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
   <button class="tab" data-tab="tutorials">Tutorials <span class="soon">soon</span></button>
@@ -450,9 +486,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     <div class="jobs-head">
       <div class="jh-text">
         <h1>Buy for me</h1>
-        <p>Need materials picked up? Post what you need and a member nearby can buy it and deliver it to you. Agree the budget, their fee, and how you'll pay — MoMo up front or on delivery — on WhatsApp, and keep the receipts.</p>
+        <p>Need materials picked up? Post what you need and a member nearby — a courier, or anyone who runs errands — can buy it and deliver it to you. Agree the budget, their fee, and how you'll pay (MoMo up front or on delivery) on WhatsApp, and keep the receipts.</p>
       </div>
-      <button class="btn-post" id="postBuyBtn" type="button">+ Request a buy</button>
+      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+        <button class="btn-post" id="postBuyBtn" type="button">+ Request a buy</button>
+        <button class="alerts-btn" id="alertsBtnSvc" type="button" style="display:none">🔔 Get alerts for your area</button>
+        <span class="alerts-note" id="alertsNoteSvc"></span>
+      </div>
     </div>
     <div id="buyMine"></div>
     <div id="buyList"></div>
@@ -514,6 +554,16 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <div id="sfItems"></div>
       <button class="btn-post" id="sfAddBtn" type="button">+ Add item</button>
     </div>
+  </div>
+
+  <!-- TAB: Orders (vendor-only) -->
+  <div id="tab-orders" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>Orders</h1>
+      <p>Orders members have placed for items in your storefront. Accept the ones you'll fulfil, then sort out price, payment and delivery with the buyer on WhatsApp. Mark done when it's handled.</p>
+    </div>
+    <div id="ordersList"></div>
+    <div id="ordersState" class="state">Loading orders…</div>
   </div>
 </div>
 
@@ -577,6 +627,20 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <div id="tradesWrap">
         <label>Trades</label>
         <div class="spec-grid" id="specGrid"></div>
+      </div>
+      <!-- Deliveries side-hustle (carpenter/vendor opt-in to buy-for-me pings) -->
+      <div id="sideHustleWrap">
+        <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.5rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+          <input type="checkbox" id="p_sh_delivery" style="width:auto;margin-top:.2rem" />
+          <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">I also do <strong>deliveries &amp; errands</strong> — ping me for buy-for-me requests in my coverage zones</span>
+        </label>
+      </div>
+      <!-- Coverage zones (couriers, or anyone who ticked deliveries) -->
+      <div id="coverageWrap" hidden>
+        <label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— where you'll pick up / deliver; you get buy-for-me pings here</span></label>
+        <div id="coverZones"></div>
+        <button type="button" class="buy-additem" id="coverAddBtn">+ Add a zone</button>
+        <p class="sf-note" style="margin-top:.35rem">Leave empty to use just your home area above.</p>
       </div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
       <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
@@ -656,6 +720,30 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
+<!-- Place an order (buyer → vendor's listed item) -->
+<div class="overlay" id="orderOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2>Place an order</h2><button class="x" id="closeOrderModal" aria-label="Close">×</button></div>
+    <form id="orderForm">
+      <div id="orderItemInfo" class="md-stock" style="margin-bottom:.5rem"></div>
+      <label for="o_qty">Quantity</label>
+      <input id="o_qty" maxlength="40" placeholder="e.g. 3, or 2 sheets" value="1" />
+      <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.6rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+        <input type="checkbox" id="o_deliver" style="width:auto;margin-top:.2rem" />
+        <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">I'd like it delivered <span id="o_deliver_hint" style="color:var(--muted)"></span></span>
+      </label>
+      <div id="o_deliver_fields" hidden>
+        <label for="o_deliver_to">Deliver to</label>
+        <input id="o_deliver_to" maxlength="200" placeholder="Area + landmark, e.g. Spintex, near Shell" />
+      </div>
+      <label for="o_notes">Notes <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <textarea id="o_notes" maxlength="500" placeholder="Colour/spec, when you need it, how you'll pay…"></textarea>
+      <button class="save" id="orderSaveBtn" type="submit">Send order</button>
+      <div class="mmsg" id="omsg"></div>
+    </form>
+  </div>
+</div>
+
 <!-- Storefront item editor (vendors) -->
 <div class="overlay" id="sfOverlay">
   <div class="modal" role="dialog" aria-modal="true">
@@ -683,7 +771,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719g"></script>
+<script src="../js/concierge.js?v=20260719h"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -813,6 +901,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       if (m.services_other) svcParts.push('<span class="chip">' + C.escapeHtml(m.services_other) + '</span>');
       svcChips = svcParts.join('');
     }
+    // Delivery coverage — couriers, and members who do the deliveries side-hustle.
+    var isRunner = m.member_type === 'courier' || (m.side_hustles || []).indexOf('deliveries_errands') >= 0;
+    var coverChips = '';
+    if (isRunner) {
+      var zones = (m.coverage_zones && m.coverage_zones.length) ? m.coverage_zones : (m.area ? [m.area] : []);
+      coverChips = zones.map(function (z) { return '<span class="chip">' + C.escapeHtml(z) + '</span>'; }).join('');
+    }
     document.getElementById('memBody').innerHTML =
       '<div class="md-top">' + photo +
         '<div style="flex:1;min-width:0">' +
@@ -823,6 +918,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
       (chips ? '<div class="md-label">' + chipsTitle + '</div><div class="chips">' + chips + '</div>' : '') +
       (svcChips ? '<div class="md-label">What they do</div><div class="chips">' + svcChips + '</div>' : '') +
+      (coverChips ? '<div class="md-label">' + (m.member_type === 'courier' ? 'Delivery coverage' : 'Also delivers · covers') + '</div><div class="chips">' + coverChips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
         ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
@@ -845,7 +941,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       '<div class="sf-name">' + C.escapeHtml(it.name) + '</div>' +
       (it.price ? '<div class="sf-price">' + C.escapeHtml(it.price) + '</div>' : '') +
       (it.description ? '<div class="sf-desc">' + C.escapeHtml(it.description) + '</div>' : '') +
-      '</div><div class="sf-actions"><a class="sf-dir" href="' + wa + '" target="_blank" rel="noopener">Ask about this</a></div></div>';
+      '</div><div class="sf-actions">' +
+        '<a class="sf-dir" href="' + wa + '" target="_blank" rel="noopener">Ask</a>' +
+        (m.phone === (me && me.phone) ? '' : '<button class="sf-order" type="button" data-item="' + it.id + '">Order</button>') +
+      '</div></div>';
   }
   async function loadMemberStore(m) {
     var el = document.getElementById('memStore'); if (!el) return;
@@ -856,6 +955,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var items = r.items || [];
       if (!items.length) { el.className = 'sf-note'; el.textContent = 'No items listed yet.'; return; }
       el.className = ''; el.innerHTML = '<div class="sf-grid">' + items.map(function (it) { return storeItemCard(m, it); }).join('') + '</div>';
+      var byId = {}; items.forEach(function (it) { byId[it.id] = it; });
+      el.querySelectorAll('.sf-order').forEach(function (b) {
+        b.addEventListener('click', function () { openOrderModal(m, byId[b.getAttribute('data-item')]); });
+      });
     } catch (e) { el.className = 'sf-note'; el.textContent = 'Could not load items.'; }
   }
   function closeMem() { memOverlay.classList.remove('open'); }
@@ -1100,13 +1203,32 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   });
   var carpFields = document.getElementById('carpFields');
   var vendorFields = document.getElementById('vendorFields');
+  var shDelivery = document.getElementById('p_sh_delivery');
+  // coverage-zone repeater (couriers / delivery side-hustlers)
+  var coverZonesWrap = document.getElementById('coverZones');
+  function addCoverZone(val) {
+    if (coverZonesWrap.children.length >= C.COVERAGE_MAX_ZONES) return;
+    var row = document.createElement('div'); row.className = 'buy-item-row';
+    var sel = document.createElement('select'); sel.className = 'bi-name';
+    C.fillZoneSelect(sel, val || '', '— choose a zone —');
+    var del = document.createElement('button'); del.type = 'button'; del.className = 'bi-del'; del.setAttribute('aria-label', 'Remove zone'); del.textContent = '×';
+    del.addEventListener('click', function () { row.remove(); });
+    row.appendChild(sel); row.appendChild(del); coverZonesWrap.appendChild(row);
+  }
+  document.getElementById('coverAddBtn').addEventListener('click', function () { addCoverZone(); });
   function syncTypeFields() {
-    var isCarp = pMemberType.value === 'carpenter';
+    var t = pMemberType.value;
+    var isCarp = t === 'carpenter', isVendor = t === 'vendor', isCourier = t === 'courier';
     carpFields.style.display = isCarp ? '' : 'none';
     document.getElementById('tradesWrap').style.display = isCarp ? '' : 'none';
-    vendorFields.style.display = isCarp ? 'none' : '';
+    vendorFields.style.display = isVendor ? '' : 'none';
+    // Side-hustle opt-in only for non-couriers (couriers do this by definition).
+    document.getElementById('sideHustleWrap').style.display = isCourier ? 'none' : '';
+    // Coverage zones: couriers always; others only if they ticked deliveries.
+    document.getElementById('coverageWrap').hidden = !(isCourier || shDelivery.checked);
   }
   pMemberType.addEventListener('change', syncTypeFields);
+  shDelivery.addEventListener('change', syncTypeFields);
 
   function openModal() {
     if (!me) return;
@@ -1121,6 +1243,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     document.getElementById('p_stock').value = me.stock || '';
     document.getElementById('p_services_other').value = me.services_other || '';
     pVendorScale.value = me.vendor_scale || '';
+    shDelivery.checked = (me.side_hustles || []).indexOf('deliveries_errands') >= 0;
+    coverZonesWrap.innerHTML = '';
+    (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
     renderPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
@@ -1146,11 +1271,18 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   document.getElementById('profileForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var saveBtn = document.getElementById('saveBtn');
-    var isVendorEdit = pMemberType.value === 'vendor';
+    var mtype = pMemberType.value;
+    var isVendorEdit = mtype === 'vendor';
+    var isCarpEdit = mtype === 'carpenter';
+    var isCourierEdit = mtype === 'courier';
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (!isVendorEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    if (isCarpEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    var deliveryOn = isCourierEdit || shDelivery.checked;
+    var coverZones = deliveryOn ? [].slice.call(coverZonesWrap.querySelectorAll('select')).map(function (s) { return s.value; }).filter(Boolean) : [];
+    coverZones = coverZones.filter(function (z, i) { return coverZones.indexOf(z) === i; });
+    var sideHustles = (!isCourierEdit && shDelivery.checked) ? ['deliveries_errands'] : [];
     var hidePhone = document.getElementById('p_hide_phone').checked;
     var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
     if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
@@ -1168,13 +1300,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         vendor_categories: isVendorEdit ? cats : [],
         vendor_services: isVendorEdit ? svcs : [],
         services_other: isVendorEdit ? document.getElementById('p_services_other').value.trim() : '',
+        coverage_zones: coverZones,
+        side_hustles: sideHustles,
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
-        skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',
-        years_experience: pMemberType.value === 'carpenter' && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
-        specialties: isVendorEdit ? [] : specs
+        skill_level: isCarpEdit ? pLvl.value : '',
+        years_experience: isCarpEdit && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
+        specialties: isCarpEdit ? specs : []
       };
       if (newPin) body.pin = newPin;
       var r = await C.api('/me', { method: 'PUT', body: body });
@@ -1352,13 +1486,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'services', 'storefront', 'tools', 'sourcing', 'tutorials'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'tutorials'];
   var jobsLoaded = false;
   var buyLoaded = false;
+  var ordersLoaded = false;
   function showTab(name) {
     if (TABS.indexOf(name) < 0) name = 'directory';
-    // Storefront management is vendor-only
-    if (name === 'storefront' && !(me && me.member_type === 'vendor')) name = 'directory';
+    // Storefront + Orders are vendor-only
+    if ((name === 'storefront' || name === 'orders') && !(me && me.member_type === 'vendor')) name = 'directory';
     TABS.forEach(function (t) {
       document.getElementById('tab-' + t).hidden = (t !== name);
     });
@@ -1374,6 +1509,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
     if (name === 'services' && !buyLoaded) { buyLoaded = true; loadBuy(); }
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
+    if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
   }
@@ -1664,43 +1800,145 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { btn.disabled = false; }
   });
 
-  // ── job alerts (Web Push) ──
-  var alertsBtn = document.getElementById('alertsBtn');
-  var alertsNote = document.getElementById('alertsNote');
+  // ── place an order (buyer → a vendor's listed item) ──
+  var currentOrderVendor = null, currentOrderItem = null;
+  var orderOverlay = document.getElementById('orderOverlay');
+  var omsg = document.getElementById('omsg');
+  function openOrderModal(m, it) {
+    if (!it) return;
+    currentOrderVendor = m; currentOrderItem = it;
+    document.getElementById('orderItemInfo').innerHTML = '<strong>' + C.escapeHtml(it.name) + '</strong>' + (it.price ? ' · ' + C.escapeHtml(it.price) : '') + '<br><span class="sf-note">from ' + C.escapeHtml(C.companyName(m)) + '</span>';
+    document.getElementById('o_qty').value = '1';
+    document.getElementById('o_deliver').checked = false;
+    document.getElementById('o_deliver_fields').hidden = true;
+    document.getElementById('o_deliver_to').value = '';
+    document.getElementById('o_notes').value = '';
+    var offersDelivery = (m.vendor_services || []).indexOf('delivery') >= 0;
+    document.getElementById('o_deliver_hint').textContent = offersDelivery ? '— this shop offers delivery' : '';
+    omsg.textContent = ''; omsg.className = 'mmsg';
+    orderOverlay.classList.add('open');
+  }
+  document.getElementById('o_deliver').addEventListener('change', function () {
+    document.getElementById('o_deliver_fields').hidden = !this.checked;
+  });
+  document.getElementById('closeOrderModal').addEventListener('click', function () { orderOverlay.classList.remove('open'); });
+  orderOverlay.addEventListener('click', function (e) { if (e.target === orderOverlay) orderOverlay.classList.remove('open'); });
+  document.getElementById('orderForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    if (!currentOrderVendor || !currentOrderItem) return;
+    var btn = document.getElementById('orderSaveBtn');
+    var deliver = document.getElementById('o_deliver').checked;
+    var deliverTo = document.getElementById('o_deliver_to').value.trim();
+    if (deliver && !deliverTo) { omsg.className = 'mmsg error'; omsg.textContent = 'Add where to deliver.'; return; }
+    btn.disabled = true; omsg.className = 'mmsg'; omsg.textContent = 'Sending…';
+    try {
+      await C.api('/orders', { method: 'POST', body: {
+        vendor_phone: C.contactPhone(currentOrderVendor),
+        item_id: currentOrderItem.id,
+        qty: document.getElementById('o_qty').value.trim() || '1',
+        deliver_wanted: deliver,
+        deliver_to: deliver ? deliverTo : '',
+        notes: document.getElementById('o_notes').value.trim()
+      }});
+      omsg.className = 'mmsg ok'; omsg.textContent = 'Order sent — the vendor is notified and will reach you on WhatsApp.';
+      setTimeout(function () { orderOverlay.classList.remove('open'); }, 1100);
+    } catch (err) {
+      omsg.className = 'mmsg error'; omsg.textContent = err.message || 'Could not send the order.';
+    } finally { btn.disabled = false; }
+  });
+
+  // ── Orders tab (vendor's incoming orders) ──
+  var ordersListEl = document.getElementById('ordersList');
+  var ordersStateEl = document.getElementById('ordersState');
+  var ordersCountEl = document.getElementById('ordersCount');
+  function updateOrdersBadge(n) {
+    if (n > 0) { ordersCountEl.hidden = false; ordersCountEl.textContent = n > 9 ? '9+' : String(n); }
+    else ordersCountEl.hidden = true;
+  }
+  function orderCard(o) {
+    var el = document.createElement('div'); el.className = 'job-card';
+    var itemsHtml = '<ul class="buy-list">' + (o.items || []).map(function (it) {
+      return '<li>' + C.escapeHtml(it.qty || '1') + ' × ' + C.escapeHtml(it.name) + (it.price ? ' <span class="sf-note">(' + C.escapeHtml(it.price) + ')</span>' : '') + '</li>';
+    }).join('') + '</ul>';
+    var waText = encodeURIComponent('Hi ' + o.buyer_name + ', about your Carpentry Concierge order — ');
+    el.innerHTML =
+      '<div class="job-title">' + C.escapeHtml(o.buyer_name || 'Member') + (o.buyer_business ? ' · ' + C.escapeHtml(o.buyer_business) : '') +
+        ' <span class="job-status ' + (o.status === 'new' ? 'open' : 'filled') + '">' + o.status + '</span></div>' +
+      itemsHtml +
+      (o.deliver_wanted ? '<div class="job-meta">Delivery: ' + C.escapeHtml(o.deliver_to || 'yes') + '</div>' : '') +
+      (o.notes ? '<div class="job-desc">' + C.escapeHtml(o.notes) + '</div>' : '') +
+      '<div class="job-foot"><span class="job-poster"></span>' +
+        '<a class="job-wa" href="' + C.waLink(o.contact_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact buyer</a>' +
+      '</div>';
+    var foot = el.querySelector('.job-foot');
+    function actBtn(label, status, danger) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'job-own-btn' + (danger ? ' danger' : ''); b.textContent = label;
+      b.addEventListener('click', async function () {
+        b.disabled = true;
+        try { await C.api('/orders/' + o.id, { method: 'PUT', body: { status: status } }); await loadOrders(); }
+        catch (err) { alert(err.message || 'Could not update the order.'); b.disabled = false; }
+      });
+      foot.appendChild(b);
+    }
+    if (o.status === 'new') { actBtn('Accept', 'accepted'); actBtn('Decline', 'declined', true); }
+    else if (o.status === 'accepted') { actBtn('Mark done', 'fulfilled'); actBtn('Decline', 'declined', true); }
+    else { actBtn('Reopen', 'new'); }
+    return el;
+  }
+  async function loadOrders() {
+    ordersStateEl.style.display = ''; ordersStateEl.textContent = 'Loading orders…';
+    try {
+      var r = await C.api('/orders');
+      var orders = r.orders || [];
+      ordersListEl.innerHTML = '';
+      orders.forEach(function (o) { ordersListEl.appendChild(orderCard(o)); });
+      if (!orders.length) { ordersStateEl.textContent = 'No orders yet. When a member orders from your storefront, it shows here.'; }
+      else { ordersStateEl.style.display = 'none'; }
+      updateOrdersBadge(orders.filter(function (o) { return o.status === 'new'; }).length);
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      ordersStateEl.textContent = err.message || 'Could not load orders.';
+    }
+  }
+
+  // ── area alerts (Web Push) — one subscription, buttons on Jobs + Services ──
+  var alertsBtns = [].slice.call(document.querySelectorAll('.alerts-btn'));
+  var alertsNotes = [].slice.call(document.querySelectorAll('.alerts-note'));
   var alertsOn = false;
 
   function renderAlertsBtn() {
-    alertsBtn.style.display = '';
-    alertsBtn.classList.toggle('on', alertsOn);
-    alertsBtn.textContent = alertsOn ? '🔔 Area alerts: ON — tap to turn off' : '🔔 Get alerts for your area';
-    alertsNote.textContent = alertsOn
-      ? 'You\'ll be notified when a job or buy request is posted in ' + ((me && me.area) || 'your area') + '.'
-      : '';
+    alertsBtns.forEach(function (b) {
+      b.style.display = '';
+      b.classList.toggle('on', alertsOn);
+      b.textContent = alertsOn ? '🔔 Area alerts: ON — tap to turn off' : '🔔 Get alerts for your area';
+    });
+    alertsNotes.forEach(function (n) {
+      n.textContent = alertsOn
+        ? 'You\'ll be notified when a job or buy request is posted in ' + ((me && me.area) || 'your area') + '.'
+        : '';
+    });
   }
   async function initAlerts() {
-    if (!C.pushSupported()) return; // button stays hidden
+    if (!C.pushSupported()) return; // buttons stay hidden
     try {
       alertsOn = !!(await C.getPushSub('sw.js'));
     } catch (e) { return; }
     renderAlertsBtn();
   }
-  alertsBtn.addEventListener('click', async function () {
-    alertsBtn.disabled = true;
+  async function toggleAlerts() {
+    alertsBtns.forEach(function (b) { b.disabled = true; });
     try {
-      if (alertsOn) {
-        await C.disablePush('sw.js');
-        alertsOn = false;
-      } else {
-        await C.enablePush('sw.js');
-        alertsOn = true;
-      }
+      if (alertsOn) { await C.disablePush('sw.js'); alertsOn = false; }
+      else { await C.enablePush('sw.js'); alertsOn = true; }
       renderAlertsBtn();
     } catch (err) {
-      alertsNote.textContent = err.message === 'permission_denied'
+      var msg = err.message === 'permission_denied'
         ? 'Notifications are blocked — allow them for this site in your browser settings, then try again.'
         : 'Could not set up alerts on this device.';
-    } finally { alertsBtn.disabled = false; }
-  });
+      alertsNotes.forEach(function (n) { n.textContent = msg; });
+    } finally { alertsBtns.forEach(function (b) { b.disabled = false; }); }
+  }
+  alertsBtns.forEach(function (b) { b.addEventListener('click', toggleAlerts); });
 
   // ── what's new since your last visit ──
   // Append an entry (next id, today's date) whenever a member-facing feature
@@ -1721,7 +1959,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
     { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' },
     { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' },
-    { id: 15, date: '2026-07-19', title: 'New: Services · Buy for me', body: 'There\'s a new Services tab. Tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' }
+    { id: 15, date: '2026-07-19', title: 'New: Services · Buy for me', body: 'There\'s a new Services tab. Tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' },
+    { id: 16, date: '2026-07-19', title: 'Notifications bell', body: 'A 🔔 bell now sits top-right. It collects your alerts — new buy requests in your zone, orders on your storefront, and when a vendor accepts your order — even if you never turned on push notifications.' },
+    { id: 17, date: '2026-07-19', title: 'Couriers & delivery runs', body: 'New member type: Courier / Delivery. Couriers set coverage zones and get pinged for buy-for-me requests there. Not a courier? In My profile tick "I also do deliveries & errands" and set your zones to get the same pings.' },
+    { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -1765,12 +2006,63 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     }
   }
 
+  // ── notifications (in-app bell) ──
+  var notifBtn = document.getElementById('notifBtn');
+  var notifPanel = document.getElementById('notifPanel');
+  var notifBadge = document.getElementById('notifBadge');
+  var notifListEl = document.getElementById('notifList');
+  var notifItems = [];
+  function notifTimeAgo(iso) {
+    var t = Date.parse(String(iso || '').replace(' ', 'T') + 'Z'); if (isNaN(t)) return '';
+    var s = Math.floor((Date.now() - t) / 1000);
+    if (s < 60) return 'just now';
+    var m = Math.floor(s / 60); if (m < 60) return m + 'm ago';
+    var h = Math.floor(m / 60); if (h < 24) return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+  function renderNotifs() {
+    var unread = notifItems.filter(function (n) { return !n.read; }).length;
+    if (unread > 0) { notifBadge.hidden = false; notifBadge.textContent = unread > 9 ? '9+' : String(unread); }
+    else notifBadge.hidden = true;
+    if (!notifItems.length) { notifListEl.innerHTML = '<div class="notif-empty">No notifications yet.</div>'; return; }
+    notifListEl.innerHTML = '';
+    notifItems.forEach(function (n) {
+      var it = document.createElement('button'); it.type = 'button'; it.className = 'notif-item' + (n.read ? '' : ' unread');
+      it.innerHTML = '<div class="n-title">' + C.escapeHtml(n.title) + '</div>' +
+        (n.body ? '<div class="n-body">' + C.escapeHtml(n.body) + '</div>' : '') +
+        '<div class="n-time">' + notifTimeAgo(n.created_at) + '</div>';
+      it.addEventListener('click', function () {
+        if (n.link && n.link.charAt(0) === '#') { var t = n.link.slice(1); if (TABS.indexOf(t) >= 0) showTab(t); }
+        if (!n.read) markNotifs([n.id]);
+        notifPanel.hidden = true;
+      });
+      notifListEl.appendChild(it);
+    });
+  }
+  async function fetchNotifs() {
+    try { var r = await C.api('/notifications'); notifItems = r.notifications || []; renderNotifs(); } catch (e) {}
+  }
+  async function markNotifs(ids) {
+    try { await C.api('/notifications/read', { method: 'POST', body: (ids && ids.length ? { ids: ids } : {}) }); } catch (e) {}
+    if (ids && ids.length) { notifItems.forEach(function (n) { if (ids.indexOf(n.id) >= 0) n.read = true; }); }
+    else { notifItems.forEach(function (n) { n.read = true; }); }
+    renderNotifs();
+  }
+  notifBtn.addEventListener('click', function (e) { e.stopPropagation(); notifPanel.hidden = !notifPanel.hidden; });
+  document.addEventListener('click', function (e) { if (!notifPanel.hidden && !e.target.closest('.notif-wrap')) notifPanel.hidden = true; });
+  document.getElementById('notifReadAll').addEventListener('click', function () { markNotifs(); });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchNotifs(); });
+
   async function init() {
     try {
       var meRes = await C.api('/me');
       me = meRes.member;
       if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
-      if (me && me.member_type === 'vendor') document.getElementById('storefrontTab').hidden = false;
+      if (me && me.member_type === 'vendor') {
+        document.getElementById('storefrontTab').hidden = false;
+        document.getElementById('ordersTab').hidden = false;
+        loadOrders(); // populate the Orders badge
+      }
     } catch (err) {
       if (err.status === 401) { location.replace('login.html'); return; }
     }
@@ -1778,6 +2070,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     renderNudge();
     maybeShowWhatsNew();
     initAlerts();
+    fetchNotifs();
   }
   if (location.hash && TABS.indexOf(location.hash.slice(1)) > 0) showTab(location.hash.slice(1));
   init();

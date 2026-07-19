@@ -33,8 +33,13 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 
 // Member identity type — drives the card badge and whether the carpenter skill
 // ladder (apprentice→master) applies. Vendors/interior designers aren't graded.
-const MEMBER_TYPES = ['carpenter', 'vendor'];
+const MEMBER_TYPES = ['carpenter', 'vendor', 'courier'];
 const STOCK_MAX = 1000; // vendor Storefront free-text cap
+// Side hustles any member can opt into. 'deliveries_errands' subscribes them to
+// buy-for-me pings (the courier pool) without being a full courier.
+const SIDE_HUSTLES = ['deliveries_errands'];
+const COVERAGE_MAX_ZONES = 12;
+const ZONE_NAME_MAX = 60;
 // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
 const VENDOR_SCALES = ['stall', 'shop', 'showroom', 'warehouse'];
 // Vendor product categories (what they sell) — Sourcing filter vocabulary.
@@ -61,6 +66,12 @@ const JOBS_MAX_TEXT = { zone: 60, start_when: 40, duration: 40, description: 100
 const BUY_MAX_OPEN_PER_MEMBER = 10;
 const BUY_MAX_ITEMS = 20;
 const BUY_MAX_TEXT = { zone: 60, item: 120, qty: 40, deliver_detail: 200, where_to_buy: 120, budget: 60, needed_by: 60, notes: 1000 };
+
+// Vendor orders caps
+const ORDER_MAX_OPEN_PER_BUYER = 20;
+const ORDER_QTY_MAX = 40;
+const ORDER_DELIVER_MAX = 200;
+const ORDER_NOTES_MAX = 500;
 
 // Public client-job anti-spam (no CAPTCHA yet — phone-keyed throttle).
 const CLIENT_JOB_MAX_PENDING_PER_PHONE = 3;   // outstanding unreviewed
@@ -163,6 +174,16 @@ async function route(request, env, ctx) {
   const mBuy = path.match(/^\/api\/buy-requests\/(\d+)$/);
   if (mBuy && method === 'PUT')    return withAuth(request, env, (m) => updateBuyRequest(request, env, m, Number(mBuy[1])));
   if (mBuy && method === 'DELETE') return withAuth(request, env, (m) => deleteBuyRequest(env, m, Number(mBuy[1])));
+
+  // ---- member: notifications (in-app bell) ----
+  if (path === '/api/notifications' && method === 'GET') return withAuth(request, env, (m) => listNotifications(env, m));
+  if (path === '/api/notifications/read' && method === 'POST') return withAuth(request, env, (m) => markNotificationsRead(request, env, m));
+
+  // ---- vendor orders (order a listed storefront item) ----
+  if (path === '/api/orders' && method === 'POST') return withAuth(request, env, (m) => createOrder(request, env, m, ctx));
+  if (path === '/api/orders' && method === 'GET')  return withAuth(request, env, (m) => listVendorOrders(env, m));
+  const mOrder = path.match(/^\/api\/orders\/(\d+)$/);
+  if (mOrder && method === 'PUT') return withAuth(request, env, (m) => updateOrder(request, env, m, Number(mOrder[1]), ctx));
 
   // ---- member: pricing tool (per-member config + quotes) ----
   if (path === '/api/pricing/config' && method === 'GET') return withAuth(request, env, (m) => getPricingConfig(env, m));
@@ -330,6 +351,16 @@ async function updateMe(request, env, member) {
     fields.vendor_services = vs;
   }
   if ('services_other' in body) fields.services_other = servicesOtherVal(body.services_other);
+  if ('coverage_zones' in body) {
+    const cz = validateCoverageZones(body.coverage_zones);
+    if (cz === false) return json({ error: 'invalid_coverage_zones' }, 400);
+    fields.coverage_zones = cz;
+  }
+  if ('side_hustles' in body) {
+    const sh = validateSideHustles(body.side_hustles);
+    if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
+    fields.side_hustles = sh;
+  }
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -365,7 +396,8 @@ async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone, hide_phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
-            location_lat, location_lng, vendor_scale, vendor_categories, vendor_services, services_other, business_phone
+            location_lat, location_lng, vendor_scale, vendor_categories, vendor_services, services_other,
+            coverage_zones, side_hustles, business_phone
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({
@@ -377,6 +409,8 @@ async function directory(env) {
     specialties: parseSpec(r.specialties),
     vendor_categories: parseSpec(r.vendor_categories),
     vendor_services: parseSpec(r.vendor_services),
+    coverage_zones: parseSpec(r.coverage_zones),
+    side_hustles: parseSpec(r.side_hustles),
     is_business: !!r.is_business,
   })) });
 }
@@ -385,7 +419,7 @@ async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
             skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale,
-            vendor_categories, vendor_services, services_other, business_phone, hide_phone,
+            vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -432,6 +466,10 @@ async function adminCreateMember(request, env) {
   const vendor_services = validateVendorServices(body.vendor_services);
   if (vendor_services === false) return json({ error: 'invalid_services' }, 400);
   const services_other = servicesOtherVal(body.services_other);
+  const coverage_zones = validateCoverageZones(body.coverage_zones);
+  if (coverage_zones === false) return json({ error: 'invalid_coverage_zones' }, 400);
+  const side_hustles = validateSideHustles(body.side_hustles);
+  if (side_hustles === false) return json({ error: 'invalid_side_hustles' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
   const hide_phone = body.hide_phone ? 1 : 0;
@@ -440,12 +478,12 @@ async function adminCreateMember(request, env) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -530,6 +568,16 @@ async function adminUpdateMember(request, env, rawPhone) {
     fields.vendor_services = vs;
   }
   if ('services_other' in body) fields.services_other = servicesOtherVal(body.services_other);
+  if ('coverage_zones' in body) {
+    const cz = validateCoverageZones(body.coverage_zones);
+    if (cz === false) return json({ error: 'invalid_coverage_zones' }, 400);
+    fields.coverage_zones = cz;
+  }
+  if ('side_hustles' in body) {
+    const sh = validateSideHustles(body.side_hustles);
+    if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
+    fields.side_hustles = sh;
+  }
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -585,6 +633,9 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM buy_requests WHERE poster_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM orders WHERE vendor_phone = ? OR buyer_phone = ?').bind(phone, phone),
+    env.DB.prepare('DELETE FROM notifications WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
@@ -776,7 +827,7 @@ async function notifyZone(env, job, opts = {}) {
   for (const row of results) {
     let sub;
     try { sub = JSON.parse(row.sub); } catch { continue; }
-    const status = await sendWebPush(sub, title, body, env);
+    const status = await sendWebPush(sub, title, body, env, '/concierge/directory.html#jobs');
     if (status === 404 || status === 410) {
       await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
     }
@@ -802,6 +853,73 @@ async function pushToAdmins(env, title, body, url) {
       await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
     }
   }
+}
+
+// ── notifications layer (shared) ───────────────────────────────────────
+// Every feature writes here; the in-app bell reads it. Web Push is optional
+// on top, so members who never granted push still see events in the bell.
+
+const NOTIF_LIST_LIMIT = 50;
+
+// Insert one notification row for a member. Never throws (best-effort).
+async function storeNotif(env, phone, n) {
+  try {
+    await env.DB.prepare(
+      `INSERT INTO notifications (member_phone, type, title, body, link) VALUES (?, ?, ?, ?, ?)`
+    ).bind(phone, n.type, n.title, n.body || null, n.link || null).run();
+  } catch (e) { console.error('storeNotif failed:', e && e.message); }
+}
+
+// Push to one specific member's subscribed devices (order placed → vendor,
+// order accepted → buyer, …). Prunes dead subs.
+async function pushToMember(env, phone, title, body, url) {
+  if (!env.VAPID_PRIVATE) return;
+  const { results } = await env.DB.prepare(
+    `SELECT id, sub FROM push_subs WHERE member_phone = ? LIMIT 20`
+  ).bind(phone).all();
+  if (!results || !results.length) return;
+  for (const row of results) {
+    let sub;
+    try { sub = JSON.parse(row.sub); } catch { continue; }
+    const status = await sendWebPush(sub, title, body, env, url || '/concierge/directory.html');
+    if (status === 404 || status === 410) {
+      await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
+    }
+  }
+}
+
+// Store an in-app notification AND fire push — the one-liner every feature uses.
+async function notifyMember(env, phone, n) {
+  await storeNotif(env, phone, n);
+  await pushToMember(env, phone, n.title, n.body || '', n.link ? ('/concierge/directory.html' + n.link) : '/concierge/directory.html');
+}
+
+async function listNotifications(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, type, title, body, link, read, created_at FROM notifications
+     WHERE member_phone = ? ORDER BY id DESC LIMIT ?`
+  ).bind(member.phone, NOTIF_LIST_LIMIT).all();
+  const u = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM notifications WHERE member_phone = ? AND read = 0`
+  ).bind(member.phone).first();
+  return json({
+    notifications: (results || []).map((n) => ({ ...n, read: !!n.read })),
+    unread: (u && u.c) || 0,
+  });
+}
+
+async function markNotificationsRead(request, env, member) {
+  const body = await readJson(request);
+  if (Array.isArray(body.ids) && body.ids.length) {
+    const ids = body.ids.filter((x) => Number.isInteger(x)).slice(0, 200);
+    if (ids.length) {
+      const ph = ids.map(() => '?').join(',');
+      await env.DB.prepare(`UPDATE notifications SET read = 1 WHERE member_phone = ? AND id IN (${ph})`).bind(member.phone, ...ids).run();
+    }
+  } else {
+    await env.DB.prepare(`UPDATE notifications SET read = 1 WHERE member_phone = ? AND read = 0`).bind(member.phone).run();
+  }
+  return json({ ok: true });
 }
 
 // Public client job request. No account; lands `pending`. Anti-spam is a
@@ -894,6 +1012,10 @@ async function publicRegister(request, env, ctx) {
   const vendor_services = validateVendorServices(body.vendor_services);
   if (vendor_services === false) return json({ error: 'invalid_services' }, 400);
   const services_other = servicesOtherVal(body.services_other);
+  const coverage_zones = validateCoverageZones(body.coverage_zones);
+  if (coverage_zones === false) return json({ error: 'invalid_coverage_zones' }, 400);
+  const side_hustles = validateSideHustles(body.side_hustles);
+  if (side_hustles === false) return json({ error: 'invalid_side_hustles' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
   const hide_phone = body.hide_phone ? 1 : 0;
@@ -906,12 +1028,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1126,32 +1248,127 @@ async function deleteBuyRequest(env, member, id) {
   return json({ deleted: true });
 }
 
-// Alert members whose area matches the request's delivery zone (same push
-// subscriptions the jobs board uses). Prunes dead subscriptions.
+// Alert the runner pool for a buy request: couriers + members who opted into the
+// 'deliveries_errands' side-hustle, whose coverage zones (or home area) include
+// the delivery zone. Writes an in-app notification for each (so it lands in the
+// bell even without push) and fires push on top.
 async function notifyBuyZone(env, req, opts = {}) {
-  if (!env.VAPID_PRIVATE) return;
   const exclude = opts.exclude || '';
   const { results } = await env.DB.prepare(
-    `SELECT s.id, s.sub FROM push_subs s
-     JOIN members m ON m.phone = s.member_phone
-     WHERE m.area = ? AND m.status = 'approved' AND m.phone != ?
-     LIMIT ?`
-  ).bind(req.zone, exclude, PUSH_MAX_PER_JOB).all();
+    `SELECT m.phone FROM members m
+     WHERE m.status = 'approved' AND m.phone != ?1
+       AND (m.member_type = 'courier'
+            OR (m.side_hustles IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(m.side_hustles) j WHERE j.value = 'deliveries_errands')))
+       AND (m.area = ?2
+            OR (m.coverage_zones IS NOT NULL AND EXISTS (SELECT 1 FROM json_each(m.coverage_zones) k WHERE k.value = ?2)))
+     LIMIT ?3`
+  ).bind(exclude, req.zone, PUSH_MAX_PER_JOB).all();
   if (!results || !results.length) return;
 
   let firstItem = '';
   try { const items = JSON.parse(req.items) || []; if (items[0]) firstItem = items[0].name; } catch {}
   const title = 'New buy request in ' + req.zone;
-  const body = (firstItem ? firstItem : 'Materials') + ' — a member needs this bought & delivered. Tap to view.';
+  const body = (firstItem ? firstItem : 'Materials') + ' — a member needs this bought & delivered.';
 
   for (const row of results) {
-    let sub;
-    try { sub = JSON.parse(row.sub); } catch { continue; }
-    const status = await sendWebPush(sub, title, body, env);
-    if (status === 404 || status === 410) {
-      await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
-    }
+    await notifyMember(env, row.phone, { type: 'buy_request', title, body, link: '#services' });
   }
+}
+
+// ── vendor orders ──────────────────────────────────────────────────────
+// A member orders a vendor's LISTED storefront item. References only listed
+// items (anti-spam). Vendor gets a bell/push notification; the buyer is
+// notified when the vendor accepts. No money handled — coordinated on WhatsApp.
+
+async function createOrder(request, env, buyer, ctx) {
+  const body = await readJson(request);
+  const handle = normalizePhone(body.vendor_phone);
+  if (!handle) return json({ error: 'invalid_vendor' }, 400);
+  // Resolve by personal OR business number (a hidden vendor is referenced by biz).
+  const vendor = await env.DB.prepare('SELECT phone, name, status FROM members WHERE phone = ? OR business_phone = ?').bind(handle, handle).first();
+  if (!vendor || vendor.status !== 'approved') return json({ error: 'vendor_not_found' }, 404);
+  const vendorPhone = vendor.phone;
+  if (vendorPhone === buyer.phone) return json({ error: 'cannot_order_own' }, 400);
+
+  const itemId = Number(body.item_id);
+  if (!Number.isInteger(itemId)) return json({ error: 'item_required' }, 400);
+  // References a LISTED item belonging to this vendor.
+  const item = await env.DB.prepare('SELECT id, name, price FROM storefront_items WHERE id = ? AND member_phone = ?').bind(itemId, vendorPhone).first();
+  if (!item) return json({ error: 'item_not_found' }, 404);
+
+  const qty = (String(body.qty == null ? '' : body.qty).trim().slice(0, ORDER_QTY_MAX)) || '1';
+  const deliver_wanted = body.deliver_wanted ? 1 : 0;
+  const deliver_to = nullableStr(body.deliver_to);
+  if (deliver_wanted && !deliver_to) return json({ error: 'deliver_to_required' }, 400);
+  if (deliver_to && deliver_to.length > ORDER_DELIVER_MAX) return json({ error: 'deliver_to_too_long' }, 400);
+  const notes = nullableStr(body.notes);
+  if (notes && notes.length > ORDER_NOTES_MAX) return json({ error: 'notes_too_long' }, 400);
+
+  const open = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM orders WHERE buyer_phone = ? AND status IN ('new','accepted')`
+  ).bind(buyer.phone).first();
+  if (open && open.c >= ORDER_MAX_OPEN_PER_BUYER) return json({ error: 'too_many_open_orders', limit: ORDER_MAX_OPEN_PER_BUYER }, 400);
+
+  const items = JSON.stringify([{ item_id: item.id, name: item.name, price: item.price || null, qty }]);
+  const r = await env.DB.prepare(
+    `INSERT INTO orders (vendor_phone, buyer_phone, items, deliver_wanted, deliver_to, notes) VALUES (?, ?, ?, ?, ?, ?)`
+  ).bind(vendorPhone, buyer.phone, items, deliver_wanted, deliver_to, notes).run();
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(r.meta.last_row_id).first();
+
+  const notif = notifyMember(env, vendorPhone, {
+    type: 'order_new', title: 'New order',
+    body: (buyer.name || 'A member') + ' ordered ' + qty + ' × ' + item.name + (deliver_wanted ? ' (delivery)' : ''),
+    link: '#orders',
+  }).catch((e) => console.error('order notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notif);
+
+  return json({ order: row }, 201);
+}
+
+async function listVendorOrders(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT o.id, o.items, o.deliver_wanted, o.deliver_to, o.notes, o.status, o.created_at,
+            b.name AS buyer_name, b.business_name AS buyer_business, b.phone AS buyer_phone, b.business_phone AS buyer_biz_phone
+     FROM orders o JOIN members b ON b.phone = o.buyer_phone
+     WHERE o.vendor_phone = ? ORDER BY (o.status = 'new') DESC, o.id DESC LIMIT 200`
+  ).bind(member.phone).all();
+  const orders = (results || []).map((o) => ({
+    id: o.id,
+    items: (() => { try { return JSON.parse(o.items) || []; } catch { return []; } })(),
+    deliver_wanted: !!o.deliver_wanted, deliver_to: o.deliver_to, notes: o.notes,
+    status: o.status, created_at: o.created_at,
+    buyer_name: o.buyer_name, buyer_business: o.buyer_business,
+    contact_phone: o.buyer_biz_phone || o.buyer_phone,
+  }));
+  return json({ orders });
+}
+
+async function updateOrder(request, env, member, id, ctx) {
+  const order = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+  if (!order) return json({ error: 'not_found' }, 404);
+  if (order.vendor_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+
+  const body = await readJson(request);
+  const status = String(body.status || '');
+  if (!['new', 'accepted', 'fulfilled', 'declined'].includes(status)) return json({ error: 'invalid_status' }, 400);
+  const wasAccepted = order.status === 'accepted';
+
+  await env.DB.prepare(`UPDATE orders SET status = ?, updated_at = datetime('now') WHERE id = ?`).bind(status, id).run();
+
+  // Alert the buyer the first time the vendor accepts.
+  if (status === 'accepted' && !wasAccepted) {
+    let itemName = 'your order';
+    try { const items = JSON.parse(order.items) || []; if (items[0]) itemName = items[0].name; } catch {}
+    const notif = notifyMember(env, order.buyer_phone, {
+      type: 'order_accepted', title: 'Order accepted',
+      body: (member.business_name || member.name || 'The vendor') + ' accepted your order for ' + itemName + " — they'll be in touch.",
+      link: '#sourcing',
+    }).catch((e) => console.error('order accept notify failed:', e && e.message));
+    if (ctx && ctx.waitUntil) ctx.waitUntil(notif);
+  }
+
+  const row = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
+  return json({ order: row });
 }
 
 // ── pricing tool (per-member config + quotes) ──────────────────────────
@@ -1729,6 +1946,22 @@ function servicesOtherVal(v) {
   return s === '' ? null : s.slice(0, SERVICES_OTHER_MAX);
 }
 
+// Coverage zones (courier/runner) — JSON array of non-empty zone strings, capped.
+// '[]' if none; false if present-but-not-array. Zone vocabulary is frontend-only.
+function validateCoverageZones(input) {
+  if (input == null) return '[]';
+  if (!Array.isArray(input)) return false;
+  const clean = [...new Set(input.map((s) => String(s == null ? '' : s).trim()).filter(Boolean).map((s) => s.slice(0, ZONE_NAME_MAX)))].slice(0, COVERAGE_MAX_ZONES);
+  return JSON.stringify(clean);
+}
+
+// Side hustles — curated JSON array. '[]' if none; false if present-but-not-array.
+function validateSideHustles(input) {
+  if (input == null) return '[]';
+  if (!Array.isArray(input)) return false;
+  return JSON.stringify([...new Set(input.map((s) => String(s)).filter((s) => SIDE_HUSTLES.includes(s)))]);
+}
+
 // Optional business/call number. null = cleared; false = invalid; else 233…
 function bizPhone(v) {
   if (v == null || v === '') return null;
@@ -1743,7 +1976,7 @@ function parseSpec(text) {
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
+  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), coverage_zones: parseSpec(m.coverage_zones), side_hustles: parseSpec(m.side_hustles), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
 }
 
 async function recordAttempt(env, phone, success) {

@@ -179,6 +179,12 @@ button.submit:disabled{ opacity:.6; cursor:default; }
           <span style="font-size:.9rem">Hide my personal number — other members reach me on the business number above <span class="opt">(requires a business number)</span></span>
         </label>
       </div>
+      <div class="field" id="r_sh_wrap">
+        <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400">
+          <input type="checkbox" id="r_sh_delivery" style="width:auto;margin-top:.2rem" />
+          <span style="font-size:.9rem">I also do <strong>deliveries &amp; errands</strong> — ping me for buy-for-me requests in my area <span class="opt">(you can set coverage zones later in your profile)</span></span>
+        </label>
+      </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="1">← Back</button>
         <button type="button" class="submit next" data-next="3">Continue →</button>
@@ -221,7 +227,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260719g"></script>
+<script src="../js/concierge.js?v=20260719h"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -247,11 +253,13 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   var rTradesWrap = document.getElementById('r_tradesWrap');
   var rCatsWrap = document.getElementById('r_catsWrap');
   function syncRType() {
-    var isCarp = rType.value === 'carpenter';
+    var t = rType.value;
+    var isCarp = t === 'carpenter', isVendor = t === 'vendor', isCourier = t === 'courier';
     rCarpFields.style.display = isCarp ? '' : 'none';
-    rVendorFields.style.display = isCarp ? 'none' : '';
+    rVendorFields.style.display = isVendor ? '' : 'none';
     rTradesWrap.style.display = isCarp ? '' : 'none';
-    rCatsWrap.style.display = isCarp ? 'none' : '';
+    rCatsWrap.style.display = isVendor ? '' : 'none';
+    var shw = document.getElementById('r_sh_wrap'); if (shw) shw.style.display = isCourier ? 'none' : '';
   }
   rType.addEventListener('change', syncRType); syncRType();
   var catGrid = document.getElementById('r_cats');
@@ -340,6 +348,8 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     var area = document.getElementById('r_area').value;
     var bizPhoneVal = document.getElementById('r_biz_phone').value.trim();
     var hidePhone = document.getElementById('r_hide_phone').checked;
+    var isCourierReg = rType.value === 'courier';
+    var sideHustles = (!isCourierReg && document.getElementById('r_sh_delivery').checked) ? ['deliveries_errands'] : [];
 
     if (!name) { return showErr('Please enter your name.'); }
     if (!phone) { return showErr('Enter a valid Ghana phone number.'); }
@@ -363,13 +373,14 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         vendor_categories: isVendorReg ? cats : [],
         vendor_services: isVendorReg ? svcs : [],
         services_other: isVendorReg ? document.getElementById('r_services_other').value.trim() : '',
+        side_hustles: sideHustles,
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         area: area,
         skill_level: rType.value === 'carpenter' ? lvl.value : '',
         years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,
         availability: avail.value,
-        specialties: isVendorReg ? [] : specs
+        specialties: rType.value === 'carpenter' ? specs : []
       }});
       form.style.display = 'none';
       document.getElementById('regDone').classList.add('show');

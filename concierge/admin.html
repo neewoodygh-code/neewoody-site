@@ -139,6 +139,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Shop size (vendors)</label><select id="a_scale"><option value="">— n/a —</option></select></div>
           <div class="field"><label>Business / call number</label><input id="a_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
           <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a_sh_delivery" style="width:auto"> Does deliveries &amp; errands (buy-for-me pings)</label></div>
+          <div class="field"><label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— couriers/runners; comma-separated</span></label><input id="a_coverage" placeholder="e.g. Spintex, Tema, Madina"></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
           <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
@@ -259,6 +261,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Shop size (vendors)</label><select id="e_scale"><option value="">— n/a —</option></select></div>
       <div class="field"><label>Business / call number</label><input id="e_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
       <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
+      <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_sh_delivery" style="width:auto"> Does deliveries &amp; errands (buy-for-me pings)</label></div>
+      <div class="field"><label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— couriers/runners; comma-separated</span></label><input id="e_coverage" placeholder="e.g. Spintex, Tema, Madina"></div>
       <div class="field"><label>What they sell (vendors)</label><div class="spec-grid" id="e_cats"></div></div>
       <div class="field"><label>What they do — services (vendors, up to 5)</label><div class="spec-grid" id="e_svcs"></div></div>
       <div class="field"><label>Other services (vendors)</label><input id="e_services_other" type="text" maxlength="160" placeholder="Free text, optional"></div>
@@ -276,7 +280,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719g"></script>
+<script src="../js/concierge.js?v=20260719h"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -360,7 +364,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     var phone = C.normalizePhone(document.getElementById('a_phone').value);
     if (!phone) { msg.className = 'msg error'; msg.textContent = 'Enter a valid Ghana phone number.'; return; }
     if (!/^\d{5}$/.test(document.getElementById('a_pin').value)) { msg.className = 'msg error'; msg.textContent = 'PIN must be 5 digits.'; return; }
-    if (aMemberType.value !== 'vendor' && !specs.length) { msg.className = 'msg error'; msg.textContent = 'Choose at least one specialty.'; return; }
+    if (aMemberType.value === 'carpenter' && !specs.length) { msg.className = 'msg error'; msg.textContent = 'Choose at least one specialty.'; return; }
     if (document.getElementById('a_hide_phone').checked && !document.getElementById('a_biz_phone').value.trim()) { msg.className = 'msg error'; msg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Adding…';
     try {
@@ -379,10 +383,12 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         services_other: aMemberType.value === 'vendor' ? document.getElementById('a_services_other').value.trim() : '',
         business_phone: document.getElementById('a_biz_phone').value.trim(),
         hide_phone: document.getElementById('a_hide_phone').checked,
+        side_hustles: document.getElementById('a_sh_delivery').checked ? ['deliveries_errands'] : [],
+        coverage_zones: document.getElementById('a_coverage').value.split(',').map(function (z) { return z.trim(); }).filter(Boolean),
         stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
-        specialties: aMemberType.value === 'vendor' ? [] : specs,
+        specialties: aMemberType.value === 'carpenter' ? specs : [],
         status: document.getElementById('a_status').value,
         role: document.getElementById('a_role').value,
         is_founder: document.getElementById('a_founder').value === '1'
@@ -632,6 +638,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eScale.value = m.vendor_scale || '';
     document.getElementById('e_biz_phone').value = m.business_phone || '';
     document.getElementById('e_hide_phone').checked = !!m.hide_phone;
+    document.getElementById('e_sh_delivery').checked = (m.side_hustles || []).indexOf('deliveries_errands') >= 0;
+    document.getElementById('e_coverage').value = (m.coverage_zones || []).join(', ');
     var eCatSet = new Set(m.vendor_categories || []);
     eCats.querySelectorAll('input').forEach(function (cb) { cb.checked = eCatSet.has(cb.value); });
     var eSvcSet = new Set(m.vendor_services || []);
@@ -651,7 +659,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     if (!editing) return;
     var btn = document.getElementById('editSaveBtn');
     var specs = [].slice.call(eSpecs.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (eMemberType.value !== 'vendor' && !specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
+    if (eMemberType.value === 'carpenter' && !specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
     if (document.getElementById('e_hide_phone').checked && !document.getElementById('e_biz_phone').value.trim()) { emsg.className = 'msg error'; emsg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; emsg.className = 'msg'; emsg.textContent = 'Saving…';
     try {
@@ -663,6 +671,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         vendor_scale: eMemberType.value === 'vendor' ? eScale.value : '',
         business_phone: document.getElementById('e_biz_phone').value.trim(),
         hide_phone: document.getElementById('e_hide_phone').checked,
+        side_hustles: document.getElementById('e_sh_delivery').checked ? ['deliveries_errands'] : [],
+        coverage_zones: document.getElementById('e_coverage').value.split(',').map(function (z) { return z.trim(); }).filter(Boolean),
         vendor_categories: eMemberType.value === 'vendor' ? [].slice.call(eCats.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
         vendor_services: eMemberType.value === 'vendor' ? [].slice.call(eSvcs.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
         services_other: eMemberType.value === 'vendor' ? document.getElementById('e_services_other').value.trim() : '',
@@ -671,7 +681,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         area: document.getElementById('e_area').value,
         skill_level: eLvl.value,
         years_experience: document.getElementById('e_yrs').value.trim() === '' ? null : Number(document.getElementById('e_yrs').value),
-        specialties: eMemberType.value === 'vendor' ? [] : specs
+        specialties: eMemberType.value === 'carpenter' ? specs : []
       }});
       emsg.className = 'msg ok'; emsg.textContent = 'Saved.';
       await loadMembers();
