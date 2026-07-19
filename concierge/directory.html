@@ -523,6 +523,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
       </div>
       <div id="vendorFields">
+        <label for="p_vendor_scale">Shop size</label>
+        <select id="p_vendor_scale"><option value="">— not set —</option></select>
         <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
         <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
       </div>
@@ -607,7 +609,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719d"></script>
+<script src="../js/concierge.js?v=20260719e"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -678,9 +680,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var photo = m.photo_url
       ? '<img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.remove()">'
       : '<div class="initials">' + C.escapeHtml(initials(m.name)) + '</div>';
-    // Carpenters lead their meta with skill level; vendors/designers with their identity.
+    // Carpenters lead with skill level; vendors with their shop size (falling back to identity).
     var ib = C.identityBadge(m);
-    var typeLead = ib.key === 'carpenter' ? C.skillLabel(m.skill_level) : ib.label;
+    var typeLead = m.member_type === 'vendor'
+      ? (C.vendorScaleLabel(m.vendor_scale) || ib.label)
+      : (ib.key === 'carpenter' ? C.skillLabel(m.skill_level) : ib.label);
     var meta = [typeLead, m.area].filter(Boolean).map(C.escapeHtml).join(' · ');
     el.innerHTML =
       '<div class="ph-wrap"><div class="ph">' + photo + '</div>' + typeBadge(m, 'type-badge') + '</div>' +
@@ -710,10 +714,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (lvl && m.years_experience != null) lvl += ' · ' + m.years_experience + ' yrs';
     var av = C.availabilityLabel(m.availability);
     var avGiver = m.availability === 'hiring' || m.availability === 'taking_apprentices';
+    var scale = m.member_type === 'vendor' ? C.vendorScaleLabel(m.vendor_scale) : '';
     var badges =
       '<span class="type-pill" style="background:' + ib.bg + ';color:' + ib.fg + '">' + C.escapeHtml(ib.label) + '</span>' +
       (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
       (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
+      (scale ? '<span class="lvl">' + C.escapeHtml(scale) + '</span>' : '') +
       (av ? '<span class="bdg-av' + (avGiver ? ' giver' : '') + '">' + C.escapeHtml(av) + '</span>' : '');
     var chips = (m.specialties || []).map(function (s) {
       return '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
@@ -973,6 +979,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   C.MEMBER_TYPE_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); pMemberType.appendChild(o);
   });
+  var pVendorScale = document.getElementById('p_vendor_scale');
+  C.VENDOR_SCALE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); pVendorScale.appendChild(o);
+  });
   var carpFields = document.getElementById('carpFields');
   var vendorFields = document.getElementById('vendorFields');
   function syncTypeFields() {
@@ -993,6 +1003,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
     pMemberType.value = me.member_type || 'carpenter';
     document.getElementById('p_stock').value = me.stock || '';
+    pVendorScale.value = me.vendor_scale || '';
     syncTypeFields();
     renderPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
@@ -1024,6 +1035,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         is_business: document.getElementById('p_type').value === '1',
         member_type: pMemberType.value,
         stock: pMemberType.value === 'vendor' ? document.getElementById('p_stock').value.trim() : '',
+        vendor_scale: pMemberType.value === 'vendor' ? pVendorScale.value : '',
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
         skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',

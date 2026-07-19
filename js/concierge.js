@@ -108,6 +108,11 @@
   }
   function mapsDirLink(lat, lng) { return 'https://www.google.com/maps?q=' + lat + ',' + lng; }
 
+  // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
+  var VENDOR_SCALE_LABELS = { stall: 'Stall', shop: 'Shop', showroom: 'Showroom', warehouse: 'Warehouse' };
+  var VENDOR_SCALE_ORDER = Object.keys(VENDOR_SCALE_LABELS);
+  function vendorScaleLabel(k) { return VENDOR_SCALE_LABELS[k] || ''; }
+
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
     { label: 'Greater Accra', zones: [
@@ -392,6 +397,7 @@
     MEMBER_TYPE_COLORS: MEMBER_TYPE_COLORS, memberTypeColor: memberTypeColor,
     identityBadge: identityBadge, companyName: companyName,
     mapEmbedUrl: mapEmbedUrl, mapsDirLink: mapsDirLink,
+    VENDOR_SCALE_LABELS: VENDOR_SCALE_LABELS, VENDOR_SCALE_ORDER: VENDOR_SCALE_ORDER, vendorScaleLabel: vendorScaleLabel,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, uploadPhoto: uploadPhoto,

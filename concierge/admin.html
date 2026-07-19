@@ -129,6 +129,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Business name</label><input id="a_biz" placeholder="Optional"></div>
           <div class="field"><label>Area</label><select id="a_area"></select></div>
           <div class="field"><label>Member type</label><select id="a_member_type"></select></div>
+          <div class="field"><label>Shop size (vendors)</label><select id="a_scale"><option value="">— n/a —</option></select></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
           <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
@@ -243,6 +244,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Name</label><input id="e_name" required></div>
       <div class="field"><label>Business name</label><input id="e_biz" placeholder="Optional"></div>
       <div class="field"><label>Member type</label><select id="e_member_type"></select></div>
+      <div class="field"><label>Shop size (vendors)</label><select id="e_scale"><option value="">— n/a —</option></select></div>
       <div class="field"><label>Account type</label>
         <select id="e_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
       <div class="field"><label>Availability badge</label><select id="e_avail"><option value="">— not shown —</option></select></div>
@@ -257,7 +259,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719d"></script>
+<script src="../js/concierge.js?v=20260719e"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -297,6 +299,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   C.MEMBER_TYPE_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); aMemberType.appendChild(o);
   });
+  var aScale = document.getElementById('a_scale');
+  C.VENDOR_SCALE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); aScale.appendChild(o); });
 
   document.getElementById('a_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
   document.getElementById('p_period').value = currentPeriod();
@@ -336,6 +340,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         years_experience: document.getElementById('a_yrs').value.trim() === '' ? null : Number(document.getElementById('a_yrs').value),
         is_business: document.getElementById('a_type').value === '1',
         member_type: aMemberType.value,
+        vendor_scale: aMemberType.value === 'vendor' ? aScale.value : '',
         stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
@@ -550,6 +555,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   C.MEMBER_TYPE_ORDER.forEach(function (k) {
     var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); eMemberType.appendChild(o);
   });
+  var eScale = document.getElementById('e_scale');
+  C.VENDOR_SCALE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); eScale.appendChild(o); });
   var eSpecs = document.getElementById('e_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -569,6 +576,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eLvl.value = m.skill_level || '';
     document.getElementById('e_yrs').value = m.years_experience != null ? m.years_experience : '';
     eMemberType.value = m.member_type || 'carpenter';
+    eScale.value = m.vendor_scale || '';
     document.getElementById('e_stock').value = m.stock || '';
     var set = new Set(m.specialties || []);
     eSpecs.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
@@ -591,6 +599,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         business_name: document.getElementById('e_biz').value.trim(),
         is_business: document.getElementById('e_type').value === '1',
         member_type: eMemberType.value,
+        vendor_scale: eMemberType.value === 'vendor' ? eScale.value : '',
         stock: document.getElementById('e_stock').value.trim(),
         availability: eAvail.value,
         area: document.getElementById('e_area').value,

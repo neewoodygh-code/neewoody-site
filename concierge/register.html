@@ -155,9 +155,15 @@ button.submit:disabled{ opacity:.6; cursor:default; }
           <input id="r_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="e.g. 8" />
         </div>
       </div>
-      <div class="field" id="r_vendorFields">
-        <label for="r_stock">About your shop <span class="opt">— optional; add items later in your Storefront</span></label>
-        <textarea id="r_stock" placeholder="A short line about your shop — brands you carry, delivery, opening hours…"></textarea>
+      <div id="r_vendorFields">
+        <div class="field">
+          <label for="r_scale">Shop size <span class="opt">— optional</span></label>
+          <select id="r_scale"><option value="">— not set —</option></select>
+        </div>
+        <div class="field">
+          <label for="r_stock">About your shop <span class="opt">— optional; add items later in your Storefront</span></label>
+          <textarea id="r_stock" placeholder="A short line about your shop — brands you carry, delivery, opening hours…"></textarea>
+        </div>
       </div>
       <div class="field">
         <label for="r_avail">Availability <span class="opt">— optional, shows as a badge</span></label>
@@ -197,7 +203,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260719d"></script>
+<script src="../js/concierge.js?v=20260719e"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -216,6 +222,8 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   // member type — skill level only applies to carpenters
   var rType = document.getElementById('r_member_type');
   C.MEMBER_TYPE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); rType.appendChild(o); });
+  var rScale = document.getElementById('r_scale');
+  C.VENDOR_SCALE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); rScale.appendChild(o); });
   var rCarpFields = document.getElementById('r_carpFields');
   var rVendorFields = document.getElementById('r_vendorFields');
   function syncRType() {
@@ -306,6 +314,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         is_business: document.getElementById('r_type').value === '1',
         member_type: rType.value,
         stock: rType.value === 'vendor' ? document.getElementById('r_stock').value.trim() : '',
+        vendor_scale: rType.value === 'vendor' ? rScale.value : '',
         area: area,
         skill_level: rType.value === 'carpenter' ? lvl.value : '',
         years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,

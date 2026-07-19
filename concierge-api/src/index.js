@@ -35,6 +35,8 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 // ladder (apprentice→master) applies. Vendors/interior designers aren't graded.
 const MEMBER_TYPES = ['carpenter', 'vendor'];
 const STOCK_MAX = 1000; // vendor Storefront free-text cap
+// Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
+const VENDOR_SCALES = ['stall', 'shop', 'showroom', 'warehouse'];
 
 // Jobs board caps (notice board, not a scheduler)
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
@@ -279,6 +281,11 @@ async function updateMe(request, env, member) {
       fields.location_lat = la; fields.location_lng = lo;
     }
   }
+  if ('vendor_scale' in body) {
+    const vs = validateVendorScale(body.vendor_scale);
+    if (vs === false) return json({ error: 'invalid_vendor_scale' }, 400);
+    fields.vendor_scale = vs;
+  }
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
   // the owner no longer knows a member's PIN after handing out the initial one.
@@ -301,7 +308,7 @@ async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
-            location_lat, location_lng
+            location_lat, location_lng, vendor_scale
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), is_business: !!r.is_business })) });
@@ -310,7 +317,7 @@ async function directory(env) {
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
-            skill_level, years_experience, is_business, availability, member_type, stock,
+            skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -348,16 +355,18 @@ async function adminCreateMember(request, env) {
   const is_business = body.is_business ? 1 : 0;
   const member_type = validateMemberType(body.member_type);
   if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
+  const vendor_scale = validateVendorScale(body.vendor_scale);
+  if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
 
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock)
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock)
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -420,6 +429,11 @@ async function adminUpdateMember(request, env, rawPhone) {
     fields.member_type = mt || 'carpenter';
   }
   if ('stock' in body) fields.stock = stockVal(body.stock);
+  if ('vendor_scale' in body) {
+    const vs = validateVendorScale(body.vendor_scale);
+    if (vs === false) return json({ error: 'invalid_vendor_scale' }, 400);
+    fields.vendor_scale = vs;
+  }
 
   // PIN reset (admin-only path — the only reset mechanism in Phase 1)
   if ('pin' in body && body.pin != null && body.pin !== '') {
@@ -764,6 +778,8 @@ async function publicRegister(request, env, ctx) {
   if (availability === false) return json({ error: 'invalid_availability' }, 400);
   const member_type = validateMemberType(body.member_type);
   if (member_type === false) return json({ error: 'invalid_member_type' }, 400);
+  const vendor_scale = validateVendorScale(body.vendor_scale);
+  if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
 
   const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (existing) return json({ error: 'member_exists' }, 409);
@@ -772,12 +788,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock)
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1413,6 +1429,11 @@ function validateAvailability(v) {
 function validateMemberType(v) {
   if (v == null || v === '') return null;
   return MEMBER_TYPES.includes(String(v)) ? String(v) : false;
+}
+
+function validateVendorScale(v) {
+  if (v == null || v === '') return null;
+  return VENDOR_SCALES.includes(String(v)) ? String(v) : false;
 }
 
 function parseSpec(text) {
