@@ -451,7 +451,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     </div>
     <div class="filters">
       <select id="srcAreaFilter"><option value="">All areas</option></select>
-      <select id="srcCatFilter"><option value="">All categories</option></select>
+      <select id="srcCatFilter"><option value="">All products</option></select>
+      <select id="srcSvcFilter"><option value="">All services</option></select>
       <input id="srcSearch" type="search" placeholder="Search shop or company…" />
       <span class="count" id="srcCount"></span>
     </div>
@@ -539,8 +540,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <div id="vendorFields">
         <label for="p_vendor_scale">Shop size</label>
         <select id="p_vendor_scale"><option value="">— not set —</option></select>
-        <label>What you sell <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— powers the Sourcing filters</span></label>
+        <label>What you sell <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— products you supply</span></label>
         <div class="spec-grid" id="catGrid"></div>
+        <label>What you do <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— services you offer; up to 5, also Sourcing filters</span></label>
+        <div class="spec-grid" id="svcGrid"></div>
+        <label for="p_services_other">Other services <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; anything not listed above</span></label>
+        <input id="p_services_other" type="text" maxlength="160" placeholder="e.g. CNC cutting, veneering" />
         <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
         <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
       </div>
@@ -627,7 +632,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719f"></script>
+<script src="../js/concierge.js?v=20260719g"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -750,6 +755,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         : '<span class="chip" data-spec="' + C.escapeHtml(s) + '" tabindex="0" role="button">' + C.escapeHtml(C.specialtyLabel(s)) + '</span>';
     }).join('');
     var chipsTitle = isVendor ? 'What they sell' : 'Trades';
+    // Vendor services ("what they do") — curated chips + optional free-text other.
+    var svcChips = '';
+    if (isVendor) {
+      var svcParts = (m.vendor_services || []).map(function (s) { return '<span class="chip">' + C.escapeHtml(C.vendorServiceLabel(s)) + '</span>'; });
+      if (m.services_other) svcParts.push('<span class="chip">' + C.escapeHtml(m.services_other) + '</span>');
+      svcChips = svcParts.join('');
+    }
     document.getElementById('memBody').innerHTML =
       '<div class="md-top">' + photo +
         '<div style="flex:1;min-width:0">' +
@@ -759,6 +771,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       '</div>' +
       (m.area ? '<div class="md-area">' + C.escapeHtml(m.area) + '</div>' : '') +
       (chips ? '<div class="md-label">' + chipsTitle + '</div><div class="chips">' + chips + '</div>' : '') +
+      (svcChips ? '<div class="md-label">What they do</div><div class="chips">' + svcChips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
         ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
@@ -952,6 +965,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
     catGrid.appendChild(l);
   });
+  var svcGrid = document.getElementById('svcGrid');
+  C.VENDOR_SERVICE_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorServiceLabel(k)) + '</span>';
+    svcGrid.appendChild(l);
+  });
+  // Cap services selection at VENDOR_SERVICES_MAX.
+  svcGrid.addEventListener('change', function (e) {
+    if (svcGrid.querySelectorAll('input:checked').length > C.VENDOR_SERVICES_MAX && e.target.checked) {
+      e.target.checked = false;
+      mmsg.className = 'mmsg error'; mmsg.textContent = 'You can pick up to ' + C.VENDOR_SERVICES_MAX + ' services.';
+    }
+  });
 
   // photo upload / remove
   var pprev = document.getElementById('pprev');
@@ -1042,6 +1068,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
     pMemberType.value = me.member_type || 'carpenter';
     document.getElementById('p_stock').value = me.stock || '';
+    document.getElementById('p_services_other').value = me.services_other || '';
     pVendorScale.value = me.vendor_scale || '';
     syncTypeFields();
     renderPreview();
@@ -1052,6 +1079,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     document.getElementById('p_hide_phone').checked = !!me.hide_phone;
     var catSet = new Set(me.vendor_categories || []);
     catGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = catSet.has(cb.value); });
+    var svcSet = new Set(me.vendor_services || []);
+    svcGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = svcSet.has(cb.value); });
     document.getElementById('p_pin').value = '';
     mmsg.textContent = ''; mmsg.className = 'mmsg';
     overlay.classList.add('open');
@@ -1069,6 +1098,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var isVendorEdit = pMemberType.value === 'vendor';
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     if (!isVendorEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
     var hidePhone = document.getElementById('p_hide_phone').checked;
     var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
@@ -1085,6 +1115,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         stock: isVendorEdit ? document.getElementById('p_stock').value.trim() : '',
         vendor_scale: isVendorEdit ? pVendorScale.value : '',
         vendor_categories: isVendorEdit ? cats : [],
+        vendor_services: isVendorEdit ? svcs : [],
+        services_other: isVendorEdit ? document.getElementById('p_services_other').value.trim() : '',
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         availability: pAvail.value,
@@ -1120,11 +1152,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
   function renderSourcing() {
     var vendors = all.filter(function (m) { return m.member_type === 'vendor'; });
-    var a = srcAreaFilter.value, cat = srcCatFilter.value, q = srcSearch.value.trim().toLowerCase();
+    var a = srcAreaFilter.value, cat = srcCatFilter.value, svc = srcSvcFilter.value, q = srcSearch.value.trim().toLowerCase();
     var list = vendors.filter(function (m) {
       if (a && m.area !== a) return false;
       if (cat && (m.vendor_categories || []).indexOf(cat) < 0) return false;
-      if (q) { var hay = (C.companyName(m) + ' ' + (m.name || '') + ' ' + (m.stock || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
+      if (svc && (m.vendor_services || []).indexOf(svc) < 0) return false;
+      if (q) { var hay = (C.companyName(m) + ' ' + (m.name || '') + ' ' + (m.stock || '') + ' ' + (m.services_other || '')).toLowerCase(); if (hay.indexOf(q) < 0) return false; }
       return true;
     });
     srcGrid.innerHTML = '';
@@ -1136,8 +1169,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
   var srcCatFilter = document.getElementById('srcCatFilter');
   C.VENDOR_CATEGORY_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorCategoryLabel(k); srcCatFilter.appendChild(o); });
+  var srcSvcFilter = document.getElementById('srcSvcFilter');
+  C.VENDOR_SERVICE_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.vendorServiceLabel(k); srcSvcFilter.appendChild(o); });
   srcAreaFilter.addEventListener('change', renderSourcing);
   srcCatFilter.addEventListener('change', renderSourcing);
+  srcSvcFilter.addEventListener('change', renderSourcing);
   srcSearch.addEventListener('input', renderSourcing);
 
   // ── My Storefront: a vendor manages their items, blurb & shop location ──
@@ -1488,7 +1524,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' },
     { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' },
     { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
-    { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' }
+    { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' },
+    { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

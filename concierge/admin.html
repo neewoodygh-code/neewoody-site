@@ -250,6 +250,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Business / call number</label><input id="e_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
       <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
       <div class="field"><label>What they sell (vendors)</label><div class="spec-grid" id="e_cats"></div></div>
+      <div class="field"><label>What they do — services (vendors, up to 5)</label><div class="spec-grid" id="e_svcs"></div></div>
+      <div class="field"><label>Other services (vendors)</label><input id="e_services_other" type="text" maxlength="160" placeholder="Free text, optional"></div>
       <div class="field"><label>Account type</label>
         <select id="e_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
       <div class="field"><label>Availability badge</label><select id="e_avail"><option value="">— not shown —</option></select></div>
@@ -264,7 +266,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719f"></script>
+<script src="../js/concierge.js?v=20260719g"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -571,6 +573,15 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     l.innerHTML = '<input type="checkbox" value="' + k + '"> ' + C.escapeHtml(C.vendorCategoryLabel(k));
     eCats.appendChild(l);
   });
+  var eSvcs = document.getElementById('e_svcs');
+  C.VENDOR_SERVICE_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> ' + C.escapeHtml(C.vendorServiceLabel(k));
+    eSvcs.appendChild(l);
+  });
+  eSvcs.addEventListener('change', function (e) {
+    if (eSvcs.querySelectorAll('input:checked').length > C.VENDOR_SERVICES_MAX && e.target.checked) { e.target.checked = false; }
+  });
   var eSpecs = document.getElementById('e_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
     var l = document.createElement('label'); l.className = 'cb';
@@ -595,6 +606,9 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     document.getElementById('e_hide_phone').checked = !!m.hide_phone;
     var eCatSet = new Set(m.vendor_categories || []);
     eCats.querySelectorAll('input').forEach(function (cb) { cb.checked = eCatSet.has(cb.value); });
+    var eSvcSet = new Set(m.vendor_services || []);
+    eSvcs.querySelectorAll('input').forEach(function (cb) { cb.checked = eSvcSet.has(cb.value); });
+    document.getElementById('e_services_other').value = m.services_other || '';
     document.getElementById('e_stock').value = m.stock || '';
     var set = new Set(m.specialties || []);
     eSpecs.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
@@ -622,6 +636,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         business_phone: document.getElementById('e_biz_phone').value.trim(),
         hide_phone: document.getElementById('e_hide_phone').checked,
         vendor_categories: eMemberType.value === 'vendor' ? [].slice.call(eCats.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
+        vendor_services: eMemberType.value === 'vendor' ? [].slice.call(eSvcs.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
+        services_other: eMemberType.value === 'vendor' ? document.getElementById('e_services_other').value.trim() : '',
         stock: document.getElementById('e_stock').value.trim(),
         availability: eAvail.value,
         area: document.getElementById('e_area').value,

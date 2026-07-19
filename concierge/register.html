@@ -192,8 +192,12 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         <div class="spec-grid" id="r_specs"></div>
       </div>
       <div class="field" id="r_catsWrap">
-        <label>What you sell <span class="opt">— pick all that apply</span></label>
+        <label>What you sell <span class="opt">— products you supply</span></label>
         <div class="spec-grid" id="r_cats"></div>
+        <label style="margin-top:1rem">What you do <span class="opt">— services you offer; up to 5, also Sourcing filters</span></label>
+        <div class="spec-grid" id="r_svcs"></div>
+        <label for="r_services_other" style="margin-top:1rem">Other services <span class="opt">— optional; anything not listed</span></label>
+        <input id="r_services_other" type="text" maxlength="160" placeholder="e.g. CNC cutting, veneering" />
       </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="2">← Back</button>
@@ -217,7 +221,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20260719f"></script>
+<script src="../js/concierge.js?v=20260719g"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -255,6 +259,17 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     var l = document.createElement('label'); l.className = 'cb';
     l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
     catGrid.appendChild(l);
+  });
+  var svcGrid = document.getElementById('r_svcs');
+  C.VENDOR_SERVICE_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorServiceLabel(k)) + '</span>';
+    svcGrid.appendChild(l);
+  });
+  svcGrid.addEventListener('change', function (e) {
+    if (svcGrid.querySelectorAll('input:checked').length > C.VENDOR_SERVICES_MAX && e.target.checked) {
+      e.target.checked = false; showErr('You can pick up to ' + C.VENDOR_SERVICES_MAX + ' services.');
+    }
   });
   var specGrid = document.getElementById('r_specs');
   C.SPECIALTY_ORDER.forEach(function (k) {
@@ -321,6 +336,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     var isVendorReg = rType.value === 'vendor';
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var area = document.getElementById('r_area').value;
     var bizPhoneVal = document.getElementById('r_biz_phone').value.trim();
     var hidePhone = document.getElementById('r_hide_phone').checked;
@@ -345,6 +361,8 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         stock: isVendorReg ? document.getElementById('r_stock').value.trim() : '',
         vendor_scale: isVendorReg ? rScale.value : '',
         vendor_categories: isVendorReg ? cats : [],
+        vendor_services: isVendorReg ? svcs : [],
+        services_other: isVendorReg ? document.getElementById('r_services_other').value.trim() : '',
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         area: area,

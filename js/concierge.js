@@ -92,7 +92,8 @@
   function identityBadge(m) {
     var specs = (m && m.specialties) || [];
     var cats = (m && m.vendor_categories) || [];
-    if (specs.indexOf('interior_design') >= 0 || cats.indexOf('interior_design') >= 0) {
+    var svcs = (m && m.vendor_services) || [];
+    if (specs.indexOf('interior_design') >= 0 || cats.indexOf('interior_design') >= 0 || svcs.indexOf('interior_design') >= 0) {
       return { key: 'interior_design', label: 'Interior Designer', icon: ICON_INTERIOR, bg: '#c8922a', fg: '#241500' };
     }
     var t = (m && m.member_type) || 'carpenter';
@@ -132,8 +133,29 @@
     interior_design: 'Interior design & installation',
     other: 'Other'
   };
-  var VENDOR_CATEGORY_ORDER = Object.keys(VENDOR_CATEGORY_LABELS);
+  // interior_design kept in LABELS for rendering legacy data, but excluded from
+  // the picker/filter ORDER — it now lives under vendor services ("what you do").
+  var VENDOR_CATEGORY_ORDER = ['materials', 'hardware', 'tools_machinery', 'tooling_consumables', 'finishes', 'interior_decor', 'lighting', 'glass_alu_stone', 'upholstery_supplies', 'other'];
   function vendorCategoryLabel(k) { return VENDOR_CATEGORY_LABELS[k] || k; }
+
+  // Vendor services — what they DO (a second axis from products). Curated so
+  // they double as clean Sourcing filters; a free-text services_other captures
+  // anything off-list (shown on the profile, not a filter). interior_design
+  // here also fires the Interior Designer badge.
+  var VENDOR_SERVICE_LABELS = {
+    interior_design: 'Interior design',
+    installation: 'Installation & fitting',
+    delivery: 'Delivery',
+    custom_fabrication: 'Custom fabrication',
+    repairs: 'Repairs & refurbishment',
+    consultation: 'Consultation & measurement',
+    spraying_finishing: 'Spraying & finishing',
+    upholstery: 'Upholstery',
+    rental: 'Rental & hire'
+  };
+  var VENDOR_SERVICE_ORDER = Object.keys(VENDOR_SERVICE_LABELS);
+  function vendorServiceLabel(k) { return VENDOR_SERVICE_LABELS[k] || k; }
+  var VENDOR_SERVICES_MAX = 5;
 
   // Area vocabulary: Greater Accra zones first, then every other region.
   var ZONE_GROUPS = [
@@ -421,6 +443,7 @@
     mapEmbedUrl: mapEmbedUrl, mapsDirLink: mapsDirLink,
     VENDOR_SCALE_LABELS: VENDOR_SCALE_LABELS, VENDOR_SCALE_ORDER: VENDOR_SCALE_ORDER, vendorScaleLabel: vendorScaleLabel,
     VENDOR_CATEGORY_LABELS: VENDOR_CATEGORY_LABELS, VENDOR_CATEGORY_ORDER: VENDOR_CATEGORY_ORDER, vendorCategoryLabel: vendorCategoryLabel,
+    VENDOR_SERVICE_LABELS: VENDOR_SERVICE_LABELS, VENDOR_SERVICE_ORDER: VENDOR_SERVICE_ORDER, vendorServiceLabel: vendorServiceLabel, VENDOR_SERVICES_MAX: VENDOR_SERVICES_MAX,
     contactPhone: contactPhone, telLink: telLink,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,

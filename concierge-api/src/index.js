@@ -38,11 +38,20 @@ const STOCK_MAX = 1000; // vendor Storefront free-text cap
 // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
 const VENDOR_SCALES = ['stall', 'shop', 'showroom', 'warehouse'];
 // Vendor product categories (what they sell) — Sourcing filter vocabulary.
+// interior_design kept for legacy data; new saves route it to vendor services.
 const VENDOR_CATEGORIES = [
   'materials', 'hardware', 'tools_machinery', 'tooling_consumables', 'finishes',
   'interior_decor', 'lighting', 'glass_alu_stone', 'upholstery_supplies',
   'interior_design', 'other',
 ];
+// Vendor services (what they do) — a second axis; curated so they double as
+// Sourcing filters. services_other (free text) captures anything off-list.
+const VENDOR_SERVICES = [
+  'interior_design', 'installation', 'delivery', 'custom_fabrication', 'repairs',
+  'consultation', 'spraying_finishing', 'upholstery', 'rental',
+];
+const VENDOR_SERVICES_MAX = 5;
+const SERVICES_OTHER_MAX = 160;
 
 // Jobs board caps (notice board, not a scheduler)
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
@@ -303,6 +312,12 @@ async function updateMe(request, env, member) {
     if (vc === false) return json({ error: 'invalid_categories' }, 400);
     fields.vendor_categories = vc;
   }
+  if ('vendor_services' in body) {
+    const vs = validateVendorServices(body.vendor_services);
+    if (vs === false) return json({ error: 'invalid_services' }, 400);
+    fields.vendor_services = vs;
+  }
+  if ('services_other' in body) fields.services_other = servicesOtherVal(body.services_other);
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -338,7 +353,7 @@ async function directory(env) {
   const { results } = await env.DB.prepare(
     `SELECT name, business_name, area, specialties, photo_url, phone, hide_phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
-            location_lat, location_lng, vendor_scale, vendor_categories, business_phone
+            location_lat, location_lng, vendor_scale, vendor_categories, vendor_services, services_other, business_phone
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({
@@ -349,6 +364,7 @@ async function directory(env) {
     hide_phone: !!r.hide_phone,
     specialties: parseSpec(r.specialties),
     vendor_categories: parseSpec(r.vendor_categories),
+    vendor_services: parseSpec(r.vendor_services),
     is_business: !!r.is_business,
   })) });
 }
@@ -357,7 +373,7 @@ async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
             skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale,
-            vendor_categories, business_phone, hide_phone,
+            vendor_categories, vendor_services, services_other, business_phone, hide_phone,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -401,6 +417,9 @@ async function adminCreateMember(request, env) {
   if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
   const vendor_categories = validateVendorCategories(body.vendor_categories);
   if (vendor_categories === false) return json({ error: 'invalid_categories' }, 400);
+  const vendor_services = validateVendorServices(body.vendor_services);
+  if (vendor_services === false) return json({ error: 'invalid_services' }, 400);
+  const services_other = servicesOtherVal(body.services_other);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
   const hide_phone = body.hide_phone ? 1 : 0;
@@ -409,12 +428,12 @@ async function adminCreateMember(request, env) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone, hide_phone)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone, hide_phone
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -493,6 +512,12 @@ async function adminUpdateMember(request, env, rawPhone) {
     if (vc === false) return json({ error: 'invalid_categories' }, 400);
     fields.vendor_categories = vc;
   }
+  if ('vendor_services' in body) {
+    const vs = validateVendorServices(body.vendor_services);
+    if (vs === false) return json({ error: 'invalid_services' }, 400);
+    fields.vendor_services = vs;
+  }
+  if ('services_other' in body) fields.services_other = servicesOtherVal(body.services_other);
   if ('business_phone' in body) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -854,6 +879,9 @@ async function publicRegister(request, env, ctx) {
   if (vendor_scale === false) return json({ error: 'invalid_vendor_scale' }, 400);
   const vendor_categories = validateVendorCategories(body.vendor_categories);
   if (vendor_categories === false) return json({ error: 'invalid_categories' }, 400);
+  const vendor_services = validateVendorServices(body.vendor_services);
+  if (vendor_services === false) return json({ error: 'invalid_services' }, 400);
+  const services_other = servicesOtherVal(body.services_other);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
   const hide_phone = body.hide_phone ? 1 : 0;
@@ -866,12 +894,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone, hide_phone)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone, hide_phone
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, business_phone, hide_phone
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1527,6 +1555,22 @@ function validateVendorCategories(input) {
   return JSON.stringify(input.filter((s) => VENDOR_CATEGORIES.includes(String(s))));
 }
 
+// Vendor services ("what they do"): curated keys, capped. '[]' if none; false
+// if present-but-not-array. Optional.
+function validateVendorServices(input) {
+  if (input == null) return '[]';
+  if (!Array.isArray(input)) return false;
+  const clean = [...new Set(input.map((s) => String(s)).filter((s) => VENDOR_SERVICES.includes(s)))].slice(0, VENDOR_SERVICES_MAX);
+  return JSON.stringify(clean);
+}
+
+// Free-text "other services" line — trimmed + length-capped. null when empty.
+function servicesOtherVal(v) {
+  if (v == null) return null;
+  const s = String(v).trim();
+  return s === '' ? null : s.slice(0, SERVICES_OTHER_MAX);
+}
+
 // Optional business/call number. null = cleared; false = invalid; else 233…
 function bizPhone(v) {
   if (v == null || v === '') return null;
@@ -1541,7 +1585,7 @@ function parseSpec(text) {
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
+  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
 }
 
 async function recordAttempt(env, phone, success) {
