@@ -131,6 +131,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Member type</label><select id="a_member_type"></select></div>
           <div class="field"><label>Shop size (vendors)</label><select id="a_scale"><option value="">— n/a —</option></select></div>
           <div class="field"><label>Business / call number</label><input id="a_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
+          <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
           <div class="field"><label>Years of experience</label><input id="a_yrs" type="number" inputmode="numeric" min="0" max="70" placeholder="Optional"></div>
@@ -247,6 +248,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Member type</label><select id="e_member_type"></select></div>
       <div class="field"><label>Shop size (vendors)</label><select id="e_scale"><option value="">— n/a —</option></select></div>
       <div class="field"><label>Business / call number</label><input id="e_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
+      <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
       <div class="field"><label>What they sell (vendors)</label><div class="spec-grid" id="e_cats"></div></div>
       <div class="field"><label>Account type</label>
         <select id="e_type"><option value="">Individual carpenter / apprentice</option><option value="1">Business</option></select></div>
@@ -332,6 +334,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     if (!phone) { msg.className = 'msg error'; msg.textContent = 'Enter a valid Ghana phone number.'; return; }
     if (!/^\d{5}$/.test(document.getElementById('a_pin').value)) { msg.className = 'msg error'; msg.textContent = 'PIN must be 5 digits.'; return; }
     if (!specs.length) { msg.className = 'msg error'; msg.textContent = 'Choose at least one specialty.'; return; }
+    if (document.getElementById('a_hide_phone').checked && !document.getElementById('a_biz_phone').value.trim()) { msg.className = 'msg error'; msg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; msg.className = 'msg'; msg.textContent = 'Adding…';
     try {
       await C.api('/admin/members', { method: 'POST', body: {
@@ -345,6 +348,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         member_type: aMemberType.value,
         vendor_scale: aMemberType.value === 'vendor' ? aScale.value : '',
         business_phone: document.getElementById('a_biz_phone').value.trim(),
+        hide_phone: document.getElementById('a_hide_phone').checked,
         stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
         pin: document.getElementById('a_pin').value,
@@ -588,6 +592,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eMemberType.value = m.member_type || 'carpenter';
     eScale.value = m.vendor_scale || '';
     document.getElementById('e_biz_phone').value = m.business_phone || '';
+    document.getElementById('e_hide_phone').checked = !!m.hide_phone;
     var eCatSet = new Set(m.vendor_categories || []);
     eCats.querySelectorAll('input').forEach(function (cb) { cb.checked = eCatSet.has(cb.value); });
     document.getElementById('e_stock').value = m.stock || '';
@@ -605,6 +610,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     var btn = document.getElementById('editSaveBtn');
     var specs = [].slice.call(eSpecs.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     if (!specs.length) { emsg.className = 'msg error'; emsg.textContent = 'Choose at least one trade.'; return; }
+    if (document.getElementById('e_hide_phone').checked && !document.getElementById('e_biz_phone').value.trim()) { emsg.className = 'msg error'; emsg.textContent = 'Add a business number before hiding the personal number.'; return; }
     btn.disabled = true; emsg.className = 'msg'; emsg.textContent = 'Saving…';
     try {
       await C.api('/admin/members/' + encodeURIComponent(editing.phone), { method: 'PUT', body: {
@@ -614,6 +620,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         member_type: eMemberType.value,
         vendor_scale: eMemberType.value === 'vendor' ? eScale.value : '',
         business_phone: document.getElementById('e_biz_phone').value.trim(),
+        hide_phone: document.getElementById('e_hide_phone').checked,
         vendor_categories: eMemberType.value === 'vendor' ? [].slice.call(eCats.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
         stock: document.getElementById('e_stock').value.trim(),
         availability: eAvail.value,

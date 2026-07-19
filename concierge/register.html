@@ -173,6 +173,12 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         <label for="r_biz_phone">Business / call number <span class="opt">— optional; shown instead of your login number</span></label>
         <input id="r_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
       </div>
+      <div class="field">
+        <label style="display:flex;align-items:flex-start;gap:.5rem;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400">
+          <input type="checkbox" id="r_hide_phone" style="width:auto;margin-top:.2rem" />
+          <span style="font-size:.9rem">Hide my personal number — other members reach me on the business number above <span class="opt">(requires a business number)</span></span>
+        </label>
+      </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="1">← Back</button>
         <button type="button" class="submit next" data-next="3">Continue →</button>
@@ -316,12 +322,15 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var area = document.getElementById('r_area').value;
+    var bizPhoneVal = document.getElementById('r_biz_phone').value.trim();
+    var hidePhone = document.getElementById('r_hide_phone').checked;
 
     if (!name) { return showErr('Please enter your name.'); }
     if (!phone) { return showErr('Enter a valid Ghana phone number.'); }
     if (!/^\d{5}$/.test(pin)) { return showErr('Your PIN must be exactly 5 digits.'); }
     if (pin !== pin2) { return showErr('The two PINs don\'t match — please re-enter them.'); }
     if (!area) { return showErr('Choose your area.'); }
+    if (hidePhone && !bizPhoneVal) { return showErr('Add a business / call number before hiding your personal number.'); }
     if (rType.value === 'carpenter' && !specs.length) { return showErr('Choose at least one trade.'); }
 
     btn.disabled = true; btn.textContent = 'Submitting…';
@@ -336,7 +345,8 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         stock: isVendorReg ? document.getElementById('r_stock').value.trim() : '',
         vendor_scale: isVendorReg ? rScale.value : '',
         vendor_categories: isVendorReg ? cats : [],
-        business_phone: document.getElementById('r_biz_phone').value.trim(),
+        business_phone: bizPhoneVal,
+        hide_phone: hidePhone,
         area: area,
         skill_level: rType.value === 'carpenter' ? lvl.value : '',
         years_experience: rType.value === 'carpenter' && document.getElementById('r_yrs').value.trim() !== '' ? Number(document.getElementById('r_yrs').value) : null,

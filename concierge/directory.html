@@ -524,6 +524,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <select id="p_avail"><option value="">— not shown —</option></select>
       <label for="p_biz_phone">Business / call number <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown to others instead of your login number</span></label>
       <input id="p_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
+      <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.5rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+        <input type="checkbox" id="p_hide_phone" style="width:auto;margin-top:.2rem" />
+        <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">Hide my personal number — other members reach me on my business number only <span style="color:var(--muted)">(requires a business number above)</span></span>
+      </label>
       <label for="p_area">Area</label>
       <select id="p_area"></select>
       <div id="carpFields">
@@ -782,7 +786,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   async function loadMemberStore(m) {
     var el = document.getElementById('memStore'); if (!el) return;
     try {
-      var r = await C.api('/storefront/' + encodeURIComponent(m.phone));
+      // Use the contact handle (business number when the personal one is hidden)
+      // — the API resolves a storefront by personal OR business phone.
+      var r = await C.api('/storefront/' + encodeURIComponent(C.contactPhone(m)));
       var items = r.items || [];
       if (!items.length) { el.className = 'sf-note'; el.textContent = 'No items listed yet.'; return; }
       el.className = ''; el.innerHTML = '<div class="sf-grid">' + items.map(function (it) { return storeItemCard(m, it); }).join('') + '</div>';
@@ -1043,6 +1049,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var set = new Set(me.specialties || []);
     specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
     document.getElementById('p_biz_phone').value = me.business_phone || '';
+    document.getElementById('p_hide_phone').checked = !!me.hide_phone;
     var catSet = new Set(me.vendor_categories || []);
     catGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = catSet.has(cb.value); });
     document.getElementById('p_pin').value = '';
@@ -1063,6 +1070,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     if (!isVendorEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    var hidePhone = document.getElementById('p_hide_phone').checked;
+    var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
+    if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
     var newPin = document.getElementById('p_pin').value;
     if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
     saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
@@ -1075,7 +1085,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         stock: isVendorEdit ? document.getElementById('p_stock').value.trim() : '',
         vendor_scale: isVendorEdit ? pVendorScale.value : '',
         vendor_categories: isVendorEdit ? cats : [],
-        business_phone: document.getElementById('p_biz_phone').value.trim(),
+        business_phone: bizPhoneVal,
+        hide_phone: hidePhone,
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
         skill_level: pMemberType.value === 'carpenter' ? pLvl.value : '',
@@ -1476,7 +1487,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
     { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' },
     { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' },
-    { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' }
+    { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
+    { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

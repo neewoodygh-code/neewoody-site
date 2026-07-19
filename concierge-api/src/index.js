@@ -302,6 +302,14 @@ async function updateMe(request, env, member) {
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
     fields.business_phone = bp;
   }
+  // Hide personal (login) number — only allowed when a business number exists,
+  // so members always keep a reachable contact channel.
+  if ('hide_phone' in body) {
+    const hp = body.hide_phone ? 1 : 0;
+    const effBiz = ('business_phone' in fields) ? fields.business_phone : member.business_phone;
+    if (hp && !effBiz) return json({ error: 'need_business_phone' }, 400);
+    fields.hide_phone = hp;
+  }
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
   // the owner no longer knows a member's PIN after handing out the initial one.
@@ -322,19 +330,28 @@ async function updateMe(request, env, member) {
 
 async function directory(env) {
   const { results } = await env.DB.prepare(
-    `SELECT name, business_name, area, specialties, photo_url, phone,
+    `SELECT name, business_name, area, specialties, photo_url, phone, hide_phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
             location_lat, location_lng, vendor_scale, vendor_categories, business_phone
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
-  return json({ members: (results || []).map((r) => ({ ...r, specialties: parseSpec(r.specialties), vendor_categories: parseSpec(r.vendor_categories), is_business: !!r.is_business })) });
+  return json({ members: (results || []).map((r) => ({
+    ...r,
+    // Redact the personal (login) number from the member-facing directory when
+    // the member has chosen to hide it. Contact then flows through business_phone.
+    phone: r.hide_phone ? null : r.phone,
+    hide_phone: !!r.hide_phone,
+    specialties: parseSpec(r.specialties),
+    vendor_categories: parseSpec(r.vendor_categories),
+    is_business: !!r.is_business,
+  })) });
 }
 
 async function adminListMembers(env) {
   const { results } = await env.DB.prepare(
     `SELECT phone, name, business_name, area, specialties, photo_url,
             skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale,
-            vendor_categories, business_phone,
+            vendor_categories, business_phone, hide_phone,
             role, status, is_founder, joined_at, created_at, last_login
      FROM members ORDER BY created_at DESC`
   ).all();
@@ -378,16 +395,18 @@ async function adminCreateMember(request, env) {
   if (vendor_categories === false) return json({ error: 'invalid_categories' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
+  const hide_phone = body.hide_phone ? 1 : 0;
+  if (hide_phone && !business_phone) return json({ error: 'need_business_phone' }, 400);
 
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, photo_url, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, nullableStr(body.photo_url), role, status, is_founder, joined_at,
-    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone
+    skill_level, years_experience, is_business, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone, hide_phone
   ).run();
 
   const created = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
@@ -464,6 +483,12 @@ async function adminUpdateMember(request, env, rawPhone) {
     const bp = bizPhone(body.business_phone);
     if (bp === false) return json({ error: 'invalid_business_phone' }, 400);
     fields.business_phone = bp;
+  }
+  if ('hide_phone' in body) {
+    const hp = body.hide_phone ? 1 : 0;
+    const effBiz = ('business_phone' in fields) ? fields.business_phone : member.business_phone;
+    if (hp && !effBiz) return json({ error: 'need_business_phone' }, 400);
+    fields.hide_phone = hp;
   }
 
   // PIN reset (admin-only path — the only reset mechanism in Phase 1)
@@ -815,6 +840,8 @@ async function publicRegister(request, env, ctx) {
   if (vendor_categories === false) return json({ error: 'invalid_categories' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
+  const hide_phone = body.hide_phone ? 1 : 0;
+  if (hide_phone && !business_phone) return json({ error: 'need_business_phone' }, 400);
 
   const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (existing) return json({ error: 'member_exists' }, 409);
@@ -823,12 +850,12 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, business_phone, hide_phone)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, business_phone, hide_phone
   ).run();
 
   const notify = pushToAdmins(env, 'New member application',
@@ -1148,12 +1175,14 @@ async function listMyStorefront(env, phone) {
 }
 
 async function getVendorStorefront(env, phone) {
-  const m = await env.DB.prepare('SELECT status FROM members WHERE phone = ?').bind(phone).first();
+  // Accept either the personal phone or the business number as the handle —
+  // members who hide their personal number are referenced by business_phone.
+  const m = await env.DB.prepare('SELECT phone, status FROM members WHERE phone = ? OR business_phone = ?').bind(phone, phone).first();
   if (!m || m.status !== 'approved') return json({ error: 'not_found' }, 404);
   const { results } = await env.DB.prepare(
     `SELECT id, name, description, price, image_key FROM storefront_items
      WHERE member_phone = ? ORDER BY sort, id`
-  ).bind(phone).all();
+  ).bind(m.phone).all();
   return json({ items: (results || []).map(storefrontRow) });
 }
 
@@ -1493,7 +1522,7 @@ function parseSpec(text) {
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), is_founder: !!m.is_founder, is_business: !!m.is_business };
+  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
 }
 
 async function recordAttempt(env, phone, success) {
