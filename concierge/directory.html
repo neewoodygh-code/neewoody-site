@@ -1083,14 +1083,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var el = document.getElementById('profileNudge');
     if (!el || !me) { if (el) el.style.display = 'none'; return; }
     try { if (sessionStorage.getItem('nwd-nudge-dismissed')) { el.style.display = 'none'; return; } } catch (e) {}
+    var mt = me.member_type || 'carpenter';
     var missing = [];
     if (!me.photo_url) missing.push('add a photo');
-    if ((me.member_type || 'carpenter') === 'carpenter' && !me.skill_level) missing.push('set your skill level');
+    if (mt === 'carpenter' && !me.skill_level) missing.push('set your skill level');
     if (!me.availability) missing.push('set your availability');
-    if (!(me.specialties || []).length) missing.push('pick your trades');
+    if (mt === 'carpenter' && !(me.specialties || []).length) missing.push('pick your trades');
+    if (mt === 'vendor' && !(me.vendor_categories || []).length && !(me.vendor_services || []).length) missing.push('list what you sell or do');
+    if (mt === 'courier' && !(me.coverage_zones || []).length) missing.push('set your coverage zones');
     if (!missing.length) { el.style.display = 'none'; return; }
     el.innerHTML =
-      '<p>Your profile is <b>' + missing.length + ' step' + (missing.length > 1 ? 's' : '') + '</b> from complete — members with a photo, level and availability get contacted far more. Still to do: ' +
+      '<p>Your profile is <b>' + missing.length + ' step' + (missing.length > 1 ? 's' : '') + '</b> from complete — a fuller profile gets contacted far more. Still to do: ' +
       C.escapeHtml(missing.join(', ')) + '.</p>' +
       '<button type="button" id="nudgeGo">Complete my profile</button>' +
       '<button type="button" class="x" id="nudgeX">Later</button>';
