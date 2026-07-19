@@ -481,8 +481,22 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     <div id="jobsState" class="state">Loading jobs…</div>
   </div>
 
-  <!-- TAB: Services · Buy for me -->
+  <!-- TAB: Services (offered by members) + Buy for me -->
   <div id="tab-services" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>Services</h1>
+      <p>Members who offer a service beyond their trade — 3D modelling, product design, teaching, deliveries and more. Pick a service to find who offers it, then message them on WhatsApp.</p>
+    </div>
+    <div class="filters">
+      <select id="offSvcFilter"><option value="">All services</option></select>
+      <select id="offAreaFilter"><option value="">All areas</option></select>
+      <span class="count" id="offCount"></span>
+    </div>
+    <div id="offGrid" class="grid"></div>
+    <div id="offState" class="state"></div>
+
+    <hr style="border:none;border-top:1px solid var(--cream-dark);margin:2.25rem 0 1.75rem">
+
     <div class="jobs-head">
       <div class="jh-text">
         <h1>Buy for me</h1>
@@ -628,12 +642,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <label>Trades</label>
         <div class="spec-grid" id="specGrid"></div>
       </div>
-      <!-- Deliveries side-hustle (carpenter/vendor opt-in to buy-for-me pings) -->
+      <!-- Services you offer (global catalog; incl. deliveries_errands = courier pings) -->
       <div id="sideHustleWrap">
-        <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.5rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-          <input type="checkbox" id="p_sh_delivery" style="width:auto;margin-top:.2rem" />
-          <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">I also do <strong>deliveries &amp; errands</strong> — ping me for buy-for-me requests in my coverage zones</span>
-        </label>
+        <label>Services you offer <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— extra skills shown on the Services page; "Deliveries &amp; errands" also gets you buy-for-me pings</span></label>
+        <div class="spec-grid" id="p_services_grid"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.5rem">
+          <input id="p_suggest" type="text" maxlength="40" placeholder="Suggest a service…" style="flex:1" />
+          <button type="button" class="pbtn" id="p_suggest_btn">Suggest</button>
+        </div>
+        <div class="sf-note" id="p_suggest_msg" style="margin-top:.3rem"></div>
       </div>
       <!-- Coverage zones (couriers, or anyone who ticked deliveries) -->
       <div id="coverageWrap" hidden>
@@ -908,6 +925,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var zones = (m.coverage_zones && m.coverage_zones.length) ? m.coverage_zones : (m.area ? [m.area] : []);
       coverChips = zones.map(function (z) { return '<span class="chip">' + C.escapeHtml(z) + '</span>'; }).join('');
     }
+    // Offered services (side skills), excluding deliveries (shown as coverage above).
+    var offChips = (m.side_hustles || []).filter(function (s) { return s !== 'deliveries_errands'; })
+      .map(function (s) { return '<span class="chip">' + C.escapeHtml(serviceLabelFor(s)) + '</span>'; }).join('');
     document.getElementById('memBody').innerHTML =
       '<div class="md-top">' + photo +
         '<div style="flex:1;min-width:0">' +
@@ -919,6 +939,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (chips ? '<div class="md-label">' + chipsTitle + '</div><div class="chips">' + chips + '</div>' : '') +
       (svcChips ? '<div class="md-label">What they do</div><div class="chips">' + svcChips + '</div>' : '') +
       (coverChips ? '<div class="md-label">' + (m.member_type === 'courier' ? 'Delivery coverage' : 'Also delivers · covers') + '</div><div class="chips">' + coverChips + '</div>' : '') +
+      (offChips ? '<div class="md-label">Also offers</div><div class="chips">' + offChips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
         ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
@@ -1206,8 +1227,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   });
   var carpFields = document.getElementById('carpFields');
   var vendorFields = document.getElementById('vendorFields');
-  var shDelivery = document.getElementById('p_sh_delivery');
-  // coverage-zone repeater (couriers / delivery side-hustlers)
+  // offered-services (dynamic catalog) picker
+  var serviceCatalog = [];
+  var servicesGrid = document.getElementById('p_services_grid');
+  function serviceLabelFor(slug) {
+    for (var i = 0; i < serviceCatalog.length; i++) if (serviceCatalog[i].slug === slug) return serviceCatalog[i].label;
+    return slug;
+  }
+  function buildServicesGrid(selected) {
+    var set = {}; (selected || []).forEach(function (s) { set[s] = true; });
+    servicesGrid.innerHTML = serviceCatalog.map(function (s) {
+      return '<label class="cb"><input type="checkbox" value="' + C.escapeHtml(s.slug) + '"' + (set[s.slug] ? ' checked' : '') + '> <span>' + C.escapeHtml(s.label) + '</span></label>';
+    }).join('') || '<span class="sf-note">No services listed yet.</span>';
+  }
+  servicesGrid.addEventListener('change', function () { syncTypeFields(); });
+  document.getElementById('p_suggest_btn').addEventListener('click', async function () {
+    var inp = document.getElementById('p_suggest'), msg = document.getElementById('p_suggest_msg');
+    var label = inp.value.trim();
+    if (!label) { msg.textContent = 'Type a service to suggest.'; return; }
+    this.disabled = true; msg.textContent = 'Sending…';
+    try {
+      var r = await C.api('/services/suggest', { method: 'POST', body: { label: label } });
+      if (r.status === 'approved') { msg.textContent = '"' + label + '" already exists — tick it above.'; }
+      else { msg.textContent = 'Sent for review — it\'ll appear once an admin approves it.'; }
+      inp.value = '';
+    } catch (err) { msg.textContent = err.message || 'Could not send the suggestion.'; }
+    finally { this.disabled = false; }
+  });
+  // coverage-zone repeater (couriers / delivery runners)
   var coverZonesWrap = document.getElementById('coverZones');
   function addCoverZone(val) {
     if (coverZonesWrap.children.length >= C.COVERAGE_MAX_ZONES) return;
@@ -1219,19 +1266,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     row.appendChild(sel); row.appendChild(del); coverZonesWrap.appendChild(row);
   }
   document.getElementById('coverAddBtn').addEventListener('click', function () { addCoverZone(); });
+  function deliverySelected() { return !!servicesGrid.querySelector('input[value="deliveries_errands"]:checked'); }
   function syncTypeFields() {
     var t = pMemberType.value;
     var isCarp = t === 'carpenter', isVendor = t === 'vendor', isCourier = t === 'courier';
     carpFields.style.display = isCarp ? '' : 'none';
     document.getElementById('tradesWrap').style.display = isCarp ? '' : 'none';
     vendorFields.style.display = isVendor ? '' : 'none';
-    // Side-hustle opt-in only for non-couriers (couriers do this by definition).
-    document.getElementById('sideHustleWrap').style.display = isCourier ? 'none' : '';
-    // Coverage zones: couriers always; others only if they ticked deliveries.
-    document.getElementById('coverageWrap').hidden = !(isCourier || shDelivery.checked);
+    // Coverage zones: couriers always; others when they offer deliveries & errands.
+    document.getElementById('coverageWrap').hidden = !(isCourier || deliverySelected());
   }
   pMemberType.addEventListener('change', syncTypeFields);
-  shDelivery.addEventListener('change', syncTypeFields);
 
   function openModal() {
     if (!me) return;
@@ -1246,7 +1291,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     document.getElementById('p_stock').value = me.stock || '';
     document.getElementById('p_services_other').value = me.services_other || '';
     pVendorScale.value = me.vendor_scale || '';
-    shDelivery.checked = (me.side_hustles || []).indexOf('deliveries_errands') >= 0;
+    buildServicesGrid(me.side_hustles || []);
+    document.getElementById('p_suggest').value = ''; document.getElementById('p_suggest_msg').textContent = '';
     coverZonesWrap.innerHTML = '';
     (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
@@ -1282,10 +1328,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
     if (isCarpEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
-    var deliveryOn = isCourierEdit || shDelivery.checked;
+    var sideHustles = [].slice.call(servicesGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var deliveryOn = isCourierEdit || sideHustles.indexOf('deliveries_errands') >= 0;
     var coverZones = deliveryOn ? [].slice.call(coverZonesWrap.querySelectorAll('select')).map(function (s) { return s.value; }).filter(Boolean) : [];
     coverZones = coverZones.filter(function (z, i) { return coverZones.indexOf(z) === i; });
-    var sideHustles = (!isCourierEdit && shDelivery.checked) ? ['deliveries_errands'] : [];
     var hidePhone = document.getElementById('p_hide_phone').checked;
     var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
     if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
@@ -1510,7 +1556,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     closeSpop();
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
-    if (name === 'services' && !buyLoaded) { buyLoaded = true; loadBuy(); }
+    if (name === 'services') { renderOffered(); if (!buyLoaded) { buyLoaded = true; loadBuy(); } }
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
@@ -1904,6 +1950,40 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     }
   }
 
+  // ── Services offered by members (Services tab, top section) ──
+  var offGrid = document.getElementById('offGrid');
+  var offState = document.getElementById('offState');
+  var offCount = document.getElementById('offCount');
+  var offSvcFilter = document.getElementById('offSvcFilter');
+  var offAreaFilter = document.getElementById('offAreaFilter');
+  function buildOfferedFilters() {
+    var svcVal = offSvcFilter.value, areaVal = offAreaFilter.value;
+    offSvcFilter.innerHTML = '<option value="">All services</option>';
+    serviceCatalog.forEach(function (s) { var o = document.createElement('option'); o.value = s.slug; o.textContent = s.label; offSvcFilter.appendChild(o); });
+    offSvcFilter.value = svcVal;
+    offAreaFilter.innerHTML = '<option value="">All areas</option>';
+    var zones = {}; all.forEach(function (m) { if ((m.side_hustles || []).length && m.area) zones[m.area] = true; });
+    Object.keys(zones).sort().forEach(function (a) { var o = document.createElement('option'); o.value = a; o.textContent = a; offAreaFilter.appendChild(o); });
+    offAreaFilter.value = areaVal;
+  }
+  function renderOffered() {
+    buildOfferedFilters();
+    var svc = offSvcFilter.value, a = offAreaFilter.value;
+    var list = all.filter(function (m) {
+      var sh = m.side_hustles || []; if (!sh.length) return false;
+      if (svc && sh.indexOf(svc) < 0) return false;
+      if (a && m.area !== a) return false;
+      return true;
+    });
+    offGrid.innerHTML = '';
+    if (!list.length) { offState.style.display = ''; offState.textContent = svc ? 'No members offer this yet.' : 'No members have listed services yet.'; offCount.textContent = ''; return; }
+    offState.style.display = 'none';
+    list.forEach(function (m) { offGrid.appendChild(card(m)); });
+    offCount.textContent = list.length + (svc ? ' offering ' + serviceLabelFor(svc) : ' offering a service');
+  }
+  offSvcFilter.addEventListener('change', renderOffered);
+  offAreaFilter.addEventListener('change', renderOffered);
+
   // ── area alerts (Web Push) — one subscription, buttons on Jobs + Services ──
   var alertsBtns = [].slice.call(document.querySelectorAll('.alerts-btn'));
   var alertsNotes = [].slice.call(document.querySelectorAll('.alerts-note'));
@@ -1965,7 +2045,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 15, date: '2026-07-19', title: 'New: Services · Buy for me', body: 'There\'s a new Services tab. Tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' },
     { id: 16, date: '2026-07-19', title: 'Notifications bell', body: 'A 🔔 bell now sits top-right. It collects your alerts — new buy requests in your zone, orders on your storefront, and when a vendor accepts your order — even if you never turned on push notifications.' },
     { id: 17, date: '2026-07-19', title: 'Couriers & delivery runs', body: 'New member type: Courier / Delivery. Couriers set coverage zones and get pinged for buy-for-me requests there. Not a courier? In My profile tick "I also do deliveries & errands" and set your zones to get the same pings.' },
-    { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' }
+    { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' },
+    { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -2060,6 +2141,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     try {
       var meRes = await C.api('/me');
       me = meRes.member;
+      try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
       if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
       if (me && me.member_type === 'vendor') {
         document.getElementById('storefrontTab').hidden = false;

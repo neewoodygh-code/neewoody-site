@@ -139,7 +139,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <div class="field"><label>Shop size (vendors)</label><select id="a_scale"><option value="">— n/a —</option></select></div>
           <div class="field"><label>Business / call number</label><input id="a_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
           <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
-          <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="a_sh_delivery" style="width:auto"> Does deliveries &amp; errands (buy-for-me pings)</label></div>
+          <div class="field"><label>Services offered <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— incl. deliveries &amp; errands</span></label><div class="spec-grid" id="a_services_grid"></div></div>
           <div class="field"><label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— couriers/runners; comma-separated</span></label><input id="a_coverage" placeholder="e.g. Spintex, Tema, Madina"></div>
           <div class="field"><label>Initial 5-digit PIN</label><input id="a_pin" inputmode="numeric" maxlength="5" placeholder="e.g. 24680" required></div>
           <div class="field"><label>Skill level</label><select id="a_lvl"><option value="">— not set —</option></select></div>
@@ -208,6 +208,24 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     </div>
   </div>
 
+  <!-- Service catalog (offered-services vocabulary + suggestions) -->
+  <div class="panel">
+    <h2>Services catalog <span class="sub" id="svcCatCount">member-suggested services to review</span></h2>
+    <div class="pbody">
+      <div class="tools" style="margin-bottom:1rem">
+        <button class="btn ghost" id="svcReload" type="button">Reload</button>
+        <span class="small" style="align-self:center;color:var(--muted)">Approve a suggestion to add it to the pickers for everyone. Moderate the vocabulary, not each member's listing.</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Service</th><th>Status</th><th>Suggested by</th><th>Actions</th></tr></thead>
+          <tbody id="svcCatBody"></tbody>
+        </table>
+      </div>
+      <div class="state" id="svcCatState">Loading services…</div>
+    </div>
+  </div>
+
   <!-- Payments -->
   <div class="panel">
     <h2>MoMo payments <span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
@@ -261,7 +279,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Shop size (vendors)</label><select id="e_scale"><option value="">— n/a —</option></select></div>
       <div class="field"><label>Business / call number</label><input id="e_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
       <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
-      <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_sh_delivery" style="width:auto"> Does deliveries &amp; errands (buy-for-me pings)</label></div>
+      <div class="field"><label>Services offered <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— incl. deliveries &amp; errands</span></label><div class="spec-grid" id="e_services_grid"></div></div>
       <div class="field"><label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— couriers/runners; comma-separated</span></label><input id="e_coverage" placeholder="e.g. Spintex, Tema, Madina"></div>
       <div class="field"><label>What they sell (vendors)</label><div class="spec-grid" id="e_cats"></div></div>
       <div class="field"><label>What they do — services (vendors, up to 5)</label><div class="spec-grid" id="e_svcs"></div></div>
@@ -383,7 +401,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         services_other: aMemberType.value === 'vendor' ? document.getElementById('a_services_other').value.trim() : '',
         business_phone: document.getElementById('a_biz_phone').value.trim(),
         hide_phone: document.getElementById('a_hide_phone').checked,
-        side_hustles: document.getElementById('a_sh_delivery').checked ? ['deliveries_errands'] : [],
+        side_hustles: [].slice.call(document.querySelectorAll('#a_services_grid input:checked')).map(function (c) { return c.value; }),
         coverage_zones: document.getElementById('a_coverage').value.split(',').map(function (z) { return z.trim(); }).filter(Boolean),
         stock: document.getElementById('a_stock').value.trim(),
         availability: aAvail.value,
@@ -638,7 +656,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eScale.value = m.vendor_scale || '';
     document.getElementById('e_biz_phone').value = m.business_phone || '';
     document.getElementById('e_hide_phone').checked = !!m.hide_phone;
-    document.getElementById('e_sh_delivery').checked = (m.side_hustles || []).indexOf('deliveries_errands') >= 0;
+    (function () { var set = {}; (m.side_hustles || []).forEach(function (s) { set[s] = true; });
+      document.querySelectorAll('#e_services_grid input').forEach(function (cb) { cb.checked = !!set[cb.value]; }); })();
     document.getElementById('e_coverage').value = (m.coverage_zones || []).join(', ');
     var eCatSet = new Set(m.vendor_categories || []);
     eCats.querySelectorAll('input').forEach(function (cb) { cb.checked = eCatSet.has(cb.value); });
@@ -671,7 +690,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         vendor_scale: eMemberType.value === 'vendor' ? eScale.value : '',
         business_phone: document.getElementById('e_biz_phone').value.trim(),
         hide_phone: document.getElementById('e_hide_phone').checked,
-        side_hustles: document.getElementById('e_sh_delivery').checked ? ['deliveries_errands'] : [],
+        side_hustles: [].slice.call(document.querySelectorAll('#e_services_grid input:checked')).map(function (c) { return c.value; }),
         coverage_zones: document.getElementById('e_coverage').value.split(',').map(function (z) { return z.trim(); }).filter(Boolean),
         vendor_categories: eMemberType.value === 'vendor' ? [].slice.call(eCats.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
         vendor_services: eMemberType.value === 'vendor' ? [].slice.call(eSvcs.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],
@@ -934,11 +953,53 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     }
   }
 
+  // ── offered-services catalog (member pickers + moderation) ──
+  var adminServiceCatalog = [];
+  function buildServiceGrids() {
+    var html = adminServiceCatalog.filter(function (s) { return s.status === 'approved'; }).map(function (s) {
+      return '<label class="cb"><input type="checkbox" value="' + s.slug + '"> ' + C.escapeHtml(s.label) + '</label>';
+    }).join('');
+    ['a_services_grid', 'e_services_grid'].forEach(function (id) { var g = document.getElementById(id); if (g) g.innerHTML = html; });
+  }
+  function svcMkBtn(label, fn, danger) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'rowbtn' + (danger ? ' danger' : ''); b.textContent = label; b.style.marginRight = '.35rem';
+    b.addEventListener('click', async function () { b.disabled = true; try { await fn(); } catch (err) { alert(err.message || 'Failed.'); b.disabled = false; } });
+    return b;
+  }
+  function svcCatRow(s) {
+    var tr = document.createElement('tr');
+    var td1 = document.createElement('td'); td1.innerHTML = '<span class="who">' + C.escapeHtml(s.label) + '</span><div class="small">' + C.escapeHtml(s.slug) + '</div>';
+    var td2 = document.createElement('td'); td2.innerHTML = '<span class="pill ' + (s.status === 'approved' ? 'approved' : 'pending') + '">' + s.status + '</span>';
+    var td3 = document.createElement('td'); td3.className = 'small'; td3.textContent = s.suggested_by || '—';
+    var td4 = document.createElement('td');
+    if (s.status === 'pending') td4.appendChild(svcMkBtn('Approve', async function () { await C.api('/admin/services/' + s.id, { method: 'PUT', body: { status: 'approved' } }); await loadServiceCatalog(); }));
+    td4.appendChild(svcMkBtn('Rename', async function () { var nl = prompt('New label:', s.label); if (nl == null) return; await C.api('/admin/services/' + s.id, { method: 'PUT', body: { label: nl } }); await loadServiceCatalog(); }));
+    td4.appendChild(svcMkBtn(s.status === 'pending' ? 'Reject' : 'Remove', async function () { if (!confirm((s.status === 'pending' ? 'Reject' : 'Remove') + ' "' + s.label + '"?')) return; await C.api('/admin/services/' + s.id, { method: 'DELETE' }); await loadServiceCatalog(); }, true));
+    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
+    return tr;
+  }
+  async function loadServiceCatalog() {
+    var body = document.getElementById('svcCatBody'), state = document.getElementById('svcCatState');
+    state.style.display = ''; state.textContent = 'Loading services…'; body.innerHTML = '';
+    try {
+      var r = await C.api('/admin/services');
+      adminServiceCatalog = r.services || [];
+      buildServiceGrids();
+      var pending = adminServiceCatalog.filter(function (s) { return s.status === 'pending'; }).length;
+      document.getElementById('svcCatCount').textContent = pending ? (pending + ' suggestion' + (pending > 1 ? 's' : '') + ' to review') : 'member-suggested services to review';
+      if (!adminServiceCatalog.length) { state.textContent = 'No services yet.'; return; }
+      state.style.display = 'none';
+      adminServiceCatalog.forEach(function (s) { body.appendChild(svcCatRow(s)); });
+    } catch (err) { state.textContent = err.message || 'Could not load services.'; }
+  }
+  document.getElementById('svcReload').addEventListener('click', loadServiceCatalog);
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
+    await loadServiceCatalog();
     await loadMembers();
     loadClientJobs();
     viewPayments();

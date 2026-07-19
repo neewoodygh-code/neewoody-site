@@ -35,11 +35,12 @@ const AVAILABILITY = ['open_to_work', 'hiring', 'seeking_apprenticeship', 'takin
 // ladder (apprentice→master) applies. Vendors/interior designers aren't graded.
 const MEMBER_TYPES = ['carpenter', 'vendor', 'courier'];
 const STOCK_MAX = 1000; // vendor Storefront free-text cap
-// Side hustles any member can opt into. 'deliveries_errands' subscribes them to
-// buy-for-me pings (the courier pool) without being a full courier.
-const SIDE_HUSTLES = ['deliveries_errands'];
+// Offered "services I offer" (stored as slugs in members.side_hustles) are
+// validated against the admin-moderated service_catalog (migration 0021), not a
+// const. 'deliveries_errands' is the courier-wired entry (see notifyBuyZone).
 const COVERAGE_MAX_ZONES = 12;
 const ZONE_NAME_MAX = 60;
+const SERVICE_LABEL_MAX = 40;
 // Vendor shop-size scale — the vendor parallel to a carpenter's skill level.
 const VENDOR_SCALES = ['stall', 'shop', 'showroom', 'warehouse'];
 // Vendor product categories (what they sell) — Sourcing filter vocabulary.
@@ -179,6 +180,10 @@ async function route(request, env, ctx) {
   if (path === '/api/notifications' && method === 'GET') return withAuth(request, env, (m) => listNotifications(env, m));
   if (path === '/api/notifications/read' && method === 'POST') return withAuth(request, env, (m) => markNotificationsRead(request, env, m));
 
+  // ---- offered-services catalog ----
+  if (path === '/api/services' && method === 'GET') return withAuth(request, env, () => listServices(env));
+  if (path === '/api/services/suggest' && method === 'POST') return withAuth(request, env, (m) => suggestService(request, env, m, ctx));
+
   // ---- vendor orders (order a listed storefront item) ----
   if (path === '/api/orders' && method === 'POST') return withAuth(request, env, (m) => createOrder(request, env, m, ctx));
   if (path === '/api/orders' && method === 'GET')  return withAuth(request, env, (m) => listVendorOrders(env, m));
@@ -223,6 +228,12 @@ async function route(request, env, ctx) {
   const mClientJob = path.match(/^\/api\/admin\/client-jobs\/(\d+)$/);
   if (mClientJob && method === 'PUT')    return withAdmin(request, env, () => adminReviewClientJob(request, env, Number(mClientJob[1]), ctx));
   if (mClientJob && method === 'DELETE') return withAdmin(request, env, () => adminDeleteClientJob(env, Number(mClientJob[1])));
+
+  // ---- admin: service catalog (moderate the offered-services vocabulary) ----
+  if (path === '/api/admin/services' && method === 'GET') return withAdmin(request, env, () => adminListServices(env));
+  const mSvc = path.match(/^\/api\/admin\/services\/(\d+)$/);
+  if (mSvc && method === 'PUT')    return withAdmin(request, env, () => adminUpdateService(request, env, Number(mSvc[1]), ctx));
+  if (mSvc && method === 'DELETE') return withAdmin(request, env, () => adminDeleteService(env, Number(mSvc[1])));
 
   // ---- admin: payments ----
   if (path === '/api/admin/payments' && method === 'POST') return withAdmin(request, env, () => adminRecordPayment(request, env));
@@ -357,7 +368,7 @@ async function updateMe(request, env, member) {
     fields.coverage_zones = cz;
   }
   if ('side_hustles' in body) {
-    const sh = validateSideHustles(body.side_hustles);
+    const sh = validateSideHustles(body.side_hustles, await approvedServiceSlugs(env));
     if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
     fields.side_hustles = sh;
   }
@@ -468,7 +479,7 @@ async function adminCreateMember(request, env) {
   const services_other = servicesOtherVal(body.services_other);
   const coverage_zones = validateCoverageZones(body.coverage_zones);
   if (coverage_zones === false) return json({ error: 'invalid_coverage_zones' }, 400);
-  const side_hustles = validateSideHustles(body.side_hustles);
+  const side_hustles = validateSideHustles(body.side_hustles, await approvedServiceSlugs(env));
   if (side_hustles === false) return json({ error: 'invalid_side_hustles' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -574,7 +585,7 @@ async function adminUpdateMember(request, env, rawPhone) {
     fields.coverage_zones = cz;
   }
   if ('side_hustles' in body) {
-    const sh = validateSideHustles(body.side_hustles);
+    const sh = validateSideHustles(body.side_hustles, await approvedServiceSlugs(env));
     if (sh === false) return json({ error: 'invalid_side_hustles' }, 400);
     fields.side_hustles = sh;
   }
@@ -1014,7 +1025,7 @@ async function publicRegister(request, env, ctx) {
   const services_other = servicesOtherVal(body.services_other);
   const coverage_zones = validateCoverageZones(body.coverage_zones);
   if (coverage_zones === false) return json({ error: 'invalid_coverage_zones' }, 400);
-  const side_hustles = validateSideHustles(body.side_hustles);
+  const side_hustles = validateSideHustles(body.side_hustles, await approvedServiceSlugs(env));
   if (side_hustles === false) return json({ error: 'invalid_side_hustles' }, 400);
   const business_phone = bizPhone(body.business_phone);
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
@@ -1369,6 +1380,85 @@ async function updateOrder(request, env, member, id, ctx) {
 
   const row = await env.DB.prepare('SELECT * FROM orders WHERE id = ?').bind(id).first();
   return json({ order: row });
+}
+
+// ── offered-services catalog ───────────────────────────────────────────
+// Curated, admin-moderated vocabulary. Members pick approved entries;
+// "suggest a service" adds a pending row an admin approves. We moderate the
+// vocabulary, not each member's listing.
+
+async function listServices(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT slug, label FROM service_catalog WHERE status = 'approved' ORDER BY label COLLATE NOCASE"
+  ).all();
+  return json({ services: results || [] });
+}
+
+async function suggestService(request, env, member, ctx) {
+  const body = await readJson(request);
+  const label = String(body.label || '').trim().slice(0, SERVICE_LABEL_MAX);
+  if (!label) return json({ error: 'label_required' }, 400);
+  const slug = slugifyService(label);
+  if (!slug) return json({ error: 'label_required' }, 400);
+
+  const existing = await env.DB.prepare('SELECT slug, status FROM service_catalog WHERE slug = ?').bind(slug).first();
+  if (existing) return json({ ok: true, slug, status: existing.status, already: true });
+
+  await env.DB.prepare(
+    "INSERT INTO service_catalog (slug, label, status, suggested_by) VALUES (?, ?, 'pending', ?)"
+  ).bind(slug, label, member.phone).run();
+
+  const notify = pushToAdmins(env, 'New service suggestion', (member.name || 'A member') + ' suggested "' + label + '" — review in admin.').catch((e) => console.error('service suggest notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+
+  return json({ ok: true, slug, status: 'pending' }, 201);
+}
+
+async function adminListServices(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT id, slug, label, status, suggested_by, created_at FROM service_catalog
+     ORDER BY (status = 'pending') DESC, label COLLATE NOCASE`
+  ).all();
+  return json({ services: results || [] });
+}
+
+async function adminUpdateService(request, env, id, ctx) {
+  const svc = await env.DB.prepare('SELECT * FROM service_catalog WHERE id = ?').bind(id).first();
+  if (!svc) return json({ error: 'not_found' }, 404);
+  const body = await readJson(request);
+  const fields = {};
+  if ('status' in body) {
+    if (!['approved', 'pending'].includes(body.status)) return json({ error: 'invalid_status' }, 400);
+    fields.status = body.status;
+  }
+  if ('label' in body) {
+    const label = String(body.label || '').trim().slice(0, SERVICE_LABEL_MAX);
+    if (!label) return json({ error: 'label_required' }, 400);
+    fields.label = label;
+  }
+  const keys = Object.keys(fields);
+  if (keys.length) {
+    const set = keys.map((k) => `${k} = ?`).join(', ');
+    await env.DB.prepare(`UPDATE service_catalog SET ${set} WHERE id = ?`).bind(...keys.map((k) => fields[k]), id).run();
+  }
+  // On approval, tell the suggester their service is now live.
+  if (fields.status === 'approved' && svc.status !== 'approved' && svc.suggested_by) {
+    const notify = notifyMember(env, svc.suggested_by, {
+      type: 'service_approved', title: 'Service added',
+      body: 'Your suggested service "' + (fields.label || svc.label) + '" is now live — add it in My profile.',
+      link: '#directory',
+    }).catch((e) => console.error('service approve notify failed:', e && e.message));
+    if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+  }
+  const row = await env.DB.prepare('SELECT * FROM service_catalog WHERE id = ?').bind(id).first();
+  return json({ service: row });
+}
+
+async function adminDeleteService(env, id) {
+  const svc = await env.DB.prepare('SELECT slug FROM service_catalog WHERE id = ?').bind(id).first();
+  if (!svc) return json({ error: 'not_found' }, 404);
+  await env.DB.prepare('DELETE FROM service_catalog WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
 }
 
 // ── pricing tool (per-member config + quotes) ──────────────────────────
@@ -1955,11 +2045,20 @@ function validateCoverageZones(input) {
   return JSON.stringify(clean);
 }
 
-// Side hustles — curated JSON array. '[]' if none; false if present-but-not-array.
-function validateSideHustles(input) {
+// Offered services — JSON array of slugs, filtered to the approved catalog.
+// '[]' if none; false if present-but-not-array. Caller passes the allowed slugs.
+function validateSideHustles(input, allowed) {
   if (input == null) return '[]';
   if (!Array.isArray(input)) return false;
-  return JSON.stringify([...new Set(input.map((s) => String(s)).filter((s) => SIDE_HUSTLES.includes(s)))]);
+  const ok = allowed || [];
+  return JSON.stringify([...new Set(input.map((s) => String(s)).filter((s) => ok.indexOf(s) >= 0))]);
+}
+async function approvedServiceSlugs(env) {
+  const { results } = await env.DB.prepare("SELECT slug FROM service_catalog WHERE status = 'approved'").all();
+  return (results || []).map((r) => r.slug);
+}
+function slugifyService(label) {
+  return String(label || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
 }
 
 // Optional business/call number. null = cleared; false = invalid; else 233…
