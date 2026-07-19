@@ -57,6 +57,11 @@ const SERVICES_OTHER_MAX = 160;
 const JOBS_MAX_OPEN_PER_MEMBER = 10;
 const JOBS_MAX_TEXT = { zone: 60, start_when: 40, duration: 40, description: 1000 };
 
+// "Buy for me" board caps (member procurement/errand board)
+const BUY_MAX_OPEN_PER_MEMBER = 10;
+const BUY_MAX_ITEMS = 20;
+const BUY_MAX_TEXT = { zone: 60, item: 120, qty: 40, deliver_detail: 200, where_to_buy: 120, budget: 60, needed_by: 60, notes: 1000 };
+
 // Public client-job anti-spam (no CAPTCHA yet — phone-keyed throttle).
 const CLIENT_JOB_MAX_PENDING_PER_PHONE = 3;   // outstanding unreviewed
 const CLIENT_JOB_WINDOW = "-1 hours";
@@ -151,6 +156,13 @@ async function route(request, env, ctx) {
   const mJob = path.match(/^\/api\/jobs\/(\d+)$/);
   if (mJob && method === 'PUT')    return withAuth(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
   if (mJob && method === 'DELETE') return withAuth(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
+
+  // ---- member: "Buy for me" board (procurement/errand requests) ----
+  if (path === '/api/buy-requests' && method === 'GET')  return withAuth(request, env, (m) => listBuyRequests(env, m));
+  if (path === '/api/buy-requests' && method === 'POST') return withAuth(request, env, (m) => createBuyRequest(request, env, m, ctx));
+  const mBuy = path.match(/^\/api\/buy-requests\/(\d+)$/);
+  if (mBuy && method === 'PUT')    return withAuth(request, env, (m) => updateBuyRequest(request, env, m, Number(mBuy[1])));
+  if (mBuy && method === 'DELETE') return withAuth(request, env, (m) => deleteBuyRequest(env, m, Number(mBuy[1])));
 
   // ---- member: pricing tool (per-member config + quotes) ----
   if (path === '/api/pricing/config' && method === 'GET') return withAuth(request, env, (m) => getPricingConfig(env, m));
@@ -994,6 +1006,152 @@ async function deleteJob(env, member, id) {
   if (job.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
   await env.DB.prepare('DELETE FROM jobs WHERE id = ?').bind(id).run();
   return json({ deleted: true });
+}
+
+// ── "Buy for me" board ─────────────────────────────────────────────────
+// A procurement/errand notice board, twin of the jobs board. A member posts
+// materials to be bought & delivered; another member contacts them on
+// WhatsApp. No money handled in-platform — budget, runner fee and payment
+// method are agreed in chat (owner constraint: the platform is a connector).
+
+// items: JSON array of {name, qty}. Returns a cleaned JSON string, or false.
+function validateBuyItems(input) {
+  let arr = input;
+  if (typeof input === 'string') { try { arr = JSON.parse(input); } catch { return false; } }
+  if (!Array.isArray(arr)) return false;
+  const clean = [];
+  for (const it of arr) {
+    if (!it || typeof it !== 'object') continue;
+    const name = String(it.name == null ? '' : it.name).trim().slice(0, BUY_MAX_TEXT.item);
+    if (!name) continue;
+    const qty = String(it.qty == null ? '' : it.qty).trim().slice(0, BUY_MAX_TEXT.qty);
+    clean.push({ name, qty });
+    if (clean.length >= BUY_MAX_ITEMS) break;
+  }
+  if (!clean.length) return false;
+  return JSON.stringify(clean);
+}
+
+async function listBuyRequests(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT b.id, b.poster_phone, b.zone, b.items, b.deliver_detail, b.where_to_buy,
+            b.budget, b.needed_by, b.notes, b.status, b.created_at,
+            m.name AS poster_name, m.business_name AS poster_business,
+            m.is_business AS poster_is_business, m.business_phone AS poster_biz_phone
+     FROM buy_requests b JOIN members m ON m.phone = b.poster_phone
+     WHERE b.status IN ('open','filled') AND m.status = 'approved'`
+  ).all();
+
+  const reqs = (results || []).map((b) => ({
+    id: b.id, zone: b.zone,
+    items: (() => { try { return JSON.parse(b.items) || []; } catch { return []; } })(),
+    deliver_detail: b.deliver_detail, where_to_buy: b.where_to_buy,
+    budget: b.budget, needed_by: b.needed_by, notes: b.notes,
+    status: b.status, created_at: b.created_at,
+    poster_name: b.poster_name, poster_business: b.poster_business,
+    poster_is_business: !!b.poster_is_business,
+    // Respect hide_phone: contact via the business number when one is set.
+    contact_phone: b.poster_biz_phone || b.poster_phone,
+    mine: b.poster_phone === member.phone,
+  }));
+
+  reqs.sort((a, b) => {
+    const ao = a.status === 'open' ? 0 : 1, bo = b.status === 'open' ? 0 : 1;
+    if (ao !== bo) return ao - bo;
+    return String(b.created_at || '').localeCompare(String(a.created_at || ''));
+  });
+  return json({ requests: reqs });
+}
+
+async function createBuyRequest(request, env, member, ctx) {
+  const body = await readJson(request);
+
+  const zone = nullableStr(body.zone);
+  if (!zone || zone.length > BUY_MAX_TEXT.zone) return json({ error: 'zone_required' }, 400);
+
+  const items = validateBuyItems(body.items);
+  if (!items) return json({ error: 'items_required' }, 400);
+
+  const deliver_detail = nullableStr(body.deliver_detail);
+  if (deliver_detail && deliver_detail.length > BUY_MAX_TEXT.deliver_detail) return json({ error: 'deliver_detail_too_long' }, 400);
+  const where_to_buy = nullableStr(body.where_to_buy);
+  if (where_to_buy && where_to_buy.length > BUY_MAX_TEXT.where_to_buy) return json({ error: 'where_too_long' }, 400);
+  const budget = nullableStr(body.budget);
+  if (budget && budget.length > BUY_MAX_TEXT.budget) return json({ error: 'budget_too_long' }, 400);
+  const needed_by = nullableStr(body.needed_by);
+  if (needed_by && needed_by.length > BUY_MAX_TEXT.needed_by) return json({ error: 'needed_by_too_long' }, 400);
+  const notes = nullableStr(body.notes);
+  if (notes && notes.length > BUY_MAX_TEXT.notes) return json({ error: 'notes_too_long' }, 400);
+
+  const open = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM buy_requests WHERE poster_phone = ? AND status = 'open'`
+  ).bind(member.phone).first();
+  if (open && open.c >= BUY_MAX_OPEN_PER_MEMBER) {
+    return json({ error: 'too_many_open_requests', limit: BUY_MAX_OPEN_PER_MEMBER }, 400);
+  }
+
+  const r = await env.DB.prepare(
+    `INSERT INTO buy_requests (poster_phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(member.phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes).run();
+
+  const row = await env.DB.prepare('SELECT * FROM buy_requests WHERE id = ?').bind(r.meta.last_row_id).first();
+
+  const notify = notifyBuyZone(env, row, { exclude: member.phone }).catch((e) => console.error('buy alert send failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+
+  return json({ request: row }, 201);
+}
+
+async function updateBuyRequest(request, env, member, id) {
+  const req = await env.DB.prepare('SELECT poster_phone FROM buy_requests WHERE id = ?').bind(id).first();
+  if (!req) return json({ error: 'not_found' }, 404);
+  if (req.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+
+  const body = await readJson(request);
+  if (!['open', 'filled'].includes(body.status)) return json({ error: 'invalid_status' }, 400);
+
+  await env.DB.prepare(
+    `UPDATE buy_requests SET status = ?, updated_at = datetime('now') WHERE id = ?`
+  ).bind(body.status, id).run();
+  const row = await env.DB.prepare('SELECT * FROM buy_requests WHERE id = ?').bind(id).first();
+  return json({ request: row });
+}
+
+async function deleteBuyRequest(env, member, id) {
+  const req = await env.DB.prepare('SELECT poster_phone FROM buy_requests WHERE id = ?').bind(id).first();
+  if (!req) return json({ error: 'not_found' }, 404);
+  if (req.poster_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+  await env.DB.prepare('DELETE FROM buy_requests WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
+}
+
+// Alert members whose area matches the request's delivery zone (same push
+// subscriptions the jobs board uses). Prunes dead subscriptions.
+async function notifyBuyZone(env, req, opts = {}) {
+  if (!env.VAPID_PRIVATE) return;
+  const exclude = opts.exclude || '';
+  const { results } = await env.DB.prepare(
+    `SELECT s.id, s.sub FROM push_subs s
+     JOIN members m ON m.phone = s.member_phone
+     WHERE m.area = ? AND m.status = 'approved' AND m.phone != ?
+     LIMIT ?`
+  ).bind(req.zone, exclude, PUSH_MAX_PER_JOB).all();
+  if (!results || !results.length) return;
+
+  let firstItem = '';
+  try { const items = JSON.parse(req.items) || []; if (items[0]) firstItem = items[0].name; } catch {}
+  const title = 'New buy request in ' + req.zone;
+  const body = (firstItem ? firstItem : 'Materials') + ' — a member needs this bought & delivered. Tap to view.';
+
+  for (const row of results) {
+    let sub;
+    try { sub = JSON.parse(row.sub); } catch { continue; }
+    const status = await sendWebPush(sub, title, body, env);
+    if (status === 404 || status === 410) {
+      await env.DB.prepare('DELETE FROM push_subs WHERE id = ?').bind(row.id).run();
+    }
+  }
 }
 
 // ── pricing tool (per-member config + quotes) ──────────────────────────

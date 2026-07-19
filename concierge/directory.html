@@ -73,6 +73,20 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .pnudge .x{ background:transparent; color:rgba(240,232,208,.55); border:1px solid rgba(240,232,208,.3); }
 
 /* jobs board */
+.subseg{ display:inline-flex; background:var(--cream-dark); border-radius:6px; padding:.25rem; gap:.25rem; margin-bottom:1.5rem; }
+.subseg-btn{ font-family:var(--ui); font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; font-weight:500;
+  border:none; background:transparent; color:var(--muted); padding:.55rem 1.1rem; border-radius:4px; cursor:pointer; transition:background .15s,color .15s; }
+.subseg-btn.active{ background:var(--green); color:var(--cream); }
+.buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+  background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
+.buy-additem:hover{ border-color:var(--gold); }
+.buy-item-row{ display:flex; gap:.5rem; margin-bottom:.5rem; align-items:center; }
+.buy-item-row .bi-name{ flex:2; min-width:0; }
+.buy-item-row .bi-qty{ flex:1; min-width:0; }
+.buy-item-row .bi-del{ flex:0 0 auto; background:transparent; border:none; color:var(--muted); font-size:1.3rem; line-height:1; cursor:pointer; padding:.2rem .4rem; }
+.buy-item-row .bi-del:hover{ color:#a52a2a; }
+.buy-list{ margin:.45rem 0 .3rem 1.1rem; font-size:.9rem; color:var(--ink); }
+.buy-list li{ margin:.15rem 0; }
 .jobs-head{ display:flex; align-items:flex-end; gap:1rem; flex-wrap:wrap; margin-bottom:1.5rem; }
 .jobs-head .jh-text{ flex:1; min-width:220px; }
 .jobs-head h1{ font-family:var(--display); font-weight:500; font-size:1.8rem; }
@@ -331,7 +345,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 <!-- member-area tabs -->
 <nav class="tabbar" id="tabbar" aria-label="Member area">
   <button class="tab active" data-tab="directory">Directory</button>
-  <button class="tab" data-tab="jobs">Jobs</button>
+  <button class="tab" data-tab="jobs">Jobs / Services</button>
   <button class="tab" data-tab="storefront" id="storefrontTab" hidden>My Storefront</button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
@@ -418,20 +432,42 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   <!-- TAB: Jobs -->
   <div id="tab-jobs" class="tabpanel" hidden>
-    <div class="jobs-head">
-      <div class="jh-text">
-        <h1>Jobs board</h1>
-        <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
-        <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
-        <button class="alerts-btn" id="alertsBtn" type="button" style="display:none">🔔 Get job alerts for your area</button>
-        <span class="alerts-note" id="alertsNote"></span>
-      </div>
+    <div class="subseg" role="tablist">
+      <button class="subseg-btn active" data-sub="jobs" type="button" role="tab">Jobs</button>
+      <button class="subseg-btn" data-sub="services" type="button" role="tab">Services</button>
     </div>
-    <div id="jobsMine"></div>
-    <div id="jobsList"></div>
-    <div id="jobsState" class="state">Loading jobs…</div>
+
+    <!-- SUB: Jobs -->
+    <div id="sub-jobs">
+      <div class="jobs-head">
+        <div class="jh-text">
+          <h1>Jobs board</h1>
+          <p>Working away from home? Post a job and hire members already based there — by the day. Rates and details are discussed on WhatsApp: tap Contact on any post.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end">
+          <button class="btn-post" id="postJobBtn" type="button">+ Post a job</button>
+          <button class="alerts-btn" id="alertsBtn" type="button" style="display:none">🔔 Get alerts for your area</button>
+          <span class="alerts-note" id="alertsNote"></span>
+        </div>
+      </div>
+      <div id="jobsMine"></div>
+      <div id="jobsList"></div>
+      <div id="jobsState" class="state">Loading jobs…</div>
+    </div>
+
+    <!-- SUB: Services · Buy for me -->
+    <div id="sub-services" hidden>
+      <div class="jobs-head">
+        <div class="jh-text">
+          <h1>Buy for me</h1>
+          <p>Need materials picked up? Post what you need and a member nearby can buy it and deliver it to you. Agree the budget, their fee, and how you'll pay — MoMo up front or on delivery — on WhatsApp, and keep the receipts.</p>
+        </div>
+        <button class="btn-post" id="postBuyBtn" type="button">+ Request a buy</button>
+      </div>
+      <div id="buyMine"></div>
+      <div id="buyList"></div>
+      <div id="buyState" class="state">Loading requests…</div>
+    </div>
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
@@ -601,6 +637,32 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <textarea id="j_desc" maxlength="1000" placeholder="What's the work? Anything they should bring? Rates are discussed on WhatsApp."></textarea>
       <button class="save" id="jobSaveBtn" type="submit">Post job</button>
       <div class="mmsg" id="jmsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Request a buy -->
+<div class="overlay" id="buyOverlay">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="mhead"><h2>Request a buy</h2><button class="x" id="closeBuyModal" aria-label="Close">×</button></div>
+    <form id="buyForm">
+      <label>What do you need? <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— item &amp; quantity</span></label>
+      <div id="buyItems"></div>
+      <button type="button" class="buy-additem" id="buyAddItem">+ Add another item</button>
+      <label for="b_zone" style="margin-top:1rem">Deliver to</label>
+      <select id="b_zone" required></select>
+      <label for="b_deliver">Delivery detail <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; landmark / address</span></label>
+      <input id="b_deliver" maxlength="200" placeholder="e.g. Near Spintex Shell, blue gate" />
+      <label for="b_where">Where to buy <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <input id="b_where" maxlength="120" placeholder="e.g. Kaneshie market, or wherever's cheapest" />
+      <label for="b_budget">Budget <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <input id="b_budget" maxlength="60" placeholder="e.g. around GHS 500 for materials" />
+      <label for="b_needed">Needed by <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <input id="b_needed" maxlength="60" placeholder="e.g. by Friday, or ASAP" />
+      <label for="b_notes">Notes <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
+      <textarea id="b_notes" maxlength="1000" placeholder="Brand/spec preferences, how you'll pay the runner, anything else…"></textarea>
+      <button class="save" id="buySaveBtn" type="submit">Post request</button>
+      <div class="mmsg" id="bmsg"></div>
     </form>
   </div>
 </div>
@@ -1469,6 +1531,159 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { btn.disabled = false; }
   });
 
+  // ── Jobs / Services segmented toggle ──
+  var buyLoaded = false;
+  document.querySelector('#tab-jobs .subseg').addEventListener('click', function (e) {
+    var b = e.target.closest('.subseg-btn'); if (!b) return;
+    var sub = b.getAttribute('data-sub');
+    document.querySelectorAll('#tab-jobs .subseg-btn').forEach(function (x) { x.classList.toggle('active', x === b); });
+    document.getElementById('sub-jobs').hidden = sub !== 'jobs';
+    document.getElementById('sub-services').hidden = sub !== 'services';
+    if (sub === 'services' && !buyLoaded) { buyLoaded = true; loadBuy(); }
+  });
+
+  // ── "Buy for me" board ──
+  var buyMineEl = document.getElementById('buyMine');
+  var buyListEl = document.getElementById('buyList');
+  var buyStateEl = document.getElementById('buyState');
+
+  function buyTitle(b) {
+    var first = (b.items && b.items[0] && b.items[0].name) ? b.items[0].name : 'Materials';
+    var n = (b.items || []).length;
+    return n > 1 ? (first + ' + ' + (n - 1) + ' more') : first;
+  }
+  function buyCard(b) {
+    var el = document.createElement('div'); el.className = 'job-card';
+    var poster = C.escapeHtml(b.poster_name || 'Member') +
+      (b.poster_business ? ' · ' + C.escapeHtml(b.poster_business) : '') +
+      (b.poster_is_business ? ' <span class="bdg-biz" style="margin-top:0">Business</span>' : '');
+    var meta = ['Deliver to ' + b.zone];
+    if (b.needed_by) meta.push('by ' + b.needed_by);
+    if (b.budget) meta.push('Budget: ' + b.budget);
+    var itemsHtml = '<ul class="buy-list">' + (b.items || []).map(function (it) {
+      return '<li>' + C.escapeHtml(it.name) + (it.qty ? ' — <strong>' + C.escapeHtml(it.qty) + '</strong>' : '') + '</li>';
+    }).join('') + '</ul>';
+    var extra = [];
+    if (b.where_to_buy) extra.push('Buy at: ' + b.where_to_buy);
+    if (b.deliver_detail) extra.push('Deliver: ' + b.deliver_detail);
+    if (b.notes) extra.push(b.notes);
+    var waText = encodeURIComponent('Hi ' + b.poster_name + ', I saw your "Buy for me" request on Carpentry Concierge (' + buyTitle(b) + ') — I can pick it up for you.');
+    el.innerHTML =
+      '<div class="job-title">' + C.escapeHtml(buyTitle(b)) +
+        ' <span class="job-status ' + b.status + '">' + b.status + '</span></div>' +
+      '<div class="job-meta">' + C.escapeHtml(meta.join(' · ')) + '</div>' +
+      itemsHtml +
+      (extra.length ? '<div class="job-desc">' + C.escapeHtml(extra.join(' · ')) + '</div>' : '') +
+      '<div class="job-foot">' +
+        '<span class="job-poster">' + poster + '</span>' +
+        (b.mine ? '' : '<a class="job-wa" href="' + C.waLink(b.contact_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact</a>') +
+      '</div>';
+    if (b.mine) {
+      var foot = el.querySelector('.job-foot');
+      var toggleBtn = document.createElement('button');
+      toggleBtn.className = 'job-own-btn'; toggleBtn.type = 'button';
+      toggleBtn.textContent = b.status === 'open' ? 'Mark done' : 'Reopen';
+      toggleBtn.addEventListener('click', async function () {
+        toggleBtn.disabled = true;
+        try { await C.api('/buy-requests/' + b.id, { method: 'PUT', body: { status: b.status === 'open' ? 'filled' : 'open' } }); await loadBuy(); }
+        catch (err) { alert(err.message || 'Could not update the request.'); toggleBtn.disabled = false; }
+      });
+      var delBtn = document.createElement('button');
+      delBtn.className = 'job-own-btn danger'; delBtn.type = 'button'; delBtn.textContent = 'Delete';
+      delBtn.addEventListener('click', async function () {
+        if (!confirm('Delete this buy request? This cannot be undone.')) return;
+        delBtn.disabled = true;
+        try { await C.api('/buy-requests/' + b.id, { method: 'DELETE' }); await loadBuy(); }
+        catch (err) { alert(err.message || 'Could not delete the request.'); delBtn.disabled = false; }
+      });
+      foot.appendChild(toggleBtn); foot.appendChild(delBtn);
+    }
+    return el;
+  }
+
+  async function loadBuy() {
+    buyStateEl.style.display = ''; buyStateEl.textContent = 'Loading requests…';
+    try {
+      var r = await C.api('/buy-requests');
+      var reqs = r.requests || [];
+      var mine = reqs.filter(function (b) { return b.mine; });
+      var others = reqs.filter(function (b) { return !b.mine; });
+      buyMineEl.innerHTML = ''; buyListEl.innerHTML = '';
+      if (mine.length) {
+        var lbl = document.createElement('p'); lbl.className = 'jobs-mine-label'; lbl.textContent = 'Your requests';
+        buyMineEl.appendChild(lbl);
+        mine.forEach(function (b) { buyMineEl.appendChild(buyCard(b)); });
+        if (others.length) {
+          var lbl2 = document.createElement('p'); lbl2.className = 'jobs-mine-label'; lbl2.style.marginTop = '1.5rem';
+          lbl2.textContent = 'Open requests'; buyMineEl.appendChild(lbl2);
+        }
+      }
+      others.forEach(function (b) { buyListEl.appendChild(buyCard(b)); });
+      if (!reqs.length) {
+        buyStateEl.textContent = 'No buy requests yet. Tap "Request a buy" to post materials for a member to pick up and deliver.';
+      } else {
+        buyStateEl.style.display = 'none';
+      }
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      buyStateEl.textContent = err.message || 'Could not load requests.';
+    }
+  }
+
+  // request-a-buy modal (itemised rows)
+  var buyOverlay = document.getElementById('buyOverlay');
+  var bmsg = document.getElementById('bmsg');
+  var buyItemsWrap = document.getElementById('buyItems');
+  function addItemRow(name, qty) {
+    var row = document.createElement('div'); row.className = 'buy-item-row';
+    row.innerHTML = '<input class="bi-name" maxlength="120" placeholder="Item (e.g. 18mm MDF)" /><input class="bi-qty" maxlength="40" placeholder="Qty (e.g. 2 sheets)" /><button type="button" class="bi-del" aria-label="Remove item">×</button>';
+    if (name) row.querySelector('.bi-name').value = name;
+    if (qty) row.querySelector('.bi-qty').value = qty;
+    row.querySelector('.bi-del').addEventListener('click', function () {
+      if (buyItemsWrap.children.length > 1) row.remove();
+      else { row.querySelector('.bi-name').value = ''; row.querySelector('.bi-qty').value = ''; }
+    });
+    buyItemsWrap.appendChild(row);
+  }
+  document.getElementById('buyAddItem').addEventListener('click', function () { addItemRow(); });
+  document.getElementById('postBuyBtn').addEventListener('click', function () {
+    buyItemsWrap.innerHTML = ''; addItemRow();
+    C.fillZoneSelect(document.getElementById('b_zone'), (me && me.area) || '', '— deliver where? —');
+    ['b_deliver', 'b_where', 'b_budget', 'b_needed', 'b_notes'].forEach(function (id) { document.getElementById(id).value = ''; });
+    bmsg.textContent = ''; bmsg.className = 'mmsg';
+    buyOverlay.classList.add('open');
+  });
+  document.getElementById('closeBuyModal').addEventListener('click', function () { buyOverlay.classList.remove('open'); });
+  buyOverlay.addEventListener('click', function (e) { if (e.target === buyOverlay) buyOverlay.classList.remove('open'); });
+
+  document.getElementById('buyForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = document.getElementById('buySaveBtn');
+    var zone = document.getElementById('b_zone').value;
+    if (!zone) { bmsg.className = 'mmsg error'; bmsg.textContent = 'Choose where to deliver.'; return; }
+    var items = [].slice.call(buyItemsWrap.querySelectorAll('.buy-item-row')).map(function (r) {
+      return { name: r.querySelector('.bi-name').value.trim(), qty: r.querySelector('.bi-qty').value.trim() };
+    }).filter(function (it) { return it.name; });
+    if (!items.length) { bmsg.className = 'mmsg error'; bmsg.textContent = 'Add at least one item.'; return; }
+    btn.disabled = true; bmsg.className = 'mmsg'; bmsg.textContent = 'Posting…';
+    try {
+      await C.api('/buy-requests', { method: 'POST', body: {
+        zone: zone,
+        items: items,
+        deliver_detail: document.getElementById('b_deliver').value.trim(),
+        where_to_buy: document.getElementById('b_where').value.trim(),
+        budget: document.getElementById('b_budget').value.trim(),
+        needed_by: document.getElementById('b_needed').value.trim(),
+        notes: document.getElementById('b_notes').value.trim()
+      }});
+      bmsg.className = 'mmsg ok'; bmsg.textContent = 'Posted — members nearby can now contact you on WhatsApp.';
+      await loadBuy();
+      setTimeout(function () { buyOverlay.classList.remove('open'); }, 900);
+    } catch (err) {
+      bmsg.className = 'mmsg error'; bmsg.textContent = err.message || 'Could not post the request.';
+    } finally { btn.disabled = false; }
+  });
+
   // ── job alerts (Web Push) ──
   var alertsBtn = document.getElementById('alertsBtn');
   var alertsNote = document.getElementById('alertsNote');
@@ -1477,9 +1692,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   function renderAlertsBtn() {
     alertsBtn.style.display = '';
     alertsBtn.classList.toggle('on', alertsOn);
-    alertsBtn.textContent = alertsOn ? '🔔 Job alerts: ON — tap to turn off' : '🔔 Get job alerts for your area';
+    alertsBtn.textContent = alertsOn ? '🔔 Area alerts: ON — tap to turn off' : '🔔 Get alerts for your area';
     alertsNote.textContent = alertsOn
-      ? 'You\'ll be notified when a job is posted in ' + ((me && me.area) || 'your area') + '.'
+      ? 'You\'ll be notified when a job or buy request is posted in ' + ((me && me.area) || 'your area') + '.'
       : '';
   }
   async function initAlerts() {
@@ -1525,7 +1740,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' },
     { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
     { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' },
-    { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' }
+    { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' },
+    { id: 15, date: '2026-07-19', title: 'New: Buy for me', body: 'The Jobs tab is now Jobs / Services. Under Services, tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
