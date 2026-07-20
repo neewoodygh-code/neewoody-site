@@ -28,10 +28,11 @@
   </style>
   <style>
     @media print {
-      body * { visibility: hidden !important; }
-      .cc-overlay { position: static !important; overflow: visible !important; background: transparent !important; padding: 0 !important; }
-      #client-copy, #client-copy * { visibility: visible !important; }
-      #client-copy { position: static !important; margin: 0 !important; max-width: 100% !important; }
+      /* The client copy is portalled to <body>. Hide the whole app and print
+         only the overlay, flowing it in normal document flow across pages. */
+      body > *:not(.cc-overlay) { display: none !important; }
+      .cc-overlay { position: static !important; overflow: visible !important; background: #fff !important; padding: 0 !important; }
+      #client-copy { margin: 0 auto !important; max-width: 100% !important; box-shadow: none !important; }
       .no-print { display: none !important; }
       @page { margin: 14mm; }
     }
@@ -1015,7 +1016,10 @@ function ClientCopy({ q, calc, session, onClose }) {
     </div>
   );
   const SecHdr = ({ch}) => <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',margin:'16px 0 4px'}}>{ch}</div>;
-  return (
+  // Portalled to <body> so the printable #client-copy escapes the summary tab's
+  // flex/overflow scroll ancestors — otherwise @media print clipped it / emitted
+  // blank pages. With it as a direct body child, print can hide everything else.
+  return ReactDOM.createPortal(
     <div className="cc-overlay" style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
       <div className="no-print" style={{maxWidth:480,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
         <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',color:'#fff',fontFamily:FB,fontSize:'.8rem'}}>
@@ -1079,7 +1083,8 @@ function ClientCopy({ q, calc, session, onClose }) {
         </div>
         <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB,marginTop:14,lineHeight:1.5}}>Prepared by {session?.workshopName||'My Workshop'} · {q.refId}</div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

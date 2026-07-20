@@ -446,8 +446,18 @@ select {
 .unlock-check { font-family: var(--mono); font-size: .62rem; color: #5a9a5a; margin-top: .4rem; display: none; }
 .unlock-check.show { display: block; }
 @media print {
-  .calc-wrap, .gen-btn, .hero, nav, footer, .result-cta { display: none !important; }
-  .rpage { display: block !important; }
+  /* Print only the generated cut list. Hide every sibling and neutralise
+     #rpage's fixed/overflow so the full list flows across pages instead of
+     being clipped to one screen (the old rule targeted `.rpage`, which never
+     matched the element `id="rpage"`, and left it position:fixed → blank/clipped). */
+  body > *:not(main) { display: none !important; }
+  main > *:not(#rpage) { display: none !important; }
+  #rpage {
+    position: static !important; inset: auto !important; z-index: auto !important;
+    overflow: visible !important; height: auto !important; display: block !important;
+    background: #fff !important;
+  }
+  #rpage .rhdr, #rpage .result-cta { display: none !important; }
   .rbody { padding: 0 !important; }
 }
 
