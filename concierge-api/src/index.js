@@ -171,6 +171,8 @@ async function route(request, env, ctx) {
   if (mMedia && method === 'GET') return servePhoto(env, request, mMedia[1]);
   const mStoreImg = path.match(/^\/api\/media\/storefront\/(233\d{9})\/(\d+)\.jpg$/);
   if (mStoreImg && method === 'GET') return serveStorefrontPhoto(env, request, mStoreImg[1], Number(mStoreImg[2]));
+  const mLogo = path.match(/^\/api\/media\/logos\/(233\d{9})\.png$/);
+  if (mLogo && method === 'GET') return serveLogo(env, request, mLogo[1]);
 
   // ---- member ----
   if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => getMe(env, m), { allowPending: true });
@@ -178,6 +180,8 @@ async function route(request, env, ctx) {
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
+  if (path === '/api/me/logo'  && method === 'POST')   return withAuth(request, env, (m) => uploadLogo(request, env, m.phone));
+  if (path === '/api/me/logo'  && method === 'DELETE') return withAuth(request, env, (m) => deleteLogo(env, m.phone));
   if (path === '/api/directory' && method === 'GET') return withPaid(request, env, () => directory(env));
 
   // ---- member: storefront (vendor items) ----
@@ -736,6 +740,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
   await env.MEDIA.delete(photoKey(phone));
+  await env.MEDIA.delete(logoKey(phone));
   // Remove all storefront item images for this member (R2 prefix delete).
   try {
     const listed = await env.MEDIA.list({ prefix: `concierge/storefront/${phone}/` });
@@ -761,7 +766,7 @@ async function adminPurgePending(env, request) {
 
   const sub = "(SELECT phone FROM members WHERE status='pending' AND role != 'admin')";
   const { results: pend } = await env.DB.prepare(
-    "SELECT phone, photo_url FROM members WHERE status='pending' AND role != 'admin'"
+    "SELECT phone, photo_url, logo_url FROM members WHERE status='pending' AND role != 'admin'"
   ).all();
   if (!pend || !pend.length) return json({ purged: 0 });
 
@@ -792,7 +797,7 @@ async function adminPurgePending(env, request) {
   ]);
 
   const keys = [];
-  pend.forEach((r) => { if (r.photo_url) keys.push(photoKey(r.phone)); });
+  pend.forEach((r) => { if (r.photo_url) keys.push(photoKey(r.phone)); if (r.logo_url) keys.push(logoKey(r.phone)); });
   (sfItems || []).forEach((i) => keys.push(`concierge/storefront/${i.member_phone}/${i.id}.jpg`));
   (cophotos || []).forEach((c) => keys.push(calloutImgKey(c.id)));
   if (keys.length) {
@@ -2178,6 +2183,48 @@ async function adminDeletePhoto(env, rawPhone) {
   const member = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (!member) return json({ error: 'member_not_found' }, 404);
   return deletePhoto(env, phone);
+}
+
+// ── member business logo (dedicated, separate from the profile photo) ──
+// Always PNG (transparency-preserving); client scales + converts. Public GET
+// like member photos (loads in <img>, low sensitivity).
+function logoKey(phone) { return `concierge/logos/${phone}.png`; }
+
+async function uploadLogo(request, env, phone) {
+  const ct = (request.headers.get('Content-Type') || '').toLowerCase();
+  if (!ct.startsWith('image/png')) return json({ error: 'invalid_image' }, 400);
+  const buf = await request.arrayBuffer();
+  // PNG magic bytes 89 50 4E 47 — rejects arbitrary payloads renamed to image/png
+  const head = new Uint8Array(buf.slice(0, 4));
+  if (buf.byteLength < 67 || head[0] !== 0x89 || head[1] !== 0x50 || head[2] !== 0x4e || head[3] !== 0x47) {
+    return json({ error: 'invalid_image' }, 400);
+  }
+  if (buf.byteLength > PHOTO_MAX_BYTES) return json({ error: 'photo_too_large', max_kb: 300 }, 413);
+
+  await env.MEDIA.put(logoKey(phone), buf, { httpMetadata: { contentType: 'image/png' } });
+  const url = `${new URL(request.url).origin}/api/media/logos/${phone}.png?v=${Date.now()}`;
+  await env.DB.prepare('UPDATE members SET logo_url = ? WHERE phone = ?').bind(url, phone).run();
+  const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  return json({ member: sanitize(updated) }, 201);
+}
+
+async function deleteLogo(env, phone) {
+  await env.MEDIA.delete(logoKey(phone));
+  await env.DB.prepare('UPDATE members SET logo_url = NULL WHERE phone = ?').bind(phone).run();
+  const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  return json({ member: sanitize(updated) });
+}
+
+async function serveLogo(env, request, phone) {
+  const obj = await env.MEDIA.get(logoKey(phone));
+  if (!obj) return json({ error: 'not_found' }, 404);
+  const etag = obj.httpEtag;
+  if (request.headers.get('If-None-Match') === etag) {
+    return new Response(null, { status: 304, headers: { 'ETag': etag } });
+  }
+  return new Response(obj.body, {
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400', 'ETag': etag },
+  });
 }
 
 async function servePhoto(env, request, phone) {

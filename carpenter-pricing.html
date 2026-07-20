@@ -188,6 +188,47 @@ async function carpFetch(path, method='GET', body) {
   return r.json();
 }
 
+// Upload a raw image blob (logo). Returns parsed JSON; throws on non-ok.
+async function carpUpload(path, blob, contentType) {
+  const r = await fetch(`${API}${path}`, {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + getToken(), 'Content-Type': contentType },
+    body: blob,
+  });
+  if (r.status === 401) { location.replace(LOGIN_URL); throw new Error('Unauthorized'); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error === 'photo_too_large' ? 'logo_too_large' : (data.error || 'upload_failed'));
+  return data;
+}
+
+// Scale an image to fit maxDim (aspect preserved) and output PNG (keeps
+// transparency). Shrinks harder if the PNG is over the 300KB cap.
+function compressLogo(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const w0 = img.naturalWidth, h0 = img.naturalHeight;
+      if (!w0 || !h0) return reject(new Error('invalid_image'));
+      const render = (max) => {
+        const s = Math.min(1, max / Math.max(w0, h0));
+        const cv = document.createElement('canvas');
+        cv.width = Math.max(1, Math.round(w0 * s)); cv.height = Math.max(1, Math.round(h0 * s));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        return cv;
+      };
+      render(420).toBlob((b) => {
+        if (b && b.size <= 300 * 1024) return resolve(b);
+        render(280).toBlob((b2) => {
+          (b2 && b2.size <= 300 * 1024) ? resolve(b2) : reject(new Error('logo_too_large'));
+        }, 'image/png');
+      }, 'image/png');
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('invalid_image')); };
+    img.src = url;
+  });
+}
+
 async function apiRegister(workshopName, pin) {
   const r = await fetch(`${API}/carp/register`, {
     method: 'POST',
@@ -482,7 +523,7 @@ function LoginScreen({ onSuccess, onBack }) {
 }
 
 // ── Overhead Settings ─────────────────────────────────────────────────
-function OverheadSettings({ cfg, member, onSave, onBack }) {
+function OverheadSettings({ cfg, member, onMember, onSave, onBack }) {
   const [c, setC] = useState(() => ({
     billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
     ownerRate:    cfg?.ownerRate    ?? DEFAULT_OVERHEAD.ownerRate,
@@ -500,6 +541,26 @@ function OverheadSettings({ cfg, member, onSave, onBack }) {
     },
   }));
   const updBrand = (u) => setC(p => ({ ...p, brand: { ...p.brand, ...u } }));
+  const [logoBusy, setLogoBusy] = useState(false);
+  const [logoErr,  setLogoErr]  = useState('');
+  const pickLogo = async (file) => {
+    if (!file) return;
+    setLogoErr(''); setLogoBusy(true);
+    try {
+      const blob = await compressLogo(file);
+      const res = await carpUpload('/me/logo', blob, 'image/png');
+      if (res && res.member) { onMember && onMember({ ...member, logoUrl: res.member.logo_url || '' }); updBrand({ useLogo: true }); }
+    } catch (e) {
+      setLogoErr(e.message === 'logo_too_large' ? 'That image is too large — try a simpler logo.' : 'Could not upload that image.');
+    }
+    setLogoBusy(false);
+  };
+  const removeLogo = async () => {
+    setLogoErr(''); setLogoBusy(true);
+    try { await carpFetch('/me/logo', 'DELETE'); onMember && onMember({ ...member, logoUrl: '' }); if (!member?.photoUrl) updBrand({ useLogo: false }); }
+    catch (e) { setLogoErr('Could not remove the logo.'); }
+    setLogoBusy(false);
+  };
   const [saving, setSaving] = useState(false);
 
   const updRun   = (id,u) => setC(p=>({...p, running:p.running.map(r=>r.id===id?{...r,...u}:r)}));
@@ -519,7 +580,7 @@ function OverheadSettings({ cfg, member, onSave, onBack }) {
 
   const save = async () => {
     setSaving(true);
-    const toSave = { ...c, brand: { ...c.brand, logoUrl: (c.brand.useLogo && member?.photoUrl) ? member.photoUrl : '' } };
+    const toSave = { ...c, brand: { ...c.brand, logoUrl: c.brand.useLogo ? (member?.logoUrl || member?.photoUrl || '') : '' } };
     await onSave(toSave); setSaving(false); onBack();
   };
 
@@ -560,12 +621,24 @@ function OverheadSettings({ cfg, member, onSave, onBack }) {
               <div><div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:4}}>Location</div>
                 <CtrlInp value={c.brand.location} onChange={e=>updBrand({location:e.target.value})} placeholder="e.g. Spintex, Accra"/></div>
             </div>
-            {member?.photoUrl
-              ? <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontFamily:FB,fontSize:'.85rem',color:S.dark,marginTop:2}}>
-                  <input type="checkbox" checked={c.brand.useLogo} onChange={e=>updBrand({useLogo:e.target.checked})} style={{width:15,height:15,accentColor:S.accent}}/>
-                  Use my profile photo as my quote logo
+            <div style={{marginTop:2}}>
+              <div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:6}}>Business logo</div>
+              <div style={{display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+                {member?.logoUrl ? <img src={member.logoUrl} alt="" style={{height:44,maxWidth:130,objectFit:'contain',background:'#fff',border:`1px solid ${S.border}`,borderRadius:4,padding:3}}/> : null}
+                <label style={{display:'inline-flex',alignItems:'center',background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 12px',fontFamily:FB,fontSize:'.82rem',cursor:logoBusy?'default':'pointer',opacity:logoBusy?.6:1}}>
+                  {logoBusy ? 'Uploading…' : (member?.logoUrl ? 'Replace logo' : 'Upload logo')}
+                  <input type="file" accept="image/png,image/jpeg,image/*" disabled={logoBusy} style={{display:'none'}} onChange={e=>{const f=e.target.files&&e.target.files[0]; e.target.value=''; pickLogo(f);}}/>
                 </label>
-              : <div style={{fontSize:'.75rem',color:S.muted,fontFamily:FB}}>Add a profile photo in your Concierge profile to use it as a logo on quotes.</div>}
+                {member?.logoUrl ? <button type="button" onClick={removeLogo} disabled={logoBusy} style={{background:'transparent',border:`1px solid ${S.border}`,borderRadius:4,color:S.mid,padding:'7px 12px',fontFamily:FB,fontSize:'.82rem',cursor:'pointer'}}>Remove</button> : null}
+              </div>
+              {logoErr ? <div style={{color:S.err,fontSize:'.75rem',fontFamily:FB,marginTop:5}}>{logoErr}</div> : null}
+              {(member?.logoUrl || member?.photoUrl)
+                ? <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontFamily:FB,fontSize:'.85rem',color:S.dark,marginTop:8}}>
+                    <input type="checkbox" checked={c.brand.useLogo} onChange={e=>updBrand({useLogo:e.target.checked})} style={{width:15,height:15,accentColor:S.accent}}/>
+                    Show {member?.logoUrl ? 'my logo' : 'my profile photo'} on quotes
+                  </label>
+                : <div style={{fontSize:'.75rem',color:S.muted,fontFamily:FB,marginTop:6}}>A PNG with a transparent background works best. No logo? You can also use your profile photo.</div>}
+            </div>
           </div>
         </div>} style={{marginBottom:14}}/>
 
@@ -1318,7 +1391,7 @@ function App() {
       setMemberInfo({
         name: m.name || '', businessName: m.business_name || '',
         phone: m.business_phone || m.phone || '', area: m.area || '',
-        photoUrl: m.photo_url || '',
+        photoUrl: m.photo_url || '', logoUrl: m.logo_url || '',
       });
       setOverheadCfg(cfgRes.config || null);
       setQuotes(qRes.quotes || []);
@@ -1418,6 +1491,7 @@ function App() {
     <OverheadSettings
       cfg={overheadCfg}
       member={memberInfo}
+      onMember={setMemberInfo}
       onSave={saveOverhead}
       onBack={()=>setScreen('dashboard')}/>
   );
