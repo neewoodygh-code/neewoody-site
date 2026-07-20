@@ -479,20 +479,16 @@ select {
 .eb-legend svg{flex-shrink:0}
 .eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:18px;padding:16px}
 .eb-item{display:flex;flex-direction:column;align-items:center;gap:4px;page-break-inside:avoid;break-inside:avoid}
-.eb-svg{width:104px;height:88px;touch-action:manipulation;display:block}
+.eb-svg{width:112px;height:97px;touch-action:manipulation;display:block}
 .eb-edge{cursor:pointer;fill:transparent}
 .eb-edge:hover{fill:rgba(200,146,42,.20)}
-.eb-dim-w{font-family:var(--mono);font-size:.58rem;color:var(--clr-mid);text-align:center}
 .eb-part-name{font-size:.6rem;color:var(--clr-mid);text-align:center;line-height:1.25;max-width:112px}
-.eb-dbl-btn{font-family:var(--mono);font-size:.56rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--clr-border);background:#fff;color:var(--clr-muted);border-radius:4px;padding:2px 8px;cursor:pointer;transition:all .15s}
-.eb-dbl-btn.on{background:#1C1A17;color:#fff;border-color:#1C1A17}
 /* Zone warnings */
 .zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
 @media print{
-  /* Force marks (SVG strokes already print; this keeps any bg fills too) */
+  /* SVG strokes already print; this keeps any bg fills too */
   #rpage,#rpage *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .eb-edge:hover{fill:transparent}
-  .eb-dbl-btn{border-color:#999;color:#333}
 }
 
 
@@ -1555,8 +1551,14 @@ function initEbState(parts){
   var seen={};
   parts.forEach(function(p){
     var k=ebKey(p);
-    if(!seen[k]){seen[k]=true;if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name);}
-    if(ebState[k] && ebState[k].dbl===undefined) ebState[k].dbl=false;
+    if(!seen[k]){
+      seen[k]=true;
+      if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name);
+      // Per-edge state is 0=none · 1=band (1 tick) · 2=double+band (3 ticks).
+      // Normalise legacy booleans → 0/1 and drop the old per-part dbl flag.
+      ['t','r','b','l'].forEach(function(s){ ebState[k][s] = ebState[k][s]===2 ? 2 : (ebState[k][s] ? 1 : 0); });
+      if('dbl' in ebState[k]) delete ebState[k].dbl;
+    }
   });
 }
 
@@ -1568,10 +1570,10 @@ function ebLine(x1,y1,x2,y2){
 function ebTicks(side,n){
   var offs = n===3 ? [-6,0,6] : [0], out='';
   offs.forEach(function(o){
-    if(side==='t')      out+=ebLine(52+o,5,52+o,19);   // top edge y=12
-    else if(side==='b') out+=ebLine(52+o,69,52+o,83);  // bottom edge y=76
-    else if(side==='l') out+=ebLine(11,44+o,25,44+o);  // left edge x=18
-    else if(side==='r') out+=ebLine(79,44+o,93,44+o);  // right edge x=86
+    if(side==='t')      out+=ebLine(50+o,3,50+o,17);   // top edge y=10
+    else if(side==='b') out+=ebLine(50+o,63,50+o,77);  // bottom edge y=70
+    else if(side==='l') out+=ebLine(11,40+o,25,40+o);  // left edge x=18
+    else if(side==='r') out+=ebLine(75,40+o,89,40+o);  // right edge x=82
   });
   return out;
 }
@@ -1588,7 +1590,7 @@ function buildEbSheet(parts){
   var legDbl ='<svg width="16" height="16" viewBox="0 0 16 16">'+ebLine(3,2,3,14)+ebLine(8,2,8,14)+ebLine(13,2,13,14)+'</svg>';
   var html='<div class="eb-sheet"><div class="eb-sheet-hdr">'+
     '<div class="eb-sheet-title">Edge Band Sheet</div>'+
-    '<div class="eb-sheet-sub">Tap an edge to band it · ×2 to double the board · then print</div>'+
+    '<div class="eb-sheet-sub">Tap an edge: once to band · twice to double · again to clear</div>'+
   '</div>'+
   '<div class="eb-legend">'+
     '<span>'+legTick+' <b>1 tick</b> = edgeband this edge</span>'+
@@ -1597,24 +1599,25 @@ function buildEbSheet(parts){
   '<div class="eb-grid">';
   unique.forEach(function(u){
     var k=u.key,p=u.part;
-    var eb=ebState[k]||{t:false,r:false,b:false,l:false,dbl:false};
-    var n=eb.dbl?3:1;
+    var eb=ebState[k]||{t:0,r:0,b:0,l:0};
     var qty=parts.filter(function(x){return ebKey(x)===k;}).reduce(function(s,x){return s+x.qty;},0);
     var nm=p.name.replace(/\s*\(Sec\s*\d+\)/g,'');
     var ticks='';
-    ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebTicks(s,n); });
-    // viewBox 0 0 104 88 · board rect edges: top12 bottom76 left18 right86
-    var svg='<svg class="eb-svg" viewBox="0 0 104 88" xmlns="http://www.w3.org/2000/svg" role="img">'+
-        '<rect x="18" y="12" width="68" height="64" fill="#f5f0e8" stroke="#9a9a9a" stroke-width="1.5"/>'+
+    ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebTicks(s, eb[s]===2?3:1); });
+    // Machine-shop layout: length (longer dim) on the right (rotated), width on the bottom.
+    var len=Math.max(p.w,p.d), wid=Math.min(p.w,p.d);
+    // viewBox 0 0 116 100 · board edges: top10 bottom70 left18 right82.
+    var svg='<svg class="eb-svg" viewBox="0 0 116 100" xmlns="http://www.w3.org/2000/svg" role="img">'+
+        '<rect x="18" y="10" width="64" height="60" fill="#f5f0e8" stroke="#9a9a9a" stroke-width="1.5"/>'+
         ticks+
-        '<text x="52" y="48" text-anchor="middle" font-family="ui-monospace,monospace" font-size="14" font-weight="700" fill="#8a6a1e">'+qty+'</text>'+
-        ebHit(k,'t',18,2,68,14)+ebHit(k,'b',18,72,68,14)+ebHit(k,'l',6,12,16,64)+ebHit(k,'r',82,12,16,64)+
+        '<text x="50" y="44" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="700" fill="#8a6a1e">'+qty+'</text>'+
+        '<text x="102" y="40" text-anchor="middle" transform="rotate(-90 102 40)" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+len+'</text>'+
+        '<text x="50" y="92" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+wid+'</text>'+
+        ebHit(k,'t',18,1,64,13)+ebHit(k,'b',18,60,64,14)+ebHit(k,'l',6,10,14,60)+ebHit(k,'r',80,10,14,60)+
       '</svg>';
     html+='<div class="eb-item">'+
       svg+
-      '<div class="eb-dim-w">'+p.w+' × '+p.d+' mm</div>'+
       '<div class="eb-part-name">'+nm+'</div>'+
-      '<button class="eb-dbl-btn'+(eb.dbl?' on':'')+'" data-ebdbl="'+k+'">×2 double</button>'+
     '</div>';
   });
   html+='</div></div>';
@@ -1754,25 +1757,15 @@ document.addEventListener('click', function(e){
     }
     return;
   }
-  // Edge band edge toggles (SVG hit-rects) — redraw the sheet to update ticks
+  // Edge band edge toggles (SVG hit-rects). Each tap cycles the edge:
+  // none → band (1 tick) → double+band (3 ticks) → none. Redraw to update.
   var eg = e.target.closest('.eb-edge');
   if(eg){
     var k    = eg.getAttribute('data-ebkey');
     var side = eg.getAttribute('data-side');
     if(k && side){
-      if(!ebState[k]) ebState[k] = {t:false,r:false,b:false,l:false,dbl:false};
-      ebState[k][side] = !ebState[k][side];
-      rerenderEbSheet();
-    }
-    return;
-  }
-  // Double-the-board toggle (banded edges then show 3 ticks instead of 1)
-  var db = e.target.closest('.eb-dbl-btn');
-  if(db){
-    var dk = db.getAttribute('data-ebdbl');
-    if(dk){
-      if(!ebState[dk]) ebState[dk] = {t:false,r:false,b:false,l:false,dbl:false};
-      ebState[dk].dbl = !ebState[dk].dbl;
+      if(!ebState[k]) ebState[k] = {t:0,r:0,b:0,l:0};
+      ebState[k][side] = ((ebState[k][side]||0) + 1) % 3;
       rerenderEbSheet();
     }
     return;
