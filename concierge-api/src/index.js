@@ -396,13 +396,10 @@ async function updateMe(request, env, member) {
   }
   if ('stock' in body) fields.stock = stockVal(body.stock);
   if ('location_lat' in body || 'location_lng' in body) {
-    const lat = body.location_lat, lng = body.location_lng;
-    if (lat == null || lat === '' || lng == null || lng === '') { fields.location_lat = null; fields.location_lng = null; }
-    else {
-      const la = Number(lat), lo = Number(lng);
-      if (!isFinite(la) || !isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) return json({ error: 'invalid_location' }, 400);
-      fields.location_lat = la; fields.location_lng = lo;
-    }
+    const ll = parseLatLng(body.location_lat, body.location_lng);
+    if (ll === false) return json({ error: 'invalid_location' }, 400);
+    fields.location_lat = ll ? ll[0] : null;
+    fields.location_lng = ll ? ll[1] : null;
   }
   if ('vendor_scale' in body) {
     const vs = validateVendorScale(body.vendor_scale);
@@ -1272,6 +1269,7 @@ async function listBuyRequests(env, member) {
   const { results } = await env.DB.prepare(
     `SELECT b.id, b.poster_phone, b.zone, b.items, b.deliver_detail, b.where_to_buy,
             b.budget, b.needed_by, b.notes, b.status, b.created_at,
+            b.deliver_lat, b.deliver_lng,
             m.name AS poster_name, m.business_name AS poster_business,
             m.is_business AS poster_is_business, m.business_phone AS poster_biz_phone
      FROM buy_requests b JOIN members m ON m.phone = b.poster_phone
@@ -1283,6 +1281,7 @@ async function listBuyRequests(env, member) {
     items: (() => { try { return JSON.parse(b.items) || []; } catch { return []; } })(),
     deliver_detail: b.deliver_detail, where_to_buy: b.where_to_buy,
     budget: b.budget, needed_by: b.needed_by, notes: b.notes,
+    deliver_lat: b.deliver_lat, deliver_lng: b.deliver_lng,
     status: b.status, created_at: b.created_at,
     poster_name: b.poster_name, poster_business: b.poster_business,
     poster_is_business: !!b.poster_is_business,
@@ -1319,6 +1318,10 @@ async function createBuyRequest(request, env, member, ctx) {
   const notes = nullableStr(body.notes);
   if (notes && notes.length > BUY_MAX_TEXT.notes) return json({ error: 'notes_too_long' }, 400);
 
+  const pin = parseLatLng(body.deliver_lat, body.deliver_lng);
+  if (pin === false) return json({ error: 'invalid_location' }, 400);
+  const deliver_lat = pin ? pin[0] : null, deliver_lng = pin ? pin[1] : null;
+
   const open = await env.DB.prepare(
     `SELECT COUNT(*) AS c FROM buy_requests WHERE poster_phone = ? AND status = 'open'`
   ).bind(member.phone).first();
@@ -1327,9 +1330,9 @@ async function createBuyRequest(request, env, member, ctx) {
   }
 
   const r = await env.DB.prepare(
-    `INSERT INTO buy_requests (poster_phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-  ).bind(member.phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes).run();
+    `INSERT INTO buy_requests (poster_phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes, deliver_lat, deliver_lng)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  ).bind(member.phone, zone, items, deliver_detail, where_to_buy, budget, needed_by, notes, deliver_lat, deliver_lng).run();
 
   const row = await env.DB.prepare('SELECT * FROM buy_requests WHERE id = ?').bind(r.meta.last_row_id).first();
 
@@ -2616,6 +2619,15 @@ function nullableStr(v) {
   if (v == null) return null;
   const s = String(v).trim();
   return s === '' ? null : s;
+}
+
+// Parse an optional lat/lng pair. Returns [lat, lng] when valid, null when
+// blank/absent, or false when present-but-invalid (out of range / non-numeric).
+function parseLatLng(lat, lng) {
+  if (lat == null || lat === '' || lng == null || lng === '') return null;
+  const la = Number(lat), lo = Number(lng);
+  if (!isFinite(la) || !isFinite(lo) || la < -90 || la > 90 || lo < -180 || lo > 180) return false;
+  return [la, lo];
 }
 
 // Vendor Storefront free-text (what they sell) — trimmed + length-capped.

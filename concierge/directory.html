@@ -209,6 +209,23 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   letter-spacing:.1em; text-transform:uppercase; background:#25D366; color:#062b12; border-radius:3px; padding:.5rem .9rem; transition:filter .2s; }
 .job-wa:hover{ filter:brightness(1.05); }
 .job-wa svg{ width:14px; height:14px; }
+.job-map{ display:inline-flex; align-items:center; font-family:var(--ui); font-size:.68rem; font-weight:500;
+  letter-spacing:.1em; text-transform:uppercase; background:transparent; color:var(--green);
+  border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.5rem .8rem; }
+.job-map:hover{ border-color:var(--gold); }
+.buy-pin{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; margin-top:.4rem; }
+.buy-pin-btn{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.06em;
+  background:transparent; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.5rem .8rem; cursor:pointer; }
+.buy-pin-btn:hover{ border-color:var(--gold); }
+.buy-pin-clear{ font-family:var(--ui); font-size:.66rem; background:none; border:none; color:var(--muted); text-decoration:underline; cursor:pointer; }
+.buy-pin-msg{ font-size:.76rem; color:var(--muted); }
+.buy-pin-msg.ok{ color:var(--green); } .buy-pin-msg.error{ color:#a52a2a; }
+.buy-near{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; margin:0 0 1.1rem; }
+.buy-near-btn{ font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.06em;
+  background:transparent; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.5rem .8rem; cursor:pointer; }
+.buy-near-btn:hover{ border-color:var(--gold); }
+.buy-near-msg{ font-size:.76rem; color:var(--muted); }
+.buy-near-msg.ok{ color:var(--green); } .buy-near-msg.error{ color:#a52a2a; }
 .job-own-btn{ font-family:var(--ui); font-size:.62rem; letter-spacing:.06em; text-transform:uppercase;
   background:transparent; border:1px solid rgba(11,31,14,.25); border-radius:3px; padding:.4rem .6rem; cursor:pointer; color:var(--ink); }
 .job-own-btn:hover{ border-color:var(--gold); }
@@ -597,6 +614,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         <span class="alerts-note" id="alertsNoteSvc"></span>
       </div>
     </div>
+    <div class="buy-near"><button class="buy-near-btn" id="buyNearBtn" type="button">📍 Show distances (nearest first)</button><span class="buy-near-msg" id="buyNearMsg"></span></div>
     <div id="buyMine"></div>
     <div id="buyList"></div>
     <div id="buyState" class="state">Loading requests…</div>
@@ -863,6 +881,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <select id="b_zone" required></select>
       <label for="b_deliver">Delivery detail <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; landmark / address</span></label>
       <input id="b_deliver" maxlength="200" placeholder="e.g. Near Spintex Shell, blue gate" />
+      <label style="margin-top:.9rem">Delivery pin <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; helps runners see how far you are</span></label>
+      <div class="buy-pin"><button type="button" class="buy-pin-btn" id="b_pinBtn">📍 Use my current location</button><span class="buy-pin-msg" id="b_pinMsg"></span><button type="button" class="buy-pin-clear" id="b_pinClear" style="display:none">Clear</button></div>
       <label for="b_where">Where to buy <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
       <input id="b_where" maxlength="120" placeholder="e.g. Kaneshie market, or wherever's cheapest" />
       <label for="b_budget">Budget <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional</span></label>
@@ -1886,6 +1906,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var n = (b.items || []).length;
     return n > 1 ? (first + ' + ' + (n - 1) + ' more') : first;
   }
+  // Viewer's location for distance-to-drop (client-side only; no live tracking).
+  var buyGeo = null;
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    var R = 6371, toRad = function (d) { return d * Math.PI / 180; };
+    var dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
   function buyCard(b) {
     var el = document.createElement('div'); el.className = 'job-card';
     var poster = C.escapeHtml(b.poster_name || 'Member') +
@@ -1894,6 +1923,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var meta = ['Deliver to ' + b.zone];
     if (b.needed_by) meta.push('by ' + b.needed_by);
     if (b.budget) meta.push('Budget: ' + b.budget);
+    if (b.deliver_lat != null && b.deliver_lng != null && buyGeo) {
+      var d = haversineKm(buyGeo.lat, buyGeo.lng, b.deliver_lat, b.deliver_lng);
+      meta.push('~' + (d < 10 ? d.toFixed(1) : Math.round(d)) + ' km away');
+    }
     var itemsHtml = '<ul class="buy-list">' + (b.items || []).map(function (it) {
       return '<li>' + C.escapeHtml(it.name) + (it.qty ? ' — <strong>' + C.escapeHtml(it.qty) + '</strong>' : '') + '</li>';
     }).join('') + '</ul>';
@@ -1910,6 +1943,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (extra.length ? '<div class="job-desc">' + C.escapeHtml(extra.join(' · ')) + '</div>' : '') +
       '<div class="job-foot">' +
         '<span class="job-poster">' + poster + '</span>' +
+        (b.deliver_lat != null && b.deliver_lng != null ? '<a class="job-map" href="https://www.google.com/maps?q=' + b.deliver_lat + ',' + b.deliver_lng + '" target="_blank" rel="noopener">📍 Map</a>' : '') +
         (b.mine ? '' : '<a class="job-wa" href="' + C.waLink(b.contact_phone) + '?text=' + waText + '" target="_blank" rel="noopener">' + WA_SVG + 'Contact</a>') +
       '</div>';
     if (b.mine) {
@@ -1942,6 +1976,14 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var reqs = r.requests || [];
       var mine = reqs.filter(function (b) { return b.mine; });
       var others = reqs.filter(function (b) { return !b.mine; });
+      if (buyGeo) {
+        // Nearest first: pinned requests ranked by distance, unpinned after.
+        others.sort(function (a, b) {
+          var da = (a.deliver_lat != null && a.deliver_lng != null) ? haversineKm(buyGeo.lat, buyGeo.lng, a.deliver_lat, a.deliver_lng) : Infinity;
+          var db = (b.deliver_lat != null && b.deliver_lng != null) ? haversineKm(buyGeo.lat, buyGeo.lng, b.deliver_lat, b.deliver_lng) : Infinity;
+          return da - db;
+        });
+      }
       buyMineEl.innerHTML = ''; buyListEl.innerHTML = '';
       if (mine.length) {
         var lbl = document.createElement('p'); lbl.className = 'jobs-mine-label'; lbl.textContent = 'Your requests';
@@ -1980,10 +2022,43 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     buyItemsWrap.appendChild(row);
   }
   document.getElementById('buyAddItem').addEventListener('click', function () { addItemRow(); });
+  // Optional delivery pin captured via geolocation.
+  var buyPin = null;
+  function setBuyPin(p) {
+    buyPin = p;
+    var msg = document.getElementById('b_pinMsg'), clr = document.getElementById('b_pinClear');
+    if (p) { msg.textContent = '📍 Pin set (' + p.lat.toFixed(4) + ', ' + p.lng.toFixed(4) + ')'; msg.className = 'buy-pin-msg ok'; clr.style.display = ''; }
+    else { msg.textContent = ''; msg.className = 'buy-pin-msg'; clr.style.display = 'none'; }
+  }
+  document.getElementById('b_pinBtn').addEventListener('click', function () {
+    var btn = this, msg = document.getElementById('b_pinMsg');
+    if (!navigator.geolocation) { msg.textContent = 'Location not available on this device.'; msg.className = 'buy-pin-msg error'; return; }
+    btn.disabled = true; msg.textContent = 'Getting location…'; msg.className = 'buy-pin-msg';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.disabled = false; setBuyPin({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+    }, function () {
+      btn.disabled = false; msg.textContent = 'Could not get location — check permissions.'; msg.className = 'buy-pin-msg error';
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  });
+  document.getElementById('b_pinClear').addEventListener('click', function () { setBuyPin(null); });
+  document.getElementById('buyNearBtn').addEventListener('click', function () {
+    var btn = this, msg = document.getElementById('buyNearMsg');
+    if (!navigator.geolocation) { msg.textContent = 'Location not available on this device.'; msg.className = 'buy-near-msg error'; return; }
+    btn.disabled = true; msg.textContent = 'Getting your location…'; msg.className = 'buy-near-msg';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.disabled = false; buyGeo = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+      btn.textContent = '📍 Distances on (nearest first)';
+      msg.textContent = 'Showing distance to each pinned request.'; msg.className = 'buy-near-msg ok';
+      loadBuy();
+    }, function () {
+      btn.disabled = false; msg.textContent = 'Could not get location — check permissions.'; msg.className = 'buy-near-msg error';
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  });
   document.getElementById('postBuyBtn').addEventListener('click', function () {
     buyItemsWrap.innerHTML = ''; addItemRow();
     C.fillZoneSelect(document.getElementById('b_zone'), (me && me.area) || '', '— deliver where? —');
     ['b_deliver', 'b_where', 'b_budget', 'b_needed', 'b_notes'].forEach(function (id) { document.getElementById(id).value = ''; });
+    setBuyPin(null);
     bmsg.textContent = ''; bmsg.className = 'mmsg';
     buyOverlay.classList.add('open');
   });
@@ -2008,7 +2083,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         where_to_buy: document.getElementById('b_where').value.trim(),
         budget: document.getElementById('b_budget').value.trim(),
         needed_by: document.getElementById('b_needed').value.trim(),
-        notes: document.getElementById('b_notes').value.trim()
+        notes: document.getElementById('b_notes').value.trim(),
+        deliver_lat: buyPin ? buyPin.lat : null,
+        deliver_lng: buyPin ? buyPin.lng : null
       }});
       bmsg.className = 'mmsg ok'; bmsg.textContent = 'Posted — members nearby can now contact you on WhatsApp.';
       await loadBuy();
@@ -2407,7 +2484,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
     { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' },
     { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' },
-    { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' }
+    { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' },
+    { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
