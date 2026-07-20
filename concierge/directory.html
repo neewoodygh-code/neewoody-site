@@ -437,7 +437,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="orders" id="ordersTab" hidden>Orders <span class="tab-count" id="ordersCount" hidden>0</span></button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
-  <button class="tab" data-tab="lessons">Lessons</button>
+  <button class="tab" data-tab="academy">Academy</button>
   <button class="tab" data-tab="support">Support</button>
 </nav>
 
@@ -574,10 +574,10 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
-  <!-- TAB: Lessons (woodworking skill videos) -->
-  <div id="tab-lessons" class="tabpanel" hidden>
+  <!-- TAB: Academy (woodworking skill videos) -->
+  <div id="tab-academy" class="tabpanel" hidden>
     <div class="lead">
-      <h1>Lessons</h1>
+      <h1>Academy</h1>
       <p>Short woodworking videos to sharpen your skills — from setting out a wardrobe carcass to spray-finish technique. Built for how we work here in Ghana. Great for apprentices.</p>
     </div>
     <div class="filters">
@@ -1644,7 +1644,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'lessons', 'support'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'academy', 'support'];
   var jobsLoaded = false;
   var buyLoaded = false;
   var ordersLoaded = false;
@@ -1678,7 +1678,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
-    if (name === 'lessons') { renderLessons(); }
+    if (name === 'academy') { renderLessons(); }
     if (name === 'support' && !supportInit) { supportInit = true; initSupport(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
   }
@@ -2133,7 +2133,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var listEl = document.getElementById('lessonsList'), stEl = document.getElementById('lessonsState'), cnt = document.getElementById('lessonCount');
     if (!LESSONS.length) {
       listEl.innerHTML = ''; cnt.textContent = '';
-      stEl.style.display = ''; stEl.textContent = 'Lessons are coming soon — short skill videos built for how we work here. Got a topic you want covered? Ask in the Support tab.';
+      stEl.style.display = ''; stEl.textContent = 'Academy videos are coming soon — short skill lessons built for how we work here. Got a topic you want covered? Ask in the Support tab.';
       return;
     }
     var lvl = lessonLevelSel.value;
@@ -2238,7 +2238,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
     { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
     { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
-    { id: 25, date: '2026-07-20', title: 'New: Lessons tab', body: 'A Lessons tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' }
+    { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
