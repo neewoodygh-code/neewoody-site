@@ -482,13 +482,15 @@ select {
 .eb-svg{width:112px;height:97px;touch-action:manipulation;display:block}
 .eb-edge{cursor:pointer;fill:transparent}
 .eb-edge:hover{fill:rgba(200,146,42,.20)}
+.eb-grain{cursor:pointer;fill:transparent}
+.eb-grain:hover{fill:rgba(11,31,14,.05)}
 .eb-part-name{font-size:.6rem;color:var(--clr-mid);text-align:center;line-height:1.25;max-width:112px}
 /* Zone warnings */
 .zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
 @media print{
   /* SVG strokes already print; this keeps any bg fills too */
   #rpage,#rpage *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .eb-edge:hover{fill:transparent}
+  .eb-edge:hover,.eb-grain:hover{fill:transparent}
 }
 
 
@@ -1558,6 +1560,8 @@ function initEbState(parts){
       // Normalise legacy booleans → 0/1 and drop the old per-part dbl flag.
       ['t','r','b','l'].forEach(function(s){ ebState[k][s] = ebState[k][s]===2 ? 2 : (ebState[k][s] ? 1 : 0); });
       if('dbl' in ebState[k]) delete ebState[k].dbl;
+      // gflip = grain reversed (length becomes the shorter dim). Default off.
+      if(ebState[k].gflip===undefined) ebState[k].gflip=false;
     }
   });
 }
@@ -1588,32 +1592,40 @@ function buildEbSheet(parts){
   });
   var legTick='<svg width="16" height="16" viewBox="0 0 16 16">'+ebLine(8,2,8,14)+'</svg>';
   var legDbl ='<svg width="16" height="16" viewBox="0 0 16 16">'+ebLine(3,2,3,14)+ebLine(8,2,8,14)+ebLine(13,2,13,14)+'</svg>';
+  var legGrain='<svg width="16" height="16" viewBox="0 0 16 16"><line x1="6" y1="2" x2="6" y2="14" stroke="#b3a892" stroke-width="1.2"/><line x1="10" y1="2" x2="10" y2="14" stroke="#b3a892" stroke-width="1.2"/></svg>';
   var html='<div class="eb-sheet"><div class="eb-sheet-hdr">'+
     '<div class="eb-sheet-title">Edge Band Sheet</div>'+
-    '<div class="eb-sheet-sub">Tap an edge: once to band · twice to double · again to clear</div>'+
+    '<div class="eb-sheet-sub">Edge — tap once to band · twice to double · again to clear.  Middle — tap to flip grain</div>'+
   '</div>'+
   '<div class="eb-legend">'+
     '<span>'+legTick+' <b>1 tick</b> = edgeband this edge</span>'+
     '<span>'+legDbl+' <b>3 ticks</b> = double the board, then edgeband</span>'+
+    '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
   '</div>'+
   '<div class="eb-grid">';
   unique.forEach(function(u){
     var k=u.key,p=u.part;
-    var eb=ebState[k]||{t:0,r:0,b:0,l:0};
+    var eb=ebState[k]||{t:0,r:0,b:0,l:0,gflip:false};
     var qty=parts.filter(function(x){return ebKey(x)===k;}).reduce(function(s,x){return s+x.qty;},0);
     var nm=p.name.replace(/\s*\(Sec\s*\d+\)/g,'');
     var ticks='';
     ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebTicks(s, eb[s]===2?3:1); });
-    // Machine-shop layout: length (longer dim) on the right (rotated), width on the bottom.
-    var len=Math.max(p.w,p.d), wid=Math.min(p.w,p.d);
+    // Length (grain direction) on the right, width on the bottom. Default grain =
+    // the longer dim; tapping the middle flips it (client-chosen reversed grain).
+    var big=Math.max(p.w,p.d), small=Math.min(p.w,p.d);
+    var len=eb.gflip?small:big, wid=eb.gflip?big:small;
+    // Faint vertical lines show the grain runs along the length.
+    var grain='<line x1="35" y1="15" x2="35" y2="65" stroke="#b3a892" stroke-width="1"/>'+
+              '<line x1="65" y1="15" x2="65" y2="65" stroke="#b3a892" stroke-width="1"/>';
     // viewBox 0 0 116 100 · board edges: top10 bottom70 left18 right82.
     var svg='<svg class="eb-svg" viewBox="0 0 116 100" xmlns="http://www.w3.org/2000/svg" role="img">'+
         '<rect x="18" y="10" width="64" height="60" fill="#f5f0e8" stroke="#9a9a9a" stroke-width="1.5"/>'+
-        ticks+
+        grain+ticks+
         '<text x="50" y="44" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="700" fill="#8a6a1e">'+qty+'</text>'+
         '<text x="102" y="40" text-anchor="middle" transform="rotate(-90 102 40)" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+len+'</text>'+
         '<text x="50" y="92" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+wid+'</text>'+
         ebHit(k,'t',18,1,64,13)+ebHit(k,'b',18,60,64,14)+ebHit(k,'l',6,10,14,60)+ebHit(k,'r',80,10,14,60)+
+        '<rect class="eb-grain" data-ebkey="'+k+'" x="22" y="16" width="56" height="42" fill="transparent"/>'+
       '</svg>';
     html+='<div class="eb-item">'+
       svg+
@@ -1766,6 +1778,17 @@ document.addEventListener('click', function(e){
     if(k && side){
       if(!ebState[k]) ebState[k] = {t:0,r:0,b:0,l:0};
       ebState[k][side] = ((ebState[k][side]||0) + 1) % 3;
+      rerenderEbSheet();
+    }
+    return;
+  }
+  // Grain flip (tap the middle of a box) — swaps which dim is the length
+  var grn = e.target.closest('.eb-grain');
+  if(grn){
+    var gk = grn.getAttribute('data-ebkey');
+    if(gk){
+      if(!ebState[gk]) ebState[gk] = {t:0,r:0,b:0,l:0};
+      ebState[gk].gflip = !ebState[gk].gflip;
       rerenderEbSheet();
     }
     return;
