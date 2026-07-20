@@ -278,7 +278,7 @@ select {
 .adv-grid { background: var(--clr-surface); border: 1.5px solid var(--clr-border); border-radius: var(--radius-lg); padding: 1rem; display: flex; flex-direction: column; gap: .75rem; margin-bottom: .75rem; }
 
 /* ── RESULTS PAGE ── */
-#rpage { display: none; position: fixed; inset: 0; background: var(--clr-bg); z-index: 200; overflow-y: auto; }
+#rpage { display: none; position: fixed; inset: 0; background: var(--clr-bg); z-index: 1000; overflow-y: auto; }
 #rpage.show { display: block; }
 .rhdr { background: var(--clr-surface); border-bottom: 1px solid var(--clr-border); padding: .8rem 1rem; display: flex; align-items: center; gap: .75rem; position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow-sm); }
 .rbtn { background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); color: var(--clr-dark); border-radius: var(--radius); padding: .45rem .9rem; font-family: var(--ff); font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s; }
@@ -347,7 +347,7 @@ select {
   padding: 1.25rem; background: var(--clr-dark);
   border-radius: var(--radius-lg); color: #fff;
 }
-.bf-logo { height: 40px; width: auto; mix-blend-mode: screen; opacity: .9; }
+.bf-logo { height: 40px; width: auto; filter: invert(1); opacity: .95; }
 .bf-info { flex: 1; }
 .bf-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; }
 .bf-details { font-size: .75rem; color: rgba(255,255,255,.55); margin-top: .25rem; line-height: 1.7; font-family: var(--mono); }
@@ -570,7 +570,7 @@ select {
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span aria-current="page">Carpenter Tools</span>
     </nav>
-    <img src="images/Neewoody_PNG_1.png" alt="Neewoody Custom Woodwork"
+    <img src="images/logo.png" alt="Neewoody Custom Woodwork"
          style="height:48px;width:auto;object-fit:contain;margin-bottom:1rem;display:block"
          onerror="this.style.display='none'">
     <div class="carpenter-badge">
@@ -796,7 +796,7 @@ select {
 </div><!-- end calc-wrap -->
 
 <!-- ════ MY CUTLISTS OVERLAY (members) ════ -->
-<div id="mycl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:400;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeCutlists()">
+<div id="mycl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:1100;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeCutlists()">
   <div style="background:#fff;border-radius:12px;width:100%;max-width:440px;max-height:80vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.35)">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;border-bottom:1px solid #e8e2d6">
       <strong style="font-size:1rem">📂 My Cutlists</strong>
@@ -812,7 +812,7 @@ select {
     <button class="rbtn" onclick="closeR()">← Edit</button>
     <div class="rhdr-title">Parts &amp; Cut List</div>
     <button class="rbtn" onclick="saveCutlist()" title="Save this cut list to your Concierge account">💾 Save</button>
-    <button class="rbtn" onclick="window.print()">⎙ Print</button>
+    <button class="rbtn" onclick="window.print()">⎙ Print / Save PDF</button>
   </div>
   <div class="rbody" id="rbody"></div>
 </div>
@@ -1674,14 +1674,14 @@ function generate(){
     '<div class="print-gate">'+
       '<div class="print-gate-hint">Follow us on Instagram or TikTok to <span>unlock print</span></div>'+
       '<div class="print-reveal" id="print-reveal">'+
-        '<button class="btn-print" onclick="window.print()">'+prSVG+' Print Cut List</button>'+
+        '<button class="btn-print" onclick="window.print()">'+prSVG+' Print / Save PDF</button>'+
         '<div class="unlock-check show">✓ Thanks for the follow — print unlocked</div>'+
       '</div>'+
     '</div>'+
   '</div>';
 
   // Brand footer with logo
-  var bf='<div class="brand-footer"><img src="images/Neewoody_PNG_1.png" class="bf-logo" alt="Neewoody logo"><div class="bf-info"><div class="bf-name">Neewoody Custom Woodwork</div><div class="bf-details">Accra, Ghana &nbsp;·&nbsp; <a href="tel:+233244633464">+233 24 463 3464</a> &nbsp;·&nbsp; <a href="https://instagram.com/neewoodygh">@neewoodygh</a> &nbsp;·&nbsp; neewoodygh.com</div></div></div>';
+  var bf='<div class="brand-footer"><img src="images/logo.png" class="bf-logo" alt="Neewoody logo" onerror="this.style.display=\'none\'"><div class="bf-info"><div class="bf-name">Neewoody Custom Woodwork</div><div class="bf-details">Accra, Ghana &nbsp;·&nbsp; <a href="tel:+233244633464">+233 24 463 3464</a> &nbsp;·&nbsp; <a href="https://instagram.com/neewoodygh">@neewoodygh</a> &nbsp;·&nbsp; neewoodygh.com</div></div></div>';
 
   var ebSheet=buildEbSheet(r.parts);
   document.getElementById('rbody').innerHTML=aw+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
