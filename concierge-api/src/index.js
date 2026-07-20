@@ -254,6 +254,7 @@ async function route(request, env, ctx) {
   // ---- admin: members ----
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
   if (path === '/api/admin/members' && method === 'POST') return withAdmin(request, env, () => adminCreateMember(request, env));
+  if (path === '/api/admin/purge-pending' && method === 'POST') return withAdmin(request, env, () => adminPurgePending(env, request));
 
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
@@ -746,6 +747,60 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
   } catch (e) { console.error('callout image cleanup failed:', e && e.message); }
 
   return json({ deleted: true, phone });
+}
+
+// Bulk-delete every pending member (never admins/approved/suspended). Set-based
+// so all DB deletes run in ONE batch (keeps subrequests low even at scale); R2
+// cleanup runs only for the rare pending member that actually has an asset.
+// Guarded by an explicit {confirm:'purge-pending'} body; the admin UI adds its
+// own count-echo prompts on top. NOTE: table list mirrors adminDeleteMember —
+// keep both in sync on schema changes.
+async function adminPurgePending(env, request) {
+  const body = await readJson(request);
+  if (body.confirm !== 'purge-pending') return json({ error: 'confirm_required' }, 400);
+
+  const sub = "(SELECT phone FROM members WHERE status='pending' AND role != 'admin')";
+  const { results: pend } = await env.DB.prepare(
+    "SELECT phone, photo_url FROM members WHERE status='pending' AND role != 'admin'"
+  ).all();
+  if (!pend || !pend.length) return json({ purged: 0 });
+
+  // Gather R2 keys BEFORE the rows are deleted.
+  const { results: sfItems } = await env.DB.prepare(
+    `SELECT id, member_phone FROM storefront_items WHERE member_phone IN ${sub}`
+  ).all();
+  const { results: cophotos } = await env.DB.prepare(
+    `SELECT id FROM callouts WHERE has_photo = 1 AND member_phone IN ${sub}`
+  ).all();
+
+  await env.DB.batch([
+    env.DB.prepare(`DELETE FROM payments WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM payment_intents WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM saved_cutlists WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM login_attempts WHERE phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM jobs WHERE poster_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM buy_requests WHERE poster_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM orders WHERE vendor_phone IN ${sub} OR buyer_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM suggestions WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM callouts WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM notifications WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM push_subs WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM members WHERE status='pending' AND role != 'admin'`),
+  ]);
+
+  const keys = [];
+  pend.forEach((r) => { if (r.photo_url) keys.push(photoKey(r.phone)); });
+  (sfItems || []).forEach((i) => keys.push(`concierge/storefront/${i.member_phone}/${i.id}.jpg`));
+  (cophotos || []).forEach((c) => keys.push(calloutImgKey(c.id)));
+  if (keys.length) {
+    try { await Promise.all(keys.map((k) => env.MEDIA.delete(k))); }
+    catch (e) { console.error('purge R2 cleanup failed:', e && e.message); }
+  }
+
+  return json({ purged: pend.length });
 }
 
 async function adminRecordPayment(request, env) {

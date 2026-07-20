@@ -194,6 +194,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
           <select id="statusFilter"><option value="">All</option><option value="pending">Pending</option><option value="approved">Approved</option><option value="suspended">Suspended</option></select></div>
         <div class="field" style="max-width:260px"><label>Search</label><input id="memSearch" type="search" placeholder="Name, business, phone…"></div>
         <button class="btn ghost" id="reloadBtn" type="button">Reload</button>
+        <button class="btn ghost" id="purgePendingBtn" type="button" style="color:#a52a2a;border-color:rgba(165,42,42,.4)">Purge pending</button>
       </div>
       <div class="table-scroll">
         <table>
@@ -463,6 +464,26 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   statusFilter.addEventListener('change', renderMembers);
   memSearch.addEventListener('input', renderMembers);
   document.getElementById('reloadBtn').addEventListener('click', loadMembers);
+
+  document.getElementById('purgePendingBtn').addEventListener('click', async function () {
+    var btn = this;
+    var pend = (members || []).filter(function (m) { return m.status === 'pending' && m.role !== 'admin'; });
+    if (!pend.length) { alert('No pending members to purge.'); return; }
+    var names = pend.slice(0, 8).map(function (m) { return '• ' + m.name + ' (' + C.displayPhone(m.phone) + ')'; }).join('\n');
+    if (pend.length > 8) names += '\n…and ' + (pend.length - 8) + ' more';
+    if (!confirm('Permanently DELETE all ' + pend.length + ' pending member(s)? This cannot be undone — it removes their registration and any saved data.\n\n' + names)) return;
+    var typed = prompt('This is permanent. Type the number ' + pend.length + ' to confirm the purge:');
+    if (typed === null) return;
+    if (typed.trim() !== String(pend.length)) { alert('Number did not match — purge cancelled.'); return; }
+    btn.disabled = true; var old = btn.textContent; btn.textContent = 'Purging…';
+    try {
+      var r = await C.api('/admin/purge-pending', { method: 'POST', body: { confirm: 'purge-pending' } });
+      await loadMembers();
+      alert('Purged ' + (r.purged || 0) + ' pending member(s).');
+    } catch (err) {
+      alert(err.message || 'Could not purge pending members.');
+    } finally { btn.disabled = false; btn.textContent = old; }
+  });
 
   function statusPill(s) { return '<span class="pill ' + s + '">' + s + '</span>'; }
 
