@@ -167,20 +167,84 @@
   var COVERAGE_MAX_ZONES = 12;
 
   // Area vocabulary: Greater Accra zones first, then every other region.
+  // Neighbourhood/town-level zones, sub-grouped so a long list stays scannable.
+  // Each non-Accra region ends in its bare region name as the "elsewhere in
+  // region" catch-all — this also keeps every legacy region-level profile valid.
   var ZONE_GROUPS = [
-    { label: 'Greater Accra', zones: [
-      'Spintex', 'Tema', 'Ashaiman', 'East Legon', 'Madina', 'Adenta',
-      'Ashaley Botwe / Lakeside', 'Achimota', 'Dome / Kwabenya', 'Lapaz / Abeka',
-      'Dansoman', 'Kaneshie', 'Osu / Labadi', 'Teshie / Nungua',
-      'Cantonments / Airport', 'Circle / Adabraka', 'Kasoa', 'Weija / Gbawe',
-      'Amasaman / Pokuase', 'Dodowa / Oyibi', 'Ada / Prampram',
-      'Greater Accra — other'
+    { label: 'Accra — Central', zones: [
+      'Accra Central (Makola / Tudu)', 'Jamestown / Ussher Town', 'Korle Bu / Korle Gonno',
+      'Adabraka', 'Asylum Down', 'Kokomlemle', 'Kwame Nkrumah Circle',
+      'Ridge', 'Osu', 'Labone', 'Cantonments', 'Airport Residential', 'Ringway / Ring Road'
     ]},
-    { label: 'Regions', zones: [
-      'Ashanti Region', 'Central Region', 'Eastern Region', 'Western Region',
-      'Western North Region', 'Volta Region', 'Oti Region', 'Bono Region',
-      'Bono East Region', 'Ahafo Region', 'Northern Region', 'Savannah Region',
-      'North East Region', 'Upper East Region', 'Upper West Region'
+    { label: 'Accra — East', zones: [
+      'East Legon', 'East Legon Hills', 'Adjiringanor / Trasacco', 'Spintex',
+      'Baatsona / Sakumono', 'Teshie', 'Nungua', 'La (Labadi)'
+    ]},
+    { label: 'Accra — North & North-East', zones: [
+      'Legon / North Legon', 'Madina', 'Adenta', 'Ashaley Botwe / Lakeside',
+      'Ogbojo', 'Oyarifa', 'Haatso', 'Dome / Kwabenya', 'Agbogba / Ashongman',
+      'Achimota', 'Dzorwulu', 'Roman Ridge', 'Abelemkpe'
+    ]},
+    { label: 'Accra — West', zones: [
+      'Lapaz', 'Abeka', 'Dansoman', 'Kaneshie', 'Odorkor', 'Darkuman',
+      'Sowutuom', 'Awoshie / Anyaa', 'Weija / Gbawe', 'Mallam / McCarthy Hill', 'Kasoa'
+    ]},
+    { label: 'Accra — Tema & Coastal', zones: [
+      'Tema', 'Ashaiman', 'Sakumono', 'Kpone', 'Prampram', 'Ada', 'Afienya / Dawhenya'
+    ]},
+    { label: 'Accra — Peri-urban', zones: [
+      'Amasaman / Pokuase', 'Oyibi / Dodowa', 'Greater Accra — other'
+    ]},
+    { label: 'Ashanti', zones: [
+      'Kumasi — Adum / Central', 'Kumasi — Asokwa', 'Kumasi — Suame', 'Kumasi — Bantama',
+      'Kumasi — Tafo', 'Kumasi — Ahodwo / Nhyiaeso', 'Kumasi — Oforikrom / KNUST',
+      'Asokore Mampong', 'Ejisu', 'Obuasi', 'Konongo', 'Mampong', 'Bekwai', 'Offinso',
+      'Ashanti Region'
+    ]},
+    { label: 'Central', zones: [
+      'Cape Coast', 'Elmina', 'Winneba', 'Agona Swedru', 'Mankessim', 'Saltpond',
+      'Dunkwa-on-Offin', 'Assin Fosu', 'Central Region'
+    ]},
+    { label: 'Eastern', zones: [
+      'Koforidua', 'Nsawam', 'Aburi', 'Akosombo / Atimpoku', 'Nkawkaw', 'Suhum',
+      'Akim Oda', 'Kibi', 'Somanya / Odumase', 'Akropong (Akuapem)', 'Eastern Region'
+    ]},
+    { label: 'Western', zones: [
+      'Takoradi', 'Sekondi', 'Tarkwa', 'Axim', 'Prestea', 'Bogoso',
+      'Agona Nkwanta', 'Shama', 'Western Region'
+    ]},
+    { label: 'Western North', zones: [
+      'Sefwi Wiawso', 'Bibiani', 'Enchi', 'Juaboso', 'Bodi', 'Western North Region'
+    ]},
+    { label: 'Volta', zones: [
+      'Ho', 'Keta', 'Aflao', 'Hohoe', 'Kpando', 'Sogakope', 'Denu', 'Anloga', 'Volta Region'
+    ]},
+    { label: 'Oti', zones: [
+      'Dambai', 'Jasikan', 'Kadjebi', 'Nkwanta', 'Kete Krachi', 'Worawora', 'Oti Region'
+    ]},
+    { label: 'Bono', zones: [
+      'Sunyani', 'Berekum', 'Dormaa Ahenkro', 'Wenchi', 'Nsawkaw', 'Bono Region'
+    ]},
+    { label: 'Bono East', zones: [
+      'Techiman', 'Kintampo', 'Nkoranza', 'Atebubu', 'Yeji', 'Bono East Region'
+    ]},
+    { label: 'Ahafo', zones: [
+      'Goaso', 'Bechem', 'Hwidiem', 'Kenyasi', 'Duayaw Nkwanta', 'Ahafo Region'
+    ]},
+    { label: 'Northern', zones: [
+      'Tamale', 'Yendi', 'Savelugu', 'Bimbilla', 'Gushegu', 'Tolon', 'Northern Region'
+    ]},
+    { label: 'Savannah', zones: [
+      'Damongo', 'Bole', 'Salaga', 'Sawla', 'Buipe', 'Savannah Region'
+    ]},
+    { label: 'North East', zones: [
+      'Nalerigu', 'Walewale', 'Gambaga', 'Bunkpurugu', 'Chereponi', 'North East Region'
+    ]},
+    { label: 'Upper East', zones: [
+      'Bolgatanga', 'Bawku', 'Navrongo', 'Zebilla', 'Paga', 'Upper East Region'
+    ]},
+    { label: 'Upper West', zones: [
+      'Wa', 'Tumu', 'Jirapa', 'Nadowli', 'Lawra', 'Nandom', 'Upper West Region'
     ]}
   ];
 
