@@ -482,7 +482,7 @@ function LoginScreen({ onSuccess, onBack }) {
 }
 
 // ── Overhead Settings ─────────────────────────────────────────────────
-function OverheadSettings({ cfg, onSave, onBack }) {
+function OverheadSettings({ cfg, member, onSave, onBack }) {
   const [c, setC] = useState(() => ({
     billableDays: cfg?.billableDays ?? DEFAULT_OVERHEAD.billableDays,
     ownerRate:    cfg?.ownerRate    ?? DEFAULT_OVERHEAD.ownerRate,
@@ -491,7 +491,15 @@ function OverheadSettings({ cfg, onSave, onBack }) {
     addOnPcts:    cfg?.addOnPcts    ? {...cfg.addOnPcts}   : {...DEFAULT_OVERHEAD.addOnPcts},
     running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
     capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
+    brand: {
+      name:     cfg?.brand?.name     ?? (member?.businessName || member?.name || ''),
+      phone:    cfg?.brand?.phone    ?? (member?.phone || ''),
+      location: cfg?.brand?.location ?? (member?.area || ''),
+      tagline:  cfg?.brand?.tagline  ?? '',
+      useLogo:  cfg?.brand?.useLogo  ?? false,
+    },
   }));
+  const updBrand = (u) => setC(p => ({ ...p, brand: { ...p.brand, ...u } }));
   const [saving, setSaving] = useState(false);
 
   const updRun   = (id,u) => setC(p=>({...p, running:p.running.map(r=>r.id===id?{...r,...u}:r)}));
@@ -502,14 +510,18 @@ function OverheadSettings({ cfg, onSave, onBack }) {
   const remCap   = id     => setC(p=>({...p, capital:p.capital.filter(x=>x.id!==id)}));
   const updTier  = (id,v) => setC(p=>({...p, tierMults:{...p.tierMults,[id]:v}}));
   const updAddOn = (id,v) => setC(p=>({...p, addOnPcts:{...p.addOnPcts,[id]:v}}));
-  const reset    = ()     => setC({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, labourRates:{...DEFAULT_OVERHEAD.labourRates}, tierMults:{...DEFAULT_OVERHEAD.tierMults}, addOnPcts:{...DEFAULT_OVERHEAD.addOnPcts}, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})) });
+  const reset    = ()     => setC(p=>({ billableDays:DEFAULT_OVERHEAD.billableDays, ownerRate:DEFAULT_OVERHEAD.ownerRate, labourRates:{...DEFAULT_OVERHEAD.labourRates}, tierMults:{...DEFAULT_OVERHEAD.tierMults}, addOnPcts:{...DEFAULT_OVERHEAD.addOnPcts}, running:DEFAULT_OVERHEAD.running.map(r=>({...r})), capital:DEFAULT_OVERHEAD.capital.map(x=>({...x})), brand:p.brand }));
 
   const runTotal    = c.running.reduce((s,r)=>s+(+r.amount||0), 0);
   const capMonthly  = c.capital.reduce((s,x)=>s+(+x.cost||0)/(Math.max(1,+x.lifeYears||1)*12), 0);
   const totalMonthly= runTotal + capMonthly;
   const dayRate     = Math.round(totalMonthly / Math.max(1,+c.billableDays||20));
 
-  const save = async () => { setSaving(true); await onSave(c); setSaving(false); onBack(); };
+  const save = async () => {
+    setSaving(true);
+    const toSave = { ...c, brand: { ...c.brand, logoUrl: (c.brand.useLogo && member?.photoUrl) ? member.photoUrl : '' } };
+    await onSave(toSave); setSaving(false); onBack();
+  };
 
   return (
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
@@ -533,6 +545,29 @@ function OverheadSettings({ cfg, onSave, onBack }) {
             <div style={{fontSize:'.85rem',fontFamily:FM,color:'rgba(255,255,255,.65)'}}>{GHS(Math.round(capMonthly))}/mo</div>
           </div>
         </div>
+
+        <Card ch={<div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Your branding · quote letterhead</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>This is what your client sees at the top of the quote you print or save — your own business details, never Neewoody's.</div>
+          <div style={{display:'grid',gap:10}}>
+            <div><div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:4}}>Business name</div>
+              <CtrlInp value={c.brand.name} onChange={e=>updBrand({name:e.target.value})} placeholder="e.g. Mensah Woodworks"/></div>
+            <div><div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:4}}>Tagline (optional)</div>
+              <CtrlInp value={c.brand.tagline} onChange={e=>updBrand({tagline:e.target.value})} placeholder="e.g. Bespoke furniture &amp; fittings"/></div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+              <div><div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:4}}>Phone</div>
+                <CtrlInp value={c.brand.phone} onChange={e=>updBrand({phone:e.target.value})} placeholder="02X XXX XXXX"/></div>
+              <div><div style={{fontFamily:FM,fontSize:'.6rem',letterSpacing:'.1em',textTransform:'uppercase',color:S.muted,marginBottom:4}}>Location</div>
+                <CtrlInp value={c.brand.location} onChange={e=>updBrand({location:e.target.value})} placeholder="e.g. Spintex, Accra"/></div>
+            </div>
+            {member?.photoUrl
+              ? <label style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontFamily:FB,fontSize:'.85rem',color:S.dark,marginTop:2}}>
+                  <input type="checkbox" checked={c.brand.useLogo} onChange={e=>updBrand({useLogo:e.target.checked})} style={{width:15,height:15,accentColor:S.accent}}/>
+                  Use my profile photo as my quote logo
+                </label>
+              : <div style={{fontSize:'.75rem',color:S.muted,fontFamily:FB}}>Add a profile photo in your Concierge profile to use it as a logo on quotes.</div>}
+          </div>
+        </div>} style={{marginBottom:14}}/>
 
         <Card ch={<div>
           <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Billable days per month</div>
@@ -753,7 +788,7 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
         {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg}/>}
         {tab==='materials' && <MaterialsTab q={q} upd={upd}/>}
         {tab==='logistics' && <LogisticsTab q={q} upd={upd}/>}
-        {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} onStatusChange={s=>upd({status:s})} onSave={save}/>}
+        {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} brand={overheadCfg?.brand} onStatusChange={s=>upd({status:s})} onSave={save}/>}
         {tab==='costs'     && <CostsTab q={q} upd={upd} calc={calc}/>}
         {tab==='notes'     && <div><Lbl ch="Notes"/><CtrlTA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
       </div>
@@ -1005,7 +1040,10 @@ function LogisticsTab({ q, upd }) {
 // Expenses (overhead + logistics, encapsulated — no tool-wear line items a
 // layman would balk at) and a Service charge (the margin). Tier multiplier,
 // gross-margin %, net-profit projection and day-rate never appear here.
-function ClientCopy({ q, calc, session, onClose }) {
+function ClientCopy({ q, calc, session, brand, onClose }) {
+  const bName = (brand && brand.name) || session?.workshopName || 'My Workshop';
+  const bContact = [brand && brand.phone, brand && brand.location].filter(Boolean).join('  ·  ');
+  const bLogo = brand && brand.logoUrl;
   const [itemize, setItemize] = useState(true);
   const mats       = [...(q.materials||[]), ...(q.optionals||[])].filter(m=>m.on && matTotal(m)>0);
   const expenses   = calc.overhead + calc.logistics;
@@ -1033,16 +1071,21 @@ function ClientCopy({ q, calc, session, onClose }) {
         </div>
       </div>
       <div id="client-copy" style={{maxWidth:480,margin:'0 auto',background:'#fff',padding:'24px 26px'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',borderBottom:`1px solid ${S.border}`,paddingBottom:12}}>
-          <div>
-            <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{session?.workshopName||'My Workshop'}</div>
-            <div style={{fontSize:'.82rem',color:S.mid,fontFamily:FB,marginTop:2}}>Quote for {q.client||'—'}</div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',borderBottom:`1px solid ${S.border}`,paddingBottom:12,gap:12}}>
+          <div style={{display:'flex',gap:12,alignItems:'flex-start',minWidth:0}}>
+            {bLogo ? <img src={bLogo} alt="" style={{width:46,height:46,borderRadius:6,objectFit:'cover',flex:'none'}}/> : null}
+            <div style={{minWidth:0}}>
+              <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark,lineHeight:1.15}}>{bName}</div>
+              {brand && brand.tagline ? <div style={{fontSize:'.74rem',color:S.mid,fontFamily:FB,marginTop:1}}>{brand.tagline}</div> : null}
+              {bContact ? <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:3}}>{bContact}</div> : null}
+            </div>
           </div>
-          <div style={{textAlign:'right',fontFamily:FM,fontSize:'.72rem',color:S.muted}}>
+          <div style={{textAlign:'right',fontFamily:FM,fontSize:'.72rem',color:S.muted,flex:'none'}}>
             <div>{q.refId}</div>
             <div style={{marginTop:2}}>{q.createdAt?fmtDate(q.createdAt):''}</div>
           </div>
         </div>
+        <div style={{fontSize:'.82rem',color:S.mid,fontFamily:FB,marginTop:8}}>Quote for {q.client||'—'}</div>
 
         <SecHdr ch="Materials"/>
         {itemize
@@ -1082,7 +1125,7 @@ function ClientCopy({ q, calc, session, onClose }) {
           <span style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.dark}}>Total</span>
           <span style={{fontFamily:FD,fontSize:'1.5rem',fontWeight:700,color:S.accent}}>{GHS(calc.quotedPrice)}</span>
         </div>
-        <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB,marginTop:14,lineHeight:1.5}}>Prepared by {session?.workshopName||'My Workshop'} · {q.refId}</div>
+        <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB,marginTop:14,lineHeight:1.5}}>Prepared by {bName} · {q.refId}</div>
       </div>
     </div>,
     document.body
@@ -1090,7 +1133,7 @@ function ClientCopy({ q, calc, session, onClose }) {
 }
 
 // ── Summary Tab ───────────────────────────────────────────────────────
-function SummaryTab({ q, calc, session, onStatusChange, onSave }) {
+function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
   const [showClient, setShowClient] = useState(false);
   const totalDays   = (q.workshopDays||0)+(q.siteDays||0);
   const activeAddOns= ADDONS.filter(a=>q.addOns?.[a.id]);
@@ -1154,7 +1197,7 @@ function SummaryTab({ q, calc, session, onStatusChange, onSave }) {
         </div>
         <Btn ch="Save quote" onClick={onSave} full color={S.accent}/>
       </div>}/>
-      {showClient && <ClientCopy q={q} calc={calc} session={session} onClose={()=>setShowClient(false)}/>}
+      {showClient && <ClientCopy q={q} calc={calc} session={session} brand={brand} onClose={()=>setShowClient(false)}/>}
     </div>
   );
 }
@@ -1253,6 +1296,7 @@ function App() {
   const [session,     setSession_]    = useState(null);
   const [quotes,      setQuotes]      = useState([]);
   const [overheadCfg, setOverheadCfg] = useState(null);
+  const [memberInfo,  setMemberInfo]  = useState(null);
   const [activeId,    setActiveId]    = useState(null);
 
   function logout() {
@@ -1271,6 +1315,11 @@ function App() {
       ]);
       const m = (meRes && meRes.member) || {};
       setSession_({ carpId: m.phone, workshopName: (m.business_name || m.name || 'My Workshop'), pin: '' });
+      setMemberInfo({
+        name: m.name || '', businessName: m.business_name || '',
+        phone: m.business_phone || m.phone || '', area: m.area || '',
+        photoUrl: m.photo_url || '',
+      });
       setOverheadCfg(cfgRes.config || null);
       setQuotes(qRes.quotes || []);
       return { ok: true, hasConfig: !!cfgRes.config };
@@ -1368,6 +1417,7 @@ function App() {
   if (screen === 'settings') return (
     <OverheadSettings
       cfg={overheadCfg}
+      member={memberInfo}
       onSave={saveOverhead}
       onBack={()=>setScreen('dashboard')}/>
   );
