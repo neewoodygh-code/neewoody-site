@@ -437,6 +437,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="orders" id="ordersTab" hidden>Orders <span class="tab-count" id="ordersCount" hidden>0</span></button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
+  <button class="tab" data-tab="lessons">Lessons</button>
   <button class="tab" data-tab="support">Support</button>
 </nav>
 
@@ -573,20 +574,29 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
+  <!-- TAB: Lessons (woodworking skill videos) -->
+  <div id="tab-lessons" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>Lessons</h1>
+      <p>Short woodworking videos to sharpen your skills — from setting out a wardrobe carcass to spray-finish technique. Built for how we work here in Ghana. Great for apprentices.</p>
+    </div>
+    <div class="filters">
+      <select id="lessonLevel"><option value="">All levels</option></select>
+      <span class="count" id="lessonCount"></span>
+    </div>
+    <div id="lessonsList"></div>
+    <div id="lessonsState" class="state"></div>
+  </div>
+
   <div id="tab-support" class="tabpanel" hidden>
     <div class="lead">
       <h1>Support</h1>
-      <p>Answers to common questions, tutorials, and a box to tell us what to build next.</p>
+      <p>Answers to common questions, and a box to tell us what to build next.</p>
     </div>
 
     <div class="sup-sec">
       <h2>Frequently asked</h2>
       <div id="faqList"></div>
-    </div>
-
-    <div class="sup-sec">
-      <h2>Tutorials</h2>
-      <div id="tutList"></div>
     </div>
 
     <div class="sup-sec">
@@ -1634,7 +1644,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'support'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'lessons', 'support'];
   var jobsLoaded = false;
   var buyLoaded = false;
   var ordersLoaded = false;
@@ -1668,6 +1678,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
+    if (name === 'lessons') { renderLessons(); }
     if (name === 'support' && !supportInit) { supportInit = true; initSupport(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
   }
@@ -2106,22 +2117,34 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { q: 'Can I hide my personal number?', a: 'Yes — in My profile add a Business / call number and tick “Hide my personal number”. Members will only ever see and contact you on the business number; your personal number still logs you in.' },
     { q: 'How do I become a vendor or list a storefront?', a: 'In My profile set “What are you?” to Vendor / Service Provider. A My Storefront tab appears where you add items, a shop blurb and your location — it shows under Sourcing.' },
   ];
-  // Tutorials: fill this array as videos are published (YouTube/TikTok links).
-  var TUTORIALS = [];
   function initSupport() {
     document.getElementById('faqList').innerHTML = FAQ.map(function (f) {
       return '<details class="faq"><summary>' + C.escapeHtml(f.q) + '</summary><div class="faq-a">' + C.escapeHtml(f.a) + '</div></details>';
     }).join('');
-    var tut = document.getElementById('tutList');
-    if (TUTORIALS.length) {
-      tut.innerHTML = TUTORIALS.map(function (t) {
-        return '<a class="tut" href="' + C.escapeHtml(t.url) + '" target="_blank" rel="noopener"><span class="tut-t">' + C.escapeHtml(t.title) + '</span>' + (t.tag ? '<span class="tut-tag">' + C.escapeHtml(t.tag) + '</span>' : '') + '</a>';
-      }).join('');
-    } else {
-      tut.innerHTML = '<p class="sup-note">Skill-building videos are coming soon — indexed by trade and level, built for how we work here. Suggest a topic below.</p>';
-    }
     loadMySuggestions();
   }
+
+  // ── Lessons tab: curated woodworking skill videos (for apprentices) ──
+  // Fill LESSONS as videos are published: { title, url, level: 'apprentice'|'carpenter'|'master', tag }.
+  var LESSONS = [];
+  var lessonLevelSel = document.getElementById('lessonLevel');
+  C.SKILL_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lessonLevelSel.appendChild(o); });
+  function renderLessons() {
+    var listEl = document.getElementById('lessonsList'), stEl = document.getElementById('lessonsState'), cnt = document.getElementById('lessonCount');
+    if (!LESSONS.length) {
+      listEl.innerHTML = ''; cnt.textContent = '';
+      stEl.style.display = ''; stEl.textContent = 'Lessons are coming soon — short skill videos built for how we work here. Got a topic you want covered? Ask in the Support tab.';
+      return;
+    }
+    var lvl = lessonLevelSel.value;
+    var list = LESSONS.filter(function (t) { return !lvl || t.level === lvl; });
+    listEl.innerHTML = list.map(function (t) {
+      return '<a class="tut" href="' + C.escapeHtml(t.url) + '" target="_blank" rel="noopener"><span class="tut-t">' + C.escapeHtml(t.title) + '</span><span class="tut-tag">' + C.escapeHtml((t.level ? C.skillLabel(t.level) : '') + (t.tag ? ' · ' + t.tag : '')) + '</span></a>';
+    }).join('') || '<p class="sup-note">No lessons at this level yet.</p>';
+    stEl.style.display = 'none';
+    cnt.textContent = list.length + ' lesson' + (list.length === 1 ? '' : 's');
+  }
+  lessonLevelSel.addEventListener('change', renderLessons);
   var sugStatusLabel = { new: 'Received', seen: 'Read', planned: 'Planned', done: 'Shipped', declined: 'Not planned' };
   function renderMySuggestions(list) {
     var el = document.getElementById('sugMine');
@@ -2214,7 +2237,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' },
     { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
     { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
-    { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions, tutorials (coming), and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' }
+    { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
+    { id: 25, date: '2026-07-20', title: 'New: Lessons tab', body: 'A Lessons tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
