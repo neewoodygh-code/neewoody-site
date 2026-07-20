@@ -36,7 +36,7 @@ gtag('config', 'G-ZP77WR6BNH');
   --clr-border:    #d4c9b0;
   --clr-muted:     #6b6557;
   --font-body:     'Jost', system-ui, sans-serif;
-  --green:         #0b1f0e;
+  --green:         #1f2f58;
   --mono: 'Roboto Mono', monospace;
   /* Remap calculator vars to site palette */
   --bg:   var(--clr-bg);
@@ -85,7 +85,7 @@ gtag('config', 'G-ZP77WR6BNH');
 .carpenter-hero::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(135deg, #123018, #0b1f0e);
+  background: linear-gradient(135deg, #2a3d6e, #1f2f58);
 }
 .carpenter-hero-accent {
   position: absolute; top: 0; right: 0;
@@ -488,7 +488,7 @@ select {
 .eb-edge{cursor:pointer;fill:transparent}
 .eb-edge:hover{fill:rgba(200,146,42,.20)}
 .eb-grain{cursor:pointer;fill:transparent}
-.eb-grain:hover{fill:rgba(11,31,14,.05)}
+.eb-grain:hover{fill:rgba(31,47,88,.05)}
 .eb-part-name{font-size:.6rem;color:var(--clr-mid);text-align:center;line-height:1.25;max-width:112px}
 /* Zone warnings */
 .zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
@@ -589,7 +589,7 @@ select {
 <div class="calc-wrap">
 
   <!-- ════ MEMBER BAR (live Concierge session) ════ -->
-  <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#0b1f0e;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
+  <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#1f2f58;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
     <span style="opacity:.85">🛠 Concierge member</span>
     <button onclick="openCutlists()" style="font-family:inherit;font-size:.8rem;font-weight:600;background:#c8922a;color:#241500;border:none;border-radius:5px;padding:.4rem .8rem;cursor:pointer">📂 My Cutlists</button>
     <a href="concierge/directory.html#tools" style="color:#f0e8d0;font-size:.8rem;font-weight:600;text-decoration:none;background:rgba(240,232,208,.12);border:1px solid rgba(240,232,208,.35);border-radius:5px;padding:.35rem .7rem;margin-left:auto">← Tools</a>
@@ -598,9 +598,9 @@ select {
   </div>
 
   <!-- ════ GUEST BAR (no session — login entry point + pitch) ════ -->
-  <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(11,31,14,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
+  <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(31,47,88,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
     <span>💾 Concierge members save &amp; reload their cut lists</span>
-    <a href="concierge/login.html?next=/cutlist.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#0b1f0e;text-decoration:none;border:1px solid rgba(11,31,14,.3);border-radius:5px;padding:.35rem .8rem">Member login →</a>
+    <a href="concierge/login.html?next=/cutlist.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#1f2f58;text-decoration:none;border:1px solid rgba(31,47,88,.3);border-radius:5px;padding:.35rem .8rem">Member login →</a>
   </div>
 
   <!-- TABS -->
@@ -1869,7 +1869,7 @@ function openCutlists(){
         return '<div style="display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid #efeadd">' +
           '<div style="flex:1;min-width:0"><div style="font-weight:600;color:#1c1a17;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escCl(c.name) + '</div>' +
           '<div style="font-size:.75rem;color:#8a8375">' + escCl(d) + '</div></div>' +
-          '<button onclick="loadCutlist(' + c.id + ')" style="font-family:inherit;font-size:.78rem;font-weight:600;background:#0b1f0e;color:#f0e8d0;border:none;border-radius:5px;padding:.4rem .75rem;cursor:pointer">Load</button>' +
+          '<button onclick="loadCutlist(' + c.id + ')" style="font-family:inherit;font-size:.78rem;font-weight:600;background:#1f2f58;color:#f0e8d0;border:none;border-radius:5px;padding:.4rem .75rem;cursor:pointer">Load</button>' +
           '<button onclick="deleteCutlist(' + c.id + ',this)" data-name="' + escCl(c.name).replace(/"/g,'&quot;') + '" style="font-family:inherit;font-size:.78rem;background:none;border:1px solid #d9d2c2;border-radius:5px;padding:.4rem .6rem;cursor:pointer;color:#8a5a4a">Delete</button>' +
           '</div>';
       }).join('');
