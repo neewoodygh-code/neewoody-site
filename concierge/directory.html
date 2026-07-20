@@ -111,6 +111,17 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:var(--green); color:var(--cream); border:none; border-radius:4px; padding:.6rem 1.1rem; cursor:pointer; white-space:nowrap; }
 .mbar button:disabled{ opacity:.6; cursor:default; }
 
+/* pay-to-join paywall */
+.paywall{ max-width:460px; margin:2.5rem auto; background:#fff; border:1px solid rgba(11,31,14,.1); border-top:3px solid var(--gold);
+  border-radius:6px; padding:2rem 1.75rem; text-align:center; box-shadow:0 18px 44px rgba(11,31,14,.08); }
+.paywall h1{ font-family:var(--display); font-weight:500; font-size:1.7rem; }
+.paywall p{ color:var(--muted); line-height:1.6; margin-top:.6rem; }
+.paywall .pw-amt{ font-family:var(--display); font-size:2rem; color:var(--green); margin:1.1rem 0; }
+.paywall .pw-amt span{ font-family:var(--ui); font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+.paywall button{ font-family:var(--ui); font-size:.78rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--gold); color:var(--green); border:none; border-radius:4px; padding:.85rem 2rem; cursor:pointer; }
+.paywall button:disabled{ opacity:.6; cursor:default; }
+
 /* jobs board */
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
@@ -403,6 +414,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 <div class="wrap">
 
   <div id="membershipBar" class="mbar" style="display:none"></div>
+  <div id="joinPaywall" class="paywall" style="display:none"></div>
 
   <nav class="crumbs" aria-label="Breadcrumb">
     <a href="../tools.html">Concierge</a><span aria-hidden="true">›</span><b id="crumbCurrent">Directory</b>
@@ -2176,6 +2188,45 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     payBar.innerHTML = '<p>We haven\'t confirmed your payment yet — if it went through, it\'ll update shortly. Check back in a minute.</p>';
   }
 
+  // ── pay-to-join hard paywall (pending members) ──
+  function renderPaywall() {
+    document.getElementById('tabbar').style.display = 'none';
+    var cr = document.querySelector('.crumbs'); if (cr) cr.style.display = 'none';
+    TABS.forEach(function (t) { var el = document.getElementById('tab-' + t); if (el) el.hidden = true; });
+    payBar.style.display = 'none';
+    var pw = document.getElementById('joinPaywall');
+    var amt = (membership && membership.amount_due) || 50;
+    var founder = membership && membership.kind === 'founder';
+    var first = (me && me.name) ? C.escapeHtml(me.name.split(' ')[0]) : '';
+    pw.style.display = 'block';
+    pw.innerHTML =
+      '<h1>One step left</h1>' +
+      '<p>Welcome' + (first ? ', ' + first : '') + '. Complete your ' + (founder ? 'founding ' : '') + 'membership to join the directory.</p>' +
+      '<div class="pw-amt">GHS ' + amt + (founder ? ' <span>once · lifetime</span>' : ' <span>/ month</span>') + '</div>' +
+      ((membership && membership.configured === false)
+        ? '<p class="sf-note">Online payment isn\'t switched on yet — you\'ll be contacted to pay by Mobile Money.</p>'
+        : '<button type="button" id="joinPayBtn">Pay now</button>') +
+      '<div id="joinMsg" class="sf-note" style="margin-top:.6rem"></div>';
+    var b = document.getElementById('joinPayBtn'); if (b) b.addEventListener('click', joinPay);
+    if (/[?&]pay=return/.test(location.search)) { try { history.replaceState(null, '', location.pathname); } catch (e) {} pollJoin(); }
+  }
+  async function joinPay() {
+    var b = document.getElementById('joinPayBtn'), msg = document.getElementById('joinMsg');
+    if (b) { b.disabled = true; b.textContent = 'Starting…'; }
+    try { var r = await C.api('/pay/init', { method: 'POST', body: {} }); if (r.authorization_url) { window.location.href = r.authorization_url; return; } if (msg) msg.textContent = 'Could not start payment.'; }
+    catch (err) { if (msg) msg.textContent = err.message || 'Could not start payment.'; }
+    if (b) { b.disabled = false; b.textContent = 'Pay now'; }
+  }
+  async function pollJoin() {
+    var msg = document.getElementById('joinMsg'); if (msg) msg.textContent = 'Confirming your payment…';
+    for (var i = 0; i < 6; i++) {
+      await new Promise(function (res) { setTimeout(res, i === 0 ? 1500 : 2500); });
+      try { var r = await C.api('/me'); me = r.member; membership = r.membership; } catch (e) {}
+      if (me.status === 'approved') { location.reload(); return; }
+    }
+    if (msg) msg.textContent = 'Not confirmed yet — if you paid, refresh in a minute.';
+  }
+
   // ── notifications (in-app bell) ──
   var notifBtn = document.getElementById('notifBtn');
   var notifPanel = document.getElementById('notifPanel');
@@ -2228,15 +2279,19 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       var meRes = await C.api('/me');
       me = meRes.member;
       membership = meRes.membership || null;
-      try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
-      if (me && me.role === 'admin') document.getElementById('adminLink').style.display = '';
-      if (me && me.member_type === 'vendor') {
-        document.getElementById('storefrontTab').hidden = false;
-        document.getElementById('ordersTab').hidden = false;
-        loadOrders(); // populate the Orders badge
-      }
     } catch (err) {
       if (err.status === 401) { location.replace('login.html'); return; }
+      return;
+    }
+    // Pay-to-join hard gate: a pending (unpaid) member only sees the paywall.
+    if (me.status !== 'approved') { renderPaywall(); return; }
+
+    try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
+    if (me.role === 'admin') document.getElementById('adminLink').style.display = '';
+    if (me.member_type === 'vendor') {
+      document.getElementById('storefrontTab').hidden = false;
+      document.getElementById('ordersTab').hidden = false;
+      loadOrders(); // populate the Orders badge
     }
     await load();
     renderNudge();

@@ -103,7 +103,9 @@ const ALLOWED_ORIGINS = [
 const PAYSTACK_BASE = 'https://api.paystack.co';
 const MONTHLY_FEE_GHS = 50;
 const FOUNDER_FEE_GHS = 100;
+const FOUNDER_CAP = 100;
 const PAY_CALLBACK_URL = 'https://neewoodygh.com/concierge/directory.html?pay=return';
+const PAY_JOIN_CALLBACK_URL = 'https://neewoodygh.com/concierge/login.html?joined=1';
 
 // ── entrypoint ─────────────────────────────────────────────────────────
 export default {
@@ -135,6 +137,8 @@ async function route(request, env, ctx) {
 
   // Paystack webhook (server-to-server; verified by HMAC signature, not auth).
   if (path === '/api/pay/webhook' && method === 'POST') return payWebhook(request, env, ctx);
+  // Founder spots remaining (public — register.html shows/hides the founder tier).
+  if (path === '/api/public/founder-spots' && method === 'GET') return founderSpots(env);
 
   // Public "Hire a Carpenter" — unauthenticated job request from a client
   // (homeowner, or a non-member master hiring hands). Lands as `pending`.
@@ -153,8 +157,8 @@ async function route(request, env, ctx) {
   if (mStoreImg && method === 'GET') return serveStorefrontPhoto(env, request, mStoreImg[1], Number(mStoreImg[2]));
 
   // ---- member ----
-  if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => getMe(env, m));
-  if (path === '/api/pay/init' && method === 'POST') return withAuth(request, env, (m) => payInit(request, env, m));
+  if (path === '/api/me' && method === 'GET')  return withAuth(request, env, (m) => getMe(env, m), { allowPending: true });
+  if (path === '/api/pay/init' && method === 'POST') return withAuth(request, env, (m) => payInit(request, env, m), { allowPending: true });
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
@@ -294,11 +298,12 @@ async function login(request, env) {
   await recordAttempt(env, phone, ok);
   if (!ok) return fail();
 
-  // Only approved members get in. Self-registered applicants sit at `pending`
-  // until an admin vets them; suspended members are blocked. (Checked AFTER a
+  // Pay-to-join: suspended members are blocked; pending (unpaid) members CAN log
+  // in, but the session is gated server-side (withAuth) to profile + payment
+  // until the webhook confirms their payment and approves them. (Checked after a
   // correct PIN, so status is only ever revealed to the account's real owner.)
-  if (member.status !== 'approved') {
-    return json({ error: member.status === 'suspended' ? 'account_suspended' : 'pending_review' }, 403);
+  if (member.status === 'suspended') {
+    return json({ error: 'account_suspended' }, 403);
   }
 
   // Record last successful login (activity visibility for the admin).
@@ -1058,6 +1063,10 @@ async function publicRegister(request, env, ctx) {
   if (business_phone === false) return json({ error: 'invalid_business_phone' }, 400);
   const hide_phone = body.hide_phone ? 1 : 0;
   if (hide_phone && !business_phone) return json({ error: 'need_business_phone' }, 400);
+  // Tier the applicant chose — founder only while spots remain; otherwise regular.
+  // Determines the CHARGE only; founder status is granted by the webhook on payment.
+  const wantsFounder = String(body.requested_tier || 'regular') === 'founder';
+  const requested_tier = (wantsFounder && (await foundersCount(env)) < FOUNDER_CAP) ? 'founder' : 'regular';
 
   const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (existing) return json({ error: 'member_exists' }, 409);
@@ -1066,19 +1075,30 @@ async function publicRegister(request, env, ctx) {
   await env.DB.prepare(
     `INSERT INTO members
        (phone, name, business_name, area, specialties, pin_hash, role, status, is_founder, joined_at,
-        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone)
-     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        skill_level, years_experience, is_business, availability, member_type, stock, vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone, requested_tier)
+     VALUES (?, ?, ?, ?, ?, ?, 'member', 'pending', 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
     phone, name, nullableStr(body.business_name), nullableStr(body.area),
     specialties, pin_hash, new Date().toISOString(),
-    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone
+    skill_level, years_experience, body.is_business ? 1 : 0, availability, member_type || 'carpenter', stockVal(body.stock), vendor_scale, vendor_categories, vendor_services, services_other, coverage_zones, side_hustles, business_phone, hide_phone, requested_tier
   ).run();
 
-  const notify = pushToAdmins(env, 'New member application',
-    name + ' · ' + (nullableStr(body.area) || 'no area given') + ' — review & approve in admin.').catch((e) => console.error('admin notify failed:', e && e.message));
+  const notify = pushToAdmins(env, 'New member registration',
+    name + ' · ' + (nullableStr(body.area) || 'no area given') + ' — joining (' + requested_tier + ').').catch((e) => console.error('admin notify failed:', e && e.message));
   if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
 
-  return json({ ok: true }, 201);
+  // Pay-to-join: start the Paystack transaction and hand back the hosted URL.
+  // (If payments aren't configured, fall back to the old application flow.)
+  if (env.PAYSTACK_SECRET) {
+    const amount = requested_tier === 'founder' ? FOUNDER_FEE_GHS : MONTHLY_FEE_GHS;
+    const r = await startPaystack(env, {
+      phone, name, period: currentPeriod(), kind: requested_tier === 'founder' ? 'founder' : 'monthly',
+      amount, callback_url: PAY_JOIN_CALLBACK_URL,
+    });
+    if (r.error) return json({ error: r.error, detail: r.detail || null }, r.status || 502);
+    return json({ authorization_url: r.authorization_url, reference: r.reference, tier: requested_tier, amount }, 201);
+  }
+  return json({ ok: true, tier: requested_tier }, 201);
 }
 
 async function adminListClientJobs(env) {
@@ -1496,6 +1516,52 @@ async function adminDeleteService(env, id) {
 function currentPeriod() { return new Date().toISOString().slice(0, 7); } // YYYY-MM
 function memberEmail(phone) { return phone + '@members.neewoodygh.com'; } // Paystack requires an email; members are phone-only
 
+async function foundersCount(env) {
+  const r = await env.DB.prepare('SELECT COUNT(*) AS c FROM members WHERE is_founder = 1').first();
+  return (r && r.c) || 0;
+}
+async function founderSpots(env) {
+  const n = await foundersCount(env);
+  return json({ founders: n, cap: FOUNDER_CAP, remaining: Math.max(0, FOUNDER_CAP - n), fee: FOUNDER_FEE_GHS, monthly: MONTHLY_FEE_GHS });
+}
+// What a member owes right now: a founder-intent member who hasn't been granted
+// founder yet (and there are spots) pays the one-time GHS 100; everyone else the
+// GHS 50 month. Returns { kind, amount }.
+async function chargeFor(env, member) {
+  if (member.requested_tier === 'founder' && !member.is_founder && (await foundersCount(env)) < FOUNDER_CAP) {
+    return { kind: 'founder', amount: FOUNDER_FEE_GHS };
+  }
+  return { kind: 'monthly', amount: MONTHLY_FEE_GHS };
+}
+
+// Create a payment_intent + initialize a Paystack transaction. Shared by the
+// authed pay flow and the pay-to-join registration flow. Returns
+// { authorization_url, reference } or { error, status }.
+async function startPaystack(env, opts) {
+  const { phone, name, period, kind, amount, callback_url } = opts;
+  const reference = 'NWD-' + phone + '-' + period + '-' + Math.random().toString(36).slice(2, 8);
+  await env.DB.prepare(
+    `INSERT INTO payment_intents (reference, member_phone, period, amount_ghs, kind) VALUES (?, ?, ?, ?, ?)`
+  ).bind(reference, phone, period, amount, kind).run();
+  let res;
+  try {
+    res = await fetch(PAYSTACK_BASE + '/transaction/initialize', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + env.PAYSTACK_SECRET, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: memberEmail(phone), amount: amount * 100, currency: 'GHS',
+        reference, callback_url, channels: ['mobile_money', 'card'],
+        metadata: { phone, period, name: name || '' },
+      }),
+    });
+  } catch (e) { return { error: 'paystack_unreachable', status: 502 }; }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.status || !data.data || !data.data.authorization_url) {
+    return { error: 'paystack_init_failed', detail: (data && data.message) || null, status: 502 };
+  }
+  return { authorization_url: data.data.authorization_url, reference };
+}
+
 async function hmacSha512Hex(key, msg) {
   const enc = new TextEncoder();
   const k = await crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-512' }, false, ['sign']);
@@ -1510,7 +1576,13 @@ async function membershipStatus(env, m) {
   if (m.role === 'admin') return { paid: true, exempt: 'admin', period };
   if (m.is_founder) return { paid: true, exempt: 'founder', period };
   const row = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(m.phone, period).first();
-  return { paid: !!row, period, amount_due: MONTHLY_FEE_GHS, configured: !!env.PAYSTACK_SECRET };
+  const charge = await chargeFor(env, m);
+  return {
+    paid: !!row, period,
+    amount_due: charge.amount, kind: charge.kind,
+    join: m.status !== 'approved', // pending → hard "pay to join" gate
+    configured: !!env.PAYSTACK_SECRET,
+  };
 }
 
 async function getMe(env, m) {
@@ -1522,38 +1594,20 @@ async function payInit(request, env, member) {
   if (member.role === 'admin' || member.is_founder) return json({ error: 'no_payment_due' }, 400);
 
   const period = currentPeriod();
-  const existing = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(member.phone, period).first();
-  if (existing) return json({ error: 'already_paid', period }, 409);
-
-  const amount = MONTHLY_FEE_GHS;
-  const reference = 'NWD-' + member.phone + '-' + period + '-' + Math.random().toString(36).slice(2, 8);
-  await env.DB.prepare(
-    `INSERT INTO payment_intents (reference, member_phone, period, amount_ghs, kind) VALUES (?, ?, ?, ?, 'monthly')`
-  ).bind(reference, member.phone, period, amount).run();
-
-  let res;
-  try {
-    res = await fetch(PAYSTACK_BASE + '/transaction/initialize', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + env.PAYSTACK_SECRET, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: memberEmail(member.phone),
-        amount: amount * 100, // pesewas
-        currency: 'GHS',
-        reference: reference,
-        callback_url: PAY_CALLBACK_URL,
-        channels: ['mobile_money', 'card'],
-        metadata: { phone: member.phone, period: period, name: member.name || '' },
-      }),
-    });
-  } catch (e) {
-    return json({ error: 'paystack_unreachable' }, 502);
+  // A monthly member who already paid this period owes nothing (founder one-time
+  // isn't period-gated — a founder-intent member with no founder status still owes).
+  const charge = await chargeFor(env, member);
+  if (charge.kind === 'monthly') {
+    const existing = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(member.phone, period).first();
+    if (existing && member.status === 'approved') return json({ error: 'already_paid', period }, 409);
   }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.status || !data.data || !data.data.authorization_url) {
-    return json({ error: 'paystack_init_failed', detail: (data && data.message) || null }, 502);
-  }
-  return json({ authorization_url: data.data.authorization_url, reference });
+
+  const r = await startPaystack(env, {
+    phone: member.phone, name: member.name, period, kind: charge.kind, amount: charge.amount,
+    callback_url: PAY_CALLBACK_URL,
+  });
+  if (r.error) return json({ error: r.error, detail: r.detail || null }, r.status || 502);
+  return json({ authorization_url: r.authorization_url, reference: r.reference });
 }
 
 async function payWebhook(request, env, ctx) {
@@ -1579,6 +1633,12 @@ async function payWebhook(request, env, ctx) {
      ON CONFLICT(member_phone, period)
      DO UPDATE SET amount_ghs = excluded.amount_ghs, momo_ref = excluded.momo_ref, recorded_at = datetime('now')`
   ).bind(intent.member_phone, intent.period, intent.amount_ghs, reference).run();
+  // Pay-to-join: a confirmed payment approves a pending member (never re-opens a
+  // suspended one). A founder-tier payment also grants lifetime founder status.
+  await env.DB.prepare(`UPDATE members SET status = 'approved' WHERE phone = ? AND status = 'pending'`).bind(intent.member_phone).run();
+  if (intent.kind === 'founder') {
+    await env.DB.prepare('UPDATE members SET is_founder = 1 WHERE phone = ?').bind(intent.member_phone).run();
+  }
 
   const notif = notifyMember(env, intent.member_phone, {
     type: 'payment', title: 'Payment received',
@@ -2004,9 +2064,16 @@ function concatBytes(...arrays) {
 //  Auth middleware
 // ═══════════════════════════════════════════════════════════════════════
 
-async function withAuth(request, env, handler) {
+async function withAuth(request, env, handler, opts) {
   const member = await authenticate(request, env);
   if (!member) return json({ error: 'unauthorized' }, 401);
+  // Pay-to-join gate: suspended always blocked; pending (unpaid) members can only
+  // reach allow-listed routes (their own profile + starting a payment) until the
+  // payment webhook approves them. Everything else is approved-members-only.
+  if (member.status === 'suspended') return json({ error: 'account_suspended' }, 403);
+  if (member.status !== 'approved' && !(opts && opts.allowPending)) {
+    return json({ error: 'payment_required' }, 403);
+  }
   return handler(member);
 }
 

@@ -127,6 +127,14 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     <!-- Step 2: Your work -->
     <div class="step" data-step="2">
       <div class="field">
+        <label for="r_tier">Membership</label>
+        <select id="r_tier">
+          <option value="regular">Regular — GHS 50 / month</option>
+          <option value="founder">Founding member — GHS 100 once, lifetime</option>
+        </select>
+        <div class="hint" id="r_tier_hint">You'll pay to join at the end — securely by Mobile Money or card.</div>
+      </div>
+      <div class="field">
         <label for="r_member_type">What are you?</label>
         <select id="r_member_type"></select>
       </div>
@@ -207,7 +215,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
       </div>
       <div class="wiz-nav">
         <button type="button" class="back" data-back="2">← Back</button>
-        <button class="submit" id="regBtn" type="submit">Submit my application</button>
+        <button class="submit" id="regBtn" type="submit">Join &amp; pay</button>
       </div>
     </div>
 
@@ -361,10 +369,11 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 
     btn.disabled = true; btn.textContent = 'Submitting…';
     try {
-      await C.api('/public/register', { auth: false, method: 'POST', body: {
+      var r = await C.api('/public/register', { auth: false, method: 'POST', body: {
         name: name,
         phone: phone,
         pin: pin,
+        requested_tier: document.getElementById('r_tier').value,
         business_name: document.getElementById('r_biz').value.trim(),
         is_business: document.getElementById('r_type').value === '1',
         member_type: rType.value,
@@ -382,14 +391,31 @@ button.submit:disabled{ opacity:.6; cursor:default; }
         availability: avail.value,
         specialties: rType.value === 'carpenter' ? specs : []
       }});
+      // Pay-to-join: go straight to Paystack's hosted page. (Fallback: if payments
+      // aren't configured the API returns {ok:true} and we show the done screen.)
+      if (r && r.authorization_url) { btn.textContent = 'Redirecting to payment…'; window.location.href = r.authorization_url; return; }
       form.style.display = 'none';
       document.getElementById('regDone').classList.add('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      showErr(err.message || 'Could not submit — please try again.');
-      btn.disabled = false; btn.textContent = 'Submit my application';
+      showErr(err.message === 'member_exists' ? 'That number is already registered — log in instead.' : (err.message || 'Could not submit — please try again.'));
+      btn.disabled = false; btn.textContent = 'Join & pay';
     }
   });
+
+  // Founder spots: update the hint + drop the founder option once 100 are taken.
+  (async function () {
+    try {
+      var s = await C.api('/public/founder-spots', { auth: false });
+      var tier = document.getElementById('r_tier'), hint = document.getElementById('r_tier_hint');
+      if (s && s.remaining > 0) {
+        hint.textContent = 'Founding: GHS ' + s.fee + ' once (lifetime) · ' + s.remaining + ' of ' + s.cap + ' spots left. Regular: GHS ' + s.monthly + '/month. You pay to join at the end.';
+      } else {
+        var opt = tier.querySelector('option[value="founder"]'); if (opt) opt.remove();
+        hint.textContent = 'Membership is GHS ' + (s ? s.monthly : 50) + '/month. You pay to join at the end — Mobile Money or card.';
+      }
+    } catch (e) {}
+  })();
 
   function showErr(t) { msg.className = 'msg error'; msg.textContent = t; }
 })();

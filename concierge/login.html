@@ -109,6 +109,12 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 
   pinEl.addEventListener('input', function () { pinEl.value = pinEl.value.replace(/\D/g, '').slice(0, 5); });
 
+  // Returning from pay-to-join checkout.
+  if (/[?&]joined=1/.test(location.search)) {
+    msg.className = 'msg'; msg.style.color = '#2e6b2e';
+    msg.textContent = 'Payment received — log in with your phone and PIN to enter.';
+  }
+
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     msg.className = 'msg'; msg.textContent = '';
