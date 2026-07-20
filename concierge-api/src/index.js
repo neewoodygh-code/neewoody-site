@@ -81,6 +81,11 @@ const ORDER_NOTES_MAX = 500;
 const SUGGESTION_MAX = 1000;
 const SUGGESTION_MAX_OPEN_PER_MEMBER = 15; // 'new' status, anti-spam
 
+// Safety check-in (lone-worker call-outs)
+const CALLOUT_GRACE_MIN = 15;                 // minutes past expected_back before overdue
+const CALLOUT_MAX_HOURS = 12;                 // max expected duration a member can set
+const CALLOUT_TEXT = { name: 80, phone: 30, location: 200, notes: 500 };
+
 // Public client-job anti-spam (no CAPTCHA yet — phone-keyed throttle).
 const CLIENT_JOB_MAX_PENDING_PER_PHONE = 3;   // outstanding unreviewed
 const CLIENT_JOB_WINDOW = "-1 hours";
@@ -126,6 +131,11 @@ export default {
     } catch (err) {
       return json({ error: 'server_error', detail: String(err && err.message || err) }, 500, cors);
     }
+  },
+
+  // Cron: scan for overdue safety call-outs and alert admins (see wrangler.toml).
+  async scheduled(event, env, ctx) {
+    ctx.waitUntil(scanOverdueCallouts(env).catch((e) => console.error('callout scan failed:', e && e.message)));
   },
 };
 
@@ -209,6 +219,12 @@ async function route(request, env, ctx) {
   if (path === '/api/suggestions' && method === 'GET')  return withAuth(request, env, (m) => listMySuggestions(env, m));
   if (path === '/api/suggestions' && method === 'POST') return withAuth(request, env, (m) => createSuggestion(request, env, m, ctx));
 
+  // ---- member: safety check-in (open to lapsed members — it's safety) ----
+  if (path === '/api/callouts' && method === 'GET')  return withAuth(request, env, (m) => listMyCallouts(env, m));
+  if (path === '/api/callouts' && method === 'POST') return withAuth(request, env, (m) => createCallout(request, env, m));
+  const mCallout = path.match(/^\/api\/callouts\/(\d+)$/);
+  if (mCallout && method === 'PUT') return withAuth(request, env, (m) => updateCallout(request, env, m, Number(mCallout[1])));
+
   // ---- offered-services catalog ----
   if (path === '/api/services' && method === 'GET') return withAuth(request, env, () => listServices(env));
   if (path === '/api/services/suggest' && method === 'POST') return withPaid(request, env, (m) => suggestService(request, env, m, ctx));
@@ -257,6 +273,9 @@ async function route(request, env, ctx) {
   const mClientJob = path.match(/^\/api\/admin\/client-jobs\/(\d+)$/);
   if (mClientJob && method === 'PUT')    return withAdmin(request, env, () => adminReviewClientJob(request, env, Number(mClientJob[1]), ctx));
   if (mClientJob && method === 'DELETE') return withAdmin(request, env, () => adminDeleteClientJob(env, Number(mClientJob[1])));
+
+  // ---- admin: safety call-out monitor ----
+  if (path === '/api/admin/callouts' && method === 'GET') return withAdmin(request, env, () => adminListCallouts(env));
 
   // ---- admin: feature suggestions ----
   if (path === '/api/admin/suggestions' && method === 'GET') return withAdmin(request, env, () => adminListSuggestions(env));
@@ -425,6 +444,13 @@ async function updateMe(request, env, member) {
     const effBiz = ('business_phone' in fields) ? fields.business_phone : member.business_phone;
     if (hp && !effBiz) return json({ error: 'need_business_phone' }, 400);
     fields.hide_phone = hp;
+  }
+  // Emergency contact (safety check-in) — private; only self + admin ever see it.
+  if ('emergency_name' in body) fields.emergency_name = nullableStr(body.emergency_name);
+  if ('emergency_phone' in body) {
+    const ep = body.emergency_phone == null || body.emergency_phone === '' ? null : normalizePhone(body.emergency_phone);
+    if (body.emergency_phone && !ep) return json({ error: 'invalid_emergency_phone' }, 400);
+    fields.emergency_phone = ep;
   }
   // Self-service PIN change (member changing their OWN PIN while authenticated).
   // Distinct from the admin-only forgotten-PIN reset — this closes the loop so
@@ -697,6 +723,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM buy_requests WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM orders WHERE vendor_phone = ? OR buyer_phone = ?').bind(phone, phone),
     env.DB.prepare('DELETE FROM suggestions WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM callouts WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM notifications WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
@@ -1588,6 +1615,124 @@ async function adminDeleteSuggestion(env, id) {
   const r = await env.DB.prepare('DELETE FROM suggestions WHERE id = ?').bind(id).run();
   if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
+}
+
+// ── safety check-in (lone-worker call-outs) ────────────────────────────
+// v1 relays through admins: an overdue call-out alerts every admin (push +
+// bell) with the member's pin + emergency contact. SMS is a later gated add.
+
+// Store + push a notification to every approved admin.
+async function notifyAdmins(env, n) {
+  const { results } = await env.DB.prepare("SELECT phone FROM members WHERE role = 'admin' AND status = 'approved'").all();
+  for (const r of (results || [])) await notifyMember(env, r.phone, n);
+}
+
+function calloutRow(c) {
+  return {
+    id: c.id, client_name: c.client_name, client_phone: c.client_phone, location: c.location,
+    lat: c.lat, lng: c.lng, notes: c.notes, expected_back: c.expected_back, status: c.status,
+    created_at: c.created_at, arrived_at: c.arrived_at, checked_out_at: c.checked_out_at, alerted_at: c.alerted_at,
+  };
+}
+
+async function createCallout(request, env, member) {
+  const body = await readJson(request);
+  const hours = Number(body.hours);
+  if (!isFinite(hours) || hours < 0.25 || hours > CALLOUT_MAX_HOURS) return json({ error: 'invalid_duration' }, 400);
+  const location = nullableStr(body.location);
+  if (!location) return json({ error: 'location_required' }, 400);
+  if (location.length > CALLOUT_TEXT.location) return json({ error: 'location_too_long' }, 400);
+  const client_name = (nullableStr(body.client_name) || '').slice(0, CALLOUT_TEXT.name) || null;
+  const client_phone = body.client_phone ? (normalizePhone(body.client_phone) || String(body.client_phone).trim().slice(0, CALLOUT_TEXT.phone)) : null;
+  const notes = (nullableStr(body.notes) || '').slice(0, CALLOUT_TEXT.notes) || null;
+
+  // One open call-out at a time (you're on one job).
+  const open = await env.DB.prepare(
+    `SELECT id FROM callouts WHERE member_phone = ? AND status IN ('active','arrived') LIMIT 1`
+  ).bind(member.phone).first();
+  if (open) return json({ error: 'callout_active', id: open.id }, 409);
+
+  const r = await env.DB.prepare(
+    `INSERT INTO callouts (member_phone, client_name, client_phone, location, notes, expected_back)
+     VALUES (?, ?, ?, ?, ?, datetime('now', ?))`
+  ).bind(member.phone, client_name, client_phone, location, notes, '+' + Math.round(hours * 60) + ' minutes').run();
+  const row = await env.DB.prepare('SELECT * FROM callouts WHERE id = ?').bind(r.meta.last_row_id).first();
+  return json({ callout: calloutRow(row) }, 201);
+}
+
+async function listMyCallouts(env, member) {
+  const { results } = await env.DB.prepare(
+    'SELECT * FROM callouts WHERE member_phone = ? ORDER BY id DESC LIMIT 30'
+  ).bind(member.phone).all();
+  return json({ callouts: (results || []).map(calloutRow) });
+}
+
+async function updateCallout(request, env, member, id) {
+  const c = await env.DB.prepare('SELECT * FROM callouts WHERE id = ?').bind(id).first();
+  if (!c) return json({ error: 'not_found' }, 404);
+  if (c.member_phone !== member.phone) return json({ error: 'forbidden' }, 403);
+  const body = await readJson(request);
+  const action = String(body.action || '');
+
+  if (action === 'arrive') {
+    let lat = null, lng = null;
+    if (body.lat != null && body.lng != null) {
+      lat = Number(body.lat); lng = Number(body.lng);
+      if (!isFinite(lat) || !isFinite(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) { lat = null; lng = null; }
+    }
+    await env.DB.prepare(`UPDATE callouts SET status = 'arrived', arrived_at = datetime('now'), lat = ?, lng = ? WHERE id = ?`).bind(lat, lng, id).run();
+  } else if (action === 'safe') {
+    await env.DB.prepare(`UPDATE callouts SET status = 'safe', checked_out_at = datetime('now') WHERE id = ?`).bind(id).run();
+  } else if (action === 'cancel') {
+    await env.DB.prepare(`UPDATE callouts SET status = 'cancelled', checked_out_at = datetime('now') WHERE id = ?`).bind(id).run();
+  } else if (action === 'extend') {
+    const hours = Number(body.hours);
+    if (!isFinite(hours) || hours < 0.25 || hours > CALLOUT_MAX_HOURS) return json({ error: 'invalid_duration' }, 400);
+    // Extend from now; also lifts an 'alerted' one back to arrived (they're OK).
+    const back = c.status === 'arrived' || c.status === 'active' || c.status === 'alerted' ? 'arrived' : c.status;
+    await env.DB.prepare(`UPDATE callouts SET expected_back = datetime('now', ?), status = ? WHERE id = ?`).bind('+' + Math.round(hours * 60) + ' minutes', back, id).run();
+  } else {
+    return json({ error: 'invalid_action' }, 400);
+  }
+  const row = await env.DB.prepare('SELECT * FROM callouts WHERE id = ?').bind(id).first();
+  return json({ callout: calloutRow(row) });
+}
+
+async function adminListCallouts(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT c.*, m.name AS member_name, m.business_phone AS member_biz_phone,
+            m.emergency_name, m.emergency_phone
+     FROM callouts c JOIN members m ON m.phone = c.member_phone
+     ORDER BY (c.status IN ('active','arrived','alerted')) DESC, c.id DESC LIMIT 300`
+  ).all();
+  return json({ callouts: (results || []).map((c) => ({
+    ...calloutRow(c),
+    member_name: c.member_name,
+    member_phone: c.member_phone,
+    member_contact: c.member_biz_phone || c.member_phone,
+    emergency_name: c.emergency_name,
+    emergency_phone: c.emergency_phone,
+  })) });
+}
+
+// Cron: flag call-outs past expected_back + grace, and alert admins.
+async function scanOverdueCallouts(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT c.id, c.location, c.member_phone, m.name AS member_name
+     FROM callouts c JOIN members m ON m.phone = c.member_phone
+     WHERE c.status IN ('active','arrived')
+       AND datetime(c.expected_back, ?) < datetime('now')
+     LIMIT 100`
+  ).bind('+' + CALLOUT_GRACE_MIN + ' minutes').all();
+  if (!results || !results.length) return;
+  for (const c of results) {
+    await env.DB.prepare(`UPDATE callouts SET status = 'alerted', alerted_at = datetime('now') WHERE id = ?`).bind(c.id).run();
+    await notifyAdmins(env, {
+      type: 'safety', title: '⚠ Safety: member overdue',
+      body: (c.member_name || 'A member') + ' is OVERDUE from a call-out' + (c.location ? ' at ' + c.location : '') + '. Open the Safety monitor in admin to check on them.',
+      link: '#directory',
+    });
+  }
 }
 
 // ── payments (Paystack, hosted checkout, one-time per period) ──────────

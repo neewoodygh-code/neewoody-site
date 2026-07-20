@@ -19,5 +19,9 @@ bucket_name = "neewoody-media"
 [observability]
 enabled = true
 
+# ── Cron: scan for overdue safety call-outs every 15 minutes ───────────
+[triggers]
+crons = ["*/15 * * * *"]
+
 # SESSION_SECRET is NOT set here. Set it out-of-band and never commit it:
 #   wrangler secret put SESSION_SECRET

@@ -172,6 +172,19 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     </div>
   </div>
 
+  <!-- Safety call-outs -->
+  <div class="panel">
+    <h2>Safety call-outs <span class="sub" id="coCount">member check-ins</span></h2>
+    <div class="pbody">
+      <div class="tools" style="margin-bottom:1rem">
+        <button class="btn ghost" id="coReload" type="button">Reload</button>
+        <span class="small" style="align-self:center;color:var(--muted)">Overdue members are highlighted — call them and their emergency contact.</span>
+      </div>
+      <div id="coList"></div>
+      <div class="state" id="coState">Loading call-outs…</div>
+    </div>
+  </div>
+
   <!-- Members -->
   <div class="panel">
     <h2>Members <span class="sub" id="memCount"></span></h2>
@@ -1053,11 +1066,55 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   }
   document.getElementById('sugReload').addEventListener('click', loadSuggestions);
 
+  // ── safety call-out monitor ──
+  var CO_LABELS = { active: 'On the way', arrived: 'Checked in', safe: 'Safe', alerted: 'OVERDUE', cancelled: 'Cancelled' };
+  function coDigits(p) { return String(p || '').replace(/[^\d]/g, ''); }
+  function coCountdown(expected) {
+    var t = Date.parse(String(expected).replace(' ', 'T') + 'Z'); if (isNaN(t)) return '';
+    var d = Math.round((t - Date.now()) / 60000);
+    return d > 0 ? ('due in ' + d + ' min') : ('overdue by ' + Math.abs(d) + ' min');
+  }
+  function coLink(label, href) { return '<a class="rowbtn" href="' + href + '" target="_blank" rel="noopener" style="margin:.2rem .3rem .2rem 0;display:inline-block">' + label + '</a>'; }
+  function coCard(c) {
+    var overdue = c.status === 'alerted';
+    var active = c.status === 'active' || c.status === 'arrived' || c.status === 'alerted';
+    var div = document.createElement('div');
+    div.style.cssText = 'border:1px solid rgba(11,31,14,.12);border-left:4px solid ' + (overdue ? '#a52a2a' : (active ? 'var(--gold)' : 'rgba(11,31,14,.15)')) + ';border-radius:6px;padding:.8rem 1rem;margin-bottom:.6rem;' + (overdue ? 'background:#fdf3f3;' : '');
+    var links = coLink('Call member', 'tel:+' + coDigits(c.member_contact)) + coLink('WhatsApp member', 'https://wa.me/' + coDigits(c.member_contact));
+    if (c.emergency_phone) links += coLink('Call ' + C.escapeHtml(c.emergency_name || 'emergency'), 'tel:+' + coDigits(c.emergency_phone)) + coLink('WhatsApp emergency', 'https://wa.me/' + coDigits(c.emergency_phone));
+    if (c.lat != null && c.lng != null) links += coLink('📍 Map', 'https://www.google.com/maps?q=' + c.lat + ',' + c.lng);
+    div.innerHTML =
+      '<div style="margin-bottom:.3rem"><b>' + C.escapeHtml(c.member_name || c.member_phone) + '</b> ' +
+        '<span class="pill ' + (overdue ? 'suspended' : (active ? 'pending' : 'approved')) + '">' + (CO_LABELS[c.status] || c.status) + '</span> ' +
+        (active ? '<span class="small">' + coCountdown(c.expected_back) + '</span>' : '') + '</div>' +
+      '<div class="small">' + C.escapeHtml(c.location || '') + (c.client_name ? ' · client: ' + C.escapeHtml(c.client_name) + (c.client_phone ? ' (' + C.escapeHtml(c.client_phone) + ')' : '') : '') + '</div>' +
+      (c.notes ? '<div class="small">' + C.escapeHtml(c.notes) + '</div>' : '') +
+      (c.emergency_phone ? '<div class="small">Emergency: ' + C.escapeHtml(c.emergency_name || '') + ' ' + C.escapeHtml(c.emergency_phone) + '</div>' : '<div class="small" style="color:#a52a2a">No emergency contact set</div>') +
+      '<div style="margin-top:.5rem">' + links + '</div>';
+    return div;
+  }
+  async function loadCallouts() {
+    var el = document.getElementById('coList'), state = document.getElementById('coState');
+    state.style.display = ''; state.textContent = 'Loading call-outs…'; el.innerHTML = '';
+    try {
+      var r = await C.api('/admin/callouts');
+      var list = r.callouts || [];
+      var overdue = list.filter(function (c) { return c.status === 'alerted'; }).length;
+      var active = list.filter(function (c) { return c.status === 'active' || c.status === 'arrived'; }).length;
+      document.getElementById('coCount').textContent = (overdue ? overdue + ' OVERDUE · ' : '') + active + ' active';
+      if (!list.length) { state.textContent = 'No call-outs yet.'; return; }
+      state.style.display = 'none';
+      list.forEach(function (c) { el.appendChild(coCard(c)); });
+    } catch (err) { state.textContent = err.message || 'Could not load call-outs.'; }
+  }
+  document.getElementById('coReload').addEventListener('click', loadCallouts);
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
+    loadCallouts();
     await loadServiceCatalog();
     loadSuggestions();
     await loadMembers();

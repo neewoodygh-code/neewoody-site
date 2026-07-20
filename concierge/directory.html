@@ -146,6 +146,32 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .sug-status.done{ background:#dcecdc; color:#2e6b2e; }
 .sug-status.declined{ background:#f2dede; color:#a52a2a; }
 
+/* Safety check-in */
+.callout-card{ background:#fff; border:1px solid rgba(11,31,14,.12); border-left:4px solid var(--gold); border-radius:6px; padding:1.1rem 1.2rem; margin-bottom:1.25rem; }
+.callout-card.overdue{ border-left-color:#a52a2a; background:#fdf3f3; }
+.co-top{ display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:.5rem; }
+.co-status{ display:inline-block; font-family:var(--ui); font-size:.6rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  padding:.2rem .55rem; border-radius:20px; background:var(--cream-dark); color:var(--muted); }
+.co-status.active{ background:rgba(200,146,42,.2); color:#8a6d16; }
+.co-status.arrived{ background:#dcecdc; color:#2e6b2e; }
+.co-status.safe{ background:#dcecdc; color:#2e6b2e; }
+.co-status.alerted{ background:#f2dede; color:#a52a2a; }
+.co-count{ font-family:var(--ui); font-size:.72rem; color:var(--muted); }
+.co-title{ font-family:var(--display); font-size:1.15rem; color:var(--ink); }
+.co-meta{ font-size:.88rem; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+.co-actions{ display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.9rem; }
+.co-btn{ font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.06em; text-transform:uppercase;
+  background:var(--green); color:var(--cream); border:none; border-radius:4px; padding:.6rem 1rem; cursor:pointer; }
+.co-btn.ghost{ background:transparent; color:var(--green); border:1px solid rgba(11,31,14,.3); }
+.co-btn:disabled{ opacity:.6; cursor:default; }
+.callout-form{ background:#fff; border:1px solid rgba(11,31,14,.1); border-radius:6px; padding:1.2rem 1.3rem; }
+.callout-form h2{ font-family:var(--display); font-weight:500; font-size:1.25rem; margin-bottom:.5rem; }
+.callout-form label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:.85rem 0 .3rem; }
+.callout-form label .opt{ text-transform:none; letter-spacing:0; font-family:var(--body); font-size:.8rem; }
+.callout-form input, .callout-form select, .callout-form textarea{ width:100%; font-family:var(--body); font-size:.95rem; padding:.6rem .7rem;
+  border:1px solid rgba(11,31,14,.2); border-radius:4px; background:#fff; color:var(--ink); }
+.co-hist{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px; padding:.6rem .8rem; margin-bottom:.4rem; font-size:.9rem; }
+
 /* jobs board */
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
@@ -436,6 +462,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="storefront" id="storefrontTab" hidden>My Storefront</button>
   <button class="tab" data-tab="orders" id="ordersTab" hidden>Orders <span class="tab-count" id="ordersCount" hidden>0</span></button>
   <button class="tab" data-tab="tools">Tools</button>
+  <button class="tab" data-tab="safety">Safety</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
   <button class="tab" data-tab="academy">Academy</button>
   <button class="tab" data-tab="support">Support</button>
@@ -574,6 +601,18 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
+  <!-- TAB: Safety (lone-worker check-in) -->
+  <div id="tab-safety" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>Safety check-in</h1>
+      <p>Going to see a client alone? Start a call-out before you go. Check in when you arrive and tap “I’m safe” when you’re done. If you don’t check out in time, the Concierge team is alerted with your details and location so they can reach you and your emergency contact.</p>
+    </div>
+    <div id="safetyEmergWarn" class="mbar info" style="display:none"></div>
+    <div id="safetyActive"></div>
+    <div id="safetyNew"></div>
+    <div id="safetyHistory"></div>
+  </div>
+
   <!-- TAB: Academy (woodworking skill videos) -->
   <div id="tab-academy" class="tabpanel" hidden>
     <div class="lead">
@@ -716,6 +755,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       <input id="soc_facebook" type="url" inputmode="url" placeholder="Facebook link" style="margin-bottom:.4rem" />
       <input id="soc_youtube" type="url" inputmode="url" placeholder="YouTube link" style="margin-bottom:.4rem" />
       <input id="soc_linkedin" type="url" inputmode="url" placeholder="LinkedIn link" />
+      <label>Emergency contact <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— private; used only for the Safety check-in if you go overdue</span></label>
+      <input id="p_emerg_name" maxlength="80" placeholder="Contact name" style="margin-bottom:.4rem" />
+      <input id="p_emerg_phone" type="tel" inputmode="numeric" placeholder="Contact phone (0XX…)" />
       <div id="carpFields">
         <label for="p_lvl">Skill level</label>
         <select id="p_lvl"><option value="">— not set —</option></select>
@@ -1400,6 +1442,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     buildServicesGrid(me.side_hustles || []);
     document.getElementById('p_suggest').value = ''; document.getElementById('p_suggest_msg').textContent = '';
     (function () { var soc = me.socials || {}; SOCIAL_KEYS.forEach(function (k) { document.getElementById('soc_' + k).value = soc[k] || ''; }); })();
+    document.getElementById('p_emerg_name').value = me.emergency_name || '';
+    document.getElementById('p_emerg_phone').value = me.emergency_phone || '';
     coverZonesWrap.innerHTML = '';
     (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
@@ -1460,6 +1504,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         coverage_zones: coverZones,
         side_hustles: sideHustles,
         socials: socials,
+        emergency_name: document.getElementById('p_emerg_name').value.trim(),
+        emergency_phone: document.getElementById('p_emerg_phone').value.trim(),
         business_phone: bizPhoneVal,
         hide_phone: hidePhone,
         availability: pAvail.value,
@@ -1644,7 +1690,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'academy', 'support'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'safety', 'sourcing', 'academy', 'support'];
   var jobsLoaded = false;
   var buyLoaded = false;
   var ordersLoaded = false;
@@ -1678,6 +1724,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
+    if (name === 'safety') { loadSafety(); }
     if (name === 'academy') { renderLessons(); }
     if (name === 'support' && !supportInit) { supportInit = true; initSupport(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
@@ -2170,6 +2217,99 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { btn.disabled = false; }
   });
 
+  // ── Safety check-in ──
+  function coCountdown(expected) {
+    var t = Date.parse(String(expected).replace(' ', 'T') + 'Z'); if (isNaN(t)) return '';
+    var d = Math.round((t - Date.now()) / 60000);
+    return d > 0 ? ('due in ' + (d >= 60 ? Math.floor(d / 60) + 'h ' + (d % 60) + 'm' : d + ' min')) : ('overdue by ' + Math.abs(d) + ' min');
+  }
+  function coStatusLabel(s) { return ({ active: 'On the way', arrived: 'Checked in', safe: 'Safe', alerted: 'ALERT sent', cancelled: 'Cancelled' })[s] || s; }
+  function mkCoBtn(label, fn, ghost) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = ghost ? 'co-btn ghost' : 'co-btn'; b.textContent = label;
+    b.addEventListener('click', async function () { b.disabled = true; try { await fn(); } catch (e) { alert(e.message || 'Could not do that.'); b.disabled = false; } });
+    return b;
+  }
+  async function coAct(id, body) { await C.api('/callouts/' + id, { method: 'PUT', body: body }); await loadSafety(); }
+  function arriveCallout(id) {
+    return new Promise(function (resolve) {
+      function go(lat, lng) { coAct(id, { action: 'arrive', lat: lat, lng: lng }).then(resolve, function () { resolve(); }); }
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (p) { go(p.coords.latitude, p.coords.longitude); }, function () { go(null, null); }, { enableHighAccuracy: true, timeout: 10000 });
+      } else { go(null, null); }
+    });
+  }
+  function renderSafetyActive(c) {
+    var el = document.getElementById('safetyActive');
+    if (!c) { el.innerHTML = ''; return; }
+    el.innerHTML =
+      '<div class="callout-card' + (c.status === 'alerted' ? ' overdue' : '') + '">' +
+        '<div class="co-top"><span class="co-status ' + c.status + '">' + coStatusLabel(c.status) + '</span><span class="co-count">' + coCountdown(c.expected_back) + '</span></div>' +
+        '<div class="co-title">' + C.escapeHtml(c.location || 'Call-out') + '</div>' +
+        (c.client_name ? '<div class="co-meta">Client: ' + C.escapeHtml(c.client_name) + (c.client_phone ? ' · ' + C.escapeHtml(c.client_phone) : '') + '</div>' : '') +
+        (c.notes ? '<div class="co-meta">' + C.escapeHtml(c.notes) + '</div>' : '') +
+        (c.status === 'alerted' ? '<div class="co-meta" style="color:#a52a2a">You’re overdue — the Concierge team has been alerted. Tap “I’m safe” if you’re OK.</div>' : '') +
+        '<div class="co-actions"></div>' +
+      '</div>';
+    var acts = el.querySelector('.co-actions');
+    if (c.status === 'active') acts.appendChild(mkCoBtn('✓ I’ve arrived (check in)', function () { return arriveCallout(c.id); }));
+    acts.appendChild(mkCoBtn('🟢 I’m safe', function () { return coAct(c.id, { action: 'safe' }); }));
+    acts.appendChild(mkCoBtn('+1 hour', function () { return coAct(c.id, { action: 'extend', hours: 1 }); }, true));
+    acts.appendChild(mkCoBtn('Cancel', function () { if (!confirm('Cancel this call-out?')) return Promise.resolve(); return coAct(c.id, { action: 'cancel' }); }, true));
+  }
+  function renderSafetyNew(show) {
+    var el = document.getElementById('safetyNew');
+    if (!show) { el.innerHTML = ''; return; }
+    el.innerHTML =
+      '<div class="callout-form"><h2>Start a call-out</h2>' +
+      '<label>Where are you going?</label><input id="co_loc" maxlength="200" placeholder="e.g. East Legon — client’s house" />' +
+      '<label>Client name <span class="opt">— optional</span></label><input id="co_cname" maxlength="80" placeholder="Optional" />' +
+      '<label>Client phone <span class="opt">— optional</span></label><input id="co_cphone" type="tel" inputmode="numeric" placeholder="Optional" />' +
+      '<label>Expect to be back within</label><select id="co_hours"><option value="0.5">30 minutes</option><option value="1" selected>1 hour</option><option value="2">2 hours</option><option value="3">3 hours</option><option value="4">4 hours</option><option value="6">6 hours</option></select>' +
+      '<label>Notes <span class="opt">— optional</span></label><textarea id="co_notes" rows="2" maxlength="500" placeholder="Anything the team should know"></textarea>' +
+      '<div style="margin-top:.8rem;display:flex;gap:.7rem;align-items:center;flex-wrap:wrap"><button class="btn-post" id="co_start">Start call-out</button><span class="sf-note" id="co_msg"></span></div>' +
+      '</div>';
+    document.getElementById('co_start').addEventListener('click', async function () {
+      var msg = document.getElementById('co_msg'), btn = this;
+      var loc = document.getElementById('co_loc').value.trim();
+      if (!loc) { msg.textContent = 'Enter where you’re going.'; return; }
+      btn.disabled = true; msg.textContent = 'Starting…';
+      try {
+        await C.api('/callouts', { method: 'POST', body: {
+          location: loc, client_name: document.getElementById('co_cname').value.trim(),
+          client_phone: document.getElementById('co_cphone').value.trim(), hours: Number(document.getElementById('co_hours').value),
+          notes: document.getElementById('co_notes').value.trim()
+        }});
+        await loadSafety();
+      } catch (err) { msg.textContent = err.message || 'Could not start.'; btn.disabled = false; }
+    });
+  }
+  function renderSafetyHistory(list) {
+    var el = document.getElementById('safetyHistory');
+    var past = list.filter(function (c) { return c.status === 'safe' || c.status === 'cancelled' || c.status === 'alerted'; });
+    if (!past.length) { el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="md-label" style="margin-top:1.5rem">Recent call-outs</div>' + past.slice(0, 15).map(function (c) {
+      return '<div class="co-hist"><span class="co-status ' + c.status + '">' + coStatusLabel(c.status) + '</span> ' + C.escapeHtml(c.location || '') + ' <span class="sf-note">· ' + C.escapeHtml(String(c.created_at || '').slice(0, 16)) + '</span></div>';
+    }).join('');
+  }
+  async function loadSafety() {
+    var warn = document.getElementById('safetyEmergWarn');
+    if (!(me && me.emergency_phone)) {
+      warn.className = 'mbar info'; warn.style.display = 'flex';
+      warn.innerHTML = '<p>Add an <b>emergency contact</b> in My profile — that’s who the team helps reach if you’re ever overdue.</p><button type="button" id="emergGo">Add now</button>';
+      document.getElementById('emergGo').addEventListener('click', openModal);
+    } else { warn.style.display = 'none'; }
+    try {
+      var r = await C.api('/callouts');
+      var list = r.callouts || [];
+      var active = list.filter(function (c) { return c.status === 'active' || c.status === 'arrived' || c.status === 'alerted'; })[0] || null;
+      renderSafetyActive(active);
+      renderSafetyNew(!active);
+      renderSafetyHistory(list);
+    } catch (e) {
+      document.getElementById('safetyActive').innerHTML = '<p class="sf-note">Could not load your call-outs.</p>';
+    }
+  }
+
   // ── area alerts (Web Push) — one subscription, buttons on Jobs + Services ──
   var alertsBtns = [].slice.call(document.querySelectorAll('.alerts-btn'));
   var alertsNotes = [].slice.call(document.querySelectorAll('.alerts-note'));
@@ -2238,7 +2378,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
     { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
     { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
-    { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' }
+    { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' },
+    { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
