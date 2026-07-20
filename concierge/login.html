@@ -11,13 +11,13 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --green:#0b1f0e; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
+  --navy:#1f2f58; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
   --ink:#1c1c1a; --muted:#6b6557;
   --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
 }
 html{font-size:16px}
 body{
-  min-height:100vh; background:var(--green); color:var(--cream);
+  min-height:100vh; background:var(--navy); color:var(--cream);
   font-family:var(--body); -webkit-font-smoothing:antialiased;
   display:flex; align-items:center; justify-content:center; padding:1.5rem;
   background-image:radial-gradient(120% 90% at 50% -10%, rgba(200,146,42,.14), transparent 60%);
@@ -37,7 +37,7 @@ label{ display:block; font-family:var(--ui); font-size:.7rem; font-weight:500; l
 .field{ margin-bottom:1.25rem; }
 input{
   width:100%; font-family:var(--body); font-size:1.05rem; color:var(--ink);
-  padding:.85rem .9rem; border:1px solid rgba(11,31,14,.18); border-radius:3px;
+  padding:.85rem .9rem; border:1px solid rgba(31,47,88,.18); border-radius:3px;
   background:#fff; transition:border-color .2s;
 }
 input:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
@@ -45,7 +45,7 @@ input#pin{ letter-spacing:.5em; text-align:center; font-size:1.4rem; }
 button.submit{
   width:100%; font-family:var(--ui); font-weight:500; font-size:.78rem;
   letter-spacing:.16em; text-transform:uppercase; color:var(--cream);
-  background:var(--green); border:none; border-radius:3px; padding:1rem;
+  background:var(--navy); border:none; border-radius:3px; padding:1rem;
   cursor:pointer; transition:background .25s; margin-top:.25rem;
 }
 button.submit:hover{ background:#12300f; }

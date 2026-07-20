@@ -12,13 +12,13 @@
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --green:#0b1f0e; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
+  --navy:#1f2f58; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
   --ink:#1c1c1a; --muted:#6b6557;
   --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
 }
 html{font-size:16px}
 body{
-  min-height:100vh; background:var(--green); color:var(--cream);
+  min-height:100vh; background:var(--navy); color:var(--cream);
   font-family:var(--body); -webkit-font-smoothing:antialiased;
   padding:2.5rem 1.5rem;
   background-image:radial-gradient(120% 60% at 50% -10%, rgba(200,146,42,.14), transparent 60%);
@@ -39,7 +39,7 @@ label .opt{ text-transform:none; letter-spacing:0; font-family:var(--body); font
 .row{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
 input, select, textarea{
   width:100%; font-family:var(--body); font-size:1rem; color:var(--ink);
-  padding:.75rem .8rem; border:1px solid rgba(11,31,14,.18); border-radius:3px; background:#fff; transition:border-color .2s;
+  padding:.75rem .8rem; border:1px solid rgba(31,47,88,.18); border-radius:3px; background:#fff; transition:border-color .2s;
 }
 textarea{ resize:vertical; min-height:88px; line-height:1.5; }
 input:focus, select:focus, textarea:focus{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px rgba(200,146,42,.15); }
@@ -52,7 +52,7 @@ input.pin{ letter-spacing:.4em; text-align:center; font-size:1.2rem; }
 .spec-grid label.cb small{ display:block; color:var(--muted); font-size:.74rem; line-height:1.4; }
 button.submit{
   width:100%; font-family:var(--ui); font-weight:500; font-size:.8rem; letter-spacing:.15em; text-transform:uppercase;
-  color:var(--green); background:var(--gold); border:none; border-radius:3px; padding:1rem; cursor:pointer; transition:filter .2s; margin-top:.5rem;
+  color:var(--navy); background:var(--gold); border:none; border-radius:3px; padding:1rem; cursor:pointer; transition:filter .2s; margin-top:.5rem;
 }
 button.submit:hover{ filter:brightness(1.06); }
 button.submit:disabled{ opacity:.6; cursor:default; }
@@ -65,7 +65,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 
 /* multi-step wizard */
 .steps-ind{ display:flex; gap:.4rem; margin-bottom:.9rem; }
-.steps-ind .seg{ flex:1; height:4px; border-radius:2px; background:rgba(11,31,14,.14); transition:background .25s; }
+.steps-ind .seg{ flex:1; height:4px; border-radius:2px; background:rgba(31,47,88,.14); transition:background .25s; }
 .steps-ind .seg.on{ background:var(--gold); }
 .step-label{ font-family:var(--ui); font-size:.64rem; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:1.1rem; }
 .step{ display:none; }
@@ -73,19 +73,19 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 .wiz-nav{ display:flex; gap:.7rem; align-items:stretch; margin-top:1.5rem; }
 .wiz-nav .submit{ margin-top:0; flex:1; }
 .wiz-nav .back{ margin-top:0; flex:0 0 auto; width:auto; padding:1rem 1.15rem; background:transparent; color:var(--muted);
-  border:1px solid rgba(11,31,14,.25); font-family:var(--ui); font-weight:500; font-size:.78rem; letter-spacing:.1em;
+  border:1px solid rgba(31,47,88,.25); font-family:var(--ui); font-weight:500; font-size:.78rem; letter-spacing:.1em;
   text-transform:uppercase; border-radius:3px; cursor:pointer; transition:border-color .2s,color .2s; }
 .wiz-nav .back:hover{ border-color:var(--gold); color:var(--ink); }
 
 .done{ display:none; }
 .done.show{ display:block; }
 .done .panel{ text-align:center; }
-.done .tick{ width:56px; height:56px; border-radius:50%; background:var(--green); color:var(--gold);
+.done .tick{ width:56px; height:56px; border-radius:50%; background:var(--navy); color:var(--gold);
   display:flex; align-items:center; justify-content:center; font-size:1.8rem; margin:0 auto 1.1rem; }
 .done h2{ font-family:var(--display); font-weight:500; font-size:1.5rem; margin-bottom:.6rem; }
 .done p{ color:var(--muted); line-height:1.7; margin-bottom:1.2rem; }
 .done .go{ display:inline-block; font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.15em;
-  text-transform:uppercase; color:var(--green); border:1px solid rgba(11,31,14,.3); border-radius:3px; padding:.7rem 1.4rem; }
+  text-transform:uppercase; color:var(--navy); border:1px solid rgba(31,47,88,.3); border-radius:3px; padding:.7rem 1.4rem; }
 @media(max-width:520px){ .row{ grid-template-columns:1fr; } }
 </style>
 </head>
