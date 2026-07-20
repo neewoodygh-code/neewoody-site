@@ -283,6 +283,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       <div class="field"><label>Shop size (vendors)</label><select id="e_scale"><option value="">— n/a —</option></select></div>
       <div class="field"><label>Business / call number</label><input id="e_biz_phone" type="tel" inputmode="numeric" placeholder="Optional"></div>
       <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_hide_phone" style="width:auto"> Hide personal number (needs business number)</label></div>
+      <div class="field"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="e_verified" style="width:auto"> ✓ Verified by Carpentry Concierge Ghana</label></div>
       <div class="field"><label>Services offered <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— incl. deliveries &amp; errands</span></label><div class="spec-grid" id="e_services_grid"></div></div>
       <div class="field"><label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);color:var(--muted)">— couriers/runners; comma-separated</span></label><input id="e_coverage" placeholder="e.g. Spintex, Tema, Madina"></div>
       <div class="field"><label>What they sell (vendors)</label><div class="spec-grid" id="e_cats"></div></div>
@@ -660,6 +661,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     eScale.value = m.vendor_scale || '';
     document.getElementById('e_biz_phone').value = m.business_phone || '';
     document.getElementById('e_hide_phone').checked = !!m.hide_phone;
+    document.getElementById('e_verified').checked = !!m.verified;
     (function () { var set = {}; (m.side_hustles || []).forEach(function (s) { set[s] = true; });
       document.querySelectorAll('#e_services_grid input').forEach(function (cb) { cb.checked = !!set[cb.value]; }); })();
     document.getElementById('e_coverage').value = (m.coverage_zones || []).join(', ');
@@ -694,6 +696,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         vendor_scale: eMemberType.value === 'vendor' ? eScale.value : '',
         business_phone: document.getElementById('e_biz_phone').value.trim(),
         hide_phone: document.getElementById('e_hide_phone').checked,
+        verified: document.getElementById('e_verified').checked,
         side_hustles: [].slice.call(document.querySelectorAll('#e_services_grid input:checked')).map(function (c) { return c.value; }),
         coverage_zones: document.getElementById('e_coverage').value.split(',').map(function (z) { return z.trim(); }).filter(Boolean),
         vendor_categories: eMemberType.value === 'vendor' ? [].slice.call(eCats.querySelectorAll('input:checked')).map(function (c) { return c.value; }) : [],

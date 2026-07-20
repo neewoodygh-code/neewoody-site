@@ -164,38 +164,38 @@ async function route(request, env, ctx) {
   if (path === '/api/me' && method === 'PUT')  return withAuth(request, env, (m) => updateMe(request, env, m));
   if (path === '/api/me/photo' && method === 'POST')   return withAuth(request, env, (m) => uploadPhoto(request, env, m.phone));
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
-  if (path === '/api/directory' && method === 'GET') return withAuth(request, env, () => directory(env));
+  if (path === '/api/directory' && method === 'GET') return withPaid(request, env, () => directory(env));
 
   // ---- member: storefront (vendor items) ----
   if (path === '/api/me/storefront' && method === 'GET')  return withAuth(request, env, (m) => listMyStorefront(env, m.phone));
-  if (path === '/api/me/storefront' && method === 'POST') return withAuth(request, env, (m) => createStorefrontItem(request, env, m.phone));
+  if (path === '/api/me/storefront' && method === 'POST') return withPaid(request, env, (m) => createStorefrontItem(request, env, m.phone));
   const mSItem = path.match(/^\/api\/me\/storefront\/(\d+)$/);
-  if (mSItem && method === 'PUT')    return withAuth(request, env, (m) => updateStorefrontItem(request, env, m.phone, Number(mSItem[1])));
+  if (mSItem && method === 'PUT')    return withPaid(request, env, (m) => updateStorefrontItem(request, env, m.phone, Number(mSItem[1])));
   if (mSItem && method === 'DELETE') return withAuth(request, env, (m) => deleteStorefrontItem(env, m.phone, Number(mSItem[1])));
   const mSItemPhoto = path.match(/^\/api\/me\/storefront\/(\d+)\/photo$/);
-  if (mSItemPhoto && method === 'POST')   return withAuth(request, env, (m) => uploadStorefrontPhoto(request, env, m.phone, Number(mSItemPhoto[1])));
+  if (mSItemPhoto && method === 'POST')   return withPaid(request, env, (m) => uploadStorefrontPhoto(request, env, m.phone, Number(mSItemPhoto[1])));
   if (mSItemPhoto && method === 'DELETE') return withAuth(request, env, (m) => deleteStorefrontPhoto(env, m.phone, Number(mSItemPhoto[1])));
   // a specific approved vendor's storefront (members browsing Sourcing)
   const mVendorStore = path.match(/^\/api\/storefront\/(233\d{9})$/);
-  if (mVendorStore && method === 'GET') return withAuth(request, env, () => getVendorStorefront(env, mVendorStore[1]));
+  if (mVendorStore && method === 'GET') return withPaid(request, env, () => getVendorStorefront(env, mVendorStore[1]));
 
   // ---- member: job alert subscriptions (Web Push) ----
   if (path === '/api/me/push' && method === 'POST')   return withAuth(request, env, (m) => savePushSub(request, env, m));
   if (path === '/api/me/push' && method === 'DELETE') return withAuth(request, env, (m) => deletePushSub(request, env, m));
 
   // ---- member: jobs board ----
-  if (path === '/api/jobs' && method === 'GET')  return withAuth(request, env, (m) => listJobs(env, m));
-  if (path === '/api/jobs' && method === 'POST') return withAuth(request, env, (m) => createJob(request, env, m, ctx));
+  if (path === '/api/jobs' && method === 'GET')  return withPaid(request, env, (m) => listJobs(env, m));
+  if (path === '/api/jobs' && method === 'POST') return withPaid(request, env, (m) => createJob(request, env, m, ctx));
   const mJob = path.match(/^\/api\/jobs\/(\d+)$/);
-  if (mJob && method === 'PUT')    return withAuth(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
-  if (mJob && method === 'DELETE') return withAuth(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
+  if (mJob && method === 'PUT')    return withPaid(request, env, (m) => updateJob(request, env, m, Number(mJob[1])));
+  if (mJob && method === 'DELETE') return withPaid(request, env, (m) => deleteJob(env, m, Number(mJob[1])));
 
   // ---- member: "Buy for me" board (procurement/errand requests) ----
-  if (path === '/api/buy-requests' && method === 'GET')  return withAuth(request, env, (m) => listBuyRequests(env, m));
-  if (path === '/api/buy-requests' && method === 'POST') return withAuth(request, env, (m) => createBuyRequest(request, env, m, ctx));
+  if (path === '/api/buy-requests' && method === 'GET')  return withPaid(request, env, (m) => listBuyRequests(env, m));
+  if (path === '/api/buy-requests' && method === 'POST') return withPaid(request, env, (m) => createBuyRequest(request, env, m, ctx));
   const mBuy = path.match(/^\/api\/buy-requests\/(\d+)$/);
-  if (mBuy && method === 'PUT')    return withAuth(request, env, (m) => updateBuyRequest(request, env, m, Number(mBuy[1])));
-  if (mBuy && method === 'DELETE') return withAuth(request, env, (m) => deleteBuyRequest(env, m, Number(mBuy[1])));
+  if (mBuy && method === 'PUT')    return withPaid(request, env, (m) => updateBuyRequest(request, env, m, Number(mBuy[1])));
+  if (mBuy && method === 'DELETE') return withPaid(request, env, (m) => deleteBuyRequest(env, m, Number(mBuy[1])));
 
   // ---- member: notifications (in-app bell) ----
   if (path === '/api/notifications' && method === 'GET') return withAuth(request, env, (m) => listNotifications(env, m));
@@ -203,23 +203,23 @@ async function route(request, env, ctx) {
 
   // ---- offered-services catalog ----
   if (path === '/api/services' && method === 'GET') return withAuth(request, env, () => listServices(env));
-  if (path === '/api/services/suggest' && method === 'POST') return withAuth(request, env, (m) => suggestService(request, env, m, ctx));
+  if (path === '/api/services/suggest' && method === 'POST') return withPaid(request, env, (m) => suggestService(request, env, m, ctx));
 
   // ---- vendor orders (order a listed storefront item) ----
-  if (path === '/api/orders' && method === 'POST') return withAuth(request, env, (m) => createOrder(request, env, m, ctx));
+  if (path === '/api/orders' && method === 'POST') return withPaid(request, env, (m) => createOrder(request, env, m, ctx));
   if (path === '/api/orders' && method === 'GET')  return withAuth(request, env, (m) => listVendorOrders(env, m));
   const mOrder = path.match(/^\/api\/orders\/(\d+)$/);
   if (mOrder && method === 'PUT') return withAuth(request, env, (m) => updateOrder(request, env, m, Number(mOrder[1]), ctx));
 
   // ---- member: pricing tool (per-member config + quotes) ----
   if (path === '/api/pricing/config' && method === 'GET') return withAuth(request, env, (m) => getPricingConfig(env, m));
-  if (path === '/api/pricing/config' && method === 'PUT') return withAuth(request, env, (m) => savePricingConfig(request, env, m));
+  if (path === '/api/pricing/config' && method === 'PUT') return withPaid(request, env, (m) => savePricingConfig(request, env, m));
   if (path === '/api/pricing/quotes' && method === 'GET') return withAuth(request, env, (m) => getQuotes(env, m));
-  if (path === '/api/pricing/quotes' && method === 'PUT') return withAuth(request, env, (m) => saveQuotes(request, env, m));
+  if (path === '/api/pricing/quotes' && method === 'PUT') return withPaid(request, env, (m) => saveQuotes(request, env, m));
 
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
-  if (path === '/api/cutlists' && method === 'POST') return withAuth(request, env, (m) => saveCutlist(request, env, m));
+  if (path === '/api/cutlists' && method === 'POST') return withPaid(request, env, (m) => saveCutlist(request, env, m));
   const mCutlist = path.match(/^\/api\/cutlists\/(\d+)$/);
   if (mCutlist && method === 'GET')    return withAuth(request, env, (m) => getCutlist(env, m, Number(mCutlist[1])));
   if (mCutlist && method === 'DELETE') return withAuth(request, env, (m) => deleteCutlist(env, m, Number(mCutlist[1])));
@@ -435,7 +435,7 @@ async function directory(env) {
     `SELECT name, business_name, area, specialties, photo_url, phone, hide_phone,
             skill_level, years_experience, is_business, availability, member_type, stock,
             location_lat, location_lng, vendor_scale, vendor_categories, vendor_services, services_other,
-            coverage_zones, side_hustles, socials, business_phone
+            coverage_zones, side_hustles, socials, verified, business_phone
      FROM members WHERE status = 'approved' ORDER BY name COLLATE NOCASE`
   ).all();
   return json({ members: (results || []).map((r) => ({
@@ -450,6 +450,7 @@ async function directory(env) {
     coverage_zones: parseSpec(r.coverage_zones),
     side_hustles: parseSpec(r.side_hustles),
     socials: parseSocials(r.socials),
+    verified: !!r.verified,
     is_business: !!r.is_business,
   })) });
 }
@@ -548,6 +549,7 @@ async function adminUpdateMember(request, env, rawPhone) {
     fields.role = body.role;
   }
   if ('is_founder' in body) fields.is_founder = body.is_founder ? 1 : 0;
+  if ('verified' in body) fields.verified = body.verified ? 1 : 0;
 
   // profile fields — admin may correct member details too
   if ('name' in body) {
@@ -1582,7 +1584,8 @@ async function membershipStatus(env, m) {
   return {
     paid: !!row, period,
     amount_due: charge.amount, kind: charge.kind,
-    join: m.status !== 'approved', // pending → hard "pay to join" gate
+    join: m.status !== 'approved',              // pending → hard "pay to join" gate
+    lapsed: m.status === 'approved' && !row,    // approved but this month unpaid → lockout
     configured: !!env.PAYSTACK_SECRET,
   };
 }
@@ -2114,6 +2117,21 @@ async function withAdmin(request, env, handler) {
   return handler(member);
 }
 
+// Approved AND paid-for-the-current-period. Gates the member benefits (directory,
+// jobs, services, new saves). Lapsed approved members get 403 renew_required —
+// they keep read access to their own saved data via the plain withAuth routes.
+async function withPaid(request, env, handler) {
+  const member = await authenticate(request, env);
+  if (!member) return json({ error: 'unauthorized' }, 401);
+  if (member.status === 'suspended') return json({ error: 'account_suspended' }, 403);
+  if (member.status !== 'approved') return json({ error: 'payment_required' }, 403);
+  if (member.role !== 'admin' && !member.is_founder) {
+    const row = await env.DB.prepare('SELECT 1 AS x FROM payments WHERE member_phone = ? AND period = ?').bind(member.phone, currentPeriod()).first();
+    if (!row) return json({ error: 'renew_required' }, 403);
+  }
+  return handler(member);
+}
+
 async function authenticate(request, env) {
   const auth = request.headers.get('Authorization') || '';
   const m = auth.match(/^Bearer\s+(.+)$/i);
@@ -2325,7 +2343,7 @@ function parseSocials(text) {
 function sanitize(m) {
   if (!m) return m;
   const { pin_hash, ...rest } = m;
-  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), coverage_zones: parseSpec(m.coverage_zones), side_hustles: parseSpec(m.side_hustles), socials: parseSocials(m.socials), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone };
+  return { ...rest, specialties: parseSpec(m.specialties), vendor_categories: parseSpec(m.vendor_categories), vendor_services: parseSpec(m.vendor_services), coverage_zones: parseSpec(m.coverage_zones), side_hustles: parseSpec(m.side_hustles), socials: parseSocials(m.socials), is_founder: !!m.is_founder, is_business: !!m.is_business, hide_phone: !!m.hide_phone, verified: !!m.verified };
 }
 
 async function recordAttempt(env, phone, success) {

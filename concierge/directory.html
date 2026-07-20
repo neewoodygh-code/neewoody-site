@@ -223,6 +223,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .mcard h3{ font-family:var(--display); font-weight:500; font-size:1rem; line-height:1.25;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mcard .biz-dot{ color:var(--gold); font-size:.7rem; vertical-align:middle; margin-left:.15rem; }
+.vtick{ display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border-radius:50%;
+  background:var(--gold); color:var(--green); font-size:.62rem; font-weight:700; vertical-align:middle; margin-left:.2rem; }
+.bdg-verified{ display:inline-block; font-family:var(--ui); font-size:.58rem; font-weight:600; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--green); background:rgba(200,146,42,.22); border:1px solid var(--gold);
+  border-radius:20px; padding:.16rem .5rem; }
 .mcard .meta{ color:var(--muted); font-size:.78rem; margin-top:.15rem;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mcard .map-pin{ font-size:.82rem; }
@@ -415,6 +420,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 
   <div id="membershipBar" class="mbar" style="display:none"></div>
   <div id="joinPaywall" class="paywall" style="display:none"></div>
+  <div id="lapsedLock" class="paywall" style="display:none"></div>
 
   <nav class="crumbs" aria-label="Breadcrumb">
     <a href="../tools.html">Concierge</a><span aria-hidden="true">›</span><b id="crumbCurrent">Directory</b>
@@ -909,7 +915,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     el.innerHTML =
       '<div class="ph-wrap"><div class="ph">' + photo + '</div>' + typeBadge(m, 'type-badge') + '</div>' +
       '<div class="body">' +
-        '<h3>' + C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name) + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
+        '<h3>' + C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name) + (m.verified ? ' <span class="vtick" title="Verified by Carpentry Concierge Ghana" aria-label="Verified">✓</span>' : '') + (m.is_business ? ' <span class="biz-dot" title="Business" aria-hidden="true">●</span>' : '') + '</h3>' +
         ((meta || pin) ? '<div class="meta">' + meta + pin + '</div>' : '') +
       '</div>' +
       '<a class="wa" href="' + C.waLink(C.contactPhone(m)) + '" target="_blank" rel="noopener" aria-label="WhatsApp ' + C.escapeHtml(m.name) + '">' + WA_SVG + '</a>';
@@ -937,6 +943,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     var scale = m.member_type === 'vendor' ? C.vendorScaleLabel(m.vendor_scale) : '';
     var badges =
       '<span class="type-pill" style="background:' + ib.bg + ';color:' + ib.fg + '">' + C.escapeHtml(ib.label) + '</span>' +
+      (m.verified ? '<span class="bdg-verified" title="Verified by Carpentry Concierge Ghana">✓ Verified</span>' : '') +
       (m.is_business ? '<span class="bdg-biz">Business</span>' : '') +
       (lvl ? '<span class="lvl">' + C.escapeHtml(lvl) + '</span>' : '') +
       (scale ? '<span class="lvl">' + C.escapeHtml(scale) + '</span>' : '') +
@@ -1587,13 +1594,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   var jobsLoaded = false;
   var buyLoaded = false;
   var ordersLoaded = false;
+  // Tabs locked for a lapsed (unpaid) member — the member benefits. Tools +
+  // Tutorials stay open (saved data is read-only; new saves are blocked server-side).
+  var LOCKED_WHEN_LAPSED = ['directory', 'jobs', 'services', 'sourcing', 'storefront', 'orders'];
   function showTab(name) {
     if (TABS.indexOf(name) < 0) name = 'directory';
     // Storefront + Orders are vendor-only
     if ((name === 'storefront' || name === 'orders') && !(me && me.member_type === 'vendor')) name = 'directory';
-    TABS.forEach(function (t) {
-      document.getElementById('tab-' + t).hidden = (t !== name);
-    });
     var activeTab = null;
     document.querySelectorAll('#tabbar .tab').forEach(function (b) {
       var on = b.getAttribute('data-tab') === name;
@@ -1603,6 +1610,15 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     // breadcrumb reflects the active section (strip any "soon" pill text)
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     closeSpop();
+    // Lapsed lockout: benefit tabs show the renew card instead of loading.
+    if (membership && membership.lapsed && LOCKED_WHEN_LAPSED.indexOf(name) >= 0) {
+      TABS.forEach(function (t) { document.getElementById('tab-' + t).hidden = true; });
+      renderLapsedLock();
+      if (history.replaceState) history.replaceState(null, '', '#' + name);
+      return;
+    }
+    document.getElementById('lapsedLock').style.display = 'none';
+    TABS.forEach(function (t) { document.getElementById('tab-' + t).hidden = (t !== name); });
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
     if (name === 'services') { renderOffered(); if (!buyLoaded) { buyLoaded = true; loadBuy(); } }
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
@@ -2096,7 +2112,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' },
     { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' },
     { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' },
-    { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' }
+    { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' },
+    { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
+    { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -2180,12 +2198,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (ref) { try { await C.api('/pay/verify', { method: 'POST', body: { reference: ref } }); } catch (e) {} }
     for (var i = 0; i < 5; i++) {
       await new Promise(function (res) { setTimeout(res, i === 0 ? 800 : 2500); });
-      await refreshMembership();
-      if (membership && membership.paid) {
-        payBar.className = 'mbar ok'; payBar.style.display = 'flex';
-        payBar.innerHTML = '<p>Payment received — your membership is active. Thank you!</p>';
-        setTimeout(renderMembershipBar, 5000); return;
-      }
+      try { var r = await C.api('/me'); me = r.member; membership = r.membership; } catch (e) {}
+      if (membership && membership.paid) { location.reload(); return; } // reload to unlock everything
     }
     payBar.className = 'mbar info'; payBar.style.display = 'flex';
     payBar.innerHTML = '<p>We haven\'t confirmed your payment yet — if it went through, it\'ll update shortly. Check back in a minute.</p>';
@@ -2234,6 +2248,28 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       if (me.status === 'approved') { location.reload(); return; }
     }
     if (msg) msg.textContent = 'Not confirmed yet — if you paid, refresh in a minute.';
+  }
+
+  // ── lapsed-membership lockout (stylish renew card on benefit tabs) ──
+  function renderLapsedLock() {
+    var pw = document.getElementById('lapsedLock');
+    var amt = (membership && membership.amount_due) || 50;
+    pw.style.display = 'block';
+    pw.innerHTML =
+      '<h1>Membership lapsed</h1>' +
+      '<p>Your membership for <b>' + C.escapeHtml(monthName(membership.period)) + '</b> is due. Renew to unlock the directory, jobs and services.<br>Your saved cutlists, quotes and profile are safe — nothing is lost.</p>' +
+      '<div class="pw-amt">GHS ' + amt + ' <span>to renew</span></div>' +
+      ((membership && membership.configured === false)
+        ? '<p class="sf-note">Online payment isn\'t switched on yet — pay by Mobile Money as usual and it\'ll reopen.</p>'
+        : '<button type="button" id="renewBtn">Renew now</button>') +
+      '<div id="renewMsg" class="sf-note" style="margin-top:.6rem">You can still open your saved work in the Tools tab.</div>';
+    var b = document.getElementById('renewBtn');
+    if (b) b.addEventListener('click', async function () {
+      var msg = document.getElementById('renewMsg'); b.disabled = true; b.textContent = 'Starting…';
+      try { var r = await C.api('/pay/init', { method: 'POST', body: {} }); if (r.authorization_url) { window.location.href = r.authorization_url; return; } msg.textContent = 'Could not start payment.'; }
+      catch (err) { msg.textContent = err.message || 'Could not start payment.'; }
+      b.disabled = false; b.textContent = 'Renew now';
+    });
   }
 
   // ── notifications (in-app bell) ──
@@ -2300,17 +2336,22 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (me.member_type === 'vendor') {
       document.getElementById('storefrontTab').hidden = false;
       document.getElementById('ordersTab').hidden = false;
-      loadOrders(); // populate the Orders badge
     }
+    handlePayReturn();  // returning from a payment (join/renew/monthly) → verify + reload
+    initAlerts();
+    fetchNotifs();
+    var h = location.hash.slice(1); h = (h && TABS.indexOf(h) >= 0) ? h : null;
+
+    // Lapsed lockout: benefit tabs are locked; don't load them. Tools stays open.
+    if (membership && membership.lapsed) { showTab(h || 'directory'); return; }
+
+    if (me.member_type === 'vendor') loadOrders(); // Orders badge (paid vendors only)
     await load();
     renderNudge();
     renderMembershipBar();
-    handlePayReturn();
     maybeShowWhatsNew();
-    initAlerts();
-    fetchNotifs();
+    if (h) showTab(h);
   }
-  if (location.hash && TABS.indexOf(location.hash.slice(1)) > 0) showTab(location.hash.slice(1));
   init();
 })();
 </script>

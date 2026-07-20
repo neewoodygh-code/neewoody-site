@@ -1764,6 +1764,7 @@ function saveCutlist(){
     })
     .catch(function(err){
       if(err.status === 401){ promptJoin(); return; }
+      if(err.message === 'renew_required'){ alert('Your membership has lapsed — renew in the member area to save new cut lists. You can still open your saved ones.'); return; }
       alert(err.message || 'Could not save — try again.');
     });
 }
