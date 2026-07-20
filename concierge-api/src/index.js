@@ -137,6 +137,8 @@ async function route(request, env, ctx) {
 
   // Paystack webhook (server-to-server; verified by HMAC signature, not auth).
   if (path === '/api/pay/webhook' && method === 'POST') return payWebhook(request, env, ctx);
+  // Verify-on-return (public; reflects Paystack's own truth by reference).
+  if (path === '/api/pay/verify' && method === 'POST') return payVerify(request, env, ctx);
   // Founder spots remaining (public — register.html shows/hides the founder tier).
   if (path === '/api/public/founder-spots' && method === 'GET') return founderSpots(env);
 
@@ -1610,6 +1612,31 @@ async function payInit(request, env, member) {
   return json({ authorization_url: r.authorization_url, reference: r.reference });
 }
 
+// Apply a confirmed payment (idempotent): mark the intent paid, write the
+// canonical payments row, approve a pending member, grant founder if it was a
+// founder-tier payment, and notify. Shared by the webhook AND verify-on-return.
+async function applyPaidIntent(env, intent, reference, ctx) {
+  if (!intent || intent.status === 'paid') return; // unknown or already handled
+  await env.DB.prepare(`UPDATE payment_intents SET status = 'paid', paid_at = datetime('now') WHERE reference = ?`).bind(reference).run();
+  await env.DB.prepare(
+    `INSERT INTO payments (member_phone, period, amount_ghs, momo_ref)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(member_phone, period)
+     DO UPDATE SET amount_ghs = excluded.amount_ghs, momo_ref = excluded.momo_ref, recorded_at = datetime('now')`
+  ).bind(intent.member_phone, intent.period, intent.amount_ghs, reference).run();
+  // Pay-to-join: approve a pending member (never re-open a suspended one).
+  await env.DB.prepare(`UPDATE members SET status = 'approved' WHERE phone = ? AND status = 'pending'`).bind(intent.member_phone).run();
+  if (intent.kind === 'founder') {
+    await env.DB.prepare('UPDATE members SET is_founder = 1 WHERE phone = ?').bind(intent.member_phone).run();
+  }
+  const notif = notifyMember(env, intent.member_phone, {
+    type: 'payment', title: 'Payment received',
+    body: 'Your GHS ' + intent.amount_ghs + ' membership for ' + intent.period + ' is confirmed. Thank you!',
+    link: '#directory',
+  }).catch((e) => console.error('payment notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notif);
+}
+
 async function payWebhook(request, env, ctx) {
   const raw = await request.text();
   if (!env.PAYSTACK_SECRET) return json({ error: 'not_configured' }, 503);
@@ -1623,31 +1650,34 @@ async function payWebhook(request, env, ctx) {
 
   const reference = String(body.data.reference || '');
   const intent = await env.DB.prepare('SELECT * FROM payment_intents WHERE reference = ?').bind(reference).first();
-  if (!intent || intent.status === 'paid') return json({ ok: true }); // unknown or already handled
-
-  await env.DB.prepare(`UPDATE payment_intents SET status = 'paid', paid_at = datetime('now') WHERE reference = ?`).bind(reference).run();
-  // Write the canonical payment row (same table admin views use); upsert per period.
-  await env.DB.prepare(
-    `INSERT INTO payments (member_phone, period, amount_ghs, momo_ref)
-     VALUES (?, ?, ?, ?)
-     ON CONFLICT(member_phone, period)
-     DO UPDATE SET amount_ghs = excluded.amount_ghs, momo_ref = excluded.momo_ref, recorded_at = datetime('now')`
-  ).bind(intent.member_phone, intent.period, intent.amount_ghs, reference).run();
-  // Pay-to-join: a confirmed payment approves a pending member (never re-opens a
-  // suspended one). A founder-tier payment also grants lifetime founder status.
-  await env.DB.prepare(`UPDATE members SET status = 'approved' WHERE phone = ? AND status = 'pending'`).bind(intent.member_phone).run();
-  if (intent.kind === 'founder') {
-    await env.DB.prepare('UPDATE members SET is_founder = 1 WHERE phone = ?').bind(intent.member_phone).run();
-  }
-
-  const notif = notifyMember(env, intent.member_phone, {
-    type: 'payment', title: 'Payment received',
-    body: 'Your GHS ' + intent.amount_ghs + ' membership for ' + intent.period + ' is confirmed. Thank you!',
-    link: '#directory',
-  }).catch((e) => console.error('payment notify failed:', e && e.message));
-  if (ctx && ctx.waitUntil) ctx.waitUntil(notif);
+  await applyPaidIntent(env, intent, reference, ctx);
 
   return json({ ok: true });
+}
+
+// Verify a transaction on return from Paystack (belt-and-braces so we never rely
+// on the webhook alone). Safe to be public + keyed by reference: it only ever
+// applies what Paystack itself confirms as 'success', and is idempotent.
+async function payVerify(request, env, ctx) {
+  if (!env.PAYSTACK_SECRET) return json({ error: 'not_configured' }, 503);
+  const body = await readJson(request);
+  const reference = String(body.reference || '').trim();
+  if (!/^NWD-[\w-]+$/.test(reference)) return json({ error: 'bad_reference' }, 400);
+  const intent = await env.DB.prepare('SELECT * FROM payment_intents WHERE reference = ?').bind(reference).first();
+  if (!intent) return json({ error: 'not_found' }, 404);
+  if (intent.status === 'paid') return json({ ok: true, status: 'paid' });
+  let res;
+  try {
+    res = await fetch(PAYSTACK_BASE + '/transaction/verify/' + encodeURIComponent(reference), {
+      headers: { 'Authorization': 'Bearer ' + env.PAYSTACK_SECRET },
+    });
+  } catch (e) { return json({ error: 'paystack_unreachable' }, 502); }
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data.status && data.data && data.data.status === 'success') {
+    await applyPaidIntent(env, intent, reference, ctx);
+    return json({ ok: true, status: 'paid' });
+  }
+  return json({ ok: false, status: (data && data.data && data.data.status) || 'pending' });
 }
 
 // ── pricing tool (per-member config + quotes) ──────────────────────────

@@ -2173,10 +2173,13 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
   async function handlePayReturn() {
     if (!/[?&]pay=return/.test(location.search)) return;
+    var qp = new URLSearchParams(location.search);
+    var ref = qp.get('reference') || qp.get('trxref');
     try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
     payBar.className = 'mbar info'; payBar.style.display = 'flex'; payBar.innerHTML = '<p>Confirming your payment… this can take a few seconds.</p>';
+    if (ref) { try { await C.api('/pay/verify', { method: 'POST', body: { reference: ref } }); } catch (e) {} }
     for (var i = 0; i < 5; i++) {
-      await new Promise(function (res) { setTimeout(res, i === 0 ? 1500 : 2500); });
+      await new Promise(function (res) { setTimeout(res, i === 0 ? 800 : 2500); });
       await refreshMembership();
       if (membership && membership.paid) {
         payBar.className = 'mbar ok'; payBar.style.display = 'flex';
@@ -2208,7 +2211,12 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         : '<button type="button" id="joinPayBtn">Pay now</button>') +
       '<div id="joinMsg" class="sf-note" style="margin-top:.6rem"></div>';
     var b = document.getElementById('joinPayBtn'); if (b) b.addEventListener('click', joinPay);
-    if (/[?&]pay=return/.test(location.search)) { try { history.replaceState(null, '', location.pathname); } catch (e) {} pollJoin(); }
+    if (/[?&]pay=return/.test(location.search)) {
+      var qp = new URLSearchParams(location.search);
+      var ref = qp.get('reference') || qp.get('trxref');
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      pollJoin(ref);
+    }
   }
   async function joinPay() {
     var b = document.getElementById('joinPayBtn'), msg = document.getElementById('joinMsg');
@@ -2217,10 +2225,11 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     catch (err) { if (msg) msg.textContent = err.message || 'Could not start payment.'; }
     if (b) { b.disabled = false; b.textContent = 'Pay now'; }
   }
-  async function pollJoin() {
+  async function pollJoin(ref) {
     var msg = document.getElementById('joinMsg'); if (msg) msg.textContent = 'Confirming your payment…';
+    if (ref) { try { await C.api('/pay/verify', { method: 'POST', body: { reference: ref } }); } catch (e) {} }
     for (var i = 0; i < 6; i++) {
-      await new Promise(function (res) { setTimeout(res, i === 0 ? 1500 : 2500); });
+      await new Promise(function (res) { setTimeout(res, i === 0 ? 800 : 2500); });
       try { var r = await C.api('/me'); me = r.member; membership = r.membership; } catch (e) {}
       if (me.status === 'approved') { location.reload(); return; }
     }

@@ -109,10 +109,17 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 
   pinEl.addEventListener('input', function () { pinEl.value = pinEl.value.replace(/\D/g, '').slice(0, 5); });
 
-  // Returning from pay-to-join checkout.
+  // Returning from pay-to-join checkout: verify the transaction (so approval
+  // doesn't depend on the webhook alone), then prompt them to log in.
   if (/[?&]joined=1/.test(location.search)) {
     msg.className = 'msg'; msg.style.color = '#2e6b2e';
-    msg.textContent = 'Payment received — log in with your phone and PIN to enter.';
+    msg.textContent = 'Confirming your payment…';
+    var jqp = new URLSearchParams(location.search);
+    var jref = jqp.get('reference') || jqp.get('trxref');
+    (async function () {
+      if (jref) { try { await C.api('/pay/verify', { auth: false, method: 'POST', body: { reference: jref } }); } catch (e) {} }
+      msg.textContent = 'Payment received — log in with your phone and PIN to enter.';
+    })();
   }
 
   form.addEventListener('submit', async function (e) {
