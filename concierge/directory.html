@@ -371,6 +371,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
 .pprev{ width:72px; height:72px; border-radius:50%; background:var(--cream-dark); overflow:hidden;
   position:relative; flex-shrink:0; border:1px solid rgba(11,31,14,.12); }
 .pprev img{ width:100%; height:100%; object-fit:cover; }
+.pprev.logo{ width:110px; height:72px; border-radius:6px; background:#fff; }
+.pprev.logo img{ object-fit:contain; padding:4px; }
+.pprev.logo .initials{ font-size:.6rem; font-family:var(--ui); letter-spacing:.1em; text-transform:uppercase; text-align:center; padding:0 6px; }
 .pprev .initials{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-family:var(--display); font-size:1.5rem; color:rgba(11,31,14,.3); }
 .photo-btns{ display:flex; flex-direction:column; gap:.4rem; }
@@ -747,6 +750,16 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       </div>
       <div class="pmsg" id="pmsg"></div>
       <input type="file" id="photoFile" accept="image/*" hidden>
+      <label style="margin-top:1rem">Business logo <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown on your quote printouts. A PNG with a transparent background works best.</span></label>
+      <div class="photo-row">
+        <div class="pprev logo" id="lprev"></div>
+        <div class="photo-btns">
+          <button class="pbtn" id="logoBtn" type="button">Upload logo</button>
+          <button class="pbtn" id="logoRemoveBtn" type="button" style="display:none">Remove logo</button>
+        </div>
+      </div>
+      <div class="pmsg" id="lmsg"></div>
+      <input type="file" id="logoFile" accept="image/png,image/jpeg,image/*" hidden>
       <label for="p_name">Name</label>
       <input id="p_name" required />
       <label for="p_member_type">What are you?</label>
@@ -950,7 +963,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260720b"></script>
+<script src="../js/concierge.js?v=20260720c"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -1379,6 +1392,53 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
   });
 
+  // ── business logo (dedicated; PNG, shown on quote printouts) ──
+  var lprev = document.getElementById('lprev');
+  var logoFile = document.getElementById('logoFile');
+  var logoBtn = document.getElementById('logoBtn');
+  var logoRemoveBtn = document.getElementById('logoRemoveBtn');
+  var lmsg = document.getElementById('lmsg');
+  function renderLogoPreview() {
+    if (me && me.logo_url) {
+      lprev.innerHTML = '<img src="' + C.escapeHtml(me.logo_url) + '" alt="" onerror="this.remove()">';
+      logoRemoveBtn.style.display = '';
+    } else {
+      lprev.innerHTML = '<div class="initials">No logo</div>';
+      logoRemoveBtn.style.display = 'none';
+    }
+  }
+  logoBtn.addEventListener('click', function () { logoFile.click(); });
+  logoFile.addEventListener('change', async function () {
+    var f = logoFile.files && logoFile.files[0];
+    logoFile.value = '';
+    if (!f) return;
+    logoBtn.disabled = logoRemoveBtn.disabled = true;
+    lmsg.className = 'pmsg'; lmsg.textContent = 'Processing…';
+    try {
+      var blob = await C.compressLogo(f);
+      lmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
+      var r = await C.uploadPhoto('/me/logo', blob, 'image/png');
+      me = r.member;
+      renderLogoPreview();
+      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo updated.';
+    } catch (err) {
+      lmsg.className = 'pmsg error';
+      lmsg.textContent = (err.message === 'logo_too_large') ? 'That image is too large — try a simpler logo.' : (err.message || 'Could not upload that logo.');
+    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
+  });
+  logoRemoveBtn.addEventListener('click', async function () {
+    logoBtn.disabled = logoRemoveBtn.disabled = true;
+    lmsg.className = 'pmsg'; lmsg.textContent = 'Removing…';
+    try {
+      var r = await C.api('/me/logo', { method: 'DELETE' });
+      me = r.member;
+      renderLogoPreview();
+      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo removed.';
+    } catch (err) {
+      lmsg.className = 'pmsg error'; lmsg.textContent = err.message || 'Could not remove the logo.';
+    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
+  });
+
   // skill level + availability options (once)
   var pLvl = document.getElementById('p_lvl');
   C.SKILL_ORDER.forEach(function (k) {
@@ -1473,7 +1533,9 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
     renderPreview();
+    renderLogoPreview();
     pmsg.textContent = ''; pmsg.className = 'pmsg';
+    lmsg.textContent = ''; lmsg.className = 'pmsg';
     var set = new Set(me.specialties || []);
     specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
     document.getElementById('p_biz_phone').value = me.business_phone || '';

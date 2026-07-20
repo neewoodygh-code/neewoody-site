@@ -476,10 +476,40 @@
     });
   }
 
+  // Scale an image to fit maxDim (aspect preserved) and output PNG so
+  // transparency survives — for business logos. Shrinks harder if over 300KB.
+  function compressLogo(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var w0 = img.naturalWidth, h0 = img.naturalHeight;
+        if (!w0 || !h0) return reject(new Error('invalid_image'));
+        function render(max) {
+          var s = Math.min(1, max / Math.max(w0, h0));
+          var cv = document.createElement('canvas');
+          cv.width = Math.max(1, Math.round(w0 * s));
+          cv.height = Math.max(1, Math.round(h0 * s));
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          return cv;
+        }
+        render(420).toBlob(function (b) {
+          if (b && b.size <= 300 * 1024) return resolve(b);
+          render(280).toBlob(function (b2) {
+            (b2 && b2.size <= 300 * 1024) ? resolve(b2) : reject(new Error('logo_too_large'));
+          }, 'image/png');
+        }, 'image/png');
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('invalid_image')); };
+      img.src = url;
+    });
+  }
+
   // POST a compressed JPEG blob to a photo endpoint ('/me/photo' or
   // '/admin/members/<phone>/photo'). Returns parsed JSON like api().
-  async function uploadPhoto(path, blob) {
-    var headers = { 'Content-Type': 'image/jpeg' };
+  async function uploadPhoto(path, blob, contentType) {
+    var headers = { 'Content-Type': contentType || 'image/jpeg' };
     var t = getToken();
     if (t) headers['Authorization'] = 'Bearer ' + t;
     var res;
@@ -531,7 +561,7 @@
     contactPhone: contactPhone, telLink: telLink,
     ZONE_GROUPS: ZONE_GROUPS, fillZoneSelect: fillZoneSelect,
     specialtyLabel: specialtyLabel,
-    compressImage: compressImage, uploadPhoto: uploadPhoto,
+    compressImage: compressImage, compressLogo: compressLogo, uploadPhoto: uploadPhoto,
     pushSupported: pushSupported, getPushSub: getPushSub,
     enablePush: enablePush, disablePush: disablePush
   };
