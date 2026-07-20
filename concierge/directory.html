@@ -768,6 +768,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       </label>
       <label for="p_area">Area</label>
       <select id="p_area"></select>
+      <label>Location pin <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shows a map on your profile &amp; lets people see how far you are</span></label>
+      <div class="buy-pin"><button type="button" class="buy-pin-btn" id="p_locBtn">📍 Use my current location</button><span class="buy-pin-msg" id="p_locMsg"></span><button type="button" class="buy-pin-clear" id="p_locClear" style="display:none">Clear</button></div>
       <label>Links <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— your website &amp; socials; shown on your profile so people can see your work</span></label>
       <input id="soc_website" type="url" inputmode="url" placeholder="Website — https://…" style="margin-bottom:.4rem" />
       <input id="soc_instagram" type="url" inputmode="url" placeholder="Instagram link" style="margin-bottom:.4rem" />
@@ -1112,7 +1114,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
       (socialChips ? '<div class="md-label">Links</div><div class="soc-links">' + socialChips + '</div>' : '') +
       (m.stock ? '<div class="md-label">About the shop</div><div class="md-stock">' + C.escapeHtml(m.stock) + '</div>' : '') +
       ((m.location_lat != null && m.location_lng != null)
-        ? '<div class="md-label">Find them</div><iframe class="sf-map" loading="lazy" title="Shop location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
+        ? '<div class="md-label">' + (isVendor ? 'Find the shop' : 'Where they’re based') + '</div><iframe class="sf-map" loading="lazy" title="Location" src="' + C.mapEmbedUrl(m.location_lat, m.location_lng) + '"></iframe>' +
           '<div><a class="sf-dir" href="' + C.mapsDirLink(m.location_lat, m.location_lng) + '" target="_blank" rel="noopener">Directions</a></div>'
         : '') +
       (isVendor ? '<div class="md-label">Storefront</div><div id="memStore" class="sf-note">Loading items…</div>' : '') +
@@ -1466,6 +1468,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     (function () { var soc = me.socials || {}; SOCIAL_KEYS.forEach(function (k) { document.getElementById('soc_' + k).value = soc[k] || ''; }); })();
     document.getElementById('p_emerg_name').value = me.emergency_name || '';
     document.getElementById('p_emerg_phone').value = me.emergency_phone || '';
+    setProfileLoc((me.location_lat != null && me.location_lng != null) ? { lat: me.location_lat, lng: me.location_lng } : null);
     coverZonesWrap.innerHTML = '';
     (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
     syncTypeFields();
@@ -1489,6 +1492,27 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 
   document.getElementById('p_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
+
+  // Optional profile location pin (all members). Same columns as the vendor
+  // shop location; here surfaced generally so anyone can pin where they're based.
+  var profileLoc = null;
+  function setProfileLoc(p) {
+    profileLoc = p;
+    var msg = document.getElementById('p_locMsg'), clr = document.getElementById('p_locClear');
+    if (p) { msg.textContent = '📍 Pin set (' + p.lat.toFixed(4) + ', ' + p.lng.toFixed(4) + ')'; msg.className = 'buy-pin-msg ok'; clr.style.display = ''; }
+    else { msg.textContent = ''; msg.className = 'buy-pin-msg'; clr.style.display = 'none'; }
+  }
+  document.getElementById('p_locBtn').addEventListener('click', function () {
+    var btn = this, msg = document.getElementById('p_locMsg');
+    if (!navigator.geolocation) { msg.textContent = 'Location not available on this device.'; msg.className = 'buy-pin-msg error'; return; }
+    btn.disabled = true; msg.textContent = 'Getting location…'; msg.className = 'buy-pin-msg';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.disabled = false; setProfileLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+    }, function () {
+      btn.disabled = false; msg.textContent = 'Could not get location — check permissions.'; msg.className = 'buy-pin-msg error';
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  });
+  document.getElementById('p_locClear').addEventListener('click', function () { setProfileLoc(null); });
 
   document.getElementById('profileForm').addEventListener('submit', async function (e) {
     e.preventDefault();
@@ -1532,6 +1556,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         hide_phone: hidePhone,
         availability: pAvail.value,
         area: document.getElementById('p_area').value,
+        location_lat: profileLoc ? profileLoc.lat : '',
+        location_lng: profileLoc ? profileLoc.lng : '',
         skill_level: isCarpEdit ? pLvl.value : '',
         years_experience: isCarpEdit && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
         specialties: isCarpEdit ? specs : []
@@ -2485,7 +2511,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' },
     { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' },
     { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' },
-    { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' }
+    { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' },
+    { id: 29, date: '2026-07-20', title: 'Pin where you’re based', body: 'Any member can now add a location pin in My profile (not just vendors). It shows a small map on your profile so people can see where you’re based and how to reach you. Totally optional — your area still works as before.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
