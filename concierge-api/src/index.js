@@ -77,6 +77,10 @@ const ORDER_QTY_MAX = 40;
 const ORDER_DELIVER_MAX = 200;
 const ORDER_NOTES_MAX = 500;
 
+// Feature-suggestion box caps
+const SUGGESTION_MAX = 1000;
+const SUGGESTION_MAX_OPEN_PER_MEMBER = 15; // 'new' status, anti-spam
+
 // Public client-job anti-spam (no CAPTCHA yet — phone-keyed throttle).
 const CLIENT_JOB_MAX_PENDING_PER_PHONE = 3;   // outstanding unreviewed
 const CLIENT_JOB_WINDOW = "-1 hours";
@@ -201,6 +205,10 @@ async function route(request, env, ctx) {
   if (path === '/api/notifications' && method === 'GET') return withAuth(request, env, (m) => listNotifications(env, m));
   if (path === '/api/notifications/read' && method === 'POST') return withAuth(request, env, (m) => markNotificationsRead(request, env, m));
 
+  // ---- member: Support / feature suggestions (open to lapsed members too) ----
+  if (path === '/api/suggestions' && method === 'GET')  return withAuth(request, env, (m) => listMySuggestions(env, m));
+  if (path === '/api/suggestions' && method === 'POST') return withAuth(request, env, (m) => createSuggestion(request, env, m, ctx));
+
   // ---- offered-services catalog ----
   if (path === '/api/services' && method === 'GET') return withAuth(request, env, () => listServices(env));
   if (path === '/api/services/suggest' && method === 'POST') return withPaid(request, env, (m) => suggestService(request, env, m, ctx));
@@ -249,6 +257,12 @@ async function route(request, env, ctx) {
   const mClientJob = path.match(/^\/api\/admin\/client-jobs\/(\d+)$/);
   if (mClientJob && method === 'PUT')    return withAdmin(request, env, () => adminReviewClientJob(request, env, Number(mClientJob[1]), ctx));
   if (mClientJob && method === 'DELETE') return withAdmin(request, env, () => adminDeleteClientJob(env, Number(mClientJob[1])));
+
+  // ---- admin: feature suggestions ----
+  if (path === '/api/admin/suggestions' && method === 'GET') return withAdmin(request, env, () => adminListSuggestions(env));
+  const mSugg = path.match(/^\/api\/admin\/suggestions\/(\d+)$/);
+  if (mSugg && method === 'PUT')    return withAdmin(request, env, () => adminUpdateSuggestion(request, env, Number(mSugg[1]), ctx));
+  if (mSugg && method === 'DELETE') return withAdmin(request, env, () => adminDeleteSuggestion(env, Number(mSugg[1])));
 
   // ---- admin: service catalog (moderate the offered-services vocabulary) ----
   if (path === '/api/admin/services' && method === 'GET') return withAdmin(request, env, () => adminListServices(env));
@@ -682,6 +696,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM buy_requests WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM orders WHERE vendor_phone = ? OR buyer_phone = ?').bind(phone, phone),
+    env.DB.prepare('DELETE FROM suggestions WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM notifications WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
@@ -1509,6 +1524,69 @@ async function adminDeleteService(env, id) {
   const svc = await env.DB.prepare('SELECT slug FROM service_catalog WHERE id = ?').bind(id).first();
   if (!svc) return json({ error: 'not_found' }, 404);
   await env.DB.prepare('DELETE FROM service_catalog WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
+}
+
+// ── feature suggestion box ─────────────────────────────────────────────
+// Members propose platform features from the Support tab; admin reviews.
+
+async function createSuggestion(request, env, member, ctx) {
+  const body = await readJson(request);
+  const text = String(body.text || '').trim().slice(0, SUGGESTION_MAX);
+  if (!text) return json({ error: 'text_required' }, 400);
+  const open = await env.DB.prepare(
+    `SELECT COUNT(*) AS c FROM suggestions WHERE member_phone = ? AND status = 'new'`
+  ).bind(member.phone).first();
+  if (open && open.c >= SUGGESTION_MAX_OPEN_PER_MEMBER) return json({ error: 'too_many_open', limit: SUGGESTION_MAX_OPEN_PER_MEMBER }, 400);
+
+  const r = await env.DB.prepare('INSERT INTO suggestions (member_phone, text) VALUES (?, ?)').bind(member.phone, text).run();
+  const row = await env.DB.prepare('SELECT id, text, status, created_at FROM suggestions WHERE id = ?').bind(r.meta.last_row_id).first();
+
+  const notify = pushToAdmins(env, 'New feature suggestion', (member.name || 'A member') + ': ' + text.slice(0, 80)).catch((e) => console.error('suggestion notify failed:', e && e.message));
+  if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+  return json({ suggestion: row }, 201);
+}
+
+async function listMySuggestions(env, member) {
+  const { results } = await env.DB.prepare(
+    'SELECT id, text, status, created_at FROM suggestions WHERE member_phone = ? ORDER BY id DESC LIMIT 50'
+  ).bind(member.phone).all();
+  return json({ suggestions: results || [] });
+}
+
+async function adminListSuggestions(env) {
+  const { results } = await env.DB.prepare(
+    `SELECT s.id, s.text, s.status, s.created_at, s.member_phone, m.name AS member_name
+     FROM suggestions s JOIN members m ON m.phone = s.member_phone
+     ORDER BY (s.status = 'new') DESC, s.id DESC LIMIT 500`
+  ).all();
+  return json({ suggestions: results || [] });
+}
+
+async function adminUpdateSuggestion(request, env, id, ctx) {
+  const sugg = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
+  if (!sugg) return json({ error: 'not_found' }, 404);
+  const body = await readJson(request);
+  const status = String(body.status || '');
+  if (!['new', 'seen', 'planned', 'done', 'declined'].includes(status)) return json({ error: 'invalid_status' }, 400);
+  await env.DB.prepare('UPDATE suggestions SET status = ? WHERE id = ?').bind(status, id).run();
+  // Nudge the suggester on the good outcomes.
+  if ((status === 'planned' || status === 'done') && sugg.status !== status) {
+    const word = status === 'done' ? 'shipped' : 'planned';
+    const notify = notifyMember(env, sugg.member_phone, {
+      type: 'suggestion', title: 'Your suggestion is ' + word,
+      body: '"' + String(sugg.text).slice(0, 70) + '" — thanks for the idea!',
+      link: '#support',
+    }).catch((e) => console.error('suggestion status notify failed:', e && e.message));
+    if (ctx && ctx.waitUntil) ctx.waitUntil(notify);
+  }
+  const row = await env.DB.prepare('SELECT * FROM suggestions WHERE id = ?').bind(id).first();
+  return json({ suggestion: row });
+}
+
+async function adminDeleteSuggestion(env, id) {
+  const r = await env.DB.prepare('DELETE FROM suggestions WHERE id = ?').bind(id).run();
+  if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
 }
 

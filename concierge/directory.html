@@ -122,6 +122,30 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:var(--gold); color:var(--green); border:none; border-radius:4px; padding:.85rem 2rem; cursor:pointer; }
 .paywall button:disabled{ opacity:.6; cursor:default; }
 
+/* Support tab */
+.sup-sec{ margin-bottom:2rem; }
+.sup-sec > h2{ font-family:var(--display); font-weight:500; font-size:1.3rem; margin-bottom:.75rem; }
+.sup-note{ color:var(--muted); font-size:.9rem; line-height:1.6; margin-bottom:.6rem; }
+.faq{ background:#fff; border:1px solid rgba(11,31,14,.1); border-radius:5px; margin-bottom:.5rem; overflow:hidden; }
+.faq > summary{ list-style:none; cursor:pointer; padding:.85rem 1rem; font-family:var(--ui); font-weight:500; font-size:.92rem;
+  color:var(--ink); display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+.faq > summary::-webkit-details-marker{ display:none; }
+.faq > summary::after{ content:'+'; color:var(--gold); font-size:1.2rem; line-height:1; }
+.faq[open] > summary::after{ content:'–'; }
+.faq .faq-a{ padding:0 1rem 1rem; color:var(--muted); font-size:.9rem; line-height:1.65; }
+.tut{ display:flex; justify-content:space-between; align-items:center; gap:1rem; background:#fff; border:1px solid rgba(11,31,14,.1);
+  border-radius:5px; padding:.8rem 1rem; margin-bottom:.5rem; text-decoration:none; color:var(--ink); }
+.tut:hover{ border-color:var(--gold); }
+.tut-tag{ font-family:var(--ui); font-size:.6rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); }
+#sugText{ width:100%; font-family:var(--body); font-size:.95rem; padding:.7rem .8rem; border:1px solid rgba(11,31,14,.2);
+  border-radius:4px; resize:vertical; min-height:70px; line-height:1.5; }
+.sug-item{ background:#fff; border:1px solid rgba(11,31,14,.08); border-radius:5px; padding:.7rem .9rem; margin-bottom:.45rem; font-size:.9rem; line-height:1.5; }
+.sug-status{ display:inline-block; font-family:var(--ui); font-size:.56rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  padding:.16rem .45rem; border-radius:20px; margin-right:.45rem; background:var(--cream-dark); color:var(--muted); vertical-align:middle; }
+.sug-status.planned{ background:rgba(200,146,42,.2); color:#8a6d16; }
+.sug-status.done{ background:#dcecdc; color:#2e6b2e; }
+.sug-status.declined{ background:#f2dede; color:#a52a2a; }
+
 /* jobs board */
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--green); border:1px dashed rgba(11,31,14,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
@@ -413,7 +437,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="orders" id="ordersTab" hidden>Orders <span class="tab-count" id="ordersCount" hidden>0</span></button>
   <button class="tab" data-tab="tools">Tools</button>
   <button class="tab" data-tab="sourcing">Sourcing</button>
-  <button class="tab" data-tab="tutorials">Tutorials <span class="soon">soon</span></button>
+  <button class="tab" data-tab="support">Support</button>
 </nav>
 
 <div class="wrap">
@@ -549,11 +573,31 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 
   <!-- TAB: Tutorials (coming soon) -->
-  <div id="tab-tutorials" class="tabpanel" hidden>
-    <div class="cs-panel">
-      <span class="cs-tag">Coming soon · members first</span>
+  <div id="tab-support" class="tabpanel" hidden>
+    <div class="lead">
+      <h1>Support</h1>
+      <p>Answers to common questions, tutorials, and a box to tell us what to build next.</p>
+    </div>
+
+    <div class="sup-sec">
+      <h2>Frequently asked</h2>
+      <div id="faqList"></div>
+    </div>
+
+    <div class="sup-sec">
       <h2>Tutorials</h2>
-      <p>Skill-building videos for Ghanaian carpenters — indexed by trade and level, from setting out a wardrobe carcass to spray-finish technique. Built for how we actually work here.</p>
+      <div id="tutList"></div>
+    </div>
+
+    <div class="sup-sec">
+      <h2>Suggest a feature</h2>
+      <p class="sup-note">Members asked for this — tell us what would make Carpentry Concierge better. We read every one.</p>
+      <textarea id="sugText" rows="3" maxlength="1000" placeholder="e.g. Let me save favourite vendors, or add a tool for pricing doors…"></textarea>
+      <div style="display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.5rem">
+        <button class="btn-post" id="sugSend" type="button">Send suggestion</button>
+        <span class="sf-note" id="sugMsg"></span>
+      </div>
+      <div id="sugMine" style="margin-top:1.25rem"></div>
     </div>
   </div>
 
@@ -1590,7 +1634,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   }
 
   // ── tabs ──
-  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'tutorials'];
+  var TABS = ['directory', 'jobs', 'services', 'storefront', 'orders', 'tools', 'sourcing', 'support'];
   var jobsLoaded = false;
   var buyLoaded = false;
   var ordersLoaded = false;
@@ -1624,6 +1668,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
     if (name === 'orders') { ordersLoaded = true; loadOrders(); }
     if (name === 'sourcing') { buildSrcAreaFilter(); renderSourcing(); }
+    if (name === 'support' && !supportInit) { supportInit = true; initSupport(); }
     if (history.replaceState) history.replaceState(null, '', '#' + name);
   }
   document.getElementById('tabbar').addEventListener('click', function (e) {
@@ -2048,6 +2093,60 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   offSvcFilter.addEventListener('change', renderOffered);
   offAreaFilter.addEventListener('change', renderOffered);
 
+  // ── Support tab: FAQ, tutorials, suggestion box ──
+  var supportInit = false;
+  var FAQ = [
+    { q: 'What is Carpentry Concierge?', a: 'A members’ network for Ghanaian carpenters and suppliers — find and hire each other, get materials bought and delivered, list what you sell, and use member tools like the cut-list generator and job pricing.' },
+    { q: 'How much does membership cost?', a: 'The first 100 founding members pay a one-time GHS 100 for lifetime membership. After that it’s GHS 50 per month. Founders and admins are never charged again.' },
+    { q: 'How do I pay?', a: 'When payment is due you’ll see a Pay now button — pay securely by Mobile Money or card. It confirms automatically and unlocks your access.' },
+    { q: 'What happens if I don’t pay for a month?', a: 'The directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap to reopen everything.' },
+    { q: 'What is the “Verified” mark?', a: 'A gold ✓ “Verified by Carpentry Concierge Ghana” badge that Neewoody grants to members it has personally vouched for — the trust signal clients and members look for.' },
+    { q: 'How do jobs work?', a: 'Post a job in any zone, or get hired for day work near you. Rates and details are agreed on WhatsApp — tap Contact on any post. Clients can also post jobs from the public site.' },
+    { q: 'What is “Buy for me”?', a: 'Under Services, post materials you need. A member nearby (a courier or anyone who runs errands) can buy them and deliver to you. Agree the budget, their fee and payment on WhatsApp.' },
+    { q: 'Can I hide my personal number?', a: 'Yes — in My profile add a Business / call number and tick “Hide my personal number”. Members will only ever see and contact you on the business number; your personal number still logs you in.' },
+    { q: 'How do I become a vendor or list a storefront?', a: 'In My profile set “What are you?” to Vendor / Service Provider. A My Storefront tab appears where you add items, a shop blurb and your location — it shows under Sourcing.' },
+  ];
+  // Tutorials: fill this array as videos are published (YouTube/TikTok links).
+  var TUTORIALS = [];
+  function initSupport() {
+    document.getElementById('faqList').innerHTML = FAQ.map(function (f) {
+      return '<details class="faq"><summary>' + C.escapeHtml(f.q) + '</summary><div class="faq-a">' + C.escapeHtml(f.a) + '</div></details>';
+    }).join('');
+    var tut = document.getElementById('tutList');
+    if (TUTORIALS.length) {
+      tut.innerHTML = TUTORIALS.map(function (t) {
+        return '<a class="tut" href="' + C.escapeHtml(t.url) + '" target="_blank" rel="noopener"><span class="tut-t">' + C.escapeHtml(t.title) + '</span>' + (t.tag ? '<span class="tut-tag">' + C.escapeHtml(t.tag) + '</span>' : '') + '</a>';
+      }).join('');
+    } else {
+      tut.innerHTML = '<p class="sup-note">Skill-building videos are coming soon — indexed by trade and level, built for how we work here. Suggest a topic below.</p>';
+    }
+    loadMySuggestions();
+  }
+  var sugStatusLabel = { new: 'Received', seen: 'Read', planned: 'Planned', done: 'Shipped', declined: 'Not planned' };
+  function renderMySuggestions(list) {
+    var el = document.getElementById('sugMine');
+    if (!list.length) { el.innerHTML = ''; return; }
+    el.innerHTML = '<div class="md-label">Your suggestions</div>' + list.map(function (s) {
+      return '<div class="sug-item"><span class="sug-status ' + s.status + '">' + (sugStatusLabel[s.status] || s.status) + '</span> ' + C.escapeHtml(s.text) + '</div>';
+    }).join('');
+  }
+  async function loadMySuggestions() {
+    try { var r = await C.api('/suggestions'); renderMySuggestions(r.suggestions || []); } catch (e) {}
+  }
+  document.getElementById('sugSend').addEventListener('click', async function () {
+    var ta = document.getElementById('sugText'), msg = document.getElementById('sugMsg'), btn = this;
+    var text = ta.value.trim();
+    if (!text) { msg.textContent = 'Type your suggestion first.'; return; }
+    btn.disabled = true; msg.textContent = 'Sending…';
+    try {
+      await C.api('/suggestions', { method: 'POST', body: { text: text } });
+      ta.value = ''; msg.textContent = 'Thank you — we’ve got it.';
+      loadMySuggestions();
+    } catch (err) {
+      msg.textContent = err.message === 'too_many_open' ? 'You have a few pending already — thanks! We’ll get to them.' : (err.message || 'Could not send — try again.');
+    } finally { btn.disabled = false; }
+  });
+
   // ── area alerts (Web Push) — one subscription, buttons on Jobs + Services ──
   var alertsBtns = [].slice.call(document.querySelectorAll('.alerts-btn'));
   var alertsNotes = [].slice.call(document.querySelectorAll('.alerts-note'));
@@ -2114,7 +2213,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' },
     { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' },
     { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
-    { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' }
+    { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
+    { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions, tutorials (coming), and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

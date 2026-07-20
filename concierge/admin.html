@@ -230,6 +230,24 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     </div>
   </div>
 
+  <!-- Feature suggestions -->
+  <div class="panel">
+    <h2>Feature suggestions <span class="sub" id="sugCount">what members want built</span></h2>
+    <div class="pbody">
+      <div class="tools" style="margin-bottom:1rem">
+        <button class="btn ghost" id="sugReload" type="button">Reload</button>
+        <span class="small" style="align-self:center;color:var(--muted)">Set a status — "Planned" or "Shipped" notifies the member who suggested it.</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Suggestion</th><th>From</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="sugBody"></tbody>
+        </table>
+      </div>
+      <div class="state" id="sugState">Loading suggestions…</div>
+    </div>
+  </div>
+
   <!-- Payments -->
   <div class="panel">
     <h2>MoMo payments <span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
@@ -1001,12 +1019,47 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   }
   document.getElementById('svcReload').addEventListener('click', loadServiceCatalog);
 
+  // ── feature suggestions ──
+  var SUG_STATUSES = ['new', 'seen', 'planned', 'done', 'declined'];
+  var SUG_LABELS = { new: 'New', seen: 'Read', planned: 'Planned', done: 'Shipped', declined: 'Not planned' };
+  function sugRow(s) {
+    var tr = document.createElement('tr');
+    var td1 = document.createElement('td'); td1.style.whiteSpace = 'normal'; td1.style.maxWidth = '420px'; td1.textContent = s.text;
+    var td2 = document.createElement('td'); td2.innerHTML = '<span class="who">' + C.escapeHtml(s.member_name || '') + '</span><div class="small">' + C.escapeHtml(s.member_phone) + '</div>';
+    var td3 = document.createElement('td');
+    var sel = document.createElement('select');
+    SUG_STATUSES.forEach(function (st) { var o = document.createElement('option'); o.value = st; o.textContent = SUG_LABELS[st]; if (st === s.status) o.selected = true; sel.appendChild(o); });
+    sel.addEventListener('change', async function () { sel.disabled = true; try { await C.api('/admin/suggestions/' + s.id, { method: 'PUT', body: { status: sel.value } }); await loadSuggestions(); } catch (e) { alert(e.message || 'Failed.'); sel.disabled = false; } });
+    td3.appendChild(sel);
+    var td4 = document.createElement('td');
+    var del = document.createElement('button'); del.type = 'button'; del.className = 'rowbtn danger'; del.textContent = 'Delete';
+    del.addEventListener('click', async function () { if (!confirm('Delete this suggestion?')) return; del.disabled = true; try { await C.api('/admin/suggestions/' + s.id, { method: 'DELETE' }); await loadSuggestions(); } catch (e) { alert(e.message || 'Failed.'); del.disabled = false; } });
+    td4.appendChild(del);
+    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
+    return tr;
+  }
+  async function loadSuggestions() {
+    var body = document.getElementById('sugBody'), state = document.getElementById('sugState');
+    state.style.display = ''; state.textContent = 'Loading suggestions…'; body.innerHTML = '';
+    try {
+      var r = await C.api('/admin/suggestions');
+      var list = r.suggestions || [];
+      var fresh = list.filter(function (s) { return s.status === 'new'; }).length;
+      document.getElementById('sugCount').textContent = fresh ? (fresh + ' new') : 'what members want built';
+      if (!list.length) { state.textContent = 'No suggestions yet.'; return; }
+      state.style.display = 'none';
+      list.forEach(function (s) { body.appendChild(sugRow(s)); });
+    } catch (err) { state.textContent = err.message || 'Could not load suggestions.'; }
+  }
+  document.getElementById('sugReload').addEventListener('click', loadSuggestions);
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
     await loadServiceCatalog();
+    loadSuggestions();
     await loadMembers();
     loadClientJobs();
     viewPayments();
