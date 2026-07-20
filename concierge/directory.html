@@ -164,6 +164,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   background:var(--green); color:var(--cream); border:none; border-radius:4px; padding:.6rem 1rem; cursor:pointer; }
 .co-btn.ghost{ background:transparent; color:var(--green); border:1px solid rgba(11,31,14,.3); }
 .co-btn:disabled{ opacity:.6; cursor:default; }
+.co-photo{ display:flex; align-items:flex-start; gap:.7rem; flex-wrap:wrap; margin-top:.9rem; }
+.co-thumb{ width:110px; height:110px; object-fit:cover; border-radius:6px; border:1px solid rgba(11,31,14,.15); background:var(--cream-dark); }
 .callout-form{ background:#fff; border:1px solid rgba(11,31,14,.1); border-radius:6px; padding:1.2rem 1.3rem; }
 .callout-form h2{ font-family:var(--display); font-weight:500; font-size:1.25rem; margin-bottom:.5rem; }
 .callout-form label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:.85rem 0 .3rem; }
@@ -926,7 +928,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719h"></script>
+<script src="../js/concierge.js?v=20260720a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -2248,6 +2250,7 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
         (c.client_name ? '<div class="co-meta">Client: ' + C.escapeHtml(c.client_name) + (c.client_phone ? ' · ' + C.escapeHtml(c.client_phone) : '') + '</div>' : '') +
         (c.notes ? '<div class="co-meta">' + C.escapeHtml(c.notes) + '</div>' : '') +
         (c.status === 'alerted' ? '<div class="co-meta" style="color:#a52a2a">You’re overdue — the Concierge team has been alerted. Tap “I’m safe” if you’re OK.</div>' : '') +
+        (c.status === 'arrived' || c.status === 'alerted' ? '<div class="co-photo" id="coPhoto"></div>' : '') +
         '<div class="co-actions"></div>' +
       '</div>';
     var acts = el.querySelector('.co-actions');
@@ -2255,6 +2258,30 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     acts.appendChild(mkCoBtn('🟢 I’m safe', function () { return coAct(c.id, { action: 'safe' }); }));
     acts.appendChild(mkCoBtn('+1 hour', function () { return coAct(c.id, { action: 'extend', hours: 1 }); }, true));
     acts.appendChild(mkCoBtn('Cancel', function () { if (!confirm('Cancel this call-out?')) return Promise.resolve(); return coAct(c.id, { action: 'cancel' }); }, true));
+    if (c.status === 'arrived' || c.status === 'alerted') renderCoPhoto(c);
+  }
+  // Optional arrival photo on a checked-in call-out (owner-only upload, auth-served).
+  function renderCoPhoto(c) {
+    var box = document.getElementById('coPhoto'); if (!box) return;
+    box.innerHTML = '';
+    if (c.has_photo) {
+      var img = document.createElement('img'); img.className = 'co-thumb'; img.alt = 'Location photo';
+      C.authImageURL('/callouts/' + c.id + '/photo').then(function (u) { img.src = u; }, function () {});
+      box.appendChild(img);
+    }
+    var lbl = document.createElement('label'); lbl.className = 'co-btn ghost'; lbl.style.display = 'inline-block'; lbl.style.cursor = 'pointer';
+    lbl.textContent = c.has_photo ? '📷 Replace photo' : '📷 Add location photo';
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.capture = 'environment'; inp.style.display = 'none';
+    inp.addEventListener('change', async function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      lbl.textContent = 'Uploading…';
+      try {
+        var blob = await C.compressImage(f);
+        await C.uploadPhoto('/callouts/' + c.id + '/photo', blob);
+        await loadSafety();
+      } catch (e) { alert(e.message || 'Upload failed.'); lbl.textContent = '📷 Add location photo'; }
+    });
+    lbl.appendChild(inp); box.appendChild(lbl);
   }
   function renderSafetyNew(show) {
     var el = document.getElementById('safetyNew');
@@ -2379,7 +2406,8 @@ header.top{ background:var(--green); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
     { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
     { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' },
-    { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' }
+    { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' },
+    { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

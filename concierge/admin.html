@@ -334,7 +334,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260719h"></script>
+<script src="../js/concierge.js?v=20260720a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -1090,7 +1090,15 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       '<div class="small">' + C.escapeHtml(c.location || '') + (c.client_name ? ' · client: ' + C.escapeHtml(c.client_name) + (c.client_phone ? ' (' + C.escapeHtml(c.client_phone) + ')' : '') : '') + '</div>' +
       (c.notes ? '<div class="small">' + C.escapeHtml(c.notes) + '</div>' : '') +
       (c.emergency_phone ? '<div class="small">Emergency: ' + C.escapeHtml(c.emergency_name || '') + ' ' + C.escapeHtml(c.emergency_phone) + '</div>' : '<div class="small" style="color:#a52a2a">No emergency contact set</div>') +
-      '<div style="margin-top:.5rem">' + links + '</div>';
+      '<div style="margin-top:.5rem">' + links + '</div>' +
+      (c.has_photo ? '<div class="co-photo-wrap" style="margin-top:.5rem"></div>' : '');
+    if (c.has_photo) {
+      var wrap = div.querySelector('.co-photo-wrap');
+      var img = document.createElement('img'); img.alt = 'Location photo';
+      img.style.cssText = 'width:120px;height:120px;object-fit:cover;border-radius:6px;border:1px solid rgba(11,31,14,.15);cursor:pointer';
+      C.authImageURL('/callouts/' + c.id + '/photo').then(function (u) { img.src = u; img.addEventListener('click', function () { window.open(u, '_blank'); }); }, function () {});
+      wrap.appendChild(img);
+    }
     return div;
   }
   async function loadCallouts() {

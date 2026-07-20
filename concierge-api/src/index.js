@@ -224,6 +224,9 @@ async function route(request, env, ctx) {
   if (path === '/api/callouts' && method === 'POST') return withAuth(request, env, (m) => createCallout(request, env, m));
   const mCallout = path.match(/^\/api\/callouts\/(\d+)$/);
   if (mCallout && method === 'PUT') return withAuth(request, env, (m) => updateCallout(request, env, m, Number(mCallout[1])));
+  const mCalloutPhoto = path.match(/^\/api\/callouts\/(\d+)\/photo$/);
+  if (mCalloutPhoto && method === 'POST') return withAuth(request, env, (m) => uploadCalloutPhoto(request, env, m, Number(mCalloutPhoto[1])));
+  if (mCalloutPhoto && method === 'GET')  return withAuth(request, env, (m) => serveCalloutPhoto(env, request, m, Number(mCalloutPhoto[1])));
 
   // ---- offered-services catalog ----
   if (path === '/api/services' && method === 'GET') return withAuth(request, env, () => listServices(env));
@@ -714,6 +717,9 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
   const member = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
   if (!member) return json({ error: 'member_not_found' }, 404);
 
+  // Capture call-out photo ids before the rows are deleted, to clean up R2 after.
+  const cophotos = await env.DB.prepare('SELECT id FROM callouts WHERE member_phone = ? AND has_photo = 1').bind(phone).all();
+
   await env.DB.batch([
     env.DB.prepare('DELETE FROM payments WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM payment_intents WHERE member_phone = ?').bind(phone),
@@ -737,6 +743,10 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     const listed = await env.MEDIA.list({ prefix: `concierge/storefront/${phone}/` });
     await Promise.all((listed.objects || []).map((o) => env.MEDIA.delete(o.key)));
   } catch (e) { console.error('storefront image cleanup failed:', e && e.message); }
+  // Remove call-out arrival photos.
+  try {
+    await Promise.all((cophotos.results || []).map((r) => env.MEDIA.delete(calloutImgKey(r.id))));
+  } catch (e) { console.error('callout image cleanup failed:', e && e.message); }
 
   return json({ deleted: true, phone });
 }
@@ -1627,12 +1637,40 @@ async function notifyAdmins(env, n) {
   for (const r of (results || [])) await notifyMember(env, r.phone, n);
 }
 
+function calloutImgKey(id) { return `concierge/callouts/${id}.jpg`; }
 function calloutRow(c) {
   return {
     id: c.id, client_name: c.client_name, client_phone: c.client_phone, location: c.location,
     lat: c.lat, lng: c.lng, notes: c.notes, expected_back: c.expected_back, status: c.status,
+    has_photo: !!c.has_photo,
     created_at: c.created_at, arrived_at: c.arrived_at, checked_out_at: c.checked_out_at, alerted_at: c.alerted_at,
   };
+}
+
+// Upload the optional arrival photo (owner only). Raw JPEG, client-compressed.
+async function uploadCalloutPhoto(request, env, member, id) {
+  const c = await env.DB.prepare('SELECT member_phone FROM callouts WHERE id = ?').bind(id).first();
+  if (!c) return json({ error: 'not_found' }, 404);
+  if (c.member_phone !== member.phone) return json({ error: 'forbidden' }, 403);
+  const ct = (request.headers.get('Content-Type') || '').toLowerCase();
+  if (!ct.startsWith('image/jpeg')) return json({ error: 'invalid_image' }, 400);
+  const buf = await request.arrayBuffer();
+  const head = new Uint8Array(buf.slice(0, 2));
+  if (buf.byteLength < 128 || head[0] !== 0xff || head[1] !== 0xd8) return json({ error: 'invalid_image' }, 400);
+  if (buf.byteLength > PHOTO_MAX_BYTES) return json({ error: 'photo_too_large', max_kb: 300 }, 413);
+  await env.MEDIA.put(calloutImgKey(id), buf, { httpMetadata: { contentType: 'image/jpeg' } });
+  await env.DB.prepare('UPDATE callouts SET has_photo = 1 WHERE id = ?').bind(id).run();
+  return json({ ok: true, has_photo: true }, 201);
+}
+
+// Serve the arrival photo AUTHENTICATED — owner or admin only (private evidence).
+async function serveCalloutPhoto(env, request, member, id) {
+  const c = await env.DB.prepare('SELECT member_phone FROM callouts WHERE id = ?').bind(id).first();
+  if (!c) return json({ error: 'not_found' }, 404);
+  if (c.member_phone !== member.phone && member.role !== 'admin') return json({ error: 'forbidden' }, 403);
+  const obj = await env.MEDIA.get(calloutImgKey(id));
+  if (!obj) return json({ error: 'not_found' }, 404);
+  return new Response(obj.body, { headers: { 'Content-Type': 'image/jpeg', 'Cache-Control': 'private, max-age=3600', 'ETag': obj.httpEtag } });
 }
 
 async function createCallout(request, env, member) {

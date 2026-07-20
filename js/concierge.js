@@ -433,11 +433,21 @@
     return data;
   }
 
+  // Fetch a private (auth-required) image and return an object URL for <img src>.
+  // Used for safety call-out photos (owner/admin only — not a public URL).
+  async function authImageURL(path) {
+    var headers = {}; var t = getToken();
+    if (t) headers['Authorization'] = 'Bearer ' + t;
+    var res = await fetch(API + path, { headers: headers });
+    if (!res.ok) throw new Error('img_' + res.status);
+    return URL.createObjectURL(await res.blob());
+  }
+
   global.Concierge = {
     API: API,
     getToken: getToken, setToken: setToken, clearToken: clearToken,
     tokenAlive: tokenAlive, requireSession: requireSession,
-    api: api, errorMessage: errorMessage,
+    api: api, errorMessage: errorMessage, authImageURL: authImageURL,
     normalizePhone: normalizePhone, waLink: waLink, displayPhone: displayPhone,
     escapeHtml: escapeHtml,
     SPECIALTY_LABELS: SPECIALTY_LABELS, SPECIALTY_ORDER: SPECIALTY_ORDER,
