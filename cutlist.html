@@ -459,6 +459,11 @@ select {
   }
   #rpage .rhdr, #rpage .result-cta { display: none !important; }
   .rbody { padding: 0 !important; }
+  /* Each major section starts on a fresh page (Parts List stays on page 1
+     with the alpha note — it has no .pgbreak). */
+  .pgbreak { break-before: page; page-break-before: always; }
+  .rcard, .notes-card, .eb-sheet { break-inside: auto; }
+  .rcard-hdr, .notes-hdr, .eb-sheet-hdr { break-after: avoid; page-break-after: avoid; }
 }
 
 /* ── Unit Toggle Bar ── */
@@ -1593,7 +1598,7 @@ function buildEbSheet(parts){
   var legTick='<svg width="16" height="16" viewBox="0 0 16 16">'+ebLine(8,2,8,14)+'</svg>';
   var legDbl ='<svg width="16" height="16" viewBox="0 0 16 16">'+ebLine(3,2,3,14)+ebLine(8,2,8,14)+ebLine(13,2,13,14)+'</svg>';
   var legGrain='<svg width="16" height="16" viewBox="0 0 16 16"><line x1="6" y1="2" x2="6" y2="14" stroke="#b3a892" stroke-width="1.2"/><line x1="10" y1="2" x2="10" y2="14" stroke="#b3a892" stroke-width="1.2"/></svg>';
-  var html='<div class="eb-sheet"><div class="eb-sheet-hdr">'+
+  var html='<div class="eb-sheet pgbreak"><div class="eb-sheet-hdr">'+
     '<div class="eb-sheet-title">Edge Band Sheet</div>'+
     '<div class="eb-sheet-sub">Edge — tap once to band · twice to double · again to clear.  Middle — tap to flip grain</div>'+
   '</div>'+
@@ -1664,14 +1669,14 @@ function generate(){
   ph+='</tbody></table></div>';
 
   // Cut list
-  var ch='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Cut List</div><div class="rcard-badge">'+totalCuts+' cuts · '+cutList.length+' unique sizes</div></div>';
+  var ch='<div class="rcard pgbreak"><div class="rcard-hdr"><div class="rcard-title">Cut List</div><div class="rcard-badge">'+totalCuts+' cuts · '+cutList.length+' unique sizes</div></div>';
   cutList.forEach(function(c){
     ch+='<div class="cut-row"><div class="cut-badge">'+c.qty+'</div><div class="cut-info"><div class="cut-dims">'+c.w+' × '+c.d+'</div><div class="cut-names">'+c.names.slice(0,3).join(' · ')+'</div></div><div class="cut-cat">'+(TL[c.tag]||c.tag)+'</div></div>';
   });
   ch+='</div>';
 
   // Zone summary
-  var zs='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Zone Summary</div></div>';
+  var zs='<div class="rcard pgbreak"><div class="rcard-hdr"><div class="rcard-title">Zone Summary</div></div>';
   S.secs.forEach(function(sec,si){
     var totZH=sec.zones.reduce(function(s,z){return s+z.h;},0);
     var avail=carcassInnerH(),diff=totZH-avail;
@@ -1685,7 +1690,7 @@ function generate(){
   zs+='</div>';
 
   // Material summary
-  var mh='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Material Summary</div></div>';
+  var mh='<div class="rcard pgbreak"><div class="rcard-hdr"><div class="rcard-title">Material Summary</div></div>';
   mh+='<div class="stat-grid">';
   mh+='<div class="stat-cell"><div class="stat-val">'+r.sqm+'</div><div class="stat-lbl">m² Net Area</div><div class="stat-sub">excl. waste</div></div>';
   mh+='<div class="stat-cell"><div class="stat-val">'+r.sheets+'</div><div class="stat-lbl">Sheets 2440×1220</div><div class="stat-sub">+15% waste</div></div>';
@@ -1705,7 +1710,7 @@ function generate(){
   mh+='</div></div>';
 
   // Notes
-  var nh='<div class="notes-card"><div class="notes-hdr">Construction Notes</div>';
+  var nh='<div class="notes-card pgbreak"><div class="notes-hdr">Construction Notes</div>';
   nh+='<div class="note-item"><div class="nbullet">1.</div><div class="ntext"><strong>SUBFRAME:</strong> Front rail ('+r.unitW+'×'+S.tkH+'mm) and back rail (same). '+r.mrCount+' mid-rails at '+r.mrLen+'×'+S.tkH+'mm. Place 2 end mid-rails flush with sides; space '+Math.max(0,r.mrCount-2)+' intermediates evenly.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">2.</div><div class="ntext"><strong>SIDE PANELS:</strong> '+R(S.h)+'mm tall — full height, cover outside of subframe. Bottom panel ('+r.topBotW+'mm wide) screws onto top of subframe, between sides.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">3.</div><div class="ntext"><strong>DIVIDERS:</strong> '+r.divH+'mm — sit between top and bottom carcass panels only. Do not enter the subframe zone.</div></div>';
