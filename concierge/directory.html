@@ -1004,7 +1004,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260720c"></script>
+<script src="../js/concierge.js?v=20260721a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -1870,6 +1870,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     }
     document.getElementById('lapsedLock').style.display = 'none';
     TABS.forEach(function (t) { document.getElementById('tab-' + t).hidden = (t !== name); });
+    C.track('tab', { tab: name });
     if (name === 'jobs' && !jobsLoaded) { jobsLoaded = true; loadJobs(); }
     if (name === 'services') { renderOffered(); if (!buyLoaded) { buyLoaded = true; loadBuy(); } }
     if (name === 'storefront' && !sfLoaded) { sfLoaded = true; loadStorefront(); }
@@ -2393,6 +2394,10 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   }
   offAreaFilter.addEventListener('change', renderOffered);
   offSearch.addEventListener('input', renderOffered);
+  // Track completed searches (on blur/enter) → "popular searches" insights.
+  [[search, 'directory'], [offSearch, 'services'], [srcSearch, 'sourcing']].forEach(function (p) {
+    if (p[0]) p[0].addEventListener('change', function () { var q = (p[0].value || '').trim(); if (q) C.track('search', { where: p[1], q: q.slice(0, 60) }); });
+  });
   offGrid.addEventListener('click', function (e) {
     var more = e.target.closest('.svc-more');
     if (more) { offExpanded[more.getAttribute('data-more')] = true; renderOffered(); return; }

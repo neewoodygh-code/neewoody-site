@@ -129,6 +129,7 @@ export default {
       for (const [k, v] of Object.entries(cors)) res.headers.set(k, v);
       return res;
     } catch (err) {
+      ctx.waitUntil(audit(env, null, 'system', 'system_error', new URL(request.url).pathname, { method: request.method, error: String(err && err.message || err) }));
       return json({ error: 'server_error', detail: String(err && err.message || err) }, 500, cors);
     }
   },
@@ -171,10 +172,80 @@ async function backupDatabase(env) {
 }
 
 // Admin-triggered manual snapshot — same as the weekly cron, on demand.
-async function adminBackup(env) {
+async function adminBackup(env, admin) {
   const r = await backupDatabase(env);
+  await audit(env, admin && admin.phone, 'admin', 'backup', null, { tables: r.tables, key: r.key });
   return json({ ok: true, tables: r.tables, key: r.key });
 }
+
+// ── audit + usage logging (best-effort; never block the main action) ──
+async function audit(env, actor, role, action, target, meta) {
+  try {
+    await env.DB.prepare('INSERT INTO audit_log (actor, actor_role, action, target, meta) VALUES (?,?,?,?,?)')
+      .bind(actor || null, role || null, action, target || null, meta ? JSON.stringify(meta) : null).run();
+  } catch (e) { console.error('audit failed:', e && e.message); }
+}
+async function logEvent(env, phone, name, meta) {
+  try {
+    await env.DB.prepare('INSERT INTO usage_events (phone, name, meta) VALUES (?,?,?)')
+      .bind(phone || null, String(name).slice(0, 60), meta ? JSON.stringify(meta).slice(0, 500) : null).run();
+  } catch (e) {}
+}
+// POST /api/events — client fires small batches of usage events (best-effort).
+async function trackEvents(request, env, member) {
+  const body = await readJson(request);
+  const list = Array.isArray(body.events) ? body.events.slice(0, 20) : (body && body.name ? [body] : []);
+  for (const e of list) { if (e && e.name) await logEvent(env, member.phone, e.name, e.meta); }
+  return json({ ok: true });
+}
+
+// GET /api/admin/audit — recent sensitive-action log (admin only).
+async function adminAudit(request, env) {
+  const url = new URL(request.url);
+  const action = url.searchParams.get('action');
+  const limit = Math.min(500, Math.max(1, Number(url.searchParams.get('limit')) || 200));
+  const rows = action
+    ? await env.DB.prepare('SELECT * FROM audit_log WHERE action = ? ORDER BY id DESC LIMIT ?').bind(action, limit).all()
+    : await env.DB.prepare('SELECT * FROM audit_log ORDER BY id DESC LIMIT ?').bind(limit).all();
+  return json({ audit: (rows.results || []).map((r) => ({ ...r, meta: r.meta ? safeParse(r.meta) : null })) });
+}
+
+// GET /api/admin/insights — usage dashboard aggregates from existing data.
+async function adminInsights(env) {
+  const one = async (sql, ...b) => { try { return (await env.DB.prepare(sql).bind(...b).first()) || {}; } catch (e) { return {}; } };
+  const many = async (sql, ...b) => { try { return (await env.DB.prepare(sql).bind(...b).all()).results || []; } catch (e) { return []; } };
+
+  const members = await many("SELECT status, member_type, role, is_founder, photo_url, specialties, side_hustles, area FROM members");
+  const byStatus = {}, byType = {};
+  let complete = 0;
+  members.forEach((m) => {
+    byStatus[m.status] = (byStatus[m.status] || 0) + 1;
+    byType[m.member_type || 'carpenter'] = (byType[m.member_type || 'carpenter'] || 0) + 1;
+    const hasTrade = (m.specialties && m.specialties !== '[]') || (m.side_hustles && m.side_hustles !== '[]');
+    if (m.photo_url && m.area && hasTrade) complete++;
+  });
+
+  const logins7 = await one("SELECT SUM(success) AS ok, SUM(1-success) AS fail, COUNT(*) AS total FROM login_attempts WHERE created_at >= datetime('now','-7 day')");
+  const logins30 = await one("SELECT SUM(success) AS ok, SUM(1-success) AS fail FROM login_attempts WHERE created_at >= datetime('now','-30 day')");
+  const jobs = await one("SELECT COUNT(*) AS total, SUM(status='open') AS open, SUM(status='filled') AS filled FROM jobs");
+  const buys = await one("SELECT COUNT(*) AS total, SUM(status='open') AS open, SUM(status='filled') AS filled FROM buy_requests");
+  const clientJobs = await one("SELECT COUNT(*) AS total, SUM(status='pending') AS pending FROM client_jobs");
+  const period = new Date().toISOString().slice(0, 7);
+  const pay = await one("SELECT COUNT(*) AS paid FROM payments WHERE period = ?", period);
+  const topTabs = await many("SELECT json_extract(meta,'$.tab') AS tab, COUNT(*) AS n FROM usage_events WHERE name='tab' AND created_at >= datetime('now','-30 day') GROUP BY tab ORDER BY n DESC LIMIT 10");
+  const topSearch = await many("SELECT lower(json_extract(meta,'$.q')) AS q, COUNT(*) AS n FROM usage_events WHERE name='search' AND json_extract(meta,'$.q') != '' AND created_at >= datetime('now','-30 day') GROUP BY q ORDER BY n DESC LIMIT 12");
+  const errs = await one("SELECT COUNT(*) AS n FROM audit_log WHERE action='system_error' AND created_at >= datetime('now','-7 day')");
+  const recentErrs = await many("SELECT created_at, target, meta FROM audit_log WHERE action='system_error' ORDER BY id DESC LIMIT 8");
+
+  return json({
+    members: { total: members.length, byStatus, byType, complete, completePct: members.length ? Math.round((complete / members.length) * 100) : 0 },
+    logins: { d7: logins7, d30: logins30 },
+    jobs, buys, clientJobs, payments: { period, paid: pay.paid || 0 },
+    topTabs, topSearch,
+    errors: { d7: errs.n || 0, recent: recentErrs.map((r) => ({ ...r, meta: r.meta ? safeParse(r.meta) : null })) },
+  });
+}
+function safeParse(s) { try { return JSON.parse(s); } catch (e) { return s; } }
 
 // ── router ─────────────────────────────────────────────────────────────
 async function route(request, env, ctx) {
@@ -219,6 +290,7 @@ async function route(request, env, ctx) {
   if (path === '/api/me/photo' && method === 'DELETE') return withAuth(request, env, (m) => deletePhoto(env, m.phone));
   if (path === '/api/me/logo'  && method === 'POST')   return withAuth(request, env, (m) => uploadLogo(request, env, m.phone));
   if (path === '/api/me/logo'  && method === 'DELETE') return withAuth(request, env, (m) => deleteLogo(env, m.phone));
+  if (path === '/api/events' && method === 'POST') return withAuth(request, env, (m) => trackEvents(request, env, m));
   if (path === '/api/directory' && method === 'GET') return withPaid(request, env, () => directory(env));
 
   // ---- member: storefront (vendor items) ----
@@ -295,12 +367,14 @@ async function route(request, env, ctx) {
   // ---- admin: members ----
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
   if (path === '/api/admin/members' && method === 'POST') return withAdmin(request, env, () => adminCreateMember(request, env));
-  if (path === '/api/admin/purge-pending' && method === 'POST') return withAdmin(request, env, () => adminPurgePending(env, request));
-  if (path === '/api/admin/backup' && method === 'POST') return withAdmin(request, env, () => adminBackup(env));
+  if (path === '/api/admin/purge-pending' && method === 'POST') return withAdmin(request, env, (admin) => adminPurgePending(env, request, admin));
+  if (path === '/api/admin/backup' && method === 'POST') return withAdmin(request, env, (admin) => adminBackup(env, admin));
+  if (path === '/api/admin/audit' && method === 'GET') return withAdmin(request, env, () => adminAudit(request, env));
+  if (path === '/api/admin/insights' && method === 'GET') return withAdmin(request, env, () => adminInsights(env));
 
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
-    return withAdmin(request, env, () => adminUpdateMember(request, env, decodeURIComponent(mMember[1])));
+    return withAdmin(request, env, (admin) => adminUpdateMember(request, env, decodeURIComponent(mMember[1]), admin));
   }
   if (mMember && method === 'DELETE') {
     return withAdmin(request, env, (admin) => adminDeleteMember(request, env, admin, decodeURIComponent(mMember[1])));
@@ -336,9 +410,9 @@ async function route(request, env, ctx) {
   if (mSvc && method === 'DELETE') return withAdmin(request, env, () => adminDeleteService(env, Number(mSvc[1])));
 
   // ---- admin: payments ----
-  if (path === '/api/admin/payments' && method === 'POST') return withAdmin(request, env, () => adminRecordPayment(request, env));
+  if (path === '/api/admin/payments' && method === 'POST') return withAdmin(request, env, (admin) => adminRecordPayment(request, env, admin));
   if (path === '/api/admin/payments' && method === 'GET')  return withAdmin(request, env, () => adminListPayments(request, env));
-  if (path === '/api/admin/payments' && method === 'DELETE') return withAdmin(request, env, () => adminDeletePayment(request, env));
+  if (path === '/api/admin/payments' && method === 'DELETE') return withAdmin(request, env, (admin) => adminDeletePayment(request, env, admin));
 
   return json({ error: 'not_found' }, 404);
 }
@@ -501,6 +575,7 @@ async function updateMe(request, env, member) {
   if ('pin' in body && body.pin != null && body.pin !== '') {
     if (!/^\d{5}$/.test(String(body.pin))) return json({ error: 'pin_must_be_5_digits' }, 400);
     fields.pin_hash = await hashPin(String(body.pin));
+    await audit(env, member.phone, 'member', 'pin_change', member.phone, { self: true });
   }
   const keys = Object.keys(fields);
   if (!keys.length) return json({ member: sanitize(member) });
@@ -613,7 +688,7 @@ async function adminCreateMember(request, env) {
   return json({ member: sanitize(created) }, 201);
 }
 
-async function adminUpdateMember(request, env, rawPhone) {
+async function adminUpdateMember(request, env, rawPhone, admin) {
   const phone = normalizePhone(rawPhone);
   if (!phone) return json({ error: 'invalid_phone' }, 400);
 
@@ -733,6 +808,10 @@ async function adminUpdateMember(request, env, rawPhone) {
   }
 
   const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  const who = admin && admin.phone;
+  if ('role' in fields && fields.role !== member.role) await audit(env, who, 'admin', 'role_change', phone, { from: member.role, to: fields.role });
+  if ('status' in fields && fields.status !== member.status) await audit(env, who, 'admin', 'status_change', phone, { from: member.status, to: fields.status });
+  if ('pin_hash' in fields) await audit(env, who, 'admin', 'pin_change', phone, { reset: true });
   return json({ member: sanitize(updated) });
 }
 
@@ -789,6 +868,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     await Promise.all((cophotos.results || []).map((r) => env.MEDIA.delete(calloutImgKey(r.id))));
   } catch (e) { console.error('callout image cleanup failed:', e && e.message); }
 
+  await audit(env, admin && admin.phone, 'admin', 'member_delete', phone, { name: member.name });
   return json({ deleted: true, phone });
 }
 
@@ -798,7 +878,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
 // Guarded by an explicit {confirm:'purge-pending'} body; the admin UI adds its
 // own count-echo prompts on top. NOTE: table list mirrors adminDeleteMember —
 // keep both in sync on schema changes.
-async function adminPurgePending(env, request) {
+async function adminPurgePending(env, request, admin) {
   const body = await readJson(request);
   if (body.confirm !== 'purge-pending') return json({ error: 'confirm_required' }, 400);
 
@@ -843,10 +923,11 @@ async function adminPurgePending(env, request) {
     catch (e) { console.error('purge R2 cleanup failed:', e && e.message); }
   }
 
+  await audit(env, admin && admin.phone, 'admin', 'purge_pending', null, { count: pend.length });
   return json({ purged: pend.length });
 }
 
-async function adminRecordPayment(request, env) {
+async function adminRecordPayment(request, env, admin) {
   const body = await readJson(request);
   const phone = normalizePhone(body.member_phone);
   if (!phone) return json({ error: 'invalid_phone' }, 400);
@@ -871,6 +952,7 @@ async function adminRecordPayment(request, env) {
   const row = await env.DB.prepare(
     'SELECT * FROM payments WHERE member_phone = ? AND period = ?'
   ).bind(phone, period).first();
+  await audit(env, admin && admin.phone, 'admin', 'payment_record', phone, { period: period, amount_ghs: amount });
   return json({ payment: row }, 201);
 }
 
@@ -890,7 +972,7 @@ async function adminListPayments(request, env) {
 
 // Reverse a wrongly-recorded payment (member + period). Idempotent: deleting
 // a row that isn't there returns deleted:0 rather than erroring.
-async function adminDeletePayment(request, env) {
+async function adminDeletePayment(request, env, admin) {
   const body = await readJson(request);
   const phone = normalizePhone(body.member_phone);
   const period = String(body.period || '');
@@ -899,7 +981,9 @@ async function adminDeletePayment(request, env) {
   const res = await env.DB.prepare(
     'DELETE FROM payments WHERE member_phone = ? AND period = ?'
   ).bind(phone, period).run();
-  return json({ ok: true, deleted: (res.meta && res.meta.changes) || 0 });
+  const deleted = (res.meta && res.meta.changes) || 0;
+  if (deleted) await audit(env, admin && admin.phone, 'admin', 'payment_reverse', phone, { period: period });
+  return json({ ok: true, deleted });
 }
 
 // ── jobs board ─────────────────────────────────────────────────────────

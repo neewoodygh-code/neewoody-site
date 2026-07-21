@@ -107,6 +107,18 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
 @media(max-width:800px){ .form-grid{ grid-template-columns:1fr 1fr; } }
 @media(max-width:560px){ .form-grid{ grid-template-columns:1fr; } }
+.ins-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:.7rem; }
+.ins-stat{ background:var(--navy); color:var(--cream); border-radius:10px; padding:.7rem .85rem; }
+.ins-v{ font-family:var(--display,serif); font-size:1.5rem; font-weight:600; color:var(--cream); line-height:1.1; }
+.ins-l{ font-family:var(--ui,sans-serif); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase; color:var(--gold); margin-top:.25rem; }
+.ins-s{ font-size:.72rem; color:rgba(240,232,208,.6); margin-top:.15rem; }
+.ins-cols{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:1.1rem; }
+@media(max-width:620px){ .ins-cols{ grid-template-columns:1fr; } }
+.ins-col h3{ font-family:var(--display,serif); font-weight:600; font-size:1rem; color:var(--navy); margin:0 0 .5rem; }
+.ins-list{ list-style:none; margin:0; padding:0; }
+.ins-list li{ display:flex; justify-content:space-between; gap:1rem; padding:.35rem 0; border-bottom:1px solid var(--cream-dark); font-size:.9rem; }
+.ins-list li b{ color:var(--gold); font-variant-numeric:tabular-nums; }
+.ins-list li span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 </style>
 </head>
 <body>
@@ -128,6 +140,28 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 </div>
 
 <div class="wrap" id="app" style="display:none">
+
+  <!-- Insights -->
+  <div class="panel">
+    <h2>Insights <span class="sub">what members actually do — last 7/30 days</span></h2>
+    <div class="pbody"><div id="insBody" class="state">Loading…</div></div>
+  </div>
+
+  <!-- Security & audit log -->
+  <div class="panel">
+    <h2>Security &amp; audit log <span class="sub">sensitive actions · admin only</span></h2>
+    <div class="pbody">
+      <div class="tools" style="margin-bottom:.8rem">
+        <div class="field" style="max-width:220px"><label>Filter action</label>
+          <select id="audFilter"><option value="">All</option><option value="pin_change">PIN changes</option><option value="member_delete">Deletions</option><option value="purge_pending">Purges</option><option value="role_change">Role changes</option><option value="status_change">Status changes</option><option value="payment_record">Payments</option><option value="payment_reverse">Payment reversals</option><option value="backup">Backups</option><option value="system_error">System errors</option></select></div>
+        <button class="btn ghost" id="audReload" type="button">Reload</button>
+      </div>
+      <div class="table-scroll">
+        <table><thead><tr><th>When</th><th>Action</th><th>Actor</th><th>Target</th><th>Detail</th></tr></thead><tbody id="audBody"></tbody></table>
+      </div>
+      <div id="audState" class="state"></div>
+    </div>
+  </div>
 
   <!-- Add member -->
   <div class="panel">
@@ -336,7 +370,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20260720c"></script>
+<script src="../js/concierge.js?v=20260721a"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -1149,11 +1183,84 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   }
   document.getElementById('coReload').addEventListener('click', loadCallouts);
 
+  // ── insights + audit ──
+  function insStat(label, val, sub) {
+    return '<div class="ins-stat"><div class="ins-v">' + val + '</div><div class="ins-l">' + C.escapeHtml(label) + '</div>' + (sub ? '<div class="ins-s">' + C.escapeHtml(sub) + '</div>' : '') + '</div>';
+  }
+  function insTopList(rows, key) {
+    rows = rows || [];
+    if (!rows.length) return '<div class="small" style="color:var(--muted)">No data yet.</div>';
+    return '<ul class="ins-list">' + rows.map(function (r) {
+      return '<li><span>' + C.escapeHtml(String(r[key] == null ? '—' : r[key])) + '</span><b>' + (r.n || 0) + '</b></li>';
+    }).join('') + '</ul>';
+  }
+  async function loadInsights() {
+    var el = document.getElementById('insBody');
+    try {
+      var d = await C.api('/admin/insights');
+      var m = d.members || {}, lg = d.logins || {}, j = d.jobs || {}, b = d.buys || {}, cj = d.clientJobs || {}, pay = d.payments || {}, er = d.errors || {};
+      var d7 = lg.d7 || {}, d30 = lg.d30 || {};
+      var fill = j.total ? Math.round(((j.filled || 0) / j.total) * 100) : 0;
+      var statuses = Object.keys(m.byStatus || {}).map(function (k) { return (m.byStatus[k]) + ' ' + k; }).join(' · ');
+      var html = '<div class="ins-grid">' +
+        insStat('Members', m.total || 0, statuses) +
+        insStat('Profile complete', (m.completePct || 0) + '%', (m.complete || 0) + ' of ' + (m.total || 0)) +
+        insStat('Sign-ins · 7d', (d7.ok || 0), (d7.fail || 0) + ' failed') +
+        insStat('Sign-ins · 30d', (d30.ok || 0), (d30.fail || 0) + ' failed') +
+        insStat('Jobs', j.total || 0, (j.open || 0) + ' open · ' + fill + '% filled') +
+        insStat('Buy-for-me', b.total || 0, (b.open || 0) + ' open') +
+        insStat('Client requests', cj.total || 0, (cj.pending || 0) + ' to review') +
+        insStat('Paid · ' + (pay.period || ''), pay.paid || 0, 'this month') +
+        insStat('System errors · 7d', er.d7 || 0, '') +
+      '</div>' +
+      '<div class="ins-cols"><div class="ins-col"><h3>Most-used tabs · 30d</h3>' + insTopList(d.topTabs, 'tab') + '</div>' +
+      '<div class="ins-col"><h3>Popular searches · 30d</h3>' + insTopList(d.topSearch, 'q') + '</div></div>';
+      el.className = ''; el.innerHTML = html;
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      el.className = 'state'; el.textContent = err.message || 'Could not load insights.';
+    }
+  }
+
+  var AUD_DANGER = ['member_delete', 'purge_pending', 'system_error'];
+  var AUD_WARN = ['role_change', 'status_change', 'pin_change'];
+  function auditPill(a) {
+    var cls = AUD_DANGER.indexOf(a) >= 0 ? 'suspended' : (AUD_WARN.indexOf(a) >= 0 ? 'pending' : 'approved');
+    return '<span class="pill ' + cls + '">' + C.escapeHtml(String(a).replace(/_/g, ' ')) + '</span>';
+  }
+  function auditActor(r) { return r.actor_role === 'system' ? 'system' : (r.actor ? C.displayPhone(r.actor) : '—'); }
+  async function loadAudit() {
+    var body = document.getElementById('audBody'), state = document.getElementById('audState');
+    var action = document.getElementById('audFilter').value;
+    state.style.display = ''; state.textContent = 'Loading…'; body.innerHTML = '';
+    try {
+      var d = await C.api('/admin/audit' + (action ? '?action=' + encodeURIComponent(action) : ''));
+      var rows = d.audit || [];
+      if (!rows.length) { state.textContent = 'No entries yet.'; return; }
+      state.style.display = 'none';
+      body.innerHTML = rows.map(function (r) {
+        var meta = r.meta ? Object.keys(r.meta).map(function (k) { return k + ': ' + r.meta[k]; }).join(', ') : '';
+        return '<tr><td class="small">' + C.escapeHtml((r.created_at || '').slice(0, 16).replace('T', ' ')) + '</td>' +
+          '<td>' + auditPill(r.action) + '</td>' +
+          '<td class="small">' + C.escapeHtml(auditActor(r)) + '</td>' +
+          '<td class="small">' + C.escapeHtml(r.target ? C.displayPhone(r.target) : '—') + '</td>' +
+          '<td class="small" style="white-space:normal;max-width:280px">' + C.escapeHtml(meta) + '</td></tr>';
+      }).join('');
+    } catch (err) {
+      if (err.status === 401) { location.replace('login.html'); return; }
+      state.textContent = err.message || 'Could not load the audit log.';
+    }
+  }
+  document.getElementById('audFilter').addEventListener('change', loadAudit);
+  document.getElementById('audReload').addEventListener('click', loadAudit);
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
+    loadInsights();
+    loadAudit();
     loadCallouts();
     await loadServiceCatalog();
     loadSuggestions();

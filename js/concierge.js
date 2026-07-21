@@ -537,8 +537,21 @@
     return URL.createObjectURL(await res.blob());
   }
 
+  // Best-effort usage event — fire-and-forget, never blocks or throws.
+  function track(name, meta) {
+    try {
+      var t = getToken(); if (!t) return;
+      fetch(API + '/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + t },
+        body: JSON.stringify({ name: name, meta: meta || null }),
+        keepalive: true,
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   global.Concierge = {
-    API: API,
+    API: API, track: track,
     getToken: getToken, setToken: setToken, clearToken: clearToken,
     tokenAlive: tokenAlive, requireSession: requireSession,
     api: api, errorMessage: errorMessage, authImageURL: authImageURL,
