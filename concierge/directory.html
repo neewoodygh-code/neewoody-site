@@ -493,6 +493,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .svc-person .nm{ display:flex; flex-direction:column; line-height:1.1; text-align:left; }
 .svc-person .nmt{ font-family:var(--body); font-size:.85rem; color:var(--ink); white-space:nowrap; }
 .svc-person .ar{ font-family:var(--ui); font-size:.62rem; color:var(--muted); }
+.svc-more{ display:inline-flex; align-items:center; font-family:var(--ui); font-size:.72rem; font-weight:500; color:var(--navy); background:transparent; border:1px dashed rgba(31,47,88,.35); border-radius:24px; padding:.34rem .85rem; cursor:pointer; transition:border-color .15s,background .15s; }
+.svc-more:hover{ border-color:var(--gold); background:var(--cream); }
 </style>
 </head>
 <body>
@@ -638,6 +640,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     </div>
     <div class="filters">
       <select id="offAreaFilter"><option value="">All areas</option></select>
+      <input id="offSearch" type="search" placeholder="Search a service or a name…" />
       <span class="count" id="offCount"></span>
     </div>
     <div id="offGrid"></div>
@@ -2328,6 +2331,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   var offState = document.getElementById('offState');
   var offCount = document.getElementById('offCount');
   var offAreaFilter = document.getElementById('offAreaFilter');
+  var offSearch = document.getElementById('offSearch');
+  var offExpanded = {};              // service slugs the viewer expanded past the cap
+  var OFF_CAP = 10;                  // mini-profiles shown before "+N more"
   function buildOfferedFilters() {
     var areaVal = offAreaFilter.value;
     offAreaFilter.innerHTML = '<option value="">All areas</option>';
@@ -2338,45 +2344,59 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   // Grouped by SERVICE: a card per service listing mini-profiles of who offers it.
   function renderOffered() {
     buildOfferedFilters();
-    var a = offAreaFilter.value;
+    var a = offAreaFilter.value, q = (offSearch.value || '').trim().toLowerCase();
     var byService = {};
     all.forEach(function (m) {
       if (a && m.area !== a) return;
       (m.side_hustles || []).forEach(function (slug) { (byService[slug] = byService[slug] || []).push(m); });
     });
-    var slugs = Object.keys(byService);
-    if (!slugs.length) {
+    var offerers = {};
+    function nameHay(m) { return ((m.name || '') + ' ' + (m.business_name || '')).toLowerCase(); }
+    function personHtml(m) {
+      var idx = all.indexOf(m); offerers[idx] = 1;
+      var ini = C.escapeHtml(initials(m.name));
+      var av = m.photo_url
+        ? '<span class="av"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + ini + '\'"></span>'
+        : '<span class="av">' + ini + '</span>';
+      var nm = C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name);
+      return '<button class="svc-person" data-idx="' + idx + '">' + av +
+        '<span class="nm"><span class="nmt">' + nm + '</span>' + (m.area ? '<span class="ar">' + C.escapeHtml(m.area) + '</span>' : '') + '</span></button>';
+    }
+    // apply search: a service shows if its label matches (all offerers) OR it has
+    // offerers whose name matches (just those).
+    var cards = [];
+    Object.keys(byService).forEach(function (slug) {
+      var label = serviceLabelFor(slug), svcMatch = !q || label.toLowerCase().indexOf(q) >= 0;
+      var ppl = (q && !svcMatch) ? byService[slug].filter(function (m) { return nameHay(m).indexOf(q) >= 0; }) : byService[slug];
+      if (ppl.length) cards.push({ slug: slug, label: label, people: ppl, total: byService[slug].length });
+    });
+    if (!cards.length) {
       offGrid.innerHTML = ''; offState.style.display = '';
-      offState.textContent = a ? ('No services offered in ' + a + ' yet.') : 'No members have listed services yet.';
+      offState.textContent = (q || a) ? 'No services match that.' : 'No members have listed services yet.';
       offCount.textContent = ''; return;
     }
     offState.style.display = 'none';
     var order = serviceCatalog.map(function (s) { return s.slug; });
-    slugs.sort(function (x, y) {
-      var ix = order.indexOf(x), iy = order.indexOf(y); if (ix < 0) ix = 999; if (iy < 0) iy = 999;
-      return ix !== iy ? ix - iy : serviceLabelFor(x).localeCompare(serviceLabelFor(y));
+    cards.sort(function (x, y) {
+      var ix = order.indexOf(x.slug), iy = order.indexOf(y.slug); if (ix < 0) ix = 999; if (iy < 0) iy = 999;
+      return ix !== iy ? ix - iy : x.label.localeCompare(y.label);
     });
-    var offerers = {};
-    offGrid.innerHTML = slugs.map(function (slug) {
-      var ppl = byService[slug];
-      return '<div class="svc-card"><div class="svc-card-hd"><span class="svc-name">' + C.escapeHtml(serviceLabelFor(slug)) +
-        '</span><span class="svc-n">' + ppl.length + '</span></div><div class="svc-people">' +
-        ppl.map(function (m) {
-          var idx = all.indexOf(m); offerers[idx] = 1;
-          var ini = C.escapeHtml(initials(m.name));
-          var av = m.photo_url
-            ? '<span class="av"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + ini + '\'"></span>'
-            : '<span class="av">' + ini + '</span>';
-          var nm = C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name);
-          return '<button class="svc-person" data-idx="' + idx + '">' + av +
-            '<span class="nm"><span class="nmt">' + nm + '</span>' + (m.area ? '<span class="ar">' + C.escapeHtml(m.area) + '</span>' : '') + '</span></button>';
-        }).join('') + '</div></div>';
+    offGrid.innerHTML = cards.map(function (c) {
+      var expanded = offExpanded[c.slug] || c.people.length <= OFF_CAP;
+      var vis = expanded ? c.people : c.people.slice(0, OFF_CAP);
+      var body = vis.map(personHtml).join('');
+      if (!expanded) body += '<button class="svc-more" data-more="' + c.slug + '">+' + (c.people.length - OFF_CAP) + ' more</button>';
+      return '<div class="svc-card"><div class="svc-card-hd"><span class="svc-name">' + C.escapeHtml(c.label) +
+        '</span><span class="svc-n">' + c.people.length + '</span></div><div class="svc-people">' + body + '</div></div>';
     }).join('');
     var mCount = Object.keys(offerers).length;
-    offCount.textContent = slugs.length + ' service' + (slugs.length > 1 ? 's' : '') + ' · ' + mCount + ' member' + (mCount > 1 ? 's' : '');
+    offCount.textContent = cards.length + ' service' + (cards.length > 1 ? 's' : '') + ' · ' + mCount + ' member' + (mCount > 1 ? 's' : '');
   }
   offAreaFilter.addEventListener('change', renderOffered);
+  offSearch.addEventListener('input', renderOffered);
   offGrid.addEventListener('click', function (e) {
+    var more = e.target.closest('.svc-more');
+    if (more) { offExpanded[more.getAttribute('data-more')] = true; renderOffered(); return; }
     var p = e.target.closest('.svc-person'); if (!p) return;
     var idx = +p.getAttribute('data-idx'); if (all[idx]) openMember(all[idx]);
   });
