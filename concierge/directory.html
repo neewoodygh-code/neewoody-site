@@ -481,7 +481,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .dash-act:hover{ filter:brightness(1.07); }
 .dash-lbl{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,232,208,.5); margin:1rem 0 .35rem; }
 /* ── service-category cards (Services tab) — compact grid, 2–3 per row ── */
-#offGrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:.75rem; align-items:start; }
+#offGrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:.75rem; align-items:stretch; }
 .svc-card{ background:#fff; border:1px solid var(--cream-dark); border-radius:12px; padding:.7rem .8rem .8rem; }
 .svc-card-hd{ display:flex; align-items:center; gap:.5rem; margin-bottom:.6rem; }
 .svc-name{ font-family:var(--display); font-weight:600; font-size:1rem; color:var(--navy); line-height:1.15; }
@@ -2332,7 +2332,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   var offAreaFilter = document.getElementById('offAreaFilter');
   var offSearch = document.getElementById('offSearch');
   var offExpanded = {};              // service slugs the viewer expanded past the cap
-  var OFF_CAP = 6;                   // mini-profiles shown before "+N more"
+  var OFF_CAP = 4;                   // mini-profiles shown before "+N more"
   function buildOfferedFilters() {
     var areaVal = offAreaFilter.value;
     offAreaFilter.innerHTML = '<option value="">All areas</option>';
