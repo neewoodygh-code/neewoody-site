@@ -480,6 +480,19 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .dash-act.ghost{ background:transparent; color:var(--cream); border-color:rgba(240,232,208,.35); }
 .dash-act:hover{ filter:brightness(1.07); }
 .dash-lbl{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,232,208,.5); margin:1rem 0 .35rem; }
+/* ── service-category cards (Services tab) ── */
+.svc-card{ background:#fff; border:1px solid var(--cream-dark); border-radius:12px; padding:.9rem 1rem 1rem; margin-bottom:1rem; }
+.svc-card-hd{ display:flex; align-items:center; gap:.55rem; margin-bottom:.75rem; }
+.svc-name{ font-family:var(--display); font-weight:600; font-size:1.12rem; color:var(--navy); }
+.svc-n{ font-family:var(--ui); font-size:.64rem; font-weight:600; letter-spacing:.04em; color:var(--gold); background:rgba(200,146,42,.14); border-radius:20px; padding:2px 9px; }
+.svc-people{ display:flex; flex-wrap:wrap; gap:.5rem; }
+.svc-person{ display:inline-flex; align-items:center; gap:.5rem; background:var(--cream); border:1px solid var(--cream-dark); border-radius:24px; padding:.28rem .75rem .28rem .3rem; cursor:pointer; transition:border-color .15s,background .15s; }
+.svc-person:hover{ border-color:var(--gold); background:#fff; }
+.svc-person .av{ width:28px; height:28px; border-radius:50%; background:var(--navy); color:var(--cream); font-family:var(--ui); font-size:.64rem; font-weight:600; display:flex; align-items:center; justify-content:center; flex:none; overflow:hidden; }
+.svc-person .av img{ width:100%; height:100%; object-fit:cover; }
+.svc-person .nm{ display:flex; flex-direction:column; line-height:1.1; text-align:left; }
+.svc-person .nmt{ font-family:var(--body); font-size:.85rem; color:var(--ink); white-space:nowrap; }
+.svc-person .ar{ font-family:var(--ui); font-size:.62rem; color:var(--muted); }
 </style>
 </head>
 <body>
@@ -621,14 +634,13 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <div id="tab-services" class="tabpanel" hidden>
     <div class="lead">
       <h1>Services</h1>
-      <p>Members who offer a service beyond their trade — 3D modelling, product design, teaching, deliveries and more. Pick a service to find who offers it, then message them on WhatsApp.</p>
+      <p>What members offer beyond their trade — 3D modelling, product design, teaching, deliveries and more. Browse a service to see who does it, then message them on WhatsApp.</p>
     </div>
     <div class="filters">
-      <select id="offSvcFilter"><option value="">All services</option></select>
       <select id="offAreaFilter"><option value="">All areas</option></select>
       <span class="count" id="offCount"></span>
     </div>
-    <div id="offGrid" class="grid"></div>
+    <div id="offGrid"></div>
     <div id="offState" class="state"></div>
 
     <hr style="border:none;border-top:1px solid var(--cream-dark);margin:2.25rem 0 1.75rem">
@@ -2315,35 +2327,59 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   var offGrid = document.getElementById('offGrid');
   var offState = document.getElementById('offState');
   var offCount = document.getElementById('offCount');
-  var offSvcFilter = document.getElementById('offSvcFilter');
   var offAreaFilter = document.getElementById('offAreaFilter');
   function buildOfferedFilters() {
-    var svcVal = offSvcFilter.value, areaVal = offAreaFilter.value;
-    offSvcFilter.innerHTML = '<option value="">All services</option>';
-    serviceCatalog.forEach(function (s) { var o = document.createElement('option'); o.value = s.slug; o.textContent = s.label; offSvcFilter.appendChild(o); });
-    offSvcFilter.value = svcVal;
+    var areaVal = offAreaFilter.value;
     offAreaFilter.innerHTML = '<option value="">All areas</option>';
     var zones = {}; all.forEach(function (m) { if ((m.side_hustles || []).length && m.area) zones[m.area] = true; });
     Object.keys(zones).sort().forEach(function (a) { var o = document.createElement('option'); o.value = a; o.textContent = a; offAreaFilter.appendChild(o); });
     offAreaFilter.value = areaVal;
   }
+  // Grouped by SERVICE: a card per service listing mini-profiles of who offers it.
   function renderOffered() {
     buildOfferedFilters();
-    var svc = offSvcFilter.value, a = offAreaFilter.value;
-    var list = all.filter(function (m) {
-      var sh = m.side_hustles || []; if (!sh.length) return false;
-      if (svc && sh.indexOf(svc) < 0) return false;
-      if (a && m.area !== a) return false;
-      return true;
+    var a = offAreaFilter.value;
+    var byService = {};
+    all.forEach(function (m) {
+      if (a && m.area !== a) return;
+      (m.side_hustles || []).forEach(function (slug) { (byService[slug] = byService[slug] || []).push(m); });
     });
-    offGrid.innerHTML = '';
-    if (!list.length) { offState.style.display = ''; offState.textContent = svc ? 'No members offer this yet.' : 'No members have listed services yet.'; offCount.textContent = ''; return; }
+    var slugs = Object.keys(byService);
+    if (!slugs.length) {
+      offGrid.innerHTML = ''; offState.style.display = '';
+      offState.textContent = a ? ('No services offered in ' + a + ' yet.') : 'No members have listed services yet.';
+      offCount.textContent = ''; return;
+    }
     offState.style.display = 'none';
-    list.forEach(function (m) { offGrid.appendChild(card(m)); });
-    offCount.textContent = list.length + (svc ? ' offering ' + serviceLabelFor(svc) : ' offering a service');
+    var order = serviceCatalog.map(function (s) { return s.slug; });
+    slugs.sort(function (x, y) {
+      var ix = order.indexOf(x), iy = order.indexOf(y); if (ix < 0) ix = 999; if (iy < 0) iy = 999;
+      return ix !== iy ? ix - iy : serviceLabelFor(x).localeCompare(serviceLabelFor(y));
+    });
+    var offerers = {};
+    offGrid.innerHTML = slugs.map(function (slug) {
+      var ppl = byService[slug];
+      return '<div class="svc-card"><div class="svc-card-hd"><span class="svc-name">' + C.escapeHtml(serviceLabelFor(slug)) +
+        '</span><span class="svc-n">' + ppl.length + '</span></div><div class="svc-people">' +
+        ppl.map(function (m) {
+          var idx = all.indexOf(m); offerers[idx] = 1;
+          var ini = C.escapeHtml(initials(m.name));
+          var av = m.photo_url
+            ? '<span class="av"><img src="' + C.escapeHtml(m.photo_url) + '" alt="" loading="lazy" onerror="this.parentNode.textContent=\'' + ini + '\'"></span>'
+            : '<span class="av">' + ini + '</span>';
+          var nm = C.escapeHtml(m.member_type === 'vendor' ? C.companyName(m) : m.name);
+          return '<button class="svc-person" data-idx="' + idx + '">' + av +
+            '<span class="nm"><span class="nmt">' + nm + '</span>' + (m.area ? '<span class="ar">' + C.escapeHtml(m.area) + '</span>' : '') + '</span></button>';
+        }).join('') + '</div></div>';
+    }).join('');
+    var mCount = Object.keys(offerers).length;
+    offCount.textContent = slugs.length + ' service' + (slugs.length > 1 ? 's' : '') + ' · ' + mCount + ' member' + (mCount > 1 ? 's' : '');
   }
-  offSvcFilter.addEventListener('change', renderOffered);
   offAreaFilter.addEventListener('change', renderOffered);
+  offGrid.addEventListener('click', function (e) {
+    var p = e.target.closest('.svc-person'); if (!p) return;
+    var idx = +p.getAttribute('data-idx'); if (all[idx]) openMember(all[idx]);
+  });
 
   // ── Support tab: FAQ, tutorials, suggestion box ──
   var supportInit = false;
