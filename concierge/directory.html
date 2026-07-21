@@ -469,6 +469,17 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .dash-txt .m{ display:block; font-family:var(--ui); font-size:.7rem; color:rgba(240,232,208,.6); margin-top:1px; }
 .dash-new{ flex:none; font-family:var(--ui); font-size:.56rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#241500; background:var(--gold); border-radius:20px; padding:2px 7px; }
 .dash-empty{ font-family:var(--body); font-size:.86rem; color:rgba(240,232,208,.72); margin-top:.55rem; line-height:1.5; }
+.dash-stats{ display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.75rem; }
+.dash-stat{ display:inline-flex; align-items:center; gap:.4rem; background:rgba(240,232,208,.08); border:1px solid rgba(240,232,208,.14); border-radius:20px; padding:.34rem .7rem .34rem .6rem; cursor:pointer; font-family:var(--ui); font-size:.75rem; color:rgba(240,232,208,.85); transition:background .15s; }
+.dash-stat:hover{ background:rgba(240,232,208,.15); }
+.dash-stat b{ color:var(--gold); font-weight:600; }
+.dash-stat svg{ width:14px; height:14px; flex:none; }
+.dash-actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
+.dash-act{ display:inline-flex; align-items:center; gap:.35rem; font-family:var(--ui); font-size:.78rem; font-weight:600; letter-spacing:.02em; border-radius:8px; padding:.5rem .9rem; cursor:pointer; border:1px solid transparent; transition:filter .15s; }
+.dash-act.primary{ background:var(--gold); color:#241500; }
+.dash-act.ghost{ background:transparent; color:var(--cream); border-color:rgba(240,232,208,.35); }
+.dash-act:hover{ filter:brightness(1.07); }
+.dash-lbl{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,232,208,.5); margin:1rem 0 .35rem; }
 </style>
 </head>
 <body>
@@ -2847,10 +2858,25 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     var jobSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
     var buySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>';
 
-    var html = '<div class="dash-greet"><h2>' + greet + ', ' + first + '</h2><span class="sub">' +
-      (newCount ? (newCount + ' new near you') : ('Near you' + (me.area ? ' · ' + C.escapeHtml(me.area) : ''))) + '</span></div>';
+    var myJobs = jobs.filter(function (j) { return j.mine && (!j.status || j.status === 'open'); }).length;
+    var myBuys = buys.filter(function (b) { return b.mine && (!b.status || b.status === 'open'); }).length;
+    var unread = (typeof notifItems !== 'undefined' && notifItems) ? notifItems.filter(function (n) { return !n.read; }).length : 0;
+    var bellSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
+
+    var html = '<div class="dash-greet"><h2>' + greet + ', ' + first + '</h2>' +
+      (me.area ? '<span class="sub">' + C.escapeHtml(me.area) + '</span>' : '') + '</div>';
+    html += '<div class="dash-stats">' +
+      '<button class="dash-stat" data-go="jobs">' + jobSvg + '<span><b>' + myJobs + '</b> your jobs</span></button>' +
+      '<button class="dash-stat" data-go="services">' + buySvg + '<span><b>' + myBuys + '</b> your buys</span></button>' +
+      '<button class="dash-stat" data-go="notif">' + bellSvg + '<span><b>' + unread + '</b> unread</span></button>' +
+    '</div>';
+    html += '<div class="dash-actions">' +
+      '<button class="dash-act primary" data-act="job">+ Post a job</button>' +
+      '<button class="dash-act ghost" data-act="buy">+ Request a buy</button>' +
+    '</div>';
+    html += '<div class="dash-lbl">Near you' + (newCount ? ' · ' + newCount + ' new' : '') + '</div>';
     if (!top.length) {
-      html += '<div class="dash-empty">Nothing new near ' + (me.area ? C.escapeHtml(me.area) : 'you') + ' yet. New jobs and buy-for-me requests in your area land here — so you never miss one, even if browser alerts are off.</div>';
+      html += '<div class="dash-empty">Nothing new near ' + (me.area ? C.escapeHtml(me.area) : 'you') + ' yet — new jobs and buy-for-me requests in your area will land here, even if browser alerts are off.</div>';
     } else {
       html += '<div class="dash-list">' + top.map(function (it) {
         var isNew = String(it.created_at || '') > seen;
@@ -2866,6 +2892,19 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     host.style.display = '';
     host.querySelectorAll('.dash-item').forEach(function (btn) {
       btn.addEventListener('click', function () { showTab(btn.getAttribute('data-tab')); window.scrollTo(0, 0); });
+    });
+    host.querySelectorAll('.dash-stat').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var go = btn.getAttribute('data-go');
+        if (go === 'notif') { if (typeof notifPanel !== 'undefined' && notifPanel) notifPanel.hidden = false; }
+        else { showTab(go); window.scrollTo(0, 0); }
+      });
+    });
+    host.querySelectorAll('.dash-act').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var t = document.getElementById(btn.getAttribute('data-act') === 'job' ? 'postJobBtn' : 'postBuyBtn');
+        if (t) t.click();
+      });
     });
     if (top.length) { try { localStorage.setItem(dashSeenKey(), String(top[0].created_at || '')); } catch (e) {} }
   }
