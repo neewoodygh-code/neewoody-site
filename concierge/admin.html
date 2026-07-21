@@ -195,6 +195,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
         <div class="field" style="max-width:260px"><label>Search</label><input id="memSearch" type="search" placeholder="Name, business, phone…"></div>
         <button class="btn ghost" id="reloadBtn" type="button">Reload</button>
         <button class="btn ghost" id="purgePendingBtn" type="button" style="color:#a52a2a;border-color:rgba(165,42,42,.4)">Purge pending</button>
+        <button class="btn ghost" id="backupBtn" type="button" title="Save a full snapshot of the database to R2">Back up now</button>
       </div>
       <div class="table-scroll">
         <table>
@@ -482,6 +483,16 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       alert('Purged ' + (r.purged || 0) + ' pending member(s).');
     } catch (err) {
       alert(err.message || 'Could not purge pending members.');
+    } finally { btn.disabled = false; btn.textContent = old; }
+  });
+
+  document.getElementById('backupBtn').addEventListener('click', async function () {
+    var btn = this; btn.disabled = true; var old = btn.textContent; btn.textContent = 'Backing up…';
+    try {
+      var r = await C.api('/admin/backup', { method: 'POST' });
+      alert('Snapshot saved to R2: ' + (r.key || '') + '\n' + (r.tables || 0) + ' tables backed up.');
+    } catch (err) {
+      alert(err.message || 'Backup failed.');
     } finally { btn.disabled = false; btn.textContent = old; }
   });
 

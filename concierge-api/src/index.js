@@ -133,11 +133,48 @@ export default {
     }
   },
 
-  // Cron: scan for overdue safety call-outs and alert admins (see wrangler.toml).
+  // Cron (see wrangler.toml): every 15 min → scan overdue call-outs; weekly
+  // (Sun 03:00 UTC) → full D1 snapshot to R2. Branch on which schedule fired.
   async scheduled(event, env, ctx) {
+    if (event.cron === '0 3 * * 0') {
+      ctx.waitUntil(backupDatabase(env).catch((e) => console.error('db backup failed:', e && e.message)));
+      return;
+    }
     ctx.waitUntil(scanOverdueCallouts(env).catch((e) => console.error('callout scan failed:', e && e.message)));
   },
 };
+
+// Weekly full snapshot of the D1 database to R2 (concierge/backups/<date>.json)
+// — a downloadable copy that complements D1 Time Travel (30-day point-in-time
+// recovery). Table names come from sqlite_master (trusted, not user input);
+// the backups/ prefix is served by NO route, so snapshots are never public.
+async function backupDatabase(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_cf_%' AND name != 'd1_migrations' ORDER BY name"
+  ).all();
+  const tables = (results || []).map((r) => r.name);
+  const dump = { generated_at: new Date().toISOString(), db: 'concierge', tables: {} };
+  for (const t of tables) {
+    const rows = await env.DB.prepare('SELECT * FROM "' + t + '"').all();
+    dump.tables[t] = rows.results || [];
+  }
+  const key = 'concierge/backups/' + new Date().toISOString().slice(0, 10) + '.json';
+  await env.MEDIA.put(key, JSON.stringify(dump), { httpMetadata: { contentType: 'application/json' } });
+  // Keep the most recent ~12 weekly snapshots.
+  try {
+    const listed = await env.MEDIA.list({ prefix: 'concierge/backups/' });
+    const keys = (listed.objects || []).map((o) => o.key).sort();
+    const excess = keys.length - 12;
+    if (excess > 0) await Promise.all(keys.slice(0, excess).map((k) => env.MEDIA.delete(k)));
+  } catch (e) { console.error('backup prune failed:', e && e.message); }
+  return { tables: tables.length, key: key };
+}
+
+// Admin-triggered manual snapshot — same as the weekly cron, on demand.
+async function adminBackup(env) {
+  const r = await backupDatabase(env);
+  return json({ ok: true, tables: r.tables, key: r.key });
+}
 
 // ── router ─────────────────────────────────────────────────────────────
 async function route(request, env, ctx) {
@@ -259,6 +296,7 @@ async function route(request, env, ctx) {
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
   if (path === '/api/admin/members' && method === 'POST') return withAdmin(request, env, () => adminCreateMember(request, env));
   if (path === '/api/admin/purge-pending' && method === 'POST') return withAdmin(request, env, () => adminPurgePending(env, request));
+  if (path === '/api/admin/backup' && method === 'POST') return withAdmin(request, env, () => adminBackup(env));
 
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
