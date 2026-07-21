@@ -454,6 +454,21 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   .lead h1{ font-size:1.5rem; }
   .filters .count{ margin-left:0; width:100%; }
 }
+/* ── personal dashboard "near you" widget ── */
+.dash-home{ background:var(--navy); color:var(--cream); border-radius:14px; padding:1.05rem 1.2rem .95rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(31,47,88,.18); }
+.dash-greet{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }
+.dash-greet h2{ font-family:var(--display); font-weight:500; font-size:1.28rem; color:var(--cream); line-height:1.1; }
+.dash-greet .sub{ font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.04em; color:var(--gold); }
+.dash-list{ margin-top:.75rem; display:flex; flex-direction:column; gap:.35rem; }
+.dash-item{ display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; background:rgba(240,232,208,.06); border:1px solid rgba(240,232,208,.1); border-radius:9px; padding:.55rem .7rem; cursor:pointer; transition:background .15s; }
+.dash-item:hover{ background:rgba(240,232,208,.13); }
+.dash-ic{ width:30px; height:30px; border-radius:7px; background:rgba(200,146,42,.18); display:flex; align-items:center; justify-content:center; flex:none; }
+.dash-ic svg{ width:16px; height:16px; }
+.dash-txt{ flex:1; min-width:0; }
+.dash-txt .t{ display:block; font-family:var(--body); font-size:.9rem; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dash-txt .m{ display:block; font-family:var(--ui); font-size:.7rem; color:rgba(240,232,208,.6); margin-top:1px; }
+.dash-new{ flex:none; font-family:var(--ui); font-size:.56rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#241500; background:var(--gold); border-radius:20px; padding:2px 7px; }
+.dash-empty{ font-family:var(--body); font-size:.86rem; color:rgba(240,232,208,.72); margin-top:.55rem; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -542,6 +557,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 
   <!-- TAB: Directory -->
   <div id="tab-directory" class="tabpanel">
+  <div id="dashHome" class="dash-home" style="display:none"></div>
   <div id="profileNudge" class="pnudge" style="display:none"></div>
   <div class="lead">
     <h1>Find a fellow carpenter</h1>
@@ -2574,7 +2590,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' },
     { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' },
     { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' },
-    { id: 29, date: '2026-07-20', title: 'Pin where you’re based', body: 'Any member can now add a location pin in My profile (not just vendors). It shows a small map on your profile so people can see where you’re based and how to reach you. Totally optional — your area still works as before.' }
+    { id: 29, date: '2026-07-20', title: 'Pin where you’re based', body: 'Any member can now add a location pin in My profile (not just vendors). It shows a small map on your profile so people can see where you’re based and how to reach you. Totally optional — your area still works as before.' },
+    { id: 30, date: '2026-07-21', title: 'Your dashboard, personalised', body: 'When you open the member area you now get a “near you” panel up top — the latest jobs and buy-for-me requests in your area, newest first, with a New tag for anything since your last visit. So even if browser alerts don’t reach you, you never miss what’s happening around you. Tap any item to jump to it.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -2779,6 +2796,80 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   document.getElementById('notifReadAll').addEventListener('click', function () { markNotifs(); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchNotifs(); });
 
+  // Personal "near you" widget — open jobs + buy-for-me requests in the
+  // member's zone(s), newest first. The in-app fallback when push doesn't fire.
+  function dashSeenKey() { return 'nwd-dash-seen-' + (me && me.phone || ''); }
+  function timeAgo(ts) {
+    if (!ts) return '';
+    var d = new Date(String(ts).replace(' ', 'T') + (String(ts).indexOf('Z') < 0 ? 'Z' : ''));
+    var s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (isNaN(s)) return '';
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+    return Math.floor(s / 604800) + 'w ago';
+  }
+  async function loadDashHome() {
+    var host = document.getElementById('dashHome');
+    if (!host || !me) return;
+    var zones = {}; [me.area].concat(me.coverage_zones || []).forEach(function (z) { if (z) zones[z] = 1; });
+    var res;
+    try {
+      res = await Promise.all([
+        C.api('/jobs').catch(function () { return {}; }),
+        C.api('/buy-requests').catch(function () { return {}; }),
+      ]);
+    } catch (e) { return; }
+    var jobs = (res[0] && res[0].jobs) || [], buys = (res[1] && res[1].requests) || [];
+    var items = [];
+    jobs.forEach(function (j) {
+      if (j.mine || (j.status && j.status !== 'open') || !zones[j.zone]) return;
+      var trade = (C.SPECIALTY_LABELS && C.SPECIALTY_LABELS[j.trade]) || j.trade || 'Carpentry';
+      items.push({ kind: 'job', zone: j.zone, created_at: j.created_at,
+        title: trade + ' work needed' + (j.workers > 1 ? (' · ' + j.workers + ' hands') : '') });
+    });
+    buys.forEach(function (b) {
+      if (b.mine || (b.status && b.status !== 'open') || !zones[b.zone]) return;
+      var first = (b.items && b.items[0] && b.items[0].name) ? b.items[0].name : 'Materials';
+      var more = (b.items || []).length - 1;
+      items.push({ kind: 'buy', zone: b.zone, created_at: b.created_at,
+        title: 'Buy-for-me: ' + first + (more > 0 ? (' +' + more + ' more') : '') });
+    });
+    items.sort(function (a, b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); });
+    var top = items.slice(0, 6);
+
+    var seen = ''; try { seen = localStorage.getItem(dashSeenKey()) || ''; } catch (e) {}
+    var newCount = top.filter(function (it) { return String(it.created_at || '') > seen; }).length;
+    var first = C.escapeHtml((me.name || 'there').split(/\s+/)[0]);
+    var hr = new Date().getHours();
+    var greet = hr < 12 ? 'Good morning' : (hr < 17 ? 'Good afternoon' : 'Good evening');
+    var jobSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    var buySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>';
+
+    var html = '<div class="dash-greet"><h2>' + greet + ', ' + first + '</h2><span class="sub">' +
+      (newCount ? (newCount + ' new near you') : ('Near you' + (me.area ? ' · ' + C.escapeHtml(me.area) : ''))) + '</span></div>';
+    if (!top.length) {
+      html += '<div class="dash-empty">Nothing new near ' + (me.area ? C.escapeHtml(me.area) : 'you') + ' yet. New jobs and buy-for-me requests in your area land here — so you never miss one, even if browser alerts are off.</div>';
+    } else {
+      html += '<div class="dash-list">' + top.map(function (it) {
+        var isNew = String(it.created_at || '') > seen;
+        var tab = it.kind === 'job' ? 'jobs' : 'services';
+        return '<button class="dash-item" data-tab="' + tab + '">' +
+          '<span class="dash-ic">' + (it.kind === 'job' ? jobSvg : buySvg) + '</span>' +
+          '<span class="dash-txt"><span class="t">' + C.escapeHtml(it.title) + '</span>' +
+          '<span class="m">' + C.escapeHtml(it.zone || '') + ' · ' + timeAgo(it.created_at) + '</span></span>' +
+          (isNew ? '<span class="dash-new">New</span>' : '') + '</button>';
+      }).join('') + '</div>';
+    }
+    host.innerHTML = html;
+    host.style.display = '';
+    host.querySelectorAll('.dash-item').forEach(function (btn) {
+      btn.addEventListener('click', function () { showTab(btn.getAttribute('data-tab')); window.scrollTo(0, 0); });
+    });
+    if (top.length) { try { localStorage.setItem(dashSeenKey(), String(top[0].created_at || '')); } catch (e) {} }
+  }
+
   async function init() {
     try {
       var meRes = await C.api('/me');
@@ -2807,6 +2898,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 
     if (me.member_type === 'vendor') loadOrders(); // Orders badge (paid vendors only)
     await load();
+    loadDashHome();  // personal "near you" widget on the landing
     renderNudge();
     renderMembershipBar();
     maybeShowWhatsNew();
