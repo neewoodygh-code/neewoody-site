@@ -124,6 +124,28 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 .ins-list li{ display:flex; justify-content:space-between; gap:1rem; padding:.35rem 0; border-bottom:1px solid var(--cream-dark); font-size:.9rem; }
 .ins-list li b{ color:var(--gold); font-variant-numeric:tabular-nums; }
 .ins-list li span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ── left-rail sections app (replaces the old single long scroll) ── */
+#app{ display:flex; gap:1.5rem; align-items:flex-start; max-width:1340px; }
+.adm-rail{ position:sticky; top:76px; flex:0 0 208px; display:flex; flex-direction:column; gap:.2rem;
+  background:#fff; border:1px solid rgba(31,47,88,.08); border-radius:8px; padding:.55rem; box-shadow:0 6px 18px rgba(31,47,88,.05); }
+.rail-item{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; width:100%;
+  font-family:var(--ui); font-size:.82rem; font-weight:500; letter-spacing:.03em; color:var(--ink);
+  background:transparent; border:none; border-radius:5px; padding:.62rem .75rem; cursor:pointer; text-align:left; }
+.rail-item:hover{ background:var(--cream); }
+.rail-item.active{ background:var(--navy); color:var(--cream); }
+.rail-badge{ font-family:var(--ui); font-size:.6rem; font-weight:600; min-width:1.25rem; text-align:center;
+  padding:.08rem .35rem; border-radius:20px; background:var(--gold); color:#241500; display:none; }
+.rail-badge.show{ display:inline-block; }
+.rail-item.active .rail-badge{ background:var(--gold); color:#241500; }
+.adm-main{ flex:1 1 auto; min-width:0; }
+.adm-main .panel[data-sec]{ display:none; }
+.adm-main .panel.sec-on{ display:block; }
+@media(max-width:820px){
+  #app{ flex-direction:column; }
+  .adm-rail{ position:static; flex:0 0 auto; flex-direction:row; overflow-x:auto; width:100%; }
+  .rail-item{ white-space:nowrap; width:auto; }
+}
 </style>
 </head>
 <body>
@@ -146,15 +168,26 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
 <div class="wrap" id="app" style="display:none">
 
+  <nav class="adm-rail" id="admRail" aria-label="Admin sections">
+    <button class="rail-item" data-go="overview"><span>Overview</span></button>
+    <button class="rail-item" data-go="members"><span>Members</span><b class="rail-badge" data-badge="members"></b></button>
+    <button class="rail-item" data-go="payments"><span>Payments</span></button>
+    <button class="rail-item" data-go="safety"><span>Safety</span><b class="rail-badge" data-badge="safety"></b></button>
+    <button class="rail-item" data-go="moderation"><span>Moderation</span><b class="rail-badge" data-badge="moderation"></b></button>
+    <button class="rail-item" data-go="audit"><span>Audit log</span></button>
+  </nav>
+
+  <main class="adm-main" id="admMain">
+
   <!-- Insights -->
-  <div class="panel">
-    <h2>Insights <span class="sub">what members actually do — last 7/30 days</span></h2>
+  <div class="panel" data-sec="overview">
+    <h2>Insights<span class="sub">what members actually do — last 7/30 days</span></h2>
     <div class="pbody"><div id="insBody" class="state">Loading…</div></div>
   </div>
 
   <!-- Security & audit log -->
-  <div class="panel">
-    <h2>Security &amp; audit log <span class="sub">sensitive actions · admin only</span></h2>
+  <div class="panel" data-sec="audit">
+    <h2>Security &amp; audit log<span class="sub">sensitive actions · admin only</span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:.8rem">
         <div class="field" style="max-width:220px"><label>Filter action</label>
@@ -169,8 +202,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Add member -->
-  <div class="panel">
-    <h2>Add a founding member <span class="sub">Admin registers · PIN told on WhatsApp</span></h2>
+  <div class="panel" data-sec="members">
+    <h2>Add a founding member<span class="sub">Admin registers · PIN told on WhatsApp</span></h2>
     <div class="pbody">
       <form id="addForm">
         <div class="form-grid">
@@ -212,8 +245,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Safety call-outs -->
-  <div class="panel">
-    <h2>Safety call-outs <span class="sub" id="coCount">member check-ins</span></h2>
+  <div class="panel" data-sec="safety">
+    <h2>Safety call-outs<span class="sub" id="coCount">member check-ins</span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:1rem">
         <button class="btn ghost" id="coReload" type="button">Reload</button>
@@ -225,8 +258,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Members -->
-  <div class="panel">
-    <h2>Members <span class="sub" id="memCount"></span></h2>
+  <div class="panel" data-sec="members">
+    <h2>Members<span class="sub" id="memCount"></span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:1rem">
         <div class="field" style="max-width:220px"><label>Filter status</label>
@@ -249,8 +282,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Client job requests (moderation) -->
-  <div class="panel">
-    <h2>Client job requests <span class="sub" id="cjCount">from the public "Hire a Carpenter" page</span></h2>
+  <div class="panel" data-sec="moderation">
+    <h2>Client job requests<span class="sub" id="cjCount">from the public "Hire a Carpenter" page</span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:1rem">
         <button class="btn ghost" id="cjReload" type="button">Reload</button>
@@ -267,8 +300,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Service catalog (offered-services vocabulary + suggestions) -->
-  <div class="panel">
-    <h2>Services catalog <span class="sub" id="svcCatCount">member-suggested services to review</span></h2>
+  <div class="panel" data-sec="moderation">
+    <h2>Services catalog<span class="sub" id="svcCatCount">member-suggested services to review</span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:1rem">
         <button class="btn ghost" id="svcReload" type="button">Reload</button>
@@ -285,8 +318,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Feature suggestions -->
-  <div class="panel">
-    <h2>Feature suggestions <span class="sub" id="sugCount">what members want built</span></h2>
+  <div class="panel" data-sec="moderation">
+    <h2>Feature suggestions<span class="sub" id="sugCount">what members want built</span></h2>
     <div class="pbody">
       <div class="tools" style="margin-bottom:1rem">
         <button class="btn ghost" id="sugReload" type="button">Reload</button>
@@ -303,8 +336,8 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   </div>
 
   <!-- Payments -->
-  <div class="panel">
-    <h2>MoMo payments <span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
+  <div class="panel" data-sec="payments">
+    <h2>MoMo payments<span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
     <div class="pbody">
       <div id="payLifetime" class="lifetime-stat" title="Total of every payment ever recorded — manual MoMo and Paystack, all periods">
         <span class="ls-lbl">Lifetime collected</span>
@@ -347,6 +380,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     </div>
   </div>
 
+  </main>
 </div>
 
 <!-- Edit member (full profile — fixes early-member data without recreating accounts) -->
@@ -1284,11 +1318,43 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   document.getElementById('audFilter').addEventListener('change', loadAudit);
   document.getElementById('audReload').addEventListener('click', loadAudit);
 
+  // ── left-rail section switching (one section on screen at a time) ──
+  var SECTIONS = ['overview', 'members', 'payments', 'safety', 'moderation', 'audit'];
+  function mnum(id, re) { var el = document.getElementById(id); if (!el) return 0; var m = (el.textContent || '').match(re); return m ? +m[1] : 0; }
+  function setRailBadge(sec, n) {
+    var b = document.querySelector('.rail-badge[data-badge="' + sec + '"]'); if (!b) return;
+    if (n > 0) { b.textContent = n; b.classList.add('show'); } else { b.textContent = ''; b.classList.remove('show'); }
+  }
+  function refreshRailBadges() {
+    setRailBadge('members', mnum('memCount', /(\d+)\s+pending/));
+    setRailBadge('safety', mnum('coCount', /(\d+)\s+OVERDUE/));
+    setRailBadge('moderation',
+      mnum('cjCount', /(\d+)\s+waiting/) + mnum('svcCatCount', /(\d+)\s+suggestion/) + mnum('sugCount', /(\d+)\s+new/));
+  }
+  function showSection(sec) {
+    if (SECTIONS.indexOf(sec) < 0) sec = 'overview';
+    document.querySelectorAll('.rail-item').forEach(function (b) { b.classList.toggle('active', b.dataset.go === sec); });
+    document.querySelectorAll('.adm-main .panel').forEach(function (p) { p.classList.toggle('sec-on', p.getAttribute('data-sec') === sec); });
+    if (location.hash.slice(1) !== sec) history.replaceState(null, '', '#' + sec);
+    window.scrollTo(0, 0);
+    refreshRailBadges();
+  }
+  document.querySelectorAll('.rail-item').forEach(function (b) {
+    b.addEventListener('click', function () { showSection(b.dataset.go); });
+  });
+  window.addEventListener('hashchange', function () { showSection(location.hash.slice(1)); });
+  // Live badge counts: loaders update these count spans asynchronously.
+  ['memCount', 'cjCount', 'svcCatCount', 'sugCount', 'coCount'].forEach(function (id) {
+    var el = document.getElementById(id); if (!el) return;
+    new MutationObserver(refreshRailBadges).observe(el, { childList: true, characterData: true, subtree: true });
+  });
+
   // ── boot ──
   (async function () {
     var ok = await checkAdmin();
     if (!ok) return;
     app.style.display = '';
+    showSection(location.hash.slice(1) || 'overview');
     loadInsights();
     loadAudit();
     loadCallouts();
@@ -1298,6 +1364,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     loadClientJobs();
     loadLifetime();
     viewPayments();
+    refreshRailBadges();
   })();
 })();
 </script>
