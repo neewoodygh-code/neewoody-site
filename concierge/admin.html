@@ -124,6 +124,22 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 .ins-list li{ display:flex; justify-content:space-between; gap:1rem; padding:.35rem 0; border-bottom:1px solid var(--cream-dark); font-size:.9rem; }
 .ins-list li b{ color:var(--gold); font-variant-numeric:tabular-nums; }
 .ins-list li span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* interactive analytics: range toggle, bar charts, daily trend */
+.ins-range{ display:flex; gap:.3rem; margin-bottom:1rem; }
+.ins-range button{ font-family:var(--ui); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+  background:#fff; color:var(--navy); border:1px solid rgba(31,47,88,.25); border-radius:20px; padding:.3rem .85rem; cursor:pointer; width:auto; }
+.ins-range button.on{ background:var(--navy); color:var(--cream); border-color:var(--navy); }
+.bars{ display:flex; flex-direction:column; gap:.4rem; }
+.bar-row{ display:grid; grid-template-columns:40% 1fr auto; align-items:center; gap:.6rem; font-size:.85rem; }
+.bar-lbl{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--ink); }
+.bar-track{ background:var(--cream-dark); border-radius:20px; height:10px; overflow:hidden; }
+.bar-fill{ display:block; height:100%; background:var(--gold); border-radius:20px; }
+.bar-n{ color:var(--navy); font-variant-numeric:tabular-nums; font-size:.8rem; }
+.ins-trend{ margin-top:.3rem; }
+.trend-ax{ display:flex; justify-content:space-between; font-family:var(--ui); font-size:.62rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-top:.3rem; }
+.ins-col h3 .leg{ float:right; font-family:var(--ui); font-size:.6rem; letter-spacing:.04em; text-transform:none; color:var(--muted); font-weight:400; }
+.ins-col h3 .leg i{ display:inline-block; width:9px; height:9px; border-radius:2px; margin:0 .2rem 0 .55rem; vertical-align:middle; }
+.leg .lg-ok{ background:var(--gold); } .leg .lg-fail{ background:#a52a2a; }
 
 /* ── left-rail sections app (replaces the old single long scroll) ── */
 #app{ display:flex; gap:1.5rem; align-items:flex-start; max-width:1340px; }
@@ -1251,35 +1267,79 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   function insStat(label, val, sub) {
     return '<div class="ins-stat"><div class="ins-v">' + val + '</div><div class="ins-l">' + C.escapeHtml(label) + '</div>' + (sub ? '<div class="ins-s">' + C.escapeHtml(sub) + '</div>' : '') + '</div>';
   }
-  function insTopList(rows, key) {
+  var insDays = 30;
+  function insBars(rows, key) {
     rows = rows || [];
     if (!rows.length) return '<div class="small" style="color:var(--muted)">No data yet.</div>';
-    return '<ul class="ins-list">' + rows.map(function (r) {
-      return '<li><span>' + C.escapeHtml(String(r[key] == null ? '—' : r[key])) + '</span><b>' + (r.n || 0) + '</b></li>';
-    }).join('') + '</ul>';
+    var max = 1; rows.forEach(function (r) { max = Math.max(max, r.n || 0); });
+    return '<div class="bars">' + rows.map(function (r) {
+      var lbl = String(r[key] == null ? '—' : r[key]);
+      var pct = Math.round(((r.n || 0) / max) * 100);
+      return '<div class="bar-row"><span class="bar-lbl" title="' + C.escapeHtml(lbl) + '">' + C.escapeHtml(lbl) + '</span>' +
+        '<span class="bar-track"><span class="bar-fill" style="width:' + pct + '%"></span></span>' +
+        '<b class="bar-n">' + (r.n || 0) + '</b></div>';
+    }).join('') + '</div>';
+  }
+  function insTrend(series, days) {
+    var byd = {}; (series || []).forEach(function (r) { byd[r.d] = r; });
+    var pts = [], t = new Date();
+    for (var i = days - 1; i >= 0; i--) {
+      var dt = new Date(t.getTime() - i * 86400000), k = dt.toISOString().slice(0, 10), r = byd[k] || {};
+      pts.push({ k: k, ok: +r.ok || 0, fail: +r.fail || 0 });
+    }
+    var max = 1; pts.forEach(function (p) { max = Math.max(max, p.ok + p.fail); });
+    var H = 120, uw = 10, ug = days > 40 ? 2 : 4, W = pts.length * (uw + ug);
+    var bars = pts.map(function (p, idx) {
+      var x = idx * (uw + ug);
+      var okh = Math.round((p.ok / max) * (H - 14));
+      var fh = Math.round((p.fail / max) * (H - 14));
+      var y1 = H - Math.max(okh, p.ok ? 1 : 0), y2 = y1 - fh;
+      var s = '<g><title>' + p.k + ' — ' + p.ok + ' sign-in' + (p.ok === 1 ? '' : 's') + (p.fail ? ', ' + p.fail + ' failed' : '') + '</title>';
+      s += '<rect x="' + x + '" y="' + y1 + '" width="' + uw + '" height="' + Math.max(okh, p.ok ? 1 : 0) + '" fill="#c8922a" rx="1"/>';
+      if (fh > 0) s += '<rect x="' + x + '" y="' + y2 + '" width="' + uw + '" height="' + fh + '" fill="#a52a2a" rx="1"/>';
+      return s + '</g>';
+    }).join('');
+    var first = pts[0].k.slice(5), last = pts[pts.length - 1].k.slice(5);
+    return '<div class="ins-trend"><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" style="width:100%;height:130px" role="img" aria-label="Sign-ins per day">' + bars + '</svg>' +
+      '<div class="trend-ax"><span>' + first + '</span><span>peak ' + max + '/day</span><span>' + last + '</span></div></div>';
   }
   async function loadInsights() {
     var el = document.getElementById('insBody');
+    el.className = 'state'; el.textContent = 'Loading…';
     try {
-      var d = await C.api('/admin/insights');
+      var d = await C.api('/admin/insights?days=' + insDays);
+      var days = d.days || insDays;
       var m = d.members || {}, lg = d.logins || {}, j = d.jobs || {}, b = d.buys || {}, cj = d.clientJobs || {}, pay = d.payments || {}, er = d.errors || {};
-      var d7 = lg.d7 || {}, d30 = lg.d30 || {};
+      var w = lg.win || {};
       var fill = j.total ? Math.round(((j.filled || 0) / j.total) * 100) : 0;
       var statuses = Object.keys(m.byStatus || {}).map(function (k) { return (m.byStatus[k]) + ' ' + k; }).join(' · ');
-      var html = '<div class="ins-grid">' +
+      var types = Object.keys(m.byType || {}).map(function (k) { return { tab: k, n: m.byType[k] }; });
+      var range = [7, 30, 90].map(function (n) {
+        return '<button type="button" data-days="' + n + '"' + (n === days ? ' class="on"' : '') + '>' + n + 'd</button>';
+      }).join('');
+      var html = '<div class="ins-range">' + range + '</div>' +
+        '<div class="ins-grid">' +
         insStat('Members', m.total || 0, statuses) +
         insStat('Profile complete', (m.completePct || 0) + '%', (m.complete || 0) + ' of ' + (m.total || 0)) +
-        insStat('Sign-ins · 7d', (d7.ok || 0), (d7.fail || 0) + ' failed') +
-        insStat('Sign-ins · 30d', (d30.ok || 0), (d30.fail || 0) + ' failed') +
+        insStat('Sign-ins · ' + days + 'd', (w.ok || 0), (w.fail || 0) + ' failed') +
+        insStat('New members · ' + days + 'd', lg.signups || 0, '') +
         insStat('Jobs', j.total || 0, (j.open || 0) + ' open · ' + fill + '% filled') +
         insStat('Buy-for-me', b.total || 0, (b.open || 0) + ' open') +
         insStat('Client requests', cj.total || 0, (cj.pending || 0) + ' to review') +
         insStat('Paid · ' + (pay.period || ''), pay.paid || 0, 'this month') +
-        insStat('System errors · 7d', er.d7 || 0, '') +
-      '</div>' +
-      '<div class="ins-cols"><div class="ins-col"><h3>Most-used tabs · 30d</h3>' + insTopList(d.topTabs, 'tab') + '</div>' +
-      '<div class="ins-col"><h3>Popular searches · 30d</h3>' + insTopList(d.topSearch, 'q') + '</div></div>';
+        insStat('System errors · ' + days + 'd', er.win || 0, '') +
+        '</div>' +
+        '<div class="ins-col" style="margin-top:1.2rem"><h3>Sign-ins per day · ' + days + 'd <span class="leg"><i class="lg-ok"></i>ok<i class="lg-fail"></i>failed</span></h3>' + insTrend(d.series, days) + '</div>' +
+        '<div class="ins-cols">' +
+        '<div class="ins-col"><h3>Most-used tabs · ' + days + 'd</h3>' + insBars(d.topTabs, 'tab') + '</div>' +
+        '<div class="ins-col"><h3>Popular searches · ' + days + 'd</h3>' + insBars(d.topSearch, 'q') + '</div>' +
+        '<div class="ins-col"><h3>Members by type</h3>' + insBars(types, 'tab') + '</div>' +
+        '<div class="ins-col"><h3>Top areas</h3>' + insBars(d.topAreas, 'area') + '</div>' +
+        '</div>';
       el.className = ''; el.innerHTML = html;
+      el.querySelectorAll('.ins-range button').forEach(function (btn) {
+        btn.addEventListener('click', function () { insDays = +btn.dataset.days; loadInsights(); });
+      });
     } catch (err) {
       if (err.status === 401) { location.replace('login.html'); return; }
       el.className = 'state'; el.textContent = err.message || 'Could not load insights.';

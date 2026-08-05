@@ -211,38 +211,53 @@ async function adminAudit(request, env) {
 }
 
 // GET /api/admin/insights — usage dashboard aggregates from existing data.
-async function adminInsights(env) {
+async function adminInsights(env, request) {
   const one = async (sql, ...b) => { try { return (await env.DB.prepare(sql).bind(...b).first()) || {}; } catch (e) { return {}; } };
   const many = async (sql, ...b) => { try { return (await env.DB.prepare(sql).bind(...b).all()).results || []; } catch (e) { return []; } };
 
+  // Selectable window for time-scoped aggregates (sign-ins, signups, tabs,
+  // searches, the daily trend). Cumulative figures (members/jobs/etc) ignore it.
+  let days = 30;
+  try { const q = +(new URL(request.url).searchParams.get('days') || 30); if ([7, 30, 90].includes(q)) days = q; } catch (e) {}
+  const win = `-${days} day`;
+
   const members = await many("SELECT status, member_type, role, is_founder, photo_url, specialties, side_hustles, area FROM members");
-  const byStatus = {}, byType = {};
+  const byStatus = {}, byType = {}, byArea = {};
   let complete = 0;
   members.forEach((m) => {
     byStatus[m.status] = (byStatus[m.status] || 0) + 1;
     byType[m.member_type || 'carpenter'] = (byType[m.member_type || 'carpenter'] || 0) + 1;
+    if (m.area) byArea[m.area] = (byArea[m.area] || 0) + 1;
     const hasTrade = (m.specialties && m.specialties !== '[]') || (m.side_hustles && m.side_hustles !== '[]');
     if (m.photo_url && m.area && hasTrade) complete++;
   });
+  const topAreas = Object.keys(byArea).map((k) => ({ area: k, n: byArea[k] })).sort((a, b) => b.n - a.n).slice(0, 8);
 
+  const loginsWin = await one("SELECT SUM(success) AS ok, SUM(1-success) AS fail, COUNT(*) AS total FROM login_attempts WHERE created_at >= datetime('now', ?)", win);
   const logins7 = await one("SELECT SUM(success) AS ok, SUM(1-success) AS fail, COUNT(*) AS total FROM login_attempts WHERE created_at >= datetime('now','-7 day')");
-  const logins30 = await one("SELECT SUM(success) AS ok, SUM(1-success) AS fail FROM login_attempts WHERE created_at >= datetime('now','-30 day')");
+  const signups = await one("SELECT COUNT(*) AS n FROM members WHERE created_at >= datetime('now', ?)", win);
+  // Daily sign-in trend across the window (days with no attempts are absent; the
+  // client fills gaps against the full date range).
+  const series = await many("SELECT date(created_at) AS d, SUM(success) AS ok, SUM(1-success) AS fail FROM login_attempts WHERE created_at >= datetime('now', ?) GROUP BY d ORDER BY d", win);
   const jobs = await one("SELECT COUNT(*) AS total, SUM(status='open') AS open, SUM(status='filled') AS filled FROM jobs");
   const buys = await one("SELECT COUNT(*) AS total, SUM(status='open') AS open, SUM(status='filled') AS filled FROM buy_requests");
   const clientJobs = await one("SELECT COUNT(*) AS total, SUM(status='pending') AS pending FROM client_jobs");
   const period = new Date().toISOString().slice(0, 7);
   const pay = await one("SELECT COUNT(*) AS paid FROM payments WHERE period = ?", period);
-  const topTabs = await many("SELECT json_extract(meta,'$.tab') AS tab, COUNT(*) AS n FROM usage_events WHERE name='tab' AND created_at >= datetime('now','-30 day') GROUP BY tab ORDER BY n DESC LIMIT 10");
-  const topSearch = await many("SELECT lower(json_extract(meta,'$.q')) AS q, COUNT(*) AS n FROM usage_events WHERE name='search' AND json_extract(meta,'$.q') != '' AND created_at >= datetime('now','-30 day') GROUP BY q ORDER BY n DESC LIMIT 12");
-  const errs = await one("SELECT COUNT(*) AS n FROM audit_log WHERE action='system_error' AND created_at >= datetime('now','-7 day')");
+  const topTabs = await many("SELECT json_extract(meta,'$.tab') AS tab, COUNT(*) AS n FROM usage_events WHERE name='tab' AND created_at >= datetime('now', ?) GROUP BY tab ORDER BY n DESC LIMIT 10", win);
+  const topSearch = await many("SELECT lower(json_extract(meta,'$.q')) AS q, COUNT(*) AS n FROM usage_events WHERE name='search' AND json_extract(meta,'$.q') != '' AND created_at >= datetime('now', ?) GROUP BY q ORDER BY n DESC LIMIT 12", win);
+  const errs = await one("SELECT COUNT(*) AS n FROM audit_log WHERE action='system_error' AND created_at >= datetime('now', ?)", win);
   const recentErrs = await many("SELECT created_at, target, meta FROM audit_log WHERE action='system_error' ORDER BY id DESC LIMIT 8");
 
   return json({
+    days,
     members: { total: members.length, byStatus, byType, complete, completePct: members.length ? Math.round((complete / members.length) * 100) : 0 },
-    logins: { d7: logins7, d30: logins30 },
+    topAreas,
+    logins: { win: loginsWin, d7: logins7, signups: signups.n || 0 },
+    series,
     jobs, buys, clientJobs, payments: { period, paid: pay.paid || 0 },
     topTabs, topSearch,
-    errors: { d7: errs.n || 0, recent: recentErrs.map((r) => ({ ...r, meta: r.meta ? safeParse(r.meta) : null })) },
+    errors: { win: errs.n || 0, recent: recentErrs.map((r) => ({ ...r, meta: r.meta ? safeParse(r.meta) : null })) },
   });
 }
 function safeParse(s) { try { return JSON.parse(s); } catch (e) { return s; } }
@@ -370,7 +385,7 @@ async function route(request, env, ctx) {
   if (path === '/api/admin/purge-pending' && method === 'POST') return withAdmin(request, env, (admin) => adminPurgePending(env, request, admin));
   if (path === '/api/admin/backup' && method === 'POST') return withAdmin(request, env, (admin) => adminBackup(env, admin));
   if (path === '/api/admin/audit' && method === 'GET') return withAdmin(request, env, () => adminAudit(request, env));
-  if (path === '/api/admin/insights' && method === 'GET') return withAdmin(request, env, () => adminInsights(env));
+  if (path === '/api/admin/insights' && method === 'GET') return withAdmin(request, env, () => adminInsights(env, request));
 
   const mMember = path.match(/^\/api\/admin\/members\/([^/]+)$/);
   if (mMember && method === 'PUT') {
