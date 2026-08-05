@@ -743,6 +743,38 @@ footer{
   .foot-nav{align-items:flex-start;margin-top:1.5rem}
   .wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
 }
+
+/* ── Avéon editorial layer — spec-sheet micro-labels + "place & a name" captions ── */
+.hero-corner{
+  position:absolute;z-index:2;
+  font-family:var(--ui);font-size:0.62rem;font-weight:400;
+  letter-spacing:0.24em;text-transform:uppercase;
+  color:rgba(240,232,208,0.72);
+  animation:fadeUp 1.1s cubic-bezier(0.16,1,0.3,1) 0.65s both;
+}
+.hero-corner .tk{color:var(--gold);margin:0 0.45em}
+.hero-corner.tl{top:6.6rem;left:3rem}
+.hero-corner.tr{top:6.6rem;right:3rem;text-align:right}
+.section-eyebrow{
+  font-family:var(--ui);font-size:0.6rem;font-weight:400;
+  letter-spacing:0.32em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:0.9rem;
+}
+.section-eyebrow .tk{color:var(--muted);margin:0 0.5em}
+.work-head{align-items:flex-end}
+.work-meta{
+  transform:none;
+  background:linear-gradient(to top,rgba(11,31,14,0.92),rgba(11,31,14,0.12) 68%,transparent);
+  padding:1.6rem;
+}
+.work-card:hover .work-meta{transform:none}
+.work-name{font-size:1.18rem;line-height:1.25}
+.work-loc{
+  font-family:var(--ui);font-size:0.57rem;font-weight:400;
+  letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--gold);margin-top:0.5rem;
+}
+@media(max-width:768px){.hero-corner{display:none}}
 </style>
 <style>
 .logo-img{height:36px;width:auto;display:block;transition:filter 0.4s}
@@ -820,6 +852,8 @@ footer{
       alt="Sage Centre full teak fitout, Wli, Volta Region" />
   </div>
   <div class="hero-scrim"></div>
+  <div class="hero-corner tl">Bespoke joinery <span class="tk">·</span> Custom furniture</div>
+  <div class="hero-corner tr">05.561° N <span class="tk">/</span> 00.214° W</div>
   <div class="hero-body">
     <p class="hero-tag">Accra, Ghana · Made to Measure</p>
     <h1 class="hero-h1">Built for the<br><em>space you<br>live in.</em></h1>
@@ -868,7 +902,10 @@ footer{
 <!-- SERVICES -->
 <section class="services">
   <div class="services-top">
-    <h2 class="section-h2">Made to measure,<br>built to last.</h2>
+    <div>
+      <p class="section-eyebrow">What we make <span class="tk">/</span> 01</p>
+      <h2 class="section-h2">Made to measure,<br>built to last.</h2>
+    </div>
     <p class="section-intro">We don't sell off-the-shelf furniture. Every piece is designed for your exact space, built in our workshop in Accra, and installed by us. No gaps, no compromises, no middlemen.</p>
   </div>
   <div class="svc-grid">
@@ -922,7 +959,10 @@ footer{
 <!-- FEATURED PROJECTS -->
 <section class="work" id="work">
   <div class="work-head">
-    <h2>Featured Projects</h2>
+    <div>
+      <p class="section-eyebrow">Selected work <span class="tk">/</span> 02</p>
+      <h2>Pieces with a place<br>and a name.</h2>
+    </div>
     <a href="portfolio.html" class="see-all">Full portfolio</a>
   </div>
   <div class="grid-work">
@@ -930,24 +970,24 @@ footer{
       <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg"
         alt="Full kitchen fit-out, Spintex, Accra" />
       <div class="work-meta">
-        <p class="work-type">Kitchens</p>
-        <p class="work-name">Full Kitchen Fit-out — Spintex</p>
+        <p class="work-name">Full kitchen fit-out</p>
+        <p class="work-loc">Spintex, Accra <span class="tk">·</span> Kitchens</p>
       </div>
     </a>
     <a href="wardrobes.html" class="work-card">
       <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
         alt="Floor-to-ceiling wardrobes, Oyarifa" />
       <div class="work-meta">
-        <p class="work-type">Wardrobes</p>
-        <p class="work-name">Floor-to-Ceiling Wardrobes — Oyarifa</p>
+        <p class="work-name">Floor-to-ceiling wardrobes</p>
+        <p class="work-loc">Oyarifa, Accra <span class="tk">·</span> Wardrobes</p>
       </div>
     </a>
     <a href="dining-living.html" class="work-card">
       <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
         alt="Hyedua dining commission, East Legon" />
       <div class="work-meta">
-        <p class="work-type">Dining &amp; Living</p>
-        <p class="work-name">Hyedua Commission — East Legon</p>
+        <p class="work-name">Hyedua dining commission</p>
+        <p class="work-loc">East Legon, Accra <span class="tk">·</span> Dining</p>
       </div>
     </a>
   </div>
