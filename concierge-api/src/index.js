@@ -959,6 +959,27 @@ async function adminRecordPayment(request, env, admin) {
 async function adminListPayments(request, env) {
   const url = new URL(request.url);
   const period = url.searchParams.get('period') || '';
+
+  // Lifetime totals across EVERY period — powers the "lifetime collected"
+  // readout. Cheap aggregate, always returned (with or without a period).
+  // Split founder (one-time lifetime) vs monthly so the owner can see the mix.
+  const life = await env.DB.prepare(
+    `SELECT COUNT(*) AS n,
+            COALESCE(SUM(p.amount_ghs), 0) AS total,
+            COALESCE(SUM(CASE WHEN m.is_founder = 1 THEN p.amount_ghs ELSE 0 END), 0) AS founders_total,
+            COUNT(DISTINCT p.member_phone) AS members
+     FROM payments p JOIN members m ON m.phone = p.member_phone`
+  ).first();
+  const lifetime = {
+    count: life?.n || 0,
+    total: life?.total || 0,
+    founders_total: life?.founders_total || 0,
+    monthly_total: (life?.total || 0) - (life?.founders_total || 0),
+    members: life?.members || 0
+  };
+
+  // No period → lifetime summary only (used to populate the readout on load).
+  if (!period) return json({ lifetime, payments: [] });
   if (!/^\d{4}-\d{2}$/.test(period)) return json({ error: 'period_must_be_YYYY_MM' }, 400);
 
   const { results } = await env.DB.prepare(
@@ -967,7 +988,7 @@ async function adminListPayments(request, env) {
      FROM payments p JOIN members m ON m.phone = p.member_phone
      WHERE p.period = ? ORDER BY p.recorded_at DESC`
   ).bind(period).all();
-  return json({ period, payments: results || [] });
+  return json({ period, payments: results || [], lifetime });
 }
 
 // Reverse a wrongly-recorded payment (member + period). Idempotent: deleting

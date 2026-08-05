@@ -35,6 +35,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1rem 1.5rem;
 .panel > h2{ font-family:var(--display); font-weight:500; font-size:1.25rem; padding:1rem 1.25rem;
   border-bottom:1px solid rgba(31,47,88,.08); display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
 .panel > h2 .sub{ font-family:var(--ui); font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); }
+.lifetime-stat{ display:flex; flex-wrap:wrap; align-items:baseline; gap:.35rem .9rem;
+  background:var(--navy); color:var(--cream); border-radius:8px; padding:1rem 1.25rem; margin-bottom:1.25rem; }
+.lifetime-stat .ls-lbl{ font-family:var(--ui); font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+.lifetime-stat .ls-val{ font-family:var(--display); font-size:1.7rem; line-height:1; font-weight:600; }
+.lifetime-stat .ls-sub{ font-family:var(--ui); font-size:.72rem; color:rgba(240,232,208,.7); letter-spacing:.02em; width:100%; }
 .pbody{ padding:1.25rem; }
 
 label{ display:block; font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.12em;
@@ -301,6 +306,11 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   <div class="panel">
     <h2>MoMo payments <span class="sub" id="paySummary">GHS 100 / month · recorded manually</span></h2>
     <div class="pbody">
+      <div id="payLifetime" class="lifetime-stat" title="Total of every payment ever recorded — manual MoMo and Paystack, all periods">
+        <span class="ls-lbl">Lifetime collected</span>
+        <span class="ls-val" id="lsTotal">GHS —</span>
+        <span class="ls-sub" id="lsBreak"></span>
+      </div>
       <form id="payForm" class="tools" style="margin-bottom:1.25rem">
         <div class="field" style="flex:2; min-width:200px"><label>Member</label>
           <select id="p_member" required><option value="">Select member…</option></select></div>
@@ -853,6 +863,24 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 
   document.getElementById('p_amount').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, ''); });
 
+  // Lifetime collected funds — every payment ever recorded (manual MoMo +
+  // Paystack, all periods). Populated on boot and refreshed after any change.
+  async function loadLifetime() {
+    var el = document.getElementById('lsTotal'), sub = document.getElementById('lsBreak');
+    try {
+      var r = await C.api('/admin/payments'); // no period → lifetime summary only
+      var L = r.lifetime || {};
+      el.textContent = 'GHS ' + (L.total || 0).toLocaleString();
+      var bits = [];
+      bits.push((L.count || 0) + ' payment' + (L.count === 1 ? '' : 's') + ' from ' + (L.members || 0) + ' member' + (L.members === 1 ? '' : 's'));
+      if (L.founders_total) bits.push('Founders GHS ' + L.founders_total.toLocaleString());
+      if (L.monthly_total) bits.push('Monthly GHS ' + L.monthly_total.toLocaleString());
+      sub.textContent = bits.join(' · ');
+    } catch (err) {
+      el.textContent = 'GHS —'; sub.textContent = 'Could not load lifetime total.';
+    }
+  }
+
   document.getElementById('payForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     var msg = document.getElementById('payMsg'), btn = document.getElementById('payBtn');
@@ -869,6 +897,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
       }});
       msg.className = 'msg ok'; msg.textContent = 'Payment recorded.';
       document.getElementById('p_ref').value = '';
+      loadLifetime();
       if (document.getElementById('viewPeriod').value.trim() === period) {
         viewPayments();
         if (document.getElementById('unpaidWrap').style.display !== 'none') viewUnpaid();
@@ -945,6 +974,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     btn.disabled = true;
     try {
       await C.api('/admin/payments', { method: 'DELETE', body: { member_phone: p.member_phone, period: p.period } });
+      loadLifetime();
       viewPayments();
       if (document.getElementById('unpaidWrap').style.display !== 'none') viewUnpaid();
     } catch (err) {
@@ -1266,6 +1296,7 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
     loadSuggestions();
     await loadMembers();
     loadClientJobs();
+    loadLifetime();
     viewPayments();
   })();
 })();
