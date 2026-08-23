@@ -1514,5 +1514,29 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
+
+<!-- ════ HOW-TO-USE GUIDE (fills the left dead-space on wide screens; drawer on phones) ════ -->
+<script src="js/tool-guide.js?v=20260823c"></script>
+<script>
+ToolGuide.init({
+  eyebrow: 'Job Pricing',
+  title: 'How to use this tool',
+  top: 112,
+  steps: [
+    { t: 'Set your overhead first', d: 'First time in you land on <strong>Overhead Settings</strong>. Enter <strong>your</strong> rent, bills, crew day-rates, billable days and margins — these are private to you and power every quote. Add your business name, phone and logo for the quote letterhead.' },
+    { t: 'Start a new quote', d: 'From the dashboard tap <strong>+ New</strong>. Each job gets its own reference (e.g. ABC-001).' },
+    { t: 'Add materials & labour', d: 'List your materials and the days each crew role works. Your saved overhead and rates load in automatically.' },
+    { t: 'Pick a tier & add-ons', d: 'Choose the build tier and any add-ons (rush, custom design…). The multiplier is applied for you.' },
+    { t: 'Read the Summary', d: 'See your cost, margin %, tier multiplier and net-profit projection. This view is <strong>for you only</strong> — never show a client.' },
+    { t: 'Share the client copy', d: 'Tap <strong>Open client copy</strong> for a clean, printable breakdown — Materials · Labour · Expenses · Service charge — on your own letterhead. Your private economics stay hidden.' },
+    { t: 'Save', d: 'Quotes save to your account, so you can reopen and reuse them anytime.' }
+  ],
+  tips: [
+    'Your figures are **private to your account** — no Neewoody numbers, and no other member sees them.',
+    'Change tier multipliers and add-on % in **Overhead Settings** — set margins that fit your business.',
+    'Use **Print / Save PDF** on the client copy to send a professional quote.'
+  ]
+});
+</script>
 </body>
 </html>

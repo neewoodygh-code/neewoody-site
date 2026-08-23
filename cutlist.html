@@ -118,6 +118,15 @@ gtag('config', 'G-ZP77WR6BNH');
   padding: 2rem 1.25rem 4rem;
 }
 
+/* ── TOOL SHELL: guide sidebar (left) + calculator, filling the dead space ── */
+.tool-shell { max-width: 1060px; margin: 0 auto; padding: 0 1.25rem; }
+.tool-shell .calc-wrap { max-width: none; margin: 0; padding: 1.5rem 0 4rem; }
+@media (min-width: 1000px) {
+  .tool-shell { display: flex; align-items: flex-start; gap: 24px; padding-top: 2rem; }
+  .tool-shell .calc-wrap { flex: 1 1 auto; min-width: 0; max-width: 780px; padding-top: 0; }
+  #cutGuide { flex: 0 0 240px; }
+}
+
 /* ── TABS ── */
 .calc-tabs {
   display: flex;
@@ -586,6 +595,8 @@ select {
 </div>
 
 <!-- ════ CALCULATOR ════ -->
+<div class="tool-shell">
+<aside id="cutGuide"><!-- How-to-use guide injected here by js/tool-guide.js --></aside>
 <div class="calc-wrap">
 
   <!-- ════ MEMBER BAR (live Concierge session) ════ -->
@@ -798,6 +809,7 @@ select {
   </div>
 
 </div><!-- end calc-wrap -->
+</div><!-- end tool-shell -->
 
 <!-- ════ MY CUTLISTS OVERLAY (members) ════ -->
 <div id="mycl-overlay" style="display:none;position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:1100;align-items:center;justify-content:center;padding:1rem" onclick="if(event.target===this)closeCutlists()">
@@ -894,7 +906,32 @@ select {
 
 <script src="js/main.js"></script>
 <script src="js/concierge.js?v=20260721a"></script>
+<script src="js/tool-guide.js?v=20260823c"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
+
+<!-- ════ HOW-TO-USE GUIDE (fills the left dead-space on wide screens; drawer on phones) ════ -->
+<script>
+ToolGuide.init({
+  mount: '#cutGuide',
+  eyebrow: 'Wardrobe Cutlist',
+  title: 'How to use this tool',
+  top: 88,
+  steps: [
+    { t: 'Choose your units', d: 'Pick <strong>mm or cm</strong> at the top. Everything you type uses that unit — the cut list itself always prints in mm for the workshop.' },
+    { t: 'Enter the carcass', d: 'On <strong>Dimensions</strong>, set the wardrobe height, width, depth and board thickness. These drive every panel size.' },
+    { t: 'Doors & back', d: 'Set the number of doors, the door style, and whether there is a back panel.' },
+    { t: 'Build the sections', d: 'On <strong>Sections</strong>, lay out each internal zone — shelves, hanging rails and drawers. Add or reorder zones to match the design.' },
+    { t: 'Frame & panels', d: 'Set any face-frame or panelling options for the look you are building.' },
+    { t: 'Read the results', d: 'You get a <strong>Parts List</strong>, an optimised <strong>Cut List</strong>, Zone & Material summaries, and an <strong>Edge Band Sheet</strong> — each on its own page when printed.' },
+    { t: 'Save it (members)', d: 'Log in as a Concierge member to <strong>save</strong> a cut list and reload it later from 📂 My Cutlists.' }
+  ],
+  tips: [
+    'Edge Band Sheet: **1 tick** on an edge = band that edge; **3 ticks** = double the board (glue 2 up) then band. Tap an edge to cycle none → band → double.',
+    'Tap the **middle of a part** to flip its grain direction (which side is the length).',
+    'Use **⎙ Print / Save PDF** to take the full list to the workshop.'
+  ]
+});
+</script>
 
 <script>
 // ══════════════════════════════════════════════════════
