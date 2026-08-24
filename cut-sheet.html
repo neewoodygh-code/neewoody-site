@@ -118,7 +118,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .qg2-frame{display:grid;grid-template-columns:1fr 56px;grid-template-rows:80px 30px;gap:5px}
 .qg2-box{grid-column:1;grid-row:1;position:relative;background:#f5f0e8;border:1.6px solid #b9b3a3;border-radius:4px;
   background-image:linear-gradient(90deg,transparent 33%,#d4ccb8 33%,#d4ccb8 33.7%,transparent 33.7%,transparent 65%,#d4ccb8 65%,#d4ccb8 65.7%,transparent 65.7%)}
-.qg2-qty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;text-align:center;background:transparent;border:none;font-family:var(--mono);font-size:.98rem;font-weight:700;color:#8a6a1e;padding:2px}
+.eb-ov{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:manipulation}
+.eb-ov .eb-edge{cursor:pointer;fill:transparent}
+.eb-ov .eb-edge:hover{fill:rgba(200,146,42,.18)}
+/* Named-list per-row edge-band box (set banding inline, no round-trip to the preview) */
+.eb-minibox{position:relative;display:inline-block;width:42px;height:42px;background:#f5f0e8;border:1.6px solid #b9b3a3;border-radius:3px;vertical-align:middle}
+.qg2-qty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:46px;text-align:center;background:transparent;border:none;font-family:var(--mono);font-size:.98rem;font-weight:700;color:#8a6a1e;padding:2px}
 .qg2-qty::placeholder{color:#c2a86a;font-weight:400}
 .qg2-qty:focus{outline:none;background:rgba(255,255,255,.7);border-radius:5px}
 .qg2-len{grid-column:2;grid-row:1;align-self:center;height:34px}
@@ -494,6 +499,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
             <th class="num col-w">Width</th>
             <th class="num col-q">Qty</th>
             <th class="col-w">Board</th>
+            <th class="num" style="width:48px">Bands</th>
             <th class="col-x"></th>
           </tr>
         </thead>
@@ -591,7 +597,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     </div>
   </div>
   <div class="qg-scroll">
-    <div class="qg-lead">Type sizes straight into the boxes — <b>length</b> on the right, <b>width</b> at the bottom, <b>quantity</b> in the middle. Board colour, thickness and everything else are set on the <b>Named list</b> tab.</div>
+    <div class="qg-lead">Type sizes straight into the boxes — <b>length</b> on the right, <b>width</b> at the bottom, <b>quantity</b> in the middle. <b>Tap a box edge to set edge banding</b> (tap again = double, again = off) — no need to leave this page. Board colour and the rest are set on the <b>Named list</b> tab.</div>
     <div id="qgBody"></div>
     <button class="qg-addsheet" onclick="addSheet()">+ Add another sheet</button>
   </div>
@@ -1155,6 +1161,7 @@ function qgBox(p,i){
     '<button class="qg2-del" title="Clear box" onclick="clearBox(\''+p.id+'\')">&times;</button>'+
     '<div class="qg2-frame">'+
       '<div class="qg2-box">'+
+        ebOverlay(p.id)+
         '<input class="qg2-qty" type="number" inputmode="numeric" min="1" data-id="'+p.id+'" data-f="qty" value="'+qv+'" placeholder="×" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)">'+
       '</div>'+
       '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
@@ -1205,6 +1212,7 @@ function renderRows(){
       '<td class="num"><input class="dim" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></td>'+
       '<td class="num"><input class="qty" type="number" inputmode="numeric" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></td>'+
       '<td><input class="code" data-id="'+p.id+'" data-f="code" value="'+esc(p.code)+'" placeholder="—" oninput="onCell(\''+p.id+'\',\'code\',this.value)"></td>'+
+      '<td class="num"><span class="eb-minibox" title="Tap an edge to band it">'+ebOverlay(p.id)+'</span></td>'+
       '<td class="num"><button class="rowdel" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button></td>';
     tb.appendChild(tr);
   });
@@ -1224,6 +1232,32 @@ function ebTicks(side,n){
   return out;
 }
 function ebHit(id,side,x,y,w,h){ return '<rect class="eb-edge" data-id="'+id+'" data-side="'+side+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"/>'; }
+
+// Edge-band OVERLAY for the Quick-grid boxes — set banding right where you type.
+// Ticks drawn just inside each edge (1 tick = band · 3 ticks = double) + tap zones,
+// in a 0–100 viewBox stretched to fill the box (preserveAspectRatio:none).
+function ebLn(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#141414" stroke-width="3" stroke-linecap="round"/>'; }
+function ebOvTicks(side,n){
+  var offs = n===3 ? [-11,0,11] : [0], out='';
+  offs.forEach(function(o){
+    if(side==='t')      out+=ebLn(50+o,3,50+o,20);
+    else if(side==='b') out+=ebLn(50+o,80,50+o,97);
+    else if(side==='l') out+=ebLn(3,50+o,20,50+o);
+    else if(side==='r') out+=ebLn(80,50+o,97,50+o);
+  });
+  return out;
+}
+function ebOvHit(id,side){
+  var r = side==='t'?[0,0,100,24] : side==='b'?[0,76,100,24] : side==='l'?[0,0,24,100] : [76,0,24,100];
+  return '<rect class="eb-edge" data-id="'+id+'" data-side="'+side+'" x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" fill="transparent"/>';
+}
+function ebOverlayInner(id){
+  var eb=ebState[id]||{t:0,r:0,b:0,l:0};
+  var ticks=''; ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebOvTicks(s, eb[s]===2?3:1); });
+  return ticks + ebOvHit(id,'t')+ebOvHit(id,'b')+ebOvHit(id,'l')+ebOvHit(id,'r');
+}
+function ebOverlay(id){ return '<svg class="eb-ov" data-pid="'+id+'" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">'+ebOverlayInner(id)+'</svg>'; }
+function refreshOverlays(id){ document.querySelectorAll('.eb-ov[data-pid="'+id+'"]').forEach(function(sv){ sv.innerHTML=ebOverlayInner(id); }); }
 
 function partBox(p, fallback){
   var eb=ebState[p.id]||{t:0,r:0,b:0,l:0,gflip:false};
@@ -1414,6 +1448,7 @@ document.addEventListener('click', function(e){
     if(id&&side){
       if(!ebState[id]) ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
       ebState[id][side]=((ebState[id][side]||0)+1)%3;
+      refreshOverlays(id);   // update the quick-grid box in place (no re-render, keeps focus)
       renderAll(); save();
     }
     return;
