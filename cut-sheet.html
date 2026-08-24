@@ -112,6 +112,18 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .proj-row .pr-btn.del:hover{background:rgba(176,64,48,.12);color:var(--rd)}
 .proj-empty{padding:.8rem;text-align:center;font-size:.76rem;color:var(--clr-muted)}
 
+/* sheet header / branding card */
+.brand-who{font-size:.76rem;color:var(--clr-muted);margin-bottom:.7rem;line-height:1.5}
+.brand-who a{color:var(--navy);font-weight:600}
+.brand-who .badge{display:inline-block;background:var(--clr-accent-lt);color:var(--clr-accent-dk);font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.05em;padding:.15rem .45rem;border-radius:4px;margin-right:.4rem}
+.brand-prev{display:flex;align-items:center;gap:.7rem;margin-top:.6rem;padding:.6rem .7rem;border:1.5px solid var(--clr-border);border-radius:9px;background:#fff}
+.brand-prev img{height:38px;width:auto;max-width:120px;object-fit:contain}
+.brand-prev .bp-txt{min-width:0}
+.brand-prev .bp-name{font-family:'Playfair Display',serif;font-size:.95rem;font-weight:700;color:var(--navy);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-prev .bp-sub{font-family:var(--mono);font-size:.66rem;color:var(--clr-muted)}
+.brand-prev .bp-none{font-size:.72rem;color:var(--clr-muted);font-style:italic}
+.brand-upload{margin-top:.55rem}
+
 /* board summary */
 .bsum{display:grid;grid-template-columns:1fr;gap:.6rem}
 .bcode-card{border:1.5px solid var(--clr-border);border-radius:10px;overflow:hidden}
@@ -178,7 +190,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   .print-cta,.sheet-hint{display:none!important}
   /* Running header — repeats on every printed sheet (logo + number). */
   .print-hdr{display:flex!important;align-items:center;gap:.7rem;position:fixed;top:0;left:0;right:0;padding:2mm 0 3mm;border-bottom:1.4px solid #1f2f58;background:#fff}
-  .print-hdr img{height:12mm;width:auto}
+  .print-hdr img{height:12mm;width:auto;max-width:55mm;object-fit:contain}
   .print-hdr .ph-name{font-family:'Playfair Display',serif;font-size:12pt;font-weight:700;color:#1f2f58;line-height:1.1}
   .print-hdr .ph-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
   .print-hdr .ph-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.35}
@@ -245,10 +257,10 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
 <!-- ════ PRINT-ONLY RUNNING HEADER (repeats on every sheet) ════ -->
 <div class="print-hdr" aria-hidden="true">
-  <img src="images/logo.png" alt="" onerror="this.style.display='none'">
+  <img id="ph-logo" src="images/logo.png" alt="" onerror="this.style.display='none'">
   <div>
-    <div class="ph-name">Neewoody Custom Woodwork</div>
-    <div class="ph-sub">Accra, Ghana · +233 24 463 3464</div>
+    <div class="ph-name" id="ph-name">Neewoody Custom Woodwork</div>
+    <div class="ph-sub" id="ph-sub">Accra, Ghana · +233 24 463 3464</div>
   </div>
   <div class="ph-right">
     <div id="ph-proj" style="display:none">Project: <b id="ph-proj-name"></b></div>
@@ -349,6 +361,22 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       </div>
     </div>
 
+    <!-- SHEET HEADER / BRANDING -->
+    <div class="card">
+      <div class="card-t"><span class="dot"></span>Sheet header <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem">— logo &amp; number on every page</span></div>
+      <div id="brandWho" class="brand-who"></div>
+      <div class="fld" style="margin-bottom:.6rem">
+        <label>Logo</label>
+        <select id="b-src" onchange="onBrandSrc()"></select>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label>Business name</label><input id="b-name" placeholder="Your business name" oninput="onBrand()"></div>
+        <div class="fld"><label>Phone</label><input id="b-phone" placeholder="Your number" oninput="onBrand()"></div>
+      </div>
+      <div id="brandPrev" class="brand-prev"></div>
+      <input type="file" id="b-file" accept="image/png,image/jpeg,image/webp" hidden onchange="onBrandFile(event)">
+    </div>
+
     <!-- PARTS -->
     <div class="card">
       <div class="card-t"><span class="dot"></span>Parts</div>
@@ -444,6 +472,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </main>
 
 <script src="js/main.js"></script>
+<script src="js/concierge.js?v=20260721a"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  CUT SHEET GENERATOR — standalone, vanilla JS
@@ -452,11 +481,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 // ══════════════════════════════════════════════════════
 var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
 var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
-var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false };
+var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
+          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
 var curProjId = null; // id of the loaded named project (null = unsaved working sheet)
+var session = { loggedIn:false, logoUrl:'', photoUrl:'', name:'', phone:'', area:'' };
 
 function uid(){ return 'p'+(seq++); }
 function num(v,def){ v=parseFloat(v); return isNaN(v)?(def||0):v; }
@@ -502,6 +533,107 @@ function onSetting(){
   renderAll(); save();
 }
 function onProjName(){ U.proj = document.getElementById('s-proj').value; renderAll(); save(); }
+
+// ── SHEET HEADER / BRANDING (member-aware: use your own logo & number) ──
+function brandDefaults(){
+  if(session.loggedIn){
+    return {
+      brandSource: session.logoUrl?'member-logo':(session.photoUrl?'member-photo':'neewoody'),
+      brandName: session.name || 'My workshop',
+      brandPhone: session.phone || ''
+    };
+  }
+  return { brandSource:'neewoody', brandName:'Neewoody Custom Woodwork', brandPhone:'+233 24 463 3464' };
+}
+function applyBrandDefaults(){ var d=brandDefaults(); U.brandSource=d.brandSource; U.brandName=d.brandName; U.brandPhone=d.brandPhone; U.customLogo=''; U.brandTouched=false; }
+function resolveLogoSrc(){
+  switch(U.brandSource){
+    case 'member-logo':  return session.logoUrl||'';
+    case 'member-photo': return session.photoUrl||'';
+    case 'custom':       return U.customLogo||'';
+    case 'none':         return '';
+    default:             return 'images/logo.png'; // neewoody
+  }
+}
+function brandOptions(){
+  var o=[];
+  if(session.loggedIn){
+    if(session.logoUrl)  o.push(['member-logo','My business logo']);
+    if(session.photoUrl) o.push(['member-photo','My profile photo']);
+    o.push(['custom', U.customLogo?'My uploaded logo':'Upload a logo…']);
+    o.push(['neewoody','Neewoody logo']);
+  } else {
+    o.push(['neewoody','Neewoody logo']);
+    o.push(['custom', U.customLogo?'My uploaded logo':'Upload a logo…']);
+  }
+  o.push(['none','No logo']);
+  return o;
+}
+function renderBrand(){
+  // status line
+  var who=document.getElementById('brandWho');
+  if(session.loggedIn){
+    who.innerHTML='<span class="badge">Member</span> Signed in as <b>'+esc(session.name||'you')+'</b> — your logo &amp; number print on every sheet. Switch below if you like.';
+  } else {
+    who.innerHTML='Prints with Neewoody branding. <a href="concierge/login.html?next=/cut-sheet.html">Log in</a> to use your own logo &amp; number, or upload one below.';
+  }
+  // select
+  var sel=document.getElementById('b-src'); var opts=brandOptions();
+  if(!U.brandSource || !opts.some(function(x){return x[0]===U.brandSource;})) U.brandSource=opts[0][0];
+  sel.innerHTML=opts.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===U.brandSource?' selected':'')+'>'+x[1]+'</option>';}).join('');
+  // name / phone fields
+  document.getElementById('b-name').value=U.brandName||'';
+  document.getElementById('b-phone').value=U.brandPhone||'';
+  renderBrandPrev();
+}
+function renderBrandPrev(){
+  var prev=document.getElementById('brandPrev'); var src=resolveLogoSrc();
+  var logo = src ? '<img src="'+src+'" alt="" onerror="this.style.display=\'none\'">' : '<span class="bp-none">No logo</span>';
+  prev.innerHTML=logo+'<div class="bp-txt"><div class="bp-name">'+esc(U.brandName||'—')+'</div><div class="bp-sub">'+esc(U.brandPhone||'')+'</div></div>';
+}
+function onBrand(){
+  U.brandName=document.getElementById('b-name').value;
+  U.brandPhone=document.getElementById('b-phone').value;
+  U.brandTouched=true; renderBrandPrev(); renderAll(); save();
+}
+function onBrandSrc(){
+  U.brandSource=document.getElementById('b-src').value; U.brandTouched=true;
+  if(U.brandSource==='custom' && !U.customLogo){ document.getElementById('b-file').click(); }
+  renderBrand(); renderAll(); save();
+}
+function onBrandFile(ev){
+  var f=ev.target.files&&ev.target.files[0]; ev.target.value='';
+  if(!f) return;
+  fileToLogo(f, function(dataUrl){
+    if(!dataUrl){ alert('Could not read that image. Try a PNG or JPG.'); return; }
+    U.customLogo=dataUrl; U.brandSource='custom'; U.brandTouched=true;
+    renderBrand(); renderAll(); save();
+  });
+}
+function fileToLogo(file, cb){
+  var url=URL.createObjectURL(file); var img=new Image();
+  img.onload=function(){
+    var max=320, w=img.width, h=img.height, sc=Math.min(1,max/Math.max(w,h||1));
+    var c=document.createElement('canvas'); c.width=Math.max(1,Math.round(w*sc)); c.height=Math.max(1,Math.round(h*sc));
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url);
+    try{ cb(c.toDataURL('image/png')); }catch(e){ cb(''); }
+  };
+  img.onerror=function(){ URL.revokeObjectURL(url); cb(''); };
+  img.src=url;
+}
+async function fetchSession(){
+  if(!(window.Concierge && Concierge.tokenAlive())) return;
+  try{
+    var r=await Concierge.api('/me');
+    var m=(r&&r.member)||{};
+    session={ loggedIn:true, logoUrl:m.logo_url||'', photoUrl:m.photo_url||'',
+              name:(m.business_name||m.name||''), phone:(m.business_phone||m.phone||''), area:m.area||'' };
+    if(!U.brandTouched) applyBrandDefaults();  // adopt member branding until the user customises
+    renderBrand(); renderAll(); save();
+  }catch(e){ /* stay on default branding */ }
+}
+
 function fillSettings(){
   document.getElementById('s-proj').value=U.proj||'';
   document.getElementById('s-projshow').checked=!!U.projShow;
@@ -514,6 +646,7 @@ function fillSettings(){
   document.getElementById('s-grain').value=U.grain;
   document.getElementById('upmm').classList.toggle('active',U.unit==='mm');
   document.getElementById('upcm').classList.toggle('active',U.unit==='cm');
+  renderBrand();
 }
 
 // ── NAMED PROJECTS (local, multiple saved cut lists) ──
@@ -831,6 +964,12 @@ function renderAll(){
   var showProj = U.projShow && (U.proj||'').trim();
   document.getElementById('ph-proj').style.display = showProj ? 'block' : 'none';
   document.getElementById('ph-proj-name').textContent = showProj ? U.proj.trim() : '';
+  // Print running-header branding (logo + name + number) from the selected source.
+  var logoSrc=resolveLogoSrc(), phLogo=document.getElementById('ph-logo');
+  if(logoSrc){ if(phLogo.getAttribute('src')!==logoSrc) phLogo.src=logoSrc; phLogo.style.display=''; }
+  else phLogo.style.display='none';
+  document.getElementById('ph-name').textContent=U.brandName||'';
+  document.getElementById('ph-sub').textContent=U.brandPhone||'';
 }
 
 // ── EDGE / GRAIN TAP DELEGATION ──
@@ -876,7 +1015,9 @@ function loadExample(){
 function clearAll(){
   if(!confirm('Clear the current sheet? Your saved projects are kept — only what\'s on screen now is cleared.')) return;
   parts=[]; ebState={}; seq=1; curProjId=null;
-  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false };
+  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
+      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false };
+  applyBrandDefaults();  // back to member (if signed in) / Neewoody branding
   fillSettings(); addRow('',0,0,1,''); renderRows(); renderAll(); save(); renderProjects();
 }
 
@@ -886,6 +1027,7 @@ function clearAll(){
   var d=new Date();
   document.getElementById('ph-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
   var had=load();
+  if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
   fillSettings();
   if(!had || !parts.length){
     if(!parts.length){ addRow('',0,0,1,''); }
@@ -893,6 +1035,7 @@ function clearAll(){
   renderRows();
   renderAll();
   renderProjects();
+  fetchSession();   // async: adopt the member's own logo & number if signed in
 })();
 </script>
 </body>
