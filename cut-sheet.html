@@ -253,10 +253,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .help-body b{color:var(--clr-dark)}
 
 /* ── PRINT ── */
-.print-hdr{display:none}
-/* Top margin (26mm) must comfortably exceed the fixed running header (capped at
-   17mm below) so box rows on continuation pages never slip behind it. */
-@page{size:A4;margin:26mm 10mm 14mm}
+/* The running header is a repeating <thead> inside the cut-sheet table. On screen
+   it's hidden (the preview shows the topbar); the table is transparent to layout. */
+.cut-table{width:100%;border-collapse:collapse}
+.cut-table .cut-td{padding:0}
+.cut-thead{display:none}
+@page{size:A4;margin:12mm 10mm 12mm}
 @media print{
   body>*:not(main){display:none!important}
   .cs-hero,#inputCol,.site-footer,.mode-top,#member-bar,#guest-bar{display:none!important}
@@ -266,22 +268,21 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   #sheetOut{border:none!important;border-radius:0!important}
   .sheet-topbar,.sheet-legend{border-color:#999}
   .print-cta,.sheet-hint{display:none!important}
-  /* Running header — repeats on every printed sheet (logo + number). Height is
-     CAPPED (fixed height + overflow) so a long project name can't grow it past
-     the reserved @page top margin and overlap the boxes. */
-  .print-hdr{display:flex!important;align-items:center;gap:.7rem;position:fixed;top:0;left:0;right:0;height:17mm;box-sizing:border-box;overflow:hidden;padding:1.5mm 0;border-bottom:1.4px solid #1f2f58;background:#fff}
-  .print-hdr img{height:11mm;width:auto;max-width:55mm;object-fit:contain}
-  .print-hdr .ph-name{font-family:'Playfair Display',serif;font-size:12pt;font-weight:700;color:#1f2f58;line-height:1.1}
-  .print-hdr .ph-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
-  .print-hdr .ph-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.35}
-  .print-hdr .ph-right b{color:#1f2f58}
-  /* Each board colour starts on a fresh page — EXCEPT the first (it follows the
-     topbar/legend at the top of page 1). NOTE: `.grp:first-of-type` did NOT work
-     because the topbar/legend divs precede the groups, so no `.grp` is the first
-     div-of-type — the first group must be tagged `.grp-first` in JS instead. */
+  /* thead repeats on EVERY printed page with reserved space → boxes can never
+     slip behind the header (the fix for the fixed-header overlap). */
+  .cut-thead{display:table-header-group}
+  .cut-thead th{padding:0 0 2.5mm}
+  .ph2{display:flex;align-items:center;gap:3mm;padding-bottom:2mm;border-bottom:1.4px solid #1f2f58}
+  .ph2-logo{height:12mm;width:auto;max-width:55mm;object-fit:contain}
+  .ph2-name{font-family:'Playfair Display',serif;font-size:12pt;font-weight:700;color:#1f2f58;line-height:1.1}
+  .ph2-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
+  .ph2-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.4}
+  .ph2-right b{color:#1f2f58}
+  /* Each board colour starts on a fresh page (first group flows at the top). */
   .grp{break-before:page;page-break-before:always}
   .grp-first{break-before:auto!important;page-break-before:auto!important}
   .grp-hd{break-after:avoid;page-break-after:avoid}
+  .eb-item{break-inside:avoid;page-break-inside:avoid}
   #sheetOut,#sheetOut *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .eb-edge:hover,.eb-grain:hover{fill:transparent}
 }
@@ -339,19 +340,9 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   </div>
 </nav>
 
-<!-- ════ PRINT-ONLY RUNNING HEADER (repeats on every sheet) ════ -->
-<div class="print-hdr" aria-hidden="true">
-  <img id="ph-logo" src="images/logo.png" alt="" onerror="this.style.display='none'">
-  <div>
-    <div class="ph-name" id="ph-name">Neewoody Custom Woodwork</div>
-    <div class="ph-sub" id="ph-sub">Accra, Ghana · +233 24 463 3464</div>
-  </div>
-  <div class="ph-right">
-    <div id="ph-proj" style="display:none">Project: <b id="ph-proj-name"></b></div>
-    <div>Board / colour: <b id="ph-code">—</b></div>
-    <div id="ph-date"></div>
-  </div>
-</div>
+<!-- Running print header is rendered as a repeating <thead> inside #sheetOut
+     (buildPrintHead) — the browser repeats it on every printed page and reserves
+     its space natively, so boxes can never slip behind it. -->
 
 <main>
 
@@ -1390,6 +1381,21 @@ function renderSummary(gs){
   html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+'</div>';
   host.innerHTML=html;
 }
+// Print running header, rendered as a repeating <thead> cell (see renderSheet).
+function buildPrintHead(gs){
+  var logo=resolveLogoSrc();
+  var d=new Date(), date=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  var code=(U.code||'').trim() || (gs&&gs[0]?gs[0].code:'—');
+  var lbl = U.projShow ? printLabel() : '';
+  return '<div class="ph2">'+
+    (logo?'<img class="ph2-logo" src="'+logo+'" alt="" onerror="this.style.display=\'none\'">':'')+
+    '<div class="ph2-id"><div class="ph2-name">'+esc(U.brandName||'')+'</div><div class="ph2-sub">'+esc(U.brandPhone||'')+'</div></div>'+
+    '<div class="ph2-right">'+
+      (lbl?'<div>Project: <b>'+esc(lbl)+'</b></div>':'')+
+      '<div>Board / colour: <b>'+esc(code)+'</b></div>'+
+      '<div>'+date+'</div>'+
+    '</div></div>';
+}
 function renderSheet(gs){
   var out=document.getElementById('sheetOut');
   var legTick='<svg width="15" height="15" viewBox="0 0 16 16">'+ebLine(8,2,8,14)+'</svg>';
@@ -1403,7 +1409,7 @@ function renderSheet(gs){
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl,BW=U.bw,kerf=U.kerf;
   var projLbl = (U.projShow && printLabel()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(printLabel())+'</span>' : '';
-  var html='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
+  var body='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
     '<div class="sheet-legend">'+
       '<span>'+legTick+' <b>1 tick</b> = band this edge</span>'+
       '<span>'+legDbl+' <b>3 ticks</b> = double board, then band</span>'+
@@ -1418,30 +1424,22 @@ function renderSheet(gs){
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var pcs=items.length;
-    html+='<div class="grp'+(gi===0?' grp-first':'')+'">'+
+    body+='<div class="grp'+(gi===0?' grp-first':'')+'">'+
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
       '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm</span></div>'+
       '<div class="eb-grid">';
-    g.parts.forEach(function(p){ html+=partBox(p, '#'+(++pn)); });
-    html+='</div></div>';
+    g.parts.forEach(function(p){ body+=partBox(p, '#'+(++pn)); });
+    body+='</div></div>';
   });
-  out.innerHTML=html;
+  // Wrap in a table: the thead repeats on every printed page (with reserved space),
+  // so nothing overlaps the header. thead is hidden on screen (preview shows topbar).
+  out.innerHTML='<table class="cut-table"><thead class="cut-thead"><tr><th>'+buildPrintHead(gs)+'</th></tr></thead>'+
+    '<tbody><tr><td class="cut-td">'+body+'</td></tr></tbody></table>';
 }
 function renderAll(){
   var gs=groups();
   renderSummary(gs);
-  renderSheet(gs);
-  document.getElementById('ph-code').textContent = U.code.trim() || (gs[0]?gs[0].code:'—');
-  // Project · list name on the printed running header — only when "show" is ticked.
-  var lbl = U.projShow ? printLabel() : '';
-  document.getElementById('ph-proj').style.display = lbl ? 'block' : 'none';
-  document.getElementById('ph-proj-name').textContent = lbl;
-  // Print running-header branding (logo + name + number) from the selected source.
-  var logoSrc=resolveLogoSrc(), phLogo=document.getElementById('ph-logo');
-  if(logoSrc){ if(phLogo.getAttribute('src')!==logoSrc) phLogo.src=logoSrc; phLogo.style.display=''; }
-  else phLogo.style.display='none';
-  document.getElementById('ph-name').textContent=U.brandName||'';
-  document.getElementById('ph-sub').textContent=U.brandPhone||'';
+  renderSheet(gs);   // renderSheet builds the repeating print header (thead) from current branding
 }
 
 // ── EDGE / GRAIN TAP DELEGATION ──
@@ -1496,8 +1494,6 @@ function clearAll(){
 // ── INIT ──
 (function init(){
   document.getElementById('footer-year').textContent=new Date().getFullYear();
-  var d=new Date();
-  document.getElementById('ph-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
   var had=load();
   maybeRecoverProjects();   // offer to restore projects from backup if the store looks empty
   if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
