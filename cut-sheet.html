@@ -275,8 +275,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   .print-hdr .ph-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
   .print-hdr .ph-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.35}
   .print-hdr .ph-right b{color:#1f2f58}
+  /* Each board colour starts on a fresh page — EXCEPT the first (it follows the
+     topbar/legend at the top of page 1). NOTE: `.grp:first-of-type` did NOT work
+     because the topbar/legend divs precede the groups, so no `.grp` is the first
+     div-of-type — the first group must be tagged `.grp-first` in JS instead. */
   .grp{break-before:page;page-break-before:always}
-  .grp:first-of-type{break-before:auto;page-break-before:auto}
+  .grp-first{break-before:auto!important;page-break-before:auto!important}
   .grp-hd{break-after:avoid;page-break-after:avoid}
   #sheetOut,#sheetOut *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .eb-edge:hover,.eb-grain:hover{fill:transparent}
@@ -1406,7 +1410,7 @@ function renderSheet(gs){
       '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
     '</div>';
   var pn=0;  // running part number → box fallback label when unnamed (quick-grid mode)
-  gs.forEach(function(g){
+  gs.forEach(function(g, gi){
     var items=[]; g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
       var len=gflip?p.W:p.L, wid=gflip?p.L:p.W;
@@ -1414,7 +1418,7 @@ function renderSheet(gs){
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var pcs=items.length;
-    html+='<div class="grp">'+
+    html+='<div class="grp'+(gi===0?' grp-first':'')+'">'+
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
       '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm</span></div>'+
       '<div class="eb-grid">';
