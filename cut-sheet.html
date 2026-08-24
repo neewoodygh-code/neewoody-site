@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cut Sheet Generator | Neewoody Carpenter Tools</title>
+<meta name="description" content="Enter your parts and get a printable cut sheet — boxes with dimensions and edge-band marks, plus how many boards you need. Built for submitting measurements to the board cutting shop. By Neewoody Custom Woodwork, Accra." />
+<link rel="canonical" href="https://neewoodygh.com/cut-sheet.html" />
+
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ZP77WR6BNH');
+</script>
+
+<link rel="stylesheet" href="css/styles.css" />
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   CUT SHEET GENERATOR — navy/gold/cream (Concierge tool family)
+   Overrides the legacy --clr-* palette so this page matches cutlist.html.
+   ══════════════════════════════════════════ */
+:root{
+  --clr-bg:#f0e8d0; --clr-bg-alt:#e8dfc4;
+  --clr-accent:#c8922a; --clr-accent-dk:#b07d20; --clr-accent-lt:rgba(200,146,42,.14);
+  --clr-border:#d4c9b0; --clr-muted:#6b6557;
+  --font-body:'Jost',system-ui,sans-serif;
+  --navy:#1f2f58;
+  --mono:'Roboto Mono',monospace;
+  --gn:#5a8a5a; --rd:#b04030;
+  --r:6px;
+}
+body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)}
+
+/* ── HERO ── */
+.cs-hero{background:var(--navy);color:#fff;padding:3.4rem 0 2.6rem;position:relative;overflow:hidden}
+.cs-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,#2a3d6e,#1f2f58)}
+.cs-hero .container{position:relative;z-index:1}
+.cs-hero h1{color:#fff;margin:.25rem 0 .6rem}
+.cs-hero p{color:rgba(255,255,255,.72);max-width:60ch;font-size:1.02rem}
+.cs-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--clr-accent);background:rgba(200,146,42,.14);border:1px solid rgba(200,146,42,.35);padding:.32rem .9rem;border-radius:3px;margin-bottom:1rem}
+.breadcrumb{font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;color:rgba(255,255,255,.6);margin-bottom:1rem}
+.breadcrumb a{color:rgba(255,255,255,.85);text-decoration:none}
+.breadcrumb a:hover{color:var(--clr-accent)}
+.breadcrumb-sep{margin:0 .4rem;opacity:.5}
+
+/* ── LAYOUT ── */
+.cs-wrap{max-width:1180px;margin:0 auto;padding:1.8rem 1.25rem 4rem}
+.cs-cols{display:grid;grid-template-columns:1fr;gap:1.6rem}
+@media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
+
+/* ── CARDS / FORM ── */
+.card{background:var(--clr-surface,#fff);border:1.5px solid var(--clr-border);border-radius:12px;padding:1.1rem 1.15rem;margin-bottom:1.1rem}
+.card-t{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--navy);margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.card-t .dot{width:7px;height:7px;border-radius:50%;background:var(--clr-accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem}
+.fld label{display:block;font-size:.66rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--clr-muted);margin-bottom:.28rem}
+.fld input,.fld select{width:100%;font-family:var(--font-body);font-size:.92rem;padding:.5rem .6rem;border:1.5px solid var(--clr-border);border-radius:var(--r);background:#fff;color:var(--clr-dark)}
+.fld input:focus,.fld select:focus{outline:none;border-color:var(--clr-accent)}
+.fld .hint{font-size:.6rem;color:var(--clr-muted);margin-top:.22rem}
+.fld.big input{font-size:1rem;font-weight:600;letter-spacing:.03em}
+
+/* unit toggle */
+.unit-bar{display:flex;align-items:center;gap:.6rem;margin-bottom:.85rem}
+.unit-bar .lbl{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--clr-muted)}
+.pill-row{display:flex;gap:2px;background:var(--clr-border);border-radius:6px;padding:2px}
+.pill{font-family:var(--mono);font-size:.7rem;font-weight:700;padding:.22rem .7rem;border:none;background:transparent;border-radius:4px;cursor:pointer;color:var(--clr-muted)}
+.pill.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* parts table */
+.pt{width:100%;border-collapse:collapse;font-size:.86rem}
+.pt th{font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--clr-muted);text-align:left;padding:.2rem .3rem .4rem}
+.pt th.num,.pt td.num{text-align:right}
+.pt td{padding:.2rem .25rem;vertical-align:middle}
+.pt input{width:100%;font-family:var(--font-body);font-size:.86rem;padding:.4rem .45rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
+.pt input:focus{outline:none;border-color:var(--clr-accent)}
+.pt-scroll{overflow-x:auto}
+.pt input.nm{min-width:60px}
+.pt input.dim{text-align:right}
+.pt input.qty{text-align:center;width:42px}
+.pt input.code{min-width:52px}
+.rowdel{border:none;background:transparent;color:var(--rd);font-size:1.05rem;cursor:pointer;line-height:1;padding:.2rem .3rem;border-radius:4px}
+.rowdel:hover{background:rgba(176,64,48,.1)}
+.col-w{width:58px}.col-q{width:44px}.col-x{width:26px}
+.btn-add{margin-top:.6rem;font-family:var(--font-body);font-size:.82rem;font-weight:600;color:var(--navy);background:var(--clr-accent-lt);border:1.5px dashed var(--clr-accent);border-radius:7px;padding:.5rem .9rem;cursor:pointer;width:100%}
+.btn-add:hover{background:rgba(200,146,42,.2)}
+.mini-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem}
+.mini-btn{font-family:var(--font-body);font-size:.74rem;font-weight:600;padding:.4rem .75rem;border-radius:6px;border:1.5px solid var(--clr-border);background:#fff;color:var(--clr-muted);cursor:pointer}
+.mini-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
+
+/* board summary */
+.bsum{display:grid;grid-template-columns:1fr;gap:.6rem}
+.bcode-card{border:1.5px solid var(--clr-border);border-radius:10px;overflow:hidden}
+.bcode-hd{background:var(--navy);color:#f3ecdd;padding:.5rem .8rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
+.bcode-name{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.04em}
+.bcode-boards{font-family:var(--mono);font-size:.72rem;color:var(--clr-accent);font-weight:700}
+.bcode-body{display:flex;gap:1.2rem;flex-wrap:wrap;padding:.55rem .8rem;font-family:var(--mono);font-size:.72rem;color:var(--clr-muted)}
+.bcode-body b{color:var(--clr-dark)}
+.oversize{color:var(--rd);font-weight:700;font-size:.68rem;padding:.35rem .8rem;background:rgba(176,64,48,.08);border-top:1px solid rgba(176,64,48,.2)}
+.grand{font-family:var(--mono);font-size:.86rem;font-weight:700;color:var(--navy);text-align:center;padding:.7rem;background:var(--clr-accent-lt);border-radius:9px;margin-top:.4rem}
+.grand b{color:var(--clr-accent-dk)}
+
+/* ── CUT SHEET OUTPUT ── */
+#sheetOut{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;overflow:hidden}
+.sheet-topbar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--clr-accent-lt);border-bottom:1px solid var(--clr-border)}
+.sheet-topbar .t{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+.sheet-legend{display:flex;justify-content:center;gap:1.3rem;flex-wrap:wrap;padding:.5rem 1rem;font-family:var(--mono);font-size:.6rem;color:var(--clr-muted);border-bottom:1px solid var(--clr-border)}
+.sheet-legend span{display:inline-flex;align-items:center;gap:.4rem}
+.sheet-legend b{color:var(--clr-dark)}
+.sheet-legend svg{flex-shrink:0}
+.grp{padding:0 0 .4rem}
+.grp-hd{padding:.55rem 1rem;border-bottom:1px solid var(--clr-border);background:#faf7f0;display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+.grp-code{font-family:var(--mono);font-size:.82rem;font-weight:700;color:var(--navy);letter-spacing:.03em}
+.grp-meta{font-family:var(--mono);font-size:.68rem;color:var(--clr-muted)}
+.grp-meta b{color:var(--clr-accent-dk)}
+.eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:18px;padding:16px}
+.eb-item{display:flex;flex-direction:column;align-items:center;gap:4px;page-break-inside:avoid;break-inside:avoid}
+.eb-svg{width:112px;height:97px;touch-action:manipulation;display:block}
+.eb-edge{cursor:pointer;fill:transparent}
+.eb-edge:hover{fill:rgba(200,146,42,.22)}
+.eb-grain{cursor:pointer;fill:transparent}
+.eb-grain:hover{fill:rgba(31,47,88,.05)}
+.eb-part-name{font-size:.62rem;color:var(--clr-mid,#4b463c);text-align:center;line-height:1.2;max-width:112px;font-weight:600}
+.eb-part-code{font-size:.55rem;color:var(--clr-muted);font-family:var(--mono)}
+.sheet-empty{padding:3rem 1rem;text-align:center;color:var(--clr-muted);font-size:.9rem}
+
+/* print buttons */
+.print-cta{display:flex;gap:.7rem;flex-wrap:wrap;padding:1rem;border-top:1px solid var(--clr-border);background:#faf7f0}
+.btn-print{display:inline-flex;align-items:center;gap:.5rem;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:.65rem 1.3rem;font-family:var(--font-body);font-size:.86rem;font-weight:700;letter-spacing:.03em;cursor:pointer}
+.btn-print:hover{opacity:.9}
+
+/* help */
+.help{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;margin-bottom:1.1rem;overflow:hidden}
+.help summary{cursor:pointer;list-style:none;padding:.75rem 1.1rem;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);display:flex;align-items:center;gap:.5rem}
+.help summary::-webkit-details-marker{display:none}
+.help summary::before{content:'▸';color:var(--clr-accent);transition:transform .15s}
+.help[open] summary::before{transform:rotate(90deg)}
+.help-body{padding:0 1.1rem 1rem;font-size:.84rem;line-height:1.55;color:var(--clr-muted)}
+.help-body ol{margin:.3rem 0 0;padding-left:1.2rem}
+.help-body li{margin-bottom:.35rem}
+.help-body b{color:var(--clr-dark)}
+
+/* ── PRINT ── */
+.print-hdr{display:none}
+@page{size:A4;margin:20mm 10mm 12mm}
+@media print{
+  body>*:not(main){display:none!important}
+  .cs-hero,#inputCol,.site-footer{display:none!important}
+  .cs-wrap{padding:0!important;max-width:none!important}
+  .cs-cols{display:block!important;gap:0!important}
+  #sheetCol>*:not(#sheetWrap){display:none!important}
+  #sheetOut{border:none!important;border-radius:0!important}
+  .sheet-topbar,.sheet-legend{border-color:#999}
+  .print-cta,.sheet-hint{display:none!important}
+  /* Running header — repeats on every printed sheet (logo + number). */
+  .print-hdr{display:flex!important;align-items:center;gap:.7rem;position:fixed;top:0;left:0;right:0;padding:2mm 0 3mm;border-bottom:1.4px solid #1f2f58;background:#fff}
+  .print-hdr img{height:12mm;width:auto}
+  .print-hdr .ph-name{font-family:'Playfair Display',serif;font-size:12pt;font-weight:700;color:#1f2f58;line-height:1.1}
+  .print-hdr .ph-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
+  .print-hdr .ph-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.35}
+  .print-hdr .ph-right b{color:#1f2f58}
+  .grp{break-before:page;page-break-before:always}
+  .grp:first-of-type{break-before:auto;page-break-before:auto}
+  .grp-hd{break-after:avoid;page-break-after:avoid}
+  #sheetOut,#sheetOut *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .eb-edge:hover,.eb-grain:hover{fill:transparent}
+}
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header class="site-header" role="banner">
+  <div class="container">
+    <div class="header-inner">
+      <a href="index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
+        Neewoody
+        <span class="logo-sub">Custom Woodwork · Accra</span>
+      </a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="wardrobes.html">Wardrobes</a>
+        <a href="kitchens.html">Kitchens</a>
+        <a href="beds.html">Beds</a>
+        <div class="nav-services-wrap">
+          <span class="nav-services-trigger">More &#9663;</span>
+          <div class="nav-services-dropdown">
+            <div class="nav-services-col">
+              <span class="nav-services-col-label">More Services</span>
+              <a href="dining-living.html">Dining &amp; Living</a>
+              <a href="tv-units.html">TV Units</a>
+              <a href="shelving.html">Shelving</a>
+              <a href="solid-wood.html">Solid Wood</a>
+              <a href="hire.html">Hire a Carpenter</a>
+            </div>
+          </div>
+        </div>
+        <a href="portfolio.html">Portfolio</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+      <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge" style="display:inline-flex;align-items:center;padding:0;margin:0 .55rem 0 0;border:0;background:none;flex:none"><svg width="34" height="34" viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="58" fill="#1f2f58"/><circle cx="60" cy="60" r="52" fill="none" stroke="#c8922a" stroke-width="1.5" opacity=".55"/><text x="47" y="63" text-anchor="middle" dominant-baseline="central" font-family="Playfair Display,serif" font-weight="700" font-size="62" fill="#c8922a">C</text><text x="73" y="63" text-anchor="middle" dominant-baseline="central" font-family="Playfair Display,serif" font-weight="700" font-size="62" fill="#f3ecdd">C</text></svg></a><button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="mobile-nav" aria-label="Mobile navigation">
+  <a href="index.html">Home</a>
+  <a href="wardrobes.html">Wardrobes</a>
+  <a href="beds.html">Beds</a>
+  <a href="kitchens.html">Kitchens</a>
+  <a href="portfolio.html">Portfolio</a>
+  <a href="hire.html">Hire a Carpenter</a>
+  <a href="contact.html">Contact</a>
+  <div class="mobile-nav-ctas">
+    <a href="https://wa.me/233244633464" class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
+    <a href="contact.html" class="btn btn-outline">Request a Quote</a>
+  </div>
+</nav>
+
+<!-- ════ PRINT-ONLY RUNNING HEADER (repeats on every sheet) ════ -->
+<div class="print-hdr" aria-hidden="true">
+  <img src="images/logo.png" alt="" onerror="this.style.display='none'">
+  <div>
+    <div class="ph-name">Neewoody Custom Woodwork</div>
+    <div class="ph-sub">Accra, Ghana · +233 24 463 3464</div>
+  </div>
+  <div class="ph-right">
+    <div>Board / colour: <b id="ph-code">—</b></div>
+    <div id="ph-date"></div>
+  </div>
+</div>
+
+<main>
+
+<!-- ════ HERO ════ -->
+<div class="cs-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Home</a><span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <a href="tools.html">Tools</a><span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <span aria-current="page">Cut Sheet</span>
+    </nav>
+    <img src="images/logo.png" alt="Neewoody Custom Woodwork" style="height:46px;width:auto;object-fit:contain;margin-bottom:.9rem;display:block;filter:invert(1) brightness(1.4)" onerror="this.style.display='none'">
+    <div class="cs-badge">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+      Carpenter Tools by Neewoody
+    </div>
+    <h1>Cut Sheet Generator</h1>
+    <p>Enter your parts — length, width, quantity. Get a printable cut sheet of boxes (width at the bottom, length on the right) with edge-band marks, plus how many boards you need. Set your board colour code, print it, and send it to the cutting shop.</p>
+  </div>
+</div>
+
+<div class="cs-wrap">
+<div class="cs-cols">
+
+  <!-- ════ LEFT: INPUT ════ -->
+  <div id="inputCol">
+
+    <details class="help">
+      <summary>How to use this sheet</summary>
+      <div class="help-body">
+        <ol>
+          <li><b>Set your board</b> — the colour code (e.g. <i>18mm Oak Melamine</i>), thickness and board size. This is what the shop cuts from.</li>
+          <li><b>Add your parts</b> — name, length, width, quantity. <b>Length is the grain direction</b> (shows on the right of each box); width shows on the bottom.</li>
+          <li><b>Mark edge banding</b> on the sheet — tap an edge once to band it (1 tick), twice to double the board then band (3 ticks), again to clear. Tap the middle of a box to flip the grain.</li>
+          <li><b>Different colours?</b> Put a different code in a row's <i>Board</i> column — each colour prints on its own page.</li>
+          <li><b>Print / Save PDF</b> — every page carries your logo and number. Hand it to the cutting shop.</li>
+        </ol>
+        Your entries are saved on this device automatically.
+      </div>
+    </details>
+
+    <!-- BOARD SETTINGS -->
+    <div class="card">
+      <div class="card-t"><span class="dot"></span>Board</div>
+      <div class="unit-bar">
+        <span class="lbl">Units</span>
+        <div class="pill-row">
+          <button class="pill active" id="upmm" onclick="setUnit('mm')">mm</button>
+          <button class="pill" id="upcm" onclick="setUnit('cm')">cm</button>
+        </div>
+      </div>
+      <div class="fld big" style="margin-bottom:.7rem">
+        <label>Board / colour code</label>
+        <input id="s-code" placeholder="e.g. 18mm Oak Melamine" oninput="onSetting()">
+        <div class="hint">Identifies which colour board you're cutting from — shown on every printed page.</div>
+      </div>
+      <div class="grid3">
+        <div class="fld"><label>Thickness (mm)</label><input id="s-thick" type="number" value="18" inputmode="decimal" oninput="onSetting()"></div>
+        <div class="fld"><label>Board length</label><input id="s-bl" type="number" value="2440" inputmode="decimal" oninput="onSetting()"></div>
+        <div class="fld"><label>Board width</label><input id="s-bw" type="number" value="1220" inputmode="decimal" oninput="onSetting()"></div>
+      </div>
+      <div class="grid3" style="margin-top:.7rem">
+        <div class="fld"><label>Saw kerf (mm)</label><input id="s-kerf" type="number" value="4" inputmode="decimal" oninput="onSetting()"><div class="hint">Cut allowance</div></div>
+        <div class="fld"><label>Waste %</label><input id="s-waste" type="number" value="12" inputmode="decimal" oninput="onSetting()"><div class="hint">Buffer on area</div></div>
+        <div class="fld"><label>Grain</label>
+          <select id="s-grain" onchange="onSetting()">
+            <option value="1">Has grain (fixed)</option>
+            <option value="0">Plain (may rotate)</option>
+          </select>
+          <div class="hint">Woodgrain = fixed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTS -->
+    <div class="card">
+      <div class="card-t"><span class="dot"></span>Parts</div>
+      <div class="pt-scroll">
+      <table class="pt">
+        <thead>
+          <tr>
+            <th>Part name</th>
+            <th class="num col-w">Length</th>
+            <th class="num col-w">Width</th>
+            <th class="num col-q">Qty</th>
+            <th class="col-w">Board</th>
+            <th class="col-x"></th>
+          </tr>
+        </thead>
+        <tbody id="ptbody"></tbody>
+      </table>
+      </div>
+      <button class="btn-add" onclick="addRow()">+ Add part</button>
+      <div class="mini-actions">
+        <button class="mini-btn" onclick="loadExample()">Load example</button>
+        <button class="mini-btn" onclick="clearAll()">Clear all</button>
+      </div>
+    </div>
+
+    <!-- BOARD SUMMARY -->
+    <div class="card">
+      <div class="card-t"><span class="dot"></span>Boards needed</div>
+      <div class="bsum" id="bsum"></div>
+    </div>
+
+  </div>
+
+  <!-- ════ RIGHT: OUTPUT ════ -->
+  <div id="sheetCol">
+    <div class="sheet-hint" style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted);margin-bottom:.6rem;letter-spacing:.03em">CUT SHEET PREVIEW — tap edges to band · tap the middle to flip grain</div>
+    <div id="sheetWrap">
+      <div id="sheetOut"></div>
+    </div>
+    <div class="print-cta">
+      <button class="btn-print" onclick="window.print()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>
+        Print / Save PDF
+      </button>
+      <span style="font-family:var(--mono);font-size:.66rem;color:var(--clr-muted);align-self:center">Each page carries your logo &amp; number · each colour on its own page</span>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ════ FOOTER ════ -->
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
+        <p>Custom wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Tools</h5>
+        <ul>
+          <li><a href="cutlist.html">&#9874; Wardrobe Cutlist</a></li>
+          <li><a href="cut-sheet.html">&#9874; Cut Sheet Generator</a></li>
+          <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
+          <li><a href="carpenter-pricing.html">Job Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="/concierge/">Carpentry Concierge</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Contact</h5>
+        <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
+        <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
+        <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
+        <div class="footer-contact-item">Accra, Ghana</div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
+      <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></div>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script src="js/main.js"></script>
+<script>
+// ══════════════════════════════════════════════════════
+//  CUT SHEET GENERATOR — standalone, vanilla JS
+//  Freeform parts → board count + printable edge-band box sheet.
+//  All dimensions stored in mm internally; display converts for cm.
+// ══════════════════════════════════════════════════════
+var LS_KEY = 'nwd-cutsheet-v1';
+var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm' };
+var parts = [];       // {id,name,L,W,qty,code}
+var ebState = {};     // id -> {t,r,b,l,gflip}
+var seq = 1;
+
+function uid(){ return 'p'+(seq++); }
+function num(v,def){ v=parseFloat(v); return isNaN(v)?(def||0):v; }
+function toMM(v){ return U.unit==='cm' ? v*10 : v; }
+function fromMM(v){ return U.unit==='cm' ? (Math.round(v/10*10)/10) : Math.round(v); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+function effCode(p){ return (p.code&&p.code.trim()) || U.code.trim() || 'Board'; }
+
+// ── PERSISTENCE ──
+function save(){
+  try{ localStorage.setItem(LS_KEY, JSON.stringify({U:U,parts:parts,ebState:ebState,seq:seq})); }catch(e){}
+}
+function load(){
+  try{
+    var raw=localStorage.getItem(LS_KEY); if(!raw) return false;
+    var d=JSON.parse(raw);
+    if(d.U) U=Object.assign(U,d.U);
+    if(Array.isArray(d.parts)) parts=d.parts;
+    if(d.ebState) ebState=d.ebState;
+    if(d.seq) seq=d.seq;
+    return true;
+  }catch(e){ return false; }
+}
+
+// ── SETTINGS ──
+function setUnit(u){
+  if(U.unit===u) return;
+  U.unit=u;
+  document.getElementById('upmm').classList.toggle('active',u==='mm');
+  document.getElementById('upcm').classList.toggle('active',u==='cm');
+  // re-render rows so dim fields show the new unit; board fields stay mm
+  renderRows(); renderAll(); save();
+}
+function onSetting(){
+  U.code = document.getElementById('s-code').value;
+  U.thick= num(document.getElementById('s-thick').value,18);
+  U.bl   = num(document.getElementById('s-bl').value,2440);
+  U.bw   = num(document.getElementById('s-bw').value,1220);
+  U.kerf = num(document.getElementById('s-kerf').value,4);
+  U.waste= num(document.getElementById('s-waste').value,12);
+  U.grain= document.getElementById('s-grain').value;
+  renderAll(); save();
+}
+function fillSettings(){
+  document.getElementById('s-code').value=U.code;
+  document.getElementById('s-thick').value=U.thick;
+  document.getElementById('s-bl').value=U.bl;
+  document.getElementById('s-bw').value=U.bw;
+  document.getElementById('s-kerf').value=U.kerf;
+  document.getElementById('s-waste').value=U.waste;
+  document.getElementById('s-grain').value=U.grain;
+  document.getElementById('upmm').classList.toggle('active',U.unit==='mm');
+  document.getElementById('upcm').classList.toggle('active',U.unit==='cm');
+}
+
+// ── PARTS ROWS ──
+function addRow(name,L,W,qty,code){
+  var id=uid();
+  parts.push({id:id, name:name||'', L:L||0, W:W||0, qty:qty||1, code:code||''});
+  ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
+  renderRows(); renderAll(); save();
+  // focus the new name field
+  var el=document.querySelector('input[data-id="'+id+'"][data-f="name"]');
+  if(el) el.focus();
+}
+function delRow(id){
+  parts=parts.filter(function(p){return p.id!==id;});
+  delete ebState[id];
+  renderRows(); renderAll(); save();
+}
+function onCell(id,f,val){
+  var p=parts.filter(function(x){return x.id===id;})[0]; if(!p) return;
+  if(f==='name'||f==='code') p[f]=val;
+  else if(f==='qty') p.qty=Math.max(1,Math.round(num(val,1)));
+  else p[f]=toMM(num(val,0));      // L or W: convert to mm
+  renderAll(); save();
+}
+function renderRows(){
+  var tb=document.getElementById('ptbody'); tb.innerHTML='';
+  parts.forEach(function(p){
+    var tr=document.createElement('tr');
+    var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
+    tr.innerHTML=
+      '<td><input class="nm" data-id="'+p.id+'" data-f="name" value="'+esc(p.name)+'" placeholder="Part name" oninput="onCell(\''+p.id+'\',\'name\',this.value)"></td>'+
+      '<td class="num"><input class="dim" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></td>'+
+      '<td class="num"><input class="dim" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></td>'+
+      '<td class="num"><input class="qty" type="number" inputmode="numeric" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></td>'+
+      '<td><input class="code" data-id="'+p.id+'" data-f="code" value="'+esc(p.code)+'" placeholder="—" oninput="onCell(\''+p.id+'\',\'code\',this.value)"></td>'+
+      '<td class="num"><button class="rowdel" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button></td>';
+    tb.appendChild(tr);
+  });
+}
+
+// ── EDGE-BAND SVG (machine-shop convention) ──
+// 1 tick straddling an edge = band it · 3 ticks = double the board then band.
+function ebLine(x1,y1,x2,y2){ return '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>'; }
+function ebTicks(side,n){
+  var offs=n===3?[-6,0,6]:[0], out='';
+  offs.forEach(function(o){
+    if(side==='t')      out+=ebLine(50+o,3,50+o,17);
+    else if(side==='b') out+=ebLine(50+o,63,50+o,77);
+    else if(side==='l') out+=ebLine(11,40+o,25,40+o);
+    else if(side==='r') out+=ebLine(75,40+o,89,40+o);
+  });
+  return out;
+}
+function ebHit(id,side,x,y,w,h){ return '<rect class="eb-edge" data-id="'+id+'" data-side="'+side+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"/>'; }
+
+function partBox(p){
+  var eb=ebState[p.id]||{t:0,r:0,b:0,l:0,gflip:false};
+  var ticks='';
+  ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebTicks(s, eb[s]===2?3:1); });
+  // Length (grain) on the right, width on the bottom — flip swaps them.
+  var len = eb.gflip? p.W : p.L;
+  var wid = eb.gflip? p.L : p.W;
+  var grain='<line x1="35" y1="15" x2="35" y2="65" stroke="#b3a892" stroke-width="1"/>'+
+            '<line x1="65" y1="15" x2="65" y2="65" stroke="#b3a892" stroke-width="1"/>';
+  var svg='<svg class="eb-svg" viewBox="0 0 116 100" xmlns="http://www.w3.org/2000/svg" role="img">'+
+      '<rect x="18" y="10" width="64" height="60" fill="#f5f0e8" stroke="#9a9a9a" stroke-width="1.5"/>'+
+      grain+ticks+
+      '<text x="50" y="44" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="700" fill="#8a6a1e">'+p.qty+'</text>'+
+      '<text x="102" y="40" text-anchor="middle" transform="rotate(-90 102 40)" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+len+'</text>'+
+      '<text x="50" y="92" text-anchor="middle" font-family="ui-monospace,monospace" font-size="9" fill="#555">'+wid+'</text>'+
+      ebHit(p.id,'t',18,1,64,13)+ebHit(p.id,'b',18,60,64,14)+ebHit(p.id,'l',6,10,14,60)+ebHit(p.id,'r',80,10,14,60)+
+      '<rect class="eb-grain" data-id="'+p.id+'" x="22" y="16" width="56" height="42" fill="transparent"/>'+
+    '</svg>';
+  return '<div class="eb-item">'+svg+'<div class="eb-part-name">'+esc(p.name||'Part')+'</div></div>';
+}
+
+// ── BOARD PACKING (guillotine shelf, first-fit-decreasing) ──
+// Grain fixed: part length runs along board length. Plain: may rotate.
+function packBoards(items, BL, BW, kerf, allowRotate){
+  var oversize=[], place=[];
+  items.forEach(function(it){
+    var a=it.len, b=it.wid;   // a along board length, b across
+    var okA = a<=BL && b<=BW;
+    var okB = allowRotate && b<=BL && a<=BW;
+    if(!okA && !okB){ oversize.push(it); return; }
+    place.push(it);
+  });
+  // sort tallest-across first
+  place.sort(function(x,y){ return Math.max(y.len,y.wid)-Math.max(x.len,x.wid); });
+  var boards=[];
+  place.forEach(function(it){
+    var placed=false;
+    for(var bi=0; bi<boards.length && !placed; bi++){
+      var bd=boards[bi];
+      placed = tryOnBoard(bd,it,BL,BW,kerf,allowRotate);
+    }
+    if(!placed){
+      var nb={shelves:[], usedY:0};
+      boards.push(nb);
+      tryOnBoard(nb,it,BL,BW,kerf,allowRotate);
+    }
+  });
+  return {count:boards.length, oversize:oversize};
+}
+function orient(it,BL,BW,allowRotate){
+  // returns list of [px,py] orientations that fit a board
+  var out=[];
+  if(it.len<=BL && it.wid<=BW) out.push([it.len,it.wid]);
+  if(allowRotate && it.wid<=BL && it.len<=BW) out.push([it.wid,it.len]);
+  return out;
+}
+function tryOnBoard(bd,it,BL,BW,kerf,allowRotate){
+  var ors=orient(it,BL,BW,allowRotate);
+  // try existing shelves first
+  for(var s=0;s<bd.shelves.length;s++){
+    var sh=bd.shelves[s];
+    for(var o=0;o<ors.length;o++){
+      var px=ors[o][0], py=ors[o][1];
+      if(py<=sh.h+0.001 && sh.x+px+kerf<=BL+0.001){
+        sh.x+=px+kerf; return true;
+      }
+    }
+  }
+  // new shelf
+  for(var o2=0;o2<ors.length;o2++){
+    var px2=ors[o2][0], py2=ors[o2][1];
+    var add = (bd.usedY>0?kerf:0)+py2;
+    if(bd.usedY+add<=BW+0.001){
+      bd.usedY+=add;
+      bd.shelves.push({h:py2, x:px2});
+      return true;
+    }
+  }
+  return false;
+}
+
+// ── RENDER ──
+function groups(){
+  // group valid parts by effective code, preserving first-seen order
+  var order=[], map={};
+  parts.forEach(function(p){
+    if(!(p.L>0 && p.W>0)) return;
+    var c=effCode(p);
+    if(!map[c]){ map[c]=[]; order.push(c); }
+    map[c].push(p);
+  });
+  return order.map(function(c){ return {code:c, parts:map[c]}; });
+}
+function renderSummary(gs){
+  var host=document.getElementById('bsum');
+  if(!gs.length){ host.innerHTML='<div style="font-size:.82rem;color:var(--clr-muted)">Add parts with a length and width to see how many boards you need.</div>'; return; }
+  var allowRot = U.grain==='0'||U.grain===0;
+  var BL=U.bl, BW=U.bw, kerf=U.kerf, boardArea=BL*BW/1e6;
+  var html='', grandBoards=0;
+  gs.forEach(function(g){
+    // expand instances
+    var items=[], net=0;
+    g.parts.forEach(function(p){
+      var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
+      var len=gflip?p.W:p.L, wid=gflip?p.L:p.W;
+      net += (p.L*p.W)*p.qty;
+      for(var i=0;i<p.qty;i++) items.push({len:len,wid:wid});
+    });
+    var pk=packBoards(items,BL,BW,kerf,allowRot);
+    var netM=net/1e6;
+    var wasteBoards=Math.ceil(netM*(1+U.waste/100)/boardArea);
+    grandBoards+=pk.count;
+    var pcs=items.length;
+    html+='<div class="bcode-card">'+
+      '<div class="bcode-hd"><span class="bcode-name">'+esc(g.code)+'</span><span class="bcode-boards">'+pk.count+' board'+(pk.count!==1?'s':'')+'</span></div>'+
+      '<div class="bcode-body">'+
+        '<span><b>'+pcs+'</b> pcs</span>'+
+        '<span>net <b>'+netM.toFixed(2)+'</b> m²</span>'+
+        '<span>util <b>'+Math.min(100,Math.round(netM/(pk.count*boardArea||1)*100))+'%</b></span>'+
+        '<span>area est <b>'+wasteBoards+'</b> (+'+U.waste+'%)</span>'+
+      '</div>'+
+      (pk.oversize.length?'<div class="oversize">⚠ '+pk.oversize.length+' part(s) larger than the '+BL+'×'+BW+' board — split them or check dimensions.</div>':'')+
+    '</div>';
+  });
+  html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+'</div>';
+  host.innerHTML=html;
+}
+function renderSheet(gs){
+  var out=document.getElementById('sheetOut');
+  var legTick='<svg width="15" height="15" viewBox="0 0 16 16">'+ebLine(8,2,8,14)+'</svg>';
+  var legDbl ='<svg width="15" height="15" viewBox="0 0 16 16">'+ebLine(3,2,3,14)+ebLine(8,2,8,14)+ebLine(13,2,13,14)+'</svg>';
+  var legGrain='<svg width="15" height="15" viewBox="0 0 16 16"><line x1="6" y1="2" x2="6" y2="14" stroke="#b3a892" stroke-width="1.2"/><line x1="10" y1="2" x2="10" y2="14" stroke="#b3a892" stroke-width="1.2"/></svg>';
+  if(!gs.length){
+    out.innerHTML='<div class="sheet-topbar"><span class="t">Cut Sheet</span></div>'+
+      '<div class="sheet-empty">Your cut sheet appears here.<br>Add a part with a length and width to begin.</div>';
+    return;
+  }
+  var allowRot = U.grain==='0'||U.grain===0;
+  var BL=U.bl,BW=U.bw,kerf=U.kerf;
+  var html='<div class="sheet-topbar"><span class="t">Cut Sheet</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
+    '<div class="sheet-legend">'+
+      '<span>'+legTick+' <b>1 tick</b> = band this edge</span>'+
+      '<span>'+legDbl+' <b>3 ticks</b> = double board, then band</span>'+
+      '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
+    '</div>';
+  gs.forEach(function(g){
+    var items=[]; g.parts.forEach(function(p){
+      var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
+      var len=gflip?p.W:p.L, wid=gflip?p.L:p.W;
+      for(var i=0;i<p.qty;i++) items.push({len:len,wid:wid});
+    });
+    var pk=packBoards(items,BL,BW,kerf,allowRot);
+    var pcs=items.length;
+    html+='<div class="grp">'+
+      '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
+      '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm</span></div>'+
+      '<div class="eb-grid">';
+    g.parts.forEach(function(p){ html+=partBox(p); });
+    html+='</div></div>';
+  });
+  out.innerHTML=html;
+}
+function renderAll(){
+  var gs=groups();
+  renderSummary(gs);
+  renderSheet(gs);
+  document.getElementById('ph-code').textContent = U.code.trim() || (gs[0]?gs[0].code:'—');
+}
+
+// ── EDGE / GRAIN TAP DELEGATION ──
+document.addEventListener('click', function(e){
+  var eg=e.target.closest('.eb-edge');
+  if(eg){
+    var id=eg.getAttribute('data-id'), side=eg.getAttribute('data-side');
+    if(id&&side){
+      if(!ebState[id]) ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
+      ebState[id][side]=((ebState[id][side]||0)+1)%3;
+      renderAll(); save();
+    }
+    return;
+  }
+  var gr=e.target.closest('.eb-grain');
+  if(gr){
+    var gid=gr.getAttribute('data-id');
+    if(gid){
+      if(!ebState[gid]) ebState[gid]={t:0,r:0,b:0,l:0,gflip:false};
+      ebState[gid].gflip=!ebState[gid].gflip;
+      renderAll(); save();
+    }
+    return;
+  }
+});
+
+// ── EXAMPLE / CLEAR ──
+function loadExample(){
+  if(parts.length && !confirm('Replace the current parts with an example?')) return;
+  U.code='18mm Oak Melamine';
+  parts=[]; ebState={}; seq=1;
+  fillSettings();
+  addRow('Side panel',1800,500,2,'');
+  addRow('Top / Bottom',764,500,2,'');
+  addRow('Fixed shelf',764,480,3,'');
+  addRow('Door',880,395,2,'');
+  // band example: doors all edges
+  parts.forEach(function(p){ if(p.name==='Door'){ ebState[p.id]={t:1,r:1,b:1,l:1,gflip:false}; }
+    else if(p.name==='Fixed shelf'){ ebState[p.id]={t:0,r:1,b:0,l:0,gflip:false}; } });
+  document.getElementById('s-code').value=U.code;
+  renderRows(); renderAll(); save();
+}
+function clearAll(){
+  if(!confirm('Clear all parts and settings on this device?')) return;
+  parts=[]; ebState={}; seq=1;
+  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm' };
+  fillSettings(); renderRows(); renderAll(); save();
+}
+
+// ── INIT ──
+(function init(){
+  document.getElementById('footer-year').textContent=new Date().getFullYear();
+  var d=new Date();
+  document.getElementById('ph-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+  var had=load();
+  fillSettings();
+  if(!had || !parts.length){
+    if(!parts.length){ addRow('',0,0,1,''); }
+  }
+  renderRows();
+  renderAll();
+})();
+</script>
+</body>
+</html>
