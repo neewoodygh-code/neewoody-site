@@ -51,10 +51,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 /* ── LAYOUT ── */
 .cs-wrap{max-width:1180px;margin:0 auto;padding:1.8rem 1.25rem 4rem}
 .cs-cols{display:grid;grid-template-columns:1fr;gap:1.6rem}
-@media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}
-  /* Quick grid becomes a full-width "page": one column so the box grid spreads out */
-  .cs-cols.single{grid-template-columns:1fr}}
-.cs-cols.single #sheetCol{margin-top:.4rem}
+@media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
 
 /* ── CARDS / FORM ── */
 .card{background:var(--clr-surface,#fff);border:1.5px solid var(--clr-border);border-radius:12px;padding:1.1rem 1.15rem;margin-bottom:1.1rem}
@@ -92,14 +89,33 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .mode-top-hint{font-family:var(--font-body);font-size:.78rem;color:var(--clr-muted);margin-left:auto;text-align:right}
 @media(max-width:560px){ .mode-top-hint{margin-left:0;text-align:left;width:100%} }
 
-/* quick-grid editor — boxes that mirror the cut sheet (width bottom · length right · qty middle) */
-.qg-hint{font-size:.74rem;color:var(--clr-muted);margin-bottom:1rem;line-height:1.45}
-.qg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1.4rem .9rem}
+/* ── QUICK-GRID STANDALONE DATA-ENTRY PAGE ── */
+.qg-page{position:fixed;inset:0;z-index:2000;background:var(--clr-bg);display:flex;flex-direction:column}
+.qg-bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
+  background:var(--navy);color:#f3ecdd;padding:.7rem 1.1rem;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.qg-bar-l,.qg-bar-r{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+.qg-back{font-family:var(--font-body);font-size:.86rem;font-weight:700;color:var(--navy);background:var(--gold,#c8922a);border:none;border-radius:7px;padding:.5rem 1rem;cursor:pointer}
+.qg-back:hover{filter:brightness(1.06)}
+.qg-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700}
+.qg-code{font-family:var(--mono);font-size:.72rem;color:#f3ecdd;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:.22rem .6rem}
+.qg-count{font-family:var(--mono);font-size:.72rem;color:rgba(243,236,221,.8)}
+.qg-print{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-body);font-size:.82rem;font-weight:600;color:#f3ecdd;background:transparent;border:1.5px solid rgba(243,236,221,.4);border-radius:7px;padding:.45rem .9rem;cursor:pointer}
+.qg-print:hover{background:rgba(255,255,255,.1)}
+.qg-scroll{flex:1;overflow-y:auto;padding:1.2rem clamp(.8rem,3vw,2rem) 3rem}
+.qg-lead{max-width:900px;margin:0 auto 1.2rem;font-family:var(--font-body);font-size:.84rem;color:var(--clr-muted);line-height:1.5;text-align:center}
+.qg-lead b{color:var(--clr-dark)}
+.qg-sheet{max-width:1200px;margin:0 auto 1.6rem;background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;overflow:hidden}
+.qg-sheet-hd{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem 1rem;background:var(--clr-accent-lt);border-bottom:1px solid var(--clr-border)}
+.qg-sheet-hd .t{font-family:var(--mono);font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+.qg-sheet-hd .m{font-family:var(--mono);font-size:.66rem;color:var(--clr-muted)}
+.qg-sheet-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1.4rem 1rem;padding:1.3rem 1rem 1.4rem}
+.qg-addsheet{display:block;margin:0 auto;max-width:1200px;width:100%;border:1.5px dashed var(--clr-accent);border-radius:10px;background:var(--clr-accent-lt);color:var(--navy);font-family:var(--font-body);font-size:.9rem;font-weight:600;padding:.9rem;cursor:pointer}
+.qg-addsheet:hover{background:rgba(200,146,42,.2)}
 .qg2{position:relative;padding-top:6px}
 .qg2-n{position:absolute;top:-2px;left:2px;z-index:2;background:var(--navy);color:#f3ecdd;font-family:var(--mono);font-size:.56rem;font-weight:700;padding:.05rem .38rem;border-radius:6px}
 .qg2-del{position:absolute;top:-4px;right:0;z-index:2;border:none;background:#fff;color:var(--rd);font-size:.95rem;line-height:1;cursor:pointer;border-radius:50%;width:19px;height:19px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 .qg2-del:hover{background:rgba(176,64,48,.12)}
-.qg2-frame{display:grid;grid-template-columns:1fr 46px;grid-template-rows:80px 30px;gap:5px}
+.qg2-frame{display:grid;grid-template-columns:1fr 56px;grid-template-rows:80px 30px;gap:5px}
 .qg2-box{grid-column:1;grid-row:1;position:relative;background:#f5f0e8;border:1.6px solid #b9b3a3;border-radius:4px;
   background-image:linear-gradient(90deg,transparent 33%,#d4ccb8 33%,#d4ccb8 33.7%,transparent 33.7%,transparent 65%,#d4ccb8 65%,#d4ccb8 65.7%,transparent 65.7%)}
 .qg2-qty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;text-align:center;background:transparent;border:none;font-family:var(--mono);font-size:.98rem;font-weight:700;color:#8a6a1e;padding:2px}
@@ -107,10 +123,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .qg2-qty:focus{outline:none;background:rgba(255,255,255,.7);border-radius:5px}
 .qg2-len{grid-column:2;grid-row:1;align-self:center;height:34px}
 .qg2-wid{grid-column:1;grid-row:2}
-.qg2-len,.qg2-wid{width:100%;min-width:0;text-align:center;font-family:var(--font-body);font-size:.84rem;padding:.32rem .2rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
+.qg2-len,.qg2-wid{width:100%;min-width:0;text-align:center;font-family:var(--font-body);font-size:.8rem;padding:.32rem .12rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
 .qg2-len:focus,.qg2-wid:focus{outline:none;border-color:var(--clr-accent)}
-.qg2-add{align-self:stretch;min-height:116px;border:1.5px dashed var(--clr-accent);border-radius:9px;background:var(--clr-accent-lt);color:var(--navy);font-family:var(--font-body);font-size:.82rem;font-weight:600;cursor:pointer}
-.qg2-add:hover{background:rgba(200,146,42,.2)}
 .pt input.nm{min-width:60px}
 .pt input.dim{text-align:right}
 .pt input.qty{text-align:center;width:42px}
@@ -212,7 +226,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 @page{size:A4;margin:20mm 10mm 12mm}
 @media print{
   body>*:not(main){display:none!important}
-  .cs-hero,#inputCol,.site-footer{display:none!important}
+  .cs-hero,#inputCol,.site-footer,.mode-top{display:none!important}
   .cs-wrap{padding:0!important;max-width:none!important}
   .cs-cols{display:block!important;gap:0!important}
   #sheetCol>*:not(#sheetWrap){display:none!important}
@@ -423,7 +437,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <div class="card">
       <div class="card-t"><span class="dot"></span>Parts</div>
 
-      <!-- Named-list editor -->
+      <!-- Named-list editor (Quick grid opens as a standalone page) -->
       <div id="listWrap" class="pt-scroll">
       <table class="pt">
         <thead>
@@ -438,12 +452,6 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
         </thead>
         <tbody id="ptbody"></tbody>
       </table>
-      </div>
-
-      <!-- Quick-grid editor (measurements only, no names) -->
-      <div id="gridWrap" style="display:none">
-        <div class="qg-hint">Type length &amp; width straight in — length is the grain (right of the box), width is the bottom. No names needed. Set edge banding by tapping the boxes on the sheet.</div>
-        <div class="qg-grid" id="qgGrid"></div>
       </div>
 
       <button class="btn-add" onclick="addRow()">+ Add part</button>
@@ -522,6 +530,26 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
 </main>
 
+<!-- ════ QUICK-GRID STANDALONE DATA-ENTRY PAGE ════ -->
+<div id="qgPage" class="qg-page" style="display:none" aria-label="Quick entry">
+  <div class="qg-bar">
+    <div class="qg-bar-l">
+      <button class="qg-back" onclick="setEntryMode('list')">&#8592; Done</button>
+      <span class="qg-title">Quick entry</span>
+      <span class="qg-code" id="qgCode"></span>
+    </div>
+    <div class="qg-bar-r">
+      <span class="qg-count" id="qgCount"></span>
+      <button class="qg-print" onclick="window.print()">&#9106; Print / Save PDF</button>
+    </div>
+  </div>
+  <div class="qg-scroll">
+    <div class="qg-lead">Type sizes straight into the boxes — <b>length</b> on the right, <b>width</b> at the bottom, <b>quantity</b> in the middle. Board colour, thickness and everything else are set on the <b>Named list</b> tab.</div>
+    <div id="qgBody"></div>
+    <button class="qg-addsheet" onclick="addSheet()">+ Add another sheet</button>
+  </div>
+</div>
+
 <script src="js/main.js"></script>
 <script src="js/concierge.js?v=20260721a"></script>
 <script>
@@ -533,7 +561,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
 var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
 var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
-          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list' };
+          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
@@ -756,7 +784,8 @@ function loadProject(id){
   ebState=d.ebState?JSON.parse(JSON.stringify(d.ebState)):{};
   seq=d.seq||1;
   curProjId=rec.id;
-  if(U.entryMode==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); }  // reopen the grid prepopulated
+  U.entryMode='list';   // land on the setup/list view after loading
+  seedParts();
   fillSettings(); renderParts(); renderAll(); save(); renderProjects();
   projStatus('Loaded "'+rec.name+'"');
 }
@@ -831,13 +860,15 @@ function onCell(id,f,val){
   if(f==='name'||f==='code') p[f]=val;
   else if(f==='qty') p.qty=Math.max(1,Math.round(num(val,1)));
   else p[f]=toMM(num(val,0));      // L or W: convert to mm
-  renderAll(); save();
+  renderAll(); if(U.entryMode==='grid') updateQgMeta(); save();
 }
-// Two interchangeable editors over the same parts[]: a named list, or a
-// quick grid of boxes (measurements straight in, no names). Switch anytime.
-var QG_MIN = 6;   // quick grid opens prepopulated with this many empty boxes
+// Two ways to enter the same parts[]: the Named list (setup + names), or the
+// Quick grid — a STANDALONE data-entry page of "sheets", each holding a fixed
+// number of boxes (length right · width bottom · qty middle). All other inputs
+// (board colour, size, project, branding) are handled on the Named list tab.
+var SHEET_SIZE = 24;   // boxes per sheet (within the 24–30 range)
 function blankPart(){ var id=uid(); ebState[id]={t:0,r:0,b:0,l:0,gflip:false}; return {id:id,name:'',L:0,W:0,qty:1,code:''}; }
-function seedParts(){ if(U.entryMode==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); } else if(!parts.length){ parts.push(blankPart()); } }
+function seedParts(){ if(!parts.length) parts.push(blankPart()); }   // the list always keeps ≥1 row
 function isEmptyPart(p){ return !(p.L>0 || p.W>0 || (p.name&&p.name.trim())); }
 function pruneEmpties(){
   parts=parts.filter(function(p){ return !isEmptyPart(p); });
@@ -845,49 +876,89 @@ function pruneEmpties(){
   Object.keys(ebState).forEach(function(k){ if(!ids[k]) delete ebState[k]; });
   if(!parts.length) parts.push(blankPart());
 }
-function applyGridLayout(){ var c=document.getElementById('csCols'); if(c) c.classList.toggle('single', U.entryMode==='grid'); }
+// Grid works in whole sheets of SHEET_SIZE — pad parts up to a full number of sheets.
+function qgSheetCount(){ return Math.max(1, U.qgSheets||1, Math.ceil(parts.length/SHEET_SIZE)); }
+function padToSheets(){
+  var n=qgSheetCount(); U.qgSheets=n;
+  while(parts.length < n*SHEET_SIZE) parts.push(blankPart());
+}
+function addSheet(){ U.qgSheets=(U.qgSheets||qgSheetCount())+1; padToSheets(); renderQuickGrid(); renderAll(); save(); }
+
 function setEntryMode(m){
   if(m!=='grid') m='list';
   U.entryMode=m;
-  if(m==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); }   // prepopulate the grid
-  else { pruneEmpties(); }
+  document.getElementById('mode-list').classList.toggle('active', m==='list');
+  document.getElementById('mode-grid').classList.toggle('active', m==='grid');
+  var hint=document.getElementById('modeHint');
+  if(hint) hint.textContent = (m==='grid')
+    ? "A full-screen page for banging in sizes — no names, no setup."
+    : "Type parts in a list — set your board, colour code, project and branding here.";
+  if(m==='grid') openQuickGrid(); else closeQuickGrid();
+  save();
+}
+function openQuickGrid(){
+  U.entryMode='grid';
+  padToSheets();
+  renderQuickGrid();
+  document.getElementById('qgPage').style.display='';
+  document.body.style.overflow='hidden';
+  var f=document.querySelector('#qgBody input[data-f="L"]'); if(f) f.focus();
+}
+function closeQuickGrid(){
+  document.getElementById('qgPage').style.display='none';
+  document.body.style.overflow='';
+  U.entryMode='list';
+  pruneEmpties();
+  document.getElementById('mode-list').classList.add('active');
+  document.getElementById('mode-grid').classList.remove('active');
   renderParts(); renderAll(); save();
-  if(m==='grid'){ var g=document.querySelector('#qgGrid input[data-f="L"]'); if(g) g.focus(); }
+}
+function qgBox(p,i){
+  var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
+  var qv=isEmptyPart(p)?'':p.qty;
+  return '<div class="qg2">'+
+    '<span class="qg2-n">#'+(i+1)+'</span>'+
+    '<button class="qg2-del" title="Clear box" onclick="clearBox(\''+p.id+'\')">&times;</button>'+
+    '<div class="qg2-frame">'+
+      '<div class="qg2-box">'+
+        '<input class="qg2-qty" type="number" inputmode="numeric" min="1" data-id="'+p.id+'" data-f="qty" value="'+qv+'" placeholder="×" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)">'+
+      '</div>'+
+      '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
+      '<input class="qg2-wid" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="wid" title="Width — bottom" oninput="onCell(\''+p.id+'\',\'W\',this.value)">'+
+    '</div></div>';
+}
+function renderQuickGrid(){
+  var body=document.getElementById('qgBody'); var html='';
+  var sheets=qgSheetCount();
+  for(var s=0;s<sheets;s++){
+    var from=s*SHEET_SIZE, slice=parts.slice(from, from+SHEET_SIZE);
+    var filled=slice.filter(function(p){return p.L>0&&p.W>0;}).length;
+    html+='<div class="qg-sheet"><div class="qg-sheet-hd"><span class="t">Sheet '+(s+1)+'</span>'+
+      '<span class="m">'+filled+' / '+SHEET_SIZE+' filled</span></div>'+
+      '<div class="qg-sheet-grid">';
+    slice.forEach(function(p,j){ html+=qgBox(p, from+j); });
+    html+='</div></div>';
+  }
+  body.innerHTML=html;
+  updateQgMeta();
+}
+function updateQgMeta(){
+  var codeEl=document.getElementById('qgCode'); if(codeEl){ var c=(U.code||'').trim(); codeEl.textContent = c?('Board: '+c):'Set board colour on the Named list tab'; }
+  var cnt=document.getElementById('qgCount');
+  if(cnt){ var pcs=parts.filter(function(p){return p.L>0&&p.W>0;}).reduce(function(s,p){return s+p.qty;},0);
+    var sh=qgSheetCount(); cnt.textContent=pcs+' piece'+(pcs!==1?'s':'')+' · '+sh+' sheet'+(sh!==1?'s':''); }
+}
+function clearBox(id){
+  var p=parts.filter(function(x){return x.id===id;})[0]; if(!p) return;
+  p.name=''; p.L=0; p.W=0; p.qty=1;
+  ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
+  renderQuickGrid(); renderAll(); save();
 }
 function renderParts(){
-  var list=U.entryMode!=='grid';
-  applyGridLayout();
-  document.getElementById('listWrap').style.display = list?'':'none';
-  document.getElementById('gridWrap').style.display = list?'none':'';
-  document.getElementById('mode-list').classList.toggle('active', list);
-  document.getElementById('mode-grid').classList.toggle('active', !list);
-  var hint=document.getElementById('modeHint');
-  if(hint) hint.textContent = list
-    ? "Type parts in a list — with names, for projects you'll come back to."
-    : "Type sizes straight into the boxes — length on the right, width at the bottom, quantity in the middle.";
-  if(list) renderRows(); else renderGrid();
-}
-function renderGrid(){
-  var host=document.getElementById('qgGrid'); host.innerHTML='';
-  parts.forEach(function(p,i){
-    var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
-    var cell=document.createElement('div'); cell.className='qg2';
-    cell.innerHTML=
-      '<span class="qg2-n">#'+(i+1)+'</span>'+
-      '<button class="qg2-del" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button>'+
-      '<div class="qg2-frame">'+
-        '<div class="qg2-box">'+
-          '<input class="qg2-qty" type="number" inputmode="numeric" min="1" data-id="'+p.id+'" data-f="qty" value="'+(p.qty||'')+'" placeholder="×" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)">'+
-        '</div>'+
-        '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
-        '<input class="qg2-wid" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="wid" title="Width — bottom" oninput="onCell(\''+p.id+'\',\'W\',this.value)">'+
-      '</div>';
-    host.appendChild(cell);
-  });
-  var add=document.createElement('button');
-  add.className='qg2-add'; add.type='button'; add.textContent='+ Add box';
-  add.onclick=function(){ addRow(); };
-  host.appendChild(add);
+  // The Named list is the only inline editor now; the grid is its own page.
+  document.getElementById('mode-list').classList.toggle('active', U.entryMode!=='grid');
+  document.getElementById('mode-grid').classList.toggle('active', U.entryMode==='grid');
+  renderRows();
 }
 function renderRows(){
   var tb=document.getElementById('ptbody'); tb.innerHTML='';
@@ -1145,7 +1216,7 @@ function clearAll(){
   if(!confirm('Clear the current sheet? Your saved projects are kept — only what\'s on screen now is cleared.')) return;
   parts=[]; ebState={}; seq=1; curProjId=null;
   U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
-      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:U.entryMode||'list' };
+      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
   applyBrandDefaults();  // back to member (if signed in) / Neewoody branding
   seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderProjects();
 }
@@ -1158,10 +1229,11 @@ function clearAll(){
   var had=load();
   if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
   fillSettings();
-  seedParts();   // 1 blank row (list) or a prepopulated grid of boxes (grid mode)
+  seedParts();
   renderParts();
   renderAll();
   renderProjects();
+  if(U.entryMode==='grid') openQuickGrid();   // resume the standalone entry page
   fetchSession();   // async: adopt the member's own logo & number if signed in
 })();
 </script>
