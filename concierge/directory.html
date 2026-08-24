@@ -269,6 +269,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   .rail{ display:block; position:sticky; top:78px; max-height:calc(100vh - 96px); overflow-y:auto;
     scrollbar-width:thin; }
   .rail::-webkit-scrollbar{ width:6px; } .rail::-webkit-scrollbar-thumb{ background:rgba(31,47,88,.18); border-radius:3px; }
+  /* the centre column is narrower under the shell — 2 roomy card columns, not 3
+     (the viewport-based 1/2/3 breakpoints don't know about the rails) */
+  .shell .grid{ grid-template-columns:1fr 1fr; }
 }
 .rail-h{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 .55rem .25rem; }
 /* left nav */
@@ -318,7 +321,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 @media(min-width:560px){ .grid{ grid-template-columns:1fr 1fr; } }
 @media(min-width:900px){ .grid{ grid-template-columns:1fr 1fr 1fr; } }
 .mcard{ background:#fff; border:1px solid rgba(31,47,88,.08); border-radius:5px;
-  padding:.65rem .75rem; display:flex; gap:.7rem; align-items:center; cursor:pointer;
+  padding:.65rem .75rem; display:flex; gap:.7rem; align-items:center; cursor:pointer; min-width:0;
   box-shadow:0 3px 10px rgba(31,47,88,.04); transition:border-color .15s, box-shadow .15s; }
 .mcard:hover, .mcard:focus-visible{ border-color:var(--gold); box-shadow:0 6px 16px rgba(31,47,88,.09); outline:none; }
 .mcard .ph{ width:48px; height:48px; border-radius:50%; background:var(--cream-dark);
@@ -1923,7 +1926,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
     // keep the left nav rail in sync with the active section
     document.querySelectorAll('#railNav .rnav').forEach(function (b) {
-      b.classList.toggle('active', b.getAttribute('data-tab') === name);
+      var on = b.getAttribute('data-tab') === name;
+      b.classList.toggle('active', on);
+      if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
     });
     closeSpop();
     // Lapsed lockout: benefit tabs show the renew card instead of loading.
@@ -1982,7 +1987,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     var html = '<div class="rail-h">Go to</div>';
     RAIL_ITEMS.forEach(function (it) {
       var idAttr = it.tab === 'storefront' ? ' id="railStorefront"' : it.tab === 'orders' ? ' id="railOrders"' : '';
-      html += '<button class="rnav' + (it.tab === 'directory' ? ' active' : '') + '" data-tab="' + it.tab + '"' + idAttr + (it.vendor ? ' hidden' : '') + '>' +
+      html += '<button class="rnav' + (it.tab === 'directory' ? ' active" aria-current="page' : '') + '" data-tab="' + it.tab + '"' + idAttr + (it.vendor ? ' hidden' : '') + '>' +
         '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (RAIL_IC[it.tab] || '') + '</svg></span>' +
         '<span class="lb"><b>' + it.label + '</b><i>' + it.sub + '</i></span>' +
         (it.count ? '<span class="rc" id="railOrdersCount" hidden>0</span>' : '') +

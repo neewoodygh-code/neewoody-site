@@ -321,7 +321,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
           <li><b>Print / Save PDF</b> — every page carries your logo and number. Hand it to the cutting shop.</li>
           <li><b>Save it as a project</b> — give it a name (e.g. a client or job) and press <b>Save project</b> to keep it. Reopen any saved list from <b>Projects</b>. The project name stays off the printed sheet unless you tick "Show project name".</li>
         </ol>
-        The current sheet is also saved on this device automatically.
+        The current sheet and your saved projects live <b>on this device</b> (this browser) — they don't sync between your phone and computer yet.
       </div>
     </details>
 
@@ -420,7 +420,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
       <!-- Quick-grid editor (measurements only, no names) -->
       <div id="gridWrap" style="display:none">
-        <div class="qg-hint">Type length &amp; width straight in — length is the grain (right of the box), width is the bottom. No names needed.</div>
+        <div class="qg-hint">Type length &amp; width straight in — length is the grain (right of the box), width is the bottom. No names needed. Set edge banding by tapping the boxes on the sheet.</div>
         <div class="qg-grid" id="qgGrid"></div>
       </div>
 
@@ -526,8 +526,14 @@ function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){retur
 function effCode(p){ return (p.code&&p.code.trim()) || U.code.trim() || 'Board'; }
 
 // ── PERSISTENCE ──
+// localStorage can be full (esp. with a custom logo data-URL per project) — a
+// swallowed failure would silently lose work, so callers check the return.
+function lsSet(key, val){ try{ localStorage.setItem(key, val); return true; }catch(e){ return false; } }
+var autosaveWarned=false;
 function save(){
-  try{ localStorage.setItem(LS_KEY, JSON.stringify({U:U,parts:parts,ebState:ebState,seq:seq})); }catch(e){}
+  var ok=lsSet(LS_KEY, JSON.stringify({U:U,parts:parts,ebState:ebState,seq:seq}));
+  if(!ok && !autosaveWarned){ autosaveWarned=true; try{ projStatus('⚠ This device\'s storage is full — changes may not be kept. Delete an old project to free space.', true); }catch(e){} }
+  else if(ok){ autosaveWarned=false; }
 }
 function load(){
   try{
@@ -683,11 +689,18 @@ function projStore(){
   try{ var d=JSON.parse(localStorage.getItem(PROJ_KEY)||'{}'); return Array.isArray(d.list)?d.list:[]; }
   catch(e){ return []; }
 }
-function projSave(list){ try{ localStorage.setItem(PROJ_KEY, JSON.stringify({list:list})); }catch(e){} }
-function snapshot(){ return { U:JSON.parse(JSON.stringify(U)), parts:JSON.parse(JSON.stringify(parts)), ebState:JSON.parse(JSON.stringify(ebState)), seq:seq }; }
-function projStatus(msg){
+function projSave(list){ return lsSet(PROJ_KEY, JSON.stringify({list:list})); }
+// Only projects actually USING a custom logo carry its (large) data-URL — keeps
+// saved projects small and avoids filling storage with stale logo copies.
+function snapshot(){
+  var u=JSON.parse(JSON.stringify(U));
+  if(u.brandSource!=='custom') u.customLogo='';
+  return { U:u, parts:JSON.parse(JSON.stringify(parts)), ebState:JSON.parse(JSON.stringify(ebState)), seq:seq };
+}
+function projStatus(msg, isErr){
   var el=document.getElementById('projStatus'); el.textContent=msg||'';
-  if(msg){ clearTimeout(el._t); el._t=setTimeout(function(){ el.textContent=''; },2600); }
+  el.style.color = isErr ? 'var(--rd)' : 'var(--gn)';
+  if(msg){ clearTimeout(el._t); el._t=setTimeout(function(){ el.textContent=''; }, isErr?6000:2600); }
 }
 function saveProject(){
   var name=(U.proj||'').trim();
@@ -703,8 +716,11 @@ function saveProject(){
   if(idx<0) idx=list.findIndex(function(p){return p.name.toLowerCase()===name.toLowerCase();});
   var rec={ id:(idx>=0?list[idx].id:('j'+now)), name:name, savedAt:now, data:snapshot() };
   if(idx>=0) list[idx]=rec; else list.unshift(rec);
-  curProjId=rec.id;
-  projSave(list); renderProjects(); renderAll();
+  if(!projSave(list)){   // storage full — don't claim it saved
+    projStatus('⚠ Couldn\'t save "'+name+'" — this device\'s storage is full. Delete an old project and try again.', true);
+    return;
+  }
+  curProjId=rec.id; renderProjects(); renderAll();
   projStatus('Saved "'+name+'"');
 }
 function loadProject(id){
