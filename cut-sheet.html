@@ -600,10 +600,15 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 <div id="projPage" class="qg-page" style="display:none" aria-label="My projects">
   <div class="qg-bar">
     <div class="qg-bar-l"><button class="qg-back" onclick="closeLibrary()">&#8592; Done</button><span class="qg-title">My projects</span></div>
-    <div class="qg-bar-r"><button class="qg-print" onclick="newProjectFromLibrary()">+ New project</button></div>
+    <div class="qg-bar-r">
+      <button class="qg-print" onclick="exportProjects()" title="Save all projects to a file">&#8681; Back up</button>
+      <button class="qg-print" onclick="document.getElementById('projImport').click()" title="Restore projects from a backup file">&#8679; Restore</button>
+      <input type="file" id="projImport" accept="application/json,.json" hidden onchange="importProjectsFile(event)">
+      <button class="qg-print" onclick="newProjectFromLibrary()">+ New project</button>
+    </div>
   </div>
   <div class="qg-scroll">
-    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it.</div>
+    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it. Projects are saved on this device — use <b>Back up</b> to keep a copy you can <b>Restore</b> on any device.</div>
     <div id="projLib"></div>
   </div>
 </div>
@@ -617,7 +622,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 //  All dimensions stored in mm internally; display converts for cm.
 // ══════════════════════════════════════════════════════
 var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
-var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
+var PROJ_KEY = 'nwd-cutsheet-projects'; // saved projects → cut lists
+var PROJ_BAK = 'nwd-cutsheet-projects-bak'; // rolling backup (loss insurance)
 var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false,
           brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
 var parts = [];       // {id,name,L,W,qty,code}
@@ -813,10 +819,26 @@ function projStore(){
     }
     return null;
   }).filter(Boolean);
-  if(migrated) projSave(arr);
+  if(migrated && arr.length) projSave(arr);   // never overwrite with an empty result
   return arr;
 }
-function projSave(arr){ return lsSet(PROJ_KEY, JSON.stringify({v:2, list:arr})); }
+function projSave(arr){
+  // Loss insurance: keep the previous non-empty store as a backup before overwriting.
+  try{ var prev=localStorage.getItem(PROJ_KEY); if(prev){ var pj=JSON.parse(prev); if(pj&&Array.isArray(pj.list)&&pj.list.length){ lsSet(PROJ_BAK, prev); } } }catch(e){}
+  return lsSet(PROJ_KEY, JSON.stringify({v:2, list:arr}));
+}
+// If the store is somehow empty but a backup holds projects, offer to restore.
+function maybeRecoverProjects(){
+  try{
+    var cur=projStore(); if(cur.length) return;
+    var bak=localStorage.getItem(PROJ_BAK); if(!bak) return;
+    var bj=JSON.parse(bak); var n=(bj&&Array.isArray(bj.list))?bj.list.length:0;
+    if(!n) return;
+    if(confirm('Found '+n+' saved project(s) in a backup that aren\'t showing. Restore them now?')){
+      lsSet(PROJ_KEY, bak);   // projStore migrates on next read
+    }
+  }catch(e){}
+}
 function findProj(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return null; }
 function findList(proj,id){ if(!proj) return null; for(var i=0;i<proj.lists.length;i++) if(proj.lists[i].id===id) return proj.lists[i]; return null; }
 function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 }; }
@@ -934,6 +956,39 @@ function addListToProject(projId){
   closeLibrary(); document.getElementById('s-listname').focus();
 }
 function newProjectFromLibrary(){ closeLibrary(); newProject(); }
+// Back up ALL projects to a file (device-independent, so nothing is ever truly lost).
+function exportProjects(){
+  var arr=projStore();
+  if(!arr.length){ alert('No saved projects to back up yet.'); return; }
+  var blob=new Blob([JSON.stringify({v:2, list:arr})],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='neewoody-cut-lists-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },1500);
+}
+function importProjectsFile(ev){
+  var f=ev.target.files&&ev.target.files[0]; ev.target.value='';
+  if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      var incoming = (d&&Array.isArray(d.list)) ? d.list : (Array.isArray(d)?d:[]);
+      if(!incoming.length){ alert('No projects found in that file.'); return; }
+      var cur=projStore(), byId={}; cur.forEach(function(p){ byId[p.id]=p; });
+      incoming.forEach(function(p){
+        var np = p.lists ? p : (p.data ? { id:p.id, name:p.name||'Project', updatedAt:p.savedAt||Date.now(),
+                 lists:[{ id:'l'+(p.id||Date.now()), name:p.name||'Cut list 1', savedAt:p.savedAt||Date.now(), data:p.data }] } : null);
+        if(!np) return;
+        if(byId[np.id]){ var ex=byId[np.id], lids={}; ex.lists.forEach(function(l){lids[l.id]=1;}); (np.lists||[]).forEach(function(l){ if(!lids[l.id]) ex.lists.push(l); }); }
+        else { byId[np.id]=np; cur.push(np); }
+      });
+      projSave(cur); renderLibrary(); renderProjectCount(); renderListChips();
+      alert('Restored. You now have '+cur.length+' project(s).');
+    }catch(e){ alert('Could not read that backup file.'); }
+  };
+  r.readAsText(f);
+}
 function renderProjectCount(){ var el=document.getElementById('projCount'); if(el) el.textContent=projStore().length; }
 // Quick-switch chips for the lists in the current project.
 function renderListChips(){
@@ -1365,6 +1420,7 @@ function clearAll(){
   var d=new Date();
   document.getElementById('ph-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
   var had=load();
+  maybeRecoverProjects();   // offer to restore projects from backup if the store looks empty
   if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
   // Always land on the entry-method selection (Named list) — never jump straight
   // into the full-screen grid. Drop any blank boxes carried from a grid session.
