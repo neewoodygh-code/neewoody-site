@@ -51,7 +51,10 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 /* ── LAYOUT ── */
 .cs-wrap{max-width:1180px;margin:0 auto;padding:1.8rem 1.25rem 4rem}
 .cs-cols{display:grid;grid-template-columns:1fr;gap:1.6rem}
-@media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
+@media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}
+  /* Quick grid becomes a full-width "page": one column so the box grid spreads out */
+  .cs-cols.single{grid-template-columns:1fr}}
+.cs-cols.single #sheetCol{margin-top:.4rem}
 
 /* ── CARDS / FORM ── */
 .card{background:var(--clr-surface,#fff);border:1.5px solid var(--clr-border);border-radius:12px;padding:1.1rem 1.15rem;margin-bottom:1.1rem}
@@ -80,21 +83,34 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .pt input{width:100%;font-family:var(--font-body);font-size:.86rem;padding:.4rem .45rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
 .pt input:focus{outline:none;border-color:var(--clr-accent)}
 .pt-scroll{overflow-x:auto}
-/* entry-mode toggle */
-.mode-row{display:inline-flex;gap:2px;background:var(--clr-border);border-radius:7px;padding:2px}
-.mode-pill{font-family:var(--font-body);font-size:.68rem;font-weight:600;letter-spacing:.02em;padding:.3rem .65rem;border:none;background:transparent;border-radius:5px;cursor:pointer;color:var(--clr-muted);text-transform:none}
-.mode-pill.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-/* quick-grid editor */
-.qg-hint{font-size:.72rem;color:var(--clr-muted);margin-bottom:.6rem;line-height:1.45}
-.qg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.6rem}
-.qg-cell{position:relative;border:1.5px solid var(--clr-border);border-radius:10px;padding:.55rem .55rem .5rem;background:#fff}
-.qg-cell .qg-n{position:absolute;top:-8px;left:8px;background:var(--navy);color:#f3ecdd;font-family:var(--mono);font-size:.58rem;font-weight:700;padding:.05rem .4rem;border-radius:6px}
-.qg-cell .qg-del{position:absolute;top:-9px;right:5px;border:none;background:#fff;color:var(--rd);font-size:1rem;line-height:1;cursor:pointer;border-radius:50%;width:18px;height:18px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
-.qg-dim{display:flex;align-items:center;gap:.3rem;margin-top:.35rem}
-.qg-dim label{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--clr-muted);width:14px;flex:none;text-align:center}
-.qg-dim input{flex:1;min-width:0;font-family:var(--font-body);font-size:.86rem;text-align:right;padding:.35rem .4rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
-.qg-dim input:focus{outline:none;border-color:var(--clr-accent)}
-.qg-cell .qg-n2{margin-top:.35rem}
+/* entry-method toggle */
+.mode-row{display:inline-flex;gap:3px;background:var(--clr-border);border-radius:8px;padding:3px}
+.mode-pill{font-family:var(--font-body);font-size:.82rem;font-weight:600;letter-spacing:.02em;padding:.42rem 1rem;border:none;background:transparent;border-radius:6px;cursor:pointer;color:var(--clr-muted);text-transform:none}
+.mode-pill.active{background:var(--navy);color:#f3ecdd;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.mode-top{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;padding:.7rem 1rem;margin-bottom:1.2rem}
+.mode-top-lbl{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--navy)}
+.mode-top-hint{font-family:var(--font-body);font-size:.78rem;color:var(--clr-muted);margin-left:auto;text-align:right}
+@media(max-width:560px){ .mode-top-hint{margin-left:0;text-align:left;width:100%} }
+
+/* quick-grid editor — boxes that mirror the cut sheet (width bottom · length right · qty middle) */
+.qg-hint{font-size:.74rem;color:var(--clr-muted);margin-bottom:1rem;line-height:1.45}
+.qg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:1.4rem .9rem}
+.qg2{position:relative;padding-top:6px}
+.qg2-n{position:absolute;top:-2px;left:2px;z-index:2;background:var(--navy);color:#f3ecdd;font-family:var(--mono);font-size:.56rem;font-weight:700;padding:.05rem .38rem;border-radius:6px}
+.qg2-del{position:absolute;top:-4px;right:0;z-index:2;border:none;background:#fff;color:var(--rd);font-size:.95rem;line-height:1;cursor:pointer;border-radius:50%;width:19px;height:19px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.qg2-del:hover{background:rgba(176,64,48,.12)}
+.qg2-frame{display:grid;grid-template-columns:1fr 46px;grid-template-rows:80px 30px;gap:5px}
+.qg2-box{grid-column:1;grid-row:1;position:relative;background:#f5f0e8;border:1.6px solid #b9b3a3;border-radius:4px;
+  background-image:linear-gradient(90deg,transparent 33%,#d4ccb8 33%,#d4ccb8 33.7%,transparent 33.7%,transparent 65%,#d4ccb8 65%,#d4ccb8 65.7%,transparent 65.7%)}
+.qg2-qty{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;text-align:center;background:transparent;border:none;font-family:var(--mono);font-size:.98rem;font-weight:700;color:#8a6a1e;padding:2px}
+.qg2-qty::placeholder{color:#c2a86a;font-weight:400}
+.qg2-qty:focus{outline:none;background:rgba(255,255,255,.7);border-radius:5px}
+.qg2-len{grid-column:2;grid-row:1;align-self:center;height:34px}
+.qg2-wid{grid-column:1;grid-row:2}
+.qg2-len,.qg2-wid{width:100%;min-width:0;text-align:center;font-family:var(--font-body);font-size:.84rem;padding:.32rem .2rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
+.qg2-len:focus,.qg2-wid:focus{outline:none;border-color:var(--clr-accent)}
+.qg2-add{align-self:stretch;min-height:116px;border:1.5px dashed var(--clr-accent);border-radius:9px;background:var(--clr-accent-lt);color:var(--navy);font-family:var(--font-body);font-size:.82rem;font-weight:600;cursor:pointer}
+.qg2-add:hover{background:rgba(200,146,42,.2)}
 .pt input.nm{min-width:60px}
 .pt input.dim{text-align:right}
 .pt input.qty{text-align:center;width:42px}
@@ -305,7 +321,18 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <div class="cs-wrap">
-<div class="cs-cols">
+
+  <!-- ════ ENTRY METHOD (choose at the top) ════ -->
+  <div class="mode-top">
+    <span class="mode-top-lbl">Entry method</span>
+    <div class="mode-row" role="tablist" aria-label="Entry method">
+      <button class="mode-pill active" id="mode-list" onclick="setEntryMode('list')" role="tab">&#9776;&nbsp; Named list</button>
+      <button class="mode-pill" id="mode-grid" onclick="setEntryMode('grid')" role="tab">&#9638;&nbsp; Quick grid</button>
+    </div>
+    <span class="mode-top-hint" id="modeHint">Type parts in a list — with names, for projects you'll come back to.</span>
+  </div>
+
+<div class="cs-cols" id="csCols">
 
   <!-- ════ LEFT: INPUT ════ -->
   <div id="inputCol">
@@ -394,12 +421,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
     <!-- PARTS -->
     <div class="card">
-      <div class="card-t" style="justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:.5rem"><span class="dot"></span>Parts</span>
-        <span class="mode-row">
-          <button class="mode-pill" id="mode-list" onclick="setEntryMode('list')" title="Type parts in a named list">Named list</button>
-          <button class="mode-pill" id="mode-grid" onclick="setEntryMode('grid')" title="Type measurements straight into a grid — no names">Quick grid</button>
-        </span>
-      </div>
+      <div class="card-t"><span class="dot"></span>Parts</div>
 
       <!-- Named-list editor -->
       <div id="listWrap" class="pt-scroll">
@@ -695,7 +717,10 @@ function projSave(list){ return lsSet(PROJ_KEY, JSON.stringify({list:list})); }
 function snapshot(){
   var u=JSON.parse(JSON.stringify(U));
   if(u.brandSource!=='custom') u.customLogo='';
-  return { U:u, parts:JSON.parse(JSON.stringify(parts)), ebState:JSON.parse(JSON.stringify(ebState)), seq:seq };
+  // don't persist blank prepopulated boxes
+  var keep=parts.filter(function(p){ return !isEmptyPart(p); });
+  var eb={}; keep.forEach(function(p){ if(ebState[p.id]) eb[p.id]=ebState[p.id]; });
+  return { U:u, parts:JSON.parse(JSON.stringify(keep)), ebState:JSON.parse(JSON.stringify(eb)), seq:seq };
 }
 function projStatus(msg, isErr){
   var el=document.getElementById('projStatus'); el.textContent=msg||'';
@@ -731,6 +756,7 @@ function loadProject(id){
   ebState=d.ebState?JSON.parse(JSON.stringify(d.ebState)):{};
   seq=d.seq||1;
   curProjId=rec.id;
+  if(U.entryMode==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); }  // reopen the grid prepopulated
   fillSettings(); renderParts(); renderAll(); save(); renderProjects();
   projStatus('Loaded "'+rec.name+'"');
 }
@@ -753,7 +779,7 @@ function newProject(){
   parts=[]; ebState={}; seq=1; curProjId=null;
   U=Object.assign(U,{ proj:'', projShow:false });
   U.code='';
-  fillSettings(); addRow('',0,0,1,''); renderParts(); renderAll(); save(); renderProjects();
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderProjects();
   document.getElementById('s-proj').focus();
 }
 function toggleProjects(){
@@ -808,33 +834,60 @@ function onCell(id,f,val){
   renderAll(); save();
 }
 // Two interchangeable editors over the same parts[]: a named list, or a
-// quick grid (measurements only, no names). Switch anytime.
+// quick grid of boxes (measurements straight in, no names). Switch anytime.
+var QG_MIN = 6;   // quick grid opens prepopulated with this many empty boxes
+function blankPart(){ var id=uid(); ebState[id]={t:0,r:0,b:0,l:0,gflip:false}; return {id:id,name:'',L:0,W:0,qty:1,code:''}; }
+function seedParts(){ if(U.entryMode==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); } else if(!parts.length){ parts.push(blankPart()); } }
+function isEmptyPart(p){ return !(p.L>0 || p.W>0 || (p.name&&p.name.trim())); }
+function pruneEmpties(){
+  parts=parts.filter(function(p){ return !isEmptyPart(p); });
+  var ids={}; parts.forEach(function(p){ ids[p.id]=1; });
+  Object.keys(ebState).forEach(function(k){ if(!ids[k]) delete ebState[k]; });
+  if(!parts.length) parts.push(blankPart());
+}
+function applyGridLayout(){ var c=document.getElementById('csCols'); if(c) c.classList.toggle('single', U.entryMode==='grid'); }
 function setEntryMode(m){
   if(m!=='grid') m='list';
-  U.entryMode=m; renderParts(); save();
+  U.entryMode=m;
+  if(m==='grid'){ while(parts.length<QG_MIN) parts.push(blankPart()); }   // prepopulate the grid
+  else { pruneEmpties(); }
+  renderParts(); renderAll(); save();
   if(m==='grid'){ var g=document.querySelector('#qgGrid input[data-f="L"]'); if(g) g.focus(); }
 }
 function renderParts(){
   var list=U.entryMode!=='grid';
+  applyGridLayout();
   document.getElementById('listWrap').style.display = list?'':'none';
   document.getElementById('gridWrap').style.display = list?'none':'';
   document.getElementById('mode-list').classList.toggle('active', list);
   document.getElementById('mode-grid').classList.toggle('active', !list);
+  var hint=document.getElementById('modeHint');
+  if(hint) hint.textContent = list
+    ? "Type parts in a list — with names, for projects you'll come back to."
+    : "Type sizes straight into the boxes — length on the right, width at the bottom, quantity in the middle.";
   if(list) renderRows(); else renderGrid();
 }
 function renderGrid(){
   var host=document.getElementById('qgGrid'); host.innerHTML='';
   parts.forEach(function(p,i){
     var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
-    var cell=document.createElement('div'); cell.className='qg-cell';
+    var cell=document.createElement('div'); cell.className='qg2';
     cell.innerHTML=
-      '<span class="qg-n">#'+(i+1)+'</span>'+
-      '<button class="qg-del" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button>'+
-      '<div class="qg-dim"><label>L</label><input type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="length" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></div>'+
-      '<div class="qg-dim"><label>W</label><input type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="width" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></div>'+
-      '<div class="qg-dim qg-n2"><label>×</label><input type="number" inputmode="numeric" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></div>';
+      '<span class="qg2-n">#'+(i+1)+'</span>'+
+      '<button class="qg2-del" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button>'+
+      '<div class="qg2-frame">'+
+        '<div class="qg2-box">'+
+          '<input class="qg2-qty" type="number" inputmode="numeric" min="1" data-id="'+p.id+'" data-f="qty" value="'+(p.qty||'')+'" placeholder="×" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)">'+
+        '</div>'+
+        '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
+        '<input class="qg2-wid" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="wid" title="Width — bottom" oninput="onCell(\''+p.id+'\',\'W\',this.value)">'+
+      '</div>';
     host.appendChild(cell);
   });
+  var add=document.createElement('button');
+  add.className='qg2-add'; add.type='button'; add.textContent='+ Add box';
+  add.onclick=function(){ addRow(); };
+  host.appendChild(add);
 }
 function renderRows(){
   var tb=document.getElementById('ptbody'); tb.innerHTML='';
@@ -1094,7 +1147,7 @@ function clearAll(){
   U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
       brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:U.entryMode||'list' };
   applyBrandDefaults();  // back to member (if signed in) / Neewoody branding
-  fillSettings(); addRow('',0,0,1,''); renderParts(); renderAll(); save(); renderProjects();
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderProjects();
 }
 
 // ── INIT ──
@@ -1105,9 +1158,7 @@ function clearAll(){
   var had=load();
   if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
   fillSettings();
-  if(!had || !parts.length){
-    if(!parts.length){ addRow('',0,0,1,''); }
-  }
+  seedParts();   // 1 blank row (list) or a prepopulated grid of boxes (grid mode)
   renderParts();
   renderAll();
   renderProjects();
