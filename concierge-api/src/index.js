@@ -379,6 +379,10 @@ async function route(request, env, ctx) {
   if (mCutlist && method === 'GET')    return withAuth(request, env, (m) => getCutlist(env, m, Number(mCutlist[1])));
   if (mCutlist && method === 'DELETE') return withAuth(request, env, (m) => deleteCutlist(env, m, Number(mCutlist[1])));
 
+  // ---- member: cut-sheet projects (whole library synced as one blob per member) ----
+  if (path === '/api/cutsheets' && method === 'GET') return withAuth(request, env, (m) => getCutsheets(env, m));
+  if (path === '/api/cutsheets' && method === 'PUT') return withPaid(request, env, (m) => saveCutsheets(request, env, m));
+
   // ---- admin: members ----
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
   if (path === '/api/admin/members' && method === 'POST') return withAdmin(request, env, () => adminCreateMember(request, env));
@@ -868,6 +872,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM cutsheet_data WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM storefront_items WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
@@ -925,6 +930,7 @@ async function adminPurgePending(env, request, admin) {
     env.DB.prepare(`DELETE FROM push_subs WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM members WHERE status='pending' AND role != 'admin'`),
   ]);
@@ -2290,6 +2296,35 @@ async function deleteCutlist(env, member, id) {
   ).bind(id, member.phone).run();
   if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
+}
+
+// ── cut-sheet projects (one JSON blob per member = their whole library) ──
+const CUTSHEET_MAX_BYTES = 1024 * 1024; // 1 MB — many projects/lists, incl. any custom logo
+
+async function getCutsheets(env, member) {
+  const row = await env.DB.prepare(
+    'SELECT data, updated_at FROM cutsheet_data WHERE member_phone = ?'
+  ).bind(member.phone).first();
+  let data = null;
+  if (row && row.data) { try { data = JSON.parse(row.data); } catch { data = null; } }
+  return json({ data: data, updated_at: row ? row.updated_at : null });
+}
+
+async function saveCutsheets(request, env, member) {
+  const body = await readJson(request);
+  let dataStr;
+  try { dataStr = JSON.stringify(body.data); } catch { dataStr = null; }
+  if (!dataStr || dataStr === 'null' || typeof body.data !== 'object') {
+    return json({ error: 'data_required' }, 400);
+  }
+  if (dataStr.length > CUTSHEET_MAX_BYTES) return json({ error: 'data_too_large', limit: CUTSHEET_MAX_BYTES }, 400);
+  await env.DB.prepare(
+    `INSERT INTO cutsheet_data (member_phone, data, updated_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(member_phone)
+     DO UPDATE SET data = excluded.data, updated_at = datetime('now')`
+  ).bind(member.phone, dataStr).run();
+  return json({ saved: true });
 }
 
 // ── member photos (R2, concierge/members/ prefix) ──────────────────────

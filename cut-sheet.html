@@ -369,13 +369,14 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   <!-- ════ BACK BAR (member ↔ Tools/Directory) ════ -->
   <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#1f2f58;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
     <span style="opacity:.85">🛠 Concierge member</span>
+    <span style="opacity:.8;font-size:.78rem">☁ Projects sync to your account</span>
     <a href="concierge/directory.html#tools" style="color:#f0e8d0;font-size:.8rem;font-weight:600;text-decoration:none;background:#c8922a;border-radius:5px;padding:.4rem .8rem;color:#241500">← Tools</a>
     <a href="concierge/directory.html" style="color:#c8922a;font-size:.8rem;text-decoration:none">Directory</a>
     <button onclick="memberLogout()" style="font-family:inherit;font-size:.75rem;background:transparent;color:rgba(240,232,208,.75);border:1px solid rgba(240,232,208,.35);border-radius:5px;padding:.35rem .7rem;cursor:pointer;margin-left:auto">Log out</button>
   </div>
   <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(31,47,88,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
     <a href="tools.html" style="font-weight:600;font-size:.82rem;color:#1f2f58;text-decoration:none;border:1px solid rgba(31,47,88,.3);border-radius:5px;padding:.35rem .8rem">← Back to Tools</a>
-    <span style="opacity:.85">Free tool — no account needed.</span>
+    <span style="opacity:.85">Free to use. <b>Log in</b> and your projects save to your account &amp; follow you across devices.</span>
     <a href="concierge/login.html?next=/cut-sheet.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#1f2f58;text-decoration:none">Member login →</a>
   </div>
 
@@ -785,7 +786,44 @@ async function fetchSession(){
               name:(m.business_name||m.name||''), phone:(m.business_phone||m.phone||''), area:m.area||'' };
     if(!U.brandTouched) applyBrandDefaults();  // adopt member branding until the user customises
     renderBrand(); renderAll(); save();
+    cloudSync();   // pull the member's projects from their account + merge (cross-device)
   }catch(e){ /* stay on default branding */ }
+}
+
+// ── CLOUD SYNC (Concierge members: projects follow you across devices) ──
+var cloudEnabled=false, cloudPushTimer=null;
+function schedulePush(){ if(!cloudEnabled) return; clearTimeout(cloudPushTimer); cloudPushTimer=setTimeout(pushCloudNow, 1500); }
+async function pushCloudNow(){
+  if(!(cloudEnabled && window.Concierge && Concierge.tokenAlive())) return;
+  try{ await Concierge.api('/cutsheets', { method:'PUT', body:{ data:{ v:2, list:projStore() } } }); }
+  catch(e){ /* offline or lapsed (renew_required) — local still holds; retries next save */ }
+}
+function mergeProjectArrays(a, b){
+  var byId={}, order=[];
+  function add(p){
+    if(!p||!p.id) return;
+    if(!byId[p.id]){ byId[p.id]=JSON.parse(JSON.stringify(p)); order.push(p.id); return; }
+    var ex=byId[p.id], lids={}; ex.lists.forEach(function(l){ lids[l.id]=l; });
+    (p.lists||[]).forEach(function(l){
+      if(!l||!l.id) return;
+      if(!lids[l.id]){ ex.lists.push(l); lids[l.id]=l; }
+      else if((l.savedAt||0) > (lids[l.id].savedAt||0)){ ex.lists[ex.lists.indexOf(lids[l.id])]=l; lids[l.id]=l; } // newer wins
+    });
+    if((p.updatedAt||0) >= (ex.updatedAt||0)){ ex.name=p.name; ex.updatedAt=p.updatedAt; }
+  }
+  (a||[]).forEach(add); (b||[]).forEach(add);
+  return order.map(function(id){ return byId[id]; });
+}
+async function cloudSync(){
+  cloudEnabled=true;
+  var cloud=null;
+  try{ var r=await Concierge.api('/cutsheets'); cloud=(r&&r.data&&Array.isArray(r.data.list))?r.data.list:[]; }
+  catch(e){ return; }   // couldn't reach account — keep working locally
+  var merged=mergeProjectArrays(projStore(), cloud);
+  projSave(merged);     // update local (also schedules a push so the account gets any local-only projects)
+  renderListChips(); renderProjectCount();
+  var libOpen=document.getElementById('projPage'); if(libOpen && libOpen.style.display!=='none') renderLibrary();
+  if(merged.length) projStatus('☁ Synced with your account — '+merged.length+' project'+(merged.length!==1?'s':''));
 }
 
 function fillSettings(){
@@ -825,7 +863,9 @@ function projStore(){
 function projSave(arr){
   // Loss insurance: keep the previous non-empty store as a backup before overwriting.
   try{ var prev=localStorage.getItem(PROJ_KEY); if(prev){ var pj=JSON.parse(prev); if(pj&&Array.isArray(pj.list)&&pj.list.length){ lsSet(PROJ_BAK, prev); } } }catch(e){}
-  return lsSet(PROJ_KEY, JSON.stringify({v:2, list:arr}));
+  var ok=lsSet(PROJ_KEY, JSON.stringify({v:2, list:arr}));
+  schedulePush();   // sync to the member's account (no-op when logged out)
+  return ok;
 }
 // If the store is somehow empty but a backup holds projects, offer to restore.
 function maybeRecoverProjects(){
