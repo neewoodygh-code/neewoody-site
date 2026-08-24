@@ -92,6 +92,25 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .mini-actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem}
 .mini-btn{font-family:var(--font-body);font-size:.74rem;font-weight:600;padding:.4rem .75rem;border-radius:6px;border:1.5px solid var(--clr-border);background:#fff;color:var(--clr-muted);cursor:pointer}
 .mini-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
+.mini-btn.primary{background:var(--navy);color:#f3ecdd;border-color:var(--navy)}
+.mini-btn.primary:hover{opacity:.9;color:#f3ecdd}
+
+/* project card */
+.chk{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--clr-muted);cursor:pointer;margin-bottom:.6rem}
+.chk input{width:16px;height:16px;accent-color:var(--clr-accent);cursor:pointer}
+.proj-actions{display:flex;gap:.5rem;flex-wrap:wrap}
+.proj-status{font-size:.7rem;color:var(--gn);margin-top:.5rem;min-height:1em;font-weight:600}
+.proj-panel{margin-top:.7rem;border:1.5px solid var(--clr-border);border-radius:9px;overflow:hidden}
+.proj-row{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;border-bottom:1px solid var(--clr-border)}
+.proj-row:last-child{border-bottom:none}
+.proj-row.cur{background:var(--clr-accent-lt)}
+.proj-row .pr-main{flex:1;min-width:0;cursor:pointer}
+.proj-row .pr-name{font-size:.86rem;font-weight:600;color:var(--clr-dark);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj-row .pr-meta{font-family:var(--mono);font-size:.6rem;color:var(--clr-muted)}
+.proj-row .pr-btn{border:none;background:transparent;color:var(--clr-muted);font-size:.68rem;font-weight:600;cursor:pointer;padding:.25rem .4rem;border-radius:4px}
+.proj-row .pr-btn:hover{background:rgba(0,0,0,.06);color:var(--navy)}
+.proj-row .pr-btn.del:hover{background:rgba(176,64,48,.12);color:var(--rd)}
+.proj-empty{padding:.8rem;text-align:center;font-size:.76rem;color:var(--clr-muted)}
 
 /* board summary */
 .bsum{display:grid;grid-template-columns:1fr;gap:.6rem}
@@ -232,6 +251,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <div class="ph-sub">Accra, Ghana · +233 24 463 3464</div>
   </div>
   <div class="ph-right">
+    <div id="ph-proj" style="display:none">Project: <b id="ph-proj-name"></b></div>
     <div>Board / colour: <b id="ph-code">—</b></div>
     <div id="ph-date"></div>
   </div>
@@ -272,10 +292,29 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
           <li><b>Mark edge banding</b> on the sheet — tap an edge once to band it (1 tick), twice to double the board then band (3 ticks), again to clear. Tap the middle of a box to flip the grain.</li>
           <li><b>Different colours?</b> Put a different code in a row's <i>Board</i> column — each colour prints on its own page.</li>
           <li><b>Print / Save PDF</b> — every page carries your logo and number. Hand it to the cutting shop.</li>
+          <li><b>Save it as a project</b> — give it a name (e.g. a client or job) and press <b>Save project</b> to keep it. Reopen any saved list from <b>Projects</b>. The project name stays off the printed sheet unless you tick "Show project name".</li>
         </ol>
-        Your entries are saved on this device automatically.
+        The current sheet is also saved on this device automatically.
       </div>
     </details>
+
+    <!-- PROJECT -->
+    <div class="card">
+      <div class="card-t"><span class="dot"></span>Project</div>
+      <div class="fld" style="margin-bottom:.6rem">
+        <label>Project name</label>
+        <input id="s-proj" placeholder="e.g. Mensah kitchen — upper units" oninput="onProjName()">
+        <div class="hint">Just a label to save and find this cut list. Not printed on the sheet unless you tick below.</div>
+      </div>
+      <label class="chk"><input type="checkbox" id="s-projshow" onchange="onSetting()"> Show project name on the printed sheet</label>
+      <div class="proj-actions">
+        <button class="mini-btn primary" onclick="saveProject()">&#128190; Save project</button>
+        <button class="mini-btn" onclick="newProject()">+ New</button>
+        <button class="mini-btn" id="projToggle" onclick="toggleProjects()">&#128193; Projects (<span id="projCount">0</span>)</button>
+      </div>
+      <div id="projPanel" class="proj-panel" style="display:none"></div>
+      <div id="projStatus" class="proj-status"></div>
+    </div>
 
     <!-- BOARD SETTINGS -->
     <div class="card">
@@ -411,11 +450,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 //  Freeform parts → board count + printable edge-band box sheet.
 //  All dimensions stored in mm internally; display converts for cm.
 // ══════════════════════════════════════════════════════
-var LS_KEY = 'nwd-cutsheet-v1';
-var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm' };
+var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
+var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
+var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
+var curProjId = null; // id of the loaded named project (null = unsaved working sheet)
 
 function uid(){ return 'p'+(seq++); }
 function num(v,def){ v=parseFloat(v); return isNaN(v)?(def||0):v; }
@@ -457,9 +498,13 @@ function onSetting(){
   U.kerf = num(document.getElementById('s-kerf').value,4);
   U.waste= num(document.getElementById('s-waste').value,12);
   U.grain= document.getElementById('s-grain').value;
+  U.projShow = document.getElementById('s-projshow').checked;
   renderAll(); save();
 }
+function onProjName(){ U.proj = document.getElementById('s-proj').value; renderAll(); save(); }
 function fillSettings(){
+  document.getElementById('s-proj').value=U.proj||'';
+  document.getElementById('s-projshow').checked=!!U.projShow;
   document.getElementById('s-code').value=U.code;
   document.getElementById('s-thick').value=U.thick;
   document.getElementById('s-bl').value=U.bl;
@@ -469,6 +514,96 @@ function fillSettings(){
   document.getElementById('s-grain').value=U.grain;
   document.getElementById('upmm').classList.toggle('active',U.unit==='mm');
   document.getElementById('upcm').classList.toggle('active',U.unit==='cm');
+}
+
+// ── NAMED PROJECTS (local, multiple saved cut lists) ──
+function projStore(){
+  try{ var d=JSON.parse(localStorage.getItem(PROJ_KEY)||'{}'); return Array.isArray(d.list)?d.list:[]; }
+  catch(e){ return []; }
+}
+function projSave(list){ try{ localStorage.setItem(PROJ_KEY, JSON.stringify({list:list})); }catch(e){} }
+function snapshot(){ return { U:JSON.parse(JSON.stringify(U)), parts:JSON.parse(JSON.stringify(parts)), ebState:JSON.parse(JSON.stringify(ebState)), seq:seq }; }
+function projStatus(msg){
+  var el=document.getElementById('projStatus'); el.textContent=msg||'';
+  if(msg){ clearTimeout(el._t); el._t=setTimeout(function(){ el.textContent=''; },2600); }
+}
+function saveProject(){
+  var name=(U.proj||'').trim();
+  if(!name){
+    name=(prompt('Name this project:','')||'').trim();
+    if(!name) return;
+    U.proj=name; document.getElementById('s-proj').value=name; save();
+  }
+  var list=projStore(), now=Date.now();
+  // update the currently-loaded project, else a same-named one, else create new
+  var idx=-1;
+  if(curProjId) idx=list.findIndex(function(p){return p.id===curProjId;});
+  if(idx<0) idx=list.findIndex(function(p){return p.name.toLowerCase()===name.toLowerCase();});
+  var rec={ id:(idx>=0?list[idx].id:('j'+now)), name:name, savedAt:now, data:snapshot() };
+  if(idx>=0) list[idx]=rec; else list.unshift(rec);
+  curProjId=rec.id;
+  projSave(list); renderProjects(); renderAll();
+  projStatus('Saved "'+name+'"');
+}
+function loadProject(id){
+  var rec=projStore().filter(function(p){return p.id===id;})[0]; if(!rec) return;
+  var d=rec.data||{};
+  U=Object.assign({ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false }, d.U||{});
+  parts=Array.isArray(d.parts)?JSON.parse(JSON.stringify(d.parts)):[];
+  ebState=d.ebState?JSON.parse(JSON.stringify(d.ebState)):{};
+  seq=d.seq||1;
+  curProjId=rec.id;
+  fillSettings(); renderRows(); renderAll(); save(); renderProjects();
+  projStatus('Loaded "'+rec.name+'"');
+}
+function renameProject(id){
+  var list=projStore(), rec=list.filter(function(p){return p.id===id;})[0]; if(!rec) return;
+  var name=(prompt('Rename project:',rec.name)||'').trim(); if(!name) return;
+  rec.name=name; rec.savedAt=Date.now();
+  if(rec.id===curProjId){ U.proj=name; document.getElementById('s-proj').value=name; save(); }
+  projSave(list); renderProjects(); renderAll();
+}
+function deleteProject(id){
+  var list=projStore(), rec=list.filter(function(p){return p.id===id;})[0]; if(!rec) return;
+  if(!confirm('Delete project "'+rec.name+'"? This only removes the saved copy, not what\'s on screen.')) return;
+  list=list.filter(function(p){return p.id!==id;});
+  if(curProjId===id) curProjId=null;
+  projSave(list); renderProjects();
+}
+function newProject(){
+  if((parts.some(function(p){return p.name||p.L||p.W;})) && !confirm('Start a new blank project? Save the current one first if you want to keep it.')) return;
+  parts=[]; ebState={}; seq=1; curProjId=null;
+  U=Object.assign(U,{ proj:'', projShow:false });
+  U.code='';
+  fillSettings(); addRow('',0,0,1,''); renderRows(); renderAll(); save(); renderProjects();
+  document.getElementById('s-proj').focus();
+}
+function toggleProjects(){
+  var p=document.getElementById('projPanel');
+  var open=p.style.display!=='none';
+  p.style.display=open?'none':'block';
+  if(!open) renderProjects();
+}
+function renderProjects(){
+  var list=projStore().slice().sort(function(a,b){return b.savedAt-a.savedAt;});
+  document.getElementById('projCount').textContent=list.length;
+  var p=document.getElementById('projPanel');
+  if(p.style.display==='none') return;
+  if(!list.length){ p.innerHTML='<div class="proj-empty">No saved projects yet. Name it above and press <b>Save project</b>.</div>'; return; }
+  p.innerHTML=list.map(function(r){
+    var n=(r.data&&r.data.parts?r.data.parts.filter(function(x){return x.L>0&&x.W>0;}).length:0);
+    var d=new Date(r.savedAt);
+    var meta=n+' part'+(n!==1?'s':'')+' · '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+    return '<div class="proj-row'+(r.id===curProjId?' cur':'')+'">'+
+      '<div class="pr-main" onclick="loadProject(\''+r.id+'\')" title="Load this project">'+
+        '<div class="pr-name">'+esc(r.name)+(r.id===curProjId?' &middot; <span style="color:var(--clr-accent-dk);font-size:.62rem;font-weight:700">OPEN</span>':'')+'</div>'+
+        '<div class="pr-meta">'+meta+'</div>'+
+      '</div>'+
+      '<button class="pr-btn" onclick="loadProject(\''+r.id+'\')">Load</button>'+
+      '<button class="pr-btn" onclick="renameProject(\''+r.id+'\')">Rename</button>'+
+      '<button class="pr-btn del" onclick="deleteProject(\''+r.id+'\')">Delete</button>'+
+    '</div>';
+  }).join('');
 }
 
 // ── PARTS ROWS ──
@@ -663,7 +798,8 @@ function renderSheet(gs){
   }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl,BW=U.bw,kerf=U.kerf;
-  var html='<div class="sheet-topbar"><span class="t">Cut Sheet</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
+  var projLbl = (U.projShow && (U.proj||'').trim()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(U.proj.trim())+'</span>' : '';
+  var html='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
     '<div class="sheet-legend">'+
       '<span>'+legTick+' <b>1 tick</b> = band this edge</span>'+
       '<span>'+legDbl+' <b>3 ticks</b> = double board, then band</span>'+
@@ -691,6 +827,10 @@ function renderAll(){
   renderSummary(gs);
   renderSheet(gs);
   document.getElementById('ph-code').textContent = U.code.trim() || (gs[0]?gs[0].code:'—');
+  // Project name on the printed running header — only when the member ticks "show".
+  var showProj = U.projShow && (U.proj||'').trim();
+  document.getElementById('ph-proj').style.display = showProj ? 'block' : 'none';
+  document.getElementById('ph-proj-name').textContent = showProj ? U.proj.trim() : '';
 }
 
 // ── EDGE / GRAIN TAP DELEGATION ──
@@ -720,7 +860,7 @@ document.addEventListener('click', function(e){
 // ── EXAMPLE / CLEAR ──
 function loadExample(){
   if(parts.length && !confirm('Replace the current parts with an example?')) return;
-  U.code='18mm Oak Melamine';
+  U.code='18mm Oak Melamine'; U.proj='Example — wardrobe'; curProjId=null;
   parts=[]; ebState={}; seq=1;
   fillSettings();
   addRow('Side panel',1800,500,2,'');
@@ -734,10 +874,10 @@ function loadExample(){
   renderRows(); renderAll(); save();
 }
 function clearAll(){
-  if(!confirm('Clear all parts and settings on this device?')) return;
-  parts=[]; ebState={}; seq=1;
-  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm' };
-  fillSettings(); renderRows(); renderAll(); save();
+  if(!confirm('Clear the current sheet? Your saved projects are kept — only what\'s on screen now is cleared.')) return;
+  parts=[]; ebState={}; seq=1; curProjId=null;
+  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false };
+  fillSettings(); addRow('',0,0,1,''); renderRows(); renderAll(); save(); renderProjects();
 }
 
 // ── INIT ──
@@ -752,6 +892,7 @@ function clearAll(){
   }
   renderRows();
   renderAll();
+  renderProjects();
 })();
 </script>
 </body>
