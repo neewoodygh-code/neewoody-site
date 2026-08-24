@@ -80,6 +80,21 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .pt input{width:100%;font-family:var(--font-body);font-size:.86rem;padding:.4rem .45rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
 .pt input:focus{outline:none;border-color:var(--clr-accent)}
 .pt-scroll{overflow-x:auto}
+/* entry-mode toggle */
+.mode-row{display:inline-flex;gap:2px;background:var(--clr-border);border-radius:7px;padding:2px}
+.mode-pill{font-family:var(--font-body);font-size:.68rem;font-weight:600;letter-spacing:.02em;padding:.3rem .65rem;border:none;background:transparent;border-radius:5px;cursor:pointer;color:var(--clr-muted);text-transform:none}
+.mode-pill.active{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+/* quick-grid editor */
+.qg-hint{font-size:.72rem;color:var(--clr-muted);margin-bottom:.6rem;line-height:1.45}
+.qg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.6rem}
+.qg-cell{position:relative;border:1.5px solid var(--clr-border);border-radius:10px;padding:.55rem .55rem .5rem;background:#fff}
+.qg-cell .qg-n{position:absolute;top:-8px;left:8px;background:var(--navy);color:#f3ecdd;font-family:var(--mono);font-size:.58rem;font-weight:700;padding:.05rem .4rem;border-radius:6px}
+.qg-cell .qg-del{position:absolute;top:-9px;right:5px;border:none;background:#fff;color:var(--rd);font-size:1rem;line-height:1;cursor:pointer;border-radius:50%;width:18px;height:18px;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.qg-dim{display:flex;align-items:center;gap:.3rem;margin-top:.35rem}
+.qg-dim label{font-family:var(--mono);font-size:.62rem;font-weight:700;color:var(--clr-muted);width:14px;flex:none;text-align:center}
+.qg-dim input{flex:1;min-width:0;font-family:var(--font-body);font-size:.86rem;text-align:right;padding:.35rem .4rem;border:1.5px solid var(--clr-border);border-radius:5px;background:#fff;color:var(--clr-dark)}
+.qg-dim input:focus{outline:none;border-color:var(--clr-accent)}
+.qg-cell .qg-n2{margin-top:.35rem}
 .pt input.nm{min-width:60px}
 .pt input.dim{text-align:right}
 .pt input.qty{text-align:center;width:42px}
@@ -379,8 +394,15 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
     <!-- PARTS -->
     <div class="card">
-      <div class="card-t"><span class="dot"></span>Parts</div>
-      <div class="pt-scroll">
+      <div class="card-t" style="justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:.5rem"><span class="dot"></span>Parts</span>
+        <span class="mode-row">
+          <button class="mode-pill" id="mode-list" onclick="setEntryMode('list')" title="Type parts in a named list">Named list</button>
+          <button class="mode-pill" id="mode-grid" onclick="setEntryMode('grid')" title="Type measurements straight into a grid — no names">Quick grid</button>
+        </span>
+      </div>
+
+      <!-- Named-list editor -->
+      <div id="listWrap" class="pt-scroll">
       <table class="pt">
         <thead>
           <tr>
@@ -395,6 +417,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
         <tbody id="ptbody"></tbody>
       </table>
       </div>
+
+      <!-- Quick-grid editor (measurements only, no names) -->
+      <div id="gridWrap" style="display:none">
+        <div class="qg-hint">Type length &amp; width straight in — length is the grain (right of the box), width is the bottom. No names needed.</div>
+        <div class="qg-grid" id="qgGrid"></div>
+      </div>
+
       <button class="btn-add" onclick="addRow()">+ Add part</button>
       <div class="mini-actions">
         <button class="mini-btn" onclick="loadExample()">Load example</button>
@@ -482,7 +511,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
 var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
 var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
-          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false };
+          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list' };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
@@ -519,7 +548,7 @@ function setUnit(u){
   document.getElementById('upmm').classList.toggle('active',u==='mm');
   document.getElementById('upcm').classList.toggle('active',u==='cm');
   // re-render rows so dim fields show the new unit; board fields stay mm
-  renderRows(); renderAll(); save();
+  renderParts(); renderAll(); save();
 }
 function onSetting(){
   U.code = document.getElementById('s-code').value;
@@ -686,7 +715,7 @@ function loadProject(id){
   ebState=d.ebState?JSON.parse(JSON.stringify(d.ebState)):{};
   seq=d.seq||1;
   curProjId=rec.id;
-  fillSettings(); renderRows(); renderAll(); save(); renderProjects();
+  fillSettings(); renderParts(); renderAll(); save(); renderProjects();
   projStatus('Loaded "'+rec.name+'"');
 }
 function renameProject(id){
@@ -708,7 +737,7 @@ function newProject(){
   parts=[]; ebState={}; seq=1; curProjId=null;
   U=Object.assign(U,{ proj:'', projShow:false });
   U.code='';
-  fillSettings(); addRow('',0,0,1,''); renderRows(); renderAll(); save(); renderProjects();
+  fillSettings(); addRow('',0,0,1,''); renderParts(); renderAll(); save(); renderProjects();
   document.getElementById('s-proj').focus();
 }
 function toggleProjects(){
@@ -744,15 +773,16 @@ function addRow(name,L,W,qty,code){
   var id=uid();
   parts.push({id:id, name:name||'', L:L||0, W:W||0, qty:qty||1, code:code||''});
   ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
-  renderRows(); renderAll(); save();
-  // focus the new name field
-  var el=document.querySelector('input[data-id="'+id+'"][data-f="name"]');
+  renderParts(); renderAll(); save();
+  // focus the new row — name in list mode, length in grid mode
+  var f = U.entryMode==='grid' ? 'L' : 'name';
+  var el=document.querySelector('input[data-id="'+id+'"][data-f="'+f+'"]');
   if(el) el.focus();
 }
 function delRow(id){
   parts=parts.filter(function(p){return p.id!==id;});
   delete ebState[id];
-  renderRows(); renderAll(); save();
+  renderParts(); renderAll(); save();
 }
 function onCell(id,f,val){
   var p=parts.filter(function(x){return x.id===id;})[0]; if(!p) return;
@@ -760,6 +790,35 @@ function onCell(id,f,val){
   else if(f==='qty') p.qty=Math.max(1,Math.round(num(val,1)));
   else p[f]=toMM(num(val,0));      // L or W: convert to mm
   renderAll(); save();
+}
+// Two interchangeable editors over the same parts[]: a named list, or a
+// quick grid (measurements only, no names). Switch anytime.
+function setEntryMode(m){
+  if(m!=='grid') m='list';
+  U.entryMode=m; renderParts(); save();
+  if(m==='grid'){ var g=document.querySelector('#qgGrid input[data-f="L"]'); if(g) g.focus(); }
+}
+function renderParts(){
+  var list=U.entryMode!=='grid';
+  document.getElementById('listWrap').style.display = list?'':'none';
+  document.getElementById('gridWrap').style.display = list?'none':'';
+  document.getElementById('mode-list').classList.toggle('active', list);
+  document.getElementById('mode-grid').classList.toggle('active', !list);
+  if(list) renderRows(); else renderGrid();
+}
+function renderGrid(){
+  var host=document.getElementById('qgGrid'); host.innerHTML='';
+  parts.forEach(function(p,i){
+    var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
+    var cell=document.createElement('div'); cell.className='qg-cell';
+    cell.innerHTML=
+      '<span class="qg-n">#'+(i+1)+'</span>'+
+      '<button class="qg-del" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button>'+
+      '<div class="qg-dim"><label>L</label><input type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="length" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></div>'+
+      '<div class="qg-dim"><label>W</label><input type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="width" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></div>'+
+      '<div class="qg-dim qg-n2"><label>×</label><input type="number" inputmode="numeric" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></div>';
+    host.appendChild(cell);
+  });
 }
 function renderRows(){
   var tb=document.getElementById('ptbody'); tb.innerHTML='';
@@ -792,7 +851,7 @@ function ebTicks(side,n){
 }
 function ebHit(id,side,x,y,w,h){ return '<rect class="eb-edge" data-id="'+id+'" data-side="'+side+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'"/>'; }
 
-function partBox(p){
+function partBox(p, fallback){
   var eb=ebState[p.id]||{t:0,r:0,b:0,l:0,gflip:false};
   var ticks='';
   ['t','b','l','r'].forEach(function(s){ if(eb[s]) ticks+=ebTicks(s, eb[s]===2?3:1); });
@@ -810,7 +869,7 @@ function partBox(p){
       ebHit(p.id,'t',18,1,64,13)+ebHit(p.id,'b',18,60,64,14)+ebHit(p.id,'l',6,10,14,60)+ebHit(p.id,'r',80,10,14,60)+
       '<rect class="eb-grain" data-id="'+p.id+'" x="22" y="16" width="56" height="42" fill="transparent"/>'+
     '</svg>';
-  return '<div class="eb-item">'+svg+'<div class="eb-part-name">'+esc(p.name||'Part')+'</div></div>';
+  return '<div class="eb-item">'+svg+'<div class="eb-part-name">'+esc((p.name&&p.name.trim())||fallback||'Part')+'</div></div>';
 }
 
 // ── BOARD PACKING (guillotine shelf, first-fit-decreasing) ──
@@ -938,6 +997,7 @@ function renderSheet(gs){
       '<span>'+legDbl+' <b>3 ticks</b> = double board, then band</span>'+
       '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
     '</div>';
+  var pn=0;  // running part number → box fallback label when unnamed (quick-grid mode)
   gs.forEach(function(g){
     var items=[]; g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
@@ -950,7 +1010,7 @@ function renderSheet(gs){
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
       '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm</span></div>'+
       '<div class="eb-grid">';
-    g.parts.forEach(function(p){ html+=partBox(p); });
+    g.parts.forEach(function(p){ html+=partBox(p, '#'+(++pn)); });
     html+='</div></div>';
   });
   out.innerHTML=html;
@@ -1010,15 +1070,15 @@ function loadExample(){
   parts.forEach(function(p){ if(p.name==='Door'){ ebState[p.id]={t:1,r:1,b:1,l:1,gflip:false}; }
     else if(p.name==='Fixed shelf'){ ebState[p.id]={t:0,r:1,b:0,l:0,gflip:false}; } });
   document.getElementById('s-code').value=U.code;
-  renderRows(); renderAll(); save();
+  renderParts(); renderAll(); save();
 }
 function clearAll(){
   if(!confirm('Clear the current sheet? Your saved projects are kept — only what\'s on screen now is cleared.')) return;
   parts=[]; ebState={}; seq=1; curProjId=null;
   U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
-      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false };
+      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:U.entryMode||'list' };
   applyBrandDefaults();  // back to member (if signed in) / Neewoody branding
-  fillSettings(); addRow('',0,0,1,''); renderRows(); renderAll(); save(); renderProjects();
+  fillSettings(); addRow('',0,0,1,''); renderParts(); renderAll(); save(); renderProjects();
 }
 
 // ── INIT ──
@@ -1032,7 +1092,7 @@ function clearAll(){
   if(!had || !parts.length){
     if(!parts.length){ addRow('',0,0,1,''); }
   }
-  renderRows();
+  renderParts();
   renderAll();
   renderProjects();
   fetchSession();   // async: adopt the member's own logo & number if signed in

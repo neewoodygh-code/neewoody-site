@@ -257,6 +257,54 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 /* intro + filters */
 .wrap{ max-width:1100px; margin:0 auto; padding:1.75rem 1.5rem 4rem; }
 .lead{ margin-bottom:1.5rem; }
+
+/* ── 3-column shell: left nav rail + centre + right help rail (wide screens) ── */
+.shell{ display:block; }
+.rail{ display:none; }
+@media(min-width:1200px){
+  .tabbar{ display:none; }               /* the left rail becomes the primary nav */
+  .shell{ display:grid; grid-template-columns:238px minmax(0,1fr) 302px; gap:1.6rem;
+    max-width:1580px; margin:0 auto; padding:1.75rem 1.6rem 4rem; align-items:start; }
+  .shell .wrap{ max-width:none; margin:0; padding:0; }
+  .rail{ display:block; position:sticky; top:78px; max-height:calc(100vh - 96px); overflow-y:auto;
+    scrollbar-width:thin; }
+  .rail::-webkit-scrollbar{ width:6px; } .rail::-webkit-scrollbar-thumb{ background:rgba(31,47,88,.18); border-radius:3px; }
+}
+.rail-h{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 .55rem .25rem; }
+/* left nav */
+.rnav{ display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; background:transparent;
+  border:none; border-radius:9px; padding:.55rem .6rem; cursor:pointer; margin-bottom:.15rem;
+  transition:background .15s,box-shadow .15s; }
+.rnav[hidden]{ display:none; }
+.rnav .ic{ width:34px; height:34px; flex:none; display:flex; align-items:center; justify-content:center;
+  border-radius:8px; background:var(--cream-dark); color:var(--navy); transition:background .15s,color .15s; }
+.rnav .ic svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.rnav .lb{ display:flex; flex-direction:column; min-width:0; }
+.rnav .lb b{ font-family:var(--ui); font-size:.84rem; font-weight:600; color:var(--ink); line-height:1.2; }
+.rnav .lb i{ font-family:var(--body); font-size:.68rem; font-style:normal; color:var(--muted);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.rnav .rc{ margin-left:auto; min-width:18px; padding:0 5px; background:var(--gold); color:var(--navy);
+  border-radius:9px; font-family:var(--ui); font-size:.6rem; font-weight:700; line-height:18px; text-align:center; }
+.rnav:hover{ background:#fff; }
+.rnav:hover .ic{ background:var(--navy); color:var(--cream); }
+.rnav.active{ background:#fff; box-shadow:0 3px 12px rgba(31,47,88,.09); }
+.rnav.active .ic{ background:var(--gold); color:var(--navy); }
+.rnav.active .lb b{ color:var(--navy); }
+/* right help panel */
+.rail-right{ background:#fff; border:1px solid rgba(31,47,88,.1); border-radius:11px; padding:1.15rem 1.05rem; }
+.rail-lead{ font-family:var(--body); font-size:.85rem; color:var(--muted); line-height:1.5; margin:0 0 .85rem; }
+.tipact{ display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; background:var(--cream);
+  border:1px solid var(--cream-dark); border-radius:9px; padding:.55rem .65rem; margin-bottom:.45rem;
+  cursor:pointer; font-family:var(--ui); font-size:.79rem; font-weight:500; color:var(--navy);
+  transition:border-color .15s,background .15s; }
+.tipact:hover{ border-color:var(--gold); background:#fffdf7; }
+.tipact svg{ width:17px; height:17px; flex:none; color:var(--gold); stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.benefits-list{ list-style:none; margin:.2rem 0 0; padding:0; }
+.benefits-list li{ font-family:var(--body); font-size:.82rem; color:var(--ink); padding:.26rem 0 .26rem 1.15rem; position:relative; line-height:1.4; }
+.benefits-list li::before{ content:'✓'; position:absolute; left:0; top:.26rem; color:var(--gold); font-weight:700; }
+.rail-tip{ margin-top:1rem; background:var(--cream); border-left:3px solid var(--gold); border-radius:0 7px 7px 0;
+  padding:.6rem .7rem; font-family:var(--body); font-size:.78rem; color:var(--ink); line-height:1.5; }
+.rail-tip b{ color:var(--navy); }
 .lead h1{ font-family:var(--display); font-weight:500; font-size:1.8rem; }
 .lead p{ color:var(--muted); font-size:.95rem; margin-top:.35rem; }
 .filters{ display:flex; flex-wrap:wrap; gap:.6rem; margin-bottom:1.5rem; align-items:center; }
@@ -530,6 +578,10 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <button class="tab" data-tab="support">Support</button>
 </nav>
 
+<div class="shell">
+
+<aside class="rail rail-left" id="railNav" aria-label="Sections"></aside>
+
 <div class="wrap">
 
   <div id="membershipBar" class="mbar" style="display:none"></div>
@@ -776,7 +828,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     <div id="ordersList"></div>
     <div id="ordersState" class="state">Loading orders…</div>
   </div>
-</div>
+</div><!-- /wrap -->
+
+<aside class="rail rail-right" id="railTips" aria-label="Getting started"></aside>
+
+</div><!-- /shell -->
 
 <!-- trade popover -->
 <div class="spop" id="spop" role="tooltip"></div>
@@ -1865,6 +1921,10 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     });
     // breadcrumb reflects the active section (strip any "soon" pill text)
     if (activeTab) document.getElementById('crumbCurrent').textContent = activeTab.textContent.replace(/soon/i, '').trim();
+    // keep the left nav rail in sync with the active section
+    document.querySelectorAll('#railNav .rnav').forEach(function (b) {
+      b.classList.toggle('active', b.getAttribute('data-tab') === name);
+    });
     closeSpop();
     // Lapsed lockout: benefit tabs show the renew card instead of loading.
     if (membership && membership.lapsed && LOCKED_WHEN_LAPSED.indexOf(name) >= 0) {
@@ -1890,6 +1950,79 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     var b = e.target.closest('.tab');
     if (b) showTab(b.getAttribute('data-tab'));
   });
+
+  // ── Left nav rail + right help rail (wide screens; the horizontal tabbar is
+  //    the mobile fallback). Icon cues make the nav more "leading" for newcomers. ──
+  var RAIL_IC = {
+    directory: '<circle cx="9" cy="7" r="3.2"/><path d="M2.5 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h4a4.5 4.5 0 0 1 4.5 4.5V20"/><path d="M17 4.2a3.2 3.2 0 0 1 0 6"/><path d="M20.5 20v-1.5a4.3 4.3 0 0 0-2.8-4"/>',
+    jobs: '<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7"/><path d="M2.5 12h19"/>',
+    services: '<path d="M17 2.5 21 6l-4 3.5"/><path d="M3 8V7a2 2 0 0 1 2-2h16"/><path d="M7 21.5 3 18l4-3.5"/><path d="M21 16v1a2 2 0 0 1-2 2H3"/>',
+    sourcing: '<path d="M5.5 3h13l1.5 4.5H4L5.5 3z"/><path d="M4 7.5V19a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 19V7.5"/><path d="M9 12a3 3 0 0 0 6 0"/>',
+    storefront: '<path d="M4 4h16l1 5H3l1-5z"/><path d="M4.5 9v10a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V9"/><path d="M9.5 20v-5h5v5"/>',
+    orders: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+    tools: '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.6-3.6a6 6 0 0 1-7.9 7.7l-6.3 6.3a2.1 2.1 0 0 1-3-3l6.3-6.3a6 6 0 0 1 7.7-7.9l-3.4 3.8z"/>',
+    safety: '<path d="M12 3 5 5.5V11c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V5.5L12 3z"/>',
+    academy: '<path d="M12 4 2.5 8.5 12 13l9.5-4.5L12 4z"/><path d="M6.5 11v4.5c0 1.2 2.5 2.5 5.5 2.5s5.5-1.3 5.5-2.5V11"/>',
+    support: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.6 1c0 2-3 2.6-3 2.6"/><path d="M12 17h.01"/>'
+  };
+  var RAIL_ITEMS = [
+    { tab: 'directory', label: 'Directory', sub: 'Find & hire members' },
+    { tab: 'jobs', label: 'Jobs', sub: 'Post work · get hired' },
+    { tab: 'services', label: 'Services', sub: 'Buy-for-me · who offers what' },
+    { tab: 'sourcing', label: 'Sourcing', sub: 'Vendors & materials' },
+    { tab: 'storefront', label: 'My Storefront', sub: 'Your shop', vendor: true },
+    { tab: 'orders', label: 'Orders', sub: 'Incoming orders', vendor: true, count: true },
+    { tab: 'tools', label: 'Tools', sub: 'Cut lists · pricing' },
+    { tab: 'safety', label: 'Safety', sub: 'Lone-worker check-in' },
+    { tab: 'academy', label: 'Academy', sub: 'Learn the craft' },
+    { tab: 'support', label: 'Support', sub: 'Help & FAQ' }
+  ];
+  function buildRailNav() {
+    var host = document.getElementById('railNav'); if (!host) return;
+    var html = '<div class="rail-h">Go to</div>';
+    RAIL_ITEMS.forEach(function (it) {
+      var idAttr = it.tab === 'storefront' ? ' id="railStorefront"' : it.tab === 'orders' ? ' id="railOrders"' : '';
+      html += '<button class="rnav' + (it.tab === 'directory' ? ' active' : '') + '" data-tab="' + it.tab + '"' + idAttr + (it.vendor ? ' hidden' : '') + '>' +
+        '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (RAIL_IC[it.tab] || '') + '</svg></span>' +
+        '<span class="lb"><b>' + it.label + '</b><i>' + it.sub + '</i></span>' +
+        (it.count ? '<span class="rc" id="railOrdersCount" hidden>0</span>' : '') +
+        '</button>';
+    });
+    host.innerHTML = html;
+    host.addEventListener('click', function (e) {
+      var b = e.target.closest('.rnav'); if (b) { showTab(b.getAttribute('data-tab')); window.scrollTo(0, 0); }
+    });
+  }
+  function buildRailTips() {
+    var host = document.getElementById('railTips'); if (!host) return;
+    var svg = function (p) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>'; };
+    host.innerHTML =
+      '<div class="rail-h">New here?</div>' +
+      '<p class="rail-lead">Tell us what you want to do — tap and we\'ll take you there.</p>' +
+      '<button class="tipact" data-go="directory">' + svg(RAIL_IC.directory) + 'Find &amp; hire a carpenter</button>' +
+      '<button class="tipact" data-go="jobs">' + svg(RAIL_IC.jobs) + 'Post a job or find work</button>' +
+      '<button class="tipact" data-go="services">' + svg(RAIL_IC.services) + 'Get materials bought &amp; delivered</button>' +
+      '<button class="tipact" data-go="tools">' + svg(RAIL_IC.tools) + 'Price a job or make a cut list</button>' +
+      '<button class="tipact" data-act="profile">' + svg(RAIL_IC.directory) + 'Complete my profile — get found</button>' +
+      '<div class="rail-h" style="margin-top:1.2rem">Your membership</div>' +
+      '<ul class="benefits-list">' +
+        '<li>Be found &amp; hire other members</li>' +
+        '<li>Jobs board — post work, get hired</li>' +
+        '<li>Buy-for-me &amp; delivery runners</li>' +
+        '<li>Free member tools — cut lists &amp; pricing</li>' +
+        '<li>Safety check-in for solo visits</li>' +
+      '</ul>' +
+      '<div class="rail-tip"><b>Tip:</b> Add a photo or logo and your trades — members are far more likely to contact a complete profile.</div>';
+    host.addEventListener('click', function (e) {
+      var b = e.target.closest('.tipact'); if (!b) return;
+      var go = b.getAttribute('data-go'), act = b.getAttribute('data-act');
+      if (act === 'profile') { var eb = document.getElementById('editBtn'); if (eb) eb.click(); return; }
+      if (go) { showTab(go); window.scrollTo(0, 0); }
+    });
+  }
+  buildRailNav();
+  buildRailTips();
+
   // NOTE: hash-based tab activation happens at the bottom of this script,
   // after every section's elements/handlers exist (showTab('jobs') calls
   // loadJobs, which needs the jobs section fully set up).
@@ -2284,6 +2417,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   function updateOrdersBadge(n) {
     if (n > 0) { ordersCountEl.hidden = false; ordersCountEl.textContent = n > 9 ? '9+' : String(n); }
     else ordersCountEl.hidden = true;
+    var rc = document.getElementById('railOrdersCount');
+    if (rc) { if (n > 0) { rc.hidden = false; rc.textContent = n > 9 ? '9+' : String(n); } else rc.hidden = true; }
   }
   function orderCard(o) {
     var el = document.createElement('div'); el.className = 'job-card';
@@ -2668,7 +2803,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' },
     { id: 29, date: '2026-07-20', title: 'Pin where you’re based', body: 'Any member can now add a location pin in My profile (not just vendors). It shows a small map on your profile so people can see where you’re based and how to reach you. Totally optional — your area still works as before.' },
     { id: 30, date: '2026-07-21', title: 'Your dashboard, personalised', body: 'When you open the member area you now get a “near you” panel up top — the latest jobs and buy-for-me requests in your area, newest first, with a New tag for anything since your last visit. So even if browser alerts don’t reach you, you never miss what’s happening around you. Tap any item to jump to it.' },
-    { id: 31, date: '2026-08-23', title: 'Step-by-step guides on the tools', body: 'The Cutlist generator and the Job Pricing tool now have a “How to use this tool” guide right on the page — a sidebar on a computer, or a “How to use” button on your phone. New to a tool? Read the quick steps and tips first, then get to work.' }
+    { id: 31, date: '2026-08-23', title: 'Step-by-step guides on the tools', body: 'The Cutlist generator and the Job Pricing tool now have a “How to use this tool” guide right on the page — a sidebar on a computer, or a “How to use” button on your phone. New to a tool? Read the quick steps and tips first, then get to work.' },
+    { id: 32, date: '2026-08-24', title: 'Easier to get around', body: 'On a computer the member area now has a side menu with clear icons on the left — Directory, Jobs, Tools and the rest, each with a line on what it’s for — plus a “New here?” panel on the right that takes you straight to what you want to do. On a phone the tabs across the top work as before.' },
+    { id: 33, date: '2026-08-24', title: 'New tool: Cut Sheet Generator', body: 'In “Your member tools” open the Cut Sheet Generator. Type in your parts — or switch to Quick grid and enter measurements straight in, no names needed — and get a printable sheet of boxes with edge-band marks plus how many boards you need. It prints with YOUR logo and number to hand to the cutting shop.' }
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
@@ -2762,6 +2899,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   // ── pay-to-join hard paywall (pending members) ──
   function renderPaywall() {
     document.getElementById('tabbar').style.display = 'none';
+    var rn = document.getElementById('railNav'); if (rn) rn.style.display = 'none';
+    var rt = document.getElementById('railTips'); if (rt) rt.style.display = 'none';
+    var sh = document.querySelector('.shell'); if (sh) sh.style.display = 'block'; // collapse the 3-col grid so the paywall centres
     var cr = document.querySelector('.crumbs'); if (cr) cr.style.display = 'none';
     TABS.forEach(function (t) { var el = document.getElementById('tab-' + t); if (el) el.hidden = true; });
     payBar.style.display = 'none';
@@ -2992,6 +3132,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     if (me.member_type === 'vendor') {
       document.getElementById('storefrontTab').hidden = false;
       document.getElementById('ordersTab').hidden = false;
+      var rs = document.getElementById('railStorefront'); if (rs) rs.hidden = false;
+      var ro = document.getElementById('railOrders'); if (ro) ro.hidden = false;
     }
     handlePayReturn();  // returning from a payment (join/renew/monthly) → verify + reload
     initAlerts();
