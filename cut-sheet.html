@@ -156,6 +156,32 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .proj-row .pr-btn:hover{background:rgba(0,0,0,.06);color:var(--navy)}
 .proj-row .pr-btn.del:hover{background:rgba(176,64,48,.12);color:var(--rd)}
 .proj-empty{padding:.8rem;text-align:center;font-size:.76rem;color:var(--clr-muted)}
+/* list quick-switch chips (lists in the current project) */
+.list-chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin-bottom:.7rem}
+.list-chips .lc-lbl{font-family:var(--mono);font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--clr-muted);width:100%;margin-bottom:.1rem}
+.list-chips .lc-empty{font-size:.74rem;color:var(--clr-muted);font-style:italic}
+.lc-chip{font-family:var(--font-body);font-size:.76rem;font-weight:600;padding:.32rem .7rem;border:1.5px solid var(--clr-border);border-radius:20px;background:#fff;color:var(--clr-muted);cursor:pointer;white-space:nowrap}
+.lc-chip:hover{border-color:var(--clr-accent);color:var(--navy)}
+.lc-chip.active{background:var(--navy);color:#f3ecdd;border-color:var(--navy)}
+.lc-chip.add{border-style:dashed;color:var(--navy)}
+/* projects library (full-screen) */
+.lib-empty{max-width:600px;margin:2rem auto;text-align:center;color:var(--clr-muted);font-size:.95rem}
+.lib-proj{max-width:900px;margin:0 auto 1.3rem;background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;overflow:hidden}
+.lib-phd{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--navy);color:#f3ecdd}
+.lib-phd .lp-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700}
+.lib-phd .lp-act{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.lib-phd .lp-count{font-family:var(--mono);font-size:.66rem;color:rgba(243,236,221,.75);margin-right:.2rem}
+.lib-phd .ll-btn{color:#f3ecdd;border-color:rgba(243,236,221,.4)}
+.lib-lists{padding:.5rem}
+.lib-list{display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;border-radius:8px}
+.lib-list:hover{background:var(--clr-accent-lt)}
+.lib-list.cur{background:var(--clr-accent-lt)}
+.lib-list .ll-main{flex:1;min-width:0;cursor:pointer}
+.lib-list .ll-name{font-size:.92rem;font-weight:600;color:var(--clr-dark)}
+.lib-list .ll-meta{font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)}
+.ll-btn{border:1.5px solid var(--clr-border);background:transparent;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem;font-weight:600;cursor:pointer;padding:.3rem .6rem;border-radius:6px}
+.ll-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
+.ll-btn.del:hover{border-color:var(--rd);color:var(--rd)}
 
 /* sheet header / branding card */
 .brand-who{font-size:.76rem;color:var(--clr-muted);margin-bottom:.7rem;line-height:1.5}
@@ -373,27 +399,30 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
           <li><b>Mark edge banding</b> on the sheet — tap an edge once to band it (1 tick), twice to double the board then band (3 ticks), again to clear. Tap the middle of a box to flip the grain.</li>
           <li><b>Different colours?</b> Put a different code in a row's <i>Board</i> column — each colour prints on its own page.</li>
           <li><b>Print / Save PDF</b> — every page carries your logo and number. Hand it to the cutting shop.</li>
-          <li><b>Save it as a project</b> — give it a name (e.g. a client or job) and press <b>Save project</b> to keep it. Reopen any saved list from <b>Projects</b>. The project name stays off the printed sheet unless you tick "Show project name".</li>
+          <li><b>Save it under a project</b> — a project is a home or client; each can hold several cut lists (a wardrobe, a kitchen, a TV unit). Name the project and the cut list, press <b>Save cut list</b>, and switch between a project's lists with the chips. Browse everything under <b>My projects</b>. Names stay off the printed sheet unless you tick "Show project &amp; list name".</li>
         </ol>
         The current sheet and your saved projects live <b>on this device</b> (this browser) — they don't sync between your phone and computer yet.
       </div>
     </details>
 
-    <!-- PROJECT -->
+    <!-- PROJECT & CUT LISTS -->
     <div class="card">
-      <div class="card-t"><span class="dot"></span>Project</div>
-      <div class="fld" style="margin-bottom:.6rem">
-        <label>Project name</label>
-        <input id="s-proj" placeholder="e.g. Mensah kitchen — upper units" oninput="onProjName()">
-        <div class="hint">Just a label to save and find this cut list. Not printed on the sheet unless you tick below.</div>
+      <div class="card-t"><span class="dot"></span>Project &amp; cut lists</div>
+      <div class="grid2" style="margin-bottom:.55rem">
+        <div class="fld"><label>Project — home / client</label>
+          <input id="s-proj" placeholder="e.g. Adjei — Cantonments" oninput="onProjName()"></div>
+        <div class="fld"><label>This cut list — which piece?</label>
+          <input id="s-listname" placeholder="e.g. Master wardrobe" oninput="onListName()"></div>
       </div>
-      <label class="chk"><input type="checkbox" id="s-projshow" onchange="onSetting()"> Show project name on the printed sheet</label>
+      <div class="hint" style="margin-bottom:.55rem">One project (a home/client) can hold several cut lists — a wardrobe, a kitchen, a TV unit…</div>
+      <div id="listChips" class="list-chips"></div>
+      <label class="chk"><input type="checkbox" id="s-projshow" onchange="onSetting()"> Show project &amp; list name on the printed sheet</label>
       <div class="proj-actions">
-        <button class="mini-btn primary" onclick="saveProject()">&#128190; Save project</button>
-        <button class="mini-btn" onclick="newProject()">+ New</button>
-        <button class="mini-btn" id="projToggle" onclick="toggleProjects()">&#128193; Projects (<span id="projCount">0</span>)</button>
+        <button class="mini-btn primary" onclick="saveCurrentList()">&#128190; Save cut list</button>
+        <button class="mini-btn" onclick="newList()">+ New list</button>
+        <button class="mini-btn" onclick="newProject()">+ New project</button>
+        <button class="mini-btn" onclick="openLibrary()">&#128193; My projects (<span id="projCount">0</span>)</button>
       </div>
-      <div id="projPanel" class="proj-panel" style="display:none"></div>
       <div id="projStatus" class="proj-status"></div>
     </div>
 
@@ -563,6 +592,18 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   </div>
 </div>
 
+<!-- ════ MY PROJECTS LIBRARY ════ -->
+<div id="projPage" class="qg-page" style="display:none" aria-label="My projects">
+  <div class="qg-bar">
+    <div class="qg-bar-l"><button class="qg-back" onclick="closeLibrary()">&#8592; Done</button><span class="qg-title">My projects</span></div>
+    <div class="qg-bar-r"><button class="qg-print" onclick="newProjectFromLibrary()">+ New project</button></div>
+  </div>
+  <div class="qg-scroll">
+    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it.</div>
+    <div id="projLib"></div>
+  </div>
+</div>
+
 <script src="js/main.js"></script>
 <script src="js/concierge.js?v=20260721a"></script>
 <script>
@@ -573,12 +614,14 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 // ══════════════════════════════════════════════════════
 var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
 var PROJ_KEY = 'nwd-cutsheet-projects'; // named saved projects
-var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
+var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false,
           brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
-var curProjId = null; // id of the loaded named project (null = unsaved working sheet)
+// A project (a home/client) holds many cut lists. The working state = one cut list.
+var curProjId = null; // project the working list belongs to (null = unsaved)
+var curListId = null; // the specific cut list within that project (null = new/unsaved)
 var session = { loggedIn:false, logoUrl:'', photoUrl:'', name:'', phone:'', area:'' };
 
 function uid(){ return 'p'+(seq++); }
@@ -594,7 +637,7 @@ function effCode(p){ return (p.code&&p.code.trim()) || U.code.trim() || 'Board';
 function lsSet(key, val){ try{ localStorage.setItem(key, val); return true; }catch(e){ return false; } }
 var autosaveWarned=false;
 function save(){
-  var ok=lsSet(LS_KEY, JSON.stringify({U:U,parts:parts,ebState:ebState,seq:seq}));
+  var ok=lsSet(LS_KEY, JSON.stringify({U:U,parts:parts,ebState:ebState,seq:seq,curProjId:curProjId,curListId:curListId}));
   if(!ok && !autosaveWarned){ autosaveWarned=true; try{ projStatus('⚠ This device\'s storage is full — changes may not be kept. Delete an old project to free space.', true); }catch(e){} }
   else if(ok){ autosaveWarned=false; }
 }
@@ -606,6 +649,8 @@ function load(){
     if(Array.isArray(d.parts)) parts=d.parts;
     if(d.ebState) ebState=d.ebState;
     if(d.seq) seq=d.seq;
+    if(d.curProjId!==undefined) curProjId=d.curProjId;
+    if(d.curListId!==undefined) curListId=d.curListId;
     return true;
   }catch(e){ return false; }
 }
@@ -631,6 +676,7 @@ function onSetting(){
   renderAll(); save();
 }
 function onProjName(){ U.proj = document.getElementById('s-proj').value; renderAll(); save(); }
+function onListName(){ U.listName = document.getElementById('s-listname').value; renderAll(); save(); }
 
 // ── SHEET HEADER / BRANDING (member-aware: use your own logo & number) ──
 function brandDefaults(){
@@ -734,6 +780,7 @@ async function fetchSession(){
 
 function fillSettings(){
   document.getElementById('s-proj').value=U.proj||'';
+  document.getElementById('s-listname').value=U.listName||'';
   document.getElementById('s-projshow').checked=!!U.projShow;
   document.getElementById('s-code').value=U.code;
   document.getElementById('s-thick').value=U.thick;
@@ -747,108 +794,183 @@ function fillSettings(){
   renderBrand();
 }
 
-// ── NAMED PROJECTS (local, multiple saved cut lists) ──
+// ── PROJECTS (a home/client) → many CUT LISTS ──
+// Storage shape v2: {v:2, list:[{id,name,updatedAt,lists:[{id,name,savedAt,data}]}]}
+// Old flat entries {id,name,savedAt,data} are migrated to a project with one list.
 function projStore(){
-  try{ var d=JSON.parse(localStorage.getItem(PROJ_KEY)||'{}'); return Array.isArray(d.list)?d.list:[]; }
-  catch(e){ return []; }
+  var d; try{ d=JSON.parse(localStorage.getItem(PROJ_KEY)||'{}'); }catch(e){ d={}; }
+  var arr=Array.isArray(d.list)?d.list:[]; var migrated=false;
+  arr=arr.map(function(p){
+    if(!p) return null;
+    if(p.lists) return p;                               // already v2
+    if(p.data){ migrated=true;                          // migrate old flat project
+      return { id:p.id, name:p.name||'Project', updatedAt:p.savedAt||Date.now(),
+               lists:[{ id:'l'+(p.id||Date.now()), name:p.name||'Cut list 1', savedAt:p.savedAt||Date.now(), data:p.data }] };
+    }
+    return null;
+  }).filter(Boolean);
+  if(migrated) projSave(arr);
+  return arr;
 }
-function projSave(list){ return lsSet(PROJ_KEY, JSON.stringify({list:list})); }
-// Only projects actually USING a custom logo carry its (large) data-URL — keeps
-// saved projects small and avoids filling storage with stale logo copies.
+function projSave(arr){ return lsSet(PROJ_KEY, JSON.stringify({v:2, list:arr})); }
+function findProj(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return null; }
+function findList(proj,id){ if(!proj) return null; for(var i=0;i<proj.lists.length;i++) if(proj.lists[i].id===id) return proj.lists[i]; return null; }
+function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 }; }
+function hasContent(){ return parts.some(function(p){ return p.L>0||p.W>0||(p.name&&p.name.trim()); }); }
+function printLabel(){ return [ (U.proj||'').trim(), (U.listName||'').trim() ].filter(Boolean).join(' · '); }
+
+// Only lists actually USING a custom logo carry its (large) data-URL; blank
+// prepopulated boxes are never persisted.
 function snapshot(){
   var u=JSON.parse(JSON.stringify(U));
   if(u.brandSource!=='custom') u.customLogo='';
-  // don't persist blank prepopulated boxes
   var keep=parts.filter(function(p){ return !isEmptyPart(p); });
   var eb={}; keep.forEach(function(p){ if(ebState[p.id]) eb[p.id]=ebState[p.id]; });
   return { U:u, parts:JSON.parse(JSON.stringify(keep)), ebState:JSON.parse(JSON.stringify(eb)), seq:seq };
 }
 function projStatus(msg, isErr){
-  var el=document.getElementById('projStatus'); el.textContent=msg||'';
+  var el=document.getElementById('projStatus'); if(!el) return; el.textContent=msg||'';
   el.style.color = isErr ? 'var(--rd)' : 'var(--gn)';
   if(msg){ clearTimeout(el._t); el._t=setTimeout(function(){ el.textContent=''; }, isErr?6000:2600); }
 }
-function saveProject(){
-  var name=(U.proj||'').trim();
-  if(!name){
-    name=(prompt('Name this project:','')||'').trim();
-    if(!name) return;
-    U.proj=name; document.getElementById('s-proj').value=name; save();
-  }
-  var list=projStore(), now=Date.now();
-  // update the currently-loaded project, else a same-named one, else create new
-  var idx=-1;
-  if(curProjId) idx=list.findIndex(function(p){return p.id===curProjId;});
-  if(idx<0) idx=list.findIndex(function(p){return p.name.toLowerCase()===name.toLowerCase();});
-  var rec={ id:(idx>=0?list[idx].id:('j'+now)), name:name, savedAt:now, data:snapshot() };
-  if(idx>=0) list[idx]=rec; else list.unshift(rec);
-  if(!projSave(list)){   // storage full — don't claim it saved
-    projStatus('⚠ Couldn\'t save "'+name+'" — this device\'s storage is full. Delete an old project and try again.', true);
-    return;
-  }
-  curProjId=rec.id; renderProjects(); renderAll();
-  projStatus('Saved "'+name+'"');
+// Quietly write the working list back into its saved list (keeps edits when switching).
+function persistCurrentList(){
+  if(!(curProjId&&curListId)) return;
+  var arr=projStore(), proj=findProj(arr,curProjId); if(!proj) return;
+  var list=findList(proj,curListId); if(!list) return;
+  list.data=snapshot(); list.savedAt=Date.now(); proj.updatedAt=Date.now();
+  projSave(arr);
 }
-function loadProject(id){
-  var rec=projStore().filter(function(p){return p.id===id;})[0]; if(!rec) return;
-  var d=rec.data||{};
-  U=Object.assign({ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false }, d.U||{});
+function saveCurrentList(){
+  var pname=(U.proj||'').trim();
+  var lname=(U.listName||'').trim();
+  if(!pname){ pname=(prompt('Project — the home or client:','')||'').trim(); if(!pname) return; U.proj=pname; document.getElementById('s-proj').value=pname; }
+  if(!lname){ lname=(prompt('Name this cut list — which piece?','Cut list')||'').trim(); if(!lname) return; U.listName=lname; document.getElementById('s-listname').value=lname; }
+  var arr=projStore(), now=Date.now();
+  var proj = (curProjId&&findProj(arr,curProjId)) || null;
+  if(!proj){ for(var i=0;i<arr.length;i++){ if(arr[i].name.toLowerCase()===pname.toLowerCase()){ proj=arr[i]; break; } } }
+  if(!proj){ proj={id:'j'+now, name:pname, updatedAt:now, lists:[]}; arr.unshift(proj); }
+  else proj.name=pname;
+  curProjId=proj.id;
+  var list = (curListId&&findList(proj,curListId)) || null;
+  if(!list){ for(var j=0;j<proj.lists.length;j++){ if(proj.lists[j].name.toLowerCase()===lname.toLowerCase()){ list=proj.lists[j]; break; } } }
+  if(!list){ list={id:'l'+now, name:lname, savedAt:now, data:snapshot()}; proj.lists.unshift(list); }
+  else { list.name=lname; list.savedAt=now; list.data=snapshot(); }
+  curListId=list.id; proj.updatedAt=now;
+  if(!projSave(arr)){ projStatus('⚠ Couldn\'t save — storage full. Delete an old project.', true); return; }
+  save(); renderListChips(); renderProjectCount();
+  projStatus('Saved "'+lname+'" in '+pname);
+}
+function loadList(projId, listId){
+  persistCurrentList();
+  var arr=projStore(), proj=findProj(arr,projId); var list=findList(proj,listId);
+  if(!proj||!list) return;
+  var d=list.data||{};
+  U=Object.assign(defaultU(), d.U||{});
+  U.proj=proj.name; U.listName=list.name; U.entryMode='list';
   parts=Array.isArray(d.parts)?JSON.parse(JSON.stringify(d.parts)):[];
   ebState=d.ebState?JSON.parse(JSON.stringify(d.ebState)):{};
-  seq=d.seq||1;
-  curProjId=rec.id;
-  U.entryMode='list';   // land on the setup/list view after loading
-  seedParts();
-  fillSettings(); renderParts(); renderAll(); save(); renderProjects();
-  projStatus('Loaded "'+rec.name+'"');
+  seq=d.seq||1; curProjId=proj.id; curListId=list.id;
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderListChips(); renderProjectCount();
+  projStatus('Opened "'+list.name+'"');
 }
-function renameProject(id){
-  var list=projStore(), rec=list.filter(function(p){return p.id===id;})[0]; if(!rec) return;
-  var name=(prompt('Rename project:',rec.name)||'').trim(); if(!name) return;
-  rec.name=name; rec.savedAt=Date.now();
-  if(rec.id===curProjId){ U.proj=name; document.getElementById('s-proj').value=name; save(); }
-  projSave(list); renderProjects(); renderAll();
-}
-function deleteProject(id){
-  var list=projStore(), rec=list.filter(function(p){return p.id===id;})[0]; if(!rec) return;
-  if(!confirm('Delete project "'+rec.name+'"? This only removes the saved copy, not what\'s on screen.')) return;
-  list=list.filter(function(p){return p.id!==id;});
-  if(curProjId===id) curProjId=null;
-  projSave(list); renderProjects();
+// Start a fresh cut list — keeps you in the same project.
+function newList(){
+  if(curProjId&&curListId) persistCurrentList();
+  else if(hasContent()){ if(confirm('Save the current cut list to this project first?')) saveCurrentList(); }
+  parts=[]; ebState={}; seq=1; curListId=null;
+  U.listName=''; U.entryMode='list';
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderListChips();
+  document.getElementById('s-listname').focus();
 }
 function newProject(){
-  if((parts.some(function(p){return p.name||p.L||p.W;})) && !confirm('Start a new blank project? Save the current one first if you want to keep it.')) return;
-  parts=[]; ebState={}; seq=1; curProjId=null;
-  U=Object.assign(U,{ proj:'', projShow:false });
-  U.code='';
-  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderProjects();
+  if(curProjId&&curListId) persistCurrentList();
+  else if(hasContent()){ if(confirm('Save the current cut list first?')) saveCurrentList(); }
+  parts=[]; ebState={}; seq=1; curProjId=null; curListId=null;
+  U.proj=''; U.listName=''; U.code=''; U.entryMode='list';
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderListChips(); renderProjectCount();
   document.getElementById('s-proj').focus();
 }
-function toggleProjects(){
-  var p=document.getElementById('projPanel');
-  var open=p.style.display!=='none';
-  p.style.display=open?'none':'block';
-  if(!open) renderProjects();
+function renameProject(id){
+  var arr=projStore(), proj=findProj(arr,id); if(!proj) return;
+  var name=(prompt('Rename project:',proj.name)||'').trim(); if(!name) return;
+  proj.name=name; proj.updatedAt=Date.now();
+  if(id===curProjId){ U.proj=name; document.getElementById('s-proj').value=name; save(); }
+  projSave(arr); renderLibrary(); renderListChips();
 }
-function renderProjects(){
-  var list=projStore().slice().sort(function(a,b){return b.savedAt-a.savedAt;});
-  document.getElementById('projCount').textContent=list.length;
-  var p=document.getElementById('projPanel');
-  if(p.style.display==='none') return;
-  if(!list.length){ p.innerHTML='<div class="proj-empty">No saved projects yet. Name it above and press <b>Save project</b>.</div>'; return; }
-  p.innerHTML=list.map(function(r){
-    var n=(r.data&&r.data.parts?r.data.parts.filter(function(x){return x.L>0&&x.W>0;}).length:0);
-    var d=new Date(r.savedAt);
-    var meta=n+' part'+(n!==1?'s':'')+' · '+d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
-    return '<div class="proj-row'+(r.id===curProjId?' cur':'')+'">'+
-      '<div class="pr-main" onclick="loadProject(\''+r.id+'\')" title="Load this project">'+
-        '<div class="pr-name">'+esc(r.name)+(r.id===curProjId?' &middot; <span style="color:var(--clr-accent-dk);font-size:.62rem;font-weight:700">OPEN</span>':'')+'</div>'+
-        '<div class="pr-meta">'+meta+'</div>'+
-      '</div>'+
-      '<button class="pr-btn" onclick="loadProject(\''+r.id+'\')">Load</button>'+
-      '<button class="pr-btn" onclick="renameProject(\''+r.id+'\')">Rename</button>'+
-      '<button class="pr-btn del" onclick="deleteProject(\''+r.id+'\')">Delete</button>'+
-    '</div>';
+function deleteProject(id){
+  var arr=projStore(), proj=findProj(arr,id); if(!proj) return;
+  if(!confirm('Delete project "'+proj.name+'" and all '+proj.lists.length+' cut list(s)? This only removes the saved copy.')) return;
+  arr=arr.filter(function(p){return p.id!==id;});
+  if(curProjId===id){ curProjId=null; curListId=null; }
+  projSave(arr); save(); renderLibrary(); renderListChips(); renderProjectCount();
+}
+function renameList(projId, listId){
+  var arr=projStore(), proj=findProj(arr,projId), list=findList(proj,listId); if(!list) return;
+  var name=(prompt('Rename cut list:',list.name)||'').trim(); if(!name) return;
+  list.name=name; list.savedAt=Date.now(); proj.updatedAt=Date.now();
+  if(listId===curListId){ U.listName=name; document.getElementById('s-listname').value=name; save(); }
+  projSave(arr); renderLibrary(); renderListChips();
+}
+function deleteList(projId, listId){
+  var arr=projStore(), proj=findProj(arr,projId), list=findList(proj,listId); if(!list) return;
+  if(!confirm('Delete cut list "'+list.name+'"?')) return;
+  proj.lists=proj.lists.filter(function(l){return l.id!==listId;});
+  if(listId===curListId) curListId=null;
+  if(!proj.lists.length){ arr=arr.filter(function(p){return p.id!==projId;}); if(curProjId===projId) curProjId=null; }
+  projSave(arr); save(); renderLibrary(); renderListChips(); renderProjectCount();
+}
+// Start a new list inside a specific project (from the library).
+function addListToProject(projId){
+  if(curProjId&&curListId) persistCurrentList();
+  var arr=projStore(), proj=findProj(arr,projId); if(!proj) return;
+  parts=[]; ebState={}; seq=1; curProjId=proj.id; curListId=null;
+  U.proj=proj.name; U.listName=''; U.entryMode='list';
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderListChips(); renderProjectCount();
+  closeLibrary(); document.getElementById('s-listname').focus();
+}
+function newProjectFromLibrary(){ closeLibrary(); newProject(); }
+function renderProjectCount(){ var el=document.getElementById('projCount'); if(el) el.textContent=projStore().length; }
+// Quick-switch chips for the lists in the current project.
+function renderListChips(){
+  var host=document.getElementById('listChips'); if(!host) return;
+  if(!curProjId){ host.innerHTML='<span class="lc-empty">Not saved yet — press Save cut list to start a project.</span>'; return; }
+  var arr=projStore(), proj=findProj(arr,curProjId);
+  if(!proj){ host.innerHTML='<span class="lc-empty">Not saved yet.</span>'; return; }
+  var html='<span class="lc-lbl">'+esc(proj.name)+' — cut lists</span>';
+  proj.lists.forEach(function(l){
+    html+='<button class="lc-chip'+(l.id===curListId?' active':'')+'" onclick="loadList(\''+proj.id+'\',\''+l.id+'\')">'+esc(l.name)+'</button>';
+  });
+  if(!curListId) html+='<span class="lc-chip active" style="cursor:default">'+esc((U.listName||'New list').trim()||'New list')+'</span>';
+  html+='<button class="lc-chip add" onclick="newList()">+ list</button>';
+  host.innerHTML=html;
+}
+// Full-screen projects library.
+function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
+function closeLibrary(){ document.getElementById('projPage').style.display='none'; document.body.style.overflow=''; }
+function renderLibrary(){
+  renderProjectCount();
+  var arr=projStore().slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
+  var host=document.getElementById('projLib');
+  if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; return; }
+  host.innerHTML=arr.map(function(p){
+    var lists=p.lists.map(function(l){
+      var n=(l.data&&l.data.parts?l.data.parts.filter(function(x){return x.L>0&&x.W>0;}).length:0);
+      var cur=(p.id===curProjId&&l.id===curListId);
+      return '<div class="lib-list'+(cur?' cur':'')+'">'+
+        '<div class="ll-main" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()"><div class="ll-name">'+esc(l.name)+(cur?' · <span style="color:var(--clr-accent-dk);font-weight:700">OPEN</span>':'')+'</div><div class="ll-meta">'+n+' part'+(n!==1?'s':'')+'</div></div>'+
+        '<button class="ll-btn" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()">Open</button>'+
+        '<button class="ll-btn" onclick="renameList(\''+p.id+'\',\''+l.id+'\')">Rename</button>'+
+        '<button class="ll-btn del" onclick="deleteList(\''+p.id+'\',\''+l.id+'\')">Delete</button>'+
+      '</div>';
+    }).join('');
+    return '<div class="lib-proj">'+
+      '<div class="lib-phd"><div class="lp-name">'+esc(p.name)+'</div>'+
+        '<div class="lp-act"><span class="lp-count">'+p.lists.length+' list'+(p.lists.length!==1?'s':'')+'</span>'+
+        '<button class="ll-btn" onclick="addListToProject(\''+p.id+'\')">+ New list</button>'+
+        '<button class="ll-btn" onclick="renameProject(\''+p.id+'\')">Rename</button>'+
+        '<button class="ll-btn del" onclick="deleteProject(\''+p.id+'\')">Delete</button></div></div>'+
+      '<div class="lib-lists">'+lists+'</div></div>';
   }).join('');
 }
 
@@ -1143,7 +1265,7 @@ function renderSheet(gs){
   }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl,BW=U.bw,kerf=U.kerf;
-  var projLbl = (U.projShow && (U.proj||'').trim()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(U.proj.trim())+'</span>' : '';
+  var projLbl = (U.projShow && printLabel()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(printLabel())+'</span>' : '';
   var html='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
     '<div class="sheet-legend">'+
       '<span>'+legTick+' <b>1 tick</b> = band this edge</span>'+
@@ -1173,10 +1295,10 @@ function renderAll(){
   renderSummary(gs);
   renderSheet(gs);
   document.getElementById('ph-code').textContent = U.code.trim() || (gs[0]?gs[0].code:'—');
-  // Project name on the printed running header — only when the member ticks "show".
-  var showProj = U.projShow && (U.proj||'').trim();
-  document.getElementById('ph-proj').style.display = showProj ? 'block' : 'none';
-  document.getElementById('ph-proj-name').textContent = showProj ? U.proj.trim() : '';
+  // Project · list name on the printed running header — only when "show" is ticked.
+  var lbl = U.projShow ? printLabel() : '';
+  document.getElementById('ph-proj').style.display = lbl ? 'block' : 'none';
+  document.getElementById('ph-proj-name').textContent = lbl;
   // Print running-header branding (logo + name + number) from the selected source.
   var logoSrc=resolveLogoSrc(), phLogo=document.getElementById('ph-logo');
   if(logoSrc){ if(phLogo.getAttribute('src')!==logoSrc) phLogo.src=logoSrc; phLogo.style.display=''; }
@@ -1212,7 +1334,7 @@ document.addEventListener('click', function(e){
 // ── EXAMPLE / CLEAR ──
 function loadExample(){
   if(parts.length && !confirm('Replace the current parts with an example?')) return;
-  U.code='18mm Oak Melamine'; U.proj='Example — wardrobe'; curProjId=null;
+  U.code='18mm Oak Melamine'; U.proj='Example home'; U.listName='Wardrobe'; curProjId=null; curListId=null;
   parts=[]; ebState={}; seq=1;
   fillSettings();
   addRow('Side panel',1800,500,2,'');
@@ -1227,11 +1349,10 @@ function loadExample(){
 }
 function clearAll(){
   if(!confirm('Clear the current sheet? Your saved projects are kept — only what\'s on screen now is cleared.')) return;
-  parts=[]; ebState={}; seq=1; curProjId=null;
-  U={ code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', projShow:false,
-      brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
+  parts=[]; ebState={}; seq=1; curProjId=null; curListId=null;
+  U=defaultU();
   applyBrandDefaults();  // back to member (if signed in) / Neewoody branding
-  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderProjects();
+  seedParts(); fillSettings(); renderParts(); renderAll(); save(); renderListChips(); renderProjectCount();
 }
 
 // ── INIT ──
@@ -1248,7 +1369,8 @@ function clearAll(){
   fillSettings();
   renderParts();
   renderAll();
-  renderProjects();
+  renderListChips();
+  renderProjectCount();
   save();
   // reveal the member back-bar (Concierge session) or the guest back-to-Tools bar
   var loggedIn = !!(window.Concierge && Concierge.tokenAlive());
