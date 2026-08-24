@@ -226,7 +226,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 @page{size:A4;margin:20mm 10mm 12mm}
 @media print{
   body>*:not(main){display:none!important}
-  .cs-hero,#inputCol,.site-footer,.mode-top{display:none!important}
+  .cs-hero,#inputCol,.site-footer,.mode-top,#member-bar,#guest-bar{display:none!important}
   .cs-wrap{padding:0!important;max-width:none!important}
   .cs-cols{display:block!important;gap:0!important}
   #sheetCol>*:not(#sheetWrap){display:none!important}
@@ -335,6 +335,19 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <div class="cs-wrap">
+
+  <!-- ════ BACK BAR (member ↔ Tools/Directory) ════ -->
+  <div id="member-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#1f2f58;color:#f0e8d0;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.85rem">
+    <span style="opacity:.85">🛠 Concierge member</span>
+    <a href="concierge/directory.html#tools" style="color:#f0e8d0;font-size:.8rem;font-weight:600;text-decoration:none;background:#c8922a;border-radius:5px;padding:.4rem .8rem;color:#241500">← Tools</a>
+    <a href="concierge/directory.html" style="color:#c8922a;font-size:.8rem;text-decoration:none">Directory</a>
+    <button onclick="memberLogout()" style="font-family:inherit;font-size:.75rem;background:transparent;color:rgba(240,232,208,.75);border:1px solid rgba(240,232,208,.35);border-radius:5px;padding:.35rem .7rem;cursor:pointer;margin-left:auto">Log out</button>
+  </div>
+  <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(31,47,88,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
+    <a href="tools.html" style="font-weight:600;font-size:.82rem;color:#1f2f58;text-decoration:none;border:1px solid rgba(31,47,88,.3);border-radius:5px;padding:.35rem .8rem">← Back to Tools</a>
+    <span style="opacity:.85">Free tool — no account needed.</span>
+    <a href="concierge/login.html?next=/cut-sheet.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#1f2f58;text-decoration:none">Member login →</a>
+  </div>
 
   <!-- ════ ENTRY METHOD (choose at the top) ════ -->
   <div class="mode-top">
@@ -1228,14 +1241,22 @@ function clearAll(){
   document.getElementById('ph-date').textContent=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
   var had=load();
   if(!U.brandSource) applyBrandDefaults();   // logged-out defaults first; fetchSession upgrades to member
+  // Always land on the entry-method selection (Named list) — never jump straight
+  // into the full-screen grid. Drop any blank boxes carried from a grid session.
+  U.entryMode='list';
+  pruneEmpties();
   fillSettings();
-  seedParts();
   renderParts();
   renderAll();
   renderProjects();
-  if(U.entryMode==='grid') openQuickGrid();   // resume the standalone entry page
+  save();
+  // reveal the member back-bar (Concierge session) or the guest back-to-Tools bar
+  var loggedIn = !!(window.Concierge && Concierge.tokenAlive());
+  var bar = document.getElementById(loggedIn ? 'member-bar' : 'guest-bar');
+  if(bar) bar.style.display='flex';
   fetchSession();   // async: adopt the member's own logo & number if signed in
 })();
+function memberLogout(){ if(window.Concierge) Concierge.clearToken(); location.reload(); }
 </script>
 </body>
 </html>
