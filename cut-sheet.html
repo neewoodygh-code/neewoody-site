@@ -249,7 +249,9 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 
 /* ── PRINT ── */
 .print-hdr{display:none}
-@page{size:A4;margin:20mm 10mm 12mm}
+/* Top margin (26mm) must comfortably exceed the fixed running header (capped at
+   17mm below) so box rows on continuation pages never slip behind it. */
+@page{size:A4;margin:26mm 10mm 14mm}
 @media print{
   body>*:not(main){display:none!important}
   .cs-hero,#inputCol,.site-footer,.mode-top,#member-bar,#guest-bar{display:none!important}
@@ -259,9 +261,11 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   #sheetOut{border:none!important;border-radius:0!important}
   .sheet-topbar,.sheet-legend{border-color:#999}
   .print-cta,.sheet-hint{display:none!important}
-  /* Running header — repeats on every printed sheet (logo + number). */
-  .print-hdr{display:flex!important;align-items:center;gap:.7rem;position:fixed;top:0;left:0;right:0;padding:2mm 0 3mm;border-bottom:1.4px solid #1f2f58;background:#fff}
-  .print-hdr img{height:12mm;width:auto;max-width:55mm;object-fit:contain}
+  /* Running header — repeats on every printed sheet (logo + number). Height is
+     CAPPED (fixed height + overflow) so a long project name can't grow it past
+     the reserved @page top margin and overlap the boxes. */
+  .print-hdr{display:flex!important;align-items:center;gap:.7rem;position:fixed;top:0;left:0;right:0;height:17mm;box-sizing:border-box;overflow:hidden;padding:1.5mm 0;border-bottom:1.4px solid #1f2f58;background:#fff}
+  .print-hdr img{height:11mm;width:auto;max-width:55mm;object-fit:contain}
   .print-hdr .ph-name{font-family:'Playfair Display',serif;font-size:12pt;font-weight:700;color:#1f2f58;line-height:1.1}
   .print-hdr .ph-sub{font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;letter-spacing:.02em}
   .print-hdr .ph-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.35}
