@@ -232,6 +232,28 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .ll-btn{border:1.5px solid var(--clr-border);background:transparent;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem;font-weight:600;cursor:pointer;padding:.3rem .6rem;border-radius:6px}
 .ll-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
 .ll-btn.del:hover{border-color:var(--rd);color:var(--rd)}
+.ll-cost{color:var(--clr-accent-dk)!important;background:rgba(200,146,42,.14)!important}
+/* project left status rail (vertical progress) */
+.lib-body{display:flex;align-items:stretch;gap:.7rem;padding:.5rem .5rem .5rem .7rem}
+.lib-track{flex:none;width:30px;display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.15rem 0}
+.lib-track .bar{flex:1;width:10px;border-radius:6px;background:var(--clr-bg-alt);position:relative;overflow:hidden;min-height:40px}
+.lib-track .bar .fill{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(#8fd39a,#3c6b4a);transition:height .2s}
+.lib-track .bar .fill.full{background:#3c6b4a}
+.lib-track .lbl{font-family:var(--mono);font-size:.56rem;font-weight:700;color:var(--clr-muted)}
+.lib-lists{flex:1;min-width:0}
+/* pricing setup */
+.price-head{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy);margin:1rem 0 .55rem;padding-top:.7rem;border-top:1px solid var(--clr-border)}
+.price-head span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem}
+/* cost box in the summary */
+.cost-box{margin-top:.5rem;background:#fff;border:1.5px solid var(--clr-accent);border-radius:10px;padding:.7rem .85rem}
+.cost-row{display:flex;justify-content:space-between;gap:.6rem;font-size:.82rem;color:var(--clr-dark);padding:.15rem 0}
+.cost-row span{color:var(--clr-muted)}
+.cost-row b{font-family:var(--mono);color:var(--clr-dark)}
+.cost-row.total{border-top:1.5px solid var(--clr-border);margin-top:.3rem;padding-top:.45rem;font-weight:700}
+.cost-row.total span{color:var(--navy);font-weight:700}
+.cost-row.total b{font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--navy)}
+.cost-note{font-size:.66rem;color:var(--clr-muted);margin-top:.4rem;line-height:1.4}
+.rb-cost .rb-num{color:var(--clr-accent-dk)}
 
 /* sheet header / branding card */
 .brand-who{font-size:.76rem;color:var(--clr-muted);margin-bottom:.7rem;line-height:1.5}
@@ -518,6 +540,15 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
           <div class="hint">Woodgrain = fixed</div>
         </div>
       </div>
+      <div class="price-head">&#8373; Pricing <span>— ballpark cost estimate</span></div>
+      <div class="grid2">
+        <div class="fld"><label>Board price (GHS each)</label><input id="s-boardp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Your sell price per board</div></div>
+        <div class="fld"><label>Edge roll (GHS)</label><input id="s-rollp" type="number" value="200" inputmode="decimal" oninput="onSetting()"><div class="hint">Per roll of banding</div></div>
+      </div>
+      <div class="grid2" style="margin-top:.7rem">
+        <div class="fld"><label>Apply / roll (GHS)</label><input id="s-applyp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Cost to apply one roll</div></div>
+        <div class="fld"><label>Roll length (m)</label><input id="s-rolllen" type="number" value="50" inputmode="decimal" oninput="onSetting()"><div class="hint" id="perm-hint">Metres per roll</div></div>
+      </div>
     </div>
 
     <!-- SHEET HEADER / BRANDING -->
@@ -694,7 +725,8 @@ var LS_KEY = 'nwd-cutsheet-v1';        // current working sheet (autosave)
 var PROJ_KEY = 'nwd-cutsheet-projects'; // saved projects → cut lists
 var PROJ_BAK = 'nwd-cutsheet-projects-bak'; // rolling backup (loss insurance)
 var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false,
-          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 };
+          brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1,
+          boardPrice:500, rollPrice:200, applyPrice:500, rollLen:50 };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
@@ -751,7 +783,12 @@ function onSetting(){
   U.kerf = num(document.getElementById('s-kerf').value,4);
   U.waste= num(document.getElementById('s-waste').value,12);
   U.grain= document.getElementById('s-grain').value;
+  U.boardPrice= num(document.getElementById('s-boardp').value,0);
+  U.rollPrice = num(document.getElementById('s-rollp').value,0);
+  U.applyPrice= num(document.getElementById('s-applyp').value,0);
+  U.rollLen   = num(document.getElementById('s-rolllen').value,50)||50;
   U.projShow = document.getElementById('s-projshow').checked;
+  var ph=document.getElementById('perm-hint'); if(ph) ph.textContent='≈ '+fmtGHS(edgePerM(U))+'/m';
   renderAll(); updateSetupSum(); save();
 }
 function updateSetupSum(){
@@ -912,6 +949,11 @@ function fillSettings(){
   document.getElementById('s-kerf').value=U.kerf;
   document.getElementById('s-waste').value=U.waste;
   document.getElementById('s-grain').value=U.grain;
+  document.getElementById('s-boardp').value=(U.boardPrice!=null?U.boardPrice:500);
+  document.getElementById('s-rollp').value=(U.rollPrice!=null?U.rollPrice:200);
+  document.getElementById('s-applyp').value=(U.applyPrice!=null?U.applyPrice:500);
+  document.getElementById('s-rolllen').value=(U.rollLen!=null?U.rollLen:50);
+  var ph=document.getElementById('perm-hint'); if(ph) ph.textContent='≈ '+fmtGHS(edgePerM(U))+'/m';
   document.getElementById('upmm').classList.toggle('active',U.unit==='mm');
   document.getElementById('upcm').classList.toggle('active',U.unit==='cm');
   renderBrand();
@@ -956,7 +998,10 @@ function maybeRecoverProjects(){
 }
 function findProj(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return null; }
 function findList(proj,id){ if(!proj) return null; for(var i=0;i<proj.lists.length;i++) if(proj.lists[i].id===id) return proj.lists[i]; return null; }
-function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1 }; }
+function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1, boardPrice:500, rollPrice:200, applyPrice:500, rollLen:50 }; }
+// GHS edge cost per metre = (roll price + application per roll) / metres per roll.
+function edgePerM(u){ u=u||U; var rl=(u.rollLen>0?u.rollLen:50); return ((num(u.rollPrice,0))+(num(u.applyPrice,0)))/rl; }
+function fmtGHS(n){ return 'GHS ' + Math.round(n).toLocaleString('en-US'); }
 function hasContent(){ return parts.some(function(p){ return p.L>0||p.W>0||(p.name&&p.name.trim()); }); }
 function printLabel(){ return [ (U.proj||'').trim(), (U.listName||'').trim() ].filter(Boolean).join(' · '); }
 
@@ -1156,7 +1201,12 @@ function listStats(data){
     });
     boards += packBoards(items,BL,BW,kerf,allowRot).count;
   });
-  return { rows:rows, pieces:pieces, boards:boards, bandM:bandMM/1000, colours:order, thick:(u.thick||18) };
+  // Fall back to the current prices for lists saved before pricing existed.
+  var bandM=bandMM/1000;
+  var bp = (u.boardPrice!=null) ? num(u.boardPrice,0) : num(U.boardPrice,0);
+  var perM = (u.rollPrice!=null||u.applyPrice!=null||u.rollLen!=null) ? edgePerM(u) : edgePerM(U);
+  var cost = boards*bp + bandM*perM;
+  return { rows:rows, pieces:pieces, boards:boards, bandM:bandM, colours:order, thick:(u.thick||18), cost:cost };
 }
 // Infer a swatch colour from a board-code string (best-effort, for a quick visual cue).
 function codeColour(code){
@@ -1173,6 +1223,7 @@ function statChips(st){
   var chips='<span class="ll-stat">'+st.pieces+' pc'+(st.pieces!==1?'s':'')+'</span>'+
     '<span class="ll-stat">'+st.boards+' board'+(st.boards!==1?'s':'')+'</span>';
   if(st.bandM>0) chips+='<span class="ll-stat">'+st.bandM.toFixed(1)+' m band</span>';
+  if(st.cost>0) chips+='<span class="ll-stat ll-cost">'+fmtGHS(st.cost)+'</span>';
   st.colours.forEach(function(c){ chips+='<span class="ll-col"><span class="ll-dot" style="background:'+codeColour(c)+'"></span>'+esc(c)+'</span>'; });
   return chips;
 }
@@ -1192,10 +1243,10 @@ function renderLibrary(){
   var host=document.getElementById('projLib');
   if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; return; }
   host.innerHTML=arr.map(function(p){
-    var pBoards=0, pPieces=0, pCols={}, pDone=0;
+    var pBoards=0, pPieces=0, pCols={}, pDone=0, pCost=0;
     var lists=p.lists.map(function(l){
       var st=listStats(l.data);
-      pBoards+=st.boards; pPieces+=st.pieces; st.colours.forEach(function(c){pCols[c]=1;});
+      pBoards+=st.boards; pPieces+=st.pieces; pCost+=st.cost; st.colours.forEach(function(c){pCols[c]=1;});
       var status=l.status||'todo'; if(status==='done') pDone++;
       var cur=(p.id===curProjId&&l.id===curListId);
       var d=l.savedAt?new Date(l.savedAt):null;
@@ -1212,15 +1263,20 @@ function renderLibrary(){
       '</div>';
     }).join('');
     var nCols=Object.keys(pCols).length, nL=p.lists.length;
+    var pct=nL?Math.round(pDone/nL*100):0;
     var roll=nL+' list'+(nL!==1?'s':'')+' · '+pBoards+' board'+(pBoards!==1?'s':'')+' · '+pPieces+' pc'+(pPieces!==1?'s':'')+(nCols?' · '+nCols+' colour'+(nCols!==1?'s':''):'')+
-      (nL?' · <b style="color:'+(pDone===nL?'#8fd39a':'#f0d79a')+'">'+pDone+'/'+nL+' done</b>':'');
+      (pCost>0?' · <b>'+fmtGHS(pCost)+'</b> est':'');
+    // Left status rail: a vertical progress bar (done fraction) tracking the project.
+    var track='<div class="lib-track" title="'+pDone+' of '+nL+' cut list'+(nL!==1?'s':'')+' done">'+
+      '<div class="bar"><div class="fill'+(pct===100?' full':'')+'" style="height:'+pct+'%"></div></div>'+
+      '<span class="lbl">'+pDone+'/'+nL+'</span></div>';
     return '<div class="lib-proj">'+
       '<div class="lib-phd"><div class="lp-head"><div class="lp-name">'+esc(p.name)+'</div><div class="lp-roll">'+roll+'</div></div>'+
         '<div class="lp-act">'+
         '<button class="ll-btn" onclick="addListToProject(\''+p.id+'\')">+ New list</button>'+
         '<button class="ll-btn" onclick="renameProject(\''+p.id+'\')">Rename</button>'+
         '<button class="ll-btn del" onclick="deleteProject(\''+p.id+'\')">Delete</button></div></div>'+
-      '<div class="lib-lists">'+lists+'</div></div>';
+      '<div class="lib-body">'+track+'<div class="lib-lists">'+lists+'</div></div></div>';
   }).join('');
 }
 
@@ -1507,6 +1563,8 @@ function renderSummary(gs){
   }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl, BW=U.bw, kerf=U.kerf, boardArea=BL*BW/1e6;
+  var perM=edgePerM(U), bp=num(U.boardPrice,0), rl=(U.rollLen>0?U.rollLen:50);
+  var priceOn = (bp>0 || perM>0);
   var html='', grandBoards=0, grandBandMM=0, grandPcs=0, grandOver=0;
   gs.forEach(function(g){
     var items=[], net=0, bandMM=0;
@@ -1519,21 +1577,31 @@ function renderSummary(gs){
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var netM=net/1e6, bandM=bandMM/1000;
+    var gCost = pk.count*bp + bandM*perM;
     grandBoards+=pk.count; grandBandMM+=bandMM; grandPcs+=items.length; grandOver+=pk.oversize.length;
-    // Lead with the numbers that matter; net m² tucked as a small detail.
     html+='<div class="bcode-card">'+
       '<div class="bcode-hd"><span class="bcode-name"><span class="ll-dot" style="background:'+codeColour(g.code)+'"></span>'+esc(g.code)+'</span><span class="bcode-boards">'+pk.count+' board'+(pk.count!==1?'s':'')+'</span></div>'+
       '<div class="bcode-body">'+
         '<span><b>'+items.length+'</b> pcs</span>'+
         '<span>edge band <b>'+(bandM>0?bandM.toFixed(1)+' m':'—')+'</b></span>'+
+        (priceOn?'<span>est <b>'+fmtGHS(gCost)+'</b></span>':'')+
         '<span class="bcode-det">net '+netM.toFixed(2)+' m²</span>'+
       '</div>'+
       (pk.oversize.length?'<div class="oversize">⚠ '+pk.oversize.length+' part(s) larger than the '+BL+'×'+BW+' board — split them or check dimensions.</div>':'')+
     '</div>';
   });
   var grandBandM=grandBandMM/1000;
+  var boardCost=grandBoards*bp, edgeCost=grandBandM*perM, rolls=(rl>0?Math.ceil(grandBandM/rl):0), grandCost=boardCost+edgeCost;
   html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+
     (grandBandM>0?' · <b>'+grandBandM.toFixed(1)+' m</b> edge banding':'')+'</div>';
+  if(priceOn){
+    html+='<div class="cost-box">'+
+      '<div class="cost-row"><span>Boards ('+grandBoards+' × '+fmtGHS(bp)+')</span><b>'+fmtGHS(boardCost)+'</b></div>'+
+      '<div class="cost-row"><span>Edge banding ('+grandBandM.toFixed(1)+' m'+(rolls?' · buy '+rolls+' roll'+(rolls!==1?'s':''):'')+')</span><b>'+fmtGHS(edgeCost)+'</b></div>'+
+      '<div class="cost-row total"><span>Estimated total</span><b>'+fmtGHS(grandCost)+'</b></div>'+
+      '<div class="cost-note">Ballpark — materials + edge application at '+fmtGHS(perM)+'/m. Not a quote.</div>'+
+    '</div>';
+  }
   host.innerHTML=html;
   // live result bar (prominent, up top)
   if(rbar){
@@ -1544,7 +1612,7 @@ function renderSummary(gs){
       '<span class="rb-stat"><span class="rb-num">'+(grandBandM>0?grandBandM.toFixed(1):'0')+'</span><span class="rb-lbl">m edge band</span></span>'+
       '<span class="rb-sep"></span>'+
       '<span class="rb-stat"><span class="rb-num">'+grandPcs+'</span><span class="rb-lbl">piece'+(grandPcs!==1?'s':'')+'</span></span>'+
-      (gs.length>1?'<span class="rb-sep"></span><span class="rb-stat"><span class="rb-num">'+gs.length+'</span><span class="rb-lbl">colours</span></span>':'')+
+      (priceOn?'<span class="rb-sep"></span><span class="rb-stat rb-cost"><span class="rb-num">'+fmtGHS(grandCost).replace('GHS ','₵')+'</span><span class="rb-lbl">est. cost</span></span>':'')+
       (grandOver?'<span class="rb-warn">⚠ '+grandOver+' oversize</span>':'');
   }
 }
