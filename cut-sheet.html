@@ -89,6 +89,39 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .mode-top-hint{font-family:var(--font-body);font-size:.78rem;color:var(--clr-muted);margin-left:auto;text-align:right}
 @media(max-width:560px){ .mode-top-hint{margin-left:0;text-align:left;width:100%} }
 
+/* first-run ribbon */
+.first-run{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--navy);color:#f3ecdd;border-radius:10px;padding:.6rem 1rem;margin-bottom:1rem}
+.first-run .fr-steps{font-family:var(--font-body);font-size:.86rem;display:flex;align-items:center;flex-wrap:wrap;gap:.15rem}
+.first-run .fr-steps b{display:inline-block;background:var(--gold,#c8922a);color:#241500;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;font-size:.72rem;font-weight:700}
+.first-run .fr-x{margin-left:auto;background:transparent;border:1px solid rgba(243,236,221,.4);color:#f3ecdd;border-radius:6px;padding:.35rem .7rem;font-family:var(--font-body);font-size:.76rem;font-weight:600;cursor:pointer}
+.first-run .fr-x:hover{background:rgba(255,255,255,.1)}
+/* live result bar */
+.result-bar{display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;background:#fff;border:1.5px solid var(--clr-border);border-left:5px solid var(--clr-accent);border-radius:10px;padding:.65rem 1.1rem;margin-bottom:1rem}
+.result-bar .rb-stat{display:flex;flex-direction:column;line-height:1.05}
+.result-bar .rb-num{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--navy)}
+.result-bar .rb-lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.06em;text-transform:uppercase;color:var(--clr-muted)}
+.result-bar .rb-sep{width:1px;height:28px;background:var(--clr-border)}
+.result-bar .rb-warn{margin-left:auto;font-size:.72rem;color:var(--rd);font-weight:700}
+/* recent-projects strip */
+.recent-bar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;background:var(--clr-accent-lt);border:1px solid var(--clr-border);border-radius:10px;padding:.55rem .9rem;margin-bottom:1rem}
+.recent-bar .rc-lbl{font-family:var(--mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--clr-muted)}
+.recent-chip{font-family:var(--font-body);font-size:.78rem;font-weight:600;color:var(--navy);background:#fff;border:1.5px solid var(--clr-border);border-radius:20px;padding:.3rem .75rem;cursor:pointer}
+.recent-chip:hover{border-color:var(--clr-accent)}
+.recent-chip .rc-sub{color:var(--clr-muted);font-weight:400;font-size:.68rem}
+.recent-bar .rc-all{margin-left:auto;font-family:var(--font-body);font-size:.74rem;font-weight:600;color:var(--navy);background:transparent;border:none;cursor:pointer;text-decoration:underline}
+/* collapsible setup */
+.setup-box{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;margin-bottom:1.1rem;overflow:hidden}
+.setup-box>summary{cursor:pointer;list-style:none;padding:.85rem 1.1rem;display:flex;align-items:center;gap:.5rem}
+.setup-box>summary::-webkit-details-marker{display:none}
+.setup-box>summary::after{content:'▸';margin-left:auto;color:var(--clr-accent);transition:transform .15s}
+.setup-box[open]>summary::after{transform:rotate(90deg)}
+.setup-t{font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--navy)}
+.setup-sum{font-family:var(--font-body);font-size:.76rem;color:var(--clr-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.setup-body{padding:0 1.1rem 1.1rem}
+.setup-body .card{border:none;padding:0;margin:0 0 1rem}
+.setup-body .card:last-child{margin-bottom:0}
+.setup-body .card-t{margin-top:.2rem}
+
 /* ── QUICK-GRID STANDALONE DATA-ENTRY PAGE ── */
 .qg-page{position:fixed;inset:0;z-index:2000;background:var(--clr-bg);display:flex;flex-direction:column}
 .qg-bar{flex:none;display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap;
@@ -189,7 +222,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .ll-date{font-family:var(--mono);font-size:.6rem;font-weight:400;color:var(--clr-muted)}
 .ll-stats{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
 .ll-stat{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--navy);background:var(--clr-bg-alt);border-radius:4px;padding:.14rem .45rem}
-.ll-col{font-family:var(--mono);font-size:.6rem;color:var(--clr-accent-dk);background:rgba(200,146,42,.12);border:1px solid rgba(200,146,42,.4);border-radius:4px;padding:.14rem .45rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ll-col{display:inline-flex;align-items:center;gap:.28rem;font-family:var(--mono);font-size:.6rem;color:var(--clr-accent-dk);background:rgba(200,146,42,.12);border:1px solid rgba(200,146,42,.4);border-radius:4px;padding:.14rem .45rem;max-width:160px;overflow:hidden;white-space:nowrap}
+.ll-dot{width:9px;height:9px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.2)}
+.ll-status{flex:none;align-self:flex-start;margin-top:.1rem;border:none;cursor:pointer;font-family:var(--mono);font-size:.58rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:5px;padding:.28rem .5rem;min-width:52px;text-align:center}
+.ll-status.st-todo{background:var(--clr-bg-alt);color:var(--clr-muted)}
+.ll-status.st-cut{background:rgba(200,146,42,.18);color:var(--clr-accent-dk)}
+.ll-status.st-done{background:rgba(60,120,74,.16);color:#2e6b2e}
 .lib-list .ll-meta{font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)}
 .ll-btn{border:1.5px solid var(--clr-border);background:transparent;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem;font-weight:600;cursor:pointer;padding:.3rem .6rem;border-radius:6px}
 .ll-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
@@ -211,7 +249,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .bsum{display:grid;grid-template-columns:1fr;gap:.6rem}
 .bcode-card{border:1.5px solid var(--clr-border);border-radius:10px;overflow:hidden}
 .bcode-hd{background:var(--navy);color:#f3ecdd;padding:.5rem .8rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap}
-.bcode-name{font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.04em}
+.bcode-name{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--mono);font-size:.78rem;font-weight:700;letter-spacing:.04em}
+.bcode-body .bcode-det{color:var(--clr-muted);opacity:.85}
 .bcode-boards{font-family:var(--mono);font-size:.72rem;color:var(--clr-accent);font-weight:700}
 .bcode-body{display:flex;gap:1.2rem;flex-wrap:wrap;padding:.55rem .8rem;font-family:var(--mono);font-size:.72rem;color:var(--clr-muted)}
 .bcode-body b{color:var(--clr-dark)}
@@ -397,6 +436,18 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <span class="mode-top-hint" id="modeHint">Type parts in a list — with names, for projects you'll come back to.</span>
   </div>
 
+  <!-- ════ FIRST-RUN RIBBON (dismissible) ════ -->
+  <div id="firstRun" class="first-run" style="display:none">
+    <span class="fr-steps"><b>1</b>&nbsp;Set your board&nbsp; · &nbsp;<b>2</b>&nbsp;Add parts&nbsp; · &nbsp;<b>3</b>&nbsp;Tap a box edge to band&nbsp; · &nbsp;<b>4</b>&nbsp;Print</span>
+    <button class="fr-x" onclick="dismissFirstRun()">Got it ✕</button>
+  </div>
+
+  <!-- ════ LIVE RESULT BAR ════ -->
+  <div id="resultBar" class="result-bar" style="display:none"></div>
+
+  <!-- ════ RECENT PROJECTS (members) ════ -->
+  <div id="recentBar" class="recent-bar" style="display:none"></div>
+
 <div class="cs-cols" id="csCols">
 
   <!-- ════ LEFT: INPUT ════ -->
@@ -438,16 +489,14 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div id="projStatus" class="proj-status"></div>
     </div>
 
+    <!-- BOARD & SHEET SETUP (collapsible) -->
+    <details class="setup-box" id="setupBox" open>
+      <summary><span class="setup-t">&#9881; Board &amp; sheet setup</span><span class="setup-sum" id="setupSum"></span></summary>
+      <div class="setup-body">
+
     <!-- BOARD SETTINGS -->
     <div class="card">
       <div class="card-t"><span class="dot"></span>Board</div>
-      <div class="unit-bar">
-        <span class="lbl">Units</span>
-        <div class="pill-row">
-          <button class="pill active" id="upmm" onclick="setUnit('mm')">mm</button>
-          <button class="pill" id="upcm" onclick="setUnit('cm')">cm</button>
-        </div>
-      </div>
       <div class="fld big" style="margin-bottom:.7rem">
         <label>Board / colour code</label>
         <input id="s-code" placeholder="e.g. 18mm Oak Melamine" oninput="onSetting()">
@@ -487,9 +536,20 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <input type="file" id="b-file" accept="image/png,image/jpeg,image/webp" hidden onchange="onBrandFile(event)">
     </div>
 
+      </div><!-- /setup-body -->
+    </details>
+
     <!-- PARTS -->
     <div class="card">
-      <div class="card-t"><span class="dot"></span>Parts</div>
+      <div class="card-t" style="justify-content:space-between"><span style="display:inline-flex;align-items:center;gap:.5rem"><span class="dot"></span>Parts</span>
+        <span class="unit-bar" style="margin:0;padding:.2rem .35rem;border:1px solid var(--clr-border);background:transparent">
+          <span class="lbl" style="font-size:.6rem">Units</span>
+          <span class="pill-row">
+            <button class="pill active" id="upmm" onclick="setUnit('mm')">mm</button>
+            <button class="pill" id="upcm" onclick="setUnit('cm')">cm</button>
+          </span>
+        </span>
+      </div>
 
       <!-- Named-list editor (Quick grid opens as a standalone page) -->
       <div id="listWrap" class="pt-scroll">
@@ -681,7 +741,7 @@ function setUnit(u){
   document.getElementById('upmm').classList.toggle('active',u==='mm');
   document.getElementById('upcm').classList.toggle('active',u==='cm');
   // re-render rows so dim fields show the new unit; board fields stay mm
-  renderParts(); renderAll(); save();
+  renderParts(); renderAll(); updateSetupSum(); save();
 }
 function onSetting(){
   U.code = document.getElementById('s-code').value;
@@ -692,8 +752,15 @@ function onSetting(){
   U.waste= num(document.getElementById('s-waste').value,12);
   U.grain= document.getElementById('s-grain').value;
   U.projShow = document.getElementById('s-projshow').checked;
-  renderAll(); save();
+  renderAll(); updateSetupSum(); save();
 }
+function updateSetupSum(){
+  var el=document.getElementById('setupSum'); if(!el) return;
+  var code=(U.code||'').trim();
+  el.textContent=(code||'no colour set')+' · '+U.bl+'×'+U.bw+' · '+U.thick+'mm';
+}
+function onSetupToggle(){ try{ localStorage.setItem('nwd-cutsheet-setup-open', document.getElementById('setupBox').open?'1':'0'); }catch(e){} }
+function dismissFirstRun(){ var el=document.getElementById('firstRun'); if(el) el.style.display='none'; try{ localStorage.setItem('nwd-cutsheet-firstrun','done'); }catch(e){} }
 function onProjName(){ U.proj = document.getElementById('s-proj').value; renderAll(); save(); }
 function onListName(){ U.listName = document.getElementById('s-listname').value; renderAll(); save(); }
 
@@ -918,8 +985,9 @@ function persistCurrentList(){
 function saveCurrentList(){
   var pname=(U.proj||'').trim();
   var lname=(U.listName||'').trim();
-  if(!pname){ pname=(prompt('Project — the home or client:','')||'').trim(); if(!pname) return; U.proj=pname; document.getElementById('s-proj').value=pname; }
+  // At least a cut-list name is required; the project can be a quick-save catch-all.
   if(!lname){ lname=(prompt('Name this cut list — which piece?','Cut list')||'').trim(); if(!lname) return; U.listName=lname; document.getElementById('s-listname').value=lname; }
+  if(!pname){ pname='Loose cut lists'; U.proj=pname; document.getElementById('s-proj').value=pname; }
   var arr=projStore(), now=Date.now();
   var proj = (curProjId&&findProj(arr,curProjId)) || null;
   if(!proj){ for(var i=0;i<arr.length;i++){ if(arr[i].name.toLowerCase()===pname.toLowerCase()){ proj=arr[i]; break; } } }
@@ -1041,9 +1109,9 @@ function renderProjectCount(){ var el=document.getElementById('projCount'); if(e
 // Quick-switch chips for the lists in the current project.
 function renderListChips(){
   var host=document.getElementById('listChips'); if(!host) return;
-  if(!curProjId){ host.innerHTML='<span class="lc-empty">Not saved yet — press Save cut list to start a project.</span>'; return; }
+  if(!curProjId){ host.innerHTML='<span class="lc-empty">Not saved yet — press Save cut list to start a project.</span>'; renderRecent(); return; }
   var arr=projStore(), proj=findProj(arr,curProjId);
-  if(!proj){ host.innerHTML='<span class="lc-empty">Not saved yet.</span>'; return; }
+  if(!proj){ host.innerHTML='<span class="lc-empty">Not saved yet.</span>'; renderRecent(); return; }
   var html='<span class="lc-lbl">'+esc(proj.name)+' — cut lists</span>';
   proj.lists.forEach(function(l){
     html+='<button class="lc-chip'+(l.id===curListId?' active':'')+'" onclick="loadList(\''+proj.id+'\',\''+l.id+'\')">'+esc(l.name)+'</button>';
@@ -1051,6 +1119,20 @@ function renderListChips(){
   if(!curListId) html+='<span class="lc-chip active" style="cursor:default">'+esc((U.listName||'New list').trim()||'New list')+'</span>';
   html+='<button class="lc-chip add" onclick="newList()">+ list</button>';
   host.innerHTML=html;
+  renderRecent();
+}
+// "Recent projects" strip — shown on a fresh/unsaved sheet so you resume rather than restart.
+function renderRecent(){
+  var bar=document.getElementById('recentBar'); if(!bar) return;
+  var arr=projStore().slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
+  if(!arr.length || curListId){ bar.style.display='none'; return; }   // hide once you're in a saved list
+  var html='<span class="rc-lbl">Pick up where you left off</span>';
+  arr.slice(0,3).forEach(function(p){
+    var l=p.lists&&p.lists[0]; if(!l) return;
+    html+='<button class="recent-chip" onclick="loadList(\''+p.id+'\',\''+l.id+'\')">'+esc(p.name)+' <span class="rc-sub">· '+esc(l.name)+'</span></button>';
+  });
+  html+='<button class="rc-all" onclick="openLibrary()">All projects →</button>';
+  bar.innerHTML=html; bar.style.display='flex';
 }
 // Full-screen projects library.
 function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
@@ -1076,12 +1158,33 @@ function listStats(data){
   });
   return { rows:rows, pieces:pieces, boards:boards, bandM:bandMM/1000, colours:order, thick:(u.thick||18) };
 }
+// Infer a swatch colour from a board-code string (best-effort, for a quick visual cue).
+function codeColour(code){
+  var s=(code||'').toLowerCase();
+  var map=[['walnut','#5a3a22'],['wenge','#4a3120'],['mahogany','#6a3326'],['sapele','#7a3a24'],
+    ['cherry','#8a4b34'],['teak','#a06a34'],['oak','#c9a86a'],['beech','#d8b78a'],['maple','#e6d3a3'],
+    ['ash','#d9cdb0'],['pine','#e0c79a'],['birch','#e3d2ac'],['grey','#8a8a8a'],['gray','#8a8a8a'],
+    ['anthracite','#3a3d40'],['charcoal','#36393b'],['black','#242424'],['white','#f4f2ea'],
+    ['cream','#efe6cf'],['ivory','#efe8d6'],['red','#a8392e'],['blue','#3a5a8a'],['green','#3c6b4a']];
+  for(var i=0;i<map.length;i++){ if(s.indexOf(map[i][0])!==-1) return map[i][1]; }
+  return '#c8922a'; // default → gold accent
+}
 function statChips(st){
   var chips='<span class="ll-stat">'+st.pieces+' pc'+(st.pieces!==1?'s':'')+'</span>'+
     '<span class="ll-stat">'+st.boards+' board'+(st.boards!==1?'s':'')+'</span>';
   if(st.bandM>0) chips+='<span class="ll-stat">'+st.bandM.toFixed(1)+' m band</span>';
-  st.colours.forEach(function(c){ chips+='<span class="ll-col">'+esc(c)+'</span>'; });
+  st.colours.forEach(function(c){ chips+='<span class="ll-col"><span class="ll-dot" style="background:'+codeColour(c)+'"></span>'+esc(c)+'</span>'; });
   return chips;
+}
+// Job status per cut list: To cut → Cut → Done.
+var STATUS_ORDER=['todo','cut','done'];
+var STATUS_LABELS={todo:'To cut', cut:'Cut', done:'Done'};
+function setListStatus(projId, listId){
+  var arr=projStore(), proj=findProj(arr,projId), l=findList(proj,listId); if(!l) return;
+  var i=STATUS_ORDER.indexOf(l.status||'todo');
+  l.status=STATUS_ORDER[(i+1)%STATUS_ORDER.length];
+  proj.updatedAt=Date.now();
+  projSave(arr); renderLibrary();
 }
 function renderLibrary(){
   renderProjectCount();
@@ -1089,14 +1192,16 @@ function renderLibrary(){
   var host=document.getElementById('projLib');
   if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; return; }
   host.innerHTML=arr.map(function(p){
-    var pBoards=0, pPieces=0, pCols={};
+    var pBoards=0, pPieces=0, pCols={}, pDone=0;
     var lists=p.lists.map(function(l){
       var st=listStats(l.data);
       pBoards+=st.boards; pPieces+=st.pieces; st.colours.forEach(function(c){pCols[c]=1;});
+      var status=l.status||'todo'; if(status==='done') pDone++;
       var cur=(p.id===curProjId&&l.id===curListId);
       var d=l.savedAt?new Date(l.savedAt):null;
       var date=d?(d.getDate()+'/'+(d.getMonth()+1)):'';
       return '<div class="lib-list'+(cur?' cur':'')+'">'+
+        '<button class="ll-status st-'+status+'" title="Tap to change status" onclick="setListStatus(\''+p.id+'\',\''+l.id+'\')">'+STATUS_LABELS[status]+'</button>'+
         '<div class="ll-main" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()">'+
           '<div class="ll-name">'+esc(l.name)+(cur?' <span class="ll-open">OPEN</span>':'')+(date?'<span class="ll-date">'+date+'</span>':'')+'</div>'+
           '<div class="ll-stats">'+statChips(st)+'</div>'+
@@ -1106,8 +1211,9 @@ function renderLibrary(){
         '<button class="ll-btn del" onclick="deleteList(\''+p.id+'\',\''+l.id+'\')">Delete</button>'+
       '</div>';
     }).join('');
-    var nCols=Object.keys(pCols).length;
-    var roll=p.lists.length+' list'+(p.lists.length!==1?'s':'')+' · '+pBoards+' board'+(pBoards!==1?'s':'')+' · '+pPieces+' pc'+(pPieces!==1?'s':'')+(nCols?' · '+nCols+' colour'+(nCols!==1?'s':''):'');
+    var nCols=Object.keys(pCols).length, nL=p.lists.length;
+    var roll=nL+' list'+(nL!==1?'s':'')+' · '+pBoards+' board'+(pBoards!==1?'s':'')+' · '+pPieces+' pc'+(pPieces!==1?'s':'')+(nCols?' · '+nCols+' colour'+(nCols!==1?'s':''):'')+
+      (nL?' · <b style="color:'+(pDone===nL?'#8fd39a':'#f0d79a')+'">'+pDone+'/'+nL+' done</b>':'');
     return '<div class="lib-proj">'+
       '<div class="lib-phd"><div class="lp-head"><div class="lp-name">'+esc(p.name)+'</div><div class="lp-roll">'+roll+'</div></div>'+
         '<div class="lp-act">'+
@@ -1393,36 +1499,34 @@ function groups(){
 }
 function renderSummary(gs){
   var host=document.getElementById('bsum');
-  if(!gs.length){ host.innerHTML='<div style="font-size:.82rem;color:var(--clr-muted)">Add parts with a length and width to see how many boards you need.</div>'; return; }
+  var rbar=document.getElementById('resultBar');
+  if(!gs.length){
+    host.innerHTML='<div style="font-size:.82rem;color:var(--clr-muted)">Add parts with a length and width to see how many boards you need.</div>';
+    if(rbar) rbar.style.display='none';
+    return;
+  }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl, BW=U.bw, kerf=U.kerf, boardArea=BL*BW/1e6;
-  var html='', grandBoards=0, grandBandMM=0;
+  var html='', grandBoards=0, grandBandMM=0, grandPcs=0, grandOver=0;
   gs.forEach(function(g){
-    // expand instances + edge-band length (mm)
     var items=[], net=0, bandMM=0;
     g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
-      var vlen=gflip?p.W:p.L;   // left/right edge length (the grain/length dim)
-      var hlen=gflip?p.L:p.W;   // top/bottom edge length (the width dim)
-      var perPiece=(eb.t?hlen:0)+(eb.b?hlen:0)+(eb.l?vlen:0)+(eb.r?vlen:0);
-      bandMM += perPiece*p.qty;
+      var vlen=gflip?p.W:p.L, hlen=gflip?p.L:p.W;
+      bandMM += ((eb.t?hlen:0)+(eb.b?hlen:0)+(eb.l?vlen:0)+(eb.r?vlen:0))*p.qty;
       net += (p.L*p.W)*p.qty;
       for(var i=0;i<p.qty;i++) items.push({len:vlen,wid:hlen});
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
-    var netM=net/1e6;
-    var wasteBoards=Math.ceil(netM*(1+U.waste/100)/boardArea);
-    var bandM=bandMM/1000;
-    grandBoards+=pk.count; grandBandMM+=bandMM;
-    var pcs=items.length;
+    var netM=net/1e6, bandM=bandMM/1000;
+    grandBoards+=pk.count; grandBandMM+=bandMM; grandPcs+=items.length; grandOver+=pk.oversize.length;
+    // Lead with the numbers that matter; net m² tucked as a small detail.
     html+='<div class="bcode-card">'+
-      '<div class="bcode-hd"><span class="bcode-name">'+esc(g.code)+'</span><span class="bcode-boards">'+pk.count+' board'+(pk.count!==1?'s':'')+'</span></div>'+
+      '<div class="bcode-hd"><span class="bcode-name"><span class="ll-dot" style="background:'+codeColour(g.code)+'"></span>'+esc(g.code)+'</span><span class="bcode-boards">'+pk.count+' board'+(pk.count!==1?'s':'')+'</span></div>'+
       '<div class="bcode-body">'+
-        '<span><b>'+pcs+'</b> pcs</span>'+
-        '<span>net <b>'+netM.toFixed(2)+'</b> m²</span>'+
-        '<span>util <b>'+Math.min(100,Math.round(netM/(pk.count*boardArea||1)*100))+'%</b></span>'+
-        '<span>area est <b>'+wasteBoards+'</b> (+'+U.waste+'%)</span>'+
+        '<span><b>'+items.length+'</b> pcs</span>'+
         '<span>edge band <b>'+(bandM>0?bandM.toFixed(1)+' m':'—')+'</b></span>'+
+        '<span class="bcode-det">net '+netM.toFixed(2)+' m²</span>'+
       '</div>'+
       (pk.oversize.length?'<div class="oversize">⚠ '+pk.oversize.length+' part(s) larger than the '+BL+'×'+BW+' board — split them or check dimensions.</div>':'')+
     '</div>';
@@ -1431,6 +1535,18 @@ function renderSummary(gs){
   html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+
     (grandBandM>0?' · <b>'+grandBandM.toFixed(1)+' m</b> edge banding':'')+'</div>';
   host.innerHTML=html;
+  // live result bar (prominent, up top)
+  if(rbar){
+    rbar.style.display='flex';
+    rbar.innerHTML=
+      '<span class="rb-stat"><span class="rb-num">'+grandBoards+'</span><span class="rb-lbl">board'+(grandBoards!==1?'s':'')+'</span></span>'+
+      '<span class="rb-sep"></span>'+
+      '<span class="rb-stat"><span class="rb-num">'+(grandBandM>0?grandBandM.toFixed(1):'0')+'</span><span class="rb-lbl">m edge band</span></span>'+
+      '<span class="rb-sep"></span>'+
+      '<span class="rb-stat"><span class="rb-num">'+grandPcs+'</span><span class="rb-lbl">piece'+(grandPcs!==1?'s':'')+'</span></span>'+
+      (gs.length>1?'<span class="rb-sep"></span><span class="rb-stat"><span class="rb-num">'+gs.length+'</span><span class="rb-lbl">colours</span></span>':'')+
+      (grandOver?'<span class="rb-warn">⚠ '+grandOver+' oversize</span>':'');
+  }
 }
 // Print running header, rendered as a repeating <thead> cell (see renderSheet).
 function buildPrintHead(gs){
@@ -1493,6 +1609,7 @@ function renderAll(){
   var gs=groups();
   renderSummary(gs);
   renderSheet(gs);   // renderSheet builds the repeating print header (thead) from current branding
+  updateSetupSum();
 }
 
 // ── EDGE / GRAIN TAP DELEGATION ──
@@ -1559,6 +1676,16 @@ function clearAll(){
   renderAll();
   renderListChips();
   renderProjectCount();
+  // Setup box: remember the user's open/closed choice; first time, collapse it if a
+  // board is already set (returning) and open it for a first-timer.
+  var setupBox=document.getElementById('setupBox');
+  var pref=null; try{ pref=localStorage.getItem('nwd-cutsheet-setup-open'); }catch(e){}
+  setupBox.open = (pref!=null) ? (pref==='1') : !((U.code||'').trim());
+  setupBox.addEventListener('toggle', onSetupToggle);   // persist only user-initiated toggles
+  updateSetupSum();
+  // First-run ribbon (once)
+  var frDone=null; try{ frDone=localStorage.getItem('nwd-cutsheet-firstrun'); }catch(e){}
+  if(!frDone) document.getElementById('firstRun').style.display='flex';
   save();
   // reveal the member back-bar (Concierge session) or the guest back-to-Tools bar
   var loggedIn = !!(window.Concierge && Concierge.tokenAlive());
