@@ -547,7 +547,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       </div>
       <div class="grid2" style="margin-top:.7rem">
         <div class="fld"><label>Apply / roll (GHS)</label><input id="s-applyp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Cost to apply one roll</div></div>
-        <div class="fld"><label>Roll length (m)</label><input id="s-rolllen" type="number" value="50" inputmode="decimal" oninput="onSetting()"><div class="hint" id="perm-hint">Metres per roll</div></div>
+        <div class="fld"><label>Roll length (m)</label><input id="s-rolllen" type="number" value="100" inputmode="decimal" oninput="onSetting()"><div class="hint" id="perm-hint">Metres per roll</div></div>
       </div>
     </div>
 
@@ -726,7 +726,7 @@ var PROJ_KEY = 'nwd-cutsheet-projects'; // saved projects → cut lists
 var PROJ_BAK = 'nwd-cutsheet-projects-bak'; // rolling backup (loss insurance)
 var U = { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false,
           brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1,
-          boardPrice:500, rollPrice:200, applyPrice:500, rollLen:50 };
+          boardPrice:500, rollPrice:200, applyPrice:500, rollLen:100 };
 var parts = [];       // {id,name,L,W,qty,code}
 var ebState = {};     // id -> {t,r,b,l,gflip}
 var seq = 1;
@@ -786,7 +786,7 @@ function onSetting(){
   U.boardPrice= num(document.getElementById('s-boardp').value,0);
   U.rollPrice = num(document.getElementById('s-rollp').value,0);
   U.applyPrice= num(document.getElementById('s-applyp').value,0);
-  U.rollLen   = num(document.getElementById('s-rolllen').value,50)||50;
+  U.rollLen   = num(document.getElementById('s-rolllen').value,100)||100;
   U.projShow = document.getElementById('s-projshow').checked;
   var ph=document.getElementById('perm-hint'); if(ph) ph.textContent='≈ '+fmtGHS(edgePerM(U))+'/m';
   renderAll(); updateSetupSum(); save();
@@ -952,7 +952,7 @@ function fillSettings(){
   document.getElementById('s-boardp').value=(U.boardPrice!=null?U.boardPrice:500);
   document.getElementById('s-rollp').value=(U.rollPrice!=null?U.rollPrice:200);
   document.getElementById('s-applyp').value=(U.applyPrice!=null?U.applyPrice:500);
-  document.getElementById('s-rolllen').value=(U.rollLen!=null?U.rollLen:50);
+  document.getElementById('s-rolllen').value=(U.rollLen!=null?U.rollLen:100);
   var ph=document.getElementById('perm-hint'); if(ph) ph.textContent='≈ '+fmtGHS(edgePerM(U))+'/m';
   document.getElementById('upmm').classList.toggle('active',U.unit==='mm');
   document.getElementById('upcm').classList.toggle('active',U.unit==='cm');
@@ -1000,7 +1000,7 @@ function findProj(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) retu
 function findList(proj,id){ if(!proj) return null; for(var i=0;i<proj.lists.length;i++) if(proj.lists[i].id===id) return proj.lists[i]; return null; }
 function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1, boardPrice:500, rollPrice:200, applyPrice:500, rollLen:50 }; }
 // GHS edge cost per metre = (roll price + application per roll) / metres per roll.
-function edgePerM(u){ u=u||U; var rl=(u.rollLen>0?u.rollLen:50); return ((num(u.rollPrice,0))+(num(u.applyPrice,0)))/rl; }
+function edgePerM(u){ u=u||U; var rl=(u.rollLen>0?u.rollLen:100); return ((num(u.rollPrice,0))+(num(u.applyPrice,0)))/rl; }
 function fmtGHS(n){ return 'GHS ' + Math.round(n).toLocaleString('en-US'); }
 function hasContent(){ return parts.some(function(p){ return p.L>0||p.W>0||(p.name&&p.name.trim()); }); }
 function printLabel(){ return [ (U.proj||'').trim(), (U.listName||'').trim() ].filter(Boolean).join(' · '); }
@@ -1563,7 +1563,7 @@ function renderSummary(gs){
   }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl, BW=U.bw, kerf=U.kerf, boardArea=BL*BW/1e6;
-  var perM=edgePerM(U), bp=num(U.boardPrice,0), rl=(U.rollLen>0?U.rollLen:50);
+  var perM=edgePerM(U), bp=num(U.boardPrice,0), rl=(U.rollLen>0?U.rollLen:100);
   var priceOn = (bp>0 || perM>0);
   var html='', grandBoards=0, grandBandMM=0, grandPcs=0, grandOver=0;
   gs.forEach(function(g){
