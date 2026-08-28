@@ -173,16 +173,23 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .lib-empty{max-width:600px;margin:2rem auto;text-align:center;color:var(--clr-muted);font-size:.95rem}
 .lib-proj{max-width:900px;margin:0 auto 1.3rem;background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;overflow:hidden}
 .lib-phd{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;padding:.7rem 1rem;background:var(--navy);color:#f3ecdd}
-.lib-phd .lp-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700}
+.lib-phd .lp-head{min-width:0}
+.lib-phd .lp-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;line-height:1.15}
+.lib-phd .lp-roll{font-family:var(--mono);font-size:.62rem;color:rgba(243,236,221,.8);margin-top:.15rem;letter-spacing:.02em}
 .lib-phd .lp-act{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.lib-phd .lp-count{font-family:var(--mono);font-size:.66rem;color:rgba(243,236,221,.75);margin-right:.2rem}
 .lib-phd .ll-btn{color:#f3ecdd;border-color:rgba(243,236,221,.4)}
 .lib-lists{padding:.5rem}
-.lib-list{display:flex;align-items:center;gap:.5rem;padding:.55rem .7rem;border-radius:8px}
+.lib-list{display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;border-radius:8px;border-bottom:1px solid var(--clr-border)}
+.lib-list:last-child{border-bottom:none}
 .lib-list:hover{background:var(--clr-accent-lt)}
 .lib-list.cur{background:var(--clr-accent-lt)}
 .lib-list .ll-main{flex:1;min-width:0;cursor:pointer}
-.lib-list .ll-name{font-size:.92rem;font-weight:600;color:var(--clr-dark)}
+.lib-list .ll-name{font-size:.94rem;font-weight:600;color:var(--clr-dark);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.ll-open{font-family:var(--mono);font-size:.58rem;font-weight:700;color:var(--clr-accent-dk);background:var(--clr-accent-lt);border:1px solid var(--clr-accent);border-radius:4px;padding:.02rem .3rem}
+.ll-date{font-family:var(--mono);font-size:.6rem;font-weight:400;color:var(--clr-muted)}
+.ll-stats{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.35rem}
+.ll-stat{font-family:var(--mono);font-size:.6rem;font-weight:700;color:var(--navy);background:var(--clr-bg-alt);border-radius:4px;padding:.14rem .45rem}
+.ll-col{font-family:var(--mono);font-size:.6rem;color:var(--clr-accent-dk);background:rgba(200,146,42,.12);border:1px solid rgba(200,146,42,.4);border-radius:4px;padding:.14rem .45rem;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lib-list .ll-meta{font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)}
 .ll-btn{border:1.5px solid var(--clr-border);background:transparent;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem;font-weight:600;cursor:pointer;padding:.3rem .6rem;border-radius:6px}
 .ll-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
@@ -1048,25 +1055,62 @@ function renderListChips(){
 // Full-screen projects library.
 function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
 function closeLibrary(){ document.getElementById('projPage').style.display='none'; document.body.style.overflow=''; }
+// At-a-glance stats for a saved cut list (computed from its snapshot, no need to open it).
+function listStats(data){
+  var u=(data&&data.U)||{}, ps=(data&&data.parts)||[], eb=(data&&data.ebState)||{};
+  var BL=u.bl||2440, BW=u.bw||1220, kerf=(u.kerf!=null?u.kerf:4), allowRot=(u.grain==='0'||u.grain===0);
+  var gcode=(u.code||'').trim();
+  var byCode={}, order=[];
+  ps.forEach(function(p){ if(!(p.L>0&&p.W>0)) return; var c=(p.code&&p.code.trim())||gcode||'Board'; if(!byCode[c]){byCode[c]=[];order.push(c);} byCode[c].push(p); });
+  var boards=0, pieces=0, rows=0, bandMM=0;
+  order.forEach(function(c){
+    var items=[];
+    byCode[c].forEach(function(p){
+      var e=eb[p.id]||{}; var gflip=!!e.gflip;
+      var vlen=gflip?p.W:p.L, hlen=gflip?p.L:p.W;
+      bandMM += ((e.t?hlen:0)+(e.b?hlen:0)+(e.l?vlen:0)+(e.r?vlen:0))*p.qty;
+      pieces += p.qty; rows++;
+      for(var i=0;i<p.qty;i++) items.push({len:vlen,wid:hlen});
+    });
+    boards += packBoards(items,BL,BW,kerf,allowRot).count;
+  });
+  return { rows:rows, pieces:pieces, boards:boards, bandM:bandMM/1000, colours:order, thick:(u.thick||18) };
+}
+function statChips(st){
+  var chips='<span class="ll-stat">'+st.pieces+' pc'+(st.pieces!==1?'s':'')+'</span>'+
+    '<span class="ll-stat">'+st.boards+' board'+(st.boards!==1?'s':'')+'</span>';
+  if(st.bandM>0) chips+='<span class="ll-stat">'+st.bandM.toFixed(1)+' m band</span>';
+  st.colours.forEach(function(c){ chips+='<span class="ll-col">'+esc(c)+'</span>'; });
+  return chips;
+}
 function renderLibrary(){
   renderProjectCount();
   var arr=projStore().slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
   var host=document.getElementById('projLib');
   if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; return; }
   host.innerHTML=arr.map(function(p){
+    var pBoards=0, pPieces=0, pCols={};
     var lists=p.lists.map(function(l){
-      var n=(l.data&&l.data.parts?l.data.parts.filter(function(x){return x.L>0&&x.W>0;}).length:0);
+      var st=listStats(l.data);
+      pBoards+=st.boards; pPieces+=st.pieces; st.colours.forEach(function(c){pCols[c]=1;});
       var cur=(p.id===curProjId&&l.id===curListId);
+      var d=l.savedAt?new Date(l.savedAt):null;
+      var date=d?(d.getDate()+'/'+(d.getMonth()+1)):'';
       return '<div class="lib-list'+(cur?' cur':'')+'">'+
-        '<div class="ll-main" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()"><div class="ll-name">'+esc(l.name)+(cur?' · <span style="color:var(--clr-accent-dk);font-weight:700">OPEN</span>':'')+'</div><div class="ll-meta">'+n+' part'+(n!==1?'s':'')+'</div></div>'+
+        '<div class="ll-main" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()">'+
+          '<div class="ll-name">'+esc(l.name)+(cur?' <span class="ll-open">OPEN</span>':'')+(date?'<span class="ll-date">'+date+'</span>':'')+'</div>'+
+          '<div class="ll-stats">'+statChips(st)+'</div>'+
+        '</div>'+
         '<button class="ll-btn" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()">Open</button>'+
         '<button class="ll-btn" onclick="renameList(\''+p.id+'\',\''+l.id+'\')">Rename</button>'+
         '<button class="ll-btn del" onclick="deleteList(\''+p.id+'\',\''+l.id+'\')">Delete</button>'+
       '</div>';
     }).join('');
+    var nCols=Object.keys(pCols).length;
+    var roll=p.lists.length+' list'+(p.lists.length!==1?'s':'')+' · '+pBoards+' board'+(pBoards!==1?'s':'')+' · '+pPieces+' pc'+(pPieces!==1?'s':'')+(nCols?' · '+nCols+' colour'+(nCols!==1?'s':''):'');
     return '<div class="lib-proj">'+
-      '<div class="lib-phd"><div class="lp-name">'+esc(p.name)+'</div>'+
-        '<div class="lp-act"><span class="lp-count">'+p.lists.length+' list'+(p.lists.length!==1?'s':'')+'</span>'+
+      '<div class="lib-phd"><div class="lp-head"><div class="lp-name">'+esc(p.name)+'</div><div class="lp-roll">'+roll+'</div></div>'+
+        '<div class="lp-act">'+
         '<button class="ll-btn" onclick="addListToProject(\''+p.id+'\')">+ New list</button>'+
         '<button class="ll-btn" onclick="renameProject(\''+p.id+'\')">Rename</button>'+
         '<button class="ll-btn del" onclick="deleteProject(\''+p.id+'\')">Delete</button></div></div>'+
