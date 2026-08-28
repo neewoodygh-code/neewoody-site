@@ -1352,20 +1352,24 @@ function renderSummary(gs){
   if(!gs.length){ host.innerHTML='<div style="font-size:.82rem;color:var(--clr-muted)">Add parts with a length and width to see how many boards you need.</div>'; return; }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl, BW=U.bw, kerf=U.kerf, boardArea=BL*BW/1e6;
-  var html='', grandBoards=0;
+  var html='', grandBoards=0, grandBandMM=0;
   gs.forEach(function(g){
-    // expand instances
-    var items=[], net=0;
+    // expand instances + edge-band length (mm)
+    var items=[], net=0, bandMM=0;
     g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
-      var len=gflip?p.W:p.L, wid=gflip?p.L:p.W;
+      var vlen=gflip?p.W:p.L;   // left/right edge length (the grain/length dim)
+      var hlen=gflip?p.L:p.W;   // top/bottom edge length (the width dim)
+      var perPiece=(eb.t?hlen:0)+(eb.b?hlen:0)+(eb.l?vlen:0)+(eb.r?vlen:0);
+      bandMM += perPiece*p.qty;
       net += (p.L*p.W)*p.qty;
-      for(var i=0;i<p.qty;i++) items.push({len:len,wid:wid});
+      for(var i=0;i<p.qty;i++) items.push({len:vlen,wid:hlen});
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var netM=net/1e6;
     var wasteBoards=Math.ceil(netM*(1+U.waste/100)/boardArea);
-    grandBoards+=pk.count;
+    var bandM=bandMM/1000;
+    grandBoards+=pk.count; grandBandMM+=bandMM;
     var pcs=items.length;
     html+='<div class="bcode-card">'+
       '<div class="bcode-hd"><span class="bcode-name">'+esc(g.code)+'</span><span class="bcode-boards">'+pk.count+' board'+(pk.count!==1?'s':'')+'</span></div>'+
@@ -1374,11 +1378,14 @@ function renderSummary(gs){
         '<span>net <b>'+netM.toFixed(2)+'</b> m²</span>'+
         '<span>util <b>'+Math.min(100,Math.round(netM/(pk.count*boardArea||1)*100))+'%</b></span>'+
         '<span>area est <b>'+wasteBoards+'</b> (+'+U.waste+'%)</span>'+
+        '<span>edge band <b>'+(bandM>0?bandM.toFixed(1)+' m':'—')+'</b></span>'+
       '</div>'+
       (pk.oversize.length?'<div class="oversize">⚠ '+pk.oversize.length+' part(s) larger than the '+BL+'×'+BW+' board — split them or check dimensions.</div>':'')+
     '</div>';
   });
-  html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+'</div>';
+  var grandBandM=grandBandMM/1000;
+  html+='<div class="grand">Total: <b>'+grandBoards+'</b> board'+(grandBoards!==1?'s':'')+' across '+gs.length+' colour'+(gs.length!==1?'s':'')+
+    (grandBandM>0?' · <b>'+grandBandM.toFixed(1)+' m</b> edge banding':'')+'</div>';
   host.innerHTML=html;
 }
 // Print running header, rendered as a repeating <thead> cell (see renderSheet).
@@ -1417,16 +1424,18 @@ function renderSheet(gs){
     '</div>';
   var pn=0;  // running part number → box fallback label when unnamed (quick-grid mode)
   gs.forEach(function(g, gi){
-    var items=[]; g.parts.forEach(function(p){
+    var items=[], bandMM=0; g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
       var len=gflip?p.W:p.L, wid=gflip?p.L:p.W;
+      bandMM += ((eb.t?wid:0)+(eb.b?wid:0)+(eb.l?len:0)+(eb.r?len:0))*p.qty;
       for(var i=0;i<p.qty;i++) items.push({len:len,wid:wid});
     });
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var pcs=items.length;
+    var bandM=bandMM/1000;
     body+='<div class="grp'+(gi===0?' grp-first':'')+'">'+
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
-      '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm</span></div>'+
+      '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm'+(bandM>0?' · <b>'+bandM.toFixed(1)+' m</b> edge band':'')+'</span></div>'+
       '<div class="eb-grid">';
     g.parts.forEach(function(p){ body+=partBox(p, '#'+(++pn)); });
     body+='</div></div>';
