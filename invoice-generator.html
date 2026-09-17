@@ -228,6 +228,7 @@
           <button class="btn ghost" onclick="openLib()">📂 My invoices</button>
           <button class="btn ghost sm" onclick="newInvoice()">＋ New</button>
         </div>
+        <div id="syncNote" style="display:none;font-family:var(--mono);font-size:.66rem;letter-spacing:.04em;color:var(--ok);margin:-.4rem 0 .8rem"></div>
 
         <!-- Document -->
         <div class="card">
@@ -309,7 +310,7 @@
           <button class="btn ghost sm" onclick="document.getElementById('restoreFile').click()">⬆ Restore</button>
           <input type="file" id="restoreFile" accept="application/json" style="display:none" onchange="restore(this)" />
         </div>
-        <p class="hint" style="padding:0 .2rem">Invoices are saved on this device/browser. Use <b>Back up all</b> to keep a copy you can restore anywhere.</p>
+        <p class="hint" style="padding:0 .2rem">Saved invoices &amp; your letterhead <b>sync to your account</b> and follow you across devices. <b>Back up all</b> keeps an offline copy too.</p>
       </div>
 
       <!-- ══ PREVIEW COLUMN ══ -->
@@ -329,7 +330,7 @@
 <div class="ig-overlay" id="libOverlay" onclick="if(event.target===this)closeLib()">
   <div class="ig-panel">
     <h3>My invoices</h3>
-    <div class="sub">Saved on this device. Tap to open.</div>
+    <div class="sub">Synced to your account. Tap to open.</div>
     <div id="libList"></div>
     <div style="display:flex;justify-content:flex-end;margin-top:.6rem">
       <button class="btn ghost sm" onclick="closeLib()">Close</button>
@@ -407,12 +408,14 @@ function fmtDate(iso){ if(!iso) return ''; var p=iso.split('-'); if(p.length!==3
   return (+p[2])+' '+M[(+p[1])-1]+' '+p[0]; }
 
 /* ── autosave ── */
+// The current working draft (INV) is device-local. The cloud blob holds only the
+// SAVED invoices + letterhead settings + counter, so only those writes push.
 function persist(){ warnStore(lsSet(K_CUR,INV)); }
-function persistSettings(){ warnStore(lsSet(K_SET,SETTINGS)); }
+function persistSettings(){ warnStore(lsSet(K_SET,SETTINGS)); schedulePush(); }
 
 /* ── field handlers ── */
 function onField(k,v){ if(k==='paid') v=+v||0; INV[k]=v; persist(); renderDoc(); if(k==='paid') syncBalance(); }
-function onSetting(k,v){ SETTINGS[k]=v; persistSettings(); renderDoc(); }
+function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); }
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   renderDoc();
@@ -523,7 +526,7 @@ function doPrint(){ renderDoc(); window.print(); }
 
 /* ── saved invoices (library) ── */
 function getList(){ return load(K_LIST, []) || []; }
-function setList(l){ warnStore(lsSet(K_LIST,l)); }
+function setList(l){ warnStore(lsSet(K_LIST,l)); schedulePush(); }
 function saveInvoice(){
   var list=getList();
   var snap=JSON.parse(JSON.stringify(INV));
@@ -631,6 +634,45 @@ function toast(msg){
   clearTimeout(toastT); toastT=setTimeout(function(){el.style.opacity='0';},1800);
 }
 
+/* ── cloud sync (account-backed, follows the admin across devices) ──
+   Mirrors the cut-sheet pattern: pull the account blob, merge with local so
+   nothing is lost (saved invoices by savedId newer-wins; settings by timestamp;
+   counter = max), write the merge back, then debounce a push on every save. */
+var syncReady=false;
+function mergeInvoiceLists(a,b){
+  var by={}; (a||[]).forEach(function(e){ if(e&&e.savedId) by[e.savedId]=e; });
+  (b||[]).forEach(function(e){ if(e&&e.savedId){ if(!by[e.savedId]||(e.savedAt||0)>(by[e.savedId].savedAt||0)) by[e.savedId]=e; } });
+  return Object.keys(by).map(function(k){return by[k];});
+}
+async function cloudSync(){
+  if(!(C && C.tokenAlive && C.tokenAlive())) return;
+  var cloud=null;
+  try{ var r=await C.api('/invoices'); cloud=(r&&r.data)?r.data:null; }
+  catch(e){ return; }  // offline / lapsed → keep local, no push
+  if(cloud){
+    var cs=cloud.settings;
+    if(cs && (+cs.updatedAt||0) > (+SETTINGS.updatedAt||0)){ SETTINGS=Object.assign({},DEF_SETTINGS,cs); lsSet(K_SET,SETTINGS); }
+    lsSet(K_LIST, mergeInvoiceLists(getListRaw(), Array.isArray(cloud.list)?cloud.list:[]));
+    var cc=+cloud.counter||0, lc=1000; try{lc=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000;}catch(e){}
+    if(cc>lc){ try{localStorage.setItem(K_CTR,String(cc));}catch(e){} }
+    syncForm(); renderItems(); renderDoc(); syncBalance();
+  }
+  syncReady=true;
+  setSyncNote('☁ Synced to your account · '+getListRaw().length+' saved');
+  pushCloud();  // push the merged result back
+}
+function getListRaw(){ return load(K_LIST, []) || []; }
+async function pushCloud(){
+  if(!(C && C.tokenAlive && C.tokenAlive())) return;
+  var counter=1000; try{counter=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000;}catch(e){}
+  try{ await C.api('/invoices',{ method:'PUT', body:{ data:{ v:1, settings:SETTINGS, list:getListRaw(), counter:counter } } });
+       setSyncNote('☁ Synced to your account · '+getListRaw().length+' saved'); }
+  catch(e){ /* lapsed/offline: local stays the source of truth */ }
+}
+var pushT;
+function schedulePush(){ if(!syncReady) return; clearTimeout(pushT); pushT=setTimeout(pushCloud,1500); }
+function setSyncNote(t){ var el=document.getElementById('syncNote'); if(el){ el.textContent=t; el.style.display=''; } }
+
 /* ── boot: admin gate ── */
 function showGate(title,msg,showLink){
   document.getElementById('gateTitle').textContent=title;
@@ -651,6 +693,7 @@ async function boot(){
   document.getElementById('app').style.display='';
   if(!INV.currency) INV.currency='GH₵';
   syncForm(); renderItems(); renderDoc(); syncBalance();
+  cloudSync();  // pull the account blob, merge, and keep it in sync across devices
 }
 boot();
 </script>

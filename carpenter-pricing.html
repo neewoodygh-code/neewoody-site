@@ -263,7 +263,7 @@ function calcQuote(q, overheadCfg) {
   const allMats  = [...(q.materials||[]), ...(q.optionals||[])];
   const matAmt   = allMats.filter(m=>m.on).reduce((s,m)=>s+matTotal(m), 0);
   const log      = q.logistics||{};
-  const logistics= (+log.primary||0) + (+log.secondary||0)*(log.secondaryReturn?2:1) + (+log.siteVisits||0)*(+log.siteVisitCost||0);
+  const logistics= (+log.primary||0) + (+log.secondary||0)*(log.secondaryReturn?2:1) + (+log.siteVisits||0)*(+log.siteVisitCost||0) + (+log.stayNights||0)*(+log.stayRooms||1)*(+log.stayRate||0);
   const rawCost  = overhead + labour + matAmt + logistics;
   let addOnMult  = 1;
   Object.entries(q.addOns||{}).forEach(([id,on])=>{ if(on) addOnMult *= 1 + (addOnPctFor(overheadCfg,id)/100); });
@@ -826,7 +826,7 @@ function newQuote(refNum, prefix) {
     materials: DEFAULT_MATERIALS.map(m=>makeMat(m,'cabinetry')),
     optionals: OPTIONAL_MATERIALS.map(makeOpt),
     addOns:{},
-    logistics:{primary:'',secondary:'',secondaryReturn:false,siteVisits:'',siteVisitCost:''},
+    logistics:{primary:'',secondary:'',secondaryReturn:false,siteVisits:'',siteVisitCost:'',stayNights:'',stayRooms:'',stayRate:''},
     expenditure:[],
     notes:'',
     taxRate:15,
@@ -1077,7 +1077,7 @@ function MaterialsTab({ q, upd }) {
 function LogisticsTab({ q, upd }) {
   const log = q.logistics||{};
   const set = (k,v) => upd({logistics:{...log,[k]:v}});
-  const total = (+log.primary||0)+(+log.secondary||0)*(log.secondaryReturn?2:1)+(+log.siteVisits||0)*(+log.siteVisitCost||0);
+  const total = (+log.primary||0)+(+log.secondary||0)*(log.secondaryReturn?2:1)+(+log.siteVisits||0)*(+log.siteVisitCost||0)+(+log.stayNights||0)*(+log.stayRooms||1)*(+log.stayRate||0);
   return(
     <div style={{display:'flex',flexDirection:'column',gap:14}}>
       <Card ch={<div style={{display:'flex',flexDirection:'column',gap:12}}>
@@ -1095,6 +1095,15 @@ function LogisticsTab({ q, upd }) {
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
             <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Number of trips</div><NumInp value={log.siteVisits||''} onChange={e=>set('siteVisits',e.target.value)}/></div>
             <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Cost per trip (GH₵)</div><NumInp value={log.siteVisitCost||''} onChange={e=>set('siteVisitCost',e.target.value)}/></div>
+          </div>
+        </div>
+        <div>
+          <Lbl ch="Accommodation — out-of-town stays"/>
+          <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FB,marginBottom:8,lineHeight:1.4}}>For jobs far enough that the crew sleeps over — hotel or guesthouse. Nights × rooms × cost per room.</div>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:8}}>
+            <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Nights</div><NumInp value={log.stayNights||''} onChange={e=>set('stayNights',e.target.value)}/></div>
+            <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Rooms</div><NumInp value={log.stayRooms||''} onChange={e=>set('stayRooms',e.target.value)} placeholder="1"/></div>
+            <div><div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginBottom:4}}>Per room / night (GH₵)</div><NumInp value={log.stayRate||''} onChange={e=>set('stayRate',e.target.value)}/></div>
           </div>
         </div>
       </div>}/>
@@ -1521,7 +1530,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(
 ToolGuide.init({
   eyebrow: 'Job Pricing',
   title: 'How to use this tool',
-  top: 112,
+  // Dock BELOW the sticky header (~98px) + the tab bar (~35px) so the floating
+  // rail sits in the left gutter and never covers the Setup/Materials/… tabs.
+  top: 150,
   steps: [
     { t: 'Set your overhead first', d: 'First time in you land on <strong>Overhead Settings</strong>. Enter <strong>your</strong> rent, bills, crew day-rates, billable days and margins — these are private to you and power every quote. Add your business name, phone and logo for the quote letterhead.' },
     { t: 'Start a new quote', d: 'From the dashboard tap <strong>+ New</strong>. Each job gets its own reference (e.g. ABC-001).' },

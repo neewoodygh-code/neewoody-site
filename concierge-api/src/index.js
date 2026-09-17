@@ -382,6 +382,8 @@ async function route(request, env, ctx) {
   // ---- member: cut-sheet projects (whole library synced as one blob per member) ----
   if (path === '/api/cutsheets' && method === 'GET') return withAuth(request, env, (m) => getCutsheets(env, m));
   if (path === '/api/cutsheets' && method === 'PUT') return withPaid(request, env, (m) => saveCutsheets(request, env, m));
+  if (path === '/api/invoices' && method === 'GET') return withAuth(request, env, (m) => getInvoices(env, m));
+  if (path === '/api/invoices' && method === 'PUT') return withPaid(request, env, (m) => saveInvoices(request, env, m));
 
   // ---- admin: members ----
   if (path === '/api/admin/members' && method === 'GET')  return withAdmin(request, env, () => adminListMembers(env));
@@ -873,6 +875,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM cutsheet_data WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM invoice_data WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM storefront_items WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
@@ -931,6 +934,7 @@ async function adminPurgePending(env, request, admin) {
     env.DB.prepare(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM invoice_data WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM members WHERE status='pending' AND role != 'admin'`),
   ]);
@@ -2320,6 +2324,37 @@ async function saveCutsheets(request, env, member) {
   if (dataStr.length > CUTSHEET_MAX_BYTES) return json({ error: 'data_too_large', limit: CUTSHEET_MAX_BYTES }, 400);
   await env.DB.prepare(
     `INSERT INTO cutsheet_data (member_phone, data, updated_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(member_phone)
+     DO UPDATE SET data = excluded.data, updated_at = datetime('now')`
+  ).bind(member.phone, dataStr).run();
+  return json({ saved: true });
+}
+
+// ── invoice/quote generator (one JSON blob per member = their whole library) ──
+// Admin-only tool in the UI; stored per-member like the cut-sheet blob. Holds
+// letterhead settings + saved invoices + the running number counter.
+const INVOICE_MAX_BYTES = 1024 * 1024; // 1 MB
+
+async function getInvoices(env, member) {
+  const row = await env.DB.prepare(
+    'SELECT data, updated_at FROM invoice_data WHERE member_phone = ?'
+  ).bind(member.phone).first();
+  let data = null;
+  if (row && row.data) { try { data = JSON.parse(row.data); } catch { data = null; } }
+  return json({ data: data, updated_at: row ? row.updated_at : null });
+}
+
+async function saveInvoices(request, env, member) {
+  const body = await readJson(request);
+  let dataStr;
+  try { dataStr = JSON.stringify(body.data); } catch { dataStr = null; }
+  if (!dataStr || dataStr === 'null' || typeof body.data !== 'object') {
+    return json({ error: 'data_required' }, 400);
+  }
+  if (dataStr.length > INVOICE_MAX_BYTES) return json({ error: 'data_too_large', limit: INVOICE_MAX_BYTES }, 400);
+  await env.DB.prepare(
+    `INSERT INTO invoice_data (member_phone, data, updated_at)
      VALUES (?, ?, datetime('now'))
      ON CONFLICT(member_phone)
      DO UPDATE SET data = excluded.data, updated_at = datetime('now')`
