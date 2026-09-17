@@ -1214,6 +1214,21 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
   );
 }
 
+// ── Push a priced quote across to the admin Invoice Generator ──────────
+// Both tools are same-origin, so we hand off via localStorage and navigate.
+// The invoice tool seeds a new draft (client + one line at the quoted total)
+// on load, then the owner itemises / adds terms / prints. Admin-only.
+function sendToInvoice(q, calc) {
+  const payload = {
+    v: 1, ts: Date.now(),
+    client: q.client || '', project: '', ref: q.refId || '',
+    total: Math.round(calc.quotedPrice || 0),
+    desc: 'Bespoke furniture' + (q.refId ? ' (quote ' + q.refId + ')' : ''),
+  };
+  try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
+  window.location.href = '/invoice-generator.html';
+}
+
 // ── Summary Tab ───────────────────────────────────────────────────────
 function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
   const [showClient, setShowClient] = useState(false);
@@ -1270,6 +1285,11 @@ function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
         <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>A client-facing breakdown — materials plus workmanship (labour, expenses, service charge). Your overhead, tier multiplier and margin stay hidden. Print it or save as PDF.</div>
         <Btn ch="Open client copy →" onClick={()=>setShowClient(true)} full outline color={S.dark}/>
       </div>}/>
+      {session && session.role === 'admin' && <Card ch={<div>
+        <Lbl ch="Neewoody billing"/>
+        <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>Send this quote's total to the <strong>Invoice &amp; Quote Generator</strong> as a new invoice draft — then itemise the pieces, add your terms and print.</div>
+        <Btn ch="Send to Invoice Generator →" onClick={()=>sendToInvoice(q,calc)} full color={S.accent}/>
+      </div>}/>}
       <Card ch={<div>
         <Lbl ch="Quote status"/>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:14}}>
@@ -1396,7 +1416,7 @@ function App() {
         carpFetch('/pricing/quotes', 'GET'),
       ]);
       const m = (meRes && meRes.member) || {};
-      setSession_({ carpId: m.phone, workshopName: (m.business_name || m.name || 'My Workshop'), pin: '' });
+      setSession_({ carpId: m.phone, workshopName: (m.business_name || m.name || 'My Workshop'), pin: '', role: m.role || '' });
       setMemberInfo({
         name: m.name || '', businessName: m.business_name || '',
         phone: m.business_phone || m.phone || '', area: m.area || '',

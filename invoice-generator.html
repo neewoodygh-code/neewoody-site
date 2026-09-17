@@ -673,6 +673,25 @@ var pushT;
 function schedulePush(){ if(!syncReady) return; clearTimeout(pushT); pushT=setTimeout(pushCloud,1500); }
 function setSyncNote(t){ var el=document.getElementById('syncNote'); if(el){ el.textContent=t; el.style.display=''; } }
 
+/* ── import a quote pushed from the Pricing tool (same-origin localStorage) ── */
+function checkHandoff(){
+  var raw; try{ raw=localStorage.getItem('nwd-invoice-handoff'); }catch(e){ return; }
+  if(!raw) return;
+  try{ localStorage.removeItem('nwd-invoice-handoff'); }catch(e){}
+  var h; try{ h=JSON.parse(raw); }catch(e){ return; }
+  if(!h || (h.ts && (Date.now()-h.ts) > 15*60*1000)) return;  // stale guard (15 min)
+  var total=Math.round(+h.total||0);
+  var msg='Import this quote from the Job Pricing tool into a new invoice?\n\n'
+        +'Client: '+(h.client||'—')+'\nTotal: '+cur()+' '+total.toLocaleString('en-US');
+  if(!confirm(msg)) return;
+  INV=blankInvoice();
+  INV.client=h.client||'';
+  INV.project=h.project||'';
+  INV.items=[{ id:uid(), desc:h.desc||'Bespoke furniture', qty:1, unit:total }];
+  persist(); syncForm(); renderItems(); renderDoc(); syncBalance();
+  toast('Imported quote'+(h.ref?' '+h.ref:''));
+}
+
 /* ── boot: admin gate ── */
 function showGate(title,msg,showLink){
   document.getElementById('gateTitle').textContent=title;
@@ -693,7 +712,8 @@ async function boot(){
   document.getElementById('app').style.display='';
   if(!INV.currency) INV.currency='GH₵';
   syncForm(); renderItems(); renderDoc(); syncBalance();
-  cloudSync();  // pull the account blob, merge, and keep it in sync across devices
+  checkHandoff();  // a quote pushed from the Pricing tool → seed a new draft
+  cloudSync();     // pull the account blob, merge, and keep it in sync across devices
 }
 boot();
 </script>
