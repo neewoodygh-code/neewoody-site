@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="robots" content="noindex,nofollow" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#1f2f58" />
+<title>Invoice &amp; Quote Generator — Neewoody (Admin)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --navy:#1f2f58; --navy-lt:#2a3d6e;
+    --gold:#c8922a; --gold-dk:#b07d20; --gold-lt:rgba(200,146,42,.14);
+    --cream:#f0e8d0; --cream-dk:#e8dfc4;
+    --ink:#1c1c1a; --mid:#4a4540; --muted:#6b6557;
+    --border:#d4c9b0; --border-dk:#c4b898;
+    --ok:#5a8a5a; --err:#b04030;
+    --mono:'Roboto Mono',monospace;
+    --body:'Jost',system-ui,sans-serif;
+    --serif:'Playfair Display',Georgia,serif;
+    --r:8px;
+  }
+  body{font-family:var(--body);background:var(--cream);color:var(--ink);line-height:1.55;-webkit-tap-highlight-color:transparent}
+  input,select,textarea,button{font-family:inherit}
+  input[type=number]::-webkit-inner-spin-button{opacity:.35}
+  a{color:inherit}
+
+  /* ── GATE (non-admin / loading) ── */
+  #gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;text-align:center}
+  #gate .box{max-width:440px;background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:2.2rem 1.8rem}
+  #gate h2{font-family:var(--serif);color:var(--navy);margin-bottom:.6rem}
+  #gate p{color:var(--mid);font-size:.95rem;margin-bottom:1.1rem}
+  #gate a.btn{display:inline-block;background:var(--navy);color:var(--cream);text-decoration:none;padding:.6rem 1.3rem;border-radius:6px;font-weight:600;font-size:.9rem}
+
+  /* ── TOP BAR ── */
+  .ig-top{background:var(--navy);color:#fff;padding:.55rem .9rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;font-size:.85rem}
+  .ig-top a{color:var(--cream);text-decoration:none;opacity:.9}
+  .ig-top a:hover{opacity:1;color:#fff}
+  .ig-top .sep{opacity:.4}
+  .ig-top .pill{margin-left:auto;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(200,146,42,.4);background:rgba(200,146,42,.12);padding:.22rem .6rem;border-radius:3px}
+
+  /* ── HERO ── */
+  .ig-hero{background:var(--navy);color:#fff;padding:2rem 0 1.7rem;position:relative;overflow:hidden}
+  .ig-hero::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--navy-lt),var(--navy))}
+  .ig-hero .in{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:0 1.25rem}
+  .ig-badge{display:inline-flex;align-items:center;gap:.5rem;font-size:.66rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);background:rgba(200,146,42,.14);border:1px solid rgba(200,146,42,.35);padding:.3rem .85rem;border-radius:3px;margin-bottom:.8rem}
+  .ig-hero h1{font-family:var(--serif);color:#fff;font-size:1.9rem;font-weight:600;margin-bottom:.35rem}
+  .ig-hero p{color:rgba(255,255,255,.72);max-width:62ch;font-size:.98rem}
+
+  /* ── LAYOUT ── */
+  .ig-wrap{max-width:1240px;margin:0 auto;padding:1.5rem 1.25rem 4rem}
+  .ig-cols{display:grid;grid-template-columns:1fr;gap:1.5rem}
+  @media(min-width:1040px){.ig-cols{grid-template-columns:minmax(0,430px) minmax(0,1fr);align-items:start}}
+
+  /* ── ACTION BAR ── */
+  .ig-actions{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+  .btn{border:1.5px solid var(--navy);background:var(--navy);color:#fff;border-radius:6px;padding:.5rem .95rem;font-size:.83rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+  .btn:hover{background:var(--navy-lt)}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#241a05}
+  .btn.gold:hover{background:var(--gold-dk)}
+  .btn.ghost{background:#fff;color:var(--navy)}
+  .btn.ghost:hover{background:var(--cream-dk)}
+  .btn.sm{padding:.35rem .6rem;font-size:.76rem}
+
+  /* ── CARDS / FORM ── */
+  .card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:1rem 1.05rem;margin-bottom:1rem}
+  .card>summary,.card-t{font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--navy);margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem;cursor:default}
+  details.card>summary{cursor:pointer;margin-bottom:0;list-style:none}
+  details.card[open]>summary{margin-bottom:.8rem}
+  details.card>summary::-webkit-details-marker{display:none}
+  details.card>summary .chev{margin-left:auto;font-size:.7rem;opacity:.6;transition:transform .15s}
+  details.card[open]>summary .chev{transform:rotate(180deg)}
+  .card-t .dot,.card>summary .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem}
+  .fld{margin-bottom:.65rem}
+  .fld:last-child{margin-bottom:0}
+  .fld label{display:block;font-size:.63rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:.25rem}
+  .fld input,.fld select,.fld textarea{width:100%;font-size:.9rem;padding:.48rem .58rem;border:1.5px solid var(--border);border-radius:var(--r);background:#fff;color:var(--ink)}
+  .fld textarea{resize:vertical;line-height:1.5;font-size:.84rem}
+  .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold)}
+  .fld .hint{font-size:.6rem;color:var(--muted);margin-top:.2rem}
+
+  /* doc-type toggle */
+  .seg{display:inline-flex;border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:#fff}
+  .seg button{border:0;background:transparent;padding:.42rem .9rem;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--navy);color:#fff}
+
+  /* items table (editor) */
+  .items-hd,.item-row{display:grid;grid-template-columns:1fr 58px 96px 96px 26px;gap:.4rem;align-items:center}
+  .items-hd{font-size:.58rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 .1rem .35rem;border-bottom:1px solid var(--border)}
+  .items-hd span{text-align:right}
+  .items-hd span:first-child{text-align:left}
+  .item-row{padding:.4rem 0;border-bottom:1px solid var(--cream-dk)}
+  .item-row input{width:100%;font-size:.85rem;padding:.4rem .45rem;border:1.5px solid var(--border);border-radius:6px;background:#fff}
+  .item-row input.num{text-align:right;font-family:var(--mono);font-size:.8rem}
+  .item-row .rm{border:0;background:transparent;color:var(--err);font-size:1rem;cursor:pointer;line-height:1;padding:.2rem}
+  .item-row .lineTot{font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--muted);padding-right:.2rem}
+  .items-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem}
+  .items-foot .gt{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--navy)}
+
+  .pay-block{border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.7rem}
+  .pay-block .fld{margin-bottom:.5rem}
+
+  /* ── PREVIEW / DOCUMENT ── */
+  #previewCol{position:relative}
+  .prev-note{font-size:.7rem;color:var(--muted);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
+  .doc-scroll{overflow-x:auto}
+  #doc{background:#fff;color:#111;width:210mm;max-width:100%;min-height:auto;margin:0 auto;padding:16mm 15mm;border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.08);font-size:11px;line-height:1.45}
+  #doc .dh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+  #doc .dh-brand{display:flex;gap:12px;align-items:flex-start;min-width:0}
+  #doc .dh-brand img{width:52px;height:52px;object-fit:contain;flex:none}
+  #doc .dh-name{font-family:var(--serif);font-size:19px;font-weight:700;color:#111;line-height:1.1;letter-spacing:.01em}
+  #doc .dh-sub{font-size:10px;color:#555;margin-top:2px}
+  #doc .dh-contact{text-align:right;font-size:10px;color:#333;line-height:1.65;flex:none}
+  #doc .dh-contact b{color:#111;font-weight:600}
+  #doc hr{border:0;border-top:1.5px solid #111;margin:12px 0}
+  #doc .title-row{display:flex;justify-content:space-between;align-items:flex-end;margin:4px 0 12px}
+  #doc .doc-type{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:.04em;color:#111;text-transform:uppercase}
+  #doc .doc-date{font-size:10.5px;color:#444;margin-top:2px}
+  #doc .total-box{text-align:right;border:2px solid #111;border-radius:4px;padding:6px 14px;min-width:150px}
+  #doc .total-box .lbl{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#555}
+  #doc .total-box .val{font-family:var(--serif);font-size:20px;font-weight:700;color:#111;line-height:1.1}
+  #doc .meta{display:flex;flex-wrap:wrap;gap:6px 26px;margin-bottom:12px}
+  #doc .meta .m{min-width:120px}
+  #doc .meta .m .k{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#777}
+  #doc .meta .m .v{font-size:12px;color:#111;font-weight:600}
+  #doc table.items{width:100%;border-collapse:collapse;margin-bottom:12px}
+  #doc table.items th{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#1f2f58;text-align:left;padding:6px 8px}
+  #doc table.items th.r,#doc table.items td.r{text-align:right}
+  #doc table.items td{font-size:11px;padding:6px 8px;border-bottom:1px solid #ddd;color:#222;vertical-align:top}
+  #doc table.items td.r{font-family:var(--mono);white-space:nowrap}
+  #doc table.items tr:last-child td{border-bottom:1px solid #ddd}
+  #doc .lower{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:12px}
+  #doc .pay{flex:1;min-width:0}
+  #doc .pay .pt{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#111;font-weight:700;margin:0 0 4px;border-bottom:1px solid #111;padding-bottom:2px}
+  #doc .pay .po{margin-bottom:7px}
+  #doc .pay .po .poh{font-size:10px;font-weight:700;color:#1f2f58;margin-bottom:1px}
+  #doc .pay .po .pob{font-size:9.5px;color:#333;white-space:pre-line;line-height:1.5}
+  #doc .totals{width:210px;flex:none}
+  #doc .totals .tr{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #e2e2e2}
+  #doc .totals .tr .tl{color:#555}
+  #doc .totals .tr .tv{font-family:var(--mono);color:#111}
+  #doc .totals .tr.bal{border-top:2px solid #111;border-bottom:0;margin-top:3px;padding-top:7px}
+  #doc .totals .tr.bal .tl{font-weight:700;color:#111;font-size:12px}
+  #doc .totals .tr.bal .tv{font-weight:700;font-size:13px}
+  #doc .terms{border-top:1.5px solid #111;padding-top:8px;margin-bottom:16px}
+  #doc .terms h4{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#111;margin-bottom:4px}
+  #doc .terms .tt{font-size:8.6px;color:#333;line-height:1.55;white-space:pre-line}
+  #doc .sign{display:flex;justify-content:space-between;gap:30px;margin-top:22px}
+  #doc .sign .s{flex:1}
+  #doc .sign .s .line{border-top:1px solid #111;margin-bottom:3px}
+  #doc .sign .s .cap{font-size:9px;color:#444}
+  #doc .empty-hint{color:#b04030;font-style:italic}
+
+  /* ── OVERLAYS (library / backup) ── */
+  .ig-overlay{position:fixed;inset:0;background:rgba(28,26,23,.55);z-index:400;display:none;align-items:flex-start;justify-content:center;padding:2.4rem 1rem;overflow-y:auto}
+  .ig-overlay.on{display:flex}
+  .ig-panel{background:var(--cream);border-radius:12px;max-width:560px;width:100%;padding:1.3rem 1.3rem 1.5rem}
+  .ig-panel h3{font-family:var(--serif);color:var(--navy);margin-bottom:.2rem}
+  .ig-panel .sub{font-size:.8rem;color:var(--muted);margin-bottom:1rem}
+  .lib-row{background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:.7rem .8rem;margin-bottom:.6rem;display:flex;align-items:center;gap:.7rem}
+  .lib-row .li-main{flex:1;min-width:0}
+  .lib-row .li-t{font-weight:600;font-size:.9rem;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lib-row .li-m{font-size:.72rem;color:var(--muted);font-family:var(--mono)}
+  .lib-row .li-tot{font-family:var(--serif);font-weight:700;color:var(--navy);font-size:.95rem;white-space:nowrap}
+  .lib-empty{text-align:center;color:var(--muted);font-size:.85rem;padding:1.4rem 0}
+  .ig-foot{text-align:center;font-size:.72rem;color:var(--muted);padding:1.5rem 1rem 0}
+  .warnbar{background:rgba(176,64,48,.1);border:1px solid rgba(176,64,48,.35);color:#8a2f22;border-radius:8px;padding:.55rem .8rem;font-size:.82rem;margin-bottom:1rem;display:none}
+  .warnbar.on{display:block}
+
+  @media print{
+    .ig-top,.ig-hero,#inputCol,.ig-actions,.prev-note,.ig-foot,.ig-overlay,.warnbar{display:none!important}
+    body{background:#fff}
+    .ig-wrap{max-width:none;margin:0;padding:0}
+    .ig-cols{display:block}
+    .doc-scroll{overflow:visible}
+    #previewCol{position:static}
+    #doc{width:auto;max-width:none;margin:0;padding:0;border:0;box-shadow:none;font-size:11px}
+    #doc table.items th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    @page{size:A4;margin:14mm}
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading / non-admin gate -->
+<div id="gate">
+  <div class="box">
+    <h2 id="gateTitle">Checking access…</h2>
+    <p id="gateMsg">One moment.</p>
+    <a id="gateLink" class="btn" href="/concierge/directory.html" style="display:none">Go to member area</a>
+  </div>
+</div>
+
+<!-- App (revealed for admins) -->
+<div id="app" style="display:none">
+
+  <div class="ig-top">
+    <a href="/concierge/directory.html#tools">← Tools</a>
+    <span class="sep">·</span>
+    <a href="/concierge/directory.html">Member area</a>
+    <span class="sep">·</span>
+    <a href="/concierge/admin.html">Admin</a>
+    <span class="pill">Admin only · Neewoody</span>
+  </div>
+
+  <div class="ig-hero">
+    <div class="in">
+      <span class="ig-badge">◆ Neewoody billing</span>
+      <h1>Invoice &amp; Quote Generator</h1>
+      <p>Your Google-Sheets invoice, rebuilt as a tool. Fill in the line items, print or save as PDF, and keep every invoice in one place. Header, payment options and terms are pre-set — change them once and they stick.</p>
+    </div>
+  </div>
+
+  <div class="ig-wrap">
+    <div id="storeWarn" class="warnbar">Storage is full — your latest changes may not have saved. Back up and delete an old invoice.</div>
+
+    <div class="ig-cols">
+      <!-- ══ INPUT COLUMN ══ -->
+      <div id="inputCol">
+
+        <div class="ig-actions">
+          <button class="btn gold" onclick="doPrint()">⎙ Print / Save PDF</button>
+          <button class="btn" onclick="saveInvoice()">💾 Save</button>
+          <button class="btn ghost" onclick="openLib()">📂 My invoices</button>
+          <button class="btn ghost sm" onclick="newInvoice()">＋ New</button>
+        </div>
+
+        <!-- Document -->
+        <div class="card">
+          <div class="card-t"><span class="dot"></span>Document</div>
+          <div class="fld">
+            <label>Type</label>
+            <div class="seg" id="typeSeg">
+              <button type="button" data-t="invoice" class="on" onclick="setType('invoice')">Invoice</button>
+              <button type="button" data-t="quote" onclick="setType('quote')">Quote</button>
+            </div>
+          </div>
+          <div class="grid2">
+            <div class="fld"><label>Invoice / Quote #</label><input id="f_number" oninput="onField('number',this.value)" /></div>
+            <div class="fld"><label>Currency</label><input id="f_currency" oninput="onField('currency',this.value)" /></div>
+            <div class="fld"><label>Date</label><input id="f_date" type="date" oninput="onField('date',this.value)" /></div>
+            <div class="fld"><label>Due date <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_dueDate" type="date" oninput="onField('dueDate',this.value)" /></div>
+          </div>
+          <div class="fld"><label>Invoice for (client / project name)</label><input id="f_client" placeholder="e.g. Prampram" oninput="onField('client',this.value)" /></div>
+          <div class="fld"><label>Project</label><input id="f_project" placeholder="e.g. Fitted Furniture" oninput="onField('project',this.value)" /></div>
+        </div>
+
+        <!-- Line items -->
+        <div class="card">
+          <div class="card-t"><span class="dot"></span>Line items</div>
+          <div class="items-hd"><span>Description</span><span>Qty</span><span>Unit price</span><span>Total</span><span></span></div>
+          <div id="itemRows"></div>
+          <div class="items-foot">
+            <button class="btn ghost sm" onclick="addItem()">＋ Add line</button>
+            <div class="gt" id="grandTotal">GH₵ 0</div>
+          </div>
+          <div class="grid2" style="margin-top:.9rem">
+            <div class="fld"><label>Amount paid <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_paid" class="num" type="number" min="0" placeholder="0" oninput="onField('paid',this.value)" /></div>
+            <div class="fld"><label>Balance due</label><input id="f_balance" readonly style="background:var(--cream-dk);font-weight:600" /></div>
+          </div>
+        </div>
+
+        <!-- Business header (settings) -->
+        <details class="card" id="setBiz">
+          <summary><span class="dot"></span>Business header <span class="chev">▾</span></summary>
+          <div class="fld"><label>Business name (Paid to)</label><input id="s_bizName" oninput="onSetting('bizName',this.value)" /></div>
+          <div class="grid2">
+            <div class="fld"><label>Address line 1</label><input id="s_addr1" oninput="onSetting('addr1',this.value)" /></div>
+            <div class="fld"><label>Address line 2</label><input id="s_addr2" oninput="onSetting('addr2',this.value)" /></div>
+            <div class="fld"><label>Email</label><input id="s_email" oninput="onSetting('email',this.value)" /></div>
+            <div class="fld"><label>Phone</label><input id="s_phone" oninput="onSetting('phone',this.value)" /></div>
+            <div class="fld"><label>Instagram</label><input id="s_instagram" oninput="onSetting('instagram',this.value)" /></div>
+            <div class="fld"><label>WhatsApp</label><input id="s_whatsapp" oninput="onSetting('whatsapp',this.value)" /></div>
+          </div>
+          <div class="fld"><label style="display:flex;align-items:center;gap:.4rem;text-transform:none;font-weight:500;color:var(--ink);font-size:.85rem"><input type="checkbox" id="s_logoOn" onchange="onSetting('logoOn',this.checked)" style="width:auto" /> Show Neewoody logo on the invoice</label></div>
+        </details>
+
+        <!-- Payment options (settings) -->
+        <details class="card" id="setPay">
+          <summary><span class="dot"></span>Payment options <span class="chev">▾</span></summary>
+          <div class="pay-block">
+            <div class="fld"><label>Option 1 — heading</label><input id="s_payTitle1" oninput="onSetting('payTitle1',this.value)" /></div>
+            <div class="fld"><label>Details</label><textarea id="s_payBody1" rows="5" oninput="onSetting('payBody1',this.value)"></textarea></div>
+          </div>
+          <div class="pay-block">
+            <div class="fld"><label>Option 2 — heading</label><input id="s_payTitle2" oninput="onSetting('payTitle2',this.value)" /></div>
+            <div class="fld"><label>Details</label><textarea id="s_payBody2" rows="5" oninput="onSetting('payBody2',this.value)"></textarea></div>
+          </div>
+          <div class="pay-block">
+            <div class="fld"><label>Option 3 — heading</label><input id="s_payTitle3" oninput="onSetting('payTitle3',this.value)" /></div>
+            <div class="fld"><label>Details</label><textarea id="s_payBody3" rows="4" oninput="onSetting('payBody3',this.value)"></textarea></div>
+          </div>
+          <p class="hint">These stay the same across every invoice. Edit once. Leave a heading blank to hide that option.</p>
+        </details>
+
+        <!-- Terms (settings) -->
+        <details class="card" id="setTerms">
+          <summary><span class="dot"></span>Terms &amp; conditions <span class="chev">▾</span></summary>
+          <div class="fld"><textarea id="s_terms" rows="12" oninput="onSetting('terms',this.value)"></textarea></div>
+          <p class="hint">Shown at the foot of the invoice. One point per line.</p>
+        </details>
+
+        <div class="ig-actions" style="margin-top:.4rem">
+          <button class="btn ghost sm" onclick="backup()">⬇ Back up all</button>
+          <button class="btn ghost sm" onclick="document.getElementById('restoreFile').click()">⬆ Restore</button>
+          <input type="file" id="restoreFile" accept="application/json" style="display:none" onchange="restore(this)" />
+        </div>
+        <p class="hint" style="padding:0 .2rem">Invoices are saved on this device/browser. Use <b>Back up all</b> to keep a copy you can restore anywhere.</p>
+      </div>
+
+      <!-- ══ PREVIEW COLUMN ══ -->
+      <div id="previewCol">
+        <div class="prev-note">Live preview — this is exactly what prints</div>
+        <div class="doc-scroll">
+          <div id="doc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ig-foot">Neewoody Custom Woodwork · internal billing tool · admin only</div>
+  </div>
+</div>
+
+<!-- Library overlay -->
+<div class="ig-overlay" id="libOverlay" onclick="if(event.target===this)closeLib()">
+  <div class="ig-panel">
+    <h3>My invoices</h3>
+    <div class="sub">Saved on this device. Tap to open.</div>
+    <div id="libList"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:.6rem">
+      <button class="btn ghost sm" onclick="closeLib()">Close</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/concierge.js?v=20260917"></script>
+<script>
+/* ============================================================
+   INVOICE & QUOTE GENERATOR — admin-only, local-first
+   Reproduces Neewoody's Google-Sheets invoice as a tool.
+   ============================================================ */
+var C = window.Concierge;
+var LOGIN = '/concierge/login.html?next=/invoice-generator.html';
+var esc = (C && C.escapeHtml) ? C.escapeHtml : function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+
+/* ── storage keys ── */
+var K_CUR='nwd-invoice-current', K_SET='nwd-invoice-settings', K_LIST='nwd-invoice-list', K_CTR='nwd-invoice-counter';
+
+/* ── defaults (from the real Prampram invoice) ── */
+var DEF_SETTINGS = {
+  bizName:'Neewoody Custom Woodwork',
+  addr1:'100 Kwame Nkrumah Ave',
+  addr2:'Adabraka, Accra/Ghana',
+  email:'neewoodygh@gmail.com',
+  phone:'+233 (0) 244 633 464',
+  instagram:'@neewoodygh',
+  whatsapp:'+233 (0) 244 633 464',
+  logoOn:true,
+  payTitle1:'Payment Option 1',
+  payBody1:'Bank: Access Bank\nMode: Cash or Cheque\nAccount No: 0030106660641\nAccount Name: Neewoody Custom Woodwork\nBranch: Osu',
+  payTitle2:'Payment Option 2',
+  payBody2:'Bank: GT Bank\nMode: Cash or Cheque\nAccount No: 20410441061590\nAccount Name: Nuer Kobla Adumua-Bossman\nBranch: Osu',
+  payTitle3:'Payment Option 3 — Mobile Money',
+  payBody3:'Mobile: MTN\nAccount No: 0244633464\nAccount Name: Nuer Kobla Adumua-Bossman',
+  terms:[
+    '1. Neewoody Custom Woodwork deals with third party vendors and service providers and as such cannot guarantee price of materials past a certain point. As such Clients should keep in mind that final estimate is subject to change.',
+    "2. Wood is a natural material that moves. Neewoody Custom Woodwork will do its utmost to provide and advise on stable wood. However natural movement of wood after a project's completion, due to exposure to elements and environments — including twisting, cupping, expansion, bowing and bending — is not within our control.",
+    '3. Transport and Delivery is not inherent of final price. Clients can choose it as an option or arrange suitable carriage.',
+    '4. Work Duration Estimates are calculated based on "All things being Equal". Clients should please keep in mind delays are inevitable when dealing with custom orders. Projects can be delayed by any number of things: Bad Weather, Slow Third Party Vendors, Availability of Chosen Materials, Holidays, etc. All duration estimates are calculated based on "Working Days" and do not include Public Holidays and Weekends.',
+    '5. IMPORTANT: Clients are reminded to be specific about Material Selection. Type of wood, Preferred Colour, and Specific order dimensions that are important should all be indicated. Neewoody Custom Woodwork will try its best to advise on suitable materials, based on availability in Ghana, but will not be held responsible for material selection after work starts.',
+    '6. Custom Orders are not considered official orders until 100% of material cost and 30% of workmanship has been paid. This condition is negotiable with NCW agents.'
+  ].join('\n')
+};
+
+var SETTINGS = load(K_SET, null) || Object.assign({}, DEF_SETTINGS);
+// backfill any new default keys onto an older saved settings object
+for (var dk in DEF_SETTINGS){ if(!(dk in SETTINGS)) SETTINGS[dk]=DEF_SETTINGS[dk]; }
+
+var INV = load(K_CUR, null) || blankInvoice();
+
+/* ── helpers ── */
+function load(k,f){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} }
+function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;} }
+function warnStore(ok){ document.getElementById('storeWarn').classList.toggle('on',!ok); }
+function uid(){ return 'i'+Math.random().toString(36).slice(2,8); }
+function nextNumber(){
+  var c = 1000; try{ c = parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000; }catch(e){}
+  return 'NWD-'+String(c+1).padStart(4,'0');
+}
+function bumpCounter(){ try{ var c=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000; localStorage.setItem(K_CTR,String(c+1)); }catch(e){} }
+function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function blankInvoice(){
+  return { docType:'invoice', number:nextNumber(), currency:'GH₵', date:todayISO(), dueDate:'',
+           client:'', project:'', items:[ item(),item(),item() ], paid:0, savedId:null };
+}
+function item(){ return { id:uid(), desc:'', qty:1, unit:0 }; }
+function cur(){ return (INV.currency||'GH₵').trim() || 'GH₵'; }
+function money(n){ n=+n||0; return cur()+' '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function lineTotal(it){ return (+it.qty||0)*(+it.unit||0); }
+function grandTotal(){ return (INV.items||[]).reduce(function(s,it){return s+lineTotal(it);},0); }
+function fmtDate(iso){ if(!iso) return ''; var p=iso.split('-'); if(p.length!==3) return iso;
+  var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return (+p[2])+' '+M[(+p[1])-1]+' '+p[0]; }
+
+/* ── autosave ── */
+function persist(){ warnStore(lsSet(K_CUR,INV)); }
+function persistSettings(){ warnStore(lsSet(K_SET,SETTINGS)); }
+
+/* ── field handlers ── */
+function onField(k,v){ if(k==='paid') v=+v||0; INV[k]=v; persist(); renderDoc(); if(k==='paid') syncBalance(); }
+function onSetting(k,v){ SETTINGS[k]=v; persistSettings(); renderDoc(); }
+function setType(t){ INV.docType=t; persist();
+  document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
+  renderDoc();
+}
+function syncBalance(){ document.getElementById('f_balance').value = money(grandTotal()-(+INV.paid||0)); }
+
+/* ── items ── */
+function addItem(){ INV.items.push(item()); persist(); renderItems(); renderDoc(); }
+function rmItem(id){ INV.items=INV.items.filter(function(x){return x.id!==id;}); if(!INV.items.length) INV.items.push(item()); persist(); renderItems(); renderDoc(); }
+function itemField(id,k,v){ var it=INV.items.find(function(x){return x.id===id;}); if(!it) return;
+  it[k]=(k==='desc')?v:(+v||0); persist();
+  // update just this row's line total + grand total without a full re-render (keeps focus)
+  var row=document.querySelector('.item-row[data-id="'+id+'"]');
+  if(row){ var lt=row.querySelector('.lineTot'); if(lt) lt.textContent=money(lineTotal(it)); }
+  document.getElementById('grandTotal').textContent=money(grandTotal());
+  syncBalance(); renderDoc();
+}
+function renderItems(){
+  var h='';
+  (INV.items||[]).forEach(function(it){
+    h+='<div class="item-row" data-id="'+it.id+'">'
+      +'<input value="'+esc(it.desc)+'" placeholder="Description" oninput="itemField(\''+it.id+'\',\'desc\',this.value)" />'
+      +'<input class="num" type="number" min="0" step="1" value="'+(it.qty!=null?it.qty:'')+'" oninput="itemField(\''+it.id+'\',\'qty\',this.value)" />'
+      +'<input class="num" type="number" min="0" step="0.01" value="'+(it.unit!=null?it.unit:'')+'" oninput="itemField(\''+it.id+'\',\'unit\',this.value)" />'
+      +'<div class="lineTot">'+money(lineTotal(it))+'</div>'
+      +'<button class="rm" title="Remove" onclick="rmItem(\''+it.id+'\')">×</button>'
+      +'</div>';
+  });
+  document.getElementById('itemRows').innerHTML=h;
+  document.getElementById('grandTotal').textContent=money(grandTotal());
+}
+
+/* ── document (preview + print) ── */
+function payOptionHtml(title,body){
+  if(!title || !String(title).trim()) return '';
+  return '<div class="po"><div class="poh">'+esc(title)+'</div><div class="pob">'+esc(body||'')+'</div></div>';
+}
+function renderDoc(){
+  var s=SETTINGS, total=grandTotal(), paid=+INV.paid||0, bal=total-paid;
+  var typeLabel = INV.docType==='quote' ? 'Quote' : 'Invoice';
+  var logo = s.logoOn ? '<img src="images/logo.png" alt="" onerror="this.style.display=\'none\'" />' : '';
+
+  var contact='';
+  if(s.addr1) contact+='<div>'+esc(s.addr1)+'</div>';
+  if(s.addr2) contact+='<div>'+esc(s.addr2)+'</div>';
+  if(s.email) contact+='<div><b>Email:</b> '+esc(s.email)+'</div>';
+  if(s.phone) contact+='<div><b>Phone:</b> '+esc(s.phone)+'</div>';
+  if(s.instagram) contact+='<div><b>Instagram:</b> '+esc(s.instagram)+'</div>';
+  if(s.whatsapp) contact+='<div><b>WhatsApp:</b> '+esc(s.whatsapp)+'</div>';
+
+  var rows='';
+  var live=(INV.items||[]).filter(function(it){ return String(it.desc).trim() || lineTotal(it)>0; });
+  if(!live.length){
+    rows='<tr><td colspan="4" class="empty-hint">Add line items to see them here…</td></tr>';
+  } else {
+    live.forEach(function(it){
+      rows+='<tr><td>'+esc(it.desc||'—')+'</td>'
+        +'<td class="r">'+(+it.qty||0)+'</td>'
+        +'<td class="r">'+money(it.unit)+'</td>'
+        +'<td class="r">'+money(lineTotal(it))+'</td></tr>';
+    });
+  }
+
+  var pays = payOptionHtml(s.payTitle1,s.payBody1)+payOptionHtml(s.payTitle2,s.payBody2)+payOptionHtml(s.payTitle3,s.payBody3);
+  var termsLines=(s.terms||'').split('\n').filter(function(l){return l.trim();}).join('\n');
+
+  var metaRows=''
+    +metaCell('Invoice for', INV.client||'—')
+    +metaCell('Paid to', s.bizName||'')
+    +metaCell(typeLabel+' #', INV.number||'—')
+    +metaCell('Project', INV.project||'—')
+    +(INV.dueDate?metaCell('Due date', fmtDate(INV.dueDate)):'');
+
+  var html=''
+    +'<div class="dh">'
+    +  '<div class="dh-brand">'+logo+'<div><div class="dh-name">'+esc(s.bizName||'')+'</div><div class="dh-sub">Bespoke Furniture &amp; Carpentry · Accra, Ghana</div></div></div>'
+    +  '<div class="dh-contact">'+contact+'</div>'
+    +'</div>'
+    +'<hr/>'
+    +'<div class="title-row">'
+    +  '<div><div class="doc-type">'+typeLabel+'</div><div class="doc-date">Date: '+(fmtDate(INV.date)||'—')+'</div></div>'
+    +  '<div class="total-box"><div class="lbl">TOTAL</div><div class="val">'+money(total)+'</div></div>'
+    +'</div>'
+    +'<div class="meta">'+metaRows+'</div>'
+    +'<table class="items"><thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Total price</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>'
+    +'<div class="lower">'
+    +  '<div class="pay">'+(pays?'<div class="pt">Payment options</div>'+pays:'')+'</div>'
+    +  '<div class="totals">'
+    +     totalRow('Total', money(total))
+    +     totalRow('Paid', paid?money(paid):'—')
+    +     '<div class="tr bal"><span class="tl">Balance</span><span class="tv">'+money(bal)+'</span></div>'
+    +  '</div>'
+    +'</div>'
+    +(termsLines?'<div class="terms"><h4>Terms &amp; Conditions</h4><div class="tt">'+esc(termsLines)+'</div></div>':'')
+    +'<div class="sign">'
+    +  '<div class="s"><div class="line"></div><div class="cap">'+esc(s.bizName||'')+': Authorized Signatory</div></div>'
+    +  '<div class="s"><div class="line"></div><div class="cap">Customer / Company</div></div>'
+    +'</div>';
+
+  document.getElementById('doc').innerHTML=html;
+}
+function metaCell(k,v){ return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>'; }
+function totalRow(l,v){ return '<div class="tr"><span class="tl">'+esc(l)+'</span><span class="tv">'+esc(v)+'</span></div>'; }
+
+/* ── print ── */
+function doPrint(){ renderDoc(); window.print(); }
+
+/* ── saved invoices (library) ── */
+function getList(){ return load(K_LIST, []) || []; }
+function setList(l){ warnStore(lsSet(K_LIST,l)); }
+function saveInvoice(){
+  var list=getList();
+  var snap=JSON.parse(JSON.stringify(INV));
+  if(!snap.savedId){ snap.savedId=uid(); INV.savedId=snap.savedId; if(/^NWD-\d+$/.test(String(INV.number))) bumpCounter(); persist(); }
+  var entry={ savedId:snap.savedId, number:snap.number, docType:snap.docType, client:snap.client,
+              project:snap.project, date:snap.date, total:grandTotal(), savedAt:Date.now(), data:snap };
+  var i=list.findIndex(function(x){return x.savedId===snap.savedId;});
+  if(i>=0) list[i]=entry; else list.unshift(entry);
+  setList(list);
+  toast('Saved · '+ (snap.number||'invoice'));
+}
+function openLib(){ renderLib(); document.getElementById('libOverlay').classList.add('on'); }
+function closeLib(){ document.getElementById('libOverlay').classList.remove('on'); }
+function renderLib(){
+  var list=getList().slice().sort(function(a,b){return (b.savedAt||0)-(a.savedAt||0);});
+  var el=document.getElementById('libList');
+  if(!list.length){ el.innerHTML='<div class="lib-empty">No saved invoices yet. Fill one in and press <b>Save</b>.</div>'; return; }
+  el.innerHTML=list.map(function(e){
+    var t=(e.docType==='quote'?'Quote':'Invoice');
+    return '<div class="lib-row">'
+      +'<div class="li-main" style="cursor:pointer" onclick="loadInvoice(\''+e.savedId+'\')">'
+      +  '<div class="li-t">'+esc(e.client||'(no client)')+(e.project?' · '+esc(e.project):'')+'</div>'
+      +  '<div class="li-m">'+t+' '+esc(e.number||'')+' · '+fmtDate(e.date)+'</div>'
+      +'</div>'
+      +'<div class="li-tot">'+money(e.total||0)+'</div>'
+      +'<button class="btn ghost sm" onclick="dupInvoice(\''+e.savedId+'\')">Copy</button>'
+      +'<button class="rm" style="font-size:1.2rem" title="Delete" onclick="delInvoice(\''+e.savedId+'\')">×</button>'
+      +'</div>';
+  }).join('');
+}
+function loadInvoice(id){
+  var e=getList().find(function(x){return x.savedId===id;}); if(!e) return;
+  INV=JSON.parse(JSON.stringify(e.data)); if(!INV.currency) INV.currency='GH₵';
+  persist(); syncForm(); renderItems(); renderDoc(); syncBalance(); closeLib();
+}
+function dupInvoice(id){
+  var e=getList().find(function(x){return x.savedId===id;}); if(!e) return;
+  var copy=JSON.parse(JSON.stringify(e.data));
+  copy.savedId=null; copy.number=nextNumber(); copy.date=todayISO(); copy.paid=0;
+  INV=copy; persist(); syncForm(); renderItems(); renderDoc(); syncBalance(); closeLib();
+  toast('Copied to a new '+(copy.docType==='quote'?'quote':'invoice'));
+}
+function delInvoice(id){
+  if(!confirm('Delete this saved invoice? This cannot be undone.')) return;
+  setList(getList().filter(function(x){return x.savedId!==id;})); renderLib();
+}
+function newInvoice(){
+  if((INV.client||INV.project||grandTotal()>0) && !confirm('Start a new blank invoice? Save first if you want to keep the current one.')) return;
+  INV=blankInvoice(); persist(); syncForm(); renderItems(); renderDoc(); syncBalance();
+}
+
+/* ── backup / restore ── */
+function backup(){
+  var payload={ v:1, exportedAt:new Date().toISOString(), settings:SETTINGS, list:getList() };
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='neewoody-invoices-'+todayISO()+'.json'; a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},2000);
+}
+function restore(inp){
+  var f=inp.files&&inp.files[0]; if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    try{
+      var d=JSON.parse(r.result);
+      if(d.settings){ SETTINGS=Object.assign({},DEF_SETTINGS,d.settings); persistSettings(); }
+      if(Array.isArray(d.list)){
+        var cur=getList(), byId={}; cur.forEach(function(e){byId[e.savedId]=e;});
+        d.list.forEach(function(e){ if(e&&e.savedId){ if(!byId[e.savedId]||(e.savedAt||0)>(byId[e.savedId].savedAt||0)) byId[e.savedId]=e; } });
+        setList(Object.keys(byId).map(function(k){return byId[k];}));
+      }
+      syncForm(); renderItems(); renderDoc(); syncBalance();
+      toast('Restored '+((d.list||[]).length)+' invoice(s)');
+    }catch(e){ alert('Could not read that backup file.'); }
+  };
+  r.readAsText(f); inp.value='';
+}
+
+/* ── sync form inputs from state ── */
+function syncForm(){
+  document.getElementById('f_number').value=INV.number||'';
+  document.getElementById('f_currency').value=INV.currency||'GH₵';
+  document.getElementById('f_date').value=INV.date||'';
+  document.getElementById('f_dueDate').value=INV.dueDate||'';
+  document.getElementById('f_client').value=INV.client||'';
+  document.getElementById('f_project').value=INV.project||'';
+  document.getElementById('f_paid').value=INV.paid?INV.paid:'';
+  document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===(INV.docType||'invoice')); });
+  // settings inputs
+  ['bizName','addr1','addr2','email','phone','instagram','whatsapp','payTitle1','payBody1','payTitle2','payBody2','payTitle3','payBody3','terms'].forEach(function(k){
+    var el=document.getElementById('s_'+k); if(el) el.value=SETTINGS[k]||'';
+  });
+  document.getElementById('s_logoOn').checked=!!SETTINGS.logoOn;
+}
+
+/* ── tiny toast ── */
+var toastT;
+function toast(msg){
+  var el=document.getElementById('toast');
+  if(!el){ el=document.createElement('div'); el.id='toast';
+    el.style.cssText='position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#1f2f58;color:#f0e8d0;padding:.6rem 1.1rem;border-radius:8px;font-size:.85rem;z-index:600;box-shadow:0 6px 20px rgba(0,0,0,.25);opacity:0;transition:opacity .2s';
+    document.body.appendChild(el);
+  }
+  el.textContent=msg; el.style.opacity='1';
+  clearTimeout(toastT); toastT=setTimeout(function(){el.style.opacity='0';},1800);
+}
+
+/* ── boot: admin gate ── */
+function showGate(title,msg,showLink){
+  document.getElementById('gateTitle').textContent=title;
+  document.getElementById('gateMsg').textContent=msg;
+  document.getElementById('gateLink').style.display=showLink?'inline-block':'none';
+}
+async function boot(){
+  if(!(C && C.tokenAlive && C.tokenAlive())){ location.replace(LOGIN); return; }
+  var me;
+  try{ var r=await C.api('/me'); me=r.member; }
+  catch(err){ if(err&&err.status===401){ location.replace(LOGIN); return; } showGate('Could not load your account','Check your connection and try again.',true); return; }
+  if(!me || me.role!=='admin'){
+    showGate('Admins only','This billing tool is for the Neewoody admin account. If you need a client-facing quote, use the Job Pricing tool in your member area.',true);
+    return;
+  }
+  // Admin — reveal the app
+  document.getElementById('gate').style.display='none';
+  document.getElementById('app').style.display='';
+  if(!INV.currency) INV.currency='GH₵';
+  syncForm(); renderItems(); renderDoc(); syncBalance();
+}
+boot();
+</script>
+</body>
+</html>

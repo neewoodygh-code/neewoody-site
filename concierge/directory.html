@@ -625,6 +625,12 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
         <p>Know what a job really costs <b>you</b> — set your own overhead, crew rates and margins once, then price and quote with confidence when a client says "it's too much." Your figures stay private to your account.</p>
         <a class="go" href="../carpenter-pricing.html">Open the pricing tool</a>
       </div>
+      <div class="tool-card" id="adminInvoiceCard" style="display:none;border-color:var(--gold);background:linear-gradient(180deg,rgba(200,146,42,.06),transparent)">
+        <span class="soon-tag" style="background:var(--gold);color:#241a05">Admin only</span>
+        <h3>Invoice &amp; Quote Generator</h3>
+        <p>Your Google-Sheets invoice, rebuilt as a tool. Fill in line items, <b>print or save as PDF</b>, and keep every invoice in one place. Header, payment options and terms are pre-set to Neewoody's.</p>
+        <a class="go" href="../invoice-generator.html">Open the generator</a>
+      </div>
       <div class="tool-card soon">
         <span class="soon-tag">In development</span>
         <h3>Safety Check-In</h3>
@@ -3133,7 +3139,10 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     if (me.status !== 'approved') { renderPaywall(); return; }
 
     try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
-    if (me.role === 'admin') document.getElementById('adminLink').style.display = '';
+    if (me.role === 'admin') {
+      document.getElementById('adminLink').style.display = '';
+      var aic = document.getElementById('adminInvoiceCard'); if (aic) aic.style.display = '';
+    }
     if (me.member_type === 'vendor') {
       document.getElementById('storefrontTab').hidden = false;
       document.getElementById('ordersTab').hidden = false;
