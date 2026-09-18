@@ -238,10 +238,12 @@
             <div class="seg" id="typeSeg">
               <button type="button" data-t="invoice" class="on" onclick="setType('invoice')">Invoice</button>
               <button type="button" data-t="quote" onclick="setType('quote')">Quote</button>
+              <button type="button" data-t="receipt" onclick="setType('receipt')">Receipt</button>
             </div>
+            <div class="hint" style="margin-top:.3rem">Receipt hides the payment options and relabels the document.</div>
           </div>
           <div class="grid2">
-            <div class="fld"><label>Invoice / Quote #</label><input id="f_number" oninput="onField('number',this.value)" /></div>
+            <div class="fld"><label>Number <span style="text-transform:none;color:var(--muted)">(auto from date)</span></label><input id="f_number" oninput="onField('number',this.value)" /><div class="hint">e.g. NWD-409182026 · edit to override</div></div>
             <div class="fld"><label>Currency</label><input id="f_currency" oninput="onField('currency',this.value)" /></div>
             <div class="fld"><label>Date</label><input id="f_date" type="date" oninput="onField('date',this.value)" /></div>
             <div class="fld"><label>Due date <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_dueDate" type="date" oninput="onField('dueDate',this.value)" /></div>
@@ -388,14 +390,21 @@ function load(k,f){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):f;}
 function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;} }
 function warnStore(ok){ document.getElementById('storeWarn').classList.toggle('on',!ok); }
 function uid(){ return 'i'+Math.random().toString(36).slice(2,8); }
-function nextNumber(){
-  var c = 1000; try{ c = parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000; }catch(e){}
-  return 'NWD-'+String(c+1).padStart(4,'0');
-}
-function bumpCounter(){ try{ var c=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000; localStorage.setItem(K_CTR,String(c+1)); }catch(e){} }
 function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+// Quarter of the invoice date on a fiscal year that starts in October
+// (Oct–Dec = Q1, Jan–Mar = Q2, Apr–Jun = Q3, Jul–Sep = Q4) — so Sept = Q4.
+function fiscalQuarter(m){ return Math.floor(((m - 10 + 12) % 12) / 3) + 1; }
+// Auto number from the invoice date: NWD-<quarter><MM><DD><YYYY>
+// e.g. 18 Sep 2026 → Q4 → NWD-409182026
+function numberForDate(iso){
+  var p = (iso && String(iso).split('-').length===3) ? String(iso).split('-') : todayISO().split('-');
+  var y=p[0], m=+p[1], d=p[2];
+  return 'NWD-' + fiscalQuarter(m) + String(m).padStart(2,'0') + String(d).padStart(2,'0') + y;
+}
+function docLabel(t){ t=t||INV.docType; return t==='quote'?'Quote':(t==='receipt'?'Receipt':'Invoice'); }
 function blankInvoice(){
-  return { docType:'invoice', number:nextNumber(), currency:'GH₵', date:todayISO(), dueDate:'',
+  var d=todayISO();
+  return { docType:'invoice', number:numberForDate(d), numberEdited:false, currency:'GH₵', date:d, dueDate:'',
            client:'', project:'', items:[ item(),item(),item() ], paid:0, savedId:null };
 }
 function item(){ return { id:uid(), desc:'', qty:1, unit:0 }; }
@@ -414,7 +423,16 @@ function persist(){ warnStore(lsSet(K_CUR,INV)); }
 function persistSettings(){ warnStore(lsSet(K_SET,SETTINGS)); schedulePush(); }
 
 /* ── field handlers ── */
-function onField(k,v){ if(k==='paid') v=+v||0; INV[k]=v; persist(); renderDoc(); if(k==='paid') syncBalance(); }
+function onField(k,v){
+  if(k==='paid') v=+v||0;
+  INV[k]=v;
+  if(k==='number') INV.numberEdited=true;                       // manual override sticks
+  if(k==='date' && !INV.numberEdited){                          // date drives the auto number
+    INV.number=numberForDate(v);
+    var nf=document.getElementById('f_number'); if(nf) nf.value=INV.number;
+  }
+  persist(); renderDoc(); if(k==='paid') syncBalance();
+}
 function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); }
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
@@ -455,7 +473,8 @@ function payOptionHtml(title,body){
 }
 function renderDoc(){
   var s=SETTINGS, total=grandTotal(), paid=+INV.paid||0, bal=total-paid;
-  var typeLabel = INV.docType==='quote' ? 'Quote' : 'Invoice';
+  var typeLabel = docLabel(INV.docType);
+  var isReceipt = INV.docType==='receipt';   // receipt: no payment options (already paid)
   var logo = s.logoOn ? '<img src="images/logo.png" alt="" onerror="this.style.display=\'none\'" />' : '';
 
   var contact='';
@@ -479,11 +498,11 @@ function renderDoc(){
     });
   }
 
-  var pays = payOptionHtml(s.payTitle1,s.payBody1)+payOptionHtml(s.payTitle2,s.payBody2)+payOptionHtml(s.payTitle3,s.payBody3);
+  var pays = isReceipt ? '' : (payOptionHtml(s.payTitle1,s.payBody1)+payOptionHtml(s.payTitle2,s.payBody2)+payOptionHtml(s.payTitle3,s.payBody3));
   var termsLines=(s.terms||'').split('\n').filter(function(l){return l.trim();}).join('\n');
 
   var metaRows=''
-    +metaCell('Invoice for', INV.client||'—')
+    +metaCell(typeLabel+' for', INV.client||'—')
     +metaCell('Paid to', s.bizName||'')
     +metaCell(typeLabel+' #', INV.number||'—')
     +metaCell('Project', INV.project||'—')
@@ -530,7 +549,7 @@ function setList(l){ warnStore(lsSet(K_LIST,l)); schedulePush(); }
 function saveInvoice(){
   var list=getList();
   var snap=JSON.parse(JSON.stringify(INV));
-  if(!snap.savedId){ snap.savedId=uid(); INV.savedId=snap.savedId; if(/^NWD-\d+$/.test(String(INV.number))) bumpCounter(); persist(); }
+  if(!snap.savedId){ snap.savedId=uid(); INV.savedId=snap.savedId; persist(); }
   var entry={ savedId:snap.savedId, number:snap.number, docType:snap.docType, client:snap.client,
               project:snap.project, date:snap.date, total:grandTotal(), savedAt:Date.now(), data:snap };
   var i=list.findIndex(function(x){return x.savedId===snap.savedId;});
@@ -545,7 +564,7 @@ function renderLib(){
   var el=document.getElementById('libList');
   if(!list.length){ el.innerHTML='<div class="lib-empty">No saved invoices yet. Fill one in and press <b>Save</b>.</div>'; return; }
   el.innerHTML=list.map(function(e){
-    var t=(e.docType==='quote'?'Quote':'Invoice');
+    var t=docLabel(e.docType);
     return '<div class="lib-row">'
       +'<div class="li-main" style="cursor:pointer" onclick="loadInvoice(\''+e.savedId+'\')">'
       +  '<div class="li-t">'+esc(e.client||'(no client)')+(e.project?' · '+esc(e.project):'')+'</div>'
@@ -565,9 +584,9 @@ function loadInvoice(id){
 function dupInvoice(id){
   var e=getList().find(function(x){return x.savedId===id;}); if(!e) return;
   var copy=JSON.parse(JSON.stringify(e.data));
-  copy.savedId=null; copy.number=nextNumber(); copy.date=todayISO(); copy.paid=0;
+  copy.savedId=null; copy.date=todayISO(); copy.numberEdited=false; copy.number=numberForDate(copy.date); copy.paid=0;
   INV=copy; persist(); syncForm(); renderItems(); renderDoc(); syncBalance(); closeLib();
-  toast('Copied to a new '+(copy.docType==='quote'?'quote':'invoice'));
+  toast('Copied to a new '+docLabel(copy.docType).toLowerCase());
 }
 function delInvoice(id){
   if(!confirm('Delete this saved invoice? This cannot be undone.')) return;
