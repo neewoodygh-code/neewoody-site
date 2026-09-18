@@ -213,6 +213,18 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .lib-phd .ll-btn{color:#f3ecdd;border-color:rgba(243,236,221,.4)}
 .lib-lists{padding:.5rem}
 .lib-list{display:flex;align-items:center;gap:.5rem;padding:.6rem .7rem;border-radius:8px;border-bottom:1px solid var(--clr-border)}
+.ll-check{flex:none;display:inline-flex;align-items:center;cursor:pointer}
+.ll-check input{width:17px;height:17px;accent-color:var(--navy);cursor:pointer;margin:0}
+.ll-btn.print{color:#c8922a;border-color:rgba(200,146,42,.55)}
+.lib-phd .ll-btn.print{color:#f3d9a4;border-color:rgba(243,236,221,.5)}
+.ll-btn.print:hover{border-color:var(--clr-accent);color:var(--clr-accent)}
+/* sticky "print selected" bar in the projects library */
+#libPrintBar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:.8rem;justify-content:center;flex-wrap:wrap;padding:.7rem 1rem;background:var(--navy);border-top:1.5px solid var(--clr-accent);box-shadow:0 -6px 18px rgba(0,0,0,.18)}
+#libPrintBar .lpb-n{font-family:var(--font-body);font-size:.86rem;color:#f3ecdd}
+#libPrintBar .lpb-n b{font-family:var(--mono);color:#f3d9a4}
+#libPrintBar .lpb-clear{font-family:var(--font-body);font-size:.8rem;font-weight:600;color:#f3ecdd;background:transparent;border:1.5px solid rgba(243,236,221,.4);border-radius:7px;padding:.4rem .85rem;cursor:pointer}
+#libPrintBar .lpb-print{font-family:var(--font-body);font-size:.86rem;font-weight:700;color:var(--navy);background:var(--clr-accent);border:none;border-radius:7px;padding:.45rem 1.1rem;cursor:pointer}
+#libPrintBar .lpb-print:hover{filter:brightness(1.06)}
 .lib-list:last-child{border-bottom:none}
 .lib-list:hover{background:var(--clr-accent-lt)}
 .lib-list.cur{background:var(--clr-accent-lt)}
@@ -349,6 +361,9 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   /* Each board colour starts on a fresh page (first group flows at the top). */
   .grp{break-before:page;page-break-before:always}
   .grp-first{break-before:auto!important;page-break-before:auto!important}
+  /* Multi-list print (My projects → Print all / Print selected): each cut list
+     after the first starts on a fresh page; its own thead prints from there. */
+  .ml-sheet + .ml-sheet{break-before:page;page-break-before:always}
   .grp-hd{break-after:avoid;page-break-after:avoid}
   .eb-item{break-inside:avoid;page-break-inside:avoid}
   #sheetOut,#sheetOut *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -708,8 +723,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     </div>
   </div>
   <div class="qg-scroll">
-    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it. Projects are saved on this device — use <b>Back up</b> to keep a copy you can <b>Restore</b> on any device.</div>
+    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it. Tick cut lists to <b>print several at once</b>, or use a project's <b>Print all</b>. Projects are saved on this device — use <b>Back up</b> to keep a copy you can <b>Restore</b> on any device.</div>
     <div id="projLib"></div>
+  </div>
+  <div id="libPrintBar" style="display:none">
+    <span class="lpb-n"><b id="libPrintN">0</b> cut list(s) selected</span>
+    <button class="lpb-clear" onclick="clearPrintSel()">Clear</button>
+    <button class="lpb-print" onclick="printSelected()">&#9113; Print selected</button>
   </div>
 </div>
 
@@ -1182,6 +1202,59 @@ function renderRecent(){
 // Full-screen projects library.
 function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
 function closeLibrary(){ document.getElementById('projPage').style.display='none'; document.body.style.overflow=''; }
+
+// ── PRINT MANY LISTS AT ONCE (from My projects) ──
+// Selection of cut lists to print together, keyed "projId|listId".
+var printSel={};
+function printKey(pid,lid){ return pid+'|'+lid; }
+function togglePrintSel(pid,lid,on){ var k=printKey(pid,lid); if(on) printSel[k]=1; else delete printSel[k]; updatePrintBar(); }
+function clearPrintSel(){ printSel={}; renderLibrary(); }
+function selectedCount(){ return Object.keys(printSel).length; }
+function updatePrintBar(){
+  var bar=document.getElementById('libPrintBar'); if(!bar) return;
+  var n=selectedCount();
+  var nEl=document.getElementById('libPrintN'); if(nEl) nEl.textContent=n;
+  bar.style.display=n?'flex':'none';
+}
+// Tick every list in a project (Print all).
+function printProject(pid){
+  var arr=projStore(), proj=findProj(arr,pid); if(!proj||!proj.lists.length) return;
+  printLists(proj.lists.map(function(l){ return {projId:pid, listId:l.id}; }));
+}
+function printSelected(){
+  var refs=Object.keys(printSel).map(function(k){ var a=k.split('|'); return {projId:a[0], listId:a[1]}; });
+  if(!refs.length) return;
+  printLists(refs);
+}
+// Render N saved cut lists into #sheetOut back-to-back (each starts a fresh page),
+// print, then restore the working sheet. Globals are swapped per list so every
+// sheet uses ITS OWN board code, branding and parts; nothing about the working
+// state is changed. Each cut list keeps the same box-sheet layout as a single print.
+function printLists(refs){
+  var arr=projStore();
+  var _U=U, _parts=parts, _eb=ebState, _seq=seq;   // stash working state
+  var tables='';
+  refs.forEach(function(r){
+    var proj=findProj(arr,r.projId), list=findList(proj,r.listId);
+    if(!proj||!list) return;
+    var d=list.data||{};
+    U=Object.assign(defaultU(), d.U||{});
+    U.proj=proj.name; U.listName=list.name;
+    parts=Array.isArray(d.parts)?d.parts:[];
+    ebState=d.ebState||{};
+    seq=d.seq||1;
+    var gs=groups();
+    if(!gs.length) return;   // skip an empty list
+    tables+='<div class="ml-sheet">'+buildSheetTable(gs)+'</div>';
+  });
+  U=_U; parts=_parts; ebState=_eb; seq=_seq;         // restore working state
+  if(!tables){ alert('Nothing to print — the selected cut list(s) have no parts.'); return; }
+  var out=document.getElementById('sheetOut');
+  var keep=out.innerHTML;
+  out.innerHTML=tables;
+  try{ window.print(); }
+  finally{ out.innerHTML=keep; }
+}
 // At-a-glance stats for a saved cut list (computed from its snapshot, no need to open it).
 function listStats(data){
   var u=(data&&data.U)||{}, ps=(data&&data.parts)||[], eb=(data&&data.ebState)||{};
@@ -1241,7 +1314,7 @@ function renderLibrary(){
   renderProjectCount();
   var arr=projStore().slice().sort(function(a,b){return (b.updatedAt||0)-(a.updatedAt||0);});
   var host=document.getElementById('projLib');
-  if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; return; }
+  if(!arr.length){ host.innerHTML='<div class="lib-empty">No saved projects yet.<br>Build a cut list, name a project (the home/client) and a cut list (the piece), then press <b>Save cut list</b>.</div>'; updatePrintBar(); return; }
   host.innerHTML=arr.map(function(p){
     var pBoards=0, pPieces=0, pCols={}, pDone=0, pCost=0;
     var lists=p.lists.map(function(l){
@@ -1252,6 +1325,7 @@ function renderLibrary(){
       var d=l.savedAt?new Date(l.savedAt):null;
       var date=d?(d.getDate()+'/'+(d.getMonth()+1)):'';
       return '<div class="lib-list'+(cur?' cur':'')+'">'+
+        '<label class="ll-check" title="Select to print"><input type="checkbox" '+(printSel[printKey(p.id,l.id)]?'checked':'')+' onclick="togglePrintSel(\''+p.id+'\',\''+l.id+'\',this.checked)"></label>'+
         '<button class="ll-status st-'+status+'" title="Tap to change status" onclick="setListStatus(\''+p.id+'\',\''+l.id+'\')">'+STATUS_LABELS[status]+'</button>'+
         '<div class="ll-main" onclick="loadList(\''+p.id+'\',\''+l.id+'\');closeLibrary()">'+
           '<div class="ll-name">'+esc(l.name)+(cur?' <span class="ll-open">OPEN</span>':'')+(date?'<span class="ll-date">'+date+'</span>':'')+'</div>'+
@@ -1273,11 +1347,13 @@ function renderLibrary(){
     return '<div class="lib-proj">'+
       '<div class="lib-phd"><div class="lp-head"><div class="lp-name">'+esc(p.name)+'</div><div class="lp-roll">'+roll+'</div></div>'+
         '<div class="lp-act">'+
+        (nL>1?'<button class="ll-btn print" onclick="printProject(\''+p.id+'\')" title="Print every cut list in this project">&#9113; Print all</button>':'')+
         '<button class="ll-btn" onclick="addListToProject(\''+p.id+'\')">+ New list</button>'+
         '<button class="ll-btn" onclick="renameProject(\''+p.id+'\')">Rename</button>'+
         '<button class="ll-btn del" onclick="deleteProject(\''+p.id+'\')">Delete</button></div></div>'+
       '<div class="lib-body">'+track+'<div class="lib-lists">'+lists+'</div></div></div>';
   }).join('');
+  updatePrintBar();
 }
 
 // ── PARTS ROWS ──
@@ -1631,16 +1707,13 @@ function buildPrintHead(gs){
       '<div>'+date+'</div>'+
     '</div></div>';
 }
-function renderSheet(gs){
-  var out=document.getElementById('sheetOut');
+// Build the full sheet <table> (thead running header + tbody body) from the
+// CURRENT globals (U/parts/ebState). Pure string-builder — reused by the live
+// preview (renderSheet) AND multi-list print (printLists swaps globals per list).
+function buildSheetTable(gs){
   var legTick='<svg width="15" height="15" viewBox="0 0 16 16">'+ebLine(8,2,8,14)+'</svg>';
   var legDbl ='<svg width="15" height="15" viewBox="0 0 16 16">'+ebLine(3,2,3,14)+ebLine(8,2,8,14)+ebLine(13,2,13,14)+'</svg>';
   var legGrain='<svg width="15" height="15" viewBox="0 0 16 16"><line x1="6" y1="2" x2="6" y2="14" stroke="#b3a892" stroke-width="1.2"/><line x1="10" y1="2" x2="10" y2="14" stroke="#b3a892" stroke-width="1.2"/></svg>';
-  if(!gs.length){
-    out.innerHTML='<div class="sheet-topbar"><span class="t">Cut Sheet</span></div>'+
-      '<div class="sheet-empty">Your cut sheet appears here.<br>Add a part with a length and width to begin.</div>';
-    return;
-  }
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl,BW=U.bw,kerf=U.kerf;
   var projLbl = (U.projShow && printLabel()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(printLabel())+'</span>' : '';
@@ -1670,8 +1743,17 @@ function renderSheet(gs){
   });
   // Wrap in a table: the thead repeats on every printed page (with reserved space),
   // so nothing overlaps the header. thead is hidden on screen (preview shows topbar).
-  out.innerHTML='<table class="cut-table"><thead class="cut-thead"><tr><th>'+buildPrintHead(gs)+'</th></tr></thead>'+
+  return '<table class="cut-table"><thead class="cut-thead"><tr><th>'+buildPrintHead(gs)+'</th></tr></thead>'+
     '<tbody><tr><td class="cut-td">'+body+'</td></tr></tbody></table>';
+}
+function renderSheet(gs){
+  var out=document.getElementById('sheetOut');
+  if(!gs.length){
+    out.innerHTML='<div class="sheet-topbar"><span class="t">Cut Sheet</span></div>'+
+      '<div class="sheet-empty">Your cut sheet appears here.<br>Add a part with a length and width to begin.</div>';
+    return;
+  }
+  out.innerHTML=buildSheetTable(gs);
 }
 function renderAll(){
   var gs=groups();
