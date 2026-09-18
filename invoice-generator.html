@@ -261,7 +261,18 @@
             <button class="btn ghost sm" onclick="addItem()">＋ Add line</button>
             <div class="gt" id="grandTotal">GH₵ 0</div>
           </div>
-          <div class="grid2" style="margin-top:.9rem">
+          <div class="fld" style="margin-top:.9rem">
+            <label>Discount <span style="text-transform:none;color:var(--muted)">(optional)</span></label>
+            <div style="display:flex;gap:.5rem;align-items:stretch">
+              <div class="seg" id="discSeg" style="flex:none">
+                <button type="button" data-d="percent" class="on" onclick="setDiscType('percent')">%</button>
+                <button type="button" data-d="amount" onclick="setDiscType('amount')">GH₵</button>
+              </div>
+              <input id="f_discount" class="num" type="number" min="0" step="0.01" placeholder="0" oninput="onField('discountValue',this.value)" style="flex:1;text-align:right;font-family:var(--mono)" />
+            </div>
+            <div class="hint" id="discHint"></div>
+          </div>
+          <div class="grid2" style="margin-top:.7rem">
             <div class="fld"><label>Amount paid <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_paid" class="num" type="number" min="0" placeholder="0" oninput="onField('paid',this.value)" /></div>
             <div class="fld"><label>Balance due</label><input id="f_balance" readonly style="background:var(--cream-dk);font-weight:600" /></div>
           </div>
@@ -391,27 +402,35 @@ function lsSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));return true;}
 function warnStore(ok){ document.getElementById('storeWarn').classList.toggle('on',!ok); }
 function uid(){ return 'i'+Math.random().toString(36).slice(2,8); }
 function todayISO(){ var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-// Quarter of the invoice date on a fiscal year that starts in October
-// (Oct–Dec = Q1, Jan–Mar = Q2, Apr–Jun = Q3, Jul–Sep = Q4) — so Sept = Q4.
-function fiscalQuarter(m){ return Math.floor(((m - 10 + 12) % 12) / 3) + 1; }
+// Calendar quarter of the invoice date (Q1 = Jan–Mar, Q2 = Apr–Jun,
+// Q3 = Jul–Sep, Q4 = Oct–Dec) — so Sept = Q3.
+function quarterOf(m){ return Math.ceil(m / 3); }
 // Auto number from the invoice date: NWD-<quarter><MM><DD><YYYY>
-// e.g. 18 Sep 2026 → Q4 → NWD-409182026
+// e.g. 18 Sep 2026 → Q3 → NWD-309182026
 function numberForDate(iso){
   var p = (iso && String(iso).split('-').length===3) ? String(iso).split('-') : todayISO().split('-');
   var y=p[0], m=+p[1], d=p[2];
-  return 'NWD-' + fiscalQuarter(m) + String(m).padStart(2,'0') + String(d).padStart(2,'0') + y;
+  return 'NWD-' + quarterOf(m) + String(m).padStart(2,'0') + String(d).padStart(2,'0') + y;
 }
 function docLabel(t){ t=t||INV.docType; return t==='quote'?'Quote':(t==='receipt'?'Receipt':'Invoice'); }
 function blankInvoice(){
   var d=todayISO();
   return { docType:'invoice', number:numberForDate(d), numberEdited:false, currency:'GH₵', date:d, dueDate:'',
-           client:'', project:'', items:[ item(),item(),item() ], paid:0, savedId:null };
+           client:'', project:'', items:[ item(),item(),item() ], discountType:'percent', discountValue:0, paid:0, savedId:null };
 }
 function item(){ return { id:uid(), desc:'', qty:1, unit:0 }; }
 function cur(){ return (INV.currency||'GH₵').trim() || 'GH₵'; }
 function money(n){ n=+n||0; return cur()+' '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}); }
 function lineTotal(it){ return (+it.qty||0)*(+it.unit||0); }
+// grandTotal() = the line-items subtotal (before discount).
 function grandTotal(){ return (INV.items||[]).reduce(function(s,it){return s+lineTotal(it);},0); }
+// Discount is either a % of the subtotal or a flat figure; clamped to [0, subtotal].
+function discountAmt(){
+  var sub=grandTotal(), v=+INV.discountValue||0;
+  var amt = (INV.discountType==='percent') ? sub*(v/100) : v;
+  return Math.max(0, Math.min(amt, sub));
+}
+function finalTotal(){ return grandTotal() - discountAmt(); }
 function fmtDate(iso){ if(!iso) return ''; var p=iso.split('-'); if(p.length!==3) return iso;
   var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return (+p[2])+' '+M[(+p[1])-1]+' '+p[0]; }
@@ -431,14 +450,23 @@ function onField(k,v){
     INV.number=numberForDate(v);
     var nf=document.getElementById('f_number'); if(nf) nf.value=INV.number;
   }
-  persist(); renderDoc(); if(k==='paid') syncBalance();
+  if(k==='discountValue') v=+v||0, INV.discountValue=v;
+  persist(); renderDoc(); if(k==='paid'||k==='discountValue') syncBalance();
 }
 function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); }
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   renderDoc();
 }
-function syncBalance(){ document.getElementById('f_balance').value = money(grandTotal()-(+INV.paid||0)); }
+function setDiscType(t){ INV.discountType=t; persist();
+  document.querySelectorAll('#discSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.d===t); });
+  renderDoc(); syncBalance();
+}
+function syncBalance(){
+  document.getElementById('f_balance').value = money(finalTotal()-(+INV.paid||0));
+  var dh=document.getElementById('discHint');
+  if(dh){ var amt=discountAmt(); dh.textContent = amt>0 ? ('You save '+money(amt)+(INV.discountType==='percent'?' ('+(+INV.discountValue||0)+'% of '+money(grandTotal())+')':'')) : ''; }
+}
 
 /* ── items ── */
 function addItem(){ INV.items.push(item()); persist(); renderItems(); renderDoc(); }
@@ -472,7 +500,7 @@ function payOptionHtml(title,body){
   return '<div class="po"><div class="poh">'+esc(title)+'</div><div class="pob">'+esc(body||'')+'</div></div>';
 }
 function renderDoc(){
-  var s=SETTINGS, total=grandTotal(), paid=+INV.paid||0, bal=total-paid;
+  var s=SETTINGS, sub=grandTotal(), disc=discountAmt(), total=sub-disc, paid=+INV.paid||0, bal=total-paid;
   var typeLabel = docLabel(INV.docType);
   var isReceipt = INV.docType==='receipt';   // receipt: no payment options (already paid)
   var logo = s.logoOn ? '<img src="images/logo.png" alt="" onerror="this.style.display=\'none\'" />' : '';
@@ -524,6 +552,7 @@ function renderDoc(){
     +'<div class="lower">'
     +  '<div class="pay">'+(pays?'<div class="pt">Payment options</div>'+pays:'')+'</div>'
     +  '<div class="totals">'
+    +     (disc>0 ? totalRow('Subtotal', money(sub)) + totalRow('Discount'+(INV.discountType==='percent'?' ('+(+INV.discountValue||0)+'%)':''), '− '+money(disc)) : '')
     +     totalRow('Total', money(total))
     +     totalRow('Paid', paid?money(paid):'—')
     +     '<div class="tr bal"><span class="tl">Balance</span><span class="tv">'+money(bal)+'</span></div>'
@@ -551,7 +580,7 @@ function saveInvoice(){
   var snap=JSON.parse(JSON.stringify(INV));
   if(!snap.savedId){ snap.savedId=uid(); INV.savedId=snap.savedId; persist(); }
   var entry={ savedId:snap.savedId, number:snap.number, docType:snap.docType, client:snap.client,
-              project:snap.project, date:snap.date, total:grandTotal(), savedAt:Date.now(), data:snap };
+              project:snap.project, date:snap.date, total:finalTotal(), savedAt:Date.now(), data:snap };
   var i=list.findIndex(function(x){return x.savedId===snap.savedId;});
   if(i>=0) list[i]=entry; else list.unshift(entry);
   setList(list);
@@ -633,7 +662,9 @@ function syncForm(){
   document.getElementById('f_client').value=INV.client||'';
   document.getElementById('f_project').value=INV.project||'';
   document.getElementById('f_paid').value=INV.paid?INV.paid:'';
+  document.getElementById('f_discount').value=INV.discountValue?INV.discountValue:'';
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===(INV.docType||'invoice')); });
+  document.querySelectorAll('#discSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.d===(INV.discountType||'percent')); });
   // settings inputs
   ['bizName','addr1','addr2','email','phone','instagram','whatsapp','payTitle1','payBody1','payTitle2','payBody2','payTitle3','payBody3','terms'].forEach(function(k){
     var el=document.getElementById('s_'+k); if(el) el.value=SETTINGS[k]||'';
