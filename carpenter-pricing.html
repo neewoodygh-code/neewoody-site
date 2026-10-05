@@ -928,7 +928,7 @@ function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSet
                           <Card key={q.id} ch={<div>
                             <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
                               <div>
-                                <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{clientName(q, clients)}</div>
+                                <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.item || 'Untitled item'}</div>
                                 <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
                               </div>
                               <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
@@ -1003,7 +1003,7 @@ function ClientsScreen({ clients, quotes, onRename, onDelete, onNewQuote, onBack
 function newQuote(refNum, prefix) {
   return {
     id:uid(), refId:`${prefix}-${String(refNum).padStart(3,'0')}`,
-    client:'', clientId:null, jobType:'cabinetry', status:'draft',
+    client:'', clientId:null, item:'', jobType:'cabinetry', status:'draft',
     createdAt: new Date().toISOString(),
     tierId:'standard',
     workshopDays:0, siteDays:0, contingencyPct:0,
@@ -1048,7 +1048,7 @@ function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, sessio
   ];
   return(
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
-      <Hdr title={q.refId} sub={clientName(q, clients) || 'New quote'} onBack={onBack} crumb="Job Pricing"
+      <Hdr title={q.item || q.refId} sub={q.item ? `${clientName(q, clients)} · ${q.refId}` : clientName(q, clients)} onBack={onBack} crumb="Job Pricing"
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
           <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:S.cream,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
           <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
@@ -1063,6 +1063,16 @@ function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, sessio
         {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} brand={overheadCfg?.brand} onStatusChange={s=>upd({status:s})} onSave={save}/>}
         {tab==='costs'     && <CostsTab q={q} upd={upd} calc={calc}/>}
         {tab==='notes'     && <div><Lbl ch="Notes"/><CtrlTA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
+        {(() => {
+          const idx = TABS.findIndex(t=>t.id===tab);
+          const prevT = TABS[idx-1], nextT = TABS[idx+1];
+          return (
+            <div style={{display:'flex',justifyContent:'space-between',gap:10,marginTop:28,paddingTop:16,borderTop:`1px solid ${S.border}`}}>
+              {prevT ? <Btn ch={`← ${prevT.l}`} onClick={()=>setTab(prevT.id)} outline/> : <div/>}
+              {nextT ? <Btn ch={`${nextT.l} →`} onClick={()=>setTab(nextT.id)} color={S.accent}/> : <Btn ch={saving?'Saving…':'Save quote'} onClick={save} disabled={saving} color={S.accent}/>}
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
@@ -1097,6 +1107,11 @@ function SetupTab({ q, upd, calc, overheadCfg, clients }) {
             </React.Fragment>);
           })()}
           <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Select an existing client, or leave "+ New client…" and type a name below — saved to your shared Clients list, same one the Cut Sheet Generator uses.</div>
+        </div>
+        <div>
+          <Lbl ch="Item / project"/>
+          <CtrlInp value={q.item} onChange={e=>upd({item:e.target.value})} placeholder="e.g. Kitchen cabinets, Built-in wardrobe"/>
+          <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>What this specific quote is for — a client can have several quotes, each for a different piece.</div>
         </div>
         <div>
           <Lbl ch="Job type"/>
@@ -1384,7 +1399,7 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
             <div style={{marginTop:2}}>{q.createdAt?fmtDate(q.createdAt):''}</div>
           </div>
         </div>
-        <div style={{fontSize:'.82rem',color:S.mid,fontFamily:FB,marginTop:8}}>Quote for {q.client||'—'}</div>
+        <div style={{fontSize:'.82rem',color:S.mid,fontFamily:FB,marginTop:8}}>Quote for {q.client||'—'}{q.item?` — ${q.item}`:''}</div>
 
         <SecHdr ch="Materials"/>
         {itemize
@@ -1438,9 +1453,9 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
 function sendToInvoice(q, calc) {
   const payload = {
     v: 1, ts: Date.now(),
-    client: q.client || '', project: '', ref: q.refId || '',
+    client: q.client || '', project: q.item || '', ref: q.refId || '',
     total: Math.round(calc.quotedPrice || 0),
-    desc: 'Bespoke furniture' + (q.refId ? ' (quote ' + q.refId + ')' : ''),
+    desc: (q.item || 'Bespoke furniture') + (q.refId ? ' (quote ' + q.refId + ')' : ''),
   };
   try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
   window.location.href = '/invoice-generator.html';
