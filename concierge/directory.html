@@ -626,9 +626,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
         <a class="go" href="../carpenter-pricing.html">Open the pricing tool</a>
       </div>
       <div class="tool-card" id="adminInvoiceCard" style="display:none;border-color:var(--gold);background:linear-gradient(180deg,rgba(200,146,42,.06),transparent)">
-        <span class="soon-tag" style="background:var(--gold);color:#241a05">Admin only</span>
         <h3>Invoice &amp; Quote Generator</h3>
-        <p>Your Google-Sheets invoice, rebuilt as a tool. Fill in line items, <b>print or save as PDF</b>, and keep every invoice in one place. Header, payment options and terms are pre-set to Neewoody's.</p>
+        <p>Produce a proper Invoice, Quote or Receipt — line items, totals, your own letterhead and terms. <b>Print or save as PDF</b>, and keep every one in one place, private to your account.</p>
         <a class="go" href="../invoice-generator.html">Open the generator</a>
       </div>
       <div class="tool-card soon">
@@ -3141,8 +3140,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
     if (me.role === 'admin') {
       document.getElementById('adminLink').style.display = '';
-      var aic = document.getElementById('adminInvoiceCard'); if (aic) aic.style.display = '';
     }
+    var aic = document.getElementById('adminInvoiceCard'); if (aic) aic.style.display = '';
     if (me.member_type === 'vendor') {
       document.getElementById('storefrontTab').hidden = false;
       document.getElementById('ordersTab').hidden = false;

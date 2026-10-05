@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex,nofollow" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#1f2f58" />
-<title>Invoice &amp; Quote Generator — Neewoody (Admin)</title>
+<title>Invoice &amp; Quote Generator — Carpentry Concierge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
 <style>
@@ -186,7 +186,7 @@
 </head>
 <body>
 
-<!-- Loading / non-admin gate -->
+<!-- Loading / logged-out gate -->
 <div id="gate">
   <div class="box">
     <h2 id="gateTitle">Checking access…</h2>
@@ -204,14 +204,14 @@
     <a href="/concierge/directory.html">Member area</a>
     <span class="sep">·</span>
     <a href="/concierge/admin.html">Admin</a>
-    <span class="pill">Admin only · Neewoody</span>
+    <span class="pill">Carpentry Concierge</span>
   </div>
 
   <div class="ig-hero">
     <div class="in">
-      <span class="ig-badge">◆ Neewoody billing</span>
+      <span class="ig-badge">◆ Invoicing</span>
       <h1>Invoice &amp; Quote Generator</h1>
-      <p>Your Google-Sheets invoice, rebuilt as a tool. Fill in the line items, print or save as PDF, and keep every invoice in one place. Header, payment options and terms are pre-set — change them once and they stick.</p>
+      <p>Produce an Invoice, Quote or Receipt — line items, totals, your own letterhead and terms. Print or save as PDF, and keep every one in one place, private to your account. Set your business header, payment options and terms once — they stick for every document after.</p>
     </div>
   </div>
 
@@ -290,7 +290,7 @@
             <div class="fld"><label>Instagram</label><input id="s_instagram" oninput="onSetting('instagram',this.value)" /></div>
             <div class="fld"><label>WhatsApp</label><input id="s_whatsapp" oninput="onSetting('whatsapp',this.value)" /></div>
           </div>
-          <div class="fld"><label style="display:flex;align-items:center;gap:.4rem;text-transform:none;font-weight:500;color:var(--ink);font-size:.85rem"><input type="checkbox" id="s_logoOn" onchange="onSetting('logoOn',this.checked)" style="width:auto" /> Show Neewoody logo on the invoice</label></div>
+          <div class="fld"><label style="display:flex;align-items:center;gap:.4rem;text-transform:none;font-weight:500;color:var(--ink);font-size:.85rem"><input type="checkbox" id="s_logoOn" onchange="onSetting('logoOn',this.checked)" style="width:auto" /> Show my logo on the document</label></div>
         </details>
 
         <!-- Payment options (settings) -->
@@ -335,7 +335,7 @@
       </div>
     </div>
 
-    <div class="ig-foot">Neewoody Custom Woodwork · internal billing tool · admin only</div>
+    <div class="ig-foot">Carpentry Concierge · member billing tool</div>
   </div>
 </div>
 
@@ -354,8 +354,11 @@
 <script src="js/concierge.js?v=20261005"></script>
 <script>
 /* ============================================================
-   INVOICE & QUOTE GENERATOR — admin-only, local-first
-   Reproduces Neewoody's Google-Sheets invoice as a tool.
+   INVOICE & QUOTE GENERATOR — open to all paid Concierge members,
+   local-first with per-member cloud sync (see cloudSync() below).
+   Originally built from Neewoody's own Google-Sheets invoice;
+   opened to all members 2026-10-05 — see boot()'s first-run
+   seeding for how the owner's real letterhead stays admin-only.
    ============================================================ */
 var C = window.Concierge;
 var LOGIN = '/concierge/login.html?next=/invoice-generator.html';
@@ -364,8 +367,14 @@ var esc = (C && C.escapeHtml) ? C.escapeHtml : function(s){return String(s==null
 /* ── storage keys ── */
 var K_CUR='nwd-invoice-current', K_SET='nwd-invoice-settings', K_LIST='nwd-invoice-list', K_CTR='nwd-invoice-counter';
 
-/* ── defaults (from the real Prampram invoice) ── */
-var DEF_SETTINGS = {
+/* ── defaults ──
+   NEEWOODY_DEFAULT_SETTINGS is the owner's real letterhead (from the real
+   Prampram invoice) — seeded ONLY for the admin account's first-ever run, so
+   Nuer's existing setup never regresses. Every other member gets
+   GENERIC_BLANK_SETTINGS instead (seeded from their own profile in boot()),
+   so opening this tool to all members never leaks the owner's bank details
+   or terms into someone else's invoice. */
+var NEEWOODY_DEFAULT_SETTINGS = {
   bizName:'Neewoody Custom Woodwork',
   addr1:'100 Kwame Nkrumah Ave',
   addr2:'Adabraka, Accra/Ghana',
@@ -389,12 +398,25 @@ var DEF_SETTINGS = {
     '6. Custom Orders are not considered official orders until 100% of material cost and 30% of workmanship has been paid. This condition is negotiable with NCW agents.'
   ].join('\n')
 };
+var GENERIC_BLANK_SETTINGS = {
+  bizName:'', addr1:'', addr2:'', email:'', phone:'', instagram:'', whatsapp:'',
+  logoOn:false,
+  payTitle1:'Payment Option 1', payBody1:'',
+  payTitle2:'Payment Option 2', payBody2:'',
+  payTitle3:'Payment Option 3', payBody3:'',
+  terms:'1. Add your own terms and conditions here.'
+};
 
-var SETTINGS = load(K_SET, null) || Object.assign({}, DEF_SETTINGS);
-// backfill any new default keys onto an older saved settings object
-for (var dk in DEF_SETTINGS){ if(!(dk in SETTINGS)) SETTINGS[dk]=DEF_SETTINGS[dk]; }
+var SETTINGS = load(K_SET, null) || Object.assign({}, GENERIC_BLANK_SETTINGS);
+// backfill any new schema keys onto an older saved settings object — blanks
+// only, never the owner's real values (this runs for every member's data).
+for (var dk in GENERIC_BLANK_SETTINGS){ if(!(dk in SETTINGS)) SETTINGS[dk]=GENERIC_BLANK_SETTINGS[dk]; }
 
 var INV = load(K_CUR, null) || blankInvoice();
+// Resolved once in boot() from the logged-in member's own profile — never a
+// hardcoded path, so "show my logo" never shows the OWNER's logo to someone
+// else's account. Admin falls back to the real Neewoody asset (unchanged).
+var MEMBER_LOGO_URL = '';
 
 /* ── helpers ── */
 function load(k,f){ try{var v=localStorage.getItem(k);return v?JSON.parse(v):f;}catch(e){return f;} }
@@ -503,7 +525,8 @@ function renderDoc(){
   var s=SETTINGS, sub=grandTotal(), disc=discountAmt(), total=sub-disc, paid=+INV.paid||0, bal=total-paid;
   var typeLabel = docLabel(INV.docType);
   var isReceipt = INV.docType==='receipt';   // receipt: no payment options (already paid)
-  var logo = s.logoOn ? '<img src="images/logo.png" alt="" onerror="this.style.display=\'none\'" />' : '';
+  var logoSrc = MEMBER_LOGO_URL || 'images/logo.png';
+  var logo = s.logoOn ? '<img src="'+esc(logoSrc)+'" alt="" onerror="this.style.display=\'none\'" />' : '';
 
   var contact='';
   if(s.addr1) contact+='<div>'+esc(s.addr1)+'</div>';
@@ -640,7 +663,7 @@ function restore(inp){
   r.onload=function(){
     try{
       var d=JSON.parse(r.result);
-      if(d.settings){ SETTINGS=Object.assign({},DEF_SETTINGS,d.settings); persistSettings(); }
+      if(d.settings){ SETTINGS=Object.assign({},GENERIC_BLANK_SETTINGS,d.settings); persistSettings(); }
       if(Array.isArray(d.list)){
         var cur=getList(), byId={}; cur.forEach(function(e){byId[e.savedId]=e;});
         d.list.forEach(function(e){ if(e&&e.savedId){ if(!byId[e.savedId]||(e.savedAt||0)>(byId[e.savedId].savedAt||0)) byId[e.savedId]=e; } });
@@ -701,7 +724,7 @@ async function cloudSync(){
   catch(e){ return; }  // offline / lapsed → keep local, no push
   if(cloud){
     var cs=cloud.settings;
-    if(cs && (+cs.updatedAt||0) > (+SETTINGS.updatedAt||0)){ SETTINGS=Object.assign({},DEF_SETTINGS,cs); lsSet(K_SET,SETTINGS); }
+    if(cs && (+cs.updatedAt||0) > (+SETTINGS.updatedAt||0)){ SETTINGS=Object.assign({},GENERIC_BLANK_SETTINGS,cs); lsSet(K_SET,SETTINGS); }
     lsSet(K_LIST, mergeInvoiceLists(getListRaw(), Array.isArray(cloud.list)?cloud.list:[]));
     var cc=+cloud.counter||0, lc=1000; try{lc=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000;}catch(e){}
     if(cc>lc){ try{localStorage.setItem(K_CTR,String(cc));}catch(e){} }
@@ -742,7 +765,7 @@ function checkHandoff(){
   toast('Imported quote'+(h.ref?' '+h.ref:''));
 }
 
-/* ── boot: admin gate ── */
+/* ── boot: member gate ── */
 function showGate(title,msg,showLink){
   document.getElementById('gateTitle').textContent=title;
   document.getElementById('gateMsg').textContent=msg;
@@ -753,11 +776,27 @@ async function boot(){
   var me;
   try{ var r=await C.api('/me'); me=r.member; }
   catch(err){ if(err&&err.status===401){ location.replace(LOGIN); return; } showGate('Could not load your account','Check your connection and try again.',true); return; }
-  if(!me || me.role!=='admin'){
-    showGate('Admins only','This billing tool is for the Neewoody admin account. If you need a client-facing quote, use the Job Pricing tool in your member area.',true);
-    return;
+  if(!me){ showGate('Could not load your account','Check your connection and try again.',true); return; }
+  MEMBER_LOGO_URL = me.logo_url || me.photo_url || '';
+
+  // First time ever on this account (no saved settings anywhere yet): seed a
+  // real starting letterhead. Admin keeps the actual Neewoody template
+  // (zero change from before); every other member is seeded from their OWN
+  // profile instead — never the owner's bank details or terms.
+  if (!load(K_SET, null)) {
+    if (me.role === 'admin') {
+      SETTINGS = Object.assign({}, NEEWOODY_DEFAULT_SETTINGS);
+    } else {
+      SETTINGS = Object.assign({}, GENERIC_BLANK_SETTINGS, {
+        bizName: me.business_name || me.name || '',
+        phone: me.business_phone || me.phone || '',
+        addr1: me.area || '',
+      });
+    }
+    persistSettings();
   }
-  // Admin — reveal the app
+
+  // Reveal the app
   document.getElementById('gate').style.display='none';
   document.getElementById('app').style.display='';
   if(!INV.currency) INV.currency='GH₵';
