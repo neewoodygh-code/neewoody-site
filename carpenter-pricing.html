@@ -854,6 +854,8 @@ function ChecklistRow({ done, label, onClick }) {
 
 function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSettings, onClients, onLogout, onSaveOverhead }) {
   const [filter, setFilter] = useState('all');
+  const [selected, setSelected] = useState({});
+  const toggleSel = id => setSelected(prev => ({...prev, [id]: !prev[id]}));
   const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
 
   const hasOverhead = !!overheadCfg;
@@ -911,36 +913,46 @@ function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSet
             <div style={{display:'flex',flexDirection:'column',gap:20}}>
               {groupOrder.map(key=>{
                 const g = groupsMap[key];
+                const selInGroup = g.quotes.filter(q=>selected[q.id]);
                 return (
                   <div key={key}>
-                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 2px 8px',gap:10}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 2px 8px',gap:10,flexWrap:'wrap'}}>
                       <div style={{minWidth:0}}>
                         <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>{g.name}</div>
-                        <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>{g.quotes.length} quote{g.quotes.length!==1?'s':''}</div>
+                        <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>{g.quotes.length} quote{g.quotes.length!==1?'s':''}{selInGroup.length>0?` · ${selInGroup.length} selected`:''}</div>
                       </div>
-                      <Btn ch="+ Quote" onClick={()=>onNew({id:g.clientId, name:g.name})} size="sm" outline/>
+                      <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                        {selInGroup.length>0 && <Btn ch={`Send ${selInGroup.length} to Invoice →`} onClick={()=>sendMultipleToInvoice(selInGroup,g.name,overheadCfg)} size="sm" color={S.accent}/>}
+                        <Btn ch="+ Quote" onClick={()=>onNew({id:g.clientId, name:g.name})} size="sm" outline/>
+                      </div>
                     </div>
+                    {g.quotes.length>1 && <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,padding:'0 2px 8px'}}>Tick quotes to bundle several onto one invoice.</div>}
                     <div style={{display:'flex',flexDirection:'column',gap:10}}>
                       {g.quotes.map(q=>{
                         const calc = calcQuote(q, overheadCfg);
                         const sm   = STATUS_META[q.status]||STATUS_META.draft;
                         return(
-                          <Card key={q.id} ch={<div>
-                            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-                              <div>
-                                <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.item || 'Untitled item'}</div>
-                                <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
-                              </div>
-                              <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                          <div key={q.id} style={{display:'flex',gap:8,alignItems:'flex-start'}}>
+                            <input type="checkbox" checked={!!selected[q.id]} onChange={()=>toggleSel(q.id)} title="Select for invoice" style={{marginTop:18,flexShrink:0,width:16,height:16,cursor:'pointer',accentColor:S.accent}}/>
+                            <div style={{flex:1,minWidth:0}}>
+                              <Card ch={<div>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                                  <div>
+                                    <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.item || 'Untitled item'}</div>
+                                    <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
+                                  </div>
+                                  <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                                </div>
+                                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                                  <div>
+                                    <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
+                                    <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
+                                  </div>
+                                  <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                                </div>
+                              </div>}/>
                             </div>
-                            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
-                              <div>
-                                <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
-                                <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
-                              </div>
-                              <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
-                            </div>
-                          </div>}/>
+                          </div>
                         );
                       })}
                     </div>
@@ -1448,8 +1460,8 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
 
 // ── Push a priced quote across to the admin Invoice Generator ──────────
 // Both tools are same-origin, so we hand off via localStorage and navigate.
-// The invoice tool seeds a new draft (client + one line at the quoted total)
-// on load, then the owner itemises / adds terms / prints. Admin-only.
+// The invoice tool seeds a new draft on load, then the member itemises /
+// adds terms / prints.
 function sendToInvoice(q, calc, qty) {
   const payload = {
     v: 1, ts: Date.now(),
@@ -1458,6 +1470,20 @@ function sendToInvoice(q, calc, qty) {
     qty: Math.max(1, Math.round(+qty || 1)),
     desc: (q.item || 'Bespoke furniture') + (q.refId ? ' (quote ' + q.refId + ')' : ''),
   };
+  try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
+  window.location.href = '/invoice-generator.html';
+}
+
+// Bundle several quotes for the same client onto ONE invoice — each selected
+// quote becomes its own line item (qty 1 at that quote's own total), rather
+// than forcing a separate invoice per quote.
+function sendMultipleToInvoice(quotes, clientName, overheadCfg) {
+  const items = quotes.map(q => ({
+    desc: (q.item || 'Bespoke furniture') + (q.refId ? ' (' + q.refId + ')' : ''),
+    qty: 1,
+    unit: Math.round(calcQuote(q, overheadCfg).quotedPrice || 0),
+  }));
+  const payload = { v: 1, ts: Date.now(), client: clientName || '', project: '', items };
   try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
   window.location.href = '/invoice-generator.html';
 }

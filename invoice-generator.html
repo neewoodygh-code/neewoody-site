@@ -753,10 +753,31 @@ function checkHandoff(){
   try{ localStorage.removeItem('nwd-invoice-handoff'); }catch(e){}
   var h; try{ h=JSON.parse(raw); }catch(e){ return; }
   if(!h || (h.ts && (Date.now()-h.ts) > 15*60*1000)) return;  // stale guard (15 min)
+
+  // Multiple quotes bundled onto one invoice (Dashboard "Send N to Invoice"):
+  // each selected quote arrives as its own {desc,qty,unit} line.
+  if (Array.isArray(h.items) && h.items.length) {
+    var n = h.items.length;
+    var grand = h.items.reduce(function(s,it){ return s + (+it.qty||1)*(+it.unit||0); }, 0);
+    var mmsg = 'Import '+n+' quote'+(n!==1?'s':'')+' from the Job Pricing tool into a new invoice?\n\n'
+          +'Client: '+(h.client||'—')+'\nCombined total: '+cur()+' '+Math.round(grand).toLocaleString('en-US');
+    if(!confirm(mmsg)) return;
+    INV=blankInvoice();
+    INV.client=h.client||'';
+    INV.project=h.project||'';
+    INV.items=h.items.map(function(it){
+      return { id:uid(), desc:it.desc||'Bespoke furniture', qty:Math.max(1,Math.round(+it.qty||1)), unit:+it.unit||0 };
+    });
+    persist(); syncForm(); renderItems(); renderDoc(); syncBalance();
+    toast('Imported '+n+' quote'+(n!==1?'s':''));
+    return;
+  }
+
+  // Single quote, optionally with a chosen quantity (Summary tab "Send to
+  // Invoice Generator"): splits the one total evenly into qty × unit so the
+  // grand total stays what was quoted.
   var total=Math.round(+h.total||0);
   var qty=Math.max(1, Math.round(+h.qty||1));
-  // Job Pricing prices the job as a whole, so a chosen quantity splits that
-  // total evenly into qty × unit — the grand total stays what was quoted.
   var unit = qty>1 ? Math.round((total/qty)*100)/100 : total;
   var msg='Import this quote from the Job Pricing tool into a new invoice?\n\n'
         +'Client: '+(h.client||'—')+'\n'
