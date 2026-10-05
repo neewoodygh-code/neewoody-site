@@ -118,14 +118,33 @@ gtag('config', 'G-ZP77WR6BNH');
   padding: 2rem 1.25rem 4rem;
 }
 
-/* ── TOOL SHELL: guide sidebar (left) + calculator, filling the dead space ── */
+/* ── TOOL SHELL: centres the calculator (was guide-sidebar + calc; the
+   sidebar guide was replaced by the first-run ribbon + help disclosure
+   below, matching cut-sheet.html's pattern) ── */
 .tool-shell { max-width: 1060px; margin: 0 auto; padding: 0 1.25rem; }
 .tool-shell .calc-wrap { max-width: none; margin: 0; padding: 1.5rem 0 4rem; }
 @media (min-width: 1000px) {
-  .tool-shell { display: flex; align-items: flex-start; gap: 24px; padding-top: 2rem; }
-  .tool-shell .calc-wrap { flex: 1 1 auto; min-width: 0; max-width: 780px; padding-top: 0; }
-  #cutGuide { flex: 0 0 240px; }
+  .tool-shell { padding-top: 2rem; }
+  .tool-shell .calc-wrap { max-width: 860px; margin: 0 auto; padding-top: 0; }
 }
+
+/* first-run ribbon (same pattern as cut-sheet.html) */
+.first-run{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--green);color:#f3ecdd;border-radius:10px;padding:.6rem 1rem;margin-bottom:1rem}
+.first-run .fr-steps{font-family:var(--font-body);font-size:.86rem;display:flex;align-items:center;flex-wrap:wrap;gap:.15rem}
+.first-run .fr-steps b{display:inline-block;background:var(--clr-accent);color:#241500;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;font-size:.72rem;font-weight:700}
+.first-run .fr-x{margin-left:auto;background:transparent;border:1px solid rgba(243,236,221,.4);color:#f3ecdd;border-radius:6px;padding:.35rem .7rem;font-family:var(--font-body);font-size:.76rem;font-weight:600;cursor:pointer}
+.first-run .fr-x:hover{background:rgba(255,255,255,.1)}
+
+/* how-to-use disclosure (same pattern as cut-sheet.html) */
+.help{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;margin-bottom:1.1rem;overflow:hidden}
+.help summary{cursor:pointer;list-style:none;padding:.75rem 1.1rem;font-family:var(--mono);font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:.5rem}
+.help summary::-webkit-details-marker{display:none}
+.help summary::before{content:'▸';color:var(--clr-accent);transition:transform .15s}
+.help[open] summary::before{transform:rotate(90deg)}
+.help-body{padding:0 1.1rem 1rem;font-size:.84rem;line-height:1.55;color:var(--clr-muted)}
+.help-body ol{margin:.3rem 0 0;padding-left:1.2rem}
+.help-body li{margin-bottom:.35rem}
+.help-body b{color:var(--clr-dark)}
 
 /* ── TABS ── */
 .calc-tabs {
@@ -596,7 +615,6 @@ select {
 
 <!-- ════ CALCULATOR ════ -->
 <div class="tool-shell">
-<aside id="cutGuide"><!-- How-to-use guide injected here by js/tool-guide.js --></aside>
 <div class="calc-wrap">
 
   <!-- ════ MEMBER BAR (live Concierge session) ════ -->
@@ -613,6 +631,28 @@ select {
     <span>💾 Concierge members save &amp; reload their cut lists</span>
     <a href="concierge/login.html?next=/cutlist.html" style="margin-left:auto;font-weight:600;font-size:.8rem;color:#1f2f58;text-decoration:none;border:1px solid rgba(31,47,88,.3);border-radius:5px;padding:.35rem .8rem">Member login →</a>
   </div>
+
+  <!-- ════ FIRST-RUN RIBBON (dismissible) ════ -->
+  <div id="firstRun" class="first-run" style="display:none">
+    <span class="fr-steps"><b>1</b>&nbsp;Dimensions&nbsp; · &nbsp;<b>2</b>&nbsp;Doors &amp; Back&nbsp; · &nbsp;<b>3</b>&nbsp;Sections&nbsp; · &nbsp;<b>4</b>&nbsp;Generate Cut List</span>
+    <button class="fr-x" onclick="dismissFirstRun()">Got it ✕</button>
+  </div>
+
+  <details class="help">
+    <summary>How to use this tool</summary>
+    <div class="help-body">
+      <ol>
+        <li><b>Choose your units</b> — mm or cm, at the top of Dimensions. Everything you type uses that unit — the cut list itself always prints in mm for the workshop.</li>
+        <li><b>Enter the carcass</b> — on <b>Dimensions</b>, set the wardrobe height, width, depth and board thickness. These drive every panel size.</li>
+        <li><b>Doors &amp; back</b> — set the number of doors, the door style, and whether there is a back panel.</li>
+        <li><b>Build the sections</b> — on <b>Sections</b>, lay out each internal zone: shelves, hanging rails and drawers. Add or reorder zones to match the design.</li>
+        <li><b>Frame &amp; panels</b> — set any face-frame or panelling options for the look you are building.</li>
+        <li><b>Read the results</b> — you get a Parts List, an optimised Cut List, Zone &amp; Material summaries, and an Edge Band Sheet, each on its own printed page.</li>
+        <li><b>Save it (members)</b> — log in as a Concierge member to save a cut list and reload it later from 📂 My Cutlists.</li>
+      </ol>
+      Edge Band Sheet: <b>1 tick</b> on an edge = band that edge; <b>3 ticks</b> = double the board (glue 2 up) then band. Tap an edge to cycle none → band → double. Tap the <b>middle of a part</b> to flip its grain direction. Use <b>⎙ Print / Save PDF</b> to take the full list to the workshop.
+    </div>
+  </details>
 
   <!-- TABS -->
   <div class="calc-tabs" role="tablist">
@@ -907,32 +947,7 @@ select {
 
 <script src="js/main.js"></script>
 <script src="js/concierge.js?v=20261005"></script>
-<script src="js/tool-guide.js?v=20260823c"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
-
-<!-- ════ HOW-TO-USE GUIDE (fills the left dead-space on wide screens; drawer on phones) ════ -->
-<script>
-ToolGuide.init({
-  mount: '#cutGuide',
-  eyebrow: 'Wardrobe Cutlist',
-  title: 'How to use this tool',
-  top: 88,
-  steps: [
-    { t: 'Choose your units', d: 'Pick <strong>mm or cm</strong> at the top. Everything you type uses that unit — the cut list itself always prints in mm for the workshop.' },
-    { t: 'Enter the carcass', d: 'On <strong>Dimensions</strong>, set the wardrobe height, width, depth and board thickness. These drive every panel size.' },
-    { t: 'Doors & back', d: 'Set the number of doors, the door style, and whether there is a back panel.' },
-    { t: 'Build the sections', d: 'On <strong>Sections</strong>, lay out each internal zone — shelves, hanging rails and drawers. Add or reorder zones to match the design.' },
-    { t: 'Frame & panels', d: 'Set any face-frame or panelling options for the look you are building.' },
-    { t: 'Read the results', d: 'You get a <strong>Parts List</strong>, an optimised <strong>Cut List</strong>, Zone & Material summaries, and an <strong>Edge Band Sheet</strong> — each on its own page when printed.' },
-    { t: 'Save it (members)', d: 'Log in as a Concierge member to <strong>save</strong> a cut list and reload it later from 📂 My Cutlists.' }
-  ],
-  tips: [
-    'Edge Band Sheet: **1 tick** on an edge = band that edge; **3 ticks** = double the board (glue 2 up) then band. Tap an edge to cycle none → band → double.',
-    'Tap the **middle of a part** to flip its grain direction (which side is the length).',
-    'Use **⎙ Print / Save PDF** to take the full list to the workshop.'
-  ]
-});
-</script>
 
 <script>
 // ══════════════════════════════════════════════════════
@@ -1990,6 +2005,13 @@ function restoreConfig(cfg){
 (function(){
   var bar = document.getElementById(memberLoggedIn() ? 'member-bar' : 'guest-bar');
   if(bar) bar.style.display = 'flex';
+})();
+
+// First-run ribbon (dismiss-once, mirrors cut-sheet.html's pattern)
+function dismissFirstRun(){ var el=document.getElementById('firstRun'); if(el) el.style.display='none'; try{ localStorage.setItem('nwd-cutlist-firstrun','done'); }catch(e){} }
+(function(){
+  var frDone=null; try{ frDone=localStorage.getItem('nwd-cutlist-firstrun'); }catch(e){}
+  if(!frDone){ var el=document.getElementById('firstRun'); if(el) el.style.display='flex'; }
 })();
 
 </script>
