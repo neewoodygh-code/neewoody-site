@@ -734,7 +734,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <script src="js/main.js"></script>
-<script src="js/concierge.js?v=20260721a"></script>
+<script src="js/concierge.js?v=20261005"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  CUT SHEET GENERATOR — standalone, vanilla JS
@@ -941,7 +941,7 @@ function mergeProjectArrays(a, b){
       if(!lids[l.id]){ ex.lists.push(l); lids[l.id]=l; }
       else if((l.savedAt||0) > (lids[l.id].savedAt||0)){ ex.lists[ex.lists.indexOf(lids[l.id])]=l; lids[l.id]=l; } // newer wins
     });
-    if((p.updatedAt||0) >= (ex.updatedAt||0)){ ex.name=p.name; ex.updatedAt=p.updatedAt; }
+    if((p.updatedAt||0) >= (ex.updatedAt||0)){ ex.name=p.name; ex.updatedAt=p.updatedAt; ex.clientId=p.clientId; }
   }
   (a||[]).forEach(add); (b||[]).forEach(add);
   return order.map(function(id){ return byId[id]; });
@@ -956,6 +956,31 @@ async function cloudSync(){
   renderListChips(); renderProjectCount();
   var libOpen=document.getElementById('projPage'); if(libOpen && libOpen.style.display!=='none') renderLibrary();
   if(merged.length) projStatus('☁ Synced with your account — '+merged.length+' project'+(merged.length!==1?'s':''));
+  migrateProjectsToClients();
+}
+
+// ── CLIENTS (shared registry — also used by the Job Pricing tool) ──
+// A cut-sheet Project already IS "a home/client" by design, so the link is a
+// straight 1:1 sync, not a picker: saving/renaming a project upserts a client
+// record with the same name and stores its id back on the project. Fire-and-
+// forget — never blocks a local save, and safe to retry (find-or-create).
+async function linkProjectToClient(proj, arr){
+  if(!(window.Concierge && Concierge.tokenAlive())) return;
+  try{
+    var res = proj.clientId ? await Concierge.saveClient({name:proj.name}, proj.clientId)
+                             : await Concierge.saveClient({name:proj.name});
+    if(res && res.client){ proj.clientId=res.client.id; projSave(arr); }
+  }catch(e){ /* offline/lapsed — local project still works untagged */ }
+}
+// One-time backfill for projects saved before the clients registry existed.
+// Only marks itself done once actually attempted while logged in — if
+// offline/logged out it just no-ops and tries again on the next cloudSync().
+function migrateProjectsToClients(){
+  if(localStorage.getItem('nwd-cutsheet-clients-migrated')) return;
+  if(!(window.Concierge && Concierge.tokenAlive())) return;
+  var arr=projStore(), pending=arr.filter(function(p){ return p && !p.clientId; });
+  pending.forEach(function(p){ linkProjectToClient(p, arr); });
+  try{ localStorage.setItem('nwd-cutsheet-clients-migrated','1'); }catch(e){}
 }
 
 function fillSettings(){
@@ -1067,6 +1092,7 @@ function saveCurrentList(){
   if(!projSave(arr)){ projStatus('⚠ Couldn\'t save — storage full. Delete an old project.', true); return; }
   save(); renderListChips(); renderProjectCount();
   projStatus('Saved "'+lname+'" in '+pname);
+  linkProjectToClient(proj, arr);
 }
 function loadList(projId, listId){
   persistCurrentList();
@@ -1104,6 +1130,7 @@ function renameProject(id){
   proj.name=name; proj.updatedAt=Date.now();
   if(id===curProjId){ U.proj=name; document.getElementById('s-proj').value=name; save(); }
   projSave(arr); renderLibrary(); renderListChips();
+  linkProjectToClient(proj, arr);
 }
 function deleteProject(id){
   var arr=projStore(), proj=findProj(arr,id); if(!proj) return;

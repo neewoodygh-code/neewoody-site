@@ -537,6 +537,15 @@
     return URL.createObjectURL(await res.blob());
   }
 
+  // ── shared clients registry (links pricing quotes + cut-sheet projects) ──
+  // Server-side name match is find-or-create (case-insensitive), so calling
+  // saveClient with just a name is safe to repeat — it never makes a dupe.
+  function listClients() { return api('/clients'); }
+  function saveClient(data, id) {
+    return api(id ? ('/clients/' + id) : '/clients', { method: id ? 'PUT' : 'POST', body: data });
+  }
+  function deleteClientRecord(id) { return api('/clients/' + id, { method: 'DELETE' }); }
+
   // Best-effort usage event — fire-and-forget, never blocks or throws.
   function track(name, meta) {
     try {
@@ -576,6 +585,7 @@
     specialtyLabel: specialtyLabel,
     compressImage: compressImage, compressLogo: compressLogo, uploadPhoto: uploadPhoto,
     pushSupported: pushSupported, getPushSub: getPushSub,
-    enablePush: enablePush, disablePush: disablePush
+    enablePush: enablePush, disablePush: disablePush,
+    listClients: listClients, saveClient: saveClient, deleteClient: deleteClientRecord
   };
 })(window);

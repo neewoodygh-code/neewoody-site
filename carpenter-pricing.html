@@ -153,6 +153,10 @@ const STATUS_META = {
 const uid     = () => Math.random().toString(36).slice(2,8).toUpperCase();
 const GHS     = n  => `GH₵ ${(+n||0).toLocaleString('en-GH',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
 const fmtDate = iso => new Date(iso).toLocaleDateString('en-GH',{day:'numeric',month:'short',year:'numeric'});
+// Resolve a quote's display name via the shared Clients registry (so
+// renaming a client updates every quote that links to it); falls back to
+// the quote's own denormalized `client` string for not-yet-linked quotes.
+const clientName = (q, clients) => (clients||[]).find(c=>c.id===q.clientId)?.name || q.client || 'Untitled';
 
 const makeMat = (def, jobType) => ({
   id:def.id, name:def.name, cab:def.cab, hw:def.hw,
@@ -763,15 +767,28 @@ function OverheadSettings({ cfg, member, onMember, onSave, onBack }) {
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────
-function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, onLogout }) {
+function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSettings, onClients, onLogout }) {
   const [filter, setFilter] = useState('all');
   const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
+
+  // Group by the shared client (fallback to the denormalized name string for
+  // any quote not yet linked) — newest quote first overall, so the group
+  // containing the most recently touched quote surfaces first.
+  const ordered = [...filtered].reverse();
+  const groupsMap = {}, groupOrder = [];
+  ordered.forEach(q => {
+    const key = q.clientId ? ('c'+q.clientId) : ('n'+(q.client||'').trim().toLowerCase());
+    if (!groupsMap[key]) { groupsMap[key] = { name: clientName(q, clients), quotes: [] }; groupOrder.push(key); }
+    groupsMap[key].quotes.push(q);
+  });
+
   return (
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
       <Hdr title={session.workshopName} sub="Job Pricing" crumb="Job Pricing"
         onBack={()=>{window.location.href='/concierge/directory.html#tools';}} backLabel="← Tools"
         right={<div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
           <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
+          <button onClick={onClients} title="Clients" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:4,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.75rem',padding:'5px 10px',lineHeight:1}}>Clients</button>
           <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:4,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
           <button onClick={onLogout} style={{background:'transparent',border:'none',color:'rgba(240,232,208,.8)',fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
         </div>}/>
@@ -784,29 +801,81 @@ function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, on
       </div>
       <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
         {filtered.length===0&&<div style={{color:S.muted,fontSize:'.85rem',fontFamily:FB,padding:'32px 0',textAlign:'center'}}>No quotes yet. Create your first one.</div>}
-        <div style={{display:'flex',flexDirection:'column',gap:10,paddingTop:4}}>
-          {[...filtered].reverse().map(q=>{
-            const calc = calcQuote(q, overheadCfg);
-            const sm   = STATUS_META[q.status]||STATUS_META.draft;
-            return(
-              <Card key={q.id} ch={<div>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-                  <div>
-                    <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{q.client||'Untitled'}</div>
-                    <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
-                  </div>
-                  <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+        <div style={{display:'flex',flexDirection:'column',gap:20}}>
+          {groupOrder.map(key=>{
+            const g = groupsMap[key];
+            return (
+              <div key={key}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',padding:'4px 2px 8px'}}>
+                  <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>{g.name}</div>
+                  <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>{g.quotes.length} quote{g.quotes.length!==1?'s':''}</div>
                 </div>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
-                  <div>
-                    <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
-                    <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
-                  </div>
-                  <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                  {g.quotes.map(q=>{
+                    const calc = calcQuote(q, overheadCfg);
+                    const sm   = STATUS_META[q.status]||STATUS_META.draft;
+                    return(
+                      <Card key={q.id} ch={<div>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                          <div>
+                            <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{clientName(q, clients)}</div>
+                            <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
+                          </div>
+                          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                        </div>
+                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                          <div>
+                            <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
+                            <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
+                          </div>
+                          <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                        </div>
+                      </div>}/>
+                    );
+                  })}
                 </div>
-              </div>}/>
+              </div>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Clients screen ─────────────────────────────────────────────────────
+function ClientsScreen({ clients, quotes, onRename, onDelete, onBack }) {
+  const countFor = id => quotes.filter(q=>q.clientId===id).length;
+  const rename = async c => {
+    const name = (prompt('Rename client:', c.name)||'').trim();
+    if (!name || name === c.name) return;
+    await onRename(c.id, name);
+  };
+  const remove = async c => {
+    const n = countFor(c.id);
+    if (!confirm(`Delete "${c.name}" from your clients list?`+(n?` Their ${n} quote(s) keep their own saved name — they just won't be linked to this record anymore.`:''))) return;
+    await onDelete(c.id);
+  };
+  return (
+    <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
+      <Hdr title="Clients" sub="Shared with Cut Sheet Generator" crumb="Job Pricing" onBack={onBack} backLabel="← Dashboard"/>
+      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
+        {clients.length===0&&<div style={{color:S.muted,fontSize:'.85rem',fontFamily:FB,padding:'32px 0',textAlign:'center'}}>No clients yet — add one from a quote's Client name field.</div>}
+        <div style={{display:'flex',flexDirection:'column',gap:10}}>
+          {[...clients].map(c=>(
+            <Card key={c.id} ch={
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:10}}>
+                <div style={{minWidth:0}}>
+                  <div style={{fontFamily:FD,fontSize:'1.05rem',fontWeight:600,color:S.dark}}>{c.name}</div>
+                  <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{countFor(c.id)} quote{countFor(c.id)!==1?'s':''}</div>
+                </div>
+                <div style={{display:'flex',gap:6,flexShrink:0}}>
+                  <Btn ch="Rename" onClick={()=>rename(c)} size="sm" outline/>
+                  <Btn ch="Delete" onClick={()=>remove(c)} size="sm" outline color={S.err}/>
+                </div>
+              </div>
+            }/>
+          ))}
         </div>
       </div>
     </div>
@@ -817,7 +886,7 @@ function Dashboard({ session, quotes, overheadCfg, onNew, onOpen, onSettings, on
 function newQuote(refNum, prefix) {
   return {
     id:uid(), refId:`${prefix}-${String(refNum).padStart(3,'0')}`,
-    client:'', jobType:'cabinetry', status:'draft',
+    client:'', clientId:null, jobType:'cabinetry', status:'draft',
     createdAt: new Date().toISOString(),
     tierId:'standard',
     workshopDays:0, siteDays:0, contingencyPct:0,
@@ -835,13 +904,26 @@ function newQuote(refNum, prefix) {
 }
 
 // ── Quote Editor ──────────────────────────────────────────────────────
-function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
+function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, session, onSave, onBack }) {
   const [q, setQ]       = useState(initial);
   const [tab, setTab]   = useState('setup');
   const [saving, setSaving] = useState(false);
   const upd  = u => setQ(prev=>({...prev,...u}));
   const calc = useMemo(()=>calcQuote(q,overheadCfg),[q,overheadCfg]);
-  const save = async () => { setSaving(true); await onSave(q); setSaving(false); };
+  const save = async () => {
+    setSaving(true);
+    let next = q;
+    const typed = (q.client||'').trim();
+    if (typed) {
+      const c = await ensureClient(typed);
+      next = c ? { ...q, client: c.name, clientId: c.id } : { ...q, clientId: null };
+    } else if (q.clientId) {
+      next = { ...q, clientId: null }; // cleared the name → unlink
+    }
+    setQ(next);
+    await onSave(next);
+    setSaving(false);
+  };
   const sm   = STATUS_META[q.status]||STATUS_META.draft;
   const TABS = [
     {id:'setup',l:'Setup'},{id:'materials',l:'Materials'},{id:'logistics',l:'Logistics'},
@@ -849,7 +931,7 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
   ];
   return(
     <div style={{minHeight:'100vh',background:S.bg,display:'flex',flexDirection:'column'}}>
-      <Hdr title={q.refId} sub={q.client||'New quote'} onBack={onBack} crumb="Job Pricing"
+      <Hdr title={q.refId} sub={clientName(q, clients) || 'New quote'} onBack={onBack} crumb="Job Pricing"
         right={<div style={{display:'flex',gap:8,alignItems:'center'}}>
           <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:S.cream,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
           <Btn ch={saving?'Saving…':'Save'} onClick={save} disabled={saving} size="sm" color={S.accent}/>
@@ -858,7 +940,7 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
         {TABS.map(t=><button key={t.id} onClick={()=>setTab(t.id)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:tab===t.id?`2px solid ${S.accent}`:'2px solid transparent',color:tab===t.id?S.accent:S.muted,padding:'9px 14px',fontFamily:FB,fontSize:'.78rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>{t.l}</button>)}
       </div>
       <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
-        {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg}/>}
+        {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg} clients={clients}/>}
         {tab==='materials' && <MaterialsTab q={q} upd={upd}/>}
         {tab==='logistics' && <LogisticsTab q={q} upd={upd}/>}
         {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} brand={overheadCfg?.brand} onStatusChange={s=>upd({status:s})} onSave={save}/>}
@@ -870,7 +952,7 @@ function QuoteEditor({ quote:initial, overheadCfg, session, onSave, onBack }) {
 }
 
 // ── Setup Tab ─────────────────────────────────────────────────────────
-function SetupTab({ q, upd, calc, overheadCfg }) {
+function SetupTab({ q, upd, calc, overheadCfg, clients }) {
   const totalDays = (q.workshopDays||0)+(q.siteDays||0);
   const addCrewRow = () => upd({crew:[...q.crew,{id:uid(),roleId:'hand',count:1,days:null}]});
   const updCrew = (id,u) => upd({crew:q.crew.map(r=>r.id===id?{...r,...u}:r)});
@@ -880,7 +962,14 @@ function SetupTab({ q, upd, calc, overheadCfg }) {
     <div style={{display:'flex',flexDirection:'column',gap:18}}>
       <Card ch={<div style={{display:'flex',flexDirection:'column',gap:12}}>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:2}}>Job details</div>
-        <div><Lbl ch="Client name"/><CtrlInp value={q.client} onChange={e=>upd({client:e.target.value})} placeholder="e.g. Mensah Residence"/></div>
+        <div>
+          <Lbl ch="Client name"/>
+          <CtrlInp value={q.client} onChange={e=>upd({client:e.target.value})} placeholder="e.g. Mensah Residence" list="clientsDatalist"/>
+          <datalist id="clientsDatalist">
+            {(clients||[]).map(c=><option key={c.id} value={c.name}/>)}
+          </datalist>
+          <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,marginTop:4}}>Pick an existing client or type a new one — saved to your shared Clients list, same one the Cut Sheet Generator uses.</div>
+        </div>
         <div>
           <Lbl ch="Job type"/>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
@@ -1397,6 +1486,7 @@ function App() {
   const [screen,      setScreen]      = useState('loading');
   const [session,     setSession_]    = useState(null);
   const [quotes,      setQuotes]      = useState([]);
+  const [clients,     setClients]     = useState([]);
   const [overheadCfg, setOverheadCfg] = useState(null);
   const [memberInfo,  setMemberInfo]  = useState(null);
   const [activeId,    setActiveId]    = useState(null);
@@ -1406,14 +1496,16 @@ function App() {
     location.replace('/concierge/login.html');
   }
 
-  // Load the member (for the workshop name / quote refs) + their saved config
-  // and quotes from concierge-api. A 401 inside carpFetch redirects to login.
+  // Load the member (for the workshop name / quote refs) + their saved config,
+  // quotes and shared Clients registry from concierge-api. A 401 inside
+  // carpFetch redirects to login.
   async function loadData() {
     try {
-      const [meRes, cfgRes, qRes] = await Promise.all([
+      const [meRes, cfgRes, qRes, clRes] = await Promise.all([
         carpFetch('/me', 'GET'),
         carpFetch('/pricing/config', 'GET'),
         carpFetch('/pricing/quotes', 'GET'),
+        carpFetch('/clients', 'GET'),
       ]);
       const m = (meRes && meRes.member) || {};
       setSession_({ carpId: m.phone, workshopName: (m.business_name || m.name || 'My Workshop'), pin: '', role: m.role || '' });
@@ -1423,10 +1515,70 @@ function App() {
         photoUrl: m.photo_url || '', logoUrl: m.logo_url || '',
       });
       setOverheadCfg(cfgRes.config || null);
-      setQuotes(qRes.quotes || []);
+
+      let loadedClients = clRes.clients || [];
+      let loadedQuotes  = qRes.quotes || [];
+
+      // One-time backfill: quotes saved before the shared Clients registry
+      // existed only have a free-text `client` string. Find-or-create a
+      // client per distinct name (server dedupes case-insensitively, so this
+      // is exactly the "auto-group by name" migration) and link it. Self-
+      // terminating — once every quote has a clientId, nothing left to do.
+      const needsLink = loadedQuotes.filter(q => (q.client||'').trim() && !q.clientId);
+      if (needsLink.length) {
+        for (const q of needsLink) {
+          const name = q.client.trim();
+          let match = loadedClients.find(c => c.name.toLowerCase() === name.toLowerCase());
+          if (!match) {
+            try {
+              const res = await carpFetch('/clients', 'POST', { name });
+              match = res && res.client;
+              if (match && !loadedClients.some(c => c.id === match.id)) loadedClients = [match, ...loadedClients];
+            } catch (e) { continue; }
+          }
+          if (match) q.clientId = match.id;
+        }
+        carpFetch('/pricing/quotes', 'PUT', loadedQuotes).catch(() => {});
+      }
+
+      setClients(loadedClients);
+      setQuotes(loadedQuotes);
       return { ok: true, hasConfig: !!cfgRes.config };
     } catch (e) { return { ok: false }; }
   }
+
+  // Find-or-create a client by name (matches the shared /api/clients
+  // semantics cut-sheet.html uses). Editing a quote's client text always
+  // resolves "which client does this quote belong to" — switch or create —
+  // and NEVER renames a previously-linked client out from under every other
+  // quote that shares it. A real rename only happens from the Clients screen
+  // via renameClient below.
+  const ensureClient = async (name) => {
+    const trimmed = (name||'').trim();
+    if (!trimmed) return null;
+    const localMatch = clients.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (localMatch) return localMatch;
+    try {
+      const res = await carpFetch('/clients', 'POST', { name: trimmed });
+      const c = res && res.client;
+      if (c) { setClients(prev => prev.some(x=>x.id===c.id) ? prev : [c, ...prev]); return c; }
+    } catch (e) {}
+    return null;
+  };
+  const renameClient = async (id, name) => {
+    const trimmed = (name||'').trim();
+    if (!trimmed) return null;
+    try {
+      const res = await carpFetch(`/clients/${id}`, 'PUT', { name: trimmed });
+      const c = res && res.client;
+      if (c) { setClients(prev => prev.map(x=>x.id===c.id?c:x)); return c; }
+    } catch (e) {}
+    return null;
+  };
+  const removeClient = async id => {
+    try { await carpFetch(`/clients/${id}`, 'DELETE'); } catch (e) {}
+    setClients(prev => prev.filter(c => c.id !== id));
+  };
 
   useEffect(() => {
     if (!getToken()) { location.replace(LOGIN_URL); return; }
@@ -1509,10 +1661,12 @@ function App() {
     <Dashboard
       session={session}
       quotes={quotes}
+      clients={clients}
       overheadCfg={overheadCfg}
       onNew={createNew}
       onOpen={openQuote}
       onSettings={()=>setScreen('settings')}
+      onClients={()=>setScreen('clients')}
       onLogout={logout}/>
   );
 
@@ -1525,12 +1679,23 @@ function App() {
       onBack={()=>setScreen('dashboard')}/>
   );
 
+  if (screen === 'clients') return (
+    <ClientsScreen
+      clients={clients}
+      quotes={quotes}
+      onRename={renameClient}
+      onDelete={removeClient}
+      onBack={()=>setScreen('dashboard')}/>
+  );
+
   if (screen === 'editor') {
     const q = quotes.find(x => x.id === activeId);
     if (!q) return null;
     return (
       <QuoteEditor
         quote={q}
+        clients={clients}
+        ensureClient={ensureClient}
         overheadCfg={overheadCfg}
         session={session}
         onSave={async updated => { await saveQuote(updated); }}

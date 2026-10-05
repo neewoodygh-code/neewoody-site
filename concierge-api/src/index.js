@@ -372,6 +372,13 @@ async function route(request, env, ctx) {
   if (path === '/api/pricing/quotes' && method === 'GET') return withAuth(request, env, (m) => getQuotes(env, m));
   if (path === '/api/pricing/quotes' && method === 'PUT') return withPaid(request, env, (m) => saveQuotes(request, env, m));
 
+  // ---- member: shared Clients registry (links pricing quotes + cut-sheet projects) ----
+  if (path === '/api/clients' && method === 'GET')  return withAuth(request, env, (m) => listClients(env, m));
+  if (path === '/api/clients' && method === 'POST') return withPaid(request, env, (m) => createClient(request, env, m));
+  const mClient = path.match(/^\/api\/clients\/(\d+)$/);
+  if (mClient && method === 'PUT')    return withPaid(request, env, (m) => updateClient(request, env, m, Number(mClient[1])));
+  if (mClient && method === 'DELETE') return withPaid(request, env, (m) => deleteClient(env, m, Number(mClient[1])));
+
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
   if (path === '/api/cutlists' && method === 'POST') return withPaid(request, env, (m) => saveCutlist(request, env, m));
@@ -874,6 +881,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM push_subs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_configs WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM pricing_quotes WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM clients WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM cutsheet_data WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM invoice_data WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM storefront_items WHERE member_phone = ?').bind(phone),
@@ -933,6 +941,7 @@ async function adminPurgePending(env, request, admin) {
     env.DB.prepare(`DELETE FROM push_subs WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
+    env.DB.prepare(`DELETE FROM clients WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM invoice_data WHERE member_phone IN ${sub}`),
     env.DB.prepare(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
@@ -2230,6 +2239,73 @@ async function saveQuotes(request, env, member) {
      ON CONFLICT(member_phone) DO UPDATE SET quotes = excluded.quotes, updated_at = datetime('now')`
   ).bind(member.phone, s).run();
   return json({ ok: true });
+}
+
+// ── shared clients registry (links pricing quotes + cut-sheet projects) ──
+// A client is a SOFT reference: quotes/projects keep their own denormalized
+// display name alongside an optional clientId, so nothing breaks if a client
+// row is later deleted or was created offline. Name is unique per member
+// (case-insensitive) so either tool creating "Mensah Residence" lands on the
+// SAME row — this is what makes the free-text-name auto-migration safe.
+const CLIENTS_MAX_PER_MEMBER = 300;
+const CLIENT_NAME_MAX = 120;
+const CLIENT_PHONE_MAX = 32;
+const CLIENT_NOTES_MAX = 500;
+const CLIENT_COLS = 'id, name, phone, notes, created_at, updated_at';
+
+async function listClients(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT ${CLIENT_COLS} FROM clients WHERE member_phone = ? ORDER BY updated_at DESC`
+  ).bind(member.phone).all();
+  return json({ clients: results || [] });
+}
+
+async function createClient(request, env, member) {
+  const body = await readJson(request);
+  const name = String(body.name || '').trim().slice(0, CLIENT_NAME_MAX);
+  if (!name) return json({ error: 'name_required' }, 400);
+  const phone = body.phone ? String(body.phone).trim().slice(0, CLIENT_PHONE_MAX) : null;
+  const notes = body.notes ? String(body.notes).trim().slice(0, CLIENT_NOTES_MAX) : null;
+
+  const existing = await env.DB.prepare(
+    `SELECT ${CLIENT_COLS} FROM clients WHERE member_phone = ? AND lower(name) = lower(?)`
+  ).bind(member.phone, name).first();
+  if (existing) return json({ client: existing, existed: true });
+
+  const c = await env.DB.prepare('SELECT COUNT(*) AS c FROM clients WHERE member_phone = ?').bind(member.phone).first();
+  if (c && c.c >= CLIENTS_MAX_PER_MEMBER) return json({ error: 'too_many_clients', limit: CLIENTS_MAX_PER_MEMBER }, 400);
+
+  const r = await env.DB.prepare(
+    'INSERT INTO clients (member_phone, name, phone, notes) VALUES (?, ?, ?, ?)'
+  ).bind(member.phone, name, phone, notes).run();
+  const row = await env.DB.prepare(`SELECT ${CLIENT_COLS} FROM clients WHERE id = ?`).bind(r.meta.last_row_id).first();
+  return json({ client: row }, 201);
+}
+
+async function updateClient(request, env, member, id) {
+  const existing = await env.DB.prepare('SELECT member_phone FROM clients WHERE id = ?').bind(id).first();
+  if (!existing) return json({ error: 'not_found' }, 404);
+  if (existing.member_phone !== member.phone) return json({ error: 'forbidden' }, 403);
+
+  const body = await readJson(request);
+  const name = String(body.name || '').trim().slice(0, CLIENT_NAME_MAX);
+  if (!name) return json({ error: 'name_required' }, 400);
+  const phone = body.phone ? String(body.phone).trim().slice(0, CLIENT_PHONE_MAX) : null;
+  const notes = body.notes ? String(body.notes).trim().slice(0, CLIENT_NOTES_MAX) : null;
+
+  await env.DB.prepare(
+    `UPDATE clients SET name = ?, phone = ?, notes = ?, updated_at = datetime('now') WHERE id = ?`
+  ).bind(name, phone, notes, id).run();
+  const row = await env.DB.prepare(`SELECT ${CLIENT_COLS} FROM clients WHERE id = ?`).bind(id).first();
+  return json({ client: row });
+}
+
+async function deleteClient(env, member, id) {
+  const existing = await env.DB.prepare('SELECT member_phone FROM clients WHERE id = ?').bind(id).first();
+  if (!existing) return json({ error: 'not_found' }, 404);
+  if (existing.member_phone !== member.phone) return json({ error: 'forbidden' }, 403);
+  await env.DB.prepare('DELETE FROM clients WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
 }
 
 // ── saved cutlists ─────────────────────────────────────────────────────
