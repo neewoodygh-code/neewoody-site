@@ -25,6 +25,12 @@
     ::-webkit-scrollbar-track{background:var(--bg-alt);}
     ::-webkit-scrollbar-thumb{background:var(--border);}
     input[type=number]::-webkit-inner-spin-button{opacity:.4;}
+    .jp-home-wrap{max-width:700px;width:100%;margin:0 auto;padding:16px;}
+    .jp-home-grid{display:flex;flex-direction:column;gap:16px;}
+    @media (min-width:1024px){
+      .jp-home-wrap{max-width:980px;}
+      .jp-home-grid{display:grid;grid-template-columns:1fr 280px;align-items:start;gap:20px;}
+    }
   </style>
   <style>
     @media print {
@@ -767,9 +773,93 @@ function OverheadSettings({ cfg, member, onMember, onSave, onBack }) {
 }
 
 // ── Dashboard ─────────────────────────────────────────────────────────
-function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSettings, onClients, onLogout }) {
+// A short, static one-liner box — the few things worth knowing that aren't
+// tied to any one action, so they don't need to be "actionable" like the
+// welcome checklist below.
+function TipsBox() {
+  const tips = [
+    'Your figures are private to your account — no Neewoody numbers, and no other member sees them.',
+    'Use Print / Save PDF on a quote’s client copy to send a professional quote.',
+    'Quotes save to your account automatically when you tap Save.',
+  ];
+  return (
+    <Card ch={<div style={{display:'flex',flexDirection:'column',gap:8}}>
+      <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase'}}>Tips</div>
+      {tips.map((t,i)=><div key={i} style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,lineHeight:1.5}}>{t}</div>)}
+    </div>}/>
+  );
+}
+
+// A quote's overhead/margin settings, lifted next to the quote list so a
+// member can glance at or tweak the handful of numbers they touch often
+// (day rate, billable days, tier multipliers) without leaving the dashboard
+// for the full Overhead Settings screen.
+function QuickSettingsPanel({ overheadCfg, onSave, onFullSettings, session }) {
+  const cfg = overheadCfg || DEFAULT_OVERHEAD;
+  const [saving, setSaving] = useState(false);
+  const patch = async (u) => {
+    setSaving(true);
+    await onSave({ ...DEFAULT_OVERHEAD, ...cfg, ...u });
+    setSaving(false);
+  };
+  return (
+    <Card ch={<div style={{display:'flex',flexDirection:'column',gap:12}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase'}}>Quick settings</div>
+        {saving && <div style={{fontSize:'.65rem',color:S.muted,fontFamily:FM}}>Saving…</div>}
+      </div>
+      {!overheadCfg && <div style={{fontSize:'.72rem',color:S.accentDk,fontFamily:FB,lineHeight:1.4}}>Showing example numbers — nothing saved yet.</div>}
+      <div>
+        <Lbl ch="Day rate"/>
+        <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.dark}}>{GHS(calcOverheadDay(overheadCfg))}</div>
+      </div>
+      <div>
+        <Lbl ch="Billable days / month"/>
+        <NumInp value={cfg.billableDays ?? DEFAULT_OVERHEAD.billableDays} onChange={e=>patch({billableDays:Math.min(30,Math.max(1,+e.target.value||20))})}/>
+      </div>
+      <div>
+        <Lbl ch="Tier multipliers"/>
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {TIERS.map(t=>(
+            <div key={t.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
+              <span style={{fontSize:'.78rem',color:S.mid,fontFamily:FB}}>{t.label}</span>
+              <NumInp value={cfg.tierMults?.[t.id] ?? t.mult} step="0.01" style={{width:72}} onChange={e=>patch({tierMults:{...(cfg.tierMults||DEFAULT_OVERHEAD.tierMults),[t.id]:+e.target.value||0}})}/>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <Lbl ch="Branding"/>
+        <div style={{fontSize:'.82rem',color:S.dark,fontFamily:FB}}>{cfg.brand?.name || session?.workshopName || '—'}</div>
+        <div style={{fontSize:'.75rem',color:S.muted,fontFamily:FM}}>{cfg.brand?.phone || 'No phone set yet'}</div>
+      </div>
+      <Btn ch="Edit full settings →" onClick={onFullSettings} size="sm" outline/>
+    </div>}/>
+  );
+}
+
+// A clickable checklist row — the fix for the old guide's "set overhead in
+// Settings" tip that never said *where* Settings was. Each row navigates
+// straight to the screen that completes it.
+function ChecklistRow({ done, label, onClick }) {
+  return (
+    <button onClick={onClick} style={{display:'flex',alignItems:'center',gap:10,background:'transparent',border:'none',padding:0,cursor:'pointer',textAlign:'left',width:'100%'}}>
+      <div style={{width:18,height:18,borderRadius:'50%',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.68rem',fontWeight:600,
+        background:done?'#8fc78f':'transparent',border:done?'none':`1px solid ${S.accent}`,color:done?S.dark:S.accent}}>{done?'✓':''}</div>
+      <div style={{fontSize:'.85rem',fontFamily:FB,color:S.cream,textDecoration:done?'line-through':'none',opacity:done?.6:1}}>{label}</div>
+      {!done && <span style={{marginLeft:'auto',fontSize:'.72rem',color:S.accent,fontFamily:FM,flexShrink:0}}>→</span>}
+    </button>
+  );
+}
+
+function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSettings, onClients, onLogout, onSaveOverhead }) {
   const [filter, setFilter] = useState('all');
   const filtered = filter==='all' ? quotes : quotes.filter(q=>q.status===filter);
+
+  const hasOverhead = !!overheadCfg;
+  const hasBranding = !!(overheadCfg?.brand?.name || overheadCfg?.brand?.phone || overheadCfg?.brand?.logoUrl);
+  const hasQuote = quotes.length > 0;
+  const showWelcome = !(hasOverhead && hasQuote);
 
   // Group by the shared client (fallback to the denormalized name string for
   // any quote not yet linked) — newest quote first overall, so the group
@@ -787,59 +877,82 @@ function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSet
       <Hdr title={session.workshopName} sub="Job Pricing" crumb="Job Pricing"
         onBack={()=>{window.location.href='/concierge/directory.html#tools';}} backLabel="← Tools"
         right={<div style={{display:'flex',gap:8,alignItems:'center',flexWrap:'wrap'}}>
-          <Btn ch="+ New Quote" onClick={onNew} size="sm" color={S.accent}/>
+          <Btn ch="+ New Quote" onClick={()=>onNew()} size="sm" color={S.accent}/>
           <button onClick={onClients} title="Clients" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:4,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.75rem',padding:'5px 10px',lineHeight:1}}>Clients</button>
-          <button onClick={onSettings} title="Overhead settings" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:4,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.82rem',padding:'5px 10px',lineHeight:1}}>⚙</button>
+          <button onClick={onSettings} title="Overhead & branding settings" style={{background:'transparent',border:'1px solid rgba(240,232,208,.35)',borderRadius:4,color:S.cream,cursor:'pointer',fontFamily:FB,fontSize:'.75rem',padding:'5px 10px',lineHeight:1}}>⚙ Settings</button>
           <button onClick={onLogout} style={{background:'transparent',border:'none',color:'rgba(240,232,208,.8)',fontSize:'.75rem',cursor:'pointer',fontFamily:FB}}>Sign out</button>
         </div>}/>
-      <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',flexShrink:0,background:S.surface}}>
-        {['all',...Object.keys(STATUS_META)].map(f=>(
-          <button key={f} onClick={()=>setFilter(f)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:filter===f?`2px solid ${S.accent}`:'2px solid transparent',color:filter===f?S.accent:S.muted,padding:'9px 16px',fontFamily:FB,fontSize:'.78rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>
-            {f==='all'?'All':STATUS_META[f].label}
-          </button>
-        ))}
-      </div>
-      <div style={{flex:1,overflowY:'auto',padding:16,maxWidth:700,width:'100%',margin:'0 auto'}}>
-        {filtered.length===0&&<div style={{color:S.muted,fontSize:'.85rem',fontFamily:FB,padding:'32px 0',textAlign:'center'}}>No quotes yet. Create your first one.</div>}
-        <div style={{display:'flex',flexDirection:'column',gap:20}}>
-          {groupOrder.map(key=>{
-            const g = groupsMap[key];
-            return (
-              <div key={key}>
-                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 2px 8px',gap:10}}>
-                  <div style={{minWidth:0}}>
-                    <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>{g.name}</div>
-                    <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>{g.quotes.length} quote{g.quotes.length!==1?'s':''}</div>
-                  </div>
-                  <Btn ch="+ Quote" onClick={()=>onNew({id:g.clientId, name:g.name})} size="sm" outline/>
-                </div>
-                <div style={{display:'flex',flexDirection:'column',gap:10}}>
-                  {g.quotes.map(q=>{
-                    const calc = calcQuote(q, overheadCfg);
-                    const sm   = STATUS_META[q.status]||STATUS_META.draft;
-                    return(
-                      <Card key={q.id} ch={<div>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
-                          <div>
-                            <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{clientName(q, clients)}</div>
-                            <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
-                          </div>
-                          <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
-                        </div>
-                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
-                          <div>
-                            <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
-                            <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
-                          </div>
-                          <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
-                        </div>
-                      </div>}/>
-                    );
-                  })}
-                </div>
+
+      <div className="jp-home-wrap" style={{flex:1,overflowY:'auto'}}>
+        {showWelcome && (
+          <div style={{background:S.green,borderRadius:4,padding:'18px 20px',marginBottom:16}}>
+            <div style={{fontFamily:FD,fontSize:'1.3rem',color:S.cream,marginBottom:4}}>Welcome, {session.workshopName}</div>
+            <div style={{fontSize:'.82rem',color:'rgba(240,232,208,.7)',marginBottom:14}}>A couple of steps before you're pricing with confidence.</div>
+            <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:16}}>
+              <ChecklistRow done={hasOverhead} label="Set your overhead (rent, crew rates, margins)" onClick={onSettings}/>
+              <ChecklistRow done={hasBranding} label="Add your business name, phone and logo" onClick={onSettings}/>
+              <ChecklistRow done={hasQuote} label="Create your first quote" onClick={()=>onNew()}/>
+            </div>
+            {!hasQuote && <Btn ch="+ Create your first quote" onClick={()=>onNew()} color={S.accent}/>}
+          </div>
+        )}
+
+        <div className="jp-home-grid">
+          <div>
+            {hasQuote && (
+              <div style={{display:'flex',gap:0,borderBottom:`1.5px solid ${S.border}`,overflowX:'auto',marginBottom:16}}>
+                {['all',...Object.keys(STATUS_META)].map(f=>(
+                  <button key={f} onClick={()=>setFilter(f)} style={{background:'transparent',border:'none',marginBottom:-1,borderBottom:filter===f?`2px solid ${S.accent}`:'2px solid transparent',color:filter===f?S.accent:S.muted,padding:'9px 16px',fontFamily:FB,fontSize:'.78rem',fontWeight:600,cursor:'pointer',whiteSpace:'nowrap'}}>
+                    {f==='all'?'All':STATUS_META[f].label}
+                  </button>
+                ))}
               </div>
-            );
-          })}
+            )}
+            <div style={{display:'flex',flexDirection:'column',gap:20}}>
+              {groupOrder.map(key=>{
+                const g = groupsMap[key];
+                return (
+                  <div key={key}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'4px 2px 8px',gap:10}}>
+                      <div style={{minWidth:0}}>
+                        <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:S.dark}}>{g.name}</div>
+                        <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM}}>{g.quotes.length} quote{g.quotes.length!==1?'s':''}</div>
+                      </div>
+                      <Btn ch="+ Quote" onClick={()=>onNew({id:g.clientId, name:g.name})} size="sm" outline/>
+                    </div>
+                    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+                      {g.quotes.map(q=>{
+                        const calc = calcQuote(q, overheadCfg);
+                        const sm   = STATUS_META[q.status]||STATUS_META.draft;
+                        return(
+                          <Card key={q.id} ch={<div>
+                            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                              <div>
+                                <div style={{fontFamily:FD,fontSize:'1.15rem',fontWeight:600,color:S.dark}}>{clientName(q, clients)}</div>
+                                <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,marginTop:2}}>{q.refId} · {q.jobType==='cabinetry'?'Cabinetry':'Hardwood'} · {q.createdAt?fmtDate(q.createdAt):''}</div>
+                              </div>
+                              <span style={{fontSize:'.68rem',fontWeight:600,color:sm.color,fontFamily:FM,background:`${sm.color}18`,padding:'3px 8px',borderRadius:4}}>{sm.label}</span>
+                            </div>
+                            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:10}}>
+                              <div>
+                                <div style={{fontSize:'.78rem',color:S.muted,fontFamily:FB}}>{TIERS.find(t=>t.id===q.tierId)?.label||'—'} · {(q.workshopDays||0)+(q.siteDays||0)} days</div>
+                                <div style={{fontFamily:FD,fontSize:'1.3rem',fontWeight:600,color:S.accent,marginTop:2}}>{GHS(calc.quotedPrice)}</div>
+                              </div>
+                              <Btn ch="Open →" onClick={()=>onOpen(q.id)} size="sm" outline/>
+                            </div>
+                          </div>}/>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:16}}>
+            <QuickSettingsPanel overheadCfg={overheadCfg} onSave={onSaveOverhead} onFullSettings={onSettings} session={session}/>
+            <TipsBox/>
+          </div>
         </div>
       </div>
     </div>
@@ -1599,9 +1712,10 @@ function App() {
     if (!getToken()) { location.replace(LOGIN_URL); return; }
     loadData().then(res => {
       if (!res.ok) return; // carpFetch already redirected on 401
-      // First tab in (no saved config yet) → land on Settings so they set
-      // their own overhead, crew rates and margins before pricing anything.
-      setScreen(res.hasConfig ? 'dashboard' : 'settings');
+      // Always land on the Dashboard — even first time in. It now explains
+      // what's left to set up (via a welcome checklist) instead of forcing a
+      // settings form on someone before they understand why they're there.
+      setScreen('dashboard');
     });
   }, []);
 
@@ -1685,6 +1799,7 @@ function App() {
       onOpen={openQuote}
       onSettings={()=>setScreen('settings')}
       onClients={()=>setScreen('clients')}
+      onSaveOverhead={saveOverhead}
       onLogout={logout}/>
   );
 
@@ -1726,32 +1841,6 @@ function App() {
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
-</script>
-
-<!-- ════ HOW-TO-USE GUIDE (fills the left dead-space on wide screens; drawer on phones) ════ -->
-<script src="js/tool-guide.js?v=20260823c"></script>
-<script>
-ToolGuide.init({
-  eyebrow: 'Job Pricing',
-  title: 'How to use this tool',
-  // Dock BELOW the sticky header (~98px) + the tab bar (~35px) so the floating
-  // rail sits in the left gutter and never covers the Setup/Materials/… tabs.
-  top: 150,
-  steps: [
-    { t: 'Set your overhead first', d: 'First time in you land on <strong>Overhead Settings</strong>. Enter <strong>your</strong> rent, bills, crew day-rates, billable days and margins — these are private to you and power every quote. Add your business name, phone and logo for the quote letterhead.' },
-    { t: 'Start a new quote', d: 'From the dashboard tap <strong>+ New</strong>. Each job gets its own reference (e.g. ABC-001).' },
-    { t: 'Add materials & labour', d: 'List your materials and the days each crew role works. Your saved overhead and rates load in automatically.' },
-    { t: 'Pick a tier & add-ons', d: 'Choose the build tier and any add-ons (rush, custom design…). The multiplier is applied for you.' },
-    { t: 'Read the Summary', d: 'See your cost, margin %, tier multiplier and net-profit projection. This view is <strong>for you only</strong> — never show a client.' },
-    { t: 'Share the client copy', d: 'Tap <strong>Open client copy</strong> for a clean, printable breakdown — Materials · Labour · Expenses · Service charge — on your own letterhead. Your private economics stay hidden.' },
-    { t: 'Save', d: 'Quotes save to your account, so you can reopen and reuse them anytime.' }
-  ],
-  tips: [
-    'Your figures are **private to your account** — no Neewoody numbers, and no other member sees them.',
-    'Change tier multipliers and add-on % in **Overhead Settings** — set margins that fit your business.',
-    'Use **Print / Save PDF** on the client copy to send a professional quote.'
-  ]
-});
 </script>
 </body>
 </html>
