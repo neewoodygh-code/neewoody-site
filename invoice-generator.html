@@ -754,13 +754,19 @@ function checkHandoff(){
   var h; try{ h=JSON.parse(raw); }catch(e){ return; }
   if(!h || (h.ts && (Date.now()-h.ts) > 15*60*1000)) return;  // stale guard (15 min)
   var total=Math.round(+h.total||0);
+  var qty=Math.max(1, Math.round(+h.qty||1));
+  // Job Pricing prices the job as a whole, so a chosen quantity splits that
+  // total evenly into qty × unit — the grand total stays what was quoted.
+  var unit = qty>1 ? Math.round((total/qty)*100)/100 : total;
   var msg='Import this quote from the Job Pricing tool into a new invoice?\n\n'
-        +'Client: '+(h.client||'—')+'\nTotal: '+cur()+' '+total.toLocaleString('en-US');
+        +'Client: '+(h.client||'—')+'\n'
+        +(qty>1 ? 'Quantity: '+qty+' × '+cur()+' '+unit.toLocaleString('en-US')+'\n' : '')
+        +'Total: '+cur()+' '+total.toLocaleString('en-US');
   if(!confirm(msg)) return;
   INV=blankInvoice();
   INV.client=h.client||'';
   INV.project=h.project||'';
-  INV.items=[{ id:uid(), desc:h.desc||'Bespoke furniture', qty:1, unit:total }];
+  INV.items=[{ id:uid(), desc:h.desc||'Bespoke furniture', qty:qty, unit:unit }];
   persist(); syncForm(); renderItems(); renderDoc(); syncBalance();
   toast('Imported quote'+(h.ref?' '+h.ref:''));
 }

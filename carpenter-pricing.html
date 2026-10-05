@@ -1450,11 +1450,12 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
 // Both tools are same-origin, so we hand off via localStorage and navigate.
 // The invoice tool seeds a new draft (client + one line at the quoted total)
 // on load, then the owner itemises / adds terms / prints. Admin-only.
-function sendToInvoice(q, calc) {
+function sendToInvoice(q, calc, qty) {
   const payload = {
     v: 1, ts: Date.now(),
     client: q.client || '', project: q.item || '', ref: q.refId || '',
     total: Math.round(calc.quotedPrice || 0),
+    qty: Math.max(1, Math.round(+qty || 1)),
     desc: (q.item || 'Bespoke furniture') + (q.refId ? ' (quote ' + q.refId + ')' : ''),
   };
   try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
@@ -1464,6 +1465,7 @@ function sendToInvoice(q, calc) {
 // ── Summary Tab ───────────────────────────────────────────────────────
 function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
   const [showClient, setShowClient] = useState(false);
+  const [sendQty, setSendQty] = useState(1);
   const totalDays   = (q.workshopDays||0)+(q.siteDays||0);
   const activeAddOns= ADDONS.filter(a=>q.addOns?.[a.id]);
   const taxRate     = q.taxRate??15;
@@ -1520,7 +1522,18 @@ function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
       <Card ch={<div>
         <Lbl ch="Invoice & Quote Generator"/>
         <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>Send this quote's total to the <strong>Invoice &amp; Quote Generator</strong> as a new draft — on your own letterhead — then itemise the pieces, add your terms and print.</div>
-        <Btn ch="Send to Invoice Generator →" onClick={()=>sendToInvoice(q,calc)} full color={S.accent}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10,alignItems:'end',marginBottom:10}}>
+          <div>
+            <Lbl ch="Number of items"/>
+            <NumInp value={sendQty} onChange={e=>setSendQty(Math.max(1,Math.round(+e.target.value||1)))}/>
+          </div>
+          <div style={{fontSize:'.72rem',color:S.muted,fontFamily:FM,paddingBottom:8}}>
+            {sendQty>1
+              ? <React.Fragment>{sendQty} × ≈{GHS(calc.quotedPrice/sendQty)} each — total stays {GHS(calc.quotedPrice)}</React.Fragment>
+              : 'One line item at the full quoted price'}
+          </div>
+        </div>
+        <Btn ch="Send to Invoice Generator →" onClick={()=>sendToInvoice(q,calc,sendQty)} full color={S.accent}/>
       </div>}/>
       <Card ch={<div>
         <Lbl ch="Quote status"/>
