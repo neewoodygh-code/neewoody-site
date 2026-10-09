@@ -98,7 +98,27 @@
   .item-row input.num{text-align:right;font-family:var(--mono);font-size:.8rem}
   .item-row .rm{border:0;background:transparent;color:var(--err);font-size:1rem;cursor:pointer;line-height:1;padding:.2rem}
   .item-row .lineTot{font-family:var(--mono);font-size:.78rem;text-align:right;color:var(--muted);padding-right:.2rem}
-  .items-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem}
+  .items-foot{display:flex;justify-content:space-between;align-items:center;margin-top:.7rem;gap:.5rem;flex-wrap:wrap}
+  /* sections (grouped lines) + options (client picks one) */
+  .sec-box{border:1.5px solid var(--border);border-radius:8px;padding:.6rem .6rem .5rem;margin-top:.8rem;background:#fffdf7}
+  .sec-box.is-opt{border-color:rgba(200,146,42,.55)}
+  .sec-hd{display:flex;gap:.4rem;align-items:center;margin-bottom:.35rem}
+  .sin{width:100%;font-size:.85rem;padding:.4rem .5rem;border:1.5px solid var(--border);border-radius:6px;background:#fff;color:var(--ink);min-width:0}
+  .sin:focus{outline:none;border-color:var(--gold)}
+  .sec-hd .sin{flex:1;font-weight:600}
+  .seg.sm button{padding:.3rem .6rem;font-size:.72rem}
+  .sec-box .rm,.opt-hd .rm{border:0;background:transparent;color:var(--err);font-size:1.05rem;cursor:pointer;line-height:1;padding:.2rem}
+  .sec-note{font-size:.7rem;color:var(--muted);margin:0 0 .3rem}
+  .opt-box{border-left:3px solid var(--gold);padding:.35rem 0 .2rem .5rem;margin:.55rem 0}
+  .sec-box .item-row{grid-template-columns:1fr 42px 78px 74px 20px;gap:.3rem}
+  .sec-box .item-row input{padding:.38rem .35rem}
+  .sec-box .item-row .lineTot{font-size:.7rem}
+  .opt-hd{display:flex;gap:.45rem;align-items:center}
+  .opt-hd .opt-l{font-family:var(--mono);font-size:.66rem;font-weight:700;letter-spacing:.06em;color:var(--navy);white-space:nowrap}
+  .sec-foot{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;font-size:.78rem}
+  .sec-foot b,.sec-foot .ot{font-family:var(--mono);font-size:.78rem;color:var(--navy)}
+  .chk{display:inline-flex;align-items:center;gap:.3rem;font-size:.78rem;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .chk input{width:auto;margin:0}
   .items-foot .gt{font-family:var(--serif);font-size:1.05rem;font-weight:700;color:var(--navy)}
 
   .pay-block{border:1px solid var(--border);border-radius:8px;padding:.7rem;margin-bottom:.7rem}
@@ -133,6 +153,16 @@
   #doc table.items td{font-size:11px;padding:6px 8px;border-bottom:1px solid #ddd;color:#222;vertical-align:top}
   #doc table.items td.r{font-family:var(--mono);white-space:nowrap}
   #doc table.items tr:last-child td{border-bottom:1px solid #ddd}
+  #doc table.items tr.sec td{background:#eef0f5;color:#111;font-weight:700;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding-top:7px}
+  #doc table.items tr.sec td .note{font-weight:400;letter-spacing:0;text-transform:none;color:#555;font-style:italic;margin-left:6px}
+  #doc table.items td.ind{padding-left:20px}
+  #doc table.items tr.sub td{font-weight:700;color:#111;border-bottom:1.5px solid #111}
+  #doc table.items tr.opt td{font-weight:700;color:#1f2f58}
+  #doc table.items tr.opt .badge{display:inline-block;margin-left:6px;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border:1px solid #1f2f58;border-radius:3px;padding:0 4px;font-weight:700}
+  #doc table.items tr.off td{color:#aaa;text-decoration:line-through}
+  #doc .total-box.range .val{font-size:15px}
+  #doc .totals.wide{width:290px}
+  #doc .totals .rnote{font-size:9px;color:#666;font-style:italic;text-align:right;margin-top:4px}
   #doc .lower{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:12px}
   #doc .pay{flex:1;min-width:0}
   #doc .pay .pt{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#111;font-weight:700;margin:0 0 4px;border-bottom:1px solid #111;padding-bottom:2px}
@@ -170,6 +200,7 @@
   .ig-foot{text-align:center;font-size:.72rem;color:var(--muted);padding:1.5rem 1rem 0}
   .warnbar{background:rgba(176,64,48,.1);border:1px solid rgba(176,64,48,.35);color:#8a2f22;border-radius:8px;padding:.55rem .8rem;font-size:.82rem;margin-bottom:1rem;display:none}
   .warnbar.on{display:block}
+  #optWarn{margin:.7rem 0 0}
 
   @media print{
     .ig-top,.ig-hero,#inputCol,.ig-actions,.prev-note,.ig-foot,.ig-overlay,.warnbar{display:none!important}
@@ -179,7 +210,7 @@
     .doc-scroll{overflow:visible}
     #previewCol{position:static}
     #doc{width:auto;max-width:none;margin:0;padding:0;border:0;box-shadow:none;font-size:11px}
-    #doc table.items th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #doc table.items th,#doc table.items tr.sec td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     @page{size:A4;margin:14mm}
   }
 </style>
@@ -257,10 +288,16 @@
           <div class="card-t"><span class="dot"></span>Line items</div>
           <div class="items-hd"><span>Description</span><span>Qty</span><span>Unit price</span><span>Total</span><span></span></div>
           <div id="itemRows"></div>
+          <div id="secWrap"></div>
           <div class="items-foot">
-            <button class="btn ghost sm" onclick="addItem()">＋ Add line</button>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+              <button class="btn ghost sm" onclick="addItem()">＋ Add line</button>
+              <button class="btn ghost sm" onclick="addSection()" title="Group lines under a heading, or offer options the client picks between">＋ Add section</button>
+            </div>
             <div class="gt" id="grandTotal">GH₵ 0</div>
           </div>
+          <div class="hint" style="margin-top:.35rem">Sections group lines under a heading (e.g. Kitchen). Switch a section to <b>Options</b> when the client picks one, e.g. laminate, plywood or drywall.</div>
+          <div class="warnbar" id="optWarn"></div>
           <div class="fld" style="margin-top:.9rem">
             <label>Discount <span style="text-transform:none;color:var(--muted)">(optional)</span></label>
             <div style="display:flex;gap:.5rem;align-items:stretch">
@@ -271,6 +308,10 @@
               <input id="f_discount" class="num" type="number" min="0" step="0.01" placeholder="0" oninput="onField('discountValue',this.value)" style="flex:1;text-align:right;font-family:var(--mono)" />
             </div>
             <div class="hint" id="discHint"></div>
+          </div>
+          <div class="fld" style="margin-top:.6rem">
+            <label class="chk" style="text-transform:none;letter-spacing:0;font-size:.85rem"><input type="checkbox" id="f_showTotal" onchange="setShowTotal(this.checked)" /> Show the grand total on the document</label>
+            <div class="hint">Turn off to send prices for comparison only, with no bottom line.</div>
           </div>
           <div class="grid2" style="margin-top:.7rem">
             <div class="fld"><label>Amount paid <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_paid" class="num" type="number" min="0" placeholder="0" oninput="onField('paid',this.value)" /></div>
@@ -438,21 +479,63 @@ function docLabel(t){ t=t||INV.docType; return t==='quote'?'Quote':(t==='receipt
 function blankInvoice(){
   var d=todayISO();
   return { docType:'invoice', number:numberForDate(d), numberEdited:false, currency:'GH₵', date:d, dueDate:'',
-           client:'', project:'', items:[ item(),item(),item() ], discountType:'percent', discountValue:0, paid:0, savedId:null };
+           client:'', project:'', items:[ item(),item(),item() ], sections:[], showTotal:true,
+           discountType:'percent', discountValue:0, paid:0, savedId:null };
 }
 function item(){ return { id:uid(), desc:'', qty:1, unit:0 }; }
 function cur(){ return (INV.currency||'GH₵').trim() || 'GH₵'; }
 function money(n){ n=+n||0; return cur()+' '+n.toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}); }
 function lineTotal(it){ return (+it.qty||0)*(+it.unit||0); }
-// grandTotal() = the line-items subtotal (before discount).
-function grandTotal(){ return (INV.items||[]).reduce(function(s,it){return s+lineTotal(it);},0); }
+/* ── sections & options ──
+   Lines live in INV.items; a line may carry `sec` (section id) and, inside an
+   Options section, `opt` (option id). Lines with no (valid) section are the
+   "loose" lines at the top — so every invoice saved before sections existed
+   still renders and totals exactly as before.
+   INV.sections[] = { id, title, kind:'items'|'options', showSub, options:[{id,name}], chosen }
+   · items section   → always counts; optional printed subtotal.
+   · options section → client picks one. Chosen option counts like normal lines;
+     with no choice yet the grand total becomes a min–max RANGE. */
+function ensureModel(){
+  if(!Array.isArray(INV.items)) INV.items=[];
+  if(!Array.isArray(INV.sections)) INV.sections=[];
+  if(INV.showTotal===undefined) INV.showTotal=true;
+}
+function secById(id){ return (INV.sections||[]).find(function(x){return x.id===id;}); }
+function looseItems(){ return INV.items.filter(function(it){ return !it.sec || !secById(it.sec); }); }
+function secItems(sc){ return INV.items.filter(function(it){ return it.sec===sc.id; }); }
+function optItems(sc,o){ return INV.items.filter(function(it){ return it.sec===sc.id && it.opt===o.id; }); }
+function sumLines(a){ return a.reduce(function(t,it){ return t+lineTotal(it); },0); }
+function optLetter(i){ return String.fromCharCode(65+i); }
+function secRange(sc){
+  if(sc.kind!=='options'){ var t=sumLines(secItems(sc)); return {min:t,max:t}; }
+  var opts=sc.options||[]; if(!opts.length) return {min:0,max:0};
+  var ch=opts.find(function(o){return o.id===sc.chosen;});
+  if(ch){ var c=sumLines(optItems(sc,ch)); return {min:c,max:c}; }
+  var tots=opts.map(function(o){ return sumLines(optItems(sc,o)); });
+  return {min:Math.min.apply(null,tots), max:Math.max.apply(null,tots)};
+}
+function subRange(){
+  ensureModel();
+  var base=sumLines(looseItems()), r={min:base,max:base};
+  INV.sections.forEach(function(sc){ var x=secRange(sc); r.min+=x.min; r.max+=x.max; });
+  return r;
+}
 // Discount is either a % of the subtotal or a flat figure; clamped to [0, subtotal].
-function discountAmt(){
-  var sub=grandTotal(), v=+INV.discountValue||0;
-  var amt = (INV.discountType==='percent') ? sub*(v/100) : v;
+// With a range it applies to both ends.
+function discFor(sub){
+  var v=+INV.discountValue||0;
+  var amt=(INV.discountType==='percent') ? sub*(v/100) : v;
   return Math.max(0, Math.min(amt, sub));
 }
-function finalTotal(){ return grandTotal() - discountAmt(); }
+// grandTotal() = the subtotal before discount (the LOW end when it's a range).
+function grandTotal(){ return subRange().min; }
+function discountAmt(){ return discFor(grandTotal()); }
+function finalRange(){ var r=subRange(); return {min:r.min-discFor(r.min), max:r.max-discFor(r.max)}; }
+function finalTotal(){ return finalRange().min; }
+function isRange(r){ return Math.abs(r.max-r.min) >= 0.005; }
+function moneyR(r){ return isRange(r) ? money(r.min)+' – '+money(r.max) : money(r.min); }
+// Options sections still waiting on the client's choice.
+function unresolved(){ return (INV.sections||[]).filter(function(sc){ return sc.kind==='options' && (sc.options||[]).length && !sc.chosen; }); }
 function fmtDate(iso){ if(!iso) return ''; var p=iso.split('-'); if(p.length!==3) return iso;
   var M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return (+p[2])+' '+M[(+p[1])-1]+' '+p[0]; }
@@ -478,42 +561,170 @@ function onField(k,v){
 function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); }
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
-  renderDoc();
+  renderDoc(); updateOptWarn();
 }
+function setShowTotal(on){ INV.showTotal=!!on; persist(); renderDoc(); }
 function setDiscType(t){ INV.discountType=t; persist();
   document.querySelectorAll('#discSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.d===t); });
   renderDoc(); syncBalance();
 }
 function syncBalance(){
-  document.getElementById('f_balance').value = money(finalTotal()-(+INV.paid||0));
+  var fr=finalRange(), pd=+INV.paid||0;
+  document.getElementById('f_balance').value = moneyR({min:fr.min-pd, max:fr.max-pd});
   var dh=document.getElementById('discHint');
   if(dh){ var amt=discountAmt(); dh.textContent = amt>0 ? ('You save '+money(amt)+(INV.discountType==='percent'?' ('+(+INV.discountValue||0)+'% of '+money(grandTotal())+')':'')) : ''; }
 }
 
-/* ── items ── */
-function addItem(){ INV.items.push(item()); persist(); renderItems(); renderDoc(); }
-function rmItem(id){ INV.items=INV.items.filter(function(x){return x.id!==id;}); if(!INV.items.length) INV.items.push(item()); persist(); renderItems(); renderDoc(); }
+/* ── items, sections & options (editor) ── */
+function commit(){ persist(); renderItems(); renderDoc(); syncBalance(); }
+function addItem(sec,opt){ var it=item(); if(sec){ it.sec=sec; if(opt) it.opt=opt; } INV.items.push(it); commit(); }
+function rmItem(id){
+  INV.items=INV.items.filter(function(x){return x.id!==id;});
+  if(!INV.items.length && !INV.sections.length) INV.items.push(item());
+  commit();
+}
 function itemField(id,k,v){ var it=INV.items.find(function(x){return x.id===id;}); if(!it) return;
   it[k]=(k==='desc')?v:(+v||0); persist();
-  // update just this row's line total + grand total without a full re-render (keeps focus)
+  // update the figures in place without a full re-render (keeps focus)
   var row=document.querySelector('.item-row[data-id="'+id+'"]');
   if(row){ var lt=row.querySelector('.lineTot'); if(lt) lt.textContent=money(lineTotal(it)); }
-  document.getElementById('grandTotal').textContent=money(grandTotal());
-  syncBalance(); renderDoc();
+  refreshTotals(); syncBalance(); renderDoc();
+}
+function nonEmpty(it){ return String(it.desc||'').trim() || lineTotal(it)>0; }
+function addSection(){
+  var sc={ id:uid(), title:'', kind:'items', showSub:true, options:[], chosen:null };
+  INV.sections.push(sc);
+  INV.items.push(Object.assign(item(),{sec:sc.id}));
+  commit();
+  var t=document.querySelector('.sec-box[data-sec="'+sc.id+'"] .sec-hd .sin'); if(t) t.focus();
+}
+function rmSection(id){
+  var sc=secById(id); if(!sc) return;
+  var n=secItems(sc).filter(nonEmpty).length;
+  if(n && !confirm('Remove this section and its '+n+' line'+(n!==1?'s':'')+'?')) return;
+  INV.sections=INV.sections.filter(function(x){return x.id!==id;});
+  INV.items=INV.items.filter(function(it){return it.sec!==id;});
+  if(!INV.items.length && !INV.sections.length) INV.items.push(item());
+  commit();
+}
+function secField(id,k,v){ var sc=secById(id); if(!sc) return; sc[k]=v; persist(); renderDoc(); }
+function setSecKind(id,kind){
+  var sc=secById(id); if(!sc || sc.kind===kind) return;
+  if(kind==='options'){
+    // existing lines become Option A; add an empty Option B to fill in
+    var a={id:uid(),name:''}, b={id:uid(),name:''};
+    sc.options=[a,b]; sc.chosen=null;
+    var mine=secItems(sc);
+    mine.forEach(function(it){ it.opt=a.id; });
+    if(!mine.length) INV.items.push(Object.assign(item(),{sec:sc.id,opt:a.id}));
+    INV.items.push(Object.assign(item(),{sec:sc.id,opt:b.id}));
+  } else {
+    // back to plain items: keep only the chosen (or first) option's lines
+    var keep=sc.chosen || (sc.options[0]&&sc.options[0].id);
+    var drop=secItems(sc).filter(function(it){ return it.opt!==keep; }).filter(nonEmpty).length;
+    if(drop && !confirm('Switching to Items keeps only '+(sc.chosen?'the chosen option':'Option A')+'. Remove the other options\' '+drop+' line'+(drop!==1?'s':'')+'?')) { renderItems(); return; }
+    INV.items=INV.items.filter(function(it){ return it.sec!==sc.id || it.opt===keep; });
+    secItems(sc).forEach(function(it){ delete it.opt; });
+    sc.options=[]; sc.chosen=null;
+  }
+  sc.kind=kind; commit();
+}
+function addOption(sid){
+  var sc=secById(sid); if(!sc) return;
+  var o={id:uid(),name:''}; sc.options.push(o);
+  INV.items.push(Object.assign(item(),{sec:sid,opt:o.id}));
+  commit();
+}
+function rmOption(sid,oid){
+  var sc=secById(sid); if(!sc) return;
+  var o=sc.options.find(function(x){return x.id===oid;});
+  var n=optItems(sc,o).filter(nonEmpty).length;
+  if(n && !confirm('Remove '+(o.name?'"'+o.name+'"':'this option')+'?')) return;
+  sc.options=sc.options.filter(function(x){return x.id!==oid;});
+  INV.items=INV.items.filter(function(it){ return !(it.sec===sid && it.opt===oid); });
+  if(sc.chosen===oid) sc.chosen=null;
+  commit();
+}
+function optName(sid,oid,v){ var sc=secById(sid); var o=sc&&sc.options.find(function(x){return x.id===oid;}); if(!o) return; o.name=v; persist(); renderDoc(); }
+function chooseOpt(sid,oid){ var sc=secById(sid); if(!sc) return; sc.chosen=oid||null; commit(); }
+
+function rowHtml(it,ph){
+  return '<div class="item-row" data-id="'+it.id+'">'
+    +'<input value="'+esc(it.desc)+'" placeholder="'+(ph||'Description')+'" oninput="itemField(\''+it.id+'\',\'desc\',this.value)" />'
+    +'<input class="num" type="number" min="0" step="1" value="'+(it.qty!=null?it.qty:'')+'" oninput="itemField(\''+it.id+'\',\'qty\',this.value)" />'
+    +'<input class="num" type="number" min="0" step="0.01" value="'+(it.unit!=null?it.unit:'')+'" oninput="itemField(\''+it.id+'\',\'unit\',this.value)" />'
+    +'<div class="lineTot">'+money(lineTotal(it))+'</div>'
+    +'<button class="rm" title="Remove" onclick="rmItem(\''+it.id+'\')">×</button>'
+    +'</div>';
+}
+function secTotLabel(sc){
+  if(sc.kind!=='options') return 'Subtotal '+money(sumLines(secItems(sc)));
+  if(!(sc.options||[]).length) return '';
+  return (sc.chosen ? 'Chosen: ' : 'Range: ')+moneyR(secRange(sc));
+}
+function refreshTotals(){
+  document.querySelectorAll('[data-sectot]').forEach(function(el){ var sc=secById(el.getAttribute('data-sectot')); if(sc) el.textContent=secTotLabel(sc); });
+  document.querySelectorAll('[data-opttot]').forEach(function(el){
+    var p=el.getAttribute('data-opttot').split('|'), sc=secById(p[0]);
+    var o=sc && sc.options.find(function(x){return x.id===p[1];});
+    if(o) el.textContent=money(sumLines(optItems(sc,o)));
+  });
+  document.getElementById('grandTotal').textContent=moneyR(subRange());
+}
+function updateOptWarn(){
+  var w=document.getElementById('optWarn'); if(!w) return;
+  var u=unresolved(), bad=u.length>0 && INV.docType!=='quote';
+  w.classList.toggle('on', bad);
+  w.textContent = bad
+    ? 'This '+docLabel().toLowerCase()+' has '+(u.length===1?'an options section':u.length+' options sections')+' with no choice yet ('
+      + u.map(function(sc){return sc.title||'untitled';}).join(', ')+'). Mark the option the client chose before printing — you can only bill for one.'
+    : '';
 }
 function renderItems(){
+  ensureModel();
   var h='';
-  (INV.items||[]).forEach(function(it){
-    h+='<div class="item-row" data-id="'+it.id+'">'
-      +'<input value="'+esc(it.desc)+'" placeholder="Description" oninput="itemField(\''+it.id+'\',\'desc\',this.value)" />'
-      +'<input class="num" type="number" min="0" step="1" value="'+(it.qty!=null?it.qty:'')+'" oninput="itemField(\''+it.id+'\',\'qty\',this.value)" />'
-      +'<input class="num" type="number" min="0" step="0.01" value="'+(it.unit!=null?it.unit:'')+'" oninput="itemField(\''+it.id+'\',\'unit\',this.value)" />'
-      +'<div class="lineTot">'+money(lineTotal(it))+'</div>'
-      +'<button class="rm" title="Remove" onclick="rmItem(\''+it.id+'\')">×</button>'
-      +'</div>';
-  });
+  looseItems().forEach(function(it){ h+=rowHtml(it); });
   document.getElementById('itemRows').innerHTML=h;
-  document.getElementById('grandTotal').textContent=money(grandTotal());
+
+  var sh='';
+  INV.sections.forEach(function(sc){
+    var isOpt=sc.kind==='options', q='\''+sc.id+'\'';
+    sh+='<div class="sec-box'+(isOpt?' is-opt':'')+'" data-sec="'+sc.id+'">'
+      +'<div class="sec-hd">'
+      +  '<input class="sin" value="'+esc(sc.title)+'" placeholder="'+(isOpt?'What it\'s for, e.g. Wall panelling':'Section, e.g. Kitchen')+'" oninput="secField('+q+',\'title\',this.value)" />'
+      +  '<div class="seg sm"><button type="button" class="'+(isOpt?'':'on')+'" onclick="setSecKind('+q+',\'items\')">Items</button>'
+      +  '<button type="button" class="'+(isOpt?'on':'')+'" onclick="setSecKind('+q+',\'options\')">Options</button></div>'
+      +  '<button class="rm" title="Remove section" onclick="rmSection('+q+')">×</button>'
+      +'</div>';
+    if(!isOpt){
+      secItems(sc).forEach(function(it){ sh+=rowHtml(it); });
+      sh+='<div class="sec-foot"><button class="btn ghost sm" onclick="addItem('+q+')">＋ Line</button>'
+        +'<label class="chk"><input type="checkbox" '+(sc.showSub!==false?'checked':'')+' onchange="secField('+q+',\'showSub\',this.checked)" /> Show subtotal</label>'
+        +'<b data-sectot="'+sc.id+'">'+secTotLabel(sc)+'</b></div>';
+    } else {
+      sh+='<p class="sec-note">The client picks one. Mark the one they choose and it counts toward the total; until then the total shows a range.</p>';
+      sc.options.forEach(function(o,i){
+        var oq=q+',\''+o.id+'\'';
+        sh+='<div class="opt-box"><div class="opt-hd">'
+          +'<span class="opt-l">OPTION '+optLetter(i)+'</span>'
+          +'<input class="sin" value="'+esc(o.name)+'" placeholder="e.g. Laminate" oninput="optName('+oq+',this.value)" />'
+          +'<label class="chk" title="The client chose this option"><input type="radio" name="ch_'+sc.id+'" '+(sc.chosen===o.id?'checked':'')+' onchange="chooseOpt('+oq+')" /> Chosen</label>'
+          +'<button class="rm" title="Remove option" onclick="rmOption('+oq+')">×</button>'
+          +'</div>';
+        optItems(sc,o).forEach(function(it){ sh+=rowHtml(it,'Details (optional)'); });
+        sh+='<div class="sec-foot"><button class="btn ghost sm" onclick="addItem('+oq+')">＋ Line</button>'
+          +'<span class="ot" data-opttot="'+sc.id+'|'+o.id+'">'+money(sumLines(optItems(sc,o)))+'</span></div></div>';
+      });
+      sh+='<div class="sec-foot"><button class="btn ghost sm" onclick="addOption('+q+')">＋ Option</button>'
+        +'<label class="chk"><input type="radio" name="ch_'+sc.id+'" '+(!sc.chosen?'checked':'')+' onchange="chooseOpt('+q+',null)" /> No choice yet</label>'
+        +'<b data-sectot="'+sc.id+'">'+secTotLabel(sc)+'</b></div>';
+    }
+    sh+='</div>';
+  });
+  document.getElementById('secWrap').innerHTML=sh;
+  document.getElementById('grandTotal').textContent=moneyR(subRange());
+  var st=document.getElementById('f_showTotal'); if(st) st.checked = INV.showTotal!==false;
+  updateOptWarn();
 }
 
 /* ── document (preview + print) ── */
@@ -522,7 +733,11 @@ function payOptionHtml(title,body){
   return '<div class="po"><div class="poh">'+esc(title)+'</div><div class="pob">'+esc(body||'')+'</div></div>';
 }
 function renderDoc(){
-  var s=SETTINGS, sub=grandTotal(), disc=discountAmt(), total=sub-disc, paid=+INV.paid||0, bal=total-paid;
+  ensureModel();
+  var s=SETTINGS, sr=subRange(), fr=finalRange(), paid=+INV.paid||0;
+  var ranged=isRange(fr), showTot=INV.showTotal!==false;
+  var dr={min:sr.min-fr.min, max:sr.max-fr.max}, hasDisc=dr.max>0||dr.min>0;
+  var bal={min:fr.min-paid, max:fr.max-paid};
   var typeLabel = docLabel(INV.docType);
   var isReceipt = INV.docType==='receipt';   // receipt: no payment options (already paid)
   var logoSrc = MEMBER_LOGO_URL || 'images/logo.png';
@@ -536,18 +751,40 @@ function renderDoc(){
   if(s.instagram) contact+='<div><b>Instagram:</b> '+esc(s.instagram)+'</div>';
   if(s.whatsapp) contact+='<div><b>WhatsApp:</b> '+esc(s.whatsapp)+'</div>';
 
-  var rows='';
-  var live=(INV.items||[]).filter(function(it){ return String(it.desc).trim() || lineTotal(it)>0; });
-  if(!live.length){
-    rows='<tr><td colspan="4" class="empty-hint">Add line items to see them here…</td></tr>';
-  } else {
-    live.forEach(function(it){
-      rows+='<tr><td>'+esc(it.desc||'—')+'</td>'
-        +'<td class="r">'+(+it.qty||0)+'</td>'
-        +'<td class="r">'+money(it.unit)+'</td>'
-        +'<td class="r">'+money(lineTotal(it))+'</td></tr>';
-    });
+  var rows='', any=false, isQuote=INV.docType==='quote';
+  function live(a){ return a.filter(nonEmpty); }
+  function lineRow(it,ind,cls){
+    return '<tr'+(cls?' class="'+cls+'"':'')+'><td'+(ind?' class="ind"':'')+'>'+esc(it.desc||'—')+'</td>'
+      +'<td class="r">'+(+it.qty||0)+'</td>'
+      +'<td class="r">'+money(it.unit)+'</td>'
+      +'<td class="r">'+money(lineTotal(it))+'</td></tr>';
   }
+  live(looseItems()).forEach(function(it){ rows+=lineRow(it); any=true; });
+  INV.sections.forEach(function(sc){
+    var title=String(sc.title||'').trim();
+    if(sc.kind!=='options'){
+      var L=live(secItems(sc)); if(!L.length) return;
+      any=true;
+      if(title) rows+='<tr class="sec"><td colspan="4">'+esc(title)+'</td></tr>';
+      L.forEach(function(it){ rows+=lineRow(it, !!title); });
+      if(sc.showSub!==false) rows+='<tr class="sub"><td colspan="3">Subtotal'+(title?' · '+esc(title):'')+'</td><td class="r">'+money(sumLines(L))+'</td></tr>';
+      return;
+    }
+    var opts=sc.options||[]; if(!opts.length) return;
+    any=true;
+    var chosen=opts.find(function(o){return o.id===sc.chosen;});
+    rows+='<tr class="sec"><td colspan="4">'+esc(title||'Options')+(chosen?'':'<span class="note">choose one</span>')+'</td></tr>';
+    opts.forEach(function(o,i){
+      var isCh=!!chosen && chosen.id===o.id, isOff=!!chosen && !isCh;
+      if(isOff && !isQuote) return;              // invoices & receipts list only what's being billed
+      var L=live(optItems(sc,o));
+      var label = (chosen && !isQuote) ? esc(o.name||('Option '+optLetter(i))) : 'Option '+optLetter(i)+(o.name?': '+esc(o.name):'');
+      rows+='<tr class="opt'+(isOff?' off':'')+'"><td colspan="3">'+label+(isCh&&isQuote?'<span class="badge">Chosen</span>':'')+'</td><td class="r">'+money(sumLines(L))+'</td></tr>';
+      // a one-line option with no description is fully described by its header row
+      if(!(L.length===1 && !String(L[0].desc||'').trim())) L.forEach(function(it){ rows+=lineRow(it, true, isOff?'off':''); });
+    });
+  });
+  if(!any) rows='<tr><td colspan="4" class="empty-hint">Add line items to see them here…</td></tr>';
 
   var pays = isReceipt ? '' : (payOptionHtml(s.payTitle1,s.payBody1)+payOptionHtml(s.payTitle2,s.payBody2)+payOptionHtml(s.payTitle3,s.payBody3));
   var termsLines=(s.terms||'').split('\n').filter(function(l){return l.trim();}).join('\n');
@@ -567,19 +804,20 @@ function renderDoc(){
     +'<hr/>'
     +'<div class="title-row">'
     +  '<div><div class="doc-type">'+typeLabel+'</div><div class="doc-date">Date: '+(fmtDate(INV.date)||'—')+'</div></div>'
-    +  '<div class="total-box"><div class="lbl">TOTAL</div><div class="val">'+money(total)+'</div></div>'
+    +  (showTot ? '<div class="total-box'+(ranged?' range':'')+'"><div class="lbl">'+(ranged?'TOTAL (BY OPTION)':'TOTAL')+'</div><div class="val">'+moneyR(fr)+'</div></div>' : '')
     +'</div>'
     +'<div class="meta">'+metaRows+'</div>'
     +'<table class="items"><thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Total price</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table>'
     +'<div class="lower">'
     +  '<div class="pay">'+(pays?'<div class="pt">Payment options</div>'+pays:'')+'</div>'
-    +  '<div class="totals">'
-    +     (disc>0 ? totalRow('Subtotal', money(sub)) + totalRow('Discount'+(INV.discountType==='percent'?' ('+(+INV.discountValue||0)+'%)':''), '− '+money(disc)) : '')
-    +     totalRow('Total', money(total))
+    +  (showTot ? '<div class="totals'+(ranged?' wide':'')+'">'
+    +     (hasDisc ? totalRow('Subtotal', moneyR(sr)) + totalRow('Discount'+(INV.discountType==='percent'?' ('+(+INV.discountValue||0)+'%)':''), '− '+moneyR(dr)) : '')
+    +     totalRow('Total', moneyR(fr))
     +     totalRow('Paid', paid?money(paid):'—')
-    +     '<div class="tr bal"><span class="tl">Balance</span><span class="tv">'+money(bal)+'</span></div>'
-    +  '</div>'
+    +     '<div class="tr bal"><span class="tl">Balance</span><span class="tv">'+moneyR(bal)+'</span></div>'
+    +     (ranged ? '<div class="rnote">Depending on the options chosen</div>' : '')
+    +  '</div>' : '')
     +'</div>'
     +(termsLines?'<div class="terms"><h4>Terms &amp; Conditions</h4><div class="tt">'+esc(termsLines)+'</div></div>':'')
     +'<div class="sign">'
@@ -593,7 +831,15 @@ function metaCell(k,v){ return '<div class="m"><div class="k">'+esc(k)+'</div><d
 function totalRow(l,v){ return '<div class="tr"><span class="tl">'+esc(l)+'</span><span class="tv">'+esc(v)+'</span></div>'; }
 
 /* ── print ── */
-function doPrint(){ renderDoc(); window.print(); }
+function doPrint(){
+  var u=unresolved();
+  if(u.length && INV.docType!=='quote'){
+    alert('Pick the option the client chose in '+u.map(function(sc){return '"'+(sc.title||'untitled')+'"';}).join(', ')
+      +' before printing this '+docLabel().toLowerCase()+'.\n\nOptions with no choice yet only make sense on a Quote.');
+    return;
+  }
+  renderDoc(); window.print();
+}
 
 /* ── saved invoices (library) ── */
 function getList(){ return load(K_LIST, []) || []; }
@@ -603,7 +849,7 @@ function saveInvoice(){
   var snap=JSON.parse(JSON.stringify(INV));
   if(!snap.savedId){ snap.savedId=uid(); INV.savedId=snap.savedId; persist(); }
   var entry={ savedId:snap.savedId, number:snap.number, docType:snap.docType, client:snap.client,
-              project:snap.project, date:snap.date, total:finalTotal(), savedAt:Date.now(), data:snap };
+              project:snap.project, date:snap.date, total:finalRange().min, totalMax:finalRange().max, savedAt:Date.now(), data:snap };
   var i=list.findIndex(function(x){return x.savedId===snap.savedId;});
   if(i>=0) list[i]=entry; else list.unshift(entry);
   setList(list);
@@ -622,7 +868,7 @@ function renderLib(){
       +  '<div class="li-t">'+esc(e.client||'(no client)')+(e.project?' · '+esc(e.project):'')+'</div>'
       +  '<div class="li-m">'+t+' '+esc(e.number||'')+' · '+fmtDate(e.date)+'</div>'
       +'</div>'
-      +'<div class="li-tot">'+money(e.total||0)+'</div>'
+      +'<div class="li-tot">'+moneyR({min:+e.total||0, max:(e.totalMax!=null?+e.totalMax:+e.total||0)})+'</div>'
       +'<button class="btn ghost sm" onclick="dupInvoice(\''+e.savedId+'\')">Copy</button>'
       +'<button class="rm" style="font-size:1.2rem" title="Delete" onclick="delInvoice(\''+e.savedId+'\')">×</button>'
       +'</div>';
@@ -759,6 +1005,27 @@ function checkHandoff(){
   if (Array.isArray(h.items) && h.items.length) {
     var n = h.items.length;
     var grand = h.items.reduce(function(s,it){ return s + (+it.qty||1)*(+it.unit||0); }, 0);
+    if (h.asOptions) {
+      // Sent as OPTIONS the client picks between → a Quote with one options section.
+      var tots=h.items.map(function(it){ return (+it.qty||1)*(+it.unit||0); });
+      var omsg='Import '+n+' quotes as OPTIONS the client chooses between?\n\n'
+            +'Client: '+(h.client||'—')+'\nPrices: '+cur()+' '+Math.round(Math.min.apply(null,tots)).toLocaleString('en-US')
+            +' – '+Math.round(Math.max.apply(null,tots)).toLocaleString('en-US');
+      if(!confirm(omsg)) return;
+      INV=blankInvoice();
+      INV.docType='quote';
+      INV.client=h.client||'';
+      INV.project=h.project||'';
+      var sc={ id:uid(), title:h.project||'', kind:'options', showSub:true, options:[], chosen:null };
+      INV.sections=[sc]; INV.items=[];
+      h.items.forEach(function(it){
+        var o={ id:uid(), name:it.desc||'' }; sc.options.push(o);
+        INV.items.push({ id:uid(), desc:'', qty:Math.max(1,Math.round(+it.qty||1)), unit:+it.unit||0, sec:sc.id, opt:o.id });
+      });
+      persist(); syncForm(); renderItems(); renderDoc(); syncBalance();
+      toast('Imported '+n+' options');
+      return;
+    }
     var mmsg = 'Import '+n+' quote'+(n!==1?'s':'')+' from the Job Pricing tool into a new invoice?\n\n'
           +'Client: '+(h.client||'—')+'\nCombined total: '+cur()+' '+Math.round(grand).toLocaleString('en-US');
     if(!confirm(mmsg)) return;

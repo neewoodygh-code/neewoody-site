@@ -1064,10 +1064,11 @@ function Dashboard({ session, quotes, clients, overheadCfg, onNew, onOpen, onSet
                       </div>
                       <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
                         {selInGroup.length>0 && <Btn ch={`Send ${selInGroup.length} to Invoice →`} onClick={()=>sendMultipleToInvoice(selInGroup,g.name,overheadCfg)} size="sm" color={S.accent}/>}
+                        {selInGroup.length>1 && <Btn ch="Send as options →" onClick={()=>sendMultipleToInvoice(selInGroup,g.name,overheadCfg,true)} size="sm" outline/>}
                         <Btn ch="+ Quote" onClick={()=>onNew({id:g.clientId, name:g.name})} size="sm" outline/>
                       </div>
                     </div>
-                    {g.quotes.length>1 && <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,padding:'0 2px 8px'}}>Tick quotes to bundle them onto one invoice, or to move, duplicate or delete them together.</div>}
+                    {g.quotes.length>1 && <div style={{fontSize:'.68rem',color:S.muted,fontFamily:FM,padding:'0 2px 8px'}}>Tick quotes to bundle them onto one invoice (or send them as options the client picks between), or to move, duplicate or delete them together.</div>}
                     <div style={{display:'flex',flexDirection:'column',gap:10}}>
                       {g.quotes.map(q=>{
                         const calc = calcQuote(q, overheadCfg);
@@ -1636,13 +1637,16 @@ function sendToInvoice(q, calc, qty) {
 // Bundle several quotes for the same client onto ONE invoice — each selected
 // quote becomes its own line item (qty 1 at that quote's own total), rather
 // than forcing a separate invoice per quote.
-function sendMultipleToInvoice(quotes, clientName, overheadCfg) {
+// asOptions → the invoice generator builds one "client picks one" options
+// section on a Quote (e.g. laminate vs plywood vs drywall panelling) instead
+// of adding the quotes together as separate lines.
+function sendMultipleToInvoice(quotes, clientName, overheadCfg, asOptions) {
   const items = quotes.map(q => ({
-    desc: (q.item || 'Bespoke furniture') + (q.refId ? ' (' + q.refId + ')' : ''),
+    desc: asOptions ? (q.item || q.refId || 'Option') : (q.item || 'Bespoke furniture') + (q.refId ? ' (' + q.refId + ')' : ''),
     qty: 1,
     unit: Math.round(calcQuote(q, overheadCfg).quotedPrice || 0),
   }));
-  const payload = { v: 1, ts: Date.now(), client: clientName || '', project: '', items };
+  const payload = { v: 1, ts: Date.now(), client: clientName || '', project: '', items, asOptions: !!asOptions };
   try { localStorage.setItem('nwd-invoice-handoff', JSON.stringify(payload)); } catch (e) {}
   window.location.href = '/invoice-generator.html';
 }
