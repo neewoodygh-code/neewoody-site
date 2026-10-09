@@ -393,15 +393,35 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .tools-grid{ display:grid; grid-template-columns:1fr; gap:.7rem; }
 @media(min-width:640px){ .tools-grid{ grid-template-columns:1fr 1fr; } }
 @media(min-width:960px){ .tools-grid{ grid-template-columns:1fr 1fr 1fr; } }
-.tool-card{ background:var(--navy); color:var(--cream); border-radius:5px; padding:.95rem 1rem; display:flex; flex-direction:column; gap:.35rem; }
-.tool-card h3{ font-family:var(--display); font-weight:500; font-size:1.1rem; }
-.tool-card p{ font-size:.83rem; color:rgba(240,232,208,.72); line-height:1.5; flex:1; }
-.tool-card .go{ align-self:flex-start; font-family:var(--ui); font-size:.7rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase; background:var(--gold); color:#241500; border-radius:3px; padding:.5rem .9rem; margin-top:.5rem; transition:filter .2s; }
-.tool-card .go:hover{ filter:brightness(1.08); }
-.tool-card.soon{ background:#fff; color:var(--ink); border:1px dashed rgba(31,47,88,.25); }
-.tool-card.soon h3{ color:var(--ink); }
-.tool-card.soon p{ color:var(--muted); }
-.soon-tag{ align-self:flex-start; font-family:var(--ui); font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; background:var(--cream-dark); color:var(--muted); border-radius:20px; padding:.25rem .6rem; }
+/* Tool cards borrow the left rail's motif: icon-in-a-rounded-square + bold
+   label + plain sub-line. Live tools are whole-card links; roadmap tools are
+   quieter rows in their own group below. */
+.tools-strip h2.next{ color:var(--muted); margin-top:1.6rem; }
+.tools-grid.live,.tools-grid.later{ grid-template-columns:1fr; }
+@media(min-width:640px){ .tools-grid.live,.tools-grid.later{ grid-template-columns:1fr 1fr; } }
+.tool-card{ display:flex; flex-direction:column; gap:.6rem; background:#fff; color:var(--ink);
+  border:1px solid rgba(31,47,88,.1); border-radius:11px; padding:1rem 1.05rem; text-decoration:none;
+  transition:box-shadow .2s, border-color .2s, transform .2s; }
+a.tool-card:hover{ border-color:rgba(31,47,88,.2); box-shadow:0 6px 18px rgba(31,47,88,.1); transform:translateY(-1px); }
+.tc-head{ display:flex; align-items:center; gap:.75rem; }
+.tool-card .ic{ width:40px; height:40px; flex:none; display:flex; align-items:center; justify-content:center;
+  background:var(--navy); color:var(--cream); border-radius:9px; transition:background .2s, color .2s; }
+.tool-card .ic svg{ width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+a.tool-card:hover .ic{ background:var(--gold); color:var(--navy); }
+.tool-card .lb{ display:flex; flex-direction:column; min-width:0; }
+.tool-card .lb b{ font-family:var(--ui); font-size:.95rem; font-weight:600; color:var(--navy); line-height:1.25; }
+.tool-card .lb i{ font-family:var(--body); font-size:.72rem; font-style:normal; color:var(--muted); }
+.tool-card p{ font-size:.83rem; color:var(--muted); line-height:1.55; flex:1; margin:0; }
+.tool-card p b{ color:var(--ink); font-weight:600; }
+.tool-card .go{ align-self:flex-start; font-family:var(--ui); font-size:.7rem; font-weight:600; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--gold); }
+a.tool-card:hover .go{ color:var(--navy); }
+.tool-card.soon{ background:transparent; border:1px dashed rgba(31,47,88,.2); padding:.75rem .9rem; gap:.4rem; }
+.tool-card.soon .ic{ width:34px; height:34px; border-radius:8px; background:var(--cream-dark); color:var(--muted); }
+.tool-card.soon .ic svg{ width:17px; height:17px; }
+.tool-card.soon .lb b{ font-size:.86rem; color:var(--ink); }
+.tool-card.soon p{ font-size:.78rem; }
+.soon-tag{ font-family:var(--ui); font-size:.58rem; letter-spacing:.12em; text-transform:uppercase; color:var(--gold); }
 .benefits{ font-size:.84rem; color:var(--muted); margin-top:.9rem; line-height:1.7; }
 .benefits b{ color:var(--ink); font-weight:600; }
 
@@ -599,46 +619,54 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <div id="tab-tools" class="tabpanel" hidden>
   <div class="tools-strip">
     <h2>Your member tools</h2>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <h3>Wardrobe Cutlist Generator</h3>
-        <p>Parametric cut lists for any wardrobe. As a member, you can <b>save and reload named cut lists</b> — set up a job once, come back to it any time.</p>
-        <a class="go" href="../cutlist.html">Open the generator</a>
-      </div>
-      <div class="tool-card">
-        <h3>Cut Sheet Generator</h3>
-        <p>Type in any parts and get a printable cut sheet — boxes with dimensions and edge-band marks, plus how many boards you need. Save it as a <b>named project</b>, and it prints with <b>your own logo &amp; number</b> to hand to the cutting shop.</p>
-        <a class="go" href="../cut-sheet.html">Open the generator</a>
+    <div class="tools-grid live">
+      <a class="tool-card" href="../cutlist.html">
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M10 10.5v3M14 10.5v3M4 18h16"/></svg></span>
+          <span class="lb"><b>Wardrobe Cutlist</b><i>Parametric · save named lists</i></span></div>
+        <p>Cut lists for any wardrobe from its sizes. <b>Save and reload named cut lists</b> — set up a job once, come back to it any time.</p>
+        <span class="go">Open the generator →</span>
+      </a>
+      <a class="tool-card" href="../cut-sheet.html">
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 10h18M10 10v11M15 3v7"/></svg></span>
+          <span class="lb"><b>Cut Sheet</b><i>Any parts · board count · edge banding</i></span></div>
+        <p>Type in parts, get a printable sheet for the cutting shop — sizes, edge-band marks and how many boards you need, with <b>your own logo &amp; number</b>.</p>
+        <span class="go">Open the generator →</span>
+      </a>
+      <a class="tool-card" href="../carpenter-pricing.html">
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8 6.5h8v3H8z"/><path d="M8.5 13h.01M12 13h.01M15.5 13h.01M8.5 17h.01M12 17h.01M15.5 17h.01"/></svg></span>
+          <span class="lb"><b>Job Pricing</b><i>Overhead · crew rates · margins</i></span></div>
+        <p>Know what a job really costs <b>you</b>, then quote with confidence when a client says "it's too much." Your figures stay private to your account.</p>
+        <span class="go">Open the pricing tool →</span>
+      </a>
+      <a class="tool-card" id="adminInvoiceCard" href="../invoice-generator.html" style="display:none">
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12v19l-3-2-3 2-3-2-3 2z"/><path d="M9 7h6M9 11h6M9 15h4"/></svg></span>
+          <span class="lb"><b>Invoice &amp; Quote</b><i>Invoices · quotes · receipts</i></span></div>
+        <p>Turn a priced job into a proper Invoice, Quote or Receipt on <b>your own letterhead</b>. Print or save as PDF, and keep every one in one place.</p>
+        <span class="go">Open the generator →</span>
+      </a>
+    </div>
+
+    <h2 class="next">Coming next</h2>
+    <div class="tools-grid later">
+      <div class="tool-card soon">
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3.5h18v5H3z"/><rect x="3" y="11.5" width="18" height="9.5" rx="1"/><path d="M12 11.5V21M9.5 15h.01M14.5 15h.01"/></svg></span>
+          <span class="lb"><b>Kitchen Cutlist</b><span class="soon-tag">Coming soon · members first</span></span></div>
+        <p>Base and wall cabinet cut lists — same engine, built for kitchen runs.</p>
       </div>
       <div class="tool-card soon">
-        <span class="soon-tag">Coming soon · members first</span>
-        <h3>Kitchen Cutlist</h3>
-        <p>Base and wall cabinet cut lists — same engine, built for kitchen runs. Members get it first.</p>
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="9" rx="1"/><rect x="2.5" y="15" width="19" height="5.5" rx="1"/><path d="M12 15v5.5"/></svg></span>
+          <span class="lb"><b>TV Unit Cutlist</b><span class="soon-tag">Coming soon · members first</span></span></div>
+        <p>Floating consoles and feature-wall media units, parametrised.</p>
       </div>
       <div class="tool-card soon">
-        <span class="soon-tag">Coming soon · members first</span>
-        <h3>TV Unit Cutlist</h3>
-        <p>Floating consoles and feature-wall media units, parametrised. Members get it first.</p>
-      </div>
-      <div class="tool-card">
-        <h3>Job Pricing Tool</h3>
-        <p>Know what a job really costs <b>you</b> — set your own overhead, crew rates and margins once, then price and quote with confidence when a client says "it's too much." Your figures stay private to your account.</p>
-        <a class="go" href="../carpenter-pricing.html">Open the pricing tool</a>
-      </div>
-      <div class="tool-card" id="adminInvoiceCard" style="display:none;border-color:var(--gold);background:linear-gradient(180deg,rgba(200,146,42,.06),transparent)">
-        <h3>Invoice &amp; Quote Generator</h3>
-        <p>Produce a proper Invoice, Quote or Receipt — line items, totals, your own letterhead and terms. <b>Print or save as PDF</b>, and keep every one in one place, private to your account.</p>
-        <a class="go" href="../invoice-generator.html">Open the generator</a>
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 5.5V11c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V5.5L12 3z"/></svg></span>
+          <span class="lb"><b>Safety Check-In</b><span class="soon-tag">In development</span></span></div>
+        <p>Log a call-out before a solo consultation. If you're overdue, someone is alerted.</p>
       </div>
       <div class="tool-card soon">
-        <span class="soon-tag">In development</span>
-        <h3>Safety Check-In</h3>
-        <p>Log a consultation call-out before you go — location, client, expected return. If you're overdue, your emergency contact is alerted. Built for lone workers.</p>
-      </div>
-      <div class="tool-card soon">
-        <span class="soon-tag">On the roadmap</span>
-        <h3>Job Dispatch &amp; Crew Tracker</h3>
-        <p>Run your jobs like a company — brief the crew, track tools out and back, close the job clean. The same system Neewoody runs daily, built for your workshop.</p>
+        <div class="tc-head"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 6h11v10h-11z"/><path d="M13.5 9.5h4l3 3.5V16h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>
+          <span class="lb"><b>Job Dispatch &amp; Crew</b><span class="soon-tag">On the roadmap</span></span></div>
+        <p>Brief the crew, track tools out and back, close the job clean — the system Neewoody runs daily.</p>
       </div>
     </div>
     <p class="benefits">Your membership today: <b>this directory</b> (be found, hire others, message direct) · <b>the jobs board</b> (post work, get hired) · <b>saved cut lists</b> on the generator · and first access to every tool above as it lands.</p>
