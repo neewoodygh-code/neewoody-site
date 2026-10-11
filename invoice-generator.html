@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#1f2f58" />
 <title>Invoice &amp; Quote Generator — Carpentry Concierge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -125,30 +125,41 @@
   .pay-block .fld{margin-bottom:.5rem}
 
   /* ── PREVIEW / DOCUMENT ── */
-  #previewCol{position:relative}
+  #previewCol{position:relative;min-width:0}
+  #inputCol{min-width:0}
   .prev-note{font-size:.7rem;color:var(--muted);font-family:var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.5rem}
-  .doc-scroll{overflow-x:auto}
-  #doc{background:#fff;color:#111;width:210mm;max-width:100%;min-height:auto;margin:0 auto;padding:16mm 15mm;border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.08);font-size:11px;line-height:1.45}
+  /* The preview is always laid out at true A4 width and scaled down to fit
+     narrow screens (fitPreview), so phones see exactly what prints. */
+  .doc-scroll{overflow:hidden;width:100%;max-width:100%}
+  #doc{--d-head:'Playfair Display',Georgia,serif;--d-body:'Jost',system-ui,sans-serif;--d-accent:#1f2f58;--d-logo:52px;
+       font-family:var(--d-body);background:#fff;color:#111;width:210mm;min-height:auto;margin:0 auto;padding:16mm 15mm;border:1px solid var(--border);box-shadow:0 8px 30px rgba(0,0,0,.08);font-size:11px;line-height:1.45;transform-origin:top left}
+  #doc.letter{width:216mm}
+  #doc.scaled{margin:0}
   #doc .dh{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
   #doc .dh-brand{display:flex;gap:12px;align-items:flex-start;min-width:0}
-  #doc .dh-brand img{width:52px;height:52px;object-fit:contain;flex:none}
-  #doc .dh-name{font-family:var(--serif);font-size:19px;font-weight:700;color:#111;line-height:1.1;letter-spacing:.01em}
+  #doc .dh-brand img{width:var(--d-logo);height:var(--d-logo);object-fit:contain;flex:none}
+  #doc .dh-name{font-family:var(--d-head);font-size:19px;font-weight:700;color:#111;line-height:1.1;letter-spacing:.01em}
+  #doc .dh.center{flex-direction:column;align-items:center;text-align:center;gap:8px}
+  #doc .dh.center .dh-brand{flex-direction:column;align-items:center;gap:6px}
+  #doc .dh.center .dh-contact{text-align:center;line-height:1.5}
+  #doc .dh.center .dh-contact div{display:inline}
+  #doc .dh.center .dh-contact div+div::before{content:' · ';color:#999}
   #doc .dh-sub{font-size:10px;color:#555;margin-top:2px}
   #doc .dh-contact{text-align:right;font-size:10px;color:#333;line-height:1.65;flex:none}
   #doc .dh-contact b{color:#111;font-weight:600}
   #doc hr{border:0;border-top:1.5px solid #111;margin:12px 0}
   #doc .title-row{display:flex;justify-content:space-between;align-items:flex-end;margin:4px 0 12px}
-  #doc .doc-type{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:.04em;color:#111;text-transform:uppercase}
+  #doc .doc-type{font-family:var(--d-head);font-size:26px;font-weight:700;letter-spacing:.04em;color:#111;text-transform:uppercase}
   #doc .doc-date{font-size:10.5px;color:#444;margin-top:2px}
-  #doc .total-box{text-align:right;border:2px solid #111;border-radius:4px;padding:6px 14px;min-width:150px}
+  #doc .total-box{text-align:right;border:2px solid var(--d-accent);border-radius:4px;padding:6px 14px;min-width:150px}
   #doc .total-box .lbl{font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#555}
-  #doc .total-box .val{font-family:var(--serif);font-size:20px;font-weight:700;color:#111;line-height:1.1}
+  #doc .total-box .val{font-family:var(--d-head);font-size:20px;font-weight:700;color:#111;line-height:1.1}
   #doc .meta{display:flex;flex-wrap:wrap;gap:6px 26px;margin-bottom:12px}
   #doc .meta .m{min-width:120px}
   #doc .meta .m .k{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#777}
   #doc .meta .m .v{font-size:12px;color:#111;font-weight:600}
   #doc table.items{width:100%;border-collapse:collapse;margin-bottom:12px}
-  #doc table.items th{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#1f2f58;text-align:left;padding:6px 8px}
+  #doc table.items th{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--d-accent);text-align:left;padding:6px 8px}
   #doc table.items th.r,#doc table.items td.r{text-align:right}
   #doc table.items td{font-size:11px;padding:6px 8px;border-bottom:1px solid #ddd;color:#222;vertical-align:top}
   #doc table.items td.r{font-family:var(--mono);white-space:nowrap}
@@ -157,8 +168,8 @@
   #doc table.items tr.sec td .note{font-weight:400;letter-spacing:0;text-transform:none;color:#555;font-style:italic;margin-left:6px}
   #doc table.items td.ind{padding-left:20px}
   #doc table.items tr.sub td{font-weight:700;color:#111;border-bottom:1.5px solid #111}
-  #doc table.items tr.opt td{font-weight:700;color:#1f2f58}
-  #doc table.items tr.opt .badge{display:inline-block;margin-left:6px;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border:1px solid #1f2f58;border-radius:3px;padding:0 4px;font-weight:700}
+  #doc table.items tr.opt td{font-weight:700;color:var(--d-accent)}
+  #doc table.items tr.opt .badge{display:inline-block;margin-left:6px;font-size:8px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--d-accent);border-radius:3px;padding:0 4px;font-weight:700}
   #doc table.items tr.off td{color:#aaa;text-decoration:line-through}
   #doc .total-box.range .val{font-size:15px}
   #doc .totals.wide{width:290px}
@@ -167,7 +178,7 @@
   #doc .pay{flex:1;min-width:0}
   #doc .pay .pt{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#111;font-weight:700;margin:0 0 4px;border-bottom:1px solid #111;padding-bottom:2px}
   #doc .pay .po{margin-bottom:7px}
-  #doc .pay .po .poh{font-size:10px;font-weight:700;color:#1f2f58;margin-bottom:1px}
+  #doc .pay .po .poh{font-size:10px;font-weight:700;color:var(--d-accent);margin-bottom:1px}
   #doc .pay .po .pob{font-size:9.5px;color:#333;white-space:pre-line;line-height:1.5}
   #doc .totals{width:210px;flex:none}
   #doc .totals .tr{display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid #e2e2e2}
@@ -201,6 +212,20 @@
   .warnbar{background:rgba(176,64,48,.1);border:1px solid rgba(176,64,48,.35);color:#8a2f22;border-radius:8px;padding:.55rem .8rem;font-size:.82rem;margin-bottom:1rem;display:none}
   .warnbar.on{display:block}
   #optWarn{margin:.7rem 0 0}
+  /* document style panel */
+  .sty-row{margin-bottom:.85rem}
+  .sty-row>label{display:block;font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+  .font-opts{display:grid;grid-template-columns:1fr 1fr;gap:.4rem}
+  .font-opt{border:1.5px solid var(--border);background:#fff;border-radius:8px;padding:.45rem .55rem;text-align:left;cursor:pointer}
+  .font-opt.on{border-color:var(--navy);box-shadow:0 0 0 1px var(--navy)}
+  .font-opt .fo-n{display:block;font-size:1.05rem;font-weight:700;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .font-opt .fo-l{display:block;font-size:.66rem;color:var(--muted);margin-top:.1rem}
+  .swatches{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+  .sw{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1.5px var(--border);cursor:pointer;padding:0}
+  .sw.on{box-shadow:0 0 0 2px var(--ink)}
+  .sw-custom{width:34px;height:30px;border:1.5px solid var(--border);border-radius:6px;padding:1px;background:#fff;cursor:pointer}
+  .sty-checks{display:flex;flex-wrap:wrap;gap:.35rem 1rem}
+  .sty-row .hint{font-size:.7rem;color:var(--muted);line-height:1.4}
 
   @media print{
     .ig-top,.ig-hero,#inputCol,.ig-actions,.prev-note,.ig-foot,.ig-overlay,.warnbar{display:none!important}
@@ -209,8 +234,9 @@
     .ig-cols{display:block}
     .doc-scroll{overflow:visible}
     #previewCol{position:static}
-    #doc{width:auto;max-width:none;margin:0;padding:0;border:0;box-shadow:none;font-size:11px}
-    #doc table.items th,#doc table.items tr.sec td{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    #doc,#doc.letter{width:auto;max-width:none;margin:0;padding:0;border:0;box-shadow:none;font-size:11px;transform:none!important}
+    .doc-scroll{height:auto!important}
+    #doc table.items th,#doc table.items tr.sec td,#doc .total-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     @page{size:A4;margin:14mm}
   }
 </style>
@@ -323,6 +349,7 @@
         <details class="card" id="setBiz">
           <summary><span class="dot"></span>Business header <span class="chev">▾</span></summary>
           <div class="fld"><label>Business name (Paid to)</label><input id="s_bizName" oninput="onSetting('bizName',this.value)" /></div>
+          <div class="fld"><label>Tagline <span style="text-transform:none;color:var(--muted)">(optional — the line under your name)</span></label><input id="s_tagline" placeholder="e.g. Kitchens &amp; wardrobes · Kumasi" oninput="onSetting('tagline',this.value)" /></div>
           <div class="grid2">
             <div class="fld"><label>Address line 1</label><input id="s_addr1" oninput="onSetting('addr1',this.value)" /></div>
             <div class="fld"><label>Address line 2</label><input id="s_addr2" oninput="onSetting('addr2',this.value)" /></div>
@@ -332,6 +359,27 @@
             <div class="fld"><label>WhatsApp</label><input id="s_whatsapp" oninput="onSetting('whatsapp',this.value)" /></div>
           </div>
           <div class="fld"><label style="display:flex;align-items:center;gap:.4rem;text-transform:none;font-weight:500;color:var(--ink);font-size:.85rem"><input type="checkbox" id="s_logoOn" onchange="onSetting('logoOn',this.checked)" style="width:auto" /> Show my logo on the document</label></div>
+        </details>
+
+        <!-- Document style (settings) -->
+        <details class="card" id="setStyle">
+          <summary><span class="dot"></span>Document style <span class="chev">▾</span></summary>
+          <div class="sty-row"><label>Fonts</label><div class="font-opts" id="fontOpts"></div></div>
+          <div class="sty-row"><label>Accent colour <span style="text-transform:none;letter-spacing:0;font-weight:400">(table header &amp; total box)</span></label><div class="swatches" id="accentOpts"></div></div>
+          <div class="sty-row"><label>Header layout</label>
+            <div class="seg" id="layoutSeg"><button type="button" data-v="left" onclick="onStyle('headerLayout','left')">Logo left</button><button type="button" data-v="center" onclick="onStyle('headerLayout','center')">Centred</button></div></div>
+          <div class="sty-row"><label>Logo size</label>
+            <div class="seg" id="logoSeg"><button type="button" data-v="s" onclick="onStyle('logoSize','s')">Small</button><button type="button" data-v="m" onclick="onStyle('logoSize','m')">Medium</button><button type="button" data-v="l" onclick="onStyle('logoSize','l')">Large</button></div></div>
+          <div class="sty-row"><label>Show on the document</label>
+            <div class="sty-checks">
+              <label class="chk"><input type="checkbox" id="st_showName" onchange="onStyle('showName',this.checked)" /> Business name</label>
+              <label class="chk"><input type="checkbox" id="st_showPaidTo" onchange="onStyle('showPaidTo',this.checked)" /> "Paid to"</label>
+              <label class="chk"><input type="checkbox" id="st_showProject" onchange="onStyle('showProject',this.checked)" /> Project</label>
+              <label class="chk"><input type="checkbox" id="st_showSign" onchange="onStyle('showSign',this.checked)" /> Signature lines</label>
+            </div>
+            <div class="hint" style="margin-top:.3rem">Untick <b>Business name</b> if your logo already spells it out.</div></div>
+          <div class="sty-row" style="margin-bottom:0"><label>Paper size</label>
+            <div class="seg" id="paperSeg"><button type="button" data-v="a4" onclick="onStyle('paper','a4')">A4</button><button type="button" data-v="letter" onclick="onStyle('paper','letter')">US Letter</button></div></div>
         </details>
 
         <!-- Payment options (settings) -->
@@ -424,6 +472,7 @@ var NEEWOODY_DEFAULT_SETTINGS = {
   instagram:'@neewoodygh',
   whatsapp:'+233 (0) 244 633 464',
   logoOn:true,
+  tagline:'Bespoke Furniture & Carpentry · Accra, Ghana',
   payTitle1:'Payment Option 1',
   payBody1:'Bank: Access Bank\nMode: Cash or Cheque\nAccount No: 0030106660641\nAccount Name: Neewoody Custom Woodwork\nBranch: Osu',
   payTitle2:'Payment Option 2',
@@ -441,17 +490,79 @@ var NEEWOODY_DEFAULT_SETTINGS = {
 };
 var GENERIC_BLANK_SETTINGS = {
   bizName:'', addr1:'', addr2:'', email:'', phone:'', instagram:'', whatsapp:'',
-  logoOn:false,
+  logoOn:false, tagline:'',
+  // document style (see the Document style panel)
+  font:'classic', accent:'#1f2f58', headerLayout:'left', logoSize:'m',
+  showName:true, showPaidTo:true, showProject:true, showSign:true, paper:'a4',
   payTitle1:'Payment Option 1', payBody1:'',
   payTitle2:'Payment Option 2', payBody2:'',
   payTitle3:'Payment Option 3', payBody3:'',
   terms:'1. Add your own terms and conditions here.'
 };
 
-var SETTINGS = load(K_SET, null) || Object.assign({}, GENERIC_BLANK_SETTINGS);
-// backfill any new schema keys onto an older saved settings object — blanks
-// only, never the owner's real values (this runs for every member's data).
-for (var dk in GENERIC_BLANK_SETTINGS){ if(!(dk in SETTINGS)) SETTINGS[dk]=GENERIC_BLANK_SETTINGS[dk]; }
+var SETTINGS = normalizeSettings(load(K_SET, null) || {});
+
+/* Fill any keys missing from an older saved settings object — generic blanks
+   only, never the owner's real values (this runs for every member's data).
+   One exception: the tagline used to be hardcoded as Neewoody's line for
+   EVERYONE; the owner's own letterhead keeps it, every other member gets a
+   blank tagline instead of someone else's. */
+function normalizeSettings(src){
+  var out=Object.assign({}, src||{});
+  if(!('tagline' in out)) out.tagline = /neewoody/i.test(out.bizName||'') ? NEEWOODY_DEFAULT_SETTINGS.tagline : '';
+  for (var k in GENERIC_BLANK_SETTINGS){ if(!(k in out)) out[k]=GENERIC_BLANK_SETTINGS[k]; }
+  return out;
+}
+
+/* ── document style presets ── */
+var FONT_PRESETS = {
+  classic:     { label:'Classic',     head:"'Playfair Display',Georgia,serif",   body:"'Jost',system-ui,sans-serif" },
+  modern:      { label:'Modern',      head:"'Montserrat',system-ui,sans-serif",  body:"'Jost',system-ui,sans-serif" },
+  traditional: { label:'Traditional', head:"'Libre Baskerville',Georgia,serif",  body:"'Lora',Georgia,serif" },
+  clean:       { label:'Clean',       head:"'Jost',system-ui,sans-serif",        body:"'Jost',system-ui,sans-serif" }
+};
+var ACCENTS = [
+  { c:'#1f2f58', n:'Navy' }, { c:'#111111', n:'Black' }, { c:'#0b1f0e', n:'Forest' },
+  { c:'#6b1e2a', n:'Burgundy' }, { c:'#5a3a1e', n:'Walnut' }, { c:'#0f4c5c', n:'Teal' }
+];
+var LOGO_PX = { s:40, m:52, l:72 };
+function safeAccent(c){ return /^#[0-9a-f]{6}$/i.test(c||'') ? c : '#1f2f58'; }
+function onStyle(k,v){ onSetting(k,v); renderStyleControls(); }
+function renderStyleControls(){
+  var s=SETTINGS, fo=document.getElementById('fontOpts'); if(!fo) return;
+  fo.innerHTML=Object.keys(FONT_PRESETS).map(function(k){
+    var f=FONT_PRESETS[k];
+    return '<button type="button" class="font-opt'+(s.font===k?' on':'')+'" onclick="onStyle(\'font\',\''+k+'\')">'
+      +'<span class="fo-n" style="font-family:'+f.head.replace(/"/g,'&quot;')+'">'+esc(s.bizName||'Your Business')+'</span>'
+      +'<span class="fo-l" style="font-family:'+f.body.replace(/"/g,'&quot;')+'">'+f.label+'</span></button>';
+  }).join('');
+  var cur=safeAccent(s.accent), isPreset=ACCENTS.some(function(a){return a.c.toLowerCase()===cur.toLowerCase();});
+  document.getElementById('accentOpts').innerHTML=ACCENTS.map(function(a){
+    return '<button type="button" class="sw'+(a.c.toLowerCase()===cur.toLowerCase()?' on':'')+'" title="'+a.n+'" style="background:'+a.c+'" onclick="onStyle(\'accent\',\''+a.c+'\')"></button>';
+  }).join('')+'<input type="color" class="sw-custom'+(isPreset?'':' on')+'" title="Custom colour" value="'+cur+'" oninput="onSetting(\'accent\',this.value)" onchange="renderStyleControls()" />';
+  [['layoutSeg','headerLayout'],['logoSeg','logoSize'],['paperSeg','paper']].forEach(function(p){
+    document.querySelectorAll('#'+p[0]+' button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===s[p[1]]); });
+  });
+  ['showName','showPaidTo','showProject','showSign'].forEach(function(k){ var el=document.getElementById('st_'+k); if(el) el.checked=s[k]!==false; });
+}
+// Lay the preview out at true paper width, then scale it down to fit the
+// column so a phone shows the whole page instead of a cropped corner.
+function fitPreview(){
+  var doc=document.getElementById('doc'), box=doc&&doc.parentElement; if(!box) return;
+  doc.style.transform=''; doc.classList.remove('scaled'); box.style.height='';
+  var avail=box.clientWidth, w=doc.offsetWidth;
+  if(w>avail+1){
+    var k=avail/w;
+    doc.classList.add('scaled'); doc.style.transform='scale('+k+')';
+    box.style.height=Math.ceil(doc.offsetHeight*k)+'px';
+  }
+}
+window.addEventListener('resize', function(){ clearTimeout(window.__fitT); window.__fitT=setTimeout(fitPreview,80); });
+function applyPageSize(){
+  var el=document.getElementById('pageStyle');
+  if(!el){ el=document.createElement('style'); el.id='pageStyle'; document.head.appendChild(el); }
+  el.textContent='@media print{@page{size:'+(SETTINGS.paper==='letter'?'letter':'A4')+';margin:14mm}}';
+}
 
 var INV = load(K_CUR, null) || blankInvoice();
 // Resolved once in boot() from the logged-in member's own profile — never a
@@ -558,7 +669,7 @@ function onField(k,v){
   if(k==='discountValue') v=+v||0, INV.discountValue=v;
   persist(); renderDoc(); if(k==='paid'||k==='discountValue') syncBalance();
 }
-function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); }
+function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); if(k==='bizName') renderStyleControls(); }
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   renderDoc(); updateOptWarn();
@@ -742,6 +853,15 @@ function renderDoc(){
   var isReceipt = INV.docType==='receipt';   // receipt: no payment options (already paid)
   var logoSrc = MEMBER_LOGO_URL || 'images/logo.png';
   var logo = s.logoOn ? '<img src="'+esc(logoSrc)+'" alt="" onerror="this.style.display=\'none\'" />' : '';
+  var fp=FONT_PRESETS[s.font]||FONT_PRESETS.classic, docEl=document.getElementById('doc');
+  docEl.style.setProperty('--d-head', fp.head);
+  docEl.style.setProperty('--d-body', fp.body);
+  docEl.style.setProperty('--d-accent', safeAccent(s.accent));
+  docEl.style.setProperty('--d-logo', (LOGO_PX[s.logoSize]||52)+'px');
+  docEl.classList.toggle('letter', s.paper==='letter');
+  applyPageSize();
+  var nameHtml = (s.showName!==false && s.bizName) ? '<div class="dh-name">'+esc(s.bizName)+'</div>' : '';
+  var tagHtml  = String(s.tagline||'').trim() ? '<div class="dh-sub">'+esc(s.tagline)+'</div>' : '';
 
   var contact='';
   if(s.addr1) contact+='<div>'+esc(s.addr1)+'</div>';
@@ -791,14 +911,14 @@ function renderDoc(){
 
   var metaRows=''
     +metaCell(typeLabel+' for', INV.client||'—')
-    +metaCell('Paid to', s.bizName||'')
+    +(s.showPaidTo!==false ? metaCell('Paid to', s.bizName||'') : '')
     +metaCell(typeLabel+' #', INV.number||'—')
-    +metaCell('Project', INV.project||'—')
+    +(s.showProject!==false ? metaCell('Project', INV.project||'—') : '')
     +(INV.dueDate?metaCell('Due date', fmtDate(INV.dueDate)):'');
 
   var html=''
-    +'<div class="dh">'
-    +  '<div class="dh-brand">'+logo+'<div><div class="dh-name">'+esc(s.bizName||'')+'</div><div class="dh-sub">Bespoke Furniture &amp; Carpentry · Accra, Ghana</div></div></div>'
+    +'<div class="dh'+(s.headerLayout==='center'?' center':'')+'">'
+    +  '<div class="dh-brand">'+logo+((nameHtml||tagHtml)?'<div>'+nameHtml+tagHtml+'</div>':'')+'</div>'
     +  '<div class="dh-contact">'+contact+'</div>'
     +'</div>'
     +'<hr/>'
@@ -820,12 +940,15 @@ function renderDoc(){
     +  '</div>' : '')
     +'</div>'
     +(termsLines?'<div class="terms"><h4>Terms &amp; Conditions</h4><div class="tt">'+esc(termsLines)+'</div></div>':'')
-    +'<div class="sign">'
+    +(s.showSign!==false ? '<div class="sign">'
     +  '<div class="s"><div class="line"></div><div class="cap">'+esc(s.bizName||'')+': Authorized Signatory</div></div>'
     +  '<div class="s"><div class="line"></div><div class="cap">Customer / Company</div></div>'
-    +'</div>';
+    +'</div>' : '');
 
-  document.getElementById('doc').innerHTML=html;
+  docEl.innerHTML=html;
+  fitPreview();
+  // the logo/fonts can change the height after they load
+  var im=docEl.querySelector('.dh-brand img'); if(im && !im.complete) im.addEventListener('load', fitPreview, {once:true});
 }
 function metaCell(k,v){ return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>'; }
 function totalRow(l,v){ return '<div class="tr"><span class="tl">'+esc(l)+'</span><span class="tv">'+esc(v)+'</span></div>'; }
@@ -909,7 +1032,7 @@ function restore(inp){
   r.onload=function(){
     try{
       var d=JSON.parse(r.result);
-      if(d.settings){ SETTINGS=Object.assign({},GENERIC_BLANK_SETTINGS,d.settings); persistSettings(); }
+      if(d.settings){ SETTINGS=normalizeSettings(d.settings); persistSettings(); }
       if(Array.isArray(d.list)){
         var cur=getList(), byId={}; cur.forEach(function(e){byId[e.savedId]=e;});
         d.list.forEach(function(e){ if(e&&e.savedId){ if(!byId[e.savedId]||(e.savedAt||0)>(byId[e.savedId].savedAt||0)) byId[e.savedId]=e; } });
@@ -935,10 +1058,11 @@ function syncForm(){
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===(INV.docType||'invoice')); });
   document.querySelectorAll('#discSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.d===(INV.discountType||'percent')); });
   // settings inputs
-  ['bizName','addr1','addr2','email','phone','instagram','whatsapp','payTitle1','payBody1','payTitle2','payBody2','payTitle3','payBody3','terms'].forEach(function(k){
+  ['bizName','tagline','addr1','addr2','email','phone','instagram','whatsapp','payTitle1','payBody1','payTitle2','payBody2','payTitle3','payBody3','terms'].forEach(function(k){
     var el=document.getElementById('s_'+k); if(el) el.value=SETTINGS[k]||'';
   });
   document.getElementById('s_logoOn').checked=!!SETTINGS.logoOn;
+  renderStyleControls();
 }
 
 /* ── tiny toast ── */
@@ -970,7 +1094,7 @@ async function cloudSync(){
   catch(e){ return; }  // offline / lapsed → keep local, no push
   if(cloud){
     var cs=cloud.settings;
-    if(cs && (+cs.updatedAt||0) > (+SETTINGS.updatedAt||0)){ SETTINGS=Object.assign({},GENERIC_BLANK_SETTINGS,cs); lsSet(K_SET,SETTINGS); }
+    if(cs && (+cs.updatedAt||0) > (+SETTINGS.updatedAt||0)){ SETTINGS=normalizeSettings(cs); lsSet(K_SET,SETTINGS); }
     lsSet(K_LIST, mergeInvoiceLists(getListRaw(), Array.isArray(cloud.list)?cloud.list:[]));
     var cc=+cloud.counter||0, lc=1000; try{lc=parseInt(localStorage.getItem(K_CTR)||'1000',10)||1000;}catch(e){}
     if(cc>lc){ try{localStorage.setItem(K_CTR,String(cc));}catch(e){} }
@@ -1079,13 +1203,13 @@ async function boot(){
   // profile instead — never the owner's bank details or terms.
   if (!load(K_SET, null)) {
     if (me.role === 'admin') {
-      SETTINGS = Object.assign({}, NEEWOODY_DEFAULT_SETTINGS);
+      SETTINGS = normalizeSettings(NEEWOODY_DEFAULT_SETTINGS);
     } else {
-      SETTINGS = Object.assign({}, GENERIC_BLANK_SETTINGS, {
+      SETTINGS = normalizeSettings(Object.assign({}, GENERIC_BLANK_SETTINGS, {
         bizName: me.business_name || me.name || '',
         phone: me.business_phone || me.phone || '',
         addr1: me.area || '',
-      });
+      }));
     }
     persistSettings();
   }
