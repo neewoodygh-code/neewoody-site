@@ -72,7 +72,7 @@
   --cream:#f0e8d0;
   --cream-dark:#e8dfc4;
   --ink:#1c1c1a;
-  --muted:#6b6557;
+  --muted:#5e584b;
   --display:'Playfair Display',Georgia,serif;
   --body:'Lora',Georgia,serif;
   --ui:'Jost',sans-serif
@@ -386,7 +386,7 @@ a{text-decoration:none}
 .case-stat-label{
   font-family:var(--ui);font-size:0.6rem;font-weight:300;
   letter-spacing:0.2em;text-transform:uppercase;
-  color:rgba(240,232,208,0.4);
+  color:rgba(240,232,208,0.62);
 }
 .case-strip-div{
   width:1px;height:2.5rem;
@@ -447,7 +447,7 @@ a{text-decoration:none}
   font-family:var(--ui);
   font-size:0.58rem;font-weight:400;
   letter-spacing:0.25em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.4rem;
+  color:var(--gold-ink,#7f5a12);margin-bottom:1.4rem;
 }
 .svc-name{
   font-family:var(--display);
@@ -650,7 +650,7 @@ footer{
   font-family:var(--body);
   font-style:italic;
   font-size:0.82rem;
-  color:rgba(240,232,208,0.45);
+  color:rgba(240,232,208,0.62);
 }
 .foot-nav{
   display:flex;flex-direction:column;
@@ -671,7 +671,7 @@ footer{
   font-family:var(--ui);
   font-size:0.6rem;font-weight:300;
   letter-spacing:0.1em;
-  color:rgba(240,232,208,0.25);
+  color:rgba(240,232,208,0.62);
 }
 
 /* ── ANIMATIONS ── */
@@ -759,7 +759,7 @@ footer{
 .section-eyebrow{
   font-family:var(--ui);font-size:0.6rem;font-weight:400;
   letter-spacing:0.32em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:0.9rem;
+  color:var(--gold-ink,#7f5a12);margin-bottom:0.9rem;
 }
 .section-eyebrow .tk{color:var(--muted);margin:0 0.5em}
 .work-head{align-items:flex-end}
@@ -865,7 +865,7 @@ footer{
 <!-- FEATURED CASE STUDY -->
 <div class="featured">
   <div class="feat-img-wrap">
-    <img
+    <img loading="lazy"
       src="images/projects/sage-centre/sage-gallery-1.jpg"
       alt="Sage Centre — solid teak furniture, Wli, Volta Region"
     />
@@ -976,7 +976,7 @@ footer{
       </div>
     </a>
     <a href="wardrobes.html" class="work-card">
-      <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
+      <img loading="lazy" src="images/projects/oyarifa/oyarifa-master-closed-1.jpg"
         alt="Floor-to-ceiling wardrobes, Oyarifa" />
       <div class="work-meta">
         <p class="work-name">Floor-to-ceiling wardrobes</p>
@@ -984,7 +984,7 @@ footer{
       </div>
     </a>
     <a href="dining-living.html" class="work-card">
-      <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
+      <img loading="lazy" src="images/projects/judith-east-legon/judith-set-installed-2.jpg"
         alt="Hyedua dining commission, East Legon" />
       <div class="work-meta">
         <p class="work-name">Hyedua dining commission</p>

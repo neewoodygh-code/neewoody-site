@@ -18,9 +18,9 @@ gtag('config', 'G-ZP77WR6BNH');
 <title>Custom TV Units & Media Consoles in Accra | Neewoody</title>
 <meta name="description" content="Custom TV units, media consoles, and entertainment centres built to measure in Accra, Ghana. Neewoody Custom Woodwork — made to fit your wall and your screen." />
 <meta name="keywords" content="custom TV unit Accra, TV stand Ghana, media console Accra, entertainment unit Ghana, custom TV cabinet Accra" />
-<link rel="canonical" href="https://neewoodygh.com/tv-units.html" />
+<link rel="canonical" href="https://neewoodygh.com/tv-units" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://neewoodygh.com/tv-units.html" />
+<meta property="og:url" content="https://neewoodygh.com/tv-units" />
 <meta property="og:title" content="Custom TV Units in Accra — Neewoody Custom Woodwork" />
 <meta property="og:description" content="Built-in and freestanding TV units made to your exact wall dimensions in Accra. Cable management, storage, and custom finishes." />
 <meta property="og:image" content="https://neewoodygh.com/images/og-image.jpg" />
@@ -37,7 +37,7 @@ gtag('config', 'G-ZP77WR6BNH');
   --cream:#f0e8d0;
   --cream-dark:#e8dfc4;
   --ink:#1c1c1a;
-  --muted:#6b6557;
+  --muted:#5e584b;
   --display:'Playfair Display',Georgia,serif;
   --body:'Lora',Georgia,serif;
   --ui:'Jost',sans-serif;
@@ -250,7 +250,7 @@ a{text-decoration:none}
 .tv-type-num{
   font-family:var(--ui);font-size:0.58rem;font-weight:400;
   letter-spacing:0.25em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.2rem;display:block;
+  color:var(--gold-ink,#7f5a12);margin-bottom:1.2rem;display:block;
 }
 .tv-type-name{
   font-family:var(--display);font-size:1.15rem;font-weight:400;
@@ -382,7 +382,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 }
 .t-role{
   display:block;font-family:var(--ui);font-size:0.62rem;font-weight:300;
-  letter-spacing:0.12em;color:rgba(240,232,208,0.4);margin-top:0.35rem;
+  letter-spacing:0.12em;color:rgba(240,232,208,0.62);margin-top:0.35rem;
 }
 
 /* ── CTA ── */
@@ -436,7 +436,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 }
 .redesign-footer .foot-tagline{
   font-family:var(--body);font-style:italic;font-size:0.82rem;
-  color:rgba(240,232,208,0.45);
+  color:rgba(240,232,208,0.62);
 }
 .redesign-footer .foot-nav{
   display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
@@ -451,7 +451,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
   padding-top:1.5rem;margin-top:0.5rem;
   font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.1em;color:rgba(240,232,208,0.25);
+  letter-spacing:0.1em;color:rgba(240,232,208,0.62);
 }
 
 /* ── WA FLOAT ── */
@@ -937,13 +937,13 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   <div class="pm-dialog">
     <button class="pm-close" id="pm-close" aria-label="Close">&times;</button>
     <div class="pm-media">
-      <div class="pm-main" id="pm-main"><img id="pm-main-img" src="" alt=""></div>
+      <div class="pm-main" id="pm-main"><img loading="lazy" id="pm-main-img" src="" alt=""></div>
       <div class="pm-thumbs" id="pm-thumbs"></div>
     </div>
     <div class="pm-text" id="pm-text"></div>
   </div>
 </div>
-<div class="pm-zoom" id="pm-zoom" aria-hidden="true"><img id="pm-zoom-img" src="" alt=""></div>
+<div class="pm-zoom" id="pm-zoom" aria-hidden="true"><img loading="lazy" id="pm-zoom-img" src="" alt=""></div>
 
 <template id="pm-tv-stands"
   data-eyebrow="TV Units &middot; Feature Walls"

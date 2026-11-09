@@ -206,10 +206,9 @@
           ? (p.writeup.length > 110 ? p.writeup.slice(0, 108).trim() + '…' : p.writeup)
           : (p.location || '');
 
-        var card = mkEl('article','cms-card');
+        var card = mkEl('div','cms-card');
         card.setAttribute('role','button');
         card.setAttribute('tabindex','0');
-        card.setAttribute('aria-label', p.title || 'View project');
 
         var imgWrap = mkEl('div','cms-card-img');
         var img     = mkEl('img');
