@@ -30,485 +30,333 @@ gtag('config', 'G-ZP77WR6BNH');
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Lora:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+/* Homepage redesign 2026-11-10 (de-AI pass, see CLAUDE.md Design system). Same palette, photos and facts; no eyebrows,
+   no section numbers, no italic accent words, no tracked capitals, no dot strings, no stat strip. */
 :root{
-  --green:#0b1f0e;
-  --gold:#c8922a;
-  --cream:#f0e8d0;
-  --cream-dark:#e8dfc4;
-  --ink:#1c1c1a;
-  --muted:#5e584b;
-  --display:'Playfair Display',Georgia,serif;
-  --body:'Lora',Georgia,serif;
-  --ui:'Jost',sans-serif;
+  --green:#0b1f0e; --green-2:#13301a; --navy:#1f2f58; --gold-hi:#d9a443; --gold:#c8922a; --gold-ink:#7f5a12;
+  --cream:#f0e8d0; --cream-2:#e8dfc4; --cream-dark:#e8dfc4; --paper:#f7f2e4; --ink:#1c1c1a; --muted:#5e584b;
+  --on-green:#efe6cc; --on-green-2:rgba(240,232,208,.72); --line:rgba(28,28,26,.14); --line-dark:rgba(240,232,208,.18);
+  --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',system-ui,sans-serif;
+  --max:1320px; --sec:clamp(4.5rem,9vw,7rem); --gut:clamp(1.25rem,4vw,3rem); --gap:clamp(1.25rem,3vw,2.5rem);
+  --r:6px; --ease:cubic-bezier(.16,1,.3,1);
+  --scrim:rgba(20,16,10,.82); --scrim-mid:rgba(20,16,10,.42); --scrim-0:rgba(20,16,10,0); --on-photo-2:rgba(240,232,208,.84); --on-photo-line:rgba(240,232,208,.55);
+  --r-card:10px; --g-img:14px; --glow:rgba(217,164,67,.55); --story-shadow:rgba(0,0,0,.6); --lift:rgba(11,31,14,.45); --lift-hi:rgba(11,31,14,.55); --menu-shadow:var(--menu-shadow);
 }
-html{font-size:16px;scroll-behavior:smooth}
-body{background:var(--cream);color:var(--ink);font-family:var(--body);-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:clip}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:var(--body);font-size:1.0625rem;line-height:1.7;-webkit-font-smoothing:antialiased}
 img{display:block;max-width:100%}
-a{text-decoration:none}
+a{color:inherit}
+::selection{background:var(--gold);color:var(--green)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
+h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:balance;overflow-wrap:break-word;min-width:0;letter-spacing:-.01em}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--gut)}
+.small{font-family:var(--ui);font-size:.9rem;color:var(--muted)}
 
-/* ── NAV ── */
-#nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:1.4rem 3rem;
-  background:rgba(240,232,208,0.95);
-  backdrop-filter:blur(8px);
-  border-bottom:1px solid rgba(11,31,14,0.08);
-  transition:background 0.4s,border-color 0.4s;
-}
-#nav.over-hero{
-  background:rgba(11,31,14,0.3);
-  backdrop-filter:blur(0px);
-  border-bottom-color:transparent;
-}
-#nav .logo{
-  display:flex;align-items:center;gap:0.65rem;
-  text-decoration:none;flex-shrink:0;
-}
-.logo-img{height:36px;width:auto;display:block;transition:filter 0.4s}
-#nav.over-hero .logo-img{filter:invert(1)}
-.logo-text-wrap{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--ink);letter-spacing:0.03em;transition:color 0.4s;
-}
-#nav.over-hero .logo-text-wrap{color:var(--cream)}
-.logo-sub{
-  display:block;font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.22em;text-transform:uppercase;opacity:0.6;margin-top:2px;
-}
-#nav .nav-links{display:flex;gap:2rem;list-style:none;align-items:center}
-#nav .nav-links a{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);text-decoration:none;transition:color 0.3s;white-space:nowrap;
-}
-#nav.over-hero .nav-links a{color:rgba(240,232,208,0.8)}
-#nav .nav-links a:hover{color:var(--gold)}
+/* nav */
+.nav{position:sticky;top:0;z-index:50;background:var(--cream);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:2rem;height:68px}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;font-family:var(--display);font-size:1.3rem}
+.brand img{width:30px;height:30px;mix-blend-mode:multiply}
+.nav ul{display:flex;gap:1.6rem;list-style:none;margin-left:auto;font-family:var(--ui);font-size:.95rem}
+.nav ul a{text-decoration:none;color:var(--ink)}
+.nav ul a:hover{color:var(--gold-ink)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;font-family:var(--ui);font-size:1rem;font-weight:500;text-decoration:none;padding:.8rem 1.3rem;border-radius:var(--r);white-space:nowrap;transition:background-color .2s var(--ease),transform .2s var(--ease)}
+.btn:active{transform:translateY(1px)}
+.btn-wa{background:var(--green);color:var(--on-green)}
+.btn-wa:hover{background:var(--green-2)}
+.btn-line{color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.btn-line:hover{background:var(--cream-2)}
+.btn svg{width:18px;height:18px}
+@media (max-width:860px){.nav ul{display:none}.nav .btn{margin-left:auto}}
+
+/* hero: photo-led, the real Sage Centre dining hall */
+.hero{display:grid;grid-template-columns:minmax(0,calc(max(0px,(100vw - var(--max)) / 2) + min(100vw,var(--max)) * .42)) minmax(0,1fr);min-height:min(86svh,820px);border-bottom:1px solid var(--line)}
+.hero-text{padding:clamp(2rem,6vw,5rem) var(--gut) clamp(2rem,6vw,5rem) calc(max(0px,(100vw - var(--max)) / 2) + var(--gut));display:flex;flex-direction:column;justify-content:center;gap:1.4rem;width:100%}
+.hero h1{font-size:clamp(2.6rem,5.4vw,4.6rem)}
+.hero p{font-size:1.15rem;max-width:36ch;color:var(--muted)}
+.hero .actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.4rem}
+.hero figure{position:relative;min-height:340px}
+.hero figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.hero figcaption,.story-inset figcaption{position:absolute;left:1rem;bottom:1rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.85rem;line-height:1.3;padding:.42rem .75rem;border-radius:var(--r);max-width:calc(100% - 2rem)}
+.facts{font-family:var(--ui);font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:1rem;margin-top:.6rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem 1rem}
+.facts dt{color:var(--ink)}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}.hero-text{order:2;padding-left:var(--gut)}.hero figure{order:1;min-height:44svh}}
+
+/* what we make: an index, not six identical cards */
+.make{padding:var(--sec) 0}
+.make-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;margin-bottom:2.5rem}
+.make h2{font-size:clamp(2rem,3.6vw,3rem)}
+.make-head p{color:var(--muted);max-width:52ch}
+@media (max-width:760px){.make-head{grid-template-columns:minmax(0,1fr)}}
+/* what we make: tiles of different sizes, real photos, a cream name label and a round arrow (2026-11-11) */
+.tiles{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(190px,19vw,250px);gap:var(--g-img)}
+.tile a{position:relative;display:block;height:100%;border-radius:var(--r-card);overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.tile a::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--scrim) 0%,var(--scrim-mid) 32%,var(--scrim-0) 58%);pointer-events:none}
+.tile-label{position:absolute;z-index:2;left:1.25rem;bottom:1.15rem;max-width:calc(100% - 4.4rem);display:flex;flex-direction:column;gap:.2rem;color:var(--on-green)}
+.tile-name{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,1.8vw,1.65rem);line-height:1.1;letter-spacing:-.005em}
+.tile-name::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.55rem 0 .4rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.tile a:hover .tile-name::after,.tile a:focus-visible .tile-name::after{transform:none}
+.tile-line{font-family:var(--ui);font-size:.88rem;color:var(--on-photo-2);line-height:1.4}
+.tile-corner{position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+.tile a:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
+.tile a:hover img,.tile a:focus-visible img{transform:scale(1.045)}
+.tile a:hover .tile-corner,.tile a:focus-visible .tile-corner{opacity:1;transform:none}
+.t-ward{grid-column:1/3;grid-row:1/3}
+.t-kit{grid-column:3/5}
+.t-solid{grid-column:1/3}
+.t-com{grid-column:3/5}
+.t-ward .tile-name{font-size:clamp(1.7rem,2.7vw,2.4rem)}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:170px;gap:.6rem}.t-ward{grid-column:1/3;grid-row:auto / span 2}.t-kit{grid-column:1/3}.t-solid,.t-com{grid-column:auto}.tile .tile-line{display:none}.t-ward .tile-line,.t-kit .tile-line{display:block}.tile-corner{width:40px;height:40px;right:7px;bottom:7px}.tile-label{left:.85rem;bottom:.8rem;max-width:calc(100% - 3.6rem)}.tile-name::after{margin:.4rem 0 .3rem}}
+@media (hover:none){.tile-corner{opacity:.85;transform:none}}
+@media (prefers-reduced-motion:reduce){.tile a,.tile img,.tile-corner,.door,.door h3::after{transition:none}.door:hover{transform:none}.tile a:hover,.tile a:focus-visible{transform:none}.tile a:hover img{transform:none}}
+
+
+/* case study: the job told as a story, numbers kept in sentences */
+.case-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--gap);align-items:start}
+.case-photos{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--g-img)}
+.case-photos img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-card)}
+.case-photos .tall{grid-row:span 2;aspect-ratio:4/5}
+.case-photos .sq{aspect-ratio:1}
+.case h2{font-size:clamp(2rem,3.6vw,3rem);margin-bottom:1.2rem}
+.case p{margin-bottom:1rem;max-width:58ch}
+.case p.muted{color:var(--on-green-2)}
+.case a{font-family:var(--ui);font-size:1rem;text-underline-offset:4px}
+@media (max-width:860px){.case-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* reviews: one voice set large, two quieter */
+.reviews{background:var(--cream);color:var(--ink);padding:var(--sec) 0 calc(var(--sec) * .6)}
+.reviews blockquote{font-family:var(--display);font-size:clamp(1.5rem,2.8vw,2.3rem);line-height:1.3;max-width:30ch;margin-bottom:1.2rem}
+.who{font-family:var(--ui);color:var(--muted);margin-bottom:3rem}
+.who b{color:var(--ink);font-weight:500}
+.more-reviews{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr);gap:var(--gap);border-top:1px solid var(--line);padding-top:2rem}
+.more-reviews p{font-size:1rem}
+.more-reviews .who{margin:.6rem 0 0}
+.g-score{font-family:var(--ui)}
+.g-score b{font-family:var(--display);font-size:2.4rem;font-weight:500;display:block;line-height:1}
+@media (max-width:860px){.more-reviews{grid-template-columns:minmax(0,1fr)}}
+
+/* two other doors */
+.doors{padding:0 0 var(--sec)}
+.doors .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
+.door{position:relative;display:block;padding:2rem 2rem 2.2rem;border-radius:var(--r-card);background:var(--cream-2);color:var(--ink);text-decoration:none;overflow:hidden;box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.door:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
+.door:hover .tile-corner,.door:focus-visible .tile-corner{opacity:1;transform:none}
+.door h3::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.65rem 0 .2rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.door:hover h3::after,.door:focus-visible h3::after{transform:none}
+.door-link{font-family:var(--ui);font-size:1rem;font-weight:500;text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
+.door.navy{background:var(--navy);color:var(--on-green)}
+.door h3{font-size:1.6rem;margin-bottom:.6rem}
+.door p{margin-bottom:1.2rem;max-width:44ch}
+.door.navy p{color:var(--on-green-2)}
+@media (max-width:760px){.doors .wrap{grid-template-columns:minmax(0,1fr)}}
+
+
+/* our work (2026-11-11): one section on green: heading row with the portfolio link, the Sage story featured,
+   then two before/after story cards (finished photo, the halfway photo inset over its corner). */
+.work{background:var(--green);color:var(--on-green);padding:var(--sec) 0}
+.work-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem 2rem;flex-wrap:wrap;margin-bottom:2.8rem}
+.work-head h2{font-size:clamp(2rem,3.6vw,3rem)}
+.work-all{font-family:var(--ui);font-size:1rem;font-weight:500;color:var(--on-green)}
+.work-all:hover{color:var(--gold-hi)}
+.work .case-grid{margin-bottom:calc(var(--sec) * .55 + 2.5rem)}
+.work .case p{color:var(--on-green)}
+.work .case p.muted{color:var(--on-green-2)}
+.work .case a{color:var(--on-green)}
+.work .case a:hover{color:var(--gold-hi)}
+.work .num{color:var(--gold)}
+.stories{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
+.story{position:relative;display:block;background:var(--green-2);border-radius:var(--r-card);color:var(--on-green);text-decoration:none;overflow:hidden;box-shadow:0 1px 0 var(--line-dark),0 14px 30px -20px var(--story-shadow);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.story:hover{transform:translateY(-3px)}
+.story:hover .tile-corner,.story:focus-visible .tile-corner{opacity:1;transform:none}
+.story-media{position:relative;aspect-ratio:16/10}
+.story-media img{width:100%;height:100%;object-fit:cover}
+.story-media>img,.story-media>picture img{border-radius:var(--r-card) var(--r-card) 0 0}
+.story-media>picture{display:block;width:100%;height:100%}
+.story-inset{position:absolute;left:1.1rem;bottom:-2.2rem;width:34%;aspect-ratio:1;border-radius:8px;overflow:hidden;box-shadow:0 0 0 4px var(--green-2);z-index:2}
+.story-inset figcaption{left:.45rem;bottom:.45rem;font-size:.75rem;padding:.25rem .5rem}
+.story-body{padding:3.1rem 1.6rem 1.8rem}
+.story h3{font-size:clamp(1.4rem,2vw,1.75rem);font-weight:400}
+.story h3::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.6rem 0 .5rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.story:hover h3::after,.story:focus-visible h3::after{transform:none}
+.story p{color:var(--on-green-2);font-size:1rem;margin-bottom:.9rem;max-width:46ch}
+.story .door-link{color:var(--gold)}
+@media (max-width:760px){.stories{grid-template-columns:minmax(0,1fr)}.work-head{margin-bottom:2rem}}
+@media (prefers-reduced-motion:reduce){.story,.story h3::after{transition:none}.story:hover{transform:none}}
+
+/* contact */
+.contact{background:var(--green);color:var(--on-green);padding:var(--sec) 0}
+.contact .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end}
+.contact h2{font-size:clamp(2.2rem,4.2vw,3.4rem)}
+.contact p{color:var(--on-green-2);margin-bottom:1.4rem;max-width:46ch}
+.contact .btn-wa{background:var(--gold);color:var(--green)}
+.contact .btn-wa:hover{background:var(--gold-hi)}
+.contact .btn-line{color:var(--on-green);box-shadow:inset 0 0 0 1px var(--line-dark)}
+.contact .btn-line:hover{background:var(--green-2)}
+.contact .actions{display:flex;gap:.8rem;flex-wrap:wrap}
+@media (max-width:760px){.contact .wrap{grid-template-columns:minmax(0,1fr)}}
+footer{background:var(--green);color:var(--on-green-2);border-top:1px solid var(--line-dark);padding:2rem 0 2.5rem;font-family:var(--ui);font-size:.95rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2rem;justify-content:space-between}
+footer nav{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem}
+footer a{color:var(--on-green);text-decoration:none}
+footer a:hover{color:var(--gold)}
+footer span a{text-decoration:underline;text-underline-offset:3px}
+
+/* nav extras: Concierge badge, menu button, mobile menu */
 .nav-more{position:relative}
-.nav-more-trigger{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:var(--muted);cursor:pointer;
-  display:flex;align-items:center;gap:0.3rem;
-  transition:color 0.3s;user-select:none;white-space:nowrap;
-}
-#nav.over-hero .nav-more-trigger{color:rgba(240,232,208,0.8)}
-.nav-more:hover .nav-more-trigger{color:var(--gold)}
-.nav-dropdown{
-  position:absolute;top:calc(100% + 0.8rem);left:50%;
-  transform:translateX(-50%) translateY(-6px);
-  background:var(--green);border:1px solid rgba(240,232,208,0.08);
-  padding:0.6rem 0;min-width:180px;
-  opacity:0;pointer-events:none;
-  transition:opacity 0.2s,transform 0.2s;z-index:300;
-}
-.nav-more:hover .nav-dropdown{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
-.nav-dropdown::before{content:'';position:absolute;bottom:100%;left:0;right:0;height:0.9rem}
-.nav-dropdown a{
-  display:block;font-family:var(--ui);font-size:0.65rem;font-weight:400;
-  letter-spacing:0.14em;text-transform:uppercase;
-  color:rgba(240,232,208,0.6);padding:0.6rem 1.4rem;
-  transition:color 0.2s,background 0.2s;
-}
-.nav-dropdown a:hover{color:var(--gold);background:rgba(255,255,255,0.04)}
-#nav .nav-cta{
-  font-family:var(--ui);font-size:0.65rem;font-weight:500;
-  letter-spacing:0.15em;text-transform:uppercase;
-  color:var(--green);background:var(--gold);
-  padding:0.5rem 1.1rem;transition:background 0.2s;
-  white-space:nowrap;flex-shrink:0;
-}
-#nav .nav-cta:hover{background:#b07d20}
-.nav-toggle{
-  display:none;flex-direction:column;gap:5px;
-  background:none;border:none;cursor:pointer;padding:4px;
-}
-.nav-toggle span{
-  display:block;width:24px;height:2px;background:var(--ink);transition:background 0.3s;
-}
-#nav.over-hero .nav-toggle span{background:var(--cream)}
-.mobile-nav{
-  position:fixed;inset:0;z-index:190;background:var(--green);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:3rem 2rem;opacity:0;pointer-events:none;transition:opacity 0.3s;
-}
-.mobile-nav.open{opacity:1;pointer-events:auto}
-.mobile-nav a{
-  font-family:var(--display);font-size:clamp(1.4rem,5vw,2rem);
-  font-weight:400;color:rgba(240,232,208,0.75);
-  padding:0.7rem 0;border-bottom:1px solid rgba(240,232,208,0.06);
-  transition:color 0.2s;display:block;
-}
-.mobile-nav a:hover{color:var(--gold)}
-.mobile-nav-ctas{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:2rem}
-.mobile-nav-close{
-  position:absolute;top:1.4rem;right:1.5rem;
-  background:none;border:none;cursor:pointer;
-  font-family:var(--ui);font-size:0.65rem;
-  letter-spacing:0.2em;text-transform:uppercase;color:rgba(240,232,208,0.5);
-}
+.nav-more-btn{display:inline-flex;align-items:center;gap:.4rem;background:none;border:0;padding:0;font:inherit;color:var(--ink);cursor:pointer}
+.nav-more-btn:hover,.nav-more.open .nav-more-btn{color:var(--gold-ink)}
+.nav-more-btn svg{transition:transform .2s var(--ease)}
+.nav-more.open .nav-more-btn svg{transform:rotate(180deg)}
+.nav-more-menu{position:absolute;top:calc(100% + .9rem);left:-1rem;min-width:220px;background:var(--cream);border-radius:var(--r);box-shadow:0 12px 30px var(--menu-shadow);padding:.4rem 0;display:none;z-index:60}
+.nav-more-menu::before{content:"";position:absolute;bottom:100%;left:0;right:0;height:1rem}
+.nav-more.open .nav-more-menu{display:block}
+.nav-more-menu a{display:block;padding:.55rem 1rem;white-space:nowrap}
+.nav-more-menu a:hover,.nav-more-menu a:focus-visible{background:var(--cream-dark)}
+@media (hover:hover){.nav-more:hover .nav-more-menu{display:block}}
+@media (max-width:1000px){.nav .wrap{gap:1.2rem}.nav ul{gap:1.05rem}}
+.nav-cc{display:inline-flex;flex:none;border-radius:8px}
+.nav-toggle{display:none;width:44px;height:44px;border:0;background:none;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:6px;border-radius:var(--r)}
+.nav-toggle span{display:block;width:22px;height:2px;background:var(--ink)}
+.nav-toggle:active{transform:translateY(1px)}
+.mnav{position:fixed;inset:0;z-index:100;background:var(--green);color:var(--on-green);padding:5rem var(--gut) 2rem;display:flex;flex-direction:column;gap:.2rem;overflow-y:auto;opacity:0;visibility:hidden;transition:opacity .25s var(--ease),visibility .25s}
+.mnav.open{opacity:1;visibility:visible}
+.mnav a{font-family:var(--display);font-size:1.6rem;color:var(--on-green);text-decoration:none;padding:.45rem 0;border-bottom:1px solid var(--line-dark)}
+.mnav a:hover{color:var(--gold)}
+.mnav .mnav-close{position:absolute;top:1rem;right:var(--gut);background:none;border:1px solid var(--line-dark);color:var(--on-green);font-family:var(--ui);font-size:1rem;padding:.5rem .9rem;border-radius:var(--r);cursor:pointer}
+.mnav .btn{margin-top:1.5rem;align-self:flex-start;font-size:1rem;border:0}
+.mnav .btn-wa{background:var(--gold);color:var(--green)}
+@media (max-width:860px){.nav-toggle{display:flex}.nav .wrap{gap:.75rem}.nav .btn{margin-left:auto}}
+@media (max-width:420px){.nav .btn-wa{padding:.65rem .9rem;font-size:.95rem}.nav-cc{display:none}}
 
-/* ── HERO (text-only, dark green — no TV unit photography in portfolio) ── */
-.tv-hero{
-  background:var(--green);
-  min-height:100vh;
-  display:flex;flex-direction:column;justify-content:flex-end;
-  padding:0 3rem 4.5rem;
-  position:relative;overflow:hidden;
-}
-.tv-hero-grain{
-  position:absolute;inset:0;
-  background:radial-gradient(ellipse at 75% 25%, rgba(200,146,42,0.07) 0%, transparent 55%),
-             radial-gradient(ellipse at 15% 85%, rgba(11,31,14,0.9) 0%, transparent 50%);
-}
-.tv-hero-body{
-  position:relative;z-index:1;
-  animation:fadeUp 1s cubic-bezier(0.16,1,0.3,1) 0.3s both;
-}
-.hero-tag{
-  font-family:var(--ui);font-size:0.65rem;font-weight:400;
-  letter-spacing:0.32em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:1.1rem;
-}
-.tv-hero h1{
-  font-family:var(--display);
-  font-size:clamp(2.6rem,6vw,5.5rem);
-  font-weight:400;line-height:1.08;
-  color:var(--cream);margin-bottom:1.8rem;max-width:16ch;
-}
-.tv-hero h1 em{font-style:italic;color:var(--gold)}
-.tv-hero-sub{
-  font-family:var(--body);font-size:1rem;line-height:1.75;
-  color:rgba(240,232,208,0.55);max-width:44ch;margin-bottom:2rem;
-}
-.hero-scroll{
-  font-family:var(--ui);font-size:0.68rem;font-weight:400;
-  letter-spacing:0.22em;text-transform:uppercase;
-  color:rgba(240,232,208,0.6);
-  display:inline-flex;align-items:center;gap:0.8rem;
-  transition:color 0.2s,gap 0.3s;
-}
-.hero-scroll:hover{color:var(--cream);gap:1.2rem}
-.hero-scroll::after{content:'↓'}
+/* Accent layer 2026-11-11 (official palette: cream 60 / green 30 / gold 10). Gold returns as the spark,
+   cream runs are broken by green and a full-bleed photo, corners soften, photos overlap. */
+.hero .btn-wa{background:var(--gold);color:var(--green)}
+.hero .btn-wa:hover{background:var(--gold-hi)}
+.facts .star{color:var(--gold-ink)}
+.case a,.work-all{text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
+.case a:hover{color:var(--gold-ink)}
+.door:hover .door-link{color:var(--gold-ink)}
+.door.green:hover .door-link{color:var(--gold-hi)}
+.case .num{color:var(--gold-ink);font-weight:500}
+.case-photos .sq{transform:translateY(2.5rem)}
+.reviews blockquote{position:relative;color:var(--ink)}
+.reviews blockquote::before{content:"“";position:absolute;left:-.04em;top:-.12em;font-size:2.6em;line-height:1;color:var(--gold)}
+.reviews blockquote{padding-top:.75em}
+.reviews .who{color:var(--muted)}
+.reviews .who b{color:var(--ink)}
+.reviews .more-reviews{border-top-color:var(--line)}
+.g-score b{color:var(--gold-ink)}
+.g-score .stars{color:var(--gold);font-size:.6em;vertical-align:.35em}
+.door.green{background:var(--green);color:var(--on-green)}
+.door.green p{color:var(--on-green-2)}
+.door.green .door-link{color:var(--gold)}
+@media (max-width:860px){.case-photos .sq{transform:none}.case{padding-bottom:clamp(4rem,9vw,7rem)}}
 
-/* ── INTRO ── */
-.tv-intro{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:5rem;align-items:start;
-  padding:7rem 3rem;background:var(--cream);
-}
-.tv-intro h2{
-  font-family:var(--display);
-  font-size:clamp(1.8rem,3.2vw,3rem);
-  font-weight:400;line-height:1.2;
-}
-.tv-intro h2 em{font-style:italic;color:var(--gold)}
-.tv-intro-text p{
-  font-family:var(--body);font-size:0.9rem;line-height:1.85;
-  color:var(--muted);margin-bottom:1.2rem;
-}
-.tv-intro-text p:last-child{margin-bottom:0}
-.link-arrow{
-  font-family:var(--ui);font-size:0.68rem;font-weight:500;
-  letter-spacing:0.2em;text-transform:uppercase;
-  color:var(--ink);border-bottom:1px solid rgba(200,146,42,0.4);
-  padding-bottom:0.35rem;
-  display:inline-flex;align-items:center;gap:0.6rem;
-  transition:color 0.2s,border-color 0.2s,gap 0.3s;
-}
-.link-arrow:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
-.link-arrow::after{content:'→'}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
-/* ── TYPES GRID ── */
-.tv-types{padding:6rem 3rem;background:var(--cream-dark)}
-.tv-types-top{
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:4rem;margin-bottom:3.5rem;align-items:end;
-}
-.section-h2{
-  font-family:var(--display);font-size:clamp(1.8rem,3.5vw,3rem);
-  font-weight:400;line-height:1.15;
-}
-.section-intro{
-  font-family:var(--body);font-size:0.9rem;line-height:1.85;color:var(--muted);
-}
-.tv-types-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:1px;background:rgba(11,31,14,0.1);
-}
-.tv-type-card{
-  background:var(--cream-dark);padding:2.2rem 1.8rem;
-  position:relative;overflow:hidden;transition:background 0.3s;
-}
-.tv-type-card::after{
-  content:'';position:absolute;top:0;left:0;width:0;height:2px;
-  background:var(--gold);transition:width 0.4s ease;
-}
-.tv-type-card:hover{background:var(--cream)}
-.tv-type-card:hover::after{width:100%}
-.tv-type-num{
-  font-family:var(--ui);font-size:0.58rem;font-weight:400;
-  letter-spacing:0.25em;text-transform:uppercase;
-  color:var(--gold-ink,#7f5a12);margin-bottom:1.2rem;display:block;
-}
-.tv-type-name{
-  font-family:var(--display);font-size:1.15rem;font-weight:400;
-  color:var(--ink);margin-bottom:0.6rem;line-height:1.3;
-}
-.tv-type-desc{
-  font-family:var(--body);font-size:0.82rem;line-height:1.75;color:var(--muted);
-}
-
-/* ── WHAT GOES IN ── */
-.tv-details{padding:6rem 3rem;background:var(--cream)}
-.tv-details-top{margin-bottom:3.5rem}
-.tv-details-top h2{
-  font-family:var(--display);font-size:clamp(1.8rem,3.5vw,3rem);
-  font-weight:400;line-height:1.15;max-width:22ch;
-}
-.tv-detail-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:1px;background:rgba(11,31,14,0.08);
-}
-.tv-detail-item{
-  background:var(--cream);padding:2rem 1.8rem;
-  border-top:2px solid transparent;
-  transition:border-color 0.3s,background 0.3s;
-}
-.tv-detail-item:hover{border-color:var(--gold);background:var(--cream-dark)}
-.tv-detail-label{
-  font-family:var(--ui);font-size:0.58rem;font-weight:400;
-  letter-spacing:0.25em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:0.8rem;display:block;
-}
-.tv-detail-item h3{
-  font-family:var(--display);font-size:1.05rem;font-weight:400;
-  color:var(--ink);margin-bottom:0.5rem;
-}
-.tv-detail-item p{
-  font-family:var(--body);font-size:0.82rem;line-height:1.75;color:var(--muted);
-}
-
-/* ── ACHIMOTA TV + PANELING FEATURE ── */
-.tv-project{padding:6rem 3rem;background:var(--cream-dark)}
-.tv-project-top{max-width:760px;margin:0 auto 3rem;text-align:center}
-.tv-project-label{font-family:var(--ui);font-size:0.6rem;font-weight:400;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:block}
-.tv-project-top h2{font-family:var(--display);font-size:clamp(1.6rem,3vw,2.5rem);font-weight:400;line-height:1.15;color:var(--ink)}
-.tv-project-note{font-family:var(--body);font-size:0.88rem;line-height:1.8;color:var(--muted);margin-top:1.4rem}
-.tv-project-gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
-.tv-project-gallery figure{margin:0;position:relative;overflow:hidden;aspect-ratio:3/4;background:#000}
-.tv-project-gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.6s ease}
-.tv-project-gallery figure:hover img{transform:scale(1.05)}
-.tv-project-gallery picture{display:block;width:100%;height:100%}
-.tv-project-gallery figure.pm-trigger{cursor:pointer}
-.tv-project-gallery figcaption{position:absolute;left:0;right:0;bottom:0;padding:0.8rem 0.9rem;font-family:var(--ui);font-size:0.56rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--cream);background:linear-gradient(to top,rgba(11,31,14,0.85),transparent)}
-.tv-project-cta{text-align:center;margin-top:2.5rem}
-.tv-project-cta a{font-family:var(--ui);font-size:0.66rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid rgba(200,146,42,0.4);padding-bottom:0.3rem;display:inline-flex;align-items:center;gap:0.6rem;transition:color 0.2s,border-color 0.2s,gap 0.3s}
-.tv-project-cta a:hover{color:var(--gold);border-color:var(--gold);gap:1rem}
-.tv-project-cta a::after{content:'→'}
-
-/* ── MAKER'S STATEMENT ── */
-.tv-statement{
-  background:var(--green);
-  padding:8rem 3rem;
-  display:flex;align-items:center;justify-content:center;
-}
-.tv-statement-inner{max-width:660px;text-align:center}
-.statement-mark{
-  font-family:var(--display);font-size:4.5rem;line-height:0.6;
-  color:var(--gold);opacity:0.3;display:block;margin-bottom:2rem;
-}
-.tv-statement p{
-  font-family:var(--display);
-  font-size:clamp(1.2rem,2.2vw,1.75rem);
-  font-weight:400;font-style:italic;
-  line-height:1.65;color:var(--cream);
-}
-.tv-statement p em{font-style:normal;color:var(--gold)}
-.statement-attr{
-  font-family:var(--ui);font-size:0.62rem;font-weight:400;
-  letter-spacing:0.22em;text-transform:uppercase;
-  color:rgba(240,232,208,0.4);margin-top:2rem;display:block;
-}
-
-/* ── FAQ ── */
-.tv-faq{padding:6rem 3rem;background:var(--cream-dark)}
-.tv-faq-inner{max-width:720px;margin:0 auto}
-.tv-faq h2{
-  font-family:var(--display);
-  font-size:clamp(1.6rem,2.8vw,2.4rem);
-  font-weight:400;margin-bottom:3rem;
-}
-details.faq-item{border-bottom:1px solid rgba(11,31,14,0.1)}
-summary.faq-question{
-  display:flex;align-items:center;justify-content:space-between;
-  gap:1rem;padding:1.4rem 0;
-  cursor:pointer;list-style:none;
-  font-family:var(--body);font-size:0.95rem;font-weight:400;
-  color:var(--ink);line-height:1.5;
-}
+/* ===== TV units on the homepage standard (2026-11-11). Same grid (--max), spacing (--sec), card tokens,
+   label style, gold corner on clickable photos, roman headings, sentence-case UI. ===== */
+.pad-x{padding-left:calc(max(0px,(100vw - var(--max)) / 2) + var(--gut));padding-right:calc(max(0px,(100vw - var(--max)) / 2) + var(--gut))}
+.text-link{font-family:var(--ui);font-size:1rem;font-weight:500;color:var(--ink);text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px;cursor:pointer}
+.text-link:hover{color:var(--gold-ink)}
+.section-h2{font-size:clamp(2rem,3.6vw,3rem)}
+.section-intro{color:var(--muted);max-width:56ch}
+.tv-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:start;padding-top:var(--sec);padding-bottom:var(--sec)}
+.tv-intro h2{font-size:clamp(2rem,3.6vw,3rem)}
+.tv-intro-text p{color:var(--muted);margin-bottom:1.1rem;max-width:58ch}
+.tv-intro-text .text-link{display:inline-block;margin-top:.6rem}
+/* projects: heading row, then a row of photos with green labels */
+.tv-project{padding-top:var(--sec);padding-bottom:var(--sec)}
+.tv-project.on-green{background:var(--green);color:var(--on-green)}
+.tv-project.on-sand{background:var(--cream-2)}
+.tv-project-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem var(--gap);align-items:end;margin-bottom:2.2rem}
+.tv-project-top .where{grid-column:1;font-family:var(--ui);color:var(--muted)}
+.tv-project-top h2{grid-column:1;font-size:clamp(2rem,3.6vw,3rem)}
+.tv-project-note{grid-column:2;grid-row:1 / span 2;color:var(--muted);max-width:56ch}
+.on-green .tv-project-top .where,.on-green .tv-project-note{color:var(--on-green-2)}
+.tv-project-gallery{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:var(--g-img)}
+.tv-project-gallery figure{position:relative;margin:0;border-radius:var(--r-card);overflow:hidden;background:var(--cream-2)}
+.tv-project-gallery img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .6s var(--ease)}
+.tv-project-gallery figcaption{position:absolute;z-index:3;left:1rem;bottom:1rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.85rem;line-height:1.3;padding:.42rem .75rem;border-radius:var(--r);max-width:calc(100% - 2rem)}
+.on-green .tv-project-gallery figcaption{background:var(--cream);color:var(--ink)}
+.tv-project-gallery .pm-trigger,.tv-project-gallery .tv-link{cursor:pointer;box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.on-green .tv-project-gallery .tv-link{box-shadow:0 1px 0 var(--line-dark),0 14px 30px -20px var(--story-shadow)}
+.tv-project-gallery .pm-trigger:hover,.tv-project-gallery .tv-link:hover{transform:translateY(-3px)}
+.tv-project-gallery .pm-trigger:hover img,.tv-project-gallery .tv-link:hover img{transform:scale(1.03)}
+.tv-project-gallery .pm-trigger::after,.tv-project-gallery .tv-link::after{content:"";position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+.tv-project-gallery .pm-trigger:hover::after,.tv-project-gallery .tv-link:hover::after,.tv-project-gallery .tv-link:focus-visible::after{opacity:1;transform:none}
+.tv-project-gallery a.tv-link{display:block}
+@media (hover:none){.tv-project-gallery .pm-trigger::after,.tv-project-gallery .tv-link::after{opacity:.85;transform:none}}
+.tv-project-cta{margin-top:1.6rem}
+.on-green .tv-project-cta .text-link{color:var(--on-green)}
+.on-green .tv-project-cta .text-link:hover{color:var(--gold-hi)}
+/* styles: a ruled index */
+.tv-types{padding-top:var(--sec);padding-bottom:var(--sec)}
+.tv-types-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;margin-bottom:2rem}
+.tv-types-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--gap);border-top:1px solid var(--line)}
+.tv-type-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:1.2rem;padding:1.3rem 0;border-bottom:1px solid var(--line)}
+.tv-type-name{font-size:clamp(1.2rem,1.6vw,1.4rem);font-weight:400}
+.tv-type-desc{color:var(--muted);font-size:1rem}
+/* what goes into it */
+.tv-details{padding-bottom:var(--sec)}
+.tv-details-top{border-top:1px solid var(--line);padding-top:calc(var(--sec) * .6);margin-bottom:2rem}
+.tv-details-top h2{font-size:clamp(2rem,3.6vw,3rem);max-width:22ch}
+.tv-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2rem var(--gap)}
+.tv-detail-item h3{font-size:clamp(1.15rem,1.5vw,1.3rem);font-weight:400;margin-bottom:.4rem}
+.tv-detail-item h3::after{content:"";display:block;width:36px;height:1px;background:var(--gold);margin-top:.5rem}
+.tv-detail-item p{color:var(--muted);font-size:1rem}
+/* statement + review: the homepage review voice */
+.tv-statement{padding-top:var(--sec);padding-bottom:calc(var(--sec) * .6)}
+.tv-statement p,.tv-testimonial blockquote{position:relative;font-family:var(--display);font-size:clamp(1.5rem,2.8vw,2.3rem);line-height:1.3;max-width:32ch;padding-top:.75em;color:var(--ink)}
+.tv-statement p::before,.tv-testimonial blockquote::before{content:"\201C";position:absolute;left:-.04em;top:-.12em;font-size:2.6em;line-height:1;color:var(--gold)}
+.statement-attr{display:block;font-family:var(--ui);color:var(--muted);margin-top:1.2rem}
+.tv-testimonial{padding-bottom:var(--sec)}
+.tv-testimonial-inner{border-top:1px solid var(--line);padding-top:calc(var(--sec) * .6)}
+.tv-testimonial blockquote{margin-bottom:1.2rem}
+.tv-testimonial .who{font-family:var(--ui);color:var(--muted)}
+.tv-testimonial .who b{color:var(--ink);font-weight:500}
+/* questions */
+.tv-faq{padding-bottom:calc(var(--sec) * .6)}
+.tv-faq-inner{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:var(--gap);border-top:1px solid var(--line);padding-top:calc(var(--sec) * .6)}
+.tv-faq h2{font-size:clamp(2rem,3.6vw,3rem)}
+.faq-list{border-top:1px solid var(--line)}
+details.faq-item{border-bottom:1px solid var(--line)}
+summary.faq-question{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1.15rem 0;font-family:var(--display);font-size:clamp(1.1rem,1.5vw,1.3rem);color:var(--ink);cursor:pointer}
 summary.faq-question::-webkit-details-marker{display:none}
-summary.faq-question::after{
-  content:'+';
-  font-family:var(--ui);font-size:1.2rem;font-weight:300;
-  color:var(--gold);flex-shrink:0;
-  transition:transform 0.3s;display:inline-block;
-}
+summary.faq-question::after{content:"+";flex:none;color:var(--gold-ink);font-family:var(--ui);font-size:1.4rem;line-height:1;transition:transform .25s var(--ease)}
+summary.faq-question:hover{color:var(--gold-ink)}
 details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
-.faq-answer{
-  font-family:var(--body);font-size:0.88rem;line-height:1.85;
-  color:var(--muted);padding-bottom:1.4rem;max-width:52ch;
-}
-
-/* ── TESTIMONIAL ── */
-.tv-testimonial{
-  background:var(--green);padding:7rem 3rem;text-align:center;
-}
-.t-mark{
-  font-family:var(--display);font-size:5rem;line-height:0.5;
-  color:var(--gold);opacity:0.35;display:block;margin-bottom:2.5rem;
-}
-.t-quote{
-  font-family:var(--display);
-  font-size:clamp(1.05rem,1.9vw,1.45rem);
-  font-weight:400;font-style:italic;
-  color:var(--cream);line-height:1.75;
-  max-width:48ch;margin:0 auto 2.5rem;
-}
-.t-name{
-  font-family:var(--ui);font-size:0.7rem;font-weight:500;
-  letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);
-}
-.t-role{
-  display:block;font-family:var(--ui);font-size:0.62rem;font-weight:300;
-  letter-spacing:0.12em;color:rgba(240,232,208,0.62);margin-top:0.35rem;
-}
-
-/* ── CTA ── */
-.tv-cta{
-  background:var(--cream);padding:8rem 3rem;
-  display:grid;grid-template-columns:1fr 1fr;
-  gap:5rem;align-items:center;
-}
-.tv-cta h2{
-  font-family:var(--display);
-  font-size:clamp(2rem,4vw,3.2rem);
-  font-weight:400;line-height:1.15;
-}
-.tv-cta h2 em{font-style:italic;color:var(--gold)}
-.tv-cta p{
-  font-family:var(--body);font-size:0.9rem;line-height:1.85;
-  color:var(--muted);margin-bottom:2.5rem;max-width:38ch;
-}
-.btn-row{display:flex;gap:0.8rem;flex-wrap:wrap}
-.btn-wa{
-  font-family:var(--ui);font-size:0.7rem;font-weight:500;
-  letter-spacing:0.15em;text-transform:uppercase;
-  padding:0.9rem 1.8rem;background:var(--gold);color:var(--green);
-  display:inline-flex;align-items:center;gap:0.6rem;
-  transition:background 0.25s;
-}
-.btn-wa:hover{background:#b07d20}
-.btn-outline{
-  font-family:var(--ui);font-size:0.7rem;font-weight:500;
-  letter-spacing:0.15em;text-transform:uppercase;
-  padding:0.9rem 1.8rem;background:transparent;
-  border:1px solid rgba(11,31,14,0.3);color:var(--ink);
-  display:inline-flex;align-items:center;
-  transition:background 0.25s,color 0.25s,border-color 0.25s;
-}
-.btn-outline:hover{background:var(--green);color:var(--cream);border-color:var(--green)}
-
-/* ── FOOTER ── */
-.redesign-footer{
-  background:var(--green);padding:3.5rem 3rem;
-  display:grid;grid-template-columns:1fr auto;align-items:end;gap:2rem;
-}
-.redesign-footer .foot-logo{
-  display:flex;align-items:center;gap:0.6rem;
-  margin-bottom:0.5rem;text-decoration:none;
-}
-.redesign-footer .logo-img{filter:invert(1);height:30px;width:auto}
-.redesign-footer .foot-logo span{
-  font-family:var(--display);font-size:1.05rem;font-weight:500;
-  color:var(--cream);letter-spacing:0.03em;
-}
-.redesign-footer .foot-tagline{
-  font-family:var(--body);font-style:italic;font-size:0.82rem;
-  color:rgba(240,232,208,0.62);
-}
-.redesign-footer .foot-nav{
-  display:flex;flex-direction:column;align-items:flex-end;gap:0.7rem;
-}
-.redesign-footer .foot-nav a{
-  font-family:var(--ui);font-size:0.65rem;font-weight:300;
-  letter-spacing:0.16em;text-transform:uppercase;
-  color:rgba(240,232,208,0.5);transition:color 0.2s;
-}
-.redesign-footer .foot-nav a:hover{color:var(--gold)}
-.redesign-footer .foot-copy{
-  grid-column:1/-1;border-top:1px solid rgba(240,232,208,0.08);
-  padding-top:1.5rem;margin-top:0.5rem;
-  font-family:var(--ui);font-size:0.6rem;font-weight:300;
-  letter-spacing:0.1em;color:rgba(240,232,208,0.62);
-}
-
-/* ── WA FLOAT ── */
-.redesign-wa-float{
-  position:fixed;bottom:1.75rem;right:1.75rem;z-index:990;
-  background:#25d366;color:#fff;width:58px;height:58px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(37,211,102,0.38);
-  transition:transform 0.3s,box-shadow 0.3s;
-}
-.redesign-wa-float:hover{transform:scale(1.1);box-shadow:0 6px 28px rgba(37,211,102,0.52)}
-.redesign-wa-float svg{width:28px;height:28px}
-.redesign-wa-tooltip{
-  position:absolute;right:66px;white-space:nowrap;
-  background:#1c1c1a;color:#fff;font-family:var(--ui);
-  font-size:0.76rem;font-weight:500;padding:0.42rem 0.88rem;border-radius:4px;
-  opacity:0;pointer-events:none;transform:translateX(6px);
-  transition:opacity 0.25s,transform 0.25s;
-}
-.redesign-wa-float:hover .redesign-wa-tooltip{opacity:1;transform:none}
-
-/* ── ANIMATIONS ── */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(24px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
-/* ── RESPONSIVE ── */
-@media(max-width:1024px){
-  .tv-intro{gap:3rem}
-  .tv-detail-grid{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:900px){
-  .tv-types-top{grid-template-columns:1fr;gap:1.5rem}
-  .tv-cta{grid-template-columns:1fr;gap:3rem}
-  .tv-project-gallery{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:768px){
-  #nav{padding:1.2rem 1.5rem}
-  #nav .nav-links{display:none}
-  #nav .nav-cta{display:none}
-  .nav-toggle{display:flex}
-  .tv-hero{padding:0 1.5rem 3.5rem}
-  .tv-intro{grid-template-columns:1fr;gap:2.5rem;padding:5rem 1.5rem}
-  .tv-types{padding:4rem 1.5rem}
-  .tv-types-grid{grid-template-columns:1fr}
-  .tv-details{padding:4rem 1.5rem}
-  .tv-detail-grid{grid-template-columns:1fr}
-  .tv-project{padding:4rem 1.5rem}
-  .tv-statement{padding:5rem 1.5rem}
-  .tv-faq{padding:4rem 1.5rem}
-  .tv-testimonial{padding:5rem 1.5rem}
-  .tv-cta{padding:5rem 1.5rem;gap:2rem}
-  .redesign-footer{grid-template-columns:1fr;padding:3rem 1.5rem;align-items:start}
-  .redesign-footer .foot-nav{align-items:flex-start;margin-top:1.5rem}
-  .redesign-wa-float{bottom:1.2rem;right:1.2rem;width:52px;height:52px}
-}
+.faq-answer{color:var(--muted);padding:0 0 1.2rem;max-width:62ch}
+/* closing CTA = homepage contact */
+.tv-cta{background:var(--green);color:var(--on-green);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;padding-top:var(--sec);padding-bottom:var(--sec)}
+.tv-cta h2{font-size:clamp(2.2rem,4.2vw,3.4rem)}
+.tv-cta p{color:var(--on-green-2);margin-bottom:1.4rem;max-width:46ch}
+.tv-cta .btn-row{display:flex;gap:.8rem;flex-wrap:wrap}
+.tv-cta .btn-wa{background:var(--gold);color:var(--green)}
+.tv-cta .btn-wa:hover{background:var(--gold-hi)}
+.tv-cta .btn-line{color:var(--on-green);box-shadow:inset 0 0 0 1px var(--line-dark)}
+.tv-cta .btn-line:hover{background:var(--green-2)}
+#cms-posts{padding-left:calc(max(0px,(100vw - var(--max)) / 2) + var(--gut))!important;padding-right:calc(max(0px,(100vw - var(--max)) / 2) + var(--gut))!important}
+/* admin posts (fallback block): heading + story-style cards, matching the rest of the page */
+#cms-posts{padding-top:var(--sec)!important;padding-bottom:0!important}
+#cms-posts .cms-label{font-family:var(--display);font-size:clamp(2rem,3.6vw,3rem);font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink);line-height:1.15;margin-bottom:2rem}
+#cms-posts .cms-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap)}
+#cms-posts .cms-card{position:relative;background:var(--paper);border-radius:var(--r-card);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease)}
+#cms-posts .cms-card:hover{transform:translateY(-3px)}
+#cms-posts .cms-card::after{content:"";position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+#cms-posts .cms-card:hover::after{opacity:1;transform:none}
+#cms-posts .cms-badge{top:auto;bottom:1rem;left:1rem;font-family:var(--ui);font-size:.85rem;letter-spacing:0;text-transform:none;color:var(--on-green);padding:.38rem .7rem;border-radius:var(--r)}
+#cms-posts .cms-card-body{padding:1.2rem 1.4rem 1.5rem}
+#cms-posts .cms-card-title{font-size:clamp(1.2rem,1.6vw,1.4rem)}
+#cms-posts .cms-card-title span{font-family:var(--ui);font-size:.9rem;letter-spacing:0}
+#cms-posts .cms-card-caption{font-family:var(--body);font-size:1rem}
+@media (max-width:760px){#cms-posts .cms-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.tv-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tv-types-grid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){.tv-intro,.tv-project-top,.tv-types-top,.tv-faq-inner,.tv-cta{grid-template-columns:minmax(0,1fr)}.tv-project-top .where,.tv-project-top h2,.tv-project-note{grid-column:auto;grid-row:auto}.tv-project-gallery{grid-auto-flow:row;grid-template-columns:repeat(2,minmax(0,1fr))}.tv-project-gallery figure:first-child{grid-column:1/3}.tv-project-gallery figcaption{left:.5rem;bottom:.5rem;font-size:.75rem;padding:.28rem .5rem}.tv-detail-grid{grid-template-columns:minmax(0,1fr)}.tv-type-card{grid-template-columns:minmax(0,1fr);gap:.3rem}}
+@media (prefers-reduced-motion:reduce){.tv-project-gallery img,.tv-project-gallery .pm-trigger,.tv-project-gallery .tv-link{transition:none}.tv-project-gallery .pm-trigger:hover,.tv-project-gallery .tv-link:hover{transform:none}}
 </style>
 
 <style>
@@ -543,160 +391,169 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   .pm-media{height:44vh}
   .pm-text{padding:1.8rem 1.5rem}
 }
+.pm-eyebrow,.pm-meta{letter-spacing:0;text-transform:none;font-size:.9rem}
+.pm-dialog{border-radius:var(--r-card)}
 </style>
 </head>
 <body>
 
-<!-- MOBILE NAV OVERLAY -->
-<nav class="mobile-nav" id="mobile-nav" aria-label="Mobile navigation">
-  <button class="mobile-nav-close" id="mobile-nav-close">✕ Close</button>
-  <a href="index.html">Home</a>
+<nav class="mnav" id="mnav" aria-label="Menu">
+  <button class="mnav-close" id="mnav-close">Close</button>
   <a href="wardrobes.html">Wardrobes</a>
   <a href="kitchens.html">Kitchens</a>
   <a href="beds.html">Beds</a>
-  <a href="dining-living.html">Dining &amp; Living</a>
-  <a href="tv-units.html">TV Units</a>
-  <a href="shelving.html">Shelving</a>
-  <a href="solid-wood.html">Solid Wood</a>
-  <a href="hire.html">Hire a Carpenter</a>
   <a href="portfolio.html">Portfolio</a>
+  <a href="dining-living.html">Dining and living</a>
+  <a href="tv-units.html">TV units</a>
+  <a href="shelving.html">Shelving</a>
+  <a href="solid-wood.html">Solid wood</a>
+  <a href="hire.html">Hire a carpenter</a>
+  <a href="/concierge/">Carpentry Concierge</a>
   <a href="contact.html">Contact</a>
-  <a href="/concierge/">Concierge</a>
-  <div class="mobile-nav-ctas">
-    <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit." target="_blank" rel="noopener" style="background:#c8922a;color:#0b1f0e;font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;gap:0.6rem;text-decoration:none;">WhatsApp Us</a>
-    <a href="contact.html" style="background:transparent;border:1px solid rgba(240,232,208,0.3);color:rgba(240,232,208,0.8);font-family:'Jost',sans-serif;font-size:0.7rem;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;padding:0.9rem 1.8rem;display:inline-flex;align-items:center;text-decoration:none;">Request a Quote</a>
-  </div>
+  <a class="btn btn-wa" href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." target="_blank" rel="noopener">WhatsApp 024 463 3464</a>
 </nav>
 
-<!-- NAV -->
-<nav id="nav" class="over-hero">
-  <a href="index.html" class="logo">
-    <img src="images/logo.png" alt="" class="logo-img" aria-hidden="true">
-    <span class="logo-text-wrap">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></span>
-  </a>
-  <ul class="nav-links">
-    <li><a href="wardrobes.html">Wardrobes</a></li>
-    <li><a href="kitchens.html">Kitchens</a></li>
-    <li><a href="beds.html">Beds</a></li>
-    <li class="nav-more">
-      <span class="nav-more-trigger">More ▾</span>
-      <div class="nav-dropdown">
-        <a href="dining-living.html">Dining &amp; Living</a>
-        <a href="tv-units.html">TV Units</a>
-        <a href="shelving.html">Shelving</a>
-        <a href="solid-wood.html">Solid Wood</a>
-        <a href="hire.html">Hire a Carpenter</a>
-        <a href="/concierge/">Concierge</a>
-      </div>
-    </li>
-    <li><a href="portfolio.html">Portfolio</a></li>
-    <li><a href="contact.html">Contact</a></li>
-  </ul>
-  <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge" style="display:inline-flex;align-items:center;padding:0;margin:0 .55rem 0 0;border:0;background:none;flex:none"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg></a><a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit." class="nav-cta">WhatsApp Us</a>
-  <button class="nav-toggle" id="nav-toggle" aria-label="Open menu">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="Neewoody Custom Woodwork, home"><img src="images/logo.png" alt="" width="30" height="30">Neewoody</a>
+    <ul>
+      <li><a href="wardrobes.html">Wardrobes</a></li>
+      <li><a href="kitchens.html">Kitchens</a></li>
+      <li><a href="beds.html">Beds</a></li>
+      <li class="nav-more">
+        <button type="button" class="nav-more-btn" aria-expanded="false" aria-controls="nav-more-menu">More <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <div class="nav-more-menu" id="nav-more-menu">
+          <a href="dining-living.html">Dining and living</a>
+          <a href="tv-units.html">TV units</a>
+          <a href="shelving.html">Shelving</a>
+          <a href="solid-wood.html">Solid wood</a>
+          <a href="hire.html">Hire a carpenter</a>
+          <a href="/concierge/">Carpentry Concierge</a>
+        </div>
+      </li>
+      <li><a href="portfolio.html">Portfolio</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg></a>
+    <a class="btn btn-wa" href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." target="_blank" rel="noopener" data-wa="nav">WhatsApp us</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-controls="mnav" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
 
 <main>
 
 <!-- HERO -->
-<section class="tv-hero">
-  <div class="tv-hero-grain" aria-hidden="true"></div>
-  <div class="tv-hero-body">
-    <p class="hero-tag">TV Units &amp; Media Consoles · Accra, Ghana</p>
-    <h1>Built for your wall,<br>your screen, <em>your room.</em></h1>
-    <p class="tv-hero-sub">Most TV units fight the room they're in. A unit built to your exact wall dimensions — with cable routing, ventilation, and storage sized for what you actually own — doesn't.</p>
-    <a href="#types" class="hero-scroll">See what we build</a>
+<section class="hero">
+  <div class="hero-text">
+    <h1>Built for your wall, your screen, your room.</h1>
+    <p>A TV unit built to your exact wall, with the cables hidden, the screen at the right height and storage sized for what you own.</p>
+    <div class="actions">
+      <a class="btn btn-wa" href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit." target="_blank" rel="noopener" data-wa="tv-hero">WhatsApp 024 463 3464</a>
+      <a class="btn btn-line" href="#bortianor">See the work</a>
+    </div>
+    <dl class="facts">
+      <dt>Build time</dt><dd>Usually 2 to 4 weeks</dd>
+      <dt>Installation</dt><dd>Included anywhere in Accra</dd>
+      <dt>Workshop</dt><dd>Amugi Avenue, Accra</dd>
+    </dl>
   </div>
+  <figure>
+    <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-living-tv-wall.webp"><img src="images/projects/bortianor/bortianor-living-tv-wall.jpg" alt="Cream TV wall framed by lit walnut-grain shelving, Bortianor" fetchpriority="high"></picture>
+    <figcaption>TV wall, Bortianor</figcaption>
+  </figure>
 </section>
 
 <!-- INTRO -->
-<section class="tv-intro">
-  <h2>A TV unit designed for <em>your space.</em></h2>
+<section class="tv-intro pad-x">
+  <h2>A TV unit designed for your space.</h2>
   <div class="tv-intro-text">
     <p>Most Accra living rooms share the same problem: the TV is fighting the room. Wrong height, wrong width, cables taped along the skirting, storage that never quite fits the decoder, router, and streaming box together. A shelf from the market rarely solves any of it.</p>
-    <p>We measure your wall, understand how you use the space — the screens you own, the equipment you need to accommodate, the seating position — and build a unit that puts everything where it belongs. Clean, functional, and finished to match your interior.</p>
+    <p>We measure your wall, understand how you use the space (the screens you own, the equipment you need to house, where you sit) and build a unit that puts everything where it belongs. Clean, functional, and finished to match your interior.</p>
     <p>Whether you want a minimal floating panel, a full-wall entertainment build, or a low console with drawer storage, we scope and price it to your brief.</p>
-    <a href="contact.html" class="link-arrow" style="margin-top:1rem">Get a free quote</a>
+    <a href="contact.html" class="text-link">Get a free quote</a>
   </div>
 </section>
 
+<!-- BORTIANOR: two TV walls in one house -->
+<section class="tv-project on-green pad-x" id="bortianor">
+  <div class="tv-project-top">
+    <p class="where">Bortianor, Accra, 2026</p>
+    <h2>Two TV walls in one new house</h2>
+    <p class="tv-project-note">In the living room, a cream wall with fluted panels between two columns of lit walnut-grain shelving, over a long low cabinet. In the master bedroom, stone-look panels with walnut-grain strips and a matching console. Both are part of a whole-house fit-out, alongside the kitchen, a bar and a glass-front wardrobe.</p>
+  </div>
+  <div class="tv-project-gallery">
+    <a class="tv-link" href="projects/bortianor.html" aria-label="Living room: see the whole house"><figure><picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-living-tv-wall.webp"><img src="images/projects/bortianor/bortianor-living-tv-wall.jpg" alt="Cream TV wall framed by lit walnut-grain shelving" loading="lazy"></picture><figcaption>Living room</figcaption></figure></a>
+    <a class="tv-link" href="projects/bortianor.html" aria-label="With the bar: see the whole house"><figure><picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-living-wide.webp"><img src="images/projects/bortianor/bortianor-living-wide.jpg" alt="The living room with the TV wall and the bar" loading="lazy"></picture><figcaption>With the bar</figcaption></figure></a>
+    <a class="tv-link" href="projects/bortianor.html" aria-label="Master bedroom: see the whole house"><figure><picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-master-tv-wall.webp"><img src="images/projects/bortianor/bortianor-master-tv-wall.jpg" alt="Master bedroom TV wall in stone-look panels with a walnut-grain console" loading="lazy"></picture><figcaption>Master bedroom</figcaption></figure></a>
+  </div>
+  <div class="tv-project-cta"><a class="text-link" href="projects/bortianor.html">See the whole house</a></div>
+</section>
+
 <!-- TYPES -->
-<section class="tv-types" id="types">
+<section class="tv-types pad-x" id="types">
   <div class="tv-types-top">
     <h2 class="section-h2">Every style of TV unit, built to your wall.</h2>
-    <p class="section-intro">From a minimal floating panel to a full feature wall — we build around your room dimensions, your equipment, and your brief.</p>
+    <p class="section-intro">From a minimal floating panel to a full feature wall, we build around your room dimensions, your equipment, and your brief.</p>
   </div>
   <div class="tv-types-grid">
     <div class="tv-type-card">
-      <span class="tv-type-num">01</span>
-      <h3 class="tv-type-name">Floating Wall Units</h3>
-      <p class="tv-type-desc">Wall-mounted with no legs touching the floor. Clean, modern, and makes the room feel larger. Cable routing is built in from the start — nothing hangs loose.</p>
+      <h3 class="tv-type-name">Floating wall units</h3>
+      <p class="tv-type-desc">Wall-mounted with no legs touching the floor. Clean, modern, and makes the room feel larger. Cable routing is built in from the start, so nothing hangs loose.</p>
     </div>
     <div class="tv-type-card">
-      <span class="tv-type-num">02</span>
-      <h3 class="tv-type-name">Floor-to-Ceiling Feature Walls</h3>
-      <p class="tv-type-desc">The TV becomes part of a complete wall composition — shelving above, closed storage below, display niches beside it. A feature wall rather than a standalone unit.</p>
+      <h3 class="tv-type-name">Floor-to-ceiling feature walls</h3>
+      <p class="tv-type-desc">The TV becomes part of a complete wall: shelving above, closed storage below, display niches beside it. A feature wall rather than a standalone unit.</p>
     </div>
     <div class="tv-type-card">
-      <span class="tv-type-num">03</span>
-      <h3 class="tv-type-name">Media Consoles &amp; Sideboards</h3>
-      <p class="tv-type-desc">A lower console with drawers, open equipment bays, and a clean top surface. Works in living rooms and bedrooms alike — and doubles as a display surface.</p>
+      <h3 class="tv-type-name">Media consoles and sideboards</h3>
+      <p class="tv-type-desc">A lower console with drawers, open equipment bays, and a clean top surface. Works in living rooms and bedrooms alike, and doubles as a display surface.</p>
     </div>
     <div class="tv-type-card">
-      <span class="tv-type-num">04</span>
-      <h3 class="tv-type-name">Alcove &amp; Recessed Builds</h3>
-      <p class="tv-type-desc">If your room has an alcove or a recess in the wall, we build a unit that fills it exactly — no visible side gaps, no awkward overhang. Fully integrated.</p>
+      <h3 class="tv-type-name">Alcove and recessed builds</h3>
+      <p class="tv-type-desc">If your room has an alcove or a recess in the wall, we build a unit that fills it exactly, with no visible side gaps, no awkward overhang. Fully integrated.</p>
     </div>
   </div>
 </section>
 
 <!-- WHAT GOES INTO IT -->
-<section class="tv-details">
+<section class="tv-details pad-x">
   <div class="tv-details-top">
     <h2>Built to handle everything in your living room.</h2>
   </div>
   <div class="tv-detail-grid">
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
-      <h3>Cable Management</h3>
-      <p>Routed from screen to decoder to wall socket — hidden inside the unit from the start, not taped on afterwards.</p>
+      <h3>Cable management</h3>
+      <p>Routed from screen to decoder to wall socket, hidden inside the unit from the start, not taped on afterwards.</p>
     </div>
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
-      <h3>Right Viewing Height</h3>
+      <h3>The right viewing height</h3>
       <p>We calculate the correct screen height based on your seating arrangement and screen size. No neck strain, no awkward tilt.</p>
     </div>
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
-      <h3>Equipment Storage</h3>
-      <p>Dedicated bays sized for your decoder, streaming box, game console, and router — so everything fits and ventilates properly.</p>
+      <h3>Equipment storage</h3>
+      <p>Dedicated bays sized for your decoder, streaming box, game console and router, so everything fits and ventilates properly.</p>
     </div>
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
       <h3>Ventilation</h3>
       <p>Decoders and amplifiers run hot. We design open bays or vented backs so equipment doesn't overheat over time.</p>
     </div>
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
-      <h3>Finish to Match Your Interior</h3>
-      <p>PVC wrap, veneer, painted finish, or a combination — we match the unit to your existing furniture and colour scheme.</p>
+      <h3>A finish to match your room</h3>
+      <p>PVC wrap, veneer, painted finish or a combination. We match the unit to your existing furniture and colour scheme.</p>
     </div>
     <div class="tv-detail-item">
-      <span class="tv-detail-label">Detail</span>
-      <h3>Any Budget, Any Scale</h3>
-      <p>A simple console or a full feature wall — we scope to what you want to spend without compromising on structure or finish.</p>
+      <h3>Any budget, any scale</h3>
+      <p>A simple console or a full feature wall: we scope to what you want to spend without compromising on structure or finish.</p>
     </div>
   </div>
 </section>
 
 <!-- ACHIMOTA TV + PANELING FEATURE -->
-<section class="tv-project" id="achimota">
+<section class="tv-project pad-x" id="achimota">
   <div class="tv-project-top">
-    <span class="tv-project-label">Project · Achimota Guesthouse</span>
-    <h2>TV Unit &amp; Wall Paneling — Achimota Guesthouse</h2>
-    <p class="tv-project-note">A marble feature wall with floating TV bench and lit glass display cabinet, paired with slat wall paneling and hallway wainscotting. We group paneling and TV unit work together because they're so often ordered as one — a single wall composition rather than separate jobs.</p>
+    <p class="where">Achimota guesthouse</p>
+    <h2>TV unit and wall paneling</h2>
+    <p class="tv-project-note">A marble feature wall with floating TV bench and lit glass display cabinet, paired with slat wall paneling and hallway wainscotting. We group paneling and TV unit work together because they're so often ordered as one: a single wall composition rather than separate jobs.</p>
   </div>
 
   <div class="tv-project-gallery">
@@ -706,7 +563,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
         <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.jpg"
           alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
       </picture>
-      <figcaption>TV unit &amp; marble wall</figcaption>
+      <figcaption>TV unit and marble wall</figcaption>
     </figure>
     <figure>
       <picture>
@@ -714,7 +571,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
         <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-2.jpg"
           alt="TV unit with marble feature wall, Achimota guesthouse room conversion" loading="lazy" />
       </picture>
-      <figcaption>Feature wall &amp; display cabinet</figcaption>
+      <figcaption>Feature wall and cabinet</figcaption>
     </figure>
     <figure>
       <picture>
@@ -738,30 +595,28 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
         <img src="images/projects/achimota-guesthouse/achimota-hallway-wainscot.jpg"
           alt="Wainscot wall paneling, hallway leading to guesthouse room, Achimota" loading="lazy" />
       </picture>
-      <figcaption>Hallway wainscotting &amp; molding</figcaption>
+      <figcaption>Hallway wainscotting</figcaption>
     </figure>
   </div>
 
-  <div class="tv-project-cta">
-    <a href="projects/achimota-guesthouse.html">See the full project</a>
-  </div>
+  <div class="tv-project-cta"><a class="text-link" href="projects/achimota-guesthouse.html">See the full project</a></div>
 </section>
 
 <!-- PRAMPRAM TV UNIT — opens project modal -->
-<section class="tv-project" style="background:var(--cream)">
+<section class="tv-project on-sand pad-x">
   <div class="tv-project-top">
-    <span class="tv-project-label">Project · Prampram</span>
-    <h2>Simple TV Unit — Prampram</h2>
-    <p class="tv-project-note">A floating TV console built alongside an open kitchen for a newly built house in a Prampram estate — push-open drawers and a wall-mounted open shelf in a warm walnut tone. Part of the same commission as the kitchen.</p>
+    <p class="where">Prampram, 2026</p>
+    <h2>A simple TV unit</h2>
+    <p class="tv-project-note">A floating TV console built alongside an open kitchen for a newly built house in a Prampram estate, with push-open drawers and a wall-mounted open shelf in a warm walnut tone. Part of the same commission as the kitchen.</p>
   </div>
-  <div class="tv-project-gallery" style="max-width:1040px;margin:0 auto">
+  <div class="tv-project-gallery">
     <figure class="pm-trigger" data-pm="pm-prampram">
       <picture>
         <source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-tv-unit.webp">
         <img src="images/projects/prampram-kitchen/prampram-tv-unit.jpg"
           alt="Floating TV console with wall-mounted open shelf, Prampram" loading="lazy" />
       </picture>
-      <figcaption>TV console &amp; shelf</figcaption>
+      <figcaption>TV console and shelf</figcaption>
     </figure>
     <figure class="pm-trigger" data-pm="pm-prampram">
       <picture>
@@ -780,19 +635,17 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
       <figcaption>Full length</figcaption>
     </figure>
   </div>
-  <div class="tv-project-cta">
-    <a href="#" class="pm-trigger" data-pm="pm-prampram">View the project</a>
-  </div>
+  <div class="tv-project-cta"><a href="#" class="text-link pm-trigger" data-pm="pm-prampram">View the project</a></div>
 </section>
 
 <!-- TV STANDS / FEATURE WALLS — opens project modal -->
-<section class="tv-project" style="background:var(--cream-dark)">
+<section class="tv-project pad-x">
   <div class="tv-project-top">
-    <span class="tv-project-label">From the workshop</span>
-    <h2>Feature-Wall TV Units &amp; Media Stands</h2>
-    <p class="tv-project-note">Floor-to-ceiling TV feature walls and freestanding media consoles built to suit the room &mdash; panelled backboards, hidden cable runs, and storage below.</p>
+    <p class="where">From the workshop</p>
+    <h2>Feature walls and media stands</h2>
+    <p class="tv-project-note">Floor-to-ceiling TV feature walls and freestanding media consoles built to suit the room: panelled backboards, hidden cable runs, and storage below.</p>
   </div>
-  <div class="tv-project-gallery" style="max-width:1040px;margin:0 auto">
+  <div class="tv-project-gallery">
     <figure class="pm-trigger" data-pm="pm-tv-stands">
       <picture><source type="image/webp" srcset="images/projects/tv-stands/tv-stand-1.webp"><img src="images/projects/tv-stands/tv-stand-1.jpg" alt="Floor-to-ceiling feature-wall TV unit with mounted TV, Accra" loading="lazy" /></picture>
       <figcaption>Feature-wall unit</figcaption>
@@ -806,9 +659,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
       <figcaption>Panelled backboard</figcaption>
     </figure>
   </div>
-  <div class="tv-project-cta">
-    <a href="#" class="pm-trigger" data-pm="pm-tv-stands">View the project</a>
-  </div>
+  <div class="tv-project-cta"><a href="#" class="text-link pm-trigger" data-pm="pm-tv-stands">See all the photos</a></div>
 </section>
 
 <!-- MAKER'S STATEMENT -->
@@ -816,32 +667,32 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="tv-units" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
 
-<section class="tv-statement">
+<section class="tv-statement pad-x">
   <div class="tv-statement-inner">
-    <span class="statement-mark">"</span>
-    <p>A TV unit built to your wall hides the cables, holds your equipment, and centres the screen at exactly the right height. When it's done right, the technology <em>disappears into the room.</em></p>
-    <span class="statement-attr">Neewoody Custom Woodwork · Accra</span>
+    <p>A TV unit built to your wall hides the cables, holds your equipment, and centres the screen at exactly the right height. When it's done right, the technology disappears into the room.</p>
+    <span class="statement-attr">Neewoody Custom Woodwork, Accra</span>
   </div>
 </section>
 
 <!-- FAQ -->
-<section class="tv-faq">
+<section class="tv-faq pad-x">
   <div class="tv-faq-inner">
     <h2>Common questions about custom TV units.</h2>
+    <div class="faq-list">
 
     <details class="faq-item">
       <summary class="faq-question">How long does it take to build a custom TV unit?</summary>
-      <div class="faq-answer">Most TV units take 2–4 weeks from order confirmation to installation. Larger feature wall builds may take up to 6 weeks. We'll give you a realistic timeline when we confirm your order — we'd rather under-promise and deliver early than the reverse.</div>
+      <div class="faq-answer">Most TV units take 2 to 4 weeks from order confirmation to installation. Larger feature wall builds may take up to 6 weeks. We'll give you a realistic timeline when we confirm your order. We'd rather under-promise and deliver early than the reverse.</div>
     </details>
 
     <details class="faq-item">
       <summary class="faq-question">Do you handle cable management as part of the build?</summary>
-      <div class="faq-answer">Yes — cable routing is planned during the design phase, not added as an afterthought. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too.</div>
+      <div class="faq-answer">Yes. Cable routing is planned during the design phase, not added as an afterthought. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too.</div>
     </details>
 
     <details class="faq-item">
       <summary class="faq-question">Can I choose the finish and colour?</summary>
-      <div class="faq-answer">Completely. We work in PVC wrap laminates (hundreds of finishes available — wood grain, solid colour, matte, gloss), painted MDF, or veneer. If you want to match an existing wardrobe or kitchen, bring a photo and we'll find the closest match.</div>
+      <div class="faq-answer">Completely. We work in PVC wrap laminates (hundreds of finishes: wood grain, solid colour, matte, gloss), painted MDF, or veneer. If you want to match an existing wardrobe or kitchen, bring a photo and we'll find the closest match.</div>
     </details>
 
     <details class="faq-item">
@@ -851,7 +702,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 
     <details class="faq-item">
       <summary class="faq-question">Do you install as well as build?</summary>
-      <div class="faq-answer">Yes — installation is included for all locations within Accra. We bring the unit, mount or position it, run the cables, and leave the room tidy. For locations outside Accra, contact us for a quote that includes travel.</div>
+      <div class="faq-answer">Yes. Installation is included for all locations within Accra. We bring the unit, mount or position it, run the cables, and leave the room tidy. For locations outside Accra, contact us for a quote that includes travel.</div>
     </details>
 
     <details class="faq-item">
@@ -859,27 +710,27 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
       <div class="faq-answer">Always. Send us your wall dimensions, what equipment you need to house, and a rough idea of the style you're after. We'll come back with a clear price. No obligation, and site visits are free within Accra.</div>
     </details>
 
+    </div>
   </div>
 </section>
 
 <!-- TESTIMONIAL -->
-<section class="tv-testimonial">
-  <span class="t-mark">"</span>
-  <p class="t-quote">I've been really impressed with their craftsmanship and professionalism. For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new — from my office to my home.</p>
-  <p class="t-name">Ngminvielu Kuuire
-    <span class="t-role">Repeat client · Accra · Google Review, November 2024</span>
-  </p>
+<section class="tv-testimonial pad-x">
+  <div class="tv-testimonial-inner">
+    <blockquote>I’ve been really impressed with their craftsmanship and professionalism. For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home.</blockquote>
+    <p class="who"><b>Ngminvielu Kuuire</b>, repeat client, Accra. Google review, November 2024</p>
+  </div>
 </section>
 
 <!-- CTA -->
 
-<section class="tv-cta">
-  <h2>Let's talk about<br><em>your living room.</em></h2>
+<section class="tv-cta pad-x">
+  <h2>Let's talk about your living room.</h2>
   <div>
-    <p>Tell us your wall dimensions, the screen size, and what equipment you need to fit. We'll come back with ideas and a clear price — no obligation.</p>
+    <p>Tell us your wall dimensions, the screen size, and what equipment you need to fit. We'll come back with ideas and a clear price, with no obligation.</p>
     <div class="btn-row">
-      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit%20and%20would%20like%20to%20discuss." class="btn-wa" target="_blank" rel="noopener">WhatsApp Us →</a>
-      <a href="contact.html" class="btn-outline">Request a Quote</a>
+      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit%20and%20would%20like%20to%20discuss." class="btn btn-wa" target="_blank" rel="noopener">WhatsApp 024 463 3464</a>
+      <a href="contact.html" class="btn btn-line">Request a quote</a>
     </div>
   </div>
 </section>
@@ -887,50 +738,43 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 </main>
 
 <!-- FOOTER -->
-<footer class="redesign-footer">
-  <div>
-    <a href="index.html" class="foot-logo">
-      <img src="images/logo.png" alt="" class="logo-img" aria-hidden="true">
-      <span>Neewoody</span>
-    </a>
-    <p class="foot-tagline">Made to measure. Built to last. Based in Accra.</p>
+<footer>
+  <div class="wrap">
+    <span>Neewoody Custom Woodwork, Amugi Avenue, Accra. Since 2015. <a href="tel:+233244633464">024 463 3464</a></span>
+    <nav>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="hire.html">Hire a carpenter</a>
+      <a href="/concierge/">Carpentry Concierge</a>
+      <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
+      <a href="privacy.html">Privacy</a>
+    </nav>
   </div>
-  <nav class="foot-nav">
-    <a href="portfolio.html">Work</a>
-    <a href="wardrobes.html">Services</a>
-    <a href="hire.html">Hire a Carpenter</a>
-    <a href="contact.html">Contact</a>
-    <a href="/concierge/">Concierge</a>
-    <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
-    <a href="privacy.html">Privacy Policy</a>
-  </nav>
-  <p class="foot-copy">© 2026 Neewoody Custom Woodwork · Accra, Ghana · 0244 633 464</p>
 </footer>
 
-<!-- FLOATING WHATSAPP BUTTON -->
-<a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27m%20interested%20in%20a%20custom%20TV%20unit."
-   class="redesign-wa-float"
-   onclick="gtag('event','whatsapp_click',{event_category:'contact',event_label:'floating_whatsapp'})"
-   target="_blank" rel="noopener"
-   aria-label="Chat with Neewoody on WhatsApp">
-  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-  <span class="redesign-wa-tooltip">Chat on WhatsApp</span>
-</a>
 
+
+
+<script src="js/main.js"></script>
+<script src="js/cms-posts.js?v=20261111d"></script>
 <script>
 (function(){
-  var nav = document.getElementById('nav');
-  var hero = document.querySelector('.tv-hero');
-  if (!nav || !hero) return;
-  var io = new IntersectionObserver(function(entries){
-    nav.classList.toggle('over-hero', entries[0].isIntersecting);
-  }, { threshold: 0.05 });
-  io.observe(hero);
+  var m=document.getElementById('mnav'),t=document.getElementById('nav-toggle'),x=document.getElementById('mnav-close');
+  function set(o){m.classList.toggle('open',o);t.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':'';if(o)x.focus();else t.focus();}
+  t.addEventListener('click',function(){set(true)});
+  x.addEventListener('click',function(){set(false)});
+  m.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){set(false)})});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&m.classList.contains('open'))set(false)});
+  var mm=document.querySelector('.nav-more'),mb=mm&&mm.querySelector('.nav-more-btn');
+  if(mm){
+    function mset(o){mm.classList.toggle('open',o);mb.setAttribute('aria-expanded',o);}
+    mb.addEventListener('click',function(){mset(!mm.classList.contains('open'))});
+    document.addEventListener('click',function(e){if(!mm.contains(e.target))mset(false)});
+    mm.addEventListener('focusout',function(e){if(!mm.contains(e.relatedTarget))mset(false)});
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mm.classList.contains('open')){mset(false);mb.focus();}});
+  }
+  document.querySelectorAll('[data-wa]').forEach(function(a){a.addEventListener('click',function(){if(window.gtag)gtag('event','whatsapp_click',{event_category:'contact',event_label:a.dataset.wa})})});
 })();
-
 </script>
-<script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111b"></script>
 
 <!-- PROJECT MODAL - reusable overlay + per-project templates -->
 <div class="pm-overlay" id="pm-overlay" role="dialog" aria-modal="true" aria-hidden="true">
@@ -946,11 +790,11 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 <div class="pm-zoom" id="pm-zoom" aria-hidden="true"><img loading="lazy" id="pm-zoom-img" src="" alt=""></div>
 
 <template id="pm-tv-stands"
-  data-eyebrow="TV Units &middot; Feature Walls"
-  data-title="Feature-Wall TV Units &amp; Media Stands"
-  data-meta="Floor-to-ceiling TV walls &amp; consoles &middot; Accra">
+  data-eyebrow="TV units, feature walls"
+  data-title="Feature walls and media stands"
+  data-meta="Floor-to-ceiling TV walls and consoles, Accra">
   <p>Beyond the case studies above, we build floor-to-ceiling TV feature walls and freestanding media consoles to suit the room.</p>
-  <p>Panelled backboards, built-in cable management, and storage below &mdash; finished to match the rest of the space.</p>
+  <p>Panelled backboards, built-in cable management and storage below, finished to match the rest of the space.</p>
   <div class="pm-srcs" hidden>
     <figure data-webp="images/projects/tv-stands/tv-stand-1.jpg" data-jpg="images/projects/tv-stands/tv-stand-1.jpg" data-alt="Feature-wall TV unit with mounted TV"></figure>
     <figure data-webp="images/projects/tv-stands/tv-stand-2.jpg" data-jpg="images/projects/tv-stands/tv-stand-2.jpg" data-alt="Panelled feature wall before TV mount"></figure>
@@ -961,12 +805,12 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 </template>
 
 <template id="pm-prampram"
-  data-eyebrow="Kitchens · Prampram"
-  data-title="Open Kitchen &amp; TV Unit"
-  data-meta="Prampram, Greater Accra · 2026 · Open kitchen + TV unit">
-  <p>An estate developer in Prampram commissioned this open kitchen and a matching TV unit for a newly built house being prepared for sale &mdash; a clean, market-ready fit-out that photographs well and appeals to a buyer.</p>
+  data-eyebrow="Kitchens, Prampram"
+  data-title="Open kitchen and TV unit"
+  data-meta="Prampram, Greater Accra, 2026">
+  <p>An estate developer in Prampram commissioned this open kitchen and a matching TV unit for a newly built house being prepared for sale: a clean, market-ready fit-out that photographs well and appeals to a buyer.</p>
   <p>The kitchen is a compact open-plan U-shape in warm walnut-grain laminate, topped with grey marble-effect counters and a waterfall peninsula that doubles as a casual breakfast bar. Integrated oven, hob, and a recessed microwave keep the run uncluttered, with under-cabinet lighting along the splashback.</p>
-  <p>In the adjoining living area, a simple floating TV console in the same walnut tone &mdash; push-open drawers with a wall-mounted open shelf &mdash; keeps the media wall minimal and in step with the kitchen.</p>
+  <p>In the adjoining living area, a simple floating TV console in the same walnut tone, with push-open drawers and a wall-mounted open shelf, keeps the media wall minimal and in step with the kitchen.</p>
   <div class="pm-srcs" hidden>
     <figure data-webp="images/projects/prampram-kitchen/prampram-kitchen-hero.webp" data-jpg="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg" data-alt="Open U-shaped kitchen with waterfall marble-effect peninsula, Prampram"></figure>
     <figure data-webp="images/projects/prampram-kitchen/prampram-kitchen-corner.webp" data-jpg="images/projects/prampram-kitchen/prampram-kitchen-corner.jpg" data-alt="Kitchen run with integrated oven, hob, and recessed microwave, Prampram"></figure>

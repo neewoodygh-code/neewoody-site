@@ -270,6 +270,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .wd-intro-text .text-link{display:inline-block;margin-top:.6rem}
 /* styles we build: a ruled index, not a row of identical cards */
 .wd-types{padding-bottom:var(--sec)}
+.wd-featured+.wd-types{padding-top:var(--sec)}
 .wd-types-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;margin-bottom:2rem}
 .wd-types-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:var(--gap);border-top:1px solid var(--line)}
 .wd-type-card{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:1.2rem;padding:1.3rem 0;border-bottom:1px solid var(--line)}
@@ -305,6 +306,15 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 /* featured commission on green, homepage case layout */
 .wd-featured{background:var(--green);color:var(--on-green);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:center;padding-top:var(--sec);padding-bottom:var(--sec)}
 .wd-feat-img img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:var(--r-card)}
+.wd-feat-link{display:block;position:relative;border-radius:var(--r-card);box-shadow:0 1px 0 var(--line-dark),0 14px 30px -20px var(--story-shadow);transition:transform .3s var(--ease)}
+.wd-feat-link:hover{transform:translateY(-3px)}
+.wd-feat-link::after{content:"";position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+.wd-feat-link:hover::after,.wd-feat-link:focus-visible::after{opacity:1;transform:none}
+.wd-featured.on-cream{background:var(--cream);color:var(--ink);grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr)}
+.wd-featured.on-cream .wd-feat-img{order:2}
+.wd-featured.on-cream .where,.wd-featured.on-cream .wd-feat-text p{color:var(--muted)}
+.wd-featured.on-cream .wd-feat-text .pull,.wd-featured.on-cream .wd-feat-text .text-link{color:var(--ink)}
+.wd-featured.on-cream .wd-feat-text .text-link:hover{color:var(--gold-ink)}
 .wd-feat-text .where{font-family:var(--ui);color:var(--on-green-2);margin-bottom:.6rem}
 .wd-feat-text h2{font-size:clamp(2rem,3.6vw,3rem);margin-bottom:1.2rem}
 .wd-feat-text p{color:var(--on-green-2);margin-bottom:1rem;max-width:52ch}
@@ -441,6 +451,20 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <p>A Neewoody custom wardrobe is designed around your actual room: measured, drawn up, built, and installed to fit perfectly from wall to wall and floor to ceiling. No filler panels, no gaps, no half-measures.</p>
     <p>We build wardrobes for bedrooms across Accra, from single-room apartments to master bedrooms in larger homes. Every project gets the same level of care.</p>
     <a href="contact.html" class="text-link">Get a free quote</a>
+  </div>
+</section>
+
+<!-- BORTIANOR FEATURED (whole-house case study) -->
+<section class="wd-featured pad-x" id="bortianor">
+  <a class="wd-feat-img wd-feat-link" href="projects/bortianor.html" aria-label="Glass-front wardrobe, Bortianor: see the whole house">
+    <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-master-wardrobe.webp"><img src="images/projects/bortianor/bortianor-master-wardrobe.jpg" alt="Full-height wardrobe with black-framed glass doors and lit walnut-grain shelves, Bortianor" loading="lazy" /></picture>
+  </a>
+  <div class="wd-feat-text">
+    <p class="where">Bortianor, Accra, 2026</p>
+    <h2>A glass-front wardrobe, lit from inside</h2>
+    <p class="pull">Black-framed glass doors, walnut-grain shelves and light strips that run up every frame.</p>
+    <p>The master-bedroom wardrobe in a new house we fitted from front to back in Bortianor, along with the kitchen, pantry, two TV walls, a bar and the bathroom vanity.</p>
+    <a href="projects/bortianor.html" class="text-link">See the whole house</a>
   </div>
 </section>
 
@@ -755,7 +779,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111c"></script>
+<script src="js/cms-posts.js?v=20261111d"></script>
 <script>
 (function(){
   var m=document.getElementById('mnav'),t=document.getElementById('nav-toggle'),x=document.getElementById('mnav-close');

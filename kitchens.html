@@ -271,6 +271,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 /* featured projects: Spintex on green, Prampram on cream (opens the gallery) */
 .kt-featured{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:center;padding-top:var(--sec);padding-bottom:var(--sec)}
 .kt-featured.on-green{background:var(--green);color:var(--on-green)}
+.kt-featured:not(.on-green)+.kt-featured:not(.on-green){padding-top:0}
 .kt-feat-img img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--r-card)}
 .kt-feat-img picture{display:block}
 .kt-feat-text .where{font-family:var(--ui);color:var(--muted);margin-bottom:.6rem}
@@ -281,6 +282,10 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .on-green .kt-feat-text .where,.on-green .kt-feat-text p{color:var(--on-green-2)}
 .on-green .kt-feat-text .pull,.on-green .kt-feat-text .text-link{color:var(--on-green)}
 .on-green .kt-feat-text .text-link:hover{color:var(--gold-hi)}
+.kt-feat-img.kt-feat-link{display:block;position:relative;border-radius:var(--r-card);box-shadow:0 1px 0 var(--line-dark),0 14px 30px -20px var(--story-shadow);transition:transform .3s var(--ease)}
+.kt-feat-img.kt-feat-link:hover{transform:translateY(-3px)}
+.kt-feat-img.kt-feat-link::after{content:"";position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+.kt-feat-img.kt-feat-link:hover::after,.kt-feat-img.kt-feat-link:focus-visible::after{opacity:1;transform:none}
 .kt-feat-img.pm-trigger{position:relative;border-radius:var(--r-card);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .kt-feat-img.pm-trigger:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
 .kt-feat-img.pm-trigger::after{content:"";position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
@@ -451,8 +456,8 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
     </dl>
   </div>
   <figure>
-    <picture><source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-kitchen-hero.webp"><img src="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg" alt="Open U-shaped kitchen in walnut-grain laminate with a waterfall marble-effect peninsula, Prampram" fetchpriority="high"></picture>
-    <figcaption>Open kitchen, Prampram</figcaption>
+    <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-kitchen-wide.webp"><img src="images/projects/bortianor/bortianor-kitchen-wide.jpg" alt="Kitchen in Bortianor with walnut-grain tall units, charcoal base units and an island under a lit ceiling" fetchpriority="high" style="object-position:50% 60%"></picture>
+    <figcaption>Kitchen, Bortianor</figcaption>
   </figure>
 </section>
 
@@ -467,8 +472,22 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   </div>
 </section>
 
+<!-- BORTIANOR FEATURED (whole-house case study) -->
+<section class="kt-featured on-green pad-x" id="bortianor">
+  <a class="kt-feat-img kt-feat-link" href="projects/bortianor.html" aria-label="Kitchen in Bortianor: see the whole house">
+    <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-kitchen-island.webp"><img src="images/projects/bortianor/bortianor-kitchen-island.jpg" alt="Walnut-grain kitchen island with deep drawers, Bortianor" loading="lazy" /></picture>
+  </a>
+  <div class="kt-feat-text">
+    <p class="where">Bortianor, Accra, 2026</p>
+    <h2>The kitchen in a whole-house fit-out</h2>
+    <p class="pull">Walnut-grain tall units, charcoal base units and an island with deep drawers, under a lit ceiling.</p>
+    <p>One room of a new house we fitted from front to back in Bortianor: kitchen, pantry, two TV walls, a gentleman’s bar, a glass-front wardrobe and the bathroom vanity, all in the same walnut-grain finish.</p>
+    <a href="projects/bortianor.html" class="text-link">See the whole house</a>
+  </div>
+</section>
+
 <!-- SPINTEX FEATURED -->
-<section class="kt-featured on-green pad-x">
+<section class="kt-featured pad-x">
   <div class="kt-feat-img">
     <img src="images/projects/spintex-kitchen/spintex-kitchen-wide.jpg"
       alt="Full L-shaped kitchen in dark espresso laminate with Calacatta marble-effect countertop — Spintex, Accra"
@@ -494,9 +513,9 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   </div>
   <div class="kt-feat-img pm-trigger" data-pm="pm-prampram" role="button" tabindex="0" aria-label="Open kitchen and TV unit, Prampram: see the photos">
     <picture>
-      <source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-kitchen-corner.webp">
-      <img src="images/projects/prampram-kitchen/prampram-kitchen-corner.jpg"
-        alt="Corner of the Prampram kitchen: walnut-grain units and grey marble-effect counters" loading="lazy" />
+      <source type="image/webp" srcset="images/projects/prampram-kitchen/prampram-kitchen-hero.webp">
+      <img src="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg"
+        alt="Open U-shaped kitchen with waterfall marble-effect peninsula, Prampram" loading="lazy" />
     </picture>
   </div>
 </section>
@@ -542,14 +561,6 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
     <a href="portfolio.html" class="text-link">See the full portfolio</a>
   </div>
   <div class="kt-grid">
-    <a href="projects/bortianor.html" class="kt-card">
-      <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-kitchen-wide.webp"><img src="images/projects/bortianor/bortianor-kitchen-wide.jpg"
-        alt="Kitchen in Bortianor with walnut-grain tall units, charcoal base units and an island" loading="lazy" style="object-position:50% 60%" /></picture>
-      <div class="kt-card-meta">
-        <p class="kt-card-type">Part of a whole-house fit-out</p>
-        <p class="kt-card-name">Kitchen, Bortianor</p>
-      </div>
-    </a>
     <a href="contact.html" class="kt-card">
       <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
         alt="Large kitchen with central island in cherry-effect laminate — Dansoman, Accra" loading="lazy" />
@@ -676,7 +687,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111c"></script>
+<script src="js/cms-posts.js?v=20261111d"></script>
 
 <script>
 (function(){

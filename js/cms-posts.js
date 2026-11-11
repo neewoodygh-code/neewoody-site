@@ -14,7 +14,7 @@
   var PAGE_LABELS = {
     'index':         'Recent work',
     'wardrobes':     'Wardrobes',     'kitchens':      'Kitchens',
-    'beds':          'Beds',          'tv-units':      'TV Units',
+    'beds':          'Beds',          'tv-units':      'More TV units',
     'dining-living': 'Dining & Living','shelving':     'Shelving',
     'solid-wood':    'Solid Wood',    'portfolio':     'Portfolio',
   };
