@@ -73,7 +73,7 @@
   --on-green:#efe6cc; --on-green-2:rgba(240,232,208,.72); --line:rgba(28,28,26,.14); --line-dark:rgba(240,232,208,.18);
   --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',system-ui,sans-serif;
   --max:1240px; --gut:clamp(1.25rem,4vw,3rem); --gap:clamp(1.25rem,3vw,2.5rem);
-  --r:3px; --ease:cubic-bezier(.16,1,.3,1);
+  --r:6px; --ease:cubic-bezier(.16,1,.3,1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:clip}
@@ -122,14 +122,28 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 .make-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;margin-bottom:2.5rem}
 .make h2{font-size:clamp(2rem,3.6vw,3rem)}
 .make-head p{color:var(--muted);max-width:52ch}
-.index{list-style:none;border-top:1px solid var(--line)}
-.index a{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) 132px;gap:var(--gap);align-items:center;padding:1.1rem 0;border-bottom:1px solid var(--line);text-decoration:none;transition:background-color .2s var(--ease)}
-.index a:hover{background:var(--cream-2)}
-.index h3{font-size:clamp(1.4rem,2.4vw,2rem);font-weight:400}
-.index p{color:var(--muted);font-size:1rem}
-.index .thumb{width:132px;aspect-ratio:4/3;overflow:hidden;border-radius:var(--r);background:var(--cream-2)}
-.index .thumb img{width:100%;height:100%;object-fit:cover}
-@media (max-width:760px){.make-head{grid-template-columns:minmax(0,1fr)}.index a{grid-template-columns:minmax(0,1fr) 96px}.index p{grid-column:1;grid-row:2}.index .thumb{grid-row:1/3;grid-column:2;width:96px}}
+@media (max-width:760px){.make-head{grid-template-columns:minmax(0,1fr)}}
+/* what we make: tiles of different sizes, real photos, a cream name label and a round arrow (2026-11-11) */
+.tiles{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(190px,19vw,250px);gap:.9rem}
+.tile a{position:relative;display:block;height:100%;border-radius:12px;overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px rgba(11,31,14,.45);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
+.tile a::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,16,10,.82) 0%,rgba(20,16,10,.42) 32%,rgba(20,16,10,0) 58%);pointer-events:none}
+.tile-label{position:absolute;z-index:2;left:1.25rem;bottom:1.15rem;max-width:calc(100% - 5.2rem);display:flex;flex-direction:column;gap:.2rem;color:var(--on-green)}
+.tile-name{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,1.8vw,1.65rem);line-height:1.1;letter-spacing:-.005em}
+.tile-name::after{content:"";display:block;width:26px;height:1px;background:var(--gold);margin:.55rem 0 .4rem;transition:width .35s var(--ease)}
+.tile a:hover .tile-name::after,.tile a:focus-visible .tile-name::after{width:54px}
+.tile-line{font-family:var(--ui);font-size:.88rem;color:rgba(240,232,208,.84);line-height:1.4}
+.tile-go{position:absolute;z-index:2;right:1.1rem;bottom:1.1rem;width:42px;height:42px;border-radius:50%;border:1px solid rgba(240,232,208,.55);color:var(--on-green);display:grid;place-items:center;font-family:var(--ui);font-size:1.05rem;transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease),transform .25s var(--ease)}
+.tile a:hover,.tile a:focus-visible{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px rgba(11,31,14,.55)}
+.tile a:hover img,.tile a:focus-visible img{transform:scale(1.045)}
+.tile a:hover .tile-go,.tile a:focus-visible .tile-go{background:var(--gold);border-color:var(--gold);color:var(--green);transform:translateX(2px)}
+.t-ward{grid-column:1/3;grid-row:1/3}
+.t-kit{grid-column:3/5}
+.t-solid{grid-column:1/3}
+.t-com{grid-column:3/5}
+.t-ward .tile-name{font-size:clamp(1.7rem,2.7vw,2.4rem)}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:170px;gap:.6rem}.t-ward{grid-column:1/3;grid-row:auto / span 2}.t-kit{grid-column:1/3}.t-solid,.t-com{grid-column:auto}.tile .tile-line{display:none}.t-ward .tile-line,.t-kit .tile-line{display:block}.tile-go{width:34px;height:34px;font-size:.95rem;right:.7rem;bottom:.75rem}.tile-label{left:.85rem;bottom:.8rem;max-width:calc(100% - 3.6rem)}.tile-name::after{margin:.4rem 0 .3rem}}
+@media (prefers-reduced-motion:reduce){.tile a,.tile img,.tile-go{transition:none}.tile a:hover,.tile a:focus-visible{transform:none}.tile a:hover img{transform:none}}
 
 /* the job, start to finish: real during/after pairs */
 .process{background:var(--green);color:var(--on-green);padding:clamp(4rem,9vw,7rem) 0}
@@ -225,6 +239,43 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 @media (max-width:860px){.nav-toggle{display:flex}.nav .wrap{gap:.75rem}.nav .btn{margin-left:auto}}
 @media (max-width:420px){.nav .btn-wa{padding:.65rem .9rem;font-size:.95rem}.nav-cc{display:none}}
 #cms-posts{padding:clamp(3rem,7vw,5rem) var(--gut);background:var(--cream)}
+/* Accent layer 2026-11-11 (official palette: cream 60 / green 30 / gold 10). Gold returns as the spark,
+   cream runs are broken by green and a full-bleed photo, corners soften, photos overlap. */
+.hero .btn-wa{background:var(--gold);color:var(--green)}
+.hero .btn-wa:hover{background:var(--gold-hi)}
+.facts .star{color:var(--gold-ink)}
+.case a,.door a,.process a.more{text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
+.case a:hover,.door a:hover{color:var(--gold-ink)}
+.case .num{color:var(--gold-ink);font-weight:500}
+.case-photos .sq{transform:translateY(2.5rem)}
+.case{padding-bottom:calc(clamp(4rem,9vw,7rem) + 2.5rem)}
+.band{position:relative;height:clamp(240px,42vw,520px);overflow:hidden;background:var(--green)}
+.band img{width:100%;height:100%;object-fit:cover}
+.band figcaption{position:absolute;left:var(--gut);bottom:1.2rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.9rem;padding:.45rem .8rem;border-radius:var(--r)}
+.band figcaption a{color:var(--gold);text-underline-offset:3px}
+.reviews{background:var(--green);color:var(--on-green);border:0}
+.reviews blockquote{position:relative;color:var(--on-green)}
+.reviews blockquote::before{content:"“";position:absolute;left:-.04em;top:-.12em;font-size:2.6em;line-height:1;color:var(--gold)}
+.reviews blockquote{padding-top:.75em}
+.reviews .who{color:var(--on-green-2)}
+.reviews .who b{color:var(--on-green)}
+.reviews .more-reviews{border-top-color:var(--line-dark)}
+.g-score b{color:var(--gold)}
+.g-score .stars{color:var(--gold);font-size:.6em;vertical-align:.35em}
+.door.green{background:var(--green);color:var(--on-green)}
+.door.green p{color:var(--on-green-2)}
+.door.green a{color:var(--gold)}
+.door{border-top:3px solid var(--gold)}
+#cms-posts{padding-left:0;padding-right:0}
+#cms-posts>*{max-width:var(--max);margin-left:auto;margin-right:auto;padding-left:var(--gut);padding-right:var(--gut)}
+#cms-posts .cms-label{font-family:var(--display);font-size:clamp(2rem,3.6vw,3rem);font-weight:500;letter-spacing:-.01em;text-transform:none;color:var(--ink);line-height:1.08;margin-bottom:2rem}
+#cms-posts .cms-card{border-radius:var(--r);background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
+#cms-posts .cms-badge{letter-spacing:0;text-transform:none;font-size:.8rem;border-radius:var(--r);font-family:var(--ui)}
+#cms-posts .cms-card-title{font-size:1.15rem}
+#cms-posts .cms-card-title span{font-size:.8rem;letter-spacing:0}
+#cms-posts .cms-card-caption{font-size:.95rem}
+@media (max-width:860px){.case-photos .sq{transform:none}.case{padding-bottom:clamp(4rem,9vw,7rem)}}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -287,7 +338,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <dl class="facts">
       <dt>Workshop</dt><dd>Amugi Avenue, Accra</dd>
       <dt>Since</dt><dd>2015</dd>
-      <dt>Google</dt><dd>4.8 from 14 reviews</dd>
+      <dt>Google</dt><dd><span class="star" aria-hidden="true">&#9733;</span> 4.8 from 14 reviews</dd>
     </dl>
   </div>
   <figure>
@@ -302,13 +353,13 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
       <h2>What we make</h2>
       <p>Everything is drawn for your space, cut in our workshop and fitted by our own crew. You deal with the people who build it.</p>
     </div>
-    <ul class="index">
-      <li><a href="wardrobes.html"><h3>Wardrobes</h3><p>Built-in, floor to ceiling, sliding or hinged doors.</p><span class="thumb"><img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
-      <li><a href="kitchens.html"><h3>Kitchens</h3><p>Full fit-outs planned around your layout and appliances.</p><span class="thumb"><img src="images/projects/spintex-kitchen/spintex-kitchen-wide.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
-      <li><a href="beds.html"><h3>Beds</h3><p>Frames, platforms, storage and bunk beds, any size.</p><span class="thumb"><img src="images/projects/sage-centre/sage-bed-room.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
-      <li><a href="dining-living.html"><h3>Dining and living</h3><p>Tables, chairs and solid-wood sofas.</p><span class="thumb"><img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
-      <li><a href="solid-wood.html"><h3>Solid wood</h3><p>Teak, mahogany, iroko and afromosia. No MDF.</p><span class="thumb"><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
-      <li><a href="contact.html"><h3>Commercial</h3><p>Restaurants, offices and guesthouses, built to spec.</p><span class="thumb"><img src="images/projects/sage-centre/sage-gallery-1.jpg" alt="" loading="lazy" width="132" height="99"></span></a></li>
+    <ul class="tiles">
+      <li class="tile t-ward"><a href="wardrobes.html"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Light oak built-in wardrobe with a dressing desk" loading="lazy" width="1500" height="2000" style="object-position:50% 40%"><span class="tile-label"><span class="tile-name">Wardrobes</span><span class="tile-line">Built-in, floor to ceiling, sliding or hinged doors.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
+      <li class="tile t-kit"><a href="kitchens.html"><img src="images/projects/spintex-kitchen/spintex-kitchen-wide.jpg" alt="Dark woodgrain kitchen with a marble-look worktop, Spintex" loading="lazy" width="2000" height="1506" style="object-position:50% 55%"><span class="tile-label"><span class="tile-name">Kitchens</span><span class="tile-line">Full fit-outs planned around your layout and appliances.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
+      <li class="tile t-bed"><a href="beds.html"><img src="images/projects/golf-hills-bed/golf-hills-bed-angle.jpg" alt="Storage bed with drawers and a shelf headboard" loading="lazy" width="2000" height="1500" style="object-position:50% 55%"><span class="tile-label"><span class="tile-name">Beds</span><span class="tile-line">Frames, platforms, storage and bunk beds.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
+      <li class="tile t-din"><a href="dining-living.html"><img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Dark hardwood dining set, East Legon" loading="lazy" width="1500" height="2000" style="object-position:50% 60%"><span class="tile-label"><span class="tile-name">Dining and living</span><span class="tile-line">Tables, chairs and solid-wood sofas.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
+      <li class="tile t-solid"><a href="solid-wood.html"><img src="images/projects/roman-ridge-live-edge/live-edge-table-hero.jpg" alt="Live-edge Hyedua table in a dining room, Roman Ridge" loading="lazy" width="1205" height="1600" style="object-position:50% 65%"><span class="tile-label"><span class="tile-name">Solid wood</span><span class="tile-line">Teak, mahogany, iroko and afromosia. No MDF.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
+      <li class="tile t-com"><a href="contact.html"><img src="images/projects/sage-centre/sage-gallery-1.jpg" alt="Teak sofa and coffee table in the Sage Centre library" loading="lazy" width="2000" height="1333" style="object-position:50% 55%"><span class="tile-label"><span class="tile-name">Commercial</span><span class="tile-line">Restaurants, offices and guesthouses.</span></span><span class="tile-go" aria-hidden="true">&#8594;</span></a></li>
     </ul>
   </div>
 </section>
@@ -340,23 +391,28 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <div>
       <h2>A retreat centre furnished from scratch in Wli</h2>
       <p>A US-based NGO needed every room of its centre in the Volta Region furnished to hotel standard, hours from the nearest supplier.</p>
-      <p class="muted">Over 26 months we built 18 bunk beds, live-edge dining tables, sofas and cabinetry, all in Ghanaian teak, and fitted them on site.</p>
+      <p class="muted">Over <span class="num">26 months</span> we built <span class="num">18 bunk beds</span>, live-edge dining tables, sofas and cabinetry, all in Ghanaian teak, and fitted them on site.</p>
       <a href="projects/sage-centre.html">Read the Sage Centre story</a>
     </div>
   </div>
 </section>
+
+<figure class="band">
+  <picture><source type="image/webp" srcset="images/projects/roman-ridge-live-edge/live-edge-table-grain-wide.webp"><img src="images/projects/roman-ridge-live-edge/live-edge-table-grain-wide.jpg" alt="Wet finish on a live-edge Hyedua tabletop, sunlight through the palms in the workshop yard" loading="lazy" width="2000" height="926"></picture>
+  <figcaption>Hyedua, finish going on in the yard. <a href="solid-wood.html">See the table</a></figcaption>
+</figure>
 
 <!-- RECENT WORK — CMS-driven (admin.html uploads). Hidden until posts target the home page. -->
 <section id="cms-posts" data-page="index" style="display:none"></section>
 
 <section class="reviews">
   <div class="wrap">
-    <blockquote>"Our guests and faculty from across Ghana and the world all compliment the custom woodwork, especially the dining tables."</blockquote>
+    <blockquote>Our guests and faculty from across Ghana and the world all compliment the custom woodwork, especially the dining tables.</blockquote>
     <p class="who"><b>Ben Schwartz</b>, educational retreat centre, Wli. Google review, December 2024</p>
     <div class="more-reviews">
       <div><p>"For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home."</p><p class="who"><b>Ngminvielu Kuuire</b>, repeat client, Accra</p></div>
       <div><p>"If you are searching for carpenters who prioritize detail and possess a natural creative talent, Neewoody is the ideal choice."</p><p class="who"><b>mcdennis appau</b>, Google Local Guide</p></div>
-      <div class="g-score"><b>4.8</b>average from 14 Google reviews</div>
+      <div class="g-score"><b>4.8 <span class="stars" aria-hidden="true">&#9733;</span></b>average from 14 Google reviews</div>
     </div>
   </div>
 </section>
@@ -368,7 +424,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
       <p>Post the job free and vetted carpenters near you get in touch on WhatsApp. No account needed.</p>
       <a href="hire.html">Post a job</a>
     </div>
-    <div class="door navy">
+    <div class="door green">
       <h3>Are you a carpenter?</h3>
       <p>We also run Carpentry Concierge: a members' directory, job board and the workshop tools we use ourselves.</p>
       <a href="/concierge/">See Carpentry Concierge</a>
@@ -421,6 +477,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   document.querySelectorAll('[data-wa]').forEach(function(a){a.addEventListener('click',function(){if(window.gtag)gtag('event','whatsapp_click',{event_category:'contact',event_label:a.dataset.wa})})});
 })();
 </script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111"></script>
 </body>
 </html>
