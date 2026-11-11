@@ -5,7 +5,7 @@
 <title>Carpentry Concierge — hire a vetted carpenter, or join the network | Ghana</title>
 <meta name="description" content="Carpentry Concierge by Neewoody — Ghana's network of vetted carpenters, vendors and couriers. Clients hire a trusted artisan; carpenters join to get listed, find work and use the tools.">
 <link rel="canonical" href="https://neewoodygh.com/concierge/">
-<link rel="icon" href="/images/logo.png">
+<link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@400;500;600&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
@@ -29,9 +29,11 @@
   .cc-lock .wm .t{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--cream);font-weight:600}
   @media(max-width:520px){.cc-lock .wm{display:none}}
 
-  /* ── hero (light, so the navy emblem reads) ── */
+  /* ── hero: the growth-rings mark + name (2026-11-11, replaced the earlier illustrated emblem) ── */
   .hero{text-align:center;padding:2.4rem 1.4rem 2.2rem}
-  .hero .emblem{width:min(340px,78vw);height:auto;margin:0 auto .4rem;display:block}
+  .hero .mark{width:clamp(84px,18vw,112px);height:auto;display:block;margin:.4rem auto 1.1rem}
+  .hero h1{font-family:'Playfair Display',serif;font-weight:600;color:var(--navy);font-size:clamp(2.2rem,6vw,3.4rem);line-height:1.04;margin:0}
+  .hero h1 small{display:block;font-family:'Jost';font-weight:500;font-size:clamp(.95rem,2.2vw,1.1rem);color:var(--gold-ink,#7f5a12);margin-top:.45rem}
   .hero .rule{width:64px;height:2px;background:var(--gold);margin:.4rem auto 1.1rem}
   .hero p{font-family:'Lora';font-size:1.08rem;color:#4a4536;max-width:600px;margin:0 auto}
 
@@ -80,18 +82,14 @@
 <div class="topbar"><div class="wrap">
   <a class="nw" href="/index.html"><span class="nm">Neewoody</span><span class="sub">Custom Woodwork · Accra</span></a>
   <a class="cc-lock" href="/concierge/" aria-label="Carpentry Concierge">
-    <svg width="36" height="36" viewBox="0 0 120 120" role="img" aria-label="Carpentry Concierge">
-      <circle cx="60" cy="60" r="58" fill="#1f2f58"/>
-      <circle cx="60" cy="60" r="52" fill="none" stroke="#c8922a" stroke-width="1.5" opacity=".55"/>
-      <text x="47" y="63" text-anchor="middle" dominant-baseline="central" font-family="'Playfair Display',serif" font-weight="700" font-size="62" fill="#c8922a">C</text>
-      <text x="73" y="63" text-anchor="middle" dominant-baseline="central" font-family="'Playfair Display',serif" font-weight="700" font-size="62" fill="#f3ecdd">C</text>
-    </svg>
+    <svg width="36" height="36" viewBox="0 0 100 100" role="img" aria-label="Carpentry Concierge"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg>
     <span class="wm"><span class="k">Carpentry</span><span class="t">Concierge</span></span>
   </a>
 </div></div>
 
 <section class="hero">
-  <img class="emblem" src="/images/concierge-logo.svg" alt="Carpentry Concierge" width="340" height="340">
+  <img class="mark" src="/images/concierge/cc-mark.svg" alt="" width="112" height="112">
+  <h1>Carpentry Concierge<small>Ghana</small></h1>
   <div class="rule"></div>
   <p>Ghana's network of vetted carpenters, vendors and couriers — and the easiest way to hire one.</p>
 </section>

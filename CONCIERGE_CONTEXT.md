@@ -158,3 +158,5 @@ Safety check-in: `callouts` table (member, client name/phone, location, expected
 ## The one-line summary
 
 Everything technical exists and works. The project's critical path runs through a 60-second TikTok video and a WhatsApp inbox, not through this codebase. Build what's asked, keep it small, and never let the code become the reason the launch waits.
+
+- **Logo (owner decision, 2026-11-11):** Carpentry Concierge now has a real mark, the "growth rings" (navy tile, gold + cream open rings = a log's rings and "CC"). It replaced both the placeholder CC circle and the commissioned illustrated emblem (`images/concierge-logo.svg`, kept in the repo, unreferenced) on the `/concierge/` landing. Assets in `images/concierge/`.
