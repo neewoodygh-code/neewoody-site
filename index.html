@@ -238,7 +238,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .mnav .btn-wa{background:var(--gold);color:var(--green)}
 @media (max-width:860px){.nav-toggle{display:flex}.nav .wrap{gap:.75rem}.nav .btn{margin-left:auto}}
 @media (max-width:420px){.nav .btn-wa{padding:.65rem .9rem;font-size:.95rem}.nav-cc{display:none}}
-#cms-posts{padding:clamp(3rem,7vw,5rem) var(--gut);background:var(--cream)}
+
 /* Accent layer 2026-11-11 (official palette: cream 60 / green 30 / gold 10). Gold returns as the spark,
    cream runs are broken by green and a full-bleed photo, corners soften, photos overlap. */
 .hero .btn-wa{background:var(--gold);color:var(--green)}
@@ -266,14 +266,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .door.green p{color:var(--on-green-2)}
 .door.green a{color:var(--gold)}
 .door{border-top:3px solid var(--gold)}
-#cms-posts{padding-left:0;padding-right:0}
-#cms-posts>*{max-width:var(--max);margin-left:auto;margin-right:auto;padding-left:var(--gut);padding-right:var(--gut)}
-#cms-posts .cms-label{font-family:var(--display);font-size:clamp(2rem,3.6vw,3rem);font-weight:500;letter-spacing:-.01em;text-transform:none;color:var(--ink);line-height:1.08;margin-bottom:2rem}
-#cms-posts .cms-card{border-radius:var(--r);background:var(--paper);box-shadow:inset 0 0 0 1px var(--line)}
-#cms-posts .cms-badge{letter-spacing:0;text-transform:none;font-size:.8rem;border-radius:var(--r);font-family:var(--ui)}
-#cms-posts .cms-card-title{font-size:1.15rem}
-#cms-posts .cms-card-title span{font-size:.8rem;letter-spacing:0}
-#cms-posts .cms-card-caption{font-size:.95rem}
 @media (max-width:860px){.case-photos .sq{transform:none}.case{padding-bottom:clamp(4rem,9vw,7rem)}}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -402,8 +394,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   <figcaption>Hyedua, finish going on in the yard. <a href="solid-wood.html">See the table</a></figcaption>
 </figure>
 
-<!-- RECENT WORK — CMS-driven (admin.html uploads). Hidden until posts target the home page. -->
-<section id="cms-posts" data-page="index" style="display:none"></section>
 
 <section class="reviews">
   <div class="wrap">
@@ -477,6 +467,5 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   document.querySelectorAll('[data-wa]').forEach(function(a){a.addEventListener('click',function(){if(window.gtag)gtag('event','whatsapp_click',{event_category:'contact',event_label:a.dataset.wa})})});
 })();
 </script>
-<script src="js/cms-posts.js?v=20261111"></script>
 </body>
 </html>

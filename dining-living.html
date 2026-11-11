@@ -628,6 +628,8 @@ a{text-decoration:none}
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="dining-living" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into=".dl-grid"><a class="dl-card" href="#"><img data-cms-img alt=""><div class="dl-card-meta"><p class="dl-card-type" data-cms-type></p><p class="dl-card-name" data-cms-title></p></div></a></template>
 
 <section class="dl-timber">
   <div class="dl-timber-top">
@@ -708,7 +710,7 @@ a{text-decoration:none}
 </a>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 (function(){

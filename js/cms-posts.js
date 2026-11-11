@@ -195,6 +195,16 @@
       var posts = (data.posts || []).filter(function (p) { return p.images && p.images[0]; });
       if (!posts.length) return;
 
+      // Native mode (2026-11-11): if the page supplies <template id="cms-card-tpl" data-into="<grid selector>">,
+      // each post becomes one of the page's OWN cards, added to the front of that grid (newest first),
+      // so CMS content follows the page's design by default. Pages without a template keep the standalone section.
+      var tpl  = document.getElementById('cms-card-tpl');
+      var into = tpl && tpl.dataset.into ? document.querySelector(tpl.dataset.into) : null;
+      if (tpl && into && tpl.content && tpl.content.firstElementChild) {
+        posts.slice().reverse().forEach(function (p) { into.insertBefore(nativeCard(tpl, p), into.firstChild); });
+        return;
+      }
+
       var label = mkEl('span','cms-label');
       label.textContent = PAGE_LABELS[slug] || 'Recent work';
 
@@ -249,6 +259,31 @@
     .catch(function () {});
 
   // ── Helpers ───────────────────────────────────────────────────────────
+  function nativeCard(tpl, p) {
+    var card = tpl.content.firstElementChild.cloneNode(true);
+    var year = p.date ? p.date.slice(0, 4) : '';
+    var cap  = p.writeup ? (p.writeup.length > 140 ? p.writeup.slice(0, 138).trim() + '…' : p.writeup) : '';
+    var parts = [p.category, p.location].filter(Boolean);
+    var vals = { title: p.title || '', category: p.category || '', location: p.location || '', year: year,
+                 caption: cap, type: parts.join(' · ') };
+    Object.keys(vals).forEach(function (k) {
+      card.querySelectorAll('[data-cms-' + k + ']').forEach(function (el) {
+        if (vals[k]) el.textContent = vals[k]; else el.parentNode.removeChild(el);
+      });
+    });
+    card.querySelectorAll('[data-cms-img]').forEach(function (im) {
+      im.src = abs(p.images[0]); im.alt = (p.title || '') + (p.location ? ', ' + p.location : ''); im.loading = 'lazy';
+    });
+    card.classList.add('cms-native');
+    if (card.tagName === 'A') card.setAttribute('href', '#');
+    if (card.tagName !== 'A' && card.tagName !== 'BUTTON') { card.setAttribute('role', 'button'); card.setAttribute('tabindex', '0'); }
+    card.setAttribute('aria-label', (p.title || 'Project') + ' (open details)');
+    card.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); openModal(p); });
+    card.addEventListener('keydown', function (e) {
+      if (card.tagName !== 'BUTTON' && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openModal(p); }
+    });
+    return card;
+  }
   function mkEl(tag, cls) {
     var el = document.createElement(tag);
     if (cls) el.className = cls;

@@ -890,6 +890,8 @@ a.wd-card{display:block;text-decoration:none}
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="wardrobes" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into=".wd-cards-grid"><a class="wd-card" href="#"><div class="wd-card-img no-lb"><img data-cms-img alt=""><span class="wd-card-badge" data-cms-category></span></div><div class="wd-card-body"><div class="wd-card-location"><span data-cms-title></span> <span class="wd-card-year" data-cms-year></span></div><p class="wd-card-caption" data-cms-caption></p></div></a></template>
 
 <section class="wd-testimonial">
   <span class="t-mark">"</span>
@@ -981,7 +983,7 @@ a.wd-card{display:block;text-decoration:none}
 </a>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 /* Nav: transparent over hero, cream after scroll */

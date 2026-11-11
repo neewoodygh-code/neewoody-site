@@ -818,6 +818,8 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="beds" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into=".bd-grid"><a class="bd-card" href="#"><img data-cms-img alt=""><div class="bd-card-meta"><p class="bd-card-type" data-cms-type></p><p class="bd-card-name" data-cms-title></p></div></a></template>
 
 <section class="bd-faq">
   <div class="bd-faq-inner">
@@ -914,7 +916,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 </div>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 (function(){

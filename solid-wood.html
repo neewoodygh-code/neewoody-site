@@ -438,6 +438,8 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="solid-wood" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into=".sw-species-grid"><a class="sw-species-card" href="#"><img data-cms-img alt=""><span class="species-latin" data-cms-type></span><h3 data-cms-title></h3><p data-cms-caption></p><span class="link-arrow-dark">View the piece</span></a></template>
 
 <section class="sw-statement">
   <div class="sw-statement-inner">
@@ -494,7 +496,7 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
 </a>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 (function(){

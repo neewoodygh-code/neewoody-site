@@ -448,7 +448,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
   </div>
 
   <div class="pf-subhead-wrap" style="margin-top:3.5rem"><h3>Made to order</h3><p>Tap any piece to explore</p></div>
-  <div class="pf-grid">
+  <div class="pf-grid" id="pf-made-grid">
 
     <button type="button" class="pf-card pm-trigger" data-pm="pm-roman-ridge-table" aria-label="Live-Edge Hyedua Table, Roman Ridge (open details)">
       <picture>
@@ -600,6 +600,8 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="portfolio" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into="#pf-made-grid"><button type="button" class="pf-card"><img data-cms-img alt=""><div class="pf-card-meta"><p class="pf-card-type" data-cms-type></p><p class="pf-card-name" data-cms-title></p></div></button></template>
 
 <section class="pf-cta">
   <span class="pf-cta-eyebrow">Like what you see?</span>
@@ -645,7 +647,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 </a>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 document.querySelectorAll('.video-thumb').forEach(function(thumb){

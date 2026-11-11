@@ -805,6 +805,8 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 
 <!-- CMS POSTS — populated by js/cms-posts.js if posts exist for this page -->
 <section id="cms-posts" data-page="kitchens" style="display:none;padding:6rem 3rem 0;background:var(--cream)"></section>
+<!-- CMS posts render as this page's own cards (js/cms-posts.js native mode) -->
+<template id="cms-card-tpl" data-into=".kt-grid"><a class="kt-card" href="#"><img data-cms-img alt=""><div class="kt-card-meta"><p class="kt-card-type" data-cms-type></p><p class="kt-card-name" data-cms-title></p></div></a></template>
 
 <section class="kt-testimonial">
   <span class="t-mark">"</span>
@@ -896,7 +898,7 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
 </a>
 
 <script src="js/main.js"></script>
-<script src="js/cms-posts.js"></script>
+<script src="js/cms-posts.js?v=20261111b"></script>
 
 <script>
 (function(){
