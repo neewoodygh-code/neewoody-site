@@ -216,7 +216,11 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .nav-more-menu a:hover,.nav-more-menu a:focus-visible{background:var(--cream-dark)}
 @media (hover:hover){.nav-more:hover .nav-more-menu{display:block}}
 @media (max-width:1000px){.nav .wrap{gap:1.2rem}.nav ul{gap:1.05rem}}
-.nav-cc{display:inline-flex;flex:none;border-radius:8px}
+.nav-cc{display:inline-flex;flex:none;border-radius:8px;position:relative;margin-left:-1.1rem;padding-left:.9rem}
+.nav-cc::before{content:"";position:absolute;left:0;top:50%;width:1px;height:24px;margin-top:-12px;background:var(--line)}
+.nav-cc svg{display:block}
+@media (max-width:1000px){.nav-cc{margin-left:-.3rem}}
+@media (max-width:860px){.nav-cc{margin-left:.15rem;padding-left:.75rem}}
 .nav-toggle{display:none;width:44px;height:44px;border:0;background:none;cursor:pointer;flex-direction:column;justify-content:center;align-items:center;gap:6px;border-radius:var(--r)}
 .nav-toggle span{display:block;width:22px;height:2px;background:var(--ink)}
 .nav-toggle:active{transform:translateY(1px)}
@@ -228,7 +232,9 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .mnav .btn{margin-top:1.5rem;align-self:flex-start;font-size:1rem;border:0}
 .mnav .btn-wa{background:var(--gold);color:var(--green)}
 @media (max-width:860px){.nav-toggle{display:flex}.nav .wrap{gap:.75rem}.nav .btn{margin-left:auto}}
-@media (max-width:420px){.nav .btn-wa{padding:.65rem .9rem;font-size:.95rem}.nav-cc{display:none}}
+.brand{flex:none}
+@media (max-width:420px){.nav .wrap{gap:.45rem}.nav-toggle{flex:none}.nav .btn-wa{padding:.6rem .65rem;font-size:.95rem}.brand{font-size:1.15rem;gap:.45rem}.brand img{width:26px;height:26px}.nav-cc{margin-left:.1rem;padding-left:.5rem}.nav-cc svg{width:30px;height:30px}}
+@media (max-width:364px){.nav-cc{display:none}}
 
 /* Accent layer 2026-11-11 (official palette: cream 60 / green 30 / gold 10). Gold returns as the spark,
    cream runs are broken by green and a full-bleed photo, corners soften, photos overlap. */
@@ -351,6 +357,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="Neewoody Custom Woodwork, home"><img src="images/logo.png" alt="" width="30" height="30">Neewoody</a>
+    <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg></a>
     <ul>
       <li><a href="wardrobes.html">Wardrobes</a></li>
       <li><a href="kitchens.html">Kitchens</a></li>
@@ -369,7 +376,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
       <li><a href="portfolio.html">Portfolio</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
-    <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg></a>
     <a class="btn btn-wa" href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." target="_blank" rel="noopener" data-wa="nav">WhatsApp us</a>
     <button class="nav-toggle" id="nav-toggle" aria-label="Open menu" aria-controls="mnav" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
