@@ -299,6 +299,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .kt-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);grid-auto-rows:clamp(220px,22vw,300px);gap:var(--g-img)}
 .kt-card{position:relative;display:block;border-radius:var(--r-card);overflow:hidden;background:var(--cream);text-decoration:none;color:var(--on-green);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
 .kt-card:first-child{grid-row:span 2}
+@media (min-width:901px){.kt-card:first-child:nth-last-child(4){grid-row:span 3}}
 .kt-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
 .kt-card::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,var(--scrim) 0%,var(--scrim-mid) 32%,var(--scrim-0) 58%);pointer-events:none}
 .kt-card-meta{position:absolute;z-index:2;left:1.25rem;bottom:1.15rem;max-width:calc(100% - 4.4rem);display:flex;flex-direction:column}
@@ -541,6 +542,14 @@ button.pm-trigger{border:none;background:var(--green);padding:0;margin:0;font:in
     <a href="portfolio.html" class="text-link">See the full portfolio</a>
   </div>
   <div class="kt-grid">
+    <a href="projects/bortianor.html" class="kt-card">
+      <picture><source type="image/webp" srcset="images/projects/bortianor/bortianor-kitchen-wide.webp"><img src="images/projects/bortianor/bortianor-kitchen-wide.jpg"
+        alt="Kitchen in Bortianor with walnut-grain tall units, charcoal base units and an island" loading="lazy" style="object-position:50% 60%" /></picture>
+      <div class="kt-card-meta">
+        <p class="kt-card-type">Part of a whole-house fit-out</p>
+        <p class="kt-card-name">Kitchen, Bortianor</p>
+      </div>
+    </a>
     <a href="contact.html" class="kt-card">
       <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg"
         alt="Large kitchen with central island in cherry-effect laminate — Dansoman, Accra" loading="lazy" />
