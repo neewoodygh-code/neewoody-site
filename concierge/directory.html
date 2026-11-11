@@ -2612,7 +2612,9 @@ a.tool-card:hover .go{ color:var(--navy); }
 
   // ── Lessons tab: curated woodworking skill videos (for apprentices) ──
   // Fill LESSONS as videos are published: { title, url, level: 'apprentice'|'carpenter'|'master', tag }.
-  var LESSONS = [];
+  var LESSONS = [
+    { title: 'Euro-style base cabinet: take it apart', url: '/concierge/academy/euro-cabinet.html', level: 'apprentice', tag: 'Cabinet construction · interactive' }
+  ];
   var lessonLevelSel = document.getElementById('lessonLevel');
   C.SKILL_ORDER.forEach(function (k) { var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lessonLevelSel.appendChild(o); });
   function renderLessons() {
@@ -2851,7 +2853,8 @@ a.tool-card:hover .go{ color:var(--navy); }
     { id: 31, date: '2026-08-23', title: 'Step-by-step guides on the tools', body: 'The Cutlist generator and the Job Pricing tool now have a “How to use this tool” guide right on the page — a sidebar on a computer, or a “How to use” button on your phone. New to a tool? Read the quick steps and tips first, then get to work.' },
     { id: 32, date: '2026-08-24', title: 'Easier to get around', body: 'On a computer the member area now has a side menu with clear icons on the left — Directory, Jobs, Tools and the rest, each with a line on what it’s for — plus a “New here?” panel on the right that takes you straight to what you want to do. On a phone the tabs across the top work as before.' },
     { id: 33, date: '2026-08-24', title: 'New tool: Cut Sheet Generator', body: 'In “Your member tools” open the Cut Sheet Generator. Type in your parts — or switch to Quick grid and enter measurements straight in, no names needed — and get a printable sheet of boxes with edge-band marks plus how many boards you need. It prints with YOUR logo and number to hand to the cutting shop.' },
-    { id: 34, date: '2026-10-11', title: 'Make your invoices look like yours', body: 'In the Invoice & Quote Generator open “Document style” to pick your fonts, colour, header layout and logo size, add your own tagline under your name, and hide your business name if your logo already shows it. Quotes can now also offer options the client picks between (e.g. laminate, plywood or drywall) and show the price as a range.' }
+    { id: 34, date: '2026-10-11', title: 'Make your invoices look like yours', body: 'In the Invoice & Quote Generator open “Document style” to pick your fonts, colour, header layout and logo size, add your own tagline under your name, and hide your business name if your logo already shows it. Quotes can now also offer options the client picks between (e.g. laminate, plywood or drywall) and show the price as a range.' },
+    { id: 35, date: '2026-11-11', title: 'Academy: take a cabinet apart', body: 'The first Academy lesson is live. Open the Academy tab and pull apart a Euro-style base cabinet: 18 mm sides, the 37 mm line with fixing points every 32 mm, screwed-in shelf, hinges, legs, kicker and finishing panel. Tap any part to see how it goes together.' },
   ];
   var WN_KEY = 'nwd-changelog-seen';
 
