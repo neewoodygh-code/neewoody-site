@@ -133,7 +133,8 @@ if ('serviceWorker' in navigator) {
   /* ── Contact form — posts to Cloudflare Worker ── */
   const contactForm = document.getElementById('quote-form');
 
-  if (contactForm) {
+  // contact.html sends the form with its own inline script; binding here too posted every lead twice
+  if (contactForm && !contactForm.hasAttribute('data-own-submit')) {
     contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
