@@ -74,6 +74,8 @@
   --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',system-ui,sans-serif;
   --max:1240px; --gut:clamp(1.25rem,4vw,3rem); --gap:clamp(1.25rem,3vw,2.5rem);
   --r:6px; --ease:cubic-bezier(.16,1,.3,1);
+  --scrim:rgba(20,16,10,.82); --scrim-mid:rgba(20,16,10,.42); --scrim-0:rgba(20,16,10,0); --on-photo-2:rgba(240,232,208,.84); --on-photo-line:rgba(240,232,208,.55);
+  --lift:rgba(11,31,14,.45); --lift-hi:rgba(11,31,14,.55); --menu-shadow:var(--menu-shadow);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:clip}
@@ -125,16 +127,16 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 @media (max-width:760px){.make-head{grid-template-columns:minmax(0,1fr)}}
 /* what we make: tiles of different sizes, real photos, a cream name label and a round arrow (2026-11-11) */
 .tiles{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(190px,19vw,250px);gap:.9rem}
-.tile a{position:relative;display:block;height:100%;border-radius:12px;overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px rgba(11,31,14,.45);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
+.tile a{position:relative;display:block;height:100%;border-radius:12px;overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
 .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
-.tile a::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(20,16,10,.82) 0%,rgba(20,16,10,.42) 32%,rgba(20,16,10,0) 58%);pointer-events:none}
+.tile a::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--scrim) 0%,var(--scrim-mid) 32%,var(--scrim-0) 58%);pointer-events:none}
 .tile-label{position:absolute;z-index:2;left:1.25rem;bottom:1.15rem;max-width:calc(100% - 5.2rem);display:flex;flex-direction:column;gap:.2rem;color:var(--on-green)}
 .tile-name{font-family:var(--display);font-weight:400;font-size:clamp(1.3rem,1.8vw,1.65rem);line-height:1.1;letter-spacing:-.005em}
-.tile-name::after{content:"";display:block;width:26px;height:1px;background:var(--gold);margin:.55rem 0 .4rem;transition:width .35s var(--ease)}
-.tile a:hover .tile-name::after,.tile a:focus-visible .tile-name::after{width:54px}
-.tile-line{font-family:var(--ui);font-size:.88rem;color:rgba(240,232,208,.84);line-height:1.4}
-.tile-go{position:absolute;z-index:2;right:1.1rem;bottom:1.1rem;width:42px;height:42px;border-radius:50%;border:1px solid rgba(240,232,208,.55);color:var(--on-green);display:grid;place-items:center;font-family:var(--ui);font-size:1.05rem;transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease),transform .25s var(--ease)}
-.tile a:hover,.tile a:focus-visible{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px rgba(11,31,14,.55)}
+.tile-name::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.55rem 0 .4rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.tile a:hover .tile-name::after,.tile a:focus-visible .tile-name::after{transform:none}
+.tile-line{font-family:var(--ui);font-size:.88rem;color:var(--on-photo-2);line-height:1.4}
+.tile-go{position:absolute;z-index:2;right:1.1rem;bottom:1.1rem;width:42px;height:42px;border-radius:50%;border:1px solid var(--on-photo-line);color:var(--on-green);display:grid;place-items:center;font-family:var(--ui);font-size:1.05rem;transition:background-color .25s var(--ease),border-color .25s var(--ease),color .25s var(--ease),transform .25s var(--ease)}
+.tile a:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
 .tile a:hover img,.tile a:focus-visible img{transform:scale(1.045)}
 .tile a:hover .tile-go,.tile a:focus-visible .tile-go{background:var(--gold);border-color:var(--gold);color:var(--green);transform:translateX(2px)}
 .t-ward{grid-column:1/3;grid-row:1/3}
@@ -172,7 +174,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 @media (max-width:860px){.case-grid{grid-template-columns:minmax(0,1fr)}}
 
 /* reviews: one voice set large, two quieter */
-.reviews{background:var(--paper);padding:clamp(4rem,9vw,7rem) 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.reviews{background:var(--green);color:var(--on-green);padding:clamp(4rem,9vw,7rem) 0}
 .reviews blockquote{font-family:var(--display);font-size:clamp(1.5rem,2.8vw,2.3rem);line-height:1.3;max-width:30ch;margin-bottom:1.2rem}
 .who{font-family:var(--ui);color:var(--muted);margin-bottom:3rem}
 .who b{color:var(--ink);font-weight:500}
@@ -218,7 +220,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .nav-more-btn:hover,.nav-more.open .nav-more-btn{color:var(--gold-ink)}
 .nav-more-btn svg{transition:transform .2s var(--ease)}
 .nav-more.open .nav-more-btn svg{transform:rotate(180deg)}
-.nav-more-menu{position:absolute;top:calc(100% + .9rem);left:-1rem;min-width:220px;background:var(--cream);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 12px 30px rgba(28,28,26,.12);padding:.4rem 0;display:none;z-index:60}
+.nav-more-menu{position:absolute;top:calc(100% + .9rem);left:-1rem;min-width:220px;background:var(--cream);border-radius:var(--r);box-shadow:0 12px 30px var(--menu-shadow);padding:.4rem 0;display:none;z-index:60}
 .nav-more-menu::before{content:"";position:absolute;bottom:100%;left:0;right:0;height:1rem}
 .nav-more.open .nav-more-menu{display:block}
 .nav-more-menu a{display:block;padding:.55rem 1rem;white-space:nowrap}
@@ -249,11 +251,10 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .case .num{color:var(--gold-ink);font-weight:500}
 .case-photos .sq{transform:translateY(2.5rem)}
 .case{padding-bottom:calc(clamp(4rem,9vw,7rem) + 2.5rem)}
-.band{position:relative;height:clamp(240px,42vw,520px);overflow:hidden;background:var(--green)}
+.band{position:relative;height:clamp(240px,42vw,520px);overflow:hidden;background:var(--green);color:var(--on-green)}
 .band img{width:100%;height:100%;object-fit:cover}
 .band figcaption{position:absolute;left:var(--gut);bottom:1.2rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.9rem;padding:.45rem .8rem;border-radius:var(--r)}
 .band figcaption a{color:var(--gold);text-underline-offset:3px}
-.reviews{background:var(--green);color:var(--on-green);border:0}
 .reviews blockquote{position:relative;color:var(--on-green)}
 .reviews blockquote::before{content:"“";position:absolute;left:-.04em;top:-.12em;font-size:2.6em;line-height:1;color:var(--gold)}
 .reviews blockquote{padding-top:.75em}
@@ -400,8 +401,8 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <blockquote>Our guests and faculty from across Ghana and the world all compliment the custom woodwork, especially the dining tables.</blockquote>
     <p class="who"><b>Ben Schwartz</b>, educational retreat centre, Wli. Google review, December 2024</p>
     <div class="more-reviews">
-      <div><p>"For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home."</p><p class="who"><b>Ngminvielu Kuuire</b>, repeat client, Accra</p></div>
-      <div><p>"If you are searching for carpenters who prioritize detail and possess a natural creative talent, Neewoody is the ideal choice."</p><p class="who"><b>mcdennis appau</b>, Google Local Guide</p></div>
+      <div><p>“For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home.”</p><p class="who"><b>Ngminvielu Kuuire</b>, repeat client, Accra</p></div>
+      <div><p>“If you are searching for carpenters who prioritize detail and possess a natural creative talent, Neewoody is the ideal choice.”</p><p class="who"><b>mcdennis appau</b>, Google Local Guide</p></div>
       <div class="g-score"><b>4.8 <span class="stars" aria-hidden="true">&#9733;</span></b>average from 14 Google reviews</div>
     </div>
   </div>
@@ -426,7 +427,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   <div class="wrap">
     <h2>Tell us about the room.</h2>
     <div>
-      <p>Send a photo and rough sizes on WhatsApp. Rough ideas are fine. We'll arrange a free site visit and take it from there.</p>
+      <p>Send a photo and rough sizes on WhatsApp. Rough ideas are fine. We’ll arrange a free site visit and take it from there.</p>
       <div class="actions">
         <a class="btn btn-wa" href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20discuss%20a%20custom%20furniture%20project." target="_blank" rel="noopener" data-wa="contact">WhatsApp 024 463 3464</a>
         <a class="btn btn-line" href="contact.html">Use the quote form</a>
