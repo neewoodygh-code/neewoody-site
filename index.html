@@ -72,10 +72,10 @@
   --cream:#f0e8d0; --cream-2:#e8dfc4; --cream-dark:#e8dfc4; --paper:#f7f2e4; --ink:#1c1c1a; --muted:#5e584b;
   --on-green:#efe6cc; --on-green-2:rgba(240,232,208,.72); --line:rgba(28,28,26,.14); --line-dark:rgba(240,232,208,.18);
   --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',system-ui,sans-serif;
-  --max:1240px; --gut:clamp(1.25rem,4vw,3rem); --gap:clamp(1.25rem,3vw,2.5rem);
+  --max:1320px; --sec:clamp(4.5rem,9vw,7rem); --gut:clamp(1.25rem,4vw,3rem); --gap:clamp(1.25rem,3vw,2.5rem);
   --r:6px; --ease:cubic-bezier(.16,1,.3,1);
   --scrim:rgba(20,16,10,.82); --scrim-mid:rgba(20,16,10,.42); --scrim-0:rgba(20,16,10,0); --on-photo-2:rgba(240,232,208,.84); --on-photo-line:rgba(240,232,208,.55);
-  --lift:rgba(11,31,14,.45); --lift-hi:rgba(11,31,14,.55); --menu-shadow:var(--menu-shadow);
+  --r-card:10px; --g-img:14px; --glow:rgba(217,164,67,.55); --story-shadow:rgba(0,0,0,.6); --lift:rgba(11,31,14,.45); --lift-hi:rgba(11,31,14,.55); --menu-shadow:var(--menu-shadow);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{overflow-x:clip}
@@ -107,27 +107,27 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 @media (max-width:860px){.nav ul{display:none}.nav .btn{margin-left:auto}}
 
 /* hero: photo-led, the real Sage Centre dining hall */
-.hero{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);min-height:min(86svh,820px);border-bottom:1px solid var(--line)}
-.hero-text{padding:clamp(2rem,6vw,5rem) var(--gut);display:flex;flex-direction:column;justify-content:center;gap:1.4rem;max-width:560px;justify-self:end;width:100%}
+.hero{display:grid;grid-template-columns:minmax(0,calc(max(0px,(100vw - var(--max)) / 2) + min(100vw,var(--max)) * .42)) minmax(0,1fr);min-height:min(86svh,820px);border-bottom:1px solid var(--line)}
+.hero-text{padding:clamp(2rem,6vw,5rem) var(--gut) clamp(2rem,6vw,5rem) calc(max(0px,(100vw - var(--max)) / 2) + var(--gut));display:flex;flex-direction:column;justify-content:center;gap:1.4rem;width:100%}
 .hero h1{font-size:clamp(2.6rem,5.4vw,4.6rem)}
 .hero p{font-size:1.15rem;max-width:36ch;color:var(--muted)}
 .hero .actions{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:.4rem}
 .hero figure{position:relative;min-height:340px}
 .hero figure img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.hero figcaption{position:absolute;left:1rem;bottom:1rem;background:var(--paper);font-family:var(--ui);font-size:.85rem;padding:.45rem .7rem;border-radius:var(--r);max-width:calc(100% - 2rem)}
+.hero figcaption,.story-inset figcaption{position:absolute;left:1rem;bottom:1rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.85rem;line-height:1.3;padding:.42rem .75rem;border-radius:var(--r);max-width:calc(100% - 2rem)}
 .facts{font-family:var(--ui);font-size:.92rem;color:var(--muted);border-top:1px solid var(--line);padding-top:1rem;margin-top:.6rem;display:grid;grid-template-columns:auto 1fr;gap:.2rem 1rem}
 .facts dt{color:var(--ink)}
-@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}.hero-text{justify-self:start;max-width:none;order:2}.hero figure{order:1;min-height:44svh}}
+@media (max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}.hero-text{order:2;padding-left:var(--gut)}.hero figure{order:1;min-height:44svh}}
 
 /* what we make: an index, not six identical cards */
-.make{padding:clamp(4rem,9vw,7rem) 0}
+.make{padding:var(--sec) 0}
 .make-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end;margin-bottom:2.5rem}
 .make h2{font-size:clamp(2rem,3.6vw,3rem)}
 .make-head p{color:var(--muted);max-width:52ch}
 @media (max-width:760px){.make-head{grid-template-columns:minmax(0,1fr)}}
 /* what we make: tiles of different sizes, real photos, a cream name label and a round arrow (2026-11-11) */
-.tiles{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(190px,19vw,250px);gap:.9rem}
-.tile a{position:relative;display:block;height:100%;border-radius:12px;overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
+.tiles{list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:clamp(190px,19vw,250px);gap:var(--g-img)}
+.tile a{position:relative;display:block;height:100%;border-radius:var(--r-card);overflow:hidden;background:var(--cream-2);text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:box-shadow .3s var(--ease),transform .3s var(--ease)}
 .tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease)}
 .tile a::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--scrim) 0%,var(--scrim-mid) 32%,var(--scrim-0) 58%);pointer-events:none}
 .tile-label{position:absolute;z-index:2;left:1.25rem;bottom:1.15rem;max-width:calc(100% - 4.4rem);display:flex;flex-direction:column;gap:.2rem;color:var(--on-green)}
@@ -135,7 +135,7 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 .tile-name::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.55rem 0 .4rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
 .tile a:hover .tile-name::after,.tile a:focus-visible .tile-name::after{transform:none}
 .tile-line{font-family:var(--ui);font-size:.88rem;color:var(--on-photo-2);line-height:1.4}
-.tile-corner{position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px rgba(217,164,67,.55));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
+.tile-corner{position:absolute;z-index:2;right:9px;bottom:9px;width:64px;height:64px;border-right:2px solid var(--gold-hi);border-bottom:2px solid var(--gold-hi);border-bottom-right-radius:7px;filter:drop-shadow(0 0 5px var(--glow));opacity:0;transform:scale(.55);transform-origin:100% 100%;transition:opacity .3s var(--ease),transform .35s var(--ease);pointer-events:none}
 .tile a:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
 .tile a:hover img,.tile a:focus-visible img{transform:scale(1.045)}
 .tile a:hover .tile-corner,.tile a:focus-visible .tile-corner{opacity:1;transform:none}
@@ -146,36 +146,23 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 .t-ward .tile-name{font-size:clamp(1.7rem,2.7vw,2.4rem)}
 @media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:170px;gap:.6rem}.t-ward{grid-column:1/3;grid-row:auto / span 2}.t-kit{grid-column:1/3}.t-solid,.t-com{grid-column:auto}.tile .tile-line{display:none}.t-ward .tile-line,.t-kit .tile-line{display:block}.tile-corner{width:40px;height:40px;right:7px;bottom:7px}.tile-label{left:.85rem;bottom:.8rem;max-width:calc(100% - 3.6rem)}.tile-name::after{margin:.4rem 0 .3rem}}
 @media (hover:none){.tile-corner{opacity:.85;transform:none}}
-@media (prefers-reduced-motion:reduce){.tile a,.tile img,.tile-corner{transition:none}.tile a:hover,.tile a:focus-visible{transform:none}.tile a:hover img{transform:none}}
+@media (prefers-reduced-motion:reduce){.tile a,.tile img,.tile-corner,.door,.door h3::after{transition:none}.door:hover{transform:none}.tile a:hover,.tile a:focus-visible{transform:none}.tile a:hover img{transform:none}}
 
-/* the job, start to finish: real during/after pairs */
-.process{background:var(--green);color:var(--on-green);padding:clamp(4rem,9vw,7rem) 0}
-.process h2{font-size:clamp(2rem,3.6vw,3rem);max-width:18ch;margin-bottom:1rem}
-.process .lede{color:var(--on-green-2);max-width:56ch;margin-bottom:3rem}
-.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.75rem;margin-bottom:1rem}
-.pair figure{position:relative;aspect-ratio:4/3;overflow:hidden;border-radius:var(--r);background:var(--green-2)}
-.pair img{width:100%;height:100%;object-fit:cover}
-.pair figcaption{position:absolute;left:.75rem;top:.75rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.85rem;padding:.3rem .6rem;border-radius:var(--r)}
-.pair-note{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:var(--ui);font-size:.95rem;color:var(--on-green-2);margin-bottom:3rem}
-.pair-note strong{color:var(--on-green);font-weight:500}
-.process a.more{color:var(--on-green);font-family:var(--ui);text-underline-offset:4px}
-.process a.more:hover{color:var(--gold)}
 
 /* case study: the job told as a story, numbers kept in sentences */
-.case{padding:clamp(4rem,9vw,7rem) 0}
 .case-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:var(--gap);align-items:start}
-.case-photos{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:.75rem}
-.case-photos img{width:100%;height:100%;object-fit:cover;border-radius:var(--r)}
+.case-photos{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:var(--g-img)}
+.case-photos img{width:100%;height:100%;object-fit:cover;border-radius:var(--r-card)}
 .case-photos .tall{grid-row:span 2;aspect-ratio:4/5}
 .case-photos .sq{aspect-ratio:1}
-.case h2{font-size:clamp(1.9rem,3.2vw,2.7rem);margin-bottom:1.2rem}
+.case h2{font-size:clamp(2rem,3.6vw,3rem);margin-bottom:1.2rem}
 .case p{margin-bottom:1rem;max-width:58ch}
-.case p.muted{color:var(--muted)}
-.case a{font-family:var(--ui);text-underline-offset:4px}
+.case p.muted{color:var(--on-green-2)}
+.case a{font-family:var(--ui);font-size:1rem;text-underline-offset:4px}
 @media (max-width:860px){.case-grid{grid-template-columns:minmax(0,1fr)}}
 
 /* reviews: one voice set large, two quieter */
-.reviews{background:var(--green);color:var(--on-green);padding:clamp(4rem,9vw,7rem) 0}
+.reviews{background:var(--cream);color:var(--ink);padding:var(--sec) 0 calc(var(--sec) * .6)}
 .reviews blockquote{font-family:var(--display);font-size:clamp(1.5rem,2.8vw,2.3rem);line-height:1.3;max-width:30ch;margin-bottom:1.2rem}
 .who{font-family:var(--ui);color:var(--muted);margin-bottom:3rem}
 .who b{color:var(--ink);font-weight:500}
@@ -187,18 +174,55 @@ h1,h2,h3{font-family:var(--display);font-weight:500;line-height:1.08;text-wrap:b
 @media (max-width:860px){.more-reviews{grid-template-columns:minmax(0,1fr)}}
 
 /* two other doors */
-.doors{padding:clamp(3rem,7vw,5rem) 0}
+.doors{padding:0 0 var(--sec)}
 .doors .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
-.door{padding:2rem;border-radius:var(--r);background:var(--cream-2)}
+.door{position:relative;display:block;padding:2rem 2rem 2.2rem;border-radius:var(--r-card);background:var(--cream-2);color:var(--ink);text-decoration:none;overflow:hidden;box-shadow:0 1px 0 var(--line),0 10px 26px -18px var(--lift);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.door:hover{transform:translateY(-3px);box-shadow:0 1px 0 var(--line),0 18px 34px -18px var(--lift-hi)}
+.door:hover .tile-corner,.door:focus-visible .tile-corner{opacity:1;transform:none}
+.door h3::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.65rem 0 .2rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.door:hover h3::after,.door:focus-visible h3::after{transform:none}
+.door-link{font-family:var(--ui);font-size:1rem;font-weight:500;text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
 .door.navy{background:var(--navy);color:var(--on-green)}
 .door h3{font-size:1.6rem;margin-bottom:.6rem}
 .door p{margin-bottom:1.2rem;max-width:44ch}
 .door.navy p{color:var(--on-green-2)}
-.door a{font-family:var(--ui);font-weight:500;text-underline-offset:4px}
 @media (max-width:760px){.doors .wrap{grid-template-columns:minmax(0,1fr)}}
 
+
+/* our work (2026-11-11): one section on green: heading row with the portfolio link, the Sage story featured,
+   then two before/after story cards (finished photo, the halfway photo inset over its corner). */
+.work{background:var(--green);color:var(--on-green);padding:var(--sec) 0}
+.work-head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem 2rem;flex-wrap:wrap;margin-bottom:2.8rem}
+.work-head h2{font-size:clamp(2rem,3.6vw,3rem)}
+.work-all{font-family:var(--ui);font-size:1rem;font-weight:500;color:var(--on-green)}
+.work-all:hover{color:var(--gold-hi)}
+.work .case-grid{margin-bottom:calc(var(--sec) * .55 + 2.5rem)}
+.work .case p{color:var(--on-green)}
+.work .case p.muted{color:var(--on-green-2)}
+.work .case a{color:var(--on-green)}
+.work .case a:hover{color:var(--gold-hi)}
+.work .num{color:var(--gold)}
+.stories{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap)}
+.story{position:relative;display:block;background:var(--green-2);border-radius:var(--r-card);color:var(--on-green);text-decoration:none;overflow:hidden;box-shadow:0 1px 0 var(--line-dark),0 14px 30px -20px var(--story-shadow);transition:transform .3s var(--ease),box-shadow .3s var(--ease)}
+.story:hover{transform:translateY(-3px)}
+.story:hover .tile-corner,.story:focus-visible .tile-corner{opacity:1;transform:none}
+.story-media{position:relative;aspect-ratio:16/10}
+.story-media img{width:100%;height:100%;object-fit:cover}
+.story-media>img,.story-media>picture img{border-radius:var(--r-card) var(--r-card) 0 0}
+.story-media>picture{display:block;width:100%;height:100%}
+.story-inset{position:absolute;left:1.1rem;bottom:-2.2rem;width:34%;aspect-ratio:1;border-radius:8px;overflow:hidden;box-shadow:0 0 0 4px var(--green-2),0 0 0 5px var(--gold);z-index:2}
+.story-inset figcaption{left:.45rem;bottom:.45rem;font-size:.75rem;padding:.25rem .5rem}
+.story-body{padding:3.1rem 1.6rem 1.8rem}
+.story h3{font-size:clamp(1.4rem,2vw,1.75rem);font-weight:400}
+.story h3::after{content:"";display:block;width:54px;height:1px;background:var(--gold);margin:.6rem 0 .5rem;transform:scaleX(.48);transform-origin:left;transition:transform .35s var(--ease)}
+.story:hover h3::after,.story:focus-visible h3::after{transform:none}
+.story p{color:var(--on-green-2);font-size:1rem;margin-bottom:.9rem;max-width:46ch}
+.story .door-link{color:var(--gold)}
+@media (max-width:760px){.stories{grid-template-columns:minmax(0,1fr)}.work-head{margin-bottom:2rem}}
+@media (prefers-reduced-motion:reduce){.story,.story h3::after{transition:none}.story:hover{transform:none}}
+
 /* contact */
-.contact{background:var(--green);color:var(--on-green);padding:clamp(4rem,9vw,6rem) 0}
+.contact{background:var(--green);color:var(--on-green);padding:var(--sec) 0}
 .contact .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--gap);align-items:end}
 .contact h2{font-size:clamp(2.2rem,4.2vw,3.4rem)}
 .contact p{color:var(--on-green-2);margin-bottom:1.4rem;max-width:46ch}
@@ -247,27 +271,23 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .hero .btn-wa{background:var(--gold);color:var(--green)}
 .hero .btn-wa:hover{background:var(--gold-hi)}
 .facts .star{color:var(--gold-ink)}
-.case a,.door a,.process a.more{text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
-.case a:hover,.door a:hover{color:var(--gold-ink)}
+.case a,.work-all{text-decoration-color:var(--gold);text-decoration-thickness:2px;text-underline-offset:5px}
+.case a:hover{color:var(--gold-ink)}
+.door:hover .door-link{color:var(--gold-ink)}
+.door.green:hover .door-link{color:var(--gold-hi)}
 .case .num{color:var(--gold-ink);font-weight:500}
 .case-photos .sq{transform:translateY(2.5rem)}
-.case{padding-bottom:calc(clamp(4rem,9vw,7rem) + 2.5rem)}
-.band{position:relative;height:clamp(240px,42vw,520px);overflow:hidden;background:var(--green);color:var(--on-green)}
-.band img{width:100%;height:100%;object-fit:cover}
-.band figcaption{position:absolute;left:var(--gut);bottom:1.2rem;background:var(--green);color:var(--on-green);font-family:var(--ui);font-size:.9rem;padding:.45rem .8rem;border-radius:var(--r)}
-.band figcaption a{color:var(--gold);text-underline-offset:3px}
-.reviews blockquote{position:relative;color:var(--on-green)}
+.reviews blockquote{position:relative;color:var(--ink)}
 .reviews blockquote::before{content:"“";position:absolute;left:-.04em;top:-.12em;font-size:2.6em;line-height:1;color:var(--gold)}
 .reviews blockquote{padding-top:.75em}
-.reviews .who{color:var(--on-green-2)}
-.reviews .who b{color:var(--on-green)}
-.reviews .more-reviews{border-top-color:var(--line-dark)}
-.g-score b{color:var(--gold)}
+.reviews .who{color:var(--muted)}
+.reviews .who b{color:var(--ink)}
+.reviews .more-reviews{border-top-color:var(--line)}
+.g-score b{color:var(--gold-ink)}
 .g-score .stars{color:var(--gold);font-size:.6em;vertical-align:.35em}
 .door.green{background:var(--green);color:var(--on-green)}
 .door.green p{color:var(--on-green-2)}
-.door.green a{color:var(--gold)}
-.door{border-top:3px solid var(--gold)}
+.door.green .door-link{color:var(--gold)}
 @media (max-width:860px){.case-photos .sq{transform:none}.case{padding-bottom:clamp(4rem,9vw,7rem)}}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
@@ -358,25 +378,13 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   </div>
 </section>
 
-<section class="process" id="work">
+<section class="work" id="work">
   <div class="wrap">
-    <h2>From the workshop floor to your house</h2>
-    <p class="lede">Two recent jobs, photographed halfway and finished.</p>
-    <div class="pair">
-      <figure><img src="images/projects/spintex-kitchen/spintex-kitchen-during.jpg" alt="Kitchen carcasses being fitted before the worktop, Spintex" loading="lazy" width="2000" height="1500"><figcaption>Carcasses in</figcaption></figure>
-      <figure><img src="images/projects/spintex-kitchen/spintex-kitchen-wide.jpg" alt="Finished kitchen with marble-look worktop, Spintex" loading="lazy" width="2000" height="1500"><figcaption>Handed over</figcaption></figure>
+    <div class="work-head">
+      <h2>Our work</h2>
+      <a class="work-all" href="portfolio.html">See the full portfolio</a>
     </div>
-    <p class="pair-note"><span><strong>Kitchen, Spintex.</strong> Dark woodgrain units, marble-look worktop.</span><a class="more" href="kitchens.html">More kitchens</a></p>
-    <div class="pair">
-      <figure><img src="images/projects/french-embassy/afromosia-table-workshop.jpg" alt="Afromosia dining table in the workshop yard before finishing" loading="lazy" width="1500" height="2000"><figcaption>In the yard</figcaption></figure>
-      <figure><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Finished afromosia dining table installed, Ridge, Accra" loading="lazy" width="1500" height="2000"><figcaption>In the dining room</figcaption></figure>
-    </div>
-    <p class="pair-note"><span><strong>Afromosia table, Ridge.</strong> One slab top on a frame base.</span><a class="more" href="projects/french-embassy.html">Read about it</a></p>
-  </div>
-</section>
-
-<section class="case">
-  <div class="wrap case-grid">
+    <div class="case case-grid">
     <div class="case-photos">
       <img class="tall" src="images/projects/sage-centre/sage-gallery-1.jpg" alt="Teak sofa and coffee table in the Sage Centre library" loading="lazy" width="800" height="1000">
       <img class="sq" src="images/projects/sage-centre/sage-bed-room.jpg" alt="Teak bunk bed in a Sage Centre guest room" loading="lazy" width="400" height="400">
@@ -389,12 +397,34 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
       <a href="projects/sage-centre.html">Read the Sage Centre story</a>
     </div>
   </div>
+    <div class="stories">
+      <a class="story" href="kitchens.html">
+        <div class="story-media">
+          <img src="images/projects/spintex-kitchen/spintex-kitchen-wide.jpg" alt="Finished kitchen with dark woodgrain units and a marble-look worktop, Spintex" loading="lazy" width="2000" height="1500">
+          <figure class="story-inset"><img src="images/projects/spintex-kitchen/spintex-kitchen-during.jpg" alt="The same kitchen halfway, carcasses fitted before the worktop" loading="lazy" width="2000" height="1500" style="object-position:50% 40%"><figcaption>Halfway</figcaption></figure>
+        </div>
+        <div class="story-body">
+          <h3>Kitchen, Spintex</h3>
+          <p>Dark woodgrain units and a marble-look worktop. Carcasses in first, then the worktop and doors.</p>
+          <span class="door-link">More kitchens</span>
+        </div>
+        <span class="tile-corner" aria-hidden="true"></span>
+      </a>
+      <a class="story" href="solid-wood.html">
+        <div class="story-media">
+          <picture><source type="image/webp" srcset="images/projects/roman-ridge-live-edge/live-edge-table-window.webp"><img src="images/projects/roman-ridge-live-edge/live-edge-table-window.jpg" alt="Live-edge Hyedua table in a dining room, Roman Ridge" loading="lazy" width="1205" height="1600" style="object-position:50% 62%"></picture>
+          <figure class="story-inset"><img src="images/projects/roman-ridge-live-edge/live-edge-table-spraying.jpg" alt="The same table in the workshop yard while the finish goes on" loading="lazy" width="900" height="1600" style="object-position:50% 40%"><figcaption>Halfway</figcaption></figure>
+        </div>
+        <div class="story-body">
+          <h3>Live-edge table, Roman Ridge</h3>
+          <p>A rugged Hyedua slab with its natural edge. Finished out in the yard, then carried into her dining room.</p>
+          <span class="door-link">More solid wood</span>
+        </div>
+        <span class="tile-corner" aria-hidden="true"></span>
+      </a>
+    </div>
+  </div>
 </section>
-
-<figure class="band">
-  <picture><source type="image/webp" srcset="images/projects/roman-ridge-live-edge/live-edge-table-grain-wide.webp"><img src="images/projects/roman-ridge-live-edge/live-edge-table-grain-wide.jpg" alt="Wet finish on a live-edge Hyedua tabletop, sunlight through the palms in the workshop yard" loading="lazy" width="2000" height="926"></picture>
-  <figcaption>Hyedua, finish going on in the yard. <a href="solid-wood.html">See the table</a></figcaption>
-</figure>
 
 
 <section class="reviews">
@@ -411,16 +441,18 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 
 <section class="doors">
   <div class="wrap">
-    <div class="door">
+    <a class="door" href="hire.html">
       <h3>Only need a repair or a fitting?</h3>
       <p>Post the job free and vetted carpenters near you get in touch on WhatsApp. No account needed.</p>
-      <a href="hire.html">Post a job</a>
-    </div>
-    <div class="door green">
+      <span class="door-link">Post a job</span>
+      <span class="tile-corner" aria-hidden="true"></span>
+    </a>
+    <a class="door green" href="/concierge/">
       <h3>Are you a carpenter?</h3>
-      <p>We also run Carpentry Concierge: a members' directory, job board and the workshop tools we use ourselves.</p>
-      <a href="/concierge/">See Carpentry Concierge</a>
-    </div>
+      <p>We also run Carpentry Concierge: a members’ directory, job board and the workshop tools we use ourselves.</p>
+      <span class="door-link">See Carpentry Concierge</span>
+      <span class="tile-corner" aria-hidden="true"></span>
+    </a>
   </div>
 </section>
 
