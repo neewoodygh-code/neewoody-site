@@ -210,7 +210,9 @@ if ('serviceWorker' in navigator) {
   /* ── Smooth anchor scroll offset (accounts for sticky header) ── */
   document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
     anchor.addEventListener('click', function (e) {
-      const target = document.querySelector(this.getAttribute('href'));
+      const href = this.getAttribute('href');
+      if (href === '#') return;   // placeholder links (cards that open a viewer) have no target
+      const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
       const offset = 80;
