@@ -265,7 +265,7 @@
     var cap  = p.writeup ? (p.writeup.length > 140 ? p.writeup.slice(0, 138).trim() + '…' : p.writeup) : '';
     var parts = [p.category, p.location].filter(Boolean);
     var vals = { title: p.title || '', category: p.category || '', location: p.location || '', year: year,
-                 caption: cap, type: parts.join(' · ') };
+                 caption: cap, type: parts.join(tpl.dataset.join || ' · ') };
     Object.keys(vals).forEach(function (k) {
       card.querySelectorAll('[data-cms-' + k + ']').forEach(function (el) {
         if (vals[k]) el.textContent = vals[k]; else el.parentNode.removeChild(el);
