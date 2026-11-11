@@ -195,6 +195,17 @@
   #doc .sign .s{flex:1}
   #doc .sign .s .line{border-top:1px solid #111;margin-bottom:3px}
   #doc .sign .s .cap{font-size:9px;color:#444}
+  #doc .sign{align-items:flex-end}
+  #doc .sign .s .sigimg{display:block;height:46px;max-width:200px;object-fit:contain;object-position:left bottom;margin:0 0 -4px 4px}
+  #doc .sign .s .signame{font-size:9.5px;color:#111;font-weight:600;margin-bottom:1px}
+  .sig-pad{display:block;width:100%;height:auto;aspect-ratio:3/1;background:#fff;border:1.5px dashed var(--border);border-radius:var(--r);touch-action:none;cursor:crosshair}
+  .sig-btns{display:flex;gap:.5rem;margin-top:.5rem;flex-wrap:wrap}
+  .btn-sm{font:inherit;font-size:.8rem;padding:.4rem .75rem;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;color:var(--ink);cursor:pointer}
+  .btn-sm.gold{background:var(--gold);border-color:var(--gold);color:#1c1c1a;font-weight:600}
+  .sig-tabs{margin-bottom:.6rem}
+  .sig-saved{margin-top:.7rem}
+  .sig-prev{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:.5rem;display:flex;align-items:center;justify-content:center;min-height:70px}
+  .sig-prev img{max-height:70px;max-width:100%}
   #doc .empty-hint{color:#b04030;font-style:italic}
 
   /* ── OVERLAYS (library / backup) ── */
@@ -383,6 +394,27 @@
             <div class="seg" id="paperSeg"><button type="button" data-v="a4" onclick="onStyle('paper','a4')">A4</button><button type="button" data-v="letter" onclick="onStyle('paper','letter')">US Letter</button></div></div>
         </details>
 
+        <!-- Signature (settings) -->
+        <details class="card" id="setSig">
+          <summary><span class="dot"></span>Signature <span class="chev">▾</span></summary>
+          <div class="hint" style="margin:0 0 .6rem">Sign once and it prints on the <b>Authorised signatory</b> line. Draw it below, or upload a photo of your signature on white paper.</div>
+          <div class="sig-tabs seg" id="sigSeg"><button type="button" data-v="draw" class="on" onclick="sigMode('draw')">Draw</button><button type="button" data-v="upload" onclick="sigMode('upload')">Upload a photo</button></div>
+          <div id="sigDraw">
+            <canvas id="sigPad" class="sig-pad" width="600" height="200" aria-label="Signature pad: draw your signature here"></canvas>
+            <div class="sig-btns"><button type="button" class="btn-sm" onclick="sigClear()">Clear</button><button type="button" class="btn-sm gold" onclick="sigUseDrawn()">Use this signature</button></div>
+          </div>
+          <div id="sigUpload" hidden>
+            <input type="file" id="sigFile" accept="image/*" onchange="sigFromFile(this.files[0]);this.value=''" />
+            <div class="hint" style="margin-top:.35rem">Sign in dark pen on plain white paper, take a close photo, and upload it. The white background is removed for you.</div>
+          </div>
+          <div id="sigSaved" class="sig-saved" hidden>
+            <div class="sig-prev"><img id="sigPrev" alt="Your saved signature" /></div>
+            <div class="sig-btns"><button type="button" class="btn-sm" onclick="sigRemove()">Remove signature</button></div>
+          </div>
+          <div class="fld" style="margin-top:.6rem"><label>Name under the signature (optional)</label><input id="s_sigName" placeholder="e.g. Kwame Mensah, Director" oninput="onSetting('sigName',this.value)" /></div>
+          <label class="chk" style="margin-top:.2rem"><input type="checkbox" id="s_sigOn" onchange="onSetting('sigOn',this.checked)" /> Add my signature to documents</label>
+        </details>
+
         <!-- Payment options (settings) -->
         <details class="card" id="setPay">
           <summary><span class="dot"></span>Payment options <span class="chev">▾</span></summary>
@@ -495,6 +527,7 @@ var GENERIC_BLANK_SETTINGS = {
   // document style (see the Document style panel)
   font:'classic', accent:'#1f2f58', headerLayout:'left', logoSize:'m',
   showName:true, showPaidTo:true, showProject:true, showSign:true, paper:'a4',
+  sigImg:'', sigOn:false, sigName:'',
   payTitle1:'Payment Option 1', payBody1:'',
   payTitle2:'Payment Option 2', payBody2:'',
   payTitle3:'Payment Option 3', payBody3:'',
@@ -942,7 +975,9 @@ function renderDoc(){
     +'</div>'
     +(termsLines?'<div class="terms"><h4>Terms &amp; Conditions</h4><div class="tt">'+esc(termsLines)+'</div></div>':'')
     +(s.showSign!==false ? '<div class="sign">'
-    +  '<div class="s"><div class="line"></div><div class="cap">'+esc(s.bizName||'')+': Authorized Signatory</div></div>'
+    +  '<div class="s">'+(s.sigOn&&s.sigImg?'<img class="sigimg" src="'+esc(s.sigImg)+'" alt="Signature" />':'')+'<div class="line"></div>'
+    +     (s.sigOn&&s.sigName?'<div class="signame">'+esc(s.sigName)+'</div>':'')
+    +     '<div class="cap">'+esc(s.bizName||'')+': Authorised signatory</div></div>'
     +  '<div class="s"><div class="line"></div><div class="cap">Customer / Company</div></div>'
     +'</div>' : '');
 
@@ -1070,8 +1105,73 @@ function syncForm(){
     var el=document.getElementById('s_'+k); if(el) el.value=SETTINGS[k]||'';
   });
   document.getElementById('s_logoOn').checked=!!SETTINGS.logoOn;
-  renderStyleControls();
+  document.getElementById('s_sigOn').checked=!!SETTINGS.sigOn;
+  document.getElementById('s_sigName').value=SETTINGS.sigName||'';
+  renderStyleControls(); renderSig();
 }
+
+/* ── signature: draw on a pad or upload a photo; stored as a small trimmed PNG in SETTINGS (syncs with the letterhead) ── */
+function renderSig(){
+  var has=!!SETTINGS.sigImg, box=document.getElementById('sigSaved'); if(!box) return;
+  box.hidden=!has; if(has) document.getElementById('sigPrev').src=SETTINGS.sigImg;
+}
+function sigMode(m){
+  document.getElementById('sigDraw').hidden=m!=='draw';
+  document.getElementById('sigUpload').hidden=m!=='upload';
+  document.querySelectorAll('#sigSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.v===m); });
+}
+var sigInk=false;
+(function initPad(){
+  var c=document.getElementById('sigPad'); if(!c) return;
+  var ctx=c.getContext('2d'), down=false, last=null;
+  ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#111'; ctx.lineWidth=3;
+  function pt(e){ var r=c.getBoundingClientRect(); return { x:(e.clientX-r.left)*c.width/r.width, y:(e.clientY-r.top)*c.height/r.height }; }
+  c.addEventListener('pointerdown',function(e){ down=true; last=pt(e); c.setPointerCapture(e.pointerId); ctx.beginPath(); ctx.arc(last.x,last.y,1.4,0,7); ctx.fillStyle='#111'; ctx.fill(); sigInk=true; e.preventDefault(); });
+  c.addEventListener('pointermove',function(e){ if(!down) return; var p=pt(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; e.preventDefault(); });
+  ['pointerup','pointercancel','pointerleave'].forEach(function(t){ c.addEventListener(t,function(){ down=false; }); });
+})();
+function sigClear(){ var c=document.getElementById('sigPad'); c.getContext('2d').clearRect(0,0,c.width,c.height); sigInk=false; }
+// crop to the ink, cap the size, return a PNG data URL (null if the canvas is blank)
+function sigTrim(src){
+  var w=src.width, h=src.height, d=src.getContext('2d').getImageData(0,0,w,h).data, x0=w, y0=h, x1=-1, y1=-1;
+  for(var y=0;y<h;y++) for(var x=0;x<w;x++){ if(d[(y*w+x)*4+3]>20){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; } }
+  if(x1<0) return null;
+  var pad=6; x0=Math.max(0,x0-pad); y0=Math.max(0,y0-pad); x1=Math.min(w-1,x1+pad); y1=Math.min(h-1,y1+pad);
+  var cw=x1-x0+1, ch=y1-y0+1, sc=Math.min(1, 600/cw, 200/ch), out=document.createElement('canvas');
+  out.width=Math.max(1,Math.round(cw*sc)); out.height=Math.max(1,Math.round(ch*sc));
+  out.getContext('2d').drawImage(src,x0,y0,cw,ch,0,0,out.width,out.height);
+  return out.toDataURL('image/png');
+}
+function sigSave(url){
+  if(!url){ toast('Nothing to save yet. Sign first.'); return; }
+  SETTINGS.sigImg=url; SETTINGS.sigOn=true; SETTINGS.updatedAt=Date.now(); persistSettings();
+  document.getElementById('s_sigOn').checked=true; renderSig(); renderDoc(); toast('Signature saved');
+}
+function sigUseDrawn(){ if(!sigInk){ toast('Draw your signature in the box first.'); return; } sigSave(sigTrim(document.getElementById('sigPad'))); sigClear(); }
+// photo of a signature on paper: shrink, turn light paper transparent, keep the ink dark
+function sigFromFile(f){
+  if(!f) return;
+  var img=new Image(), u=URL.createObjectURL(f);
+  img.onload=function(){
+    URL.revokeObjectURL(u);
+    var sc=Math.min(1, 1400/Math.max(img.width,img.height)), c=document.createElement('canvas');
+    c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+    var ctx=c.getContext('2d'); ctx.drawImage(img,0,0,c.width,c.height);
+    var id=ctx.getImageData(0,0,c.width,c.height), d=id.data, sum=0, n=d.length/4;
+    for(var i=0;i<d.length;i+=4) sum+=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+    var paper=sum/n, cut=paper-40, soft=paper-90;   // brighter than cut = paper; darker than soft = full ink
+    for(var j=0;j<d.length;j+=4){
+      var L=0.299*d[j]+0.587*d[j+1]+0.114*d[j+2];
+      var a = L>=cut ? 0 : L<=soft ? 255 : Math.round(255*(cut-L)/(cut-soft));
+      d[j]=d[j+1]=d[j+2]=17; d[j+3]=a;
+    }
+    ctx.putImageData(id,0,0);
+    sigSave(sigTrim(c));
+  };
+  img.onerror=function(){ URL.revokeObjectURL(u); toast('Could not read that image.'); };
+  img.src=u;
+}
+function sigRemove(){ if(!confirm('Remove your saved signature?')) return; SETTINGS.sigImg=''; SETTINGS.sigOn=false; SETTINGS.updatedAt=Date.now(); persistSettings(); document.getElementById('s_sigOn').checked=false; renderSig(); renderDoc(); }
 
 /* ── tiny toast ── */
 var toastT;
