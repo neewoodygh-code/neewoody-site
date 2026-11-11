@@ -158,6 +158,7 @@
   #doc .meta .m{min-width:120px}
   #doc .meta .m .k{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:#777}
   #doc .meta .m .v{font-size:12px;color:#111;font-weight:600}
+  #doc .meta .m .v .addr{display:block;font-weight:400;color:#333;line-height:1.4;margin-top:1px}
   #doc table.items{width:100%;border-collapse:collapse;margin-bottom:12px}
   #doc table.items th{font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--d-accent);text-align:left;padding:6px 8px}
   #doc table.items th.r,#doc table.items td.r{text-align:right}
@@ -305,7 +306,7 @@
             <div class="fld"><label>Date</label><input id="f_date" type="date" oninput="onField('date',this.value)" /></div>
             <div class="fld"><label>Due date <span style="text-transform:none;color:var(--muted)">(optional)</span></label><input id="f_dueDate" type="date" oninput="onField('dueDate',this.value)" /></div>
           </div>
-          <div class="fld"><label>Invoice for (client / project name)</label><input id="f_client" placeholder="e.g. Prampram" oninput="onField('client',this.value)" /></div>
+          <div class="fld"><label>Invoice for (client name and address)</label><textarea id="f_client" rows="3" placeholder="e.g. The Clerk to Parliament&#10;Office of Parliament&#10;Osu, Accra" oninput="onField('client',this.value)"></textarea></div>
           <div class="fld"><label>Project</label><input id="f_project" placeholder="e.g. Fitted Furniture" oninput="onField('project',this.value)" /></div>
         </div>
 
@@ -910,7 +911,7 @@ function renderDoc(){
   var termsLines=(s.terms||'').split('\n').filter(function(l){return l.trim();}).join('\n');
 
   var metaRows=''
-    +metaCell(typeLabel+' for', INV.client||'—')
+    +addrCell(typeLabel+' for', INV.client)
     +(s.showPaidTo!==false ? metaCell('Paid to', s.bizName||'') : '')
     +metaCell(typeLabel+' #', INV.number||'—')
     +(s.showProject!==false ? metaCell('Project', INV.project||'—') : '')
@@ -951,6 +952,13 @@ function renderDoc(){
   var im=docEl.querySelector('.dh-brand img'); if(im && !im.complete) im.addEventListener('load', fitPreview, {once:true});
 }
 function metaCell(k,v){ return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(v)+'</div></div>'; }
+// client + address: first line is the name (bold), the rest print as plain address lines
+function addrCell(k,v){
+  var lines=String(v||'').split(/\n/).map(function(l){return l.trim();}).filter(Boolean);
+  if(!lines.length) return metaCell(k,'—');
+  return '<div class="m"><div class="k">'+esc(k)+'</div><div class="v">'+esc(lines[0])
+    +(lines.length>1?'<span class="addr">'+lines.slice(1).map(esc).join('<br>')+'</span>':'')+'</div></div>';
+}
 function totalRow(l,v){ return '<div class="tr"><span class="tl">'+esc(l)+'</span><span class="tv">'+esc(v)+'</span></div>'; }
 
 /* ── print ── */
@@ -988,7 +996,7 @@ function renderLib(){
     var t=docLabel(e.docType);
     return '<div class="lib-row">'
       +'<div class="li-main" style="cursor:pointer" onclick="loadInvoice(\''+e.savedId+'\')">'
-      +  '<div class="li-t">'+esc(e.client||'(no client)')+(e.project?' · '+esc(e.project):'')+'</div>'
+      +  '<div class="li-t">'+esc((e.client||'').split(/\n/)[0]||'(no client)')+(e.project?' · '+esc(e.project):'')+'</div>'
       +  '<div class="li-m">'+t+' '+esc(e.number||'')+' · '+fmtDate(e.date)+'</div>'
       +'</div>'
       +'<div class="li-tot">'+moneyR({min:+e.total||0, max:(e.totalMax!=null?+e.totalMax:+e.total||0)})+'</div>'
