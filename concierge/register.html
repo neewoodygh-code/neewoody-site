@@ -97,7 +97,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     <p>Register in two minutes. Be found for work, hire trusted carpenters near you, and get first access to every tool we build.</p>
   </div>
 
-  <form class="panel" id="regForm" autocomplete="off">
+  <form class="panel" id="regForm" autocomplete="off" onsubmit="return false">
     <div class="steps-ind"><span class="seg on"></span><span class="seg"></span><span class="seg"></span></div>
     <div class="step-label" id="stepLabel">Step 1 of 3 · You</div>
 
@@ -239,6 +239,13 @@ button.submit:disabled{ opacity:.6; cursor:default; }
 <script>
 (function () {
   var C = window.Concierge;
+  // Weak connection: the shared script didn't load, so nothing below can run.
+  // Say so (and offer a reload) instead of the form silently reloading the page.
+  if (!C) {
+    var m0 = document.getElementById('regMsg');
+    if (m0) { m0.className = 'msg error'; m0.innerHTML = 'The page did not load fully, so you cannot log in yet. Check your internet (try switching between Wi-Fi and mobile data), then <a href="#" onclick="location.reload();return false" style="color:inherit;text-decoration:underline">tap here to reload</a>.'; }
+    return;
+  }
   if (C.tokenAlive()) { location.replace('directory.html'); return; }
 
   var form = document.getElementById('regForm');
