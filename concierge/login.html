@@ -134,6 +134,22 @@ button.submit:disabled{ opacity:.6; cursor:default; }
     try {
       var data = await C.api('/auth/login', { auth: false, method: 'POST', body: { phone: phone, pin: pinEl.value } });
       C.setToken(data.token);
+      // Device-side loop guards: the PIN was right, but if this browser can't
+      // keep the login (blocked storage / in-app browser) or the phone's clock
+      // is far off, the next page would bounce straight back here.
+      if (C.getToken() !== data.token) {
+        msg.className = 'msg error';
+        msg.textContent = 'Your PIN is correct, but this browser is not saving your login. Open neewoodygh.com/concierge/login.html in Chrome (not inside WhatsApp or Facebook, and not a private/incognito tab), then log in again.';
+        btn.disabled = false; btn.textContent = 'Log in';
+        return;
+      }
+      if (!C.tokenAlive()) {
+        C.clearToken();
+        msg.className = 'msg error';
+        msg.textContent = 'Your PIN is correct, but your phone\'s date and time look wrong. Go to Settings > Date & time, turn on "Automatic", then log in again.';
+        btn.disabled = false; btn.textContent = 'Log in';
+        return;
+      }
       location.replace(dest());
     } catch (err) {
       msg.className = 'msg error';
