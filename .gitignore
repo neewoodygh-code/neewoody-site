@@ -13,3 +13,9 @@ _inbox/
 
 # Standalone React design studio (local only, not deployed)
 _studio/
+
+# Astro build (step 1 of the migration, 2026-11-13)
+node_modules/
+.stage/
+dist/
+.astro/
