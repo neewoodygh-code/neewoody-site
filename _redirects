@@ -1,0 +1,18 @@
+# Internal files that live in the repo but must never be served publicly.
+# Cloudflare Pages applies these even though the files exist (added 2026-11-13).
+/CLAUDE.md /404 302
+/HISTORY.md /404 302
+/CONCIERGE_CONTEXT.md /404 302
+/CONCIERGE_SPEC.md /404 302
+/BACKUP_RESTORE.md /404 302
+/IMPROVEMENTS.md /404 302
+/MVP_GATES.md /404 302
+/NEEWOODY_WEB_TASKS.md /404 302
+/REDESIGN-BRIEF.md /404 302
+/REDESIGN-INDEX.md /404 302
+/worker.js /404 302
+/docs/* /404 302
+/concierge-api/* /404 302
+/scripts/* /404 302
+/_inbox/* /404 302
+/.gitignore /404 302
