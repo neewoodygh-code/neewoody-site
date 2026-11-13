@@ -53,6 +53,9 @@ python -m http.server 8080
 - `manifest.json` — PWA manifest (app name: "Neewoody Dispatch")
 - Push notifications open `/dispatch.html` on click
 
+## Redesign prototype (Astro, 2026-11-13)
+Owner asked for a clean-slate premium redesign ("forget the rules, use React/Node, act as a senior dev"). Working prototype of the homepage lives in **`_studio/astro/`** (gitignored, local only, not deployed): Astro 7 + one React island (work gallery), `astro:assets` responsive AVIF/WebP, self-hosted fonts (Cormorant Garamond + Manrope), Lenis smooth scroll, new palette from the wood (bone `#efe9df`, espresso `#17130f`, walnut `#6b4a33`, brass `#c49455`), the logo's slanted N as the one motif (`.slash`). Content is all in static HTML (no-JS safe), services index links to the existing pages, JSON-LD + GA4 (prod domain only). Lighthouse local: mobile 98/100/100/100 at 258 KB, desktop 100x4. Copy lives in `src/data.js`; photos in `src/assets/photos/`. Run: `npm --prefix _studio/astro run build` then launch config `astro` (port 4321). Earlier throwaway versions: `_studio/site/` (Vite React SPA, superseded because it shipped empty HTML) and root `concept-premium.html`. Not yet decided: whether the whole site moves to Astro.
+
 ## Design system
 
 ### Official Neewoody colours (owner-approved 2026-11-11 — "Forest and timber")

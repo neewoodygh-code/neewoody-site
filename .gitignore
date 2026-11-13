@@ -10,3 +10,6 @@ neewoody-redesign-concept.html
 # Raw image staging area — sorted/converted outputs go to images/projects/ (tracked).
 # _inbox holds originals + the un-catalogued portfolio backlog; kept local only.
 _inbox/
+
+# Standalone React design studio (local only, not deployed)
+_studio/
