@@ -380,7 +380,6 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
   <a href="portfolio.html">Portfolio</a>
   <a href="dining-living.html">Dining and living</a>
   <a href="tv-units.html">TV units</a>
-  <a href="shelving.html">Shelving</a>
   <a href="solid-wood.html">Solid wood</a>
   <a href="hire.html">Hire a carpenter</a>
   <a href="/concierge/">Carpentry Concierge</a>
@@ -401,7 +400,6 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
         <div class="nav-more-menu" id="nav-more-menu">
           <a href="dining-living.html">Dining and living</a>
           <a href="tv-units.html">TV units</a>
-          <a href="shelving.html">Shelving</a>
           <a href="solid-wood.html">Solid wood</a>
           <a href="hire.html">Hire a carpenter</a>
           <a href="/concierge/">Carpentry Concierge</a>
@@ -613,6 +611,7 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
     <span>Neewoody Custom Woodwork, Amugi Avenue, Accra. Since 2015. <a href="tel:+233244633464">024 463 3464</a></span>
     <nav>
       <a href="portfolio.html">Portfolio</a>
+      <a href="shelving.html">Shelving</a>
       <a href="hire.html">Hire a carpenter</a>
       <a href="/concierge/">Carpentry Concierge</a>
       <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
@@ -624,8 +623,8 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
 <!-- FLOATING WHATSAPP BUTTON -->
 
 
-<script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111d"></script>
+<script src="js/main.js?v=20261113"></script>
+<script src="js/cms-posts.js?v=20261113"></script>
 
 <script>
 (function(){
@@ -773,27 +772,41 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
 </template>
 
 <script>
-/* PROJECT MODAL (reusable) */
+/* PROJECT MODAL (reusable) — keyboard + screen-reader support added 2026-11-13 */
 (function(){
   var overlay=document.getElementById('pm-overlay');
   if(!overlay)return;
   var mainImg=document.getElementById('pm-main-img');
+  var mainBox=document.getElementById('pm-main');
   var thumbs=document.getElementById('pm-thumbs');
   var textCol=document.getElementById('pm-text');
   var zoom=document.getElementById('pm-zoom');
   var zoomImg=document.getElementById('pm-zoom-img');
-  var imgs=[];
+  var closeBtn=document.getElementById('pm-close');
+  var imgs=[],lastFocus=null;
+  overlay.setAttribute('aria-labelledby','pm-title');
+  mainBox.setAttribute('role','button');mainBox.tabIndex=0;mainBox.setAttribute('aria-label','Enlarge photo');
+  zoom.setAttribute('role','dialog');zoom.setAttribute('aria-label','Enlarged photo, press Escape to close');zoom.tabIndex=-1;
+  // triggers that are not links/buttons still need to be reachable and usable by keyboard
+  document.querySelectorAll('[data-pm]').forEach(function(t){
+    if(/^(A|BUTTON)$/.test(t.tagName))return;
+    // a <figure> cannot be a button, so the photo inside it takes that role
+    var el=t.tagName==='FIGURE'?(t.querySelector('img')||t):t;
+    el.tabIndex=0;el.setAttribute('role','button');
+    if(!el.getAttribute('aria-label')&&!t.getAttribute('aria-label')){var img=t.querySelector('img');el.setAttribute('aria-label','Open project'+(img&&img.alt?': '+img.alt:''));}
+  });
   function setMain(i){
     var f=imgs[i];if(!f)return;
     mainImg.src=f.jpg;mainImg.alt=f.alt;
     var ch=thumbs.children;
-    for(var t=0;t<ch.length;t++)ch[t].classList.toggle('is-active',t===i);
+    for(var t=0;t<ch.length;t++){ch[t].classList.toggle('is-active',t===i);ch[t].setAttribute('aria-pressed',t===i?'true':'false');}
   }
   function openModal(id){
     var tpl=document.getElementById(id);if(!tpl)return;
+    lastFocus=document.activeElement;
     var html='';
     if(tpl.dataset.eyebrow)html+='<span class="pm-eyebrow">'+tpl.dataset.eyebrow+'</span>';
-    if(tpl.dataset.title)html+='<h2>'+tpl.dataset.title+'</h2>';
+    if(tpl.dataset.title)html+='<h2 id="pm-title">'+tpl.dataset.title+'</h2>';
     if(tpl.dataset.meta)html+='<p class="pm-meta">'+tpl.dataset.meta+'</p>';
     var frag=tpl.content.cloneNode(true);
     var ps=frag.querySelectorAll('p');
@@ -804,6 +817,7 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
     figs.forEach(function(fig,i){
       imgs.push({webp:fig.dataset.webp,jpg:fig.dataset.jpg,alt:fig.dataset.alt||''});
       var b=document.createElement('button');b.className='pm-thumb';b.type='button';
+      b.setAttribute('aria-label','Show photo '+(i+1)+' of '+figs.length);
       var im=document.createElement('img');im.src=fig.dataset.jpg;im.alt='';im.loading='lazy';
       b.appendChild(im);
       b.addEventListener('click',(function(idx){return function(){setMain(idx);};})(i));
@@ -812,23 +826,40 @@ a.sw-species-card{display:block;text-decoration:none;color:inherit}
     setMain(0);
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
     document.body.style.overflow='hidden';
+    closeBtn.focus();
   }
-  function close(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+  function close(){
+    overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';
+    if(lastFocus&&lastFocus.focus)lastFocus.focus();
+  }
+  function openZoom(){
+    if(!mainImg.src)return;zoomImg.src=mainImg.src;zoomImg.alt=mainImg.alt;
+    zoom.classList.add('open');zoom.setAttribute('aria-hidden','false');zoom.focus();
+  }
+  function closeZoom(){zoom.classList.remove('open');zoom.setAttribute('aria-hidden','true');mainBox.focus();}
   document.addEventListener('click',function(e){
     var t=e.target.closest('[data-pm]');
     if(t){e.preventDefault();openModal(t.getAttribute('data-pm'));}
   });
-  document.getElementById('pm-close').addEventListener('click',close);
-  overlay.addEventListener('click',function(e){if(e.target===overlay)close();});
-  document.getElementById('pm-main').addEventListener('click',function(){
-    if(!mainImg.src)return;zoomImg.src=mainImg.src;zoomImg.alt=mainImg.alt;
-    zoom.classList.add('open');zoom.setAttribute('aria-hidden','false');
-  });
-  zoom.addEventListener('click',function(){zoom.classList.remove('open');zoom.setAttribute('aria-hidden','true');});
   document.addEventListener('keydown',function(e){
-    if(e.key!=='Escape')return;
-    if(zoom.classList.contains('open')){zoom.classList.remove('open');}
-    else if(overlay.classList.contains('open')){close();}
+    var t=e.target.closest&&e.target.closest('[data-pm]');
+    if(t&&!/^(A|BUTTON)$/.test(t.tagName)&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openModal(t.getAttribute('data-pm'));}
+  });
+  closeBtn.addEventListener('click',close);
+  overlay.addEventListener('click',function(e){if(e.target===overlay)close();});
+  mainBox.addEventListener('click',openZoom);
+  mainBox.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();openZoom();}});
+  zoom.addEventListener('click',closeZoom);
+  document.addEventListener('keydown',function(e){
+    if(zoom.classList.contains('open')){if(e.key==='Escape'||e.key==='Tab'){e.preventDefault();closeZoom();}return;}
+    if(!overlay.classList.contains('open'))return;
+    if(e.key==='Escape'){close();return;}
+    if(e.key==='Tab'){ // keep focus inside the open project
+      var f=overlay.querySelectorAll('button,[href],[tabindex="0"]');
+      var first=f[0],last=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
   });
 })();
 </script>

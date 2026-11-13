@@ -353,6 +353,8 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   cursor:zoom-out;
 }
 .lb-overlay.open{display:flex}
+.lb-close{position:absolute;top:1rem;right:1rem;width:2.75rem;height:2.75rem;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.4);color:#fff;font-size:1.6rem;line-height:1;cursor:pointer}
+.lb-close:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .lb-overlay img{
   max-width:90vw;max-height:90vh;
   object-fit:contain;cursor:default;
@@ -373,7 +375,6 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
   <a href="portfolio.html">Portfolio</a>
   <a href="dining-living.html">Dining and living</a>
   <a href="tv-units.html">TV units</a>
-  <a href="shelving.html">Shelving</a>
   <a href="solid-wood.html">Solid wood</a>
   <a href="hire.html">Hire a carpenter</a>
   <a href="/concierge/">Carpentry Concierge</a>
@@ -394,7 +395,6 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
         <div class="nav-more-menu" id="nav-more-menu">
           <a href="dining-living.html">Dining and living</a>
           <a href="tv-units.html">TV units</a>
-          <a href="shelving.html">Shelving</a>
           <a href="solid-wood.html">Solid wood</a>
           <a href="hire.html">Hire a carpenter</a>
           <a href="/concierge/">Carpentry Concierge</a>
@@ -693,6 +693,7 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
     <span>Neewoody Custom Woodwork, Amugi Avenue, Accra. Since 2015. <a href="tel:+233244633464">024 463 3464</a></span>
     <nav>
       <a href="portfolio.html">Portfolio</a>
+      <a href="shelving.html">Shelving</a>
       <a href="hire.html">Hire a carpenter</a>
       <a href="/concierge/">Carpentry Concierge</a>
       <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
@@ -704,12 +705,13 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 
 
 <!-- LIGHTBOX -->
-<div class="lb-overlay" id="lb-overlay" role="dialog" aria-modal="true" aria-label="Image lightbox">
+<div class="lb-overlay" id="lb-overlay" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <button type="button" class="lb-close" id="lb-close" aria-label="Close">&times;</button>
   <img loading="lazy" id="lb-img" src="" alt="" />
 </div>
 
-<script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111d"></script>
+<script src="js/main.js?v=20261113"></script>
+<script src="js/cms-posts.js?v=20261113"></script>
 <script>
 (function(){
   var m=document.getElementById('mnav'),t=document.getElementById('nav-toggle'),x=document.getElementById('mnav-close');
@@ -734,16 +736,20 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
 (function(){
   var overlay = document.getElementById('lb-overlay');
   var lbImg = document.getElementById('lb-img');
+  var closeBtn = document.getElementById('lb-close'), lastFocus = null;
   function openLightbox(src, alt){
+    lastFocus = document.activeElement;
     lbImg.src = src;
     lbImg.alt = alt || '';
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    closeBtn.focus();
   }
   function closeLightbox(){
     overlay.classList.remove('open');
     document.body.style.overflow = '';
     lbImg.src = '';
+    if (lastFocus) lastFocus.focus();
   }
   document.querySelectorAll('.bd-card').forEach(function(card){
     card.addEventListener('click', function(e){
@@ -756,7 +762,9 @@ details.faq-item[open] summary.faq-question::after{transform:rotate(45deg)}
     if (e.target !== lbImg) closeLightbox();
   });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && overlay.classList.contains('open')) closeLightbox();
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'Tab') { e.preventDefault(); closeBtn.focus(); } // only one control inside
   });
 })();
 </script>

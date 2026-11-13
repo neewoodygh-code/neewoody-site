@@ -34,7 +34,7 @@ gtag('config', 'G-ZP77WR6BNH');
   --clr-accent-dk: #b07d20;
   --clr-accent-lt: rgba(200,146,42,.14);
   --clr-border:    #d4c9b0;
-  --clr-muted:     #6b6557;
+  --clr-muted:     #5e584b; /* was #6b6557, failed 4.5:1 on cream */
   --font-body:     'Jost', system-ui, sans-serif;
   --green:         #1f2f58;
   --mono: 'Roboto Mono', monospace;
@@ -527,6 +527,9 @@ select {
 }
 
 
+/* Contrast fixes (2026-11-13): brand gold is for large text only; small gold text uses deep gold */
+.alpha-banner{background:#7f5a12}
+.calc-tab.active,.sh-txt,.unit-toggle-lbl,.unit-pill.active{color:#7f5a12}
 </style>
 </head>
 <body>
@@ -559,7 +562,6 @@ select {
               <span class="nav-services-col-label">More Services</span>
               <a href="dining-living.html">Dining &amp; Living</a>
               <a href="tv-units.html">TV Units</a>
-              <a href="shelving.html">Shelving</a>
               <a href="solid-wood.html">Solid Wood</a>
               <a href="hire.html">Hire a Carpenter</a>
             </div>
@@ -676,15 +678,15 @@ select {
 
     <div class="sh"><div class="sh-txt">Wardrobe Dimensions</div><div class="sh-line"></div></div>
     <div class="igrid c3">
-      <div class="ig"><label id="lbl-w">Width (mm)</label><input type="number" id="i-w" value="2400" inputmode="decimal" oninput="live()"><div class="hint">Total outer width</div></div>
-      <div class="ig"><label id="lbl-h">Height (mm)</label><input type="number" id="i-h" value="2100" inputmode="decimal" oninput="live()"><div class="hint">Floor to ceiling</div></div>
-      <div class="ig"><label id="lbl-d">Depth (mm)</label><input type="number" id="i-d" value="580" inputmode="decimal" oninput="live()"><div class="hint">Front to back</div></div>
+      <div class="ig"><label id="lbl-w" for="i-w">Width (mm)</label><input type="number" id="i-w" value="2400" inputmode="decimal" oninput="live()"><div class="hint">Total outer width</div></div>
+      <div class="ig"><label id="lbl-h" for="i-h">Height (mm)</label><input type="number" id="i-h" value="2100" inputmode="decimal" oninput="live()"><div class="hint">Floor to ceiling</div></div>
+      <div class="ig"><label id="lbl-d" for="i-d">Depth (mm)</label><input type="number" id="i-d" value="580" inputmode="decimal" oninput="live()"><div class="hint">Front to back</div></div>
     </div>
 
     <div class="sh"><div class="sh-txt">Board Thickness</div><div class="sh-line"></div></div>
     <div class="igrid">
-      <div class="ig"><label>Carcass Board (mm)</label><input type="number" id="i-thick" value="18" inputmode="numeric" oninput="live()"><div class="hint">Sides, top, bottom, dividers</div></div>
-      <div class="ig"><label>Sections</label><select id="i-secs" onchange="onSecsChange()">
+      <div class="ig"><label for="i-thick">Carcass Board (mm)</label><input type="number" id="i-thick" value="18" inputmode="numeric" oninput="live()"><div class="hint">Sides, top, bottom, dividers</div></div>
+      <div class="ig"><label for="i-secs">Sections</label><select id="i-secs" onchange="onSecsChange()">
         <option value="1">1 section</option><option value="2">2 sections</option>
         <option value="3" selected>3 sections</option><option value="4">4 sections</option>
         <option value="5">5 sections</option><option value="6">6 sections</option>
@@ -693,7 +695,7 @@ select {
 
     <div class="sh"><div class="sh-txt">Internal Clearance</div><div class="sh-line"></div></div>
     <div class="igrid">
-      <div class="ig"><label>Shelf clearance (mm)</label><input type="number" id="i-clear" value="2" inputmode="numeric" oninput="live()"><div class="hint">Each side of shelf</div></div>
+      <div class="ig"><label for="i-clear">Shelf clearance (mm)</label><input type="number" id="i-clear" value="2" inputmode="numeric" oninput="live()"><div class="hint">Each side of shelf</div></div>
     </div>
 
     <div class="sh"><div class="sh-txt">Visual Diagram</div><div class="sh-line"></div></div>
@@ -719,24 +721,24 @@ select {
     <div class="callout"><p><strong>OVERLAY:</strong> How far the door covers the carcass frame on each side. Standard is 11mm. Gap values control clearance between door edges.</p></div>
     <div class="adv-grid">
       <div class="igrid c3" style="padding:0">
-        <div class="ig"><label>Edge Clearance (mm)</label><input type="number" id="i-overlay" value="2" inputmode="numeric" oninput="live()"><div class="hint">0=flush · 2–3=shadow line · 4+=visible reveal</div></div>
-        <div class="ig"><label>Door Gap (mm)</label><input type="number" id="i-dgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Between adj. doors</div></div>
+        <div class="ig"><label for="i-overlay">Edge Clearance (mm)</label><input type="number" id="i-overlay" value="2" inputmode="numeric" oninput="live()"><div class="hint">0=flush · 2–3=shadow line · 4+=visible reveal</div></div>
+        <div class="ig"><label for="i-dgap">Door Gap (mm)</label><input type="number" id="i-dgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Between adj. doors</div></div>
       </div>
       <div class="igrid" style="padding:0">
-        <div class="ig"><label>Top Gap (mm)</label><input type="number" id="i-topgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to top panel</div></div>
-        <div class="ig"><label>Bottom Gap (mm)</label><input type="number" id="i-botgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to floor (full height)</div></div>
+        <div class="ig"><label for="i-topgap">Top Gap (mm)</label><input type="number" id="i-topgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to top panel</div></div>
+        <div class="ig"><label for="i-botgap">Bottom Gap (mm)</label><input type="number" id="i-botgap" value="2" inputmode="numeric" oninput="live()"><div class="hint">Door to floor (full height)</div></div>
       </div>
       <div class="igrid" style="padding:0">
-        <div class="ig"><label>Door Thickness (mm)</label><input type="number" id="i-doorthick" value="18" inputmode="numeric" oninput="live()"></div>
+        <div class="ig"><label for="i-doorthick">Door Thickness (mm)</label><input type="number" id="i-doorthick" value="18" inputmode="numeric" oninput="live()"></div>
       </div>
     </div>
 
     <div class="sh"><div class="sh-txt">Back Panel</div><div class="sh-line"></div></div>
     <div class="adv-grid">
-      <div class="ig"><label>Back Type</label>
+      <div class="ig"><label for="i-back">Back Type</label>
         <select id="i-back" onchange="live()"><option value="inset">Inset (grooved in)</option><option value="nailon">Nail-on (flush back)</option></select>
       </div>
-      <div class="ig"><label>Back Thickness (mm)</label><input type="number" id="i-backthick" value="3" inputmode="numeric" oninput="live()"><div class="hint">Usually 3mm hardboard</div></div>
+      <div class="ig"><label for="i-backthick">Back Thickness (mm)</label><input type="number" id="i-backthick" value="3" inputmode="numeric" oninput="live()"><div class="hint">Usually 3mm hardboard</div></div>
     </div>
 
     <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
@@ -756,28 +758,28 @@ select {
     <div class="callout"><p><strong>FRAME STRUCTURE:</strong> Front and back rails span the full unit width, sandwiching the mid-rails. Mid-rail count is auto-calculated from unit width.</p></div>
     <div class="adv-grid">
       <div class="igrid" style="padding:0">
-        <div class="ig"><label>Frame Height (mm)</label><input type="number" id="tk-h" value="100" inputmode="numeric" oninput="live()"><div class="hint">Toe kick height</div></div>
-        <div class="ig"><label>Frame Style</label>
+        <div class="ig"><label for="tk-h">Frame Height (mm)</label><input type="number" id="tk-h" value="100" inputmode="numeric" oninput="live()"><div class="hint">Toe kick height</div></div>
+        <div class="ig"><label for="tk-style">Frame Style</label>
           <select id="tk-style" onchange="live()"><option value="setback">Setback (recessed)</option><option value="flush">Flush with front</option></select>
         </div>
       </div>
       <div class="igrid" style="padding:0" id="tk-sb-wrap">
-        <div class="ig"><label>Setback Depth (mm)</label><input type="number" id="tk-setback" value="60" inputmode="numeric" oninput="live()"><div class="hint">From front face</div></div>
-        <div class="ig"><label>Frame Board Thick. (mm)</label><input type="number" id="tk-thick" value="18" inputmode="numeric" oninput="live()"></div>
+        <div class="ig"><label for="tk-setback">Setback Depth (mm)</label><input type="number" id="tk-setback" value="60" inputmode="numeric" oninput="live()"><div class="hint">From front face</div></div>
+        <div class="ig"><label for="tk-thick">Frame Board Thick. (mm)</label><input type="number" id="tk-thick" value="18" inputmode="numeric" oninput="live()"></div>
       </div>
-      <div class="ig"><label>Face Panel Gap (mm)</label><input type="number" id="tk-gap" value="3" inputmode="numeric" oninput="live()"><div class="hint">Door to face panel clearance</div></div>
+      <div class="ig"><label for="tk-gap">Face Panel Gap (mm)</label><input type="number" id="tk-gap" value="3" inputmode="numeric" oninput="live()"><div class="hint">Door to face panel clearance</div></div>
     </div>
 
     <div class="sh"><div class="sh-txt">Mid-Rail Count</div><div class="sh-line"></div></div>
     <div class="adv-grid">
       <div class="igrid" style="padding:0">
         <div class="ig">
-          <label>Mode</label>
+          <label for="tk-mr-mode">Mode</label>
           <select id="tk-mr-mode" onchange="live()"><option value="auto">Auto (by width)</option><option value="manual">Manual override</option></select>
           <div class="hint" id="tk-auto-note">—</div>
         </div>
         <div class="ig" id="tk-mr-manual" style="display:none">
-          <label>Mid-Rail Qty</label>
+          <label for="tk-mr-qty">Mid-Rail Qty</label>
           <input type="number" id="tk-mr-qty" value="3" min="2" max="12" inputmode="numeric" oninput="live()">
           <div class="hint">incl. 2 end rails</div>
         </div>
@@ -789,7 +791,7 @@ select {
     <div class="adv-grid">
       <div class="igrid" style="padding:0">
         <div class="ig">
-          <label>Number of Units</label>
+          <label for="mod-units">Number of Units</label>
           <select id="mod-units" onchange="live()">
             <option value="1" selected>1 — single carcass</option>
             <option value="2">2 units</option><option value="3">3 units</option><option value="4">4 units</option>
@@ -797,7 +799,7 @@ select {
           <div class="hint" id="mod-note">—</div>
         </div>
         <div class="ig">
-          <label>Unit Join</label>
+          <label for="mod-join">Unit Join</label>
           <select id="mod-join" onchange="live()"><option value="butt">Butt join (2 panels)</option><option value="shared">Shared divider (1 panel)</option></select>
         </div>
       </div>
@@ -814,19 +816,19 @@ select {
       </div>
       <div class="sp-extra show" id="sp-extra">
         <div class="igrid c3" style="margin-bottom:.5rem">
-          <div class="ig"><label>Left Panel</label><select id="sp-l" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
-          <div class="ig"><label>Right Panel</label><select id="sp-r" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
-          <div class="ig"><label>Thickness (mm)</label><input type="number" id="sp-thick" value="18" inputmode="numeric" oninput="live()"></div>
+          <div class="ig"><label for="sp-l">Left Panel</label><select id="sp-l" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
+          <div class="ig"><label for="sp-r">Right Panel</label><select id="sp-r" onchange="live()"><option value="0">None</option><option value="1" selected>Yes</option></select></div>
+          <div class="ig"><label for="sp-thick">Thickness (mm)</label><input type="number" id="sp-thick" value="18" inputmode="numeric" oninput="live()"></div>
         </div>
         <div id="sp-ext-row" style="display:none">
           <div class="igrid" style="margin-bottom:.5rem">
-            <div class="ig"><label>Extra Height (mm)</label><input type="number" id="sp-eh" value="50" inputmode="numeric" oninput="live()"><div class="hint">Above wardrobe</div></div>
-            <div class="ig"><label>Extra Depth (mm)</label><input type="number" id="sp-ed" value="0" inputmode="numeric" oninput="live()"><div class="hint">Beyond door face</div></div>
+            <div class="ig"><label for="sp-eh">Extra Height (mm)</label><input type="number" id="sp-eh" value="50" inputmode="numeric" oninput="live()"><div class="hint">Above wardrobe</div></div>
+            <div class="ig"><label for="sp-ed">Extra Depth (mm)</label><input type="number" id="sp-ed" value="0" inputmode="numeric" oninput="live()"><div class="hint">Beyond door face</div></div>
           </div>
         </div>
         <div id="sp-scrib-row" style="display:none">
           <div class="igrid" style="margin-bottom:.5rem">
-            <div class="ig"><label>Scribe Width (mm)</label><input type="number" id="sp-sw" value="30" inputmode="numeric" oninput="live()"><div class="hint">Extra mm into wall</div></div>
+            <div class="ig"><label for="sp-sw">Scribe Width (mm)</label><input type="number" id="sp-sw" value="30" inputmode="numeric" oninput="live()"><div class="hint">Extra mm into wall</div></div>
           </div>
         </div>
         <div style="background:var(--clr-bg-alt);border:1px solid var(--clr-border);border-radius:var(--radius);padding:.6rem .85rem">
@@ -842,7 +844,7 @@ select {
         <label class="toggle"><input type="checkbox" id="pel-en" onchange="live()"><span class="tslide"></span></label>
         <span class="tog-lbl">Include Top Pelmet</span>
       </div>
-      <div class="ig"><label>Pelmet Height (mm)</label><input type="number" id="pel-h" value="80" inputmode="numeric" oninput="live()"></div>
+      <div class="ig"><label for="pel-h">Pelmet Height (mm)</label><input type="number" id="pel-h" value="80" inputmode="numeric" oninput="live()"></div>
     </div>
 
     <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
@@ -914,7 +916,7 @@ select {
           <li><a href="wardrobes.html">Custom Wardrobes</a></li>
           <li><a href="beds.html">Custom Beds</a></li>
           <li><a href="kitchens.html">Kitchen Cabinets</a></li>
-          <li><a href="portfolio.html">Shelving &amp; Storage</a></li>
+          <li><a href="shelving.html">Shelving &amp; Storage</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -945,7 +947,7 @@ select {
 
 </main>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=20261113"></script>
 <script src="js/concierge.js?v=20261005"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
@@ -1097,9 +1099,9 @@ function buildZoneRow(z,si,zi,total){
   var up=zi>0?'<button class="move-btn" onclick="moveZone('+si+','+zi+',-1)" title="Move up">↑</button>':'';
   var dn=zi<total-1?'<button class="move-btn" onclick="moveZone('+si+','+zi+',1)" title="Move down">↓</button>':'';
   var extra='';
-  if(z.type==='shelves')extra='<div class="ig"><label>Shelves</label><input type="number" id="zsh-'+si+'-'+zi+'" value="'+z.shelves+'" min="0" max="12" inputmode="numeric" oninput="live()"></div>';
-  if(z.type==='drawers')extra='<div class="ig"><label>Drawers</label><input type="number" id="zdr-'+si+'-'+zi+'" value="'+z.drawers+'" min="1" max="12" inputmode="numeric" oninput="live()"></div>';
-  return '<div class="zone-row"><div class="zone-hdr"><span class="zone-badge '+bc[z.type]+'">'+z.type+'</span><div class="zone-flex"></div>'+up+dn+'<button class="zone-del" onclick="delZone('+si+','+zi+')" title="Remove zone">×</button></div><div class="zone-dims"><div class="ig"><label>Height (mm)</label><input type="number" id="zh-'+si+'-'+zi+'" value="'+z.h+'" inputmode="numeric" oninput="zoneHeightChanged('+si+','+zi+')"></div>'+extra+'</div></div>';
+  if(z.type==='shelves')extra='<div class="ig"><label for="zsh-'+si+'-'+zi+'">Shelves</label><input type="number" id="zsh-'+si+'-'+zi+'" value="'+z.shelves+'" min="0" max="12" inputmode="numeric" oninput="live()"></div>';
+  if(z.type==='drawers')extra='<div class="ig"><label for="zdr-'+si+'-'+zi+'">Drawers</label><input type="number" id="zdr-'+si+'-'+zi+'" value="'+z.drawers+'" min="1" max="12" inputmode="numeric" oninput="live()"></div>';
+  return '<div class="zone-row"><div class="zone-hdr"><span class="zone-badge '+bc[z.type]+'">'+z.type+'</span><div class="zone-flex"></div>'+up+dn+'<button class="zone-del" onclick="delZone('+si+','+zi+')" title="Remove zone">×</button></div><div class="zone-dims"><div class="ig"><label for="zh-'+si+'-'+zi+'">Height (mm)</label><input type="number" id="zh-'+si+'-'+zi+'" value="'+z.h+'" inputmode="numeric" oninput="zoneHeightChanged('+si+','+zi+')"></div>'+extra+'</div></div>';
 }
 
 function renderSecs(){

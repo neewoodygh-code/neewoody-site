@@ -302,6 +302,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 .ct-card .ct-note{margin-top:.9rem;font-size:.95rem}
 @media (max-width:960px){.ct-layout{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:760px){.ct-head{grid-template-columns:minmax(0,1fr)}.form-row{grid-template-columns:minmax(0,1fr)}}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -314,7 +315,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   <a href="portfolio.html">Portfolio</a>
   <a href="dining-living.html">Dining and living</a>
   <a href="tv-units.html">TV units</a>
-  <a href="shelving.html">Shelving</a>
   <a href="solid-wood.html">Solid wood</a>
   <a href="hire.html">Hire a carpenter</a>
   <a href="/concierge/">Carpentry Concierge</a>
@@ -335,7 +335,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
         <div class="nav-more-menu" id="nav-more-menu">
           <a href="dining-living.html">Dining and living</a>
           <a href="tv-units.html">TV units</a>
-          <a href="shelving.html">Shelving</a>
           <a href="solid-wood.html">Solid wood</a>
           <a href="hire.html">Hire a carpenter</a>
           <a href="/concierge/">Carpentry Concierge</a>
@@ -445,7 +444,8 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   </div>
 
   <!-- SIDEBAR -->
-  <aside class="ct-sidebar">
+  <aside class="ct-sidebar" aria-labelledby="ct-other">
+    <h2 id="ct-other" class="sr-only">Other ways to reach us</h2>
 
     <div class="ct-card on-green">
       <h3>Prefer to chat?</h3>
@@ -491,6 +491,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <span>Neewoody Custom Woodwork, Amugi Avenue, Accra. Since 2015. <a href="tel:+233244633464">024 463 3464</a></span>
     <nav>
       <a href="portfolio.html">Portfolio</a>
+      <a href="shelving.html">Shelving</a>
       <a href="hire.html">Hire a carpenter</a>
       <a href="/concierge/">Carpentry Concierge</a>
       <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
@@ -501,7 +502,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 
 
 
-<script src="js/main.js?v=20261111"></script>
+<script src="js/main.js?v=20261113"></script>
 <script>
 (function(){
   var m=document.getElementById('mnav'),t=document.getElementById('nav-toggle'),x=document.getElementById('mnav-close');

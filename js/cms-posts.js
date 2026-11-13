@@ -111,7 +111,7 @@
 
   // ── Modal (pm-style: media column + text column) ──────────────────────
   var overlay = mkEl('div','cms-overlay');
-  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true');
+  overlay.setAttribute('role','dialog'); overlay.setAttribute('aria-modal','true'); overlay.setAttribute('aria-labelledby','cms-title');
   var dialog   = mkEl('div','cms-dialog');
   var closeBtn = mkEl('button','cms-close'); closeBtn.innerHTML = '&times;';
   closeBtn.setAttribute('aria-label','Close');
@@ -119,6 +119,7 @@
   var mainWrap = mkEl('div','cms-main');
   var mainImg  = mkEl('img');
   mainWrap.appendChild(mainImg);
+  mainWrap.setAttribute('role','button'); mainWrap.tabIndex = 0; mainWrap.setAttribute('aria-label','Enlarge photo');
   var thumbs   = mkEl('div','cms-thumbs');
   media.appendChild(mainWrap); media.appendChild(thumbs);
   var textCol  = mkEl('div','cms-text');
@@ -127,25 +128,28 @@
   document.body.appendChild(overlay);
 
   // ── Zoom layer ────────────────────────────────────────────────────────
-  var zoomEl  = mkEl('div','cms-zoom'); zoomEl.setAttribute('role','dialog');
+  var zoomEl  = mkEl('div','cms-zoom'); zoomEl.setAttribute('role','dialog'); zoomEl.setAttribute('aria-label','Enlarged photo, press Escape to close'); zoomEl.tabIndex = -1;
   var zoomImg = mkEl('img');
   zoomEl.appendChild(zoomImg);
   document.body.appendChild(zoomEl);
 
-  var imgs = [];
+  var imgs = [], curTitle = '', lastFocus = null;
   function setMain(i) {
     if (!imgs[i]) return;
     mainImg.src = abs(imgs[i]);
+    mainImg.alt = curTitle + (imgs.length > 1 ? ', photo ' + (i + 1) + ' of ' + imgs.length : '');
     var ch = thumbs.children;
-    for (var t = 0; t < ch.length; t++) ch[t].classList.toggle('is-active', t === i);
+    for (var t = 0; t < ch.length; t++) { ch[t].classList.toggle('is-active', t === i); ch[t].setAttribute('aria-pressed', t === i ? 'true' : 'false'); }
   }
 
   function openModal(post) {
     imgs = (post.images || []).filter(Boolean);
+    curTitle = post.title || 'Project photo';
+    lastFocus = document.activeElement;
 
     var html = '';
     if (post.category) html += '<span class="cms-eyebrow">' + esc(post.category) + '</span>';
-    html += '<h2>' + esc(post.title || '') + '</h2>';
+    html += '<h2 id="cms-title">' + esc(post.title || '') + '</h2>';
     var metaBits = [];
     if (post.location) metaBits.push(esc(post.location));
     if (post.date)     metaBits.push(post.date.slice(0, 4));
@@ -159,7 +163,7 @@
 
     thumbs.innerHTML = '';
     imgs.forEach(function (src, i) {
-      var b  = mkEl('button','cms-thumb'); b.type = 'button';
+      var b  = mkEl('button','cms-thumb'); b.type = 'button'; b.setAttribute('aria-label', 'Show photo ' + (i + 1) + ' of ' + imgs.length);
       var im = mkEl('img'); im.src = abs(src); im.alt = ''; im.loading = 'lazy';
       b.appendChild(im);
       b.addEventListener('click', (function (idx) { return function () { setMain(idx); }; })(i));
@@ -170,22 +174,35 @@
     setMain(0);
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
+    closeBtn.focus();
   }
 
-  function closeModal() { overlay.classList.remove('open'); document.body.style.overflow = ''; }
+  function closeModal() {
+    overlay.classList.remove('open'); document.body.style.overflow = '';
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  function openZoom() {
+    if (!mainImg.src) return;
+    zoomImg.src = mainImg.src; zoomImg.alt = mainImg.alt;
+    zoomEl.classList.add('open'); zoomEl.focus();
+  }
+  function closeZoom() { zoomEl.classList.remove('open'); mainWrap.focus(); }
 
   closeBtn.addEventListener('click', closeModal);
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
-  mainWrap.addEventListener('click', function () {
-    if (!mainImg.src) return;
-    zoomImg.src = mainImg.src;
-    zoomEl.classList.add('open');
-  });
-  zoomEl.addEventListener('click', function () { zoomEl.classList.remove('open'); });
+  mainWrap.addEventListener('click', openZoom);
+  mainWrap.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openZoom(); } });
+  zoomEl.addEventListener('click', closeZoom);
   document.addEventListener('keydown', function (e) {
-    if (e.key !== 'Escape') return;
-    if (zoomEl.classList.contains('open')) zoomEl.classList.remove('open');
-    else if (overlay.classList.contains('open')) closeModal();
+    if (zoomEl.classList.contains('open')) { if (e.key === 'Escape' || e.key === 'Tab') { e.preventDefault(); closeZoom(); } return; }
+    if (!overlay.classList.contains('open')) return;
+    if (e.key === 'Escape') { closeModal(); return; }
+    if (e.key === 'Tab') { // keep focus inside the open project
+      var f = overlay.querySelectorAll('button,[href],[tabindex="0"]');
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
   });
 
   // ── Fetch & render cards ──────────────────────────────────────────────

@@ -137,7 +137,8 @@ export default {
   // Cron (see wrangler.toml): every 15 min → scan overdue call-outs; weekly
   // (Sun 03:00 UTC) → full D1 snapshot to R2. Branch on which schedule fired.
   async scheduled(event, env, ctx) {
-    if (event.cron === '0 3 * * 0') {
+    // Cloudflare numbers Sunday as 1 / SUN (not 0); '0 3 * * 0' is rejected as invalid.
+    if (event.cron === '0 3 * * SUN') {
       ctx.waitUntil(backupDatabase(env).catch((e) => console.error('db backup failed:', e && e.message)));
       return;
     }

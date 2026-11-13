@@ -391,7 +391,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
   <a href="portfolio.html">Portfolio</a>
   <a href="dining-living.html">Dining and living</a>
   <a href="tv-units.html">TV units</a>
-  <a href="shelving.html">Shelving</a>
   <a href="solid-wood.html">Solid wood</a>
   <a href="hire.html">Hire a carpenter</a>
   <a href="/concierge/">Carpentry Concierge</a>
@@ -412,7 +411,6 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
         <div class="nav-more-menu" id="nav-more-menu">
           <a href="dining-living.html">Dining and living</a>
           <a href="tv-units.html">TV units</a>
-          <a href="shelving.html">Shelving</a>
           <a href="solid-wood.html">Solid wood</a>
           <a href="hire.html">Hire a carpenter</a>
           <a href="/concierge/">Carpentry Concierge</a>
@@ -774,6 +772,7 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     <span>Neewoody Custom Woodwork, Amugi Avenue, Accra. Since 2015. <a href="tel:+233244633464">024 463 3464</a></span>
     <nav>
       <a href="portfolio.html">Portfolio</a>
+      <a href="shelving.html">Shelving</a>
       <a href="hire.html">Hire a carpenter</a>
       <a href="/concierge/">Carpentry Concierge</a>
       <a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">Instagram</a>
@@ -784,8 +783,8 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
 
 
 
-<script src="js/main.js"></script>
-<script src="js/cms-posts.js?v=20261111d"></script>
+<script src="js/main.js?v=20261113"></script>
+<script src="js/cms-posts.js?v=20261113"></script>
 <script>
 (function(){
   var m=document.getElementById('mnav'),t=document.getElementById('nav-toggle'),x=document.getElementById('mnav-close');
@@ -842,9 +841,14 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     srcs.push(img.src); alts.push(img.alt);
     div.addEventListener('click', function(){ open(i); });
     div.style.cursor = 'pointer';
+    // reachable and usable by keyboard (added 2026-11-13)
+    div.tabIndex = 0; div.setAttribute('role','button');
+    div.setAttribute('aria-label', 'Enlarge photo: ' + (img.alt || 'wardrobe'));
+    div.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); open(i); } });
   });
-  function open(i){ current=i; lbImg.src=srcs[i]; lbImg.alt=alts[i]; lb.classList.add('open'); document.body.style.overflow='hidden'; }
-  function close(){ lb.classList.remove('open'); document.body.style.overflow=''; }
+  var lastFocus = null;
+  function open(i){ if(!lb.classList.contains('open')) lastFocus=document.activeElement; current=i; lbImg.src=srcs[i]; lbImg.alt=alts[i]; lb.classList.add('open'); document.body.style.overflow='hidden'; if(!lb.contains(document.activeElement)) lbClose.focus(); }
+  function close(){ lb.classList.remove('open'); document.body.style.overflow=''; if(lastFocus) lastFocus.focus(); }
   lbClose.addEventListener('click', close);
   lb.addEventListener('click', function(e){ if(e.target===lb) close(); });
   lbPrev.addEventListener('click', function(){ open((current-1+srcs.length)%srcs.length); });
@@ -854,6 +858,10 @@ footer span a{text-decoration:underline;text-underline-offset:3px}
     if(e.key==='Escape') close();
     if(e.key==='ArrowLeft') lbPrev.click();
     if(e.key==='ArrowRight') lbNext.click();
+    if(e.key==='Tab'){ // keep focus inside the viewer
+      var f=[lbClose,lbPrev,lbNext], k=f.indexOf(document.activeElement);
+      e.preventDefault(); f[(k+(e.shiftKey?f.length-1:1))%f.length].focus();
+    }
   });
 })();
 </script>

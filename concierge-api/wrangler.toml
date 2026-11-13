@@ -26,7 +26,9 @@ enabled = true
 #     backupDatabase() code is live; re-add "0 3 * * 0" here + redeploy when the
 #     API is healthy, or trigger the backup manually (dashboard → Triggers).
 [triggers]
-crons = ["*/15 * * * *"]
+# 2026-11-13: the July failure was the cron itself; Cloudflare rejects "0 3 * * 0"
+# (Sunday is 1 or SUN in its format). Weekly backup is now "0 3 * * SUN".
+crons = ["*/15 * * * *", "0 3 * * SUN"]
 
 # SESSION_SECRET is NOT set here. Set it out-of-band and never commit it:
 #   wrangler secret put SESSION_SECRET

@@ -393,7 +393,6 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
               <span class="nav-services-col-label">More Services</span>
               <a href="dining-living.html">Dining &amp; Living</a>
               <a href="tv-units.html">TV Units</a>
-              <a href="shelving.html">Shelving</a>
               <a href="solid-wood.html">Solid Wood</a>
               <a href="hire.html">Hire a Carpenter</a>
             </div>
@@ -509,9 +508,9 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <div class="card">
       <div class="card-t"><span class="dot"></span>Project &amp; cut lists</div>
       <div class="grid2" style="margin-bottom:.55rem">
-        <div class="fld"><label>Project — home / client</label>
+        <div class="fld"><label for="s-proj">Project — home / client</label>
           <input id="s-proj" placeholder="e.g. Adjei — Cantonments" oninput="onProjName()"></div>
-        <div class="fld"><label>This cut list — which piece?</label>
+        <div class="fld"><label for="s-listname">This cut list — which piece?</label>
           <input id="s-listname" placeholder="e.g. Master wardrobe" oninput="onListName()"></div>
       </div>
       <div class="hint" style="margin-bottom:.55rem">One project (a home/client) can hold several cut lists — a wardrobe, a kitchen, a TV unit…</div>
@@ -535,19 +534,19 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <div class="card">
       <div class="card-t"><span class="dot"></span>Board</div>
       <div class="fld big" style="margin-bottom:.7rem">
-        <label>Board / colour code</label>
+        <label for="s-code">Board / colour code</label>
         <input id="s-code" placeholder="e.g. 18mm Oak Melamine" oninput="onSetting()">
         <div class="hint">Identifies which colour board you're cutting from — shown on every printed page.</div>
       </div>
       <div class="grid3">
-        <div class="fld"><label>Thickness (mm)</label><input id="s-thick" type="number" value="18" inputmode="decimal" oninput="onSetting()"></div>
-        <div class="fld"><label>Board length</label><input id="s-bl" type="number" value="2440" inputmode="decimal" oninput="onSetting()"></div>
-        <div class="fld"><label>Board width</label><input id="s-bw" type="number" value="1220" inputmode="decimal" oninput="onSetting()"></div>
+        <div class="fld"><label for="s-thick">Thickness (mm)</label><input id="s-thick" type="number" value="18" inputmode="decimal" oninput="onSetting()"></div>
+        <div class="fld"><label for="s-bl">Board length</label><input id="s-bl" type="number" value="2440" inputmode="decimal" oninput="onSetting()"></div>
+        <div class="fld"><label for="s-bw">Board width</label><input id="s-bw" type="number" value="1220" inputmode="decimal" oninput="onSetting()"></div>
       </div>
       <div class="grid3" style="margin-top:.7rem">
-        <div class="fld"><label>Saw kerf (mm)</label><input id="s-kerf" type="number" value="4" inputmode="decimal" oninput="onSetting()"><div class="hint">Cut allowance</div></div>
-        <div class="fld"><label>Waste %</label><input id="s-waste" type="number" value="12" inputmode="decimal" oninput="onSetting()"><div class="hint">Buffer on area</div></div>
-        <div class="fld"><label>Grain</label>
+        <div class="fld"><label for="s-kerf">Saw kerf (mm)</label><input id="s-kerf" type="number" value="4" inputmode="decimal" oninput="onSetting()"><div class="hint">Cut allowance</div></div>
+        <div class="fld"><label for="s-waste">Waste %</label><input id="s-waste" type="number" value="12" inputmode="decimal" oninput="onSetting()"><div class="hint">Buffer on area</div></div>
+        <div class="fld"><label for="s-grain">Grain</label>
           <select id="s-grain" onchange="onSetting()">
             <option value="1">Has grain (fixed)</option>
             <option value="0">Plain (may rotate)</option>
@@ -557,12 +556,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       </div>
       <div class="price-head">&#8373; Pricing <span>— ballpark cost estimate</span></div>
       <div class="grid2">
-        <div class="fld"><label>Board price (GHS each)</label><input id="s-boardp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Your sell price per board</div></div>
-        <div class="fld"><label>Edge roll (GHS)</label><input id="s-rollp" type="number" value="200" inputmode="decimal" oninput="onSetting()"><div class="hint">Per roll of banding</div></div>
+        <div class="fld"><label for="s-boardp">Board price (GHS each)</label><input id="s-boardp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Your sell price per board</div></div>
+        <div class="fld"><label for="s-rollp">Edge roll (GHS)</label><input id="s-rollp" type="number" value="200" inputmode="decimal" oninput="onSetting()"><div class="hint">Per roll of banding</div></div>
       </div>
       <div class="grid2" style="margin-top:.7rem">
-        <div class="fld"><label>Apply / roll (GHS)</label><input id="s-applyp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Cost to apply one roll</div></div>
-        <div class="fld"><label>Roll length (m)</label><input id="s-rolllen" type="number" value="100" inputmode="decimal" oninput="onSetting()"><div class="hint" id="perm-hint">Metres per roll</div></div>
+        <div class="fld"><label for="s-applyp">Apply / roll (GHS)</label><input id="s-applyp" type="number" value="500" inputmode="decimal" oninput="onSetting()"><div class="hint">Cost to apply one roll</div></div>
+        <div class="fld"><label for="s-rolllen">Roll length (m)</label><input id="s-rolllen" type="number" value="100" inputmode="decimal" oninput="onSetting()"><div class="hint" id="perm-hint">Metres per roll</div></div>
       </div>
     </div>
 
@@ -571,12 +570,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div class="card-t"><span class="dot"></span>Sheet header <span style="font-weight:400;letter-spacing:0;text-transform:none;color:var(--clr-muted);font-family:var(--font-body);font-size:.72rem">— logo &amp; number on every page</span></div>
       <div id="brandWho" class="brand-who"></div>
       <div class="fld" style="margin-bottom:.6rem">
-        <label>Logo</label>
+        <label for="b-src">Logo</label>
         <select id="b-src" onchange="onBrandSrc()"></select>
       </div>
       <div class="grid2">
-        <div class="fld"><label>Business name</label><input id="b-name" placeholder="Your business name" oninput="onBrand()"></div>
-        <div class="fld"><label>Phone</label><input id="b-phone" placeholder="Your number" oninput="onBrand()"></div>
+        <div class="fld"><label for="b-name">Business name</label><input id="b-name" placeholder="Your business name" oninput="onBrand()"></div>
+        <div class="fld"><label for="b-phone">Phone</label><input id="b-phone" placeholder="Your number" oninput="onBrand()"></div>
       </div>
       <div id="brandPrev" class="brand-prev"></div>
       <input type="file" id="b-file" accept="image/png,image/jpeg,image/webp" hidden onchange="onBrandFile(event)">
@@ -669,6 +668,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
         <h5>Company</h5>
         <ul>
           <li><a href="portfolio.html">Portfolio</a></li>
+          <li><a href="shelving.html">Shelving</a></li>
           <li><a href="contact.html">Contact Us</a></li>
           <li><a href="/concierge/">Carpentry Concierge</a></li>
           <li><a href="privacy.html">Privacy Policy</a></li>
@@ -733,7 +733,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   </div>
 </div>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=20261113"></script>
 <script src="js/concierge.js?v=20261005"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -1507,14 +1507,14 @@ function renderParts(){
 }
 function renderRows(){
   var tb=document.getElementById('ptbody'); tb.innerHTML='';
-  parts.forEach(function(p){
+  parts.forEach(function(p,i){
     var tr=document.createElement('tr');
     var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
     tr.innerHTML=
       '<td><input class="nm" data-id="'+p.id+'" data-f="name" value="'+esc(p.name)+'" placeholder="Part name" oninput="onCell(\''+p.id+'\',\'name\',this.value)"></td>'+
-      '<td class="num"><input class="dim" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></td>'+
-      '<td class="num"><input class="dim" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></td>'+
-      '<td class="num"><input class="qty" type="number" inputmode="numeric" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></td>'+
+      '<td class="num"><input class="dim" type="number" inputmode="decimal" aria-label="Length, part '+(i+1)+'" data-id="'+p.id+'" data-f="L" value="'+Ld+'" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></td>'+
+      '<td class="num"><input class="dim" type="number" inputmode="decimal" aria-label="Width, part '+(i+1)+'" data-id="'+p.id+'" data-f="W" value="'+Wd+'" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></td>'+
+      '<td class="num"><input class="qty" type="number" inputmode="numeric" aria-label="Quantity, part '+(i+1)+'" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></td>'+
       '<td><input class="code" data-id="'+p.id+'" data-f="code" value="'+esc(p.code)+'" placeholder="—" oninput="onCell(\''+p.id+'\',\'code\',this.value)"></td>'+
       '<td class="num"><span class="eb-minibox" title="Tap an edge to band it">'+ebOverlay(p.id)+'</span></td>'+
       '<td class="num"><button class="rowdel" title="Delete" onclick="delRow(\''+p.id+'\')">&times;</button></td>';

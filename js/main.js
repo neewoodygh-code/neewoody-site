@@ -103,11 +103,14 @@ if ('serviceWorker' in navigator) {
     question.addEventListener('click', function () {
       const isOpen = item.classList.contains('open');
 
-      // Close all
-      faqItems.forEach(function (i) { i.classList.remove('open'); });
+      // Close all (and tell screen readers)
+      faqItems.forEach(function (i) {
+        i.classList.remove('open');
+        var q = i.querySelector('.faq-question'); if (q) q.setAttribute('aria-expanded', 'false');
+      });
 
       // Open clicked (unless it was already open)
-      if (!isOpen) item.classList.add('open');
+      if (!isOpen) { item.classList.add('open'); question.setAttribute('aria-expanded', 'true'); }
     });
   });
 
