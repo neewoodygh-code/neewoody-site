@@ -1,0 +1,53 @@
+---
+import { Image } from 'astro:assets';
+import logoLight from '../assets/brand/logo-light.png';
+import logoDark from '../assets/brand/logo-dark.png';
+import { WA, PHONE } from '../data.js';
+const links = [['Services', '#services'], ['Work', '#work'], ['Portfolio', '/portfolio'], ['Concierge', '/concierge/'], ['Contact', '#contact']];
+---
+<header class="nav" data-tone="dark" id="nav">
+  <a class="nav-brand" href="#top" aria-label="Neewoody Custom Woodwork, home">
+    <Image class="nav-logo on-dark" src={logoLight} alt="" width={180} />
+    <Image class="nav-logo on-light" src={logoDark} alt="" width={180} />
+  </a>
+  <nav aria-label="Main" class="nav-links">
+    {links.map(([t, h]) => <a href={h}>{t}</a>)}
+  </nav>
+  <a class="nav-wa" href={WA}>WhatsApp <span class="nav-num">{PHONE}</span></a>
+  <button class="nav-menu" type="button" aria-haspopup="dialog" id="menuOpen">Menu</button>
+</header>
+
+<dialog class="menu" id="menu" aria-label="Menu">
+  <div class="menu-top">
+    <Image class="menu-logo" src={logoLight} alt="Neewoody Custom Woodwork" width={150} />
+    <button type="button" class="menu-close" id="menuClose">Close</button>
+  </div>
+  <nav aria-label="Menu">
+    {links.map(([t, h]) => <a href={h}>{t}</a>)}
+  </nav>
+  <a class="menu-wa" href={WA}>WhatsApp {PHONE}</a>
+</dialog>
+
+<script>
+  const nav = document.getElementById('nav')!;
+  // Flip the nav to whatever section sits under it
+  let raf = 0;
+  const check = () => {
+    raf = 0;
+    const under = document.elementsFromPoint(24, 38).find((el) => !el.closest('.nav'));
+    const sec = under?.closest<HTMLElement>('[data-nav]');
+    if (sec) nav.dataset.tone = sec.dataset.nav;
+    // frosted backing once we're past the hero, so links never sit on top of body text
+    nav.classList.toggle('scrolled', scrollY > innerHeight * 0.8);
+  };
+  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(check); }, { passive: true });
+  check();
+
+  // Phone menu: native <dialog> gives focus trapping and Esc for free
+  const menu = document.getElementById('menu') as HTMLDialogElement;
+  const openBtn = document.getElementById('menuOpen')!;
+  openBtn.addEventListener('click', () => menu.showModal());
+  document.getElementById('menuClose')!.addEventListener('click', () => menu.close());
+  menu.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('a')) menu.close(); });
+  menu.addEventListener('close', () => openBtn.focus());
+</script>

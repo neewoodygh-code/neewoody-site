@@ -1,0 +1,99 @@
+---
+// Shared page shell for every Astro page: head (SEO, verification, analytics),
+// fonts, smooth scrolling and fade-ins. Pages pass title / description / path.
+import '@fontsource/cormorant-garamond/300.css';
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/300-italic.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/500.css';
+import '@fontsource/manrope/600.css';
+import '../styles/global.css';
+import { getImage } from 'astro:assets';
+import { SITE, EMAIL } from '../data.js';
+import { photo } from '../photos.js';
+
+const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero' } = Astro.props;
+const url = SITE + path;
+const og = await getImage({ src: photo(ogPhoto), width: 1200, height: 630, fit: 'cover', format: 'jpg' });
+const ld = {
+  '@context': 'https://schema.org',
+  '@type': 'LocalBusiness',
+  name: 'Neewoody Custom Woodwork',
+  url: SITE,
+  logo: SITE + '/images/logo.png',
+  image: SITE + og.src,
+  description: 'Custom wardrobes, beds, kitchen cabinets, and bespoke furniture made to measure in Accra, Ghana.',
+  telephone: '+233244633464',
+  email: EMAIL,
+  foundingDate: '2015',
+  address: { '@type': 'PostalAddress', streetAddress: 'Amugi Avenue', addressLocality: 'Accra', addressCountry: 'GH' },
+  geo: { '@type': 'GeoCoordinates', latitude: '5.56108', longitude: '-0.21373' },
+  openingHours: 'Mo-Sa 08:00-18:00',
+  sameAs: ['https://www.instagram.com/neewoodygh'],
+  priceRange: '$$',
+  areaServed: { '@type': 'City', name: 'Accra' },
+  serviceType: ['Custom Wardrobes', 'Custom Beds', 'Kitchen Cabinets', 'Shelving', 'TV Units', 'Bespoke Woodwork'],
+  aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.8', reviewCount: '14' },
+};
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <script src="https://analytics.ahrefs.com/analytics.js" data-key="Ilf08aAed9rQJJbWdeQ5wQ" async></script>
+  <meta charset="utf-8" />
+  <meta name="facebook-domain-verification" content="1pybt70ecjdf8hhqpg2phn2tb0h80n" />
+  <meta name="google-site-verification" content="ypOHt1fPRfkOXcSX1v6DHt07Lrsi_tyGk1TVaFrExhs" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={url} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={url} />
+  <meta property="og:title" content={ogTitle || title} />
+  <meta property="og:description" content={ogDescription || description} />
+  <meta property="og:image" content={SITE + og.src} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#17130f" />
+  <link rel="icon" href="/images/favicon.ico" />
+  <link rel="apple-touch-icon" href="/images/logo.png" />
+  <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+  <script is:inline>document.documentElement.classList.add('js')</script>
+  <!-- Google Analytics (G-ZP77WR6BNH): real domain only, never local previews -->
+  <script is:inline>
+    if (location.hostname === 'neewoodygh.com') {
+      var s = document.createElement('script'); s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH'; document.head.appendChild(s);
+    }
+    window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments)}
+    gtag('js', new Date()); gtag('config', 'G-ZP77WR6BNH');
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <slot />
+  <script>
+    import Lenis from 'lenis';
+    import 'lenis/dist/lenis.css';
+    // Smooth scrolling, skipped for anyone who asks their device for less motion
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const lenis = new Lenis({ duration: 1.1, anchors: true });
+      const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
+      requestAnimationFrame(raf);
+    }
+    // Fade-ins: content is visible without JS; with JS it rises in once
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    }), { rootMargin: '0px 0px -6% 0px' });
+    document.querySelectorAll('.rv').forEach((el) => io.observe(el));
+    // Same GA events the old pages send (WhatsApp / phone / Instagram clicks)
+    document.addEventListener('click', (e) => {
+      const a = (e.target as HTMLElement).closest('a');
+      if (!a || !(window as any).gtag) return;
+      const g = (window as any).gtag, page = location.pathname;
+      if (a.href.includes('wa.me/')) g('event', 'whatsapp_click', { event_category: 'contact', event_label: page });
+      else if (a.href.startsWith('tel:')) g('event', 'phone_click', { event_category: 'contact', event_label: page });
+      else if (a.href.includes('instagram.com')) g('event', 'instagram_click', { page });
+    });
+  </script>
+</body>
+</html>

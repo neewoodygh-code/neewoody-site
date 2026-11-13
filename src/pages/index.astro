@@ -1,0 +1,182 @@
+---
+import { Picture, Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Services from '../components/Services.astro';
+import WorkGallery from '../components/WorkGallery.jsx';
+import { WORK, STEPS, SERVICES, WA, PHONE, EMAIL } from '../data.js';
+import logoLight from '../assets/brand/logo-light.png';
+import { photo } from '../photos.js';
+
+
+// The gallery is a React island, so hand it ready-made responsive image sources
+const work = await Promise.all(WORK.map(async (w) => {
+  const src = photo(w.img);
+  const sizes = w.wide ? '(min-width: 900px) 60vw, 82vw' : '(min-width: 900px) 30vw, 82vw';
+  const webp = await getImage({ src, widths: [500, 800, 1200], format: 'webp' });
+  const avif = await getImage({ src, widths: [500, 800, 1200], format: 'avif' });
+  return { ...w, sizes, src: webp.src, webp: webp.srcSet.attribute, avif: avif.srcSet.attribute, w: webp.attributes.width, h: webp.attributes.height };
+}));
+
+const statement = 'Every piece starts as a rough slab in our yard and ends in someone’s home. We draw it, cut it, finish it and fit it ourselves.';
+---
+<Base
+  title="Custom Wardrobes, Beds & Kitchens in Accra | Neewoody Custom Woodwork"
+  description="Neewoody Custom Woodwork designs and builds custom wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra. Made-to-measure furniture crafted for your space."
+  ogTitle="Neewoody Custom Woodwork | Custom Furniture in Accra, Ghana"
+  ogDescription="Made-to-measure wardrobes, beds, kitchen cabinets, and bespoke furniture built for Accra homes. Request a free quote today."
+  path="/">
+  <Nav />
+  <main id="main">
+
+    <section class="hero" id="top" data-nav="dark">
+      <Picture pictureAttributes={{ class: "hero-img" }} src={photo('hero')} formats={['avif', 'webp']} widths={[800, 1400, 2000]} sizes="100vw"
+        alt="The dining hall at Sage Centre, Wli: long teak tables under hanging lights" loading="eager" fetchpriority="high" />
+      <div class="hero-shade"></div>
+      <div class="hero-copy">
+        <h1 class="hero-h"><span class="mask"><span>Made by hand,</span></span><span class="mask"><span>made to stay.</span></span></h1>
+        <div class="hero-foot">
+          <p>Solid wood furniture, wardrobes and kitchens, drawn, built and fitted by our own crew in Accra since 2015.</p>
+          <div class="hero-acts">
+            <a class="pill" href={WA}>Start a commission <span aria-hidden="true">↗</span></a>
+            <a class="ulink light" href="#work">See the work</a>
+          </div>
+        </div>
+      </div>
+      <p class="hero-cap">Sage Centre, Wli<span class="slash" aria-hidden="true"></span>Teak</p>
+    </section>
+
+    <section class="manifesto" data-nav="light" aria-label="About the workshop">
+      <div class="mf-grid">
+        <p class="label">The workshop</p>
+        <p class="mf-text" id="mfText">{statement.split(' ').map((w) => <span>{w} </span>)}</p>
+      </div>
+      <div class="mf-row">
+        <figure class="mf-img rv">
+          <Picture src={photo('grain')} formats={['avif', 'webp']} widths={[700, 1100]} sizes="(min-width: 900px) 42vw, 92vw" alt="The grain of a Hyedua table top, just finished, Roman Ridge" loading="lazy" />
+        </figure>
+        <dl class="mf-facts rv">
+          <div><dt>Workshop</dt><dd>Amugi Avenue, Accra</dd></div>
+          <div><dt>Since</dt><dd>2015</dd></div>
+          <div><dt>Timbers</dt><dd>Teak, Hyedua, Afromosia, walnut</dd></div>
+          <div><dt>Google</dt><dd><span class="star" aria-hidden="true">★</span> 4.8 from 14 reviews</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <Services />
+
+    <section class="sage" id="sage" data-nav="dark" aria-labelledby="sage-h">
+      <div class="sage-top rv">
+        <p class="label light">Featured commission</p>
+        <h2 id="sage-h" class="display">A whole retreat,<br />in solid teak.</h2>
+      </div>
+      <div class="sage-grid">
+        <figure class="sage-main par-slow">
+          <Picture src={photo('sage-lounge')} formats={['avif', 'webp']} widths={[800, 1300]} sizes="(min-width: 900px) 58vw, 92vw" alt="Teak-framed sofas around a glass-topped teak coffee table at Sage Centre" loading="lazy" />
+        </figure>
+        <div class="sage-side">
+          <div class="rv">
+            <p class="lede">Beds, dining tables, sofas, shelving and staircase rails for an educational retreat in the Volta hills. Twenty-six months of work, built to an international standard.</p>
+            <a class="ulink brass" href="/projects/sage-centre">Read how we built it</a>
+          </div>
+          <figure class="sage-small par-fast">
+            <Picture src={photo('sage-louvres')} formats={['avif', 'webp']} widths={[500, 800]} sizes="(min-width: 900px) 30vw, 64vw" alt="Teak louvred windows and a lounge chair in a quiet corridor" loading="lazy" />
+          </figure>
+        </div>
+      </div>
+      <figure class="band">
+        <Picture pictureAttributes={{ class: "band-img" }} src={photo('wli')} formats={['avif', 'webp']} widths={[900, 1600, 2000]} sizes="100vw" alt="The hills above Wli, seen from the Sage Centre lawns" loading="lazy" />
+        <figcaption>Wli, Volta Region</figcaption>
+      </figure>
+    </section>
+
+    <section class="work" id="work" data-nav="light" aria-labelledby="work-h">
+      <div class="work-head rv">
+        <h2 id="work-h" class="display">Selected work</h2>
+        <a class="ulink" href="/portfolio">The full portfolio</a>
+      </div>
+      <WorkGallery client:visible items={work} />
+    </section>
+
+    <section class="process" id="process" data-nav="light" aria-labelledby="proc-h">
+      <div class="proc-frame-wrap" aria-hidden="true">
+        <div class="proc-frame">
+          {STEPS.map((s, i) => (
+            <Picture pictureAttributes={{ class: 'proc-img' + (i === 0 ? ' on' : '') }} src={photo(s.img)} formats={['avif', 'webp']} widths={[700, 1100]} sizes="45vw" alt="" loading="lazy" />
+          ))}
+          <span class="frame-tag" id="frameTag">{STEPS[0].title}</span>
+        </div>
+      </div>
+      <div class="proc-steps">
+        <h2 id="proc-h" class="display rv">From slab<br />to room.</h2>
+        <p class="proc-intro rv">We start with a visit to measure the room, then drawings and one clear price.</p>
+        {STEPS.map((s, i) => (
+          <div class={'step' + (i === 0 ? ' on' : '')} data-step={i} data-title={s.title}>
+            <h3>{s.title}</h3>
+            <p>{s.text}</p>
+            <Picture pictureAttributes={{ class: "step-img" }} src={photo(s.img)} formats={['avif', 'webp']} widths={[600, 900]} sizes="92vw" alt={s.title} loading="lazy" />
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="voice" data-nav="light" aria-labelledby="voice-h">
+      <h2 id="voice-h" class="sr">What clients say</h2>
+      <figure class="voice-in rv">
+        <blockquote>“Nee is one of the very few carpenters in Ghana we trust to deliver quality results. He pays attention to details.”</blockquote>
+        <figcaption>Ben Schwartz<span class="slash" aria-hidden="true"></span>Co-founder, Sage Experience<span class="slash" aria-hidden="true"></span>Google review</figcaption>
+      </figure>
+    </section>
+
+  </main>
+
+  <footer class="contact" id="contact" data-nav="dark">
+    <h2 class="contact-h rv">Tell us about<br />the room.</h2>
+    <div class="contact-row rv">
+      <a class="pill" href={WA}>WhatsApp {PHONE} <span aria-hidden="true">↗</span></a>
+      <a class="ulink light" href={'mailto:' + EMAIL}>{EMAIL}</a>
+    </div>
+    <div class="contact-meta">
+      <p>Workshop<span>Amugi Avenue, Accra</span></p>
+      <p>Hours<span>Monday to Saturday, 8am to 6pm</span></p>
+      <p>Call<a href="tel:+233244633464">024 463 3464</a></p>
+    </div>
+    <nav class="foot-links" aria-label="Footer">
+      <div><p>What we make</p>{SERVICES.map((s) => <a href={s.href}>{s.name}</a>)}</div>
+      <div><p>Our work</p><a href="/portfolio">Portfolio</a><a href="/projects/sage-centre">Sage Centre</a><a href="/projects/bortianor">Bortianor</a></div>
+      <div><p>More</p><a href="/hire">Hire a carpenter</a><a href="/concierge/">Carpentry Concierge</a><a href="/contact">Contact</a><a href="https://www.instagram.com/neewoodygh">Instagram</a><a href="/privacy">Privacy</a></div>
+    </nav>
+    <Image class="contact-logo" src={logoLight} alt="Neewoody Custom Woodwork" width={1000} />
+    <p class="fine">© Neewoody Custom Woodwork, Accra. Registered 2017.</p>
+  </footer>
+
+  <script>
+    // Statement: each word darkens as it scrolls through the screen (stays readable at every step)
+    const words = document.querySelectorAll('#mfText span');
+    const mf = document.getElementById('mfText')!;
+    let ticking = false;
+    const ink = () => {
+      ticking = false;
+      const r = mf.getBoundingClientRect();
+      const p = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.4)));
+      const n = Math.round(p * words.length);
+      words.forEach((w, i) => w.classList.toggle('ink', i < n));
+    };
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) words.forEach((w) => w.classList.add('ink'));
+    else { addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(ink); } }, { passive: true }); ink(); }
+
+    // Process: the sticky photo follows whichever step is in the middle of the screen
+    const imgs = document.querySelectorAll('.proc-frame .proc-img');
+    const tag = document.getElementById('frameTag')!;
+    const steps = document.querySelectorAll<HTMLElement>('.step');
+    const so = new IntersectionObserver((es) => es.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const i = Number((e.target as HTMLElement).dataset.step);
+      steps.forEach((s, k) => s.classList.toggle('on', k === i));
+      imgs.forEach((m, k) => m.classList.toggle('on', k === i));
+      tag.textContent = (e.target as HTMLElement).dataset.title!;
+    }), { rootMargin: '-45% 0px -45% 0px' });
+    steps.forEach((s) => so.observe(s));
+  </script>
+</Base>

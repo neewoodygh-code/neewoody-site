@@ -1,0 +1,41 @@
+---
+import { Picture } from 'astro:assets';
+import { SERVICES } from '../data.js';
+import { photo } from '../photos.js';
+---
+<section class="services" id="services" data-nav="light" aria-labelledby="svc-h">
+  <div class="svc-head rv">
+    <h2 id="svc-h" class="display">What we make</h2>
+    <p>Every piece is drawn for the room it goes in, then built in our workshop.</p>
+  </div>
+  <div class="svc-body">
+    <ul class="svc-list" id="svcList">
+      {SERVICES.map((s, i) => (
+        <li>
+          <a href={s.href} data-i={i} class={i === 0 ? 'on' : ''}>
+            <Picture pictureAttributes={{ class: "svc-thumb" }} src={photo(s.img)} formats={['avif', 'webp']} widths={[240]} sizes="96px" alt="" loading="lazy" />
+            <span class="svc-name">{s.name}</span>
+            <span class="svc-line">{s.line}</span>
+            <span class="svc-arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+    <div class="svc-preview" aria-hidden="true">
+      {SERVICES.map((s, i) => (
+        <Picture pictureAttributes={{ class: 'svc-img' + (i === 0 ? ' on' : '') }} src={photo(s.img)} formats={['avif', 'webp']} widths={[560, 900]} sizes="(min-width: 900px) 34vw, 1px" alt="" loading="lazy" />
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  // Hover or keyboard focus on a service swaps the large photo beside the list
+  const links = document.querySelectorAll<HTMLAnchorElement>('#svcList a');
+  const imgs = document.querySelectorAll('.svc-preview .svc-img');
+  const show = (i: number) => {
+    links.forEach((a, k) => a.classList.toggle('on', k === i));
+    imgs.forEach((m, k) => m.classList.toggle('on', k === i));
+  };
+  links.forEach((a, i) => { a.addEventListener('mouseenter', () => show(i)); a.addEventListener('focus', () => show(i)); });
+</script>
