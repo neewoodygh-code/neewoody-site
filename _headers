@@ -18,3 +18,7 @@
 
 /favicon.ico
   Cache-Control: public, max-age=604800
+
+# Astro build output: file names change whenever content changes, so keep for a year.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
