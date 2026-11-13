@@ -17,7 +17,7 @@ const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
       <p>{hero.text}</p>
       <div class="hero-acts">
         <a class="pill" href={wa}>WhatsApp 024 463 3464 <span aria-hidden="true">↗</span></a>
-        <a class="ulink light" href="#gallery">See the work</a>
+        <a class="ulink light" href={hero.workLink || '#gallery'}>{hero.workLabel || 'See the work'}</a>
       </div>
     </div>
     {hero.facts && (

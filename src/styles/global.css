@@ -6,6 +6,9 @@
   --walnut: #6b4a33;
   --brass: #c49455;
   --stone: #675e53;
+  /* names js/cms-posts.js reads for its fallback cards (otherwise it falls back to a too-faint grey) */
+  --muted: #675e53;
+  --ink: #17130f;
   --on-dark: #efe9df;
   --on-dark-2: rgba(239, 233, 223, .7);
   --hair: rgba(23, 19, 15, .16);
@@ -290,8 +293,55 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: .98; lett
 .faq-item[open] summary::after { transform: rotate(45deg); }
 .faq-item p { color: var(--stone); padding: 0 2.5rem 1.4rem 0; max-width: 62ch; }
 
+.gal-text { color: var(--stone); max-width: 60ch; margin: -0.6rem 0 1.8rem; }
+.g-more { display: block; margin-top: .45rem; font-size: .8rem; letter-spacing: .12em; text-transform: uppercase; color: var(--walnut); }
+.viewer-txt { max-width: 70ch; text-align: center; }
+.viewer-txt #viewerText p { margin-top: .7rem; font-size: .92rem; color: var(--on-dark-2); text-align: left; }
+.viewer-txt #viewerText:not(:empty) { max-height: 18vh; overflow-y: auto; padding: 0 .5rem; }
+.viewer img { max-height: 70vh; }
+.v-prev[hidden], .v-next[hidden] { display: none; }
+
+.statement-sec { padding: clamp(5rem, 11vw, 9rem) var(--gut); }
+.statement { font-family: var(--serif); font-weight: 300; font-size: clamp(2rem, 4.2vw, 4rem); line-height: 1.12; max-width: 26ch; margin-left: auto; margin-right: clamp(0rem, 8vw, 10rem); }
+
+.types-sec.details { background: var(--bone-2); border-top: 0; }
+.types-sec.details .types-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.types-sec.details h3 { font-size: clamp(1.35rem, 1.9vw, 1.7rem); }
+.types-list.with-photos li { border-bottom: 0; }
+.types-img img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; margin-bottom: 1.2rem; }
+
+.proj-sec { padding: clamp(5rem, 10vw, 8rem) var(--gut); }
+.proj-sec.dark { background: var(--espresso); color: var(--on-dark); }
+.proj-sec.sand { background: var(--bone-2); }
+.proj-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+.proj-head h2 { font-size: clamp(2.2rem, 4vw, 3.8rem); margin-top: .9rem; }
+.proj-text p { color: var(--stone); margin-bottom: 1rem; max-width: 56ch; }
+.proj-sec.dark .proj-text p { color: var(--on-dark-2); }
+.proj-more { margin: .2rem 0 1.2rem; }
+.proj-more summary { cursor: pointer; font-weight: 500; list-style: none; display: inline-block; padding-bottom: 3px; border-bottom: 1px solid currentColor; }
+.proj-more summary::-webkit-details-marker { display: none; }
+.proj-more[open] summary { margin-bottom: .8rem; }
+.proj-text .ulink { margin-top: .3rem; }
+.proj-photos { display: grid; gap: clamp(1rem, 2vw, 1.6rem); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.proj-photos.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.proj-photos.n4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.proj-photos.n5 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.proj-photos.n5 .proj-ph:nth-child(-n+2) { grid-column: span 3; }
+.proj-photos.n5 .proj-ph:nth-child(n+3) { grid-column: span 2; }
+.proj-ph { display: block; position: relative; overflow: hidden; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; color: inherit; font: inherit; text-decoration: none; }
+.proj-ph img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; transition: transform 1.2s var(--ease); }
+.proj-photos.n5 .proj-ph:nth-child(-n+2) img { aspect-ratio: 4 / 3; }
+.proj-ph:hover img { transform: scale(1.04); }
+.proj-cap { position: absolute; left: .7rem; bottom: .7rem; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--on-dark); background: rgba(23,19,15,.78); padding: .3rem .6rem; }
+
 /* ---------- small screens ---------- */
 @media (max-width: 900px) {
+  .proj-head { grid-template-columns: minmax(0, 1fr); }
+  .proj-photos, .proj-photos.n4, .proj-photos.n5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .proj-photos.n5 .proj-ph:nth-child(n) { grid-column: auto; }
+  .proj-photos.n5 .proj-ph:first-child { grid-column: 1 / -1; }
+  .types-sec.details .types-list { grid-template-columns: minmax(0, 1fr); }
+  .statement { margin: 0; }
   .intro-grid, .feature, .types-head, .faq-sec { grid-template-columns: minmax(0, 1fr); }
   .hero-split { grid-template-columns: minmax(0, 1fr); min-height: 0; }
   .hero-split .hero-img { grid-column: 1; grid-row: 1; height: 42svh; min-height: 0; }

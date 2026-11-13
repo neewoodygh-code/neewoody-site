@@ -1,6 +1,12 @@
 ---
-// Small text sections shared by product pages: intro, types list, review, FAQ.
+// Text sections shared by product pages: intro, types (optionally with photos),
+// details (compact grid), statement, review, FAQ (+ FAQPage structured data).
+import { Picture } from 'astro:assets';
+import { img } from '../../photos.js';
 const { kind, d } = Astro.props;
+const items = (kind === 'types' || kind === 'details')
+  ? await Promise.all(d.items.map(async ([name, text, photo, alt]: string[]) => ({ name, text, alt, src: photo ? await img(photo) : null })))
+  : [];
 ---
 {kind === 'intro' && (
   <section class="intro-sec" data-nav="light" aria-labelledby="intro-h">
@@ -14,15 +20,26 @@ const { kind, d } = Astro.props;
   </section>
 )}
 
-{kind === 'types' && (
-  <section class="types-sec" data-nav="light" aria-labelledby="types-h">
+{(kind === 'types' || kind === 'details') && (
+  <section class={kind === 'details' ? 'types-sec details' : 'types-sec'} id={d.id} data-nav="light">
     <div class="types-head rv">
-      <h2 id="types-h" class="display">{d.title}</h2>
-      <p>{d.text}</p>
+      <h2 class="display">{d.title}</h2>
+      {d.text && <p>{d.text}</p>}
     </div>
-    <ul class="types-list">
-      {d.items.map(([name, text]: [string, string]) => <li class="rv"><h3>{name}</h3><p>{text}</p></li>)}
+    <ul class={'types-list' + (items.some((i: any) => i.src) ? ' with-photos' : '')}>
+      {items.map((i: any) => (
+        <li class="rv">
+          {i.src && <Picture class="types-img" src={i.src} formats={['avif', 'webp']} widths={[600, 1000]} sizes="(min-width: 900px) 45vw, 92vw" alt={i.alt || ''} loading="lazy" />}
+          <h3>{i.name}</h3><p>{i.text}</p>
+        </li>
+      ))}
     </ul>
+  </section>
+)}
+
+{kind === 'statement' && (
+  <section class="statement-sec" data-nav="light">
+    <p class="statement rv">{d.text}</p>
   </section>
 )}
 

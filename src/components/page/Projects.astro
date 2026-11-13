@@ -1,0 +1,39 @@
+---
+// Project blocks: label, title, text, a row of photos (each opens the viewer on
+// the project's full set, incl. `extra` photos), optional "Read more" write-up
+// and link. Used for multi-photo projects (TV units, Kitchens, Solid wood).
+import { Picture } from 'astro:assets';
+import { img, bigSet } from '../../photos.js';
+const { p } = Astro.props;
+const shown = await Promise.all(p.photos.map(async (ph: any) => ({ ...ph, src: await img(ph.img) })));
+const set = await bigSet([...p.photos, ...(p.extra || [])]);
+const tone = p.tone || 'light';
+---
+<section class={'proj-sec ' + tone} id={p.id} data-nav={tone === 'dark' ? 'dark' : 'light'} aria-labelledby={p.id ? p.id + '-h' : undefined}>
+  <div class="proj-head rv">
+    <div>
+      {p.label && <p class={'label' + (tone === 'dark' ? ' light' : '')}>{p.label}</p>}
+      <h2 id={p.id ? p.id + '-h' : undefined}>{p.title}</h2>
+    </div>
+    <div class="proj-text">
+      {(Array.isArray(p.text) ? p.text : [p.text]).map((t: string) => <p>{t}</p>)}
+      {p.more && (
+        <details class="proj-more"><summary>Read more</summary>{p.more.map((t: string) => <p>{t}</p>)}</details>
+      )}
+      {p.link && <a class={'ulink' + (tone === 'dark' ? ' brass' : '')} href={p.link[0]}>{p.link[1]}</a>}
+    </div>
+  </div>
+  <div class={'proj-photos n' + Math.min(shown.length, 5)}>
+    {shown.map((ph: any, i: number) => {
+      const inner = (
+        <Fragment>
+          <Picture src={ph.src} formats={['avif', 'webp']} widths={[500, 900]} sizes="(min-width: 900px) 33vw, 80vw" alt={ph.alt} loading="lazy" />
+          {ph.cap && <span class="proj-cap">{ph.cap}</span>}
+        </Fragment>
+      );
+      return ph.href
+        ? <a class="proj-ph" href={ph.href}>{inner}</a>
+        : <button type="button" class="proj-ph" data-view data-set={JSON.stringify(set)} data-start={i} data-text={JSON.stringify(p.more || [])} aria-label={'Open photos: ' + (ph.cap || ph.alt)}>{inner}</button>;
+    })}
+  </div>
+</section>

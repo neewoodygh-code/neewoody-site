@@ -1,0 +1,116 @@
+// Everything the TV units page says, in page order. Layout: src/layouts/ProductPage.astro.
+const P = 'images/projects/';
+const BOR = '/projects/bortianor';
+export default {
+  slug: 'tv-units',
+  path: '/tv-units',
+  seo: {
+    title: 'Custom TV Units & Media Consoles in Accra | Neewoody',
+    description: 'Custom TV units, media consoles, and entertainment centres built to measure in Accra, Ghana. Neewoody Custom Woodwork, made to fit your wall and your screen.',
+    ogTitle: 'Custom TV Units in Accra | Neewoody Custom Woodwork',
+    ogDescription: 'Built-in and freestanding TV units made to your exact wall dimensions in Accra. Cable management, storage, and custom finishes.',
+  },
+  waText: "Hi Neewoody, I'm interested in a custom TV unit.",
+  hero: {
+    lines: ['Built for your wall,', 'your screen, your room.'],
+    text: 'A TV unit built to your exact wall, with the cables hidden, the screen at the right height and storage sized for what you own.',
+    img: P + 'bortianor/bortianor-living-tv-wall.jpg',
+    alt: 'Cream TV wall framed by lit walnut-grain shelving, Bortianor',
+    caption: 'TV wall, Bortianor',
+    workLink: '#bortianor',
+    facts: [['Build time', 'Usually 2 to 4 weeks'], ['Installation', 'Included anywhere in Accra'], ['Workshop', 'Amugi Avenue, Accra']],
+  },
+  sections: [
+    { kind: 'intro', title: 'A TV unit designed for your space.', paras: [
+      'Most Accra living rooms share the same problem: the TV is fighting the room. Wrong height, wrong width, cables taped along the skirting, storage that never quite fits the decoder, router, and streaming box together. A shelf from the market rarely solves any of it.',
+      'We measure your wall, understand how you use the space (the screens you own, the equipment you need to house, where you sit) and build a unit that puts everything where it belongs. Clean, functional, and finished to match your interior.',
+      'Whether you want a minimal floating panel, a full-wall entertainment build, or a low console with drawer storage, we scope and price it to your brief.',
+    ], link: ['/contact', 'Get a free quote'] },
+    { kind: 'projects', id: 'bortianor', tone: 'dark', label: 'Bortianor, Accra, 2026', title: 'Two TV walls in one new house',
+      text: 'In the living room, a cream wall with fluted panels between two columns of lit walnut-grain shelving, over a long low cabinet. In the master bedroom, stone-look panels with walnut-grain strips and a matching console. Both are part of a whole-house fit-out, alongside the kitchen, a bar and a glass-front wardrobe.',
+      link: [BOR, 'See the whole house'],
+      photos: [
+        { img: P + 'bortianor/bortianor-living-tv-wall.jpg', alt: 'Lit walnut-grain shelving either side of a TV wall, Bortianor', cap: 'Living room', href: BOR },
+        { img: P + 'bortianor/bortianor-living-wide.jpg', alt: 'The living room with the TV wall and the bar', cap: 'With the bar', href: BOR },
+        { img: P + 'bortianor/bortianor-master-tv-wall.jpg', alt: 'Master bedroom TV wall in stone-look panels with a walnut-grain console', cap: 'Master bedroom', href: BOR },
+      ] },
+    { kind: 'types', id: 'types', title: 'Every style of TV unit, built to your wall.', text: 'From a minimal floating panel to a full feature wall, we build around your room dimensions, your equipment, and your brief.', items: [
+      ['Floating wall units', 'Wall-mounted with no legs touching the floor. Clean, modern, and makes the room feel larger. Cable routing is built in from the start, so nothing hangs loose.'],
+      ['Floor-to-ceiling feature walls', 'The TV becomes part of a complete wall: shelving above, closed storage below, display niches beside it. A feature wall rather than a standalone unit.'],
+      ['Media consoles and sideboards', 'A lower console with drawers, open equipment bays, and a clean top surface. Works in living rooms and bedrooms alike, and doubles as a display surface.'],
+      ['Alcove and recessed builds', 'If your room has an alcove or a recess in the wall, we build a unit that fills it exactly, with no visible side gaps, no awkward overhang. Fully integrated.'],
+    ] },
+    { kind: 'details', title: 'Built to handle everything in your living room.', items: [
+      ['Cable management', 'Routed from screen to decoder to wall socket, hidden inside the unit from the start, not taped on afterwards.'],
+      ['The right viewing height', 'We calculate the correct screen height based on your seating arrangement and screen size. No neck strain, no awkward tilt.'],
+      ['Equipment storage', 'Dedicated bays sized for your decoder, streaming box, game console and router, so everything fits and ventilates properly.'],
+      ['Ventilation', "Decoders and amplifiers run hot. We design open bays or vented backs so equipment doesn't overheat over time."],
+      ['A finish to match your room', 'PVC wrap, veneer, painted finish or a combination. We match the unit to your existing furniture and colour scheme.'],
+      ['Any budget, any scale', 'A simple console or a full feature wall: we scope to what you want to spend without compromising on structure or finish.'],
+    ] },
+    { kind: 'projects', id: 'achimota', label: 'Achimota guesthouse', title: 'TV unit and wall paneling',
+      text: "A marble feature wall with floating TV bench and lit glass display cabinet, paired with slat wall paneling and hallway wainscotting. We group paneling and TV unit work together because they're so often ordered as one: a single wall composition rather than separate jobs.",
+      link: ['/projects/achimota-guesthouse', 'See the full project'],
+      photos: [
+        { img: P + 'achimota-guesthouse/achimota-tv-marble-wall-1.jpg', alt: 'TV unit with marble feature wall, Achimota guesthouse room conversion', cap: 'TV unit and marble wall' },
+        { img: P + 'achimota-guesthouse/achimota-tv-marble-wall-2.jpg', alt: 'TV unit with marble feature wall, Achimota guesthouse room conversion', cap: 'Feature wall and cabinet' },
+        { img: P + 'achimota-guesthouse/achimota-ac-paneling-1.jpg', alt: 'Wood slat wall paneling detail, Achimota guesthouse', cap: 'Slat wall paneling' },
+        { img: P + 'achimota-guesthouse/achimota-ac-paneling-2.jpg', alt: 'Wood slat wall paneling detail, Achimota guesthouse', cap: 'Paneling detail' },
+        { img: P + 'achimota-guesthouse/achimota-hallway-wainscot.jpg', alt: 'Wainscot wall paneling, hallway leading to guesthouse room, Achimota', cap: 'Hallway wainscotting' },
+      ] },
+    { kind: 'projects', id: 'prampram', tone: 'sand', label: 'Prampram, 2026', title: 'A simple TV unit',
+      text: 'A floating TV console built alongside an open kitchen for a newly built house in a Prampram estate, with push-open drawers and a wall-mounted open shelf in a warm walnut tone. Part of the same commission as the kitchen.',
+      more: [
+        'An estate developer in Prampram commissioned this open kitchen and a matching TV unit for a newly built house being prepared for sale: a clean, market-ready fit-out that photographs well and appeals to a buyer.',
+        'The kitchen is a compact open-plan U-shape in warm walnut-grain laminate, topped with grey marble-effect counters and a waterfall peninsula that doubles as a casual breakfast bar. Integrated oven, hob, and a recessed microwave keep the run uncluttered, with under-cabinet lighting along the splashback.',
+        'In the adjoining living area, a simple floating TV console in the same walnut tone, with push-open drawers and a wall-mounted open shelf, keeps the media wall minimal and in step with the kitchen.',
+      ],
+      photos: [
+        { img: P + 'prampram-kitchen/prampram-tv-unit.jpg', alt: 'Floating TV console with wall-mounted open shelf, Prampram', cap: 'TV console and shelf' },
+        { img: P + 'prampram-kitchen/prampram-tv-unit-shelf.jpg', alt: 'TV console and open display shelf, Prampram', cap: 'Open display shelf' },
+        { img: P + 'prampram-kitchen/prampram-tv-unit-angle.jpg', alt: 'Floating TV console, full length, Prampram', cap: 'Full length' },
+      ],
+      extra: [
+        { img: P + 'prampram-kitchen/prampram-kitchen-hero.jpg', alt: 'Open U-shaped kitchen with waterfall marble-effect peninsula, Prampram', cap: 'The kitchen' },
+        { img: P + 'prampram-kitchen/prampram-kitchen-corner.jpg', alt: 'Kitchen run with integrated oven, hob, and recessed microwave, Prampram', cap: 'Oven, hob and microwave' },
+        { img: P + 'prampram-kitchen/prampram-kitchen-cabinets.jpg', alt: 'Walnut-grain tall cabinets and recessed microwave niche, Prampram kitchen', cap: 'Tall cabinets' },
+      ] },
+    { kind: 'projects', id: 'feature-walls', label: 'From the workshop', title: 'Feature walls and media stands',
+      text: 'Floor-to-ceiling TV feature walls and freestanding media consoles built to suit the room: panelled backboards, hidden cable runs, and storage below.',
+      more: [
+        'Beyond the case studies above, we build floor-to-ceiling TV feature walls and freestanding media consoles to suit the room.',
+        'Panelled backboards, built-in cable management and storage below, finished to match the rest of the space.',
+      ],
+      photos: [
+        { img: P + 'tv-stands/tv-stand-1.jpg', alt: 'Floor-to-ceiling feature-wall TV unit with mounted TV, Accra', cap: 'Feature-wall unit' },
+        { img: P + 'tv-stands/tv-stand-3.jpg', alt: 'Media console with open storage, Accra', cap: 'Media console' },
+        { img: P + 'tv-stands/tv-stand-2.jpg', alt: 'Panelled feature wall before the TV is mounted', cap: 'Panelled backboard' },
+      ],
+      extra: [
+        { img: P + 'tv-stands/tv-stand-4.jpg', alt: 'Feature wall during install', cap: 'During install' },
+        { img: P + 'tv-stands/tv-stand-5.jpg', alt: 'Feature-wall TV unit, angle view', cap: 'Angle view' },
+      ] },
+    { kind: 'projects', id: 'amasaman', tone: 'sand', label: 'Amasaman, 2026', title: 'A long floating console',
+      text: 'A low wall-hung console in light oak and charcoal, running most of the wall under the screen, with clean handle-free fronts and the floor left clear below.',
+      photos: [
+        { img: P + 'amasaman-tv-console/amasaman-tv-wide.jpg', alt: 'The living room with the floating TV console under the screen, Amasaman', cap: 'The room' },
+        { img: P + 'amasaman-tv-console/amasaman-tv-console.jpg', alt: 'Floating TV console in light oak and charcoal, Amasaman', cap: 'Console' },
+        { img: P + 'amasaman-tv-console/amasaman-tv-side.jpg', alt: 'Side view of the floating console showing the light oak top and charcoal fronts', cap: 'From the side' },
+      ] },
+    { kind: 'statement', text: "A TV unit built to your wall hides the cables, holds your equipment, and centres the screen at exactly the right height. When it's done right, the technology disappears into the room." },
+    { kind: 'faq', title: 'Common questions about custom TV units.', items: [
+      ['How long does it take to build a custom TV unit?', "Most TV units take 2 to 4 weeks from order confirmation to installation. Larger feature wall builds may take up to 6 weeks. We'll give you a realistic timeline when we confirm your order. We'd rather under-promise and deliver early than the reverse."],
+      ['Do you handle cable management as part of the build?', "Yes. Cable routing is planned during the design phase, not added as an afterthought. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too."],
+      ['Can I choose the finish and colour?', "Completely. We work in PVC wrap laminates (hundreds of finishes: wood grain, solid colour, matte, gloss), painted MDF, or veneer. If you want to match an existing wardrobe or kitchen, bring a photo and we'll find the closest match."],
+      ['What if I want to add open shelving for books or display items?', "That's a natural part of the design conversation. We commonly build units that combine a closed lower section for equipment with open shelving above for books, plants, or ornaments. Tell us what you want to display and we design around it."],
+      ['Do you install as well as build?', 'Yes. Installation is included for all locations within Accra. We bring the unit, mount or position it, run the cables, and leave the room tidy. For locations outside Accra, contact us for a quote that includes travel.'],
+      ['Can I get a quote before committing?', "Always. Send us your wall dimensions, what equipment you need to house, and a rough idea of the style you're after. We'll come back with a clear price. No obligation, and site visits are free within Accra."],
+    ] },
+    { kind: 'review', quote: 'I’ve been really impressed with their craftsmanship and professionalism. For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home.', who: 'Ngminvielu Kuuire', role: 'repeat client, Accra. Google review, November 2024' },
+  ],
+  footer: {
+    title: "Let's talk about<br />your living room.",
+    text: "Tell us your wall dimensions, the screen size, and what equipment you need to fit. We'll come back with ideas and a clear price, with no obligation.",
+    quoteLink: true,
+  },
+};

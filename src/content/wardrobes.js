@@ -1,104 +1,289 @@
-// Everything the Wardrobes page says. Edit words here; layout lives in src/components/page/.
+// Everything the wardrobes page says, in page order. Edit words here; layout lives in
+// src/layouts/ProductPage.astro and src/components/page/.
 export default {
-  slug: 'wardrobes',
-  path: '/wardrobes',
-  seo: {
-    title: 'Custom Wardrobes in Accra, Ghana | Neewoody Custom Woodwork',
-    description: 'Custom built-in wardrobes, sliding door wardrobes, and floor-to-ceiling wardrobes made to measure in Accra, Ghana. Get a free quote from Neewoody Custom Woodwork.',
-    ogTitle: 'Custom Wardrobes in Accra | Neewoody Custom Woodwork',
-    ogDescription: 'Made-to-measure wardrobes built for Accra homes. Sliding, hinged, floor-to-ceiling, and walk-in designs. Request a quote today.',
+  "slug": "wardrobes",
+  "path": "/wardrobes",
+  "seo": {
+    "title": "Custom Wardrobes in Accra, Ghana | Neewoody Custom Woodwork",
+    "description": "Custom built-in wardrobes, sliding door wardrobes, and floor-to-ceiling wardrobes made to measure in Accra, Ghana. Get a free quote from Neewoody Custom Woodwork.",
+    "ogTitle": "Custom Wardrobes in Accra | Neewoody Custom Woodwork",
+    "ogDescription": "Made-to-measure wardrobes built for Accra homes. Sliding, hinged, floor-to-ceiling, and walk-in designs. Request a quote today."
   },
-  waText: "Hi Neewoody, I'd like to discuss a custom wardrobe.",
-  hero: {
-    lines: ['Built for your bedroom,', 'from floor to ceiling.'],
-    text: 'Made-to-measure wardrobes for Accra homes: sliding, hinged, walk-in and fitted into awkward alcoves.',
-    img: 'images/projects/oyarifa/oyarifa-master-closed-1.jpg',
-    alt: 'Floor-to-ceiling built-in wardrobes in greige oak laminate, Oyarifa, Accra',
-    caption: 'Floor-to-ceiling wardrobe, Oyarifa',
-    facts: [
-      ['Build time', 'Usually 5 to 15 working days'],
-      ['Site visit', 'We measure your room before we quote'],
-      ['Workshop', 'Amugi Avenue, Accra'],
+  "waText": "Hi Neewoody, I'd like to discuss a custom wardrobe.",
+  "hero": {
+    "lines": [
+      "Built for your bedroom,",
+      "from floor to ceiling."
     ],
+    "text": "Made-to-measure wardrobes for Accra homes: sliding, hinged, walk-in and fitted into awkward alcoves.",
+    "img": "images/projects/oyarifa/oyarifa-master-closed-1.jpg",
+    "alt": "Floor-to-ceiling built-in wardrobes in greige oak laminate, Oyarifa, Accra",
+    "caption": "Floor-to-ceiling wardrobe, Oyarifa",
+    "facts": [
+      [
+        "Build time",
+        "Usually 5 to 15 working days"
+      ],
+      [
+        "Site visit",
+        "We measure your room before we quote"
+      ],
+      [
+        "Workshop",
+        "Amugi Avenue, Accra"
+      ]
+    ]
   },
-  intro: {
-    title: 'A wardrobe built for your room, not borrowed from a showroom.',
-    paras: [
-      "Most homes in Accra don't have standard dimensions. Ceilings are higher or lower than expected, walls aren't perfectly square, and alcoves create awkward spaces that off-the-shelf wardrobes never quite fill.",
-      'A Neewoody custom wardrobe is designed around your actual room: measured, drawn up, built, and installed to fit perfectly from wall to wall and floor to ceiling. No filler panels, no gaps, no half-measures.',
-      'We build wardrobes for bedrooms across Accra, from single-room apartments to master bedrooms in larger homes. Every project gets the same level of care.',
-    ],
-    link: ['/contact', 'Get a free quote'],
-  },
-  features: [
+  "sections": [
     {
-      dark: true,
-      img: 'images/projects/bortianor/bortianor-master-wardrobe.jpg',
-      alt: 'A black-framed glass-front wardrobe with lit shelves in a master bedroom, Bortianor',
-      label: 'Bortianor, Accra, 2026',
-      title: 'A glass-front wardrobe, lit from inside',
-      lede: 'Black-framed glass doors, walnut-grain shelves and light strips that run up every frame.',
-      text: 'The master-bedroom wardrobe in a new house we fitted from front to back in Bortianor, along with the kitchen, pantry, two TV walls, a bar and the bathroom vanity.',
-      link: ['/projects/bortianor', 'See the whole house'],
+      "kind": "intro",
+      "title": "A wardrobe built for your room, not borrowed from a showroom.",
+      "paras": [
+        "Most homes in Accra don't have standard dimensions. Ceilings are higher or lower than expected, walls aren't perfectly square, and alcoves create awkward spaces that off-the-shelf wardrobes never quite fill.",
+        "A Neewoody custom wardrobe is designed around your actual room: measured, drawn up, built, and installed to fit perfectly from wall to wall and floor to ceiling. No filler panels, no gaps, no half-measures.",
+        "We build wardrobes for bedrooms across Accra, from single-room apartments to master bedrooms in larger homes. Every project gets the same level of care."
+      ],
+      "link": [
+        "/contact",
+        "Get a free quote"
+      ]
     },
-  ],
-  types: {
-    title: 'Every style, built to your specification.',
-    text: 'Sliding, hinged, floor to ceiling or walk-in: whatever your bedroom calls for, we design and build it around your exact space and how you use it.',
-    items: [
-      ['Sliding door wardrobes', 'Space-saving doors in wood, mirror, or glass. Two or three-panel configurations on aluminium track.'],
-      ['Hinged door wardrobes', 'Full-access hinged doors in single, double, or multi-door layouts with soft-close hinges.'],
-      ['Floor to ceiling', 'Maximum-height built-ins that reach the ceiling and use the full volume of your room.'],
-      ['Walk-in wardrobes', 'Open dressing areas with shelves, rails, drawers, and optional island units when space allows.'],
-      ['Alcove and fitted storage', 'Awkward recesses and narrow alcoves turned into fitted, seamless storage.'],
-      ['Custom interiors', 'Rails, shelves, drawers and shoe racks, configured around how you actually organise your things.'],
-    ],
-  },
-  gallery: {
-    title: 'Wardrobes we have built',
-    filters: [['all', 'All'], ['builtin', 'Built-in'], ['sliding', 'Sliding'], ['hinged', 'Hinged'], ['open', 'Open systems']],
-    items: [
-      { cat: 'builtin', badge: 'Built-in', place: 'Achimota, Accra', year: '2026', caption: 'Built-in wardrobe with floating vanity desk and glass display cabinet, part of a full guesthouse room conversion. See the full project.', img: 'images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.jpg', alt: 'Built-in wardrobe with floating vanity desk and glass display cabinet, Achimota', href: '/projects/achimota-guesthouse' },
-      { cat: 'builtin', badge: 'Built-in', place: 'Agbogba, Accra', year: '2022', caption: 'Floor-to-ceiling built-in in oak-effect laminate with open shelving tower, hanging rail, and bottom drawers.', img: 'images/projects/agbogba/agbogba-builtin-interior.jpg', alt: 'Floor-to-ceiling built-in wardrobe interior, Agbogba, Accra 2022' },
-      { cat: 'builtin', badge: 'Built-in', place: 'Oyarifa, master bedroom', year: '2025', caption: 'Wall-to-wall floor-to-ceiling in greige oak laminate with matte black handles and recessed downlight.', img: 'images/projects/oyarifa/oyarifa-master-closed-1.jpg', alt: 'Master bedroom wall-to-wall floor-to-ceiling wardrobe, Oyarifa, Accra 2025' },
-      { cat: 'builtin', badge: 'Built-in', place: 'Oyarifa, guest room', year: '2025', caption: 'Narrow guest bedroom wardrobe, floor to ceiling, with 6-shelf tower and hanging section with drawers at base.', img: 'images/projects/oyarifa/oyarifa-guest-interior.jpg', alt: 'Guest bedroom floor-to-ceiling wardrobe, Oyarifa, Accra 2025' },
-      { cat: 'sliding', badge: 'Sliding', place: 'Dansoman, Accra', year: '2024', caption: 'Cherry-effect laminate with 2 large sliding doors on aluminium track, open top shelf, overhead cabinet, and internal drawers.', img: 'images/projects/dansoman/dansoman-closed-1.jpg', alt: 'Freestanding sliding door wardrobe, Dansoman, Accra 2024' },
-      { cat: 'sliding', badge: 'Sliding', place: 'Adenta, Accra', year: '2024', caption: 'Alcove sliding door wardrobe in light ash laminate. Left: hanging rail and shelf. Right: 5 open shelves and 3 drawers.', img: 'images/projects/adenta/adenta-interior-left.jpg', alt: 'Alcove sliding door wardrobe interior, Adenta, Accra 2024' },
-      { cat: 'sliding', badge: 'Sliding', place: 'Cantonments, Accra', year: '2026', caption: 'Dark walnut-effect laminate with 2-panel sliding doors above and integrated 4-drawer chest at the base.', img: 'images/projects/zoe-cantonments/zoe-front-closed.jpg', alt: 'Freestanding sliding wardrobe with integrated drawer chest, Cantonments, Accra 2026' },
-      { cat: 'hinged', badge: 'Hinged', place: 'Agbogba, Accra', year: '2022', caption: 'Full-width freestanding wardrobe with integrated dresser recess, overhead cabinets, and recessed spotlights.', img: 'images/projects/agbogba/agbogba-dresser-lit.jpg', alt: 'Full-width wardrobe with integrated dresser recess, Agbogba, Accra 2022' },
-      { cat: 'hinged', badge: 'Hinged', place: 'Dobro, master bedroom', year: '2025', caption: '2 hinged doors above and 6 drawers at base in cherry-effect laminate. One of 4 wardrobes built for this new-build.', img: 'images/projects/dobro/dobro-wide-closed.jpg', alt: 'Master bedroom wardrobe with 6-drawer base, Dobro, Accra 2025' },
-      { cat: 'hinged', badge: 'Hinged', place: 'Dobro, guest room', year: '2025', caption: '2 hinged doors with 3 drawers at base. Same cherry-effect laminate carried across all 4 rooms.', img: 'images/projects/dobro/dobro-narrow-closed.jpg', alt: 'Guest bedroom wardrobe, Dobro, Accra 2025' },
-      { cat: 'hinged', badge: 'Hinged', place: 'Dome, Accra', year: '2025', caption: 'Freestanding in dark rustic walnut-effect laminate with 2 hinged doors and 3 drawers. Part of a full home commission.', img: 'images/projects/nadia-dome/nadia-wardrobe-front.jpg', alt: 'Dark rustic walnut-effect wardrobe, Dome, Accra 2025' },
-      { cat: 'open', badge: 'Open system', place: 'Nmai Dzorn, Accra', year: '', caption: '4 white melamine units installed facing each other in pairs, making a dedicated walk-in dressing room with integrated full-length mirror.', img: 'images/projects/seyram-nmai-dzorn/seyram-installed.jpg', alt: 'Open wardrobe system, walk-in dressing room, Nmai Dzorn' },
-    ],
-  },
-  featuresAfter: [
     {
-      dark: false,
-      img: 'images/projects/nadia-dome/nadia-wardrobe-front.jpg',
-      alt: 'Full-height fitted wardrobe in dark laminate, Dome, Accra',
-      label: 'Dome, Accra, 2025',
-      title: 'Fitted wardrobe, Nadia Dome',
-      lede: 'Full-height. Dark laminate. Matte black bar handles. Built to exact room dimensions.',
-      text: 'Part of a four-piece home commission: a two-door fitted wardrobe with three drawers below, built to fit a private bedroom in Dome. Same matte black hardware carried across all four pieces.',
-      link: ['/projects/nadia-dome', 'View the full commission'],
+      "kind": "feature",
+      "dark": true,
+      "img": "images/projects/bortianor/bortianor-master-wardrobe.jpg",
+      "alt": "A black-framed glass-front wardrobe with lit shelves in a master bedroom, Bortianor",
+      "label": "Bortianor, Accra, 2026",
+      "title": "A glass-front wardrobe, lit from inside",
+      "lede": "Black-framed glass doors, walnut-grain shelves and light strips that run up every frame.",
+      "text": "The master-bedroom wardrobe in a new house we fitted from front to back in Bortianor, along with the kitchen, pantry, two TV walls, a bar and the bathroom vanity.",
+      "link": [
+        "/projects/bortianor",
+        "See the whole house"
+      ]
     },
+    {
+      "kind": "types",
+      "title": "Every style, built to your specification.",
+      "text": "Sliding, hinged, floor to ceiling or walk-in: whatever your bedroom calls for, we design and build it around your exact space and how you use it.",
+      "items": [
+        [
+          "Sliding door wardrobes",
+          "Space-saving doors in wood, mirror, or glass. Two or three-panel configurations on aluminium track."
+        ],
+        [
+          "Hinged door wardrobes",
+          "Full-access hinged doors in single, double, or multi-door layouts with soft-close hinges."
+        ],
+        [
+          "Floor to ceiling",
+          "Maximum-height built-ins that reach the ceiling and use the full volume of your room."
+        ],
+        [
+          "Walk-in wardrobes",
+          "Open dressing areas with shelves, rails, drawers, and optional island units when space allows."
+        ],
+        [
+          "Alcove and fitted storage",
+          "Awkward recesses and narrow alcoves turned into fitted, seamless storage."
+        ],
+        [
+          "Custom interiors",
+          "Rails, shelves, drawers and shoe racks, configured around how you actually organise your things."
+        ]
+      ]
+    },
+    {
+      "kind": "gallery",
+      "title": "Wardrobes we have built",
+      "filters": [
+        [
+          "all",
+          "All"
+        ],
+        [
+          "builtin",
+          "Built-in"
+        ],
+        [
+          "sliding",
+          "Sliding"
+        ],
+        [
+          "hinged",
+          "Hinged"
+        ],
+        [
+          "open",
+          "Open systems"
+        ]
+      ],
+      "items": [
+        {
+          "cat": "builtin",
+          "badge": "Built-in",
+          "place": "Achimota, Accra",
+          "year": "2026",
+          "caption": "Built-in wardrobe with floating vanity desk and glass display cabinet, part of a full guesthouse room conversion. See the full project.",
+          "img": "images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.jpg",
+          "alt": "Built-in wardrobe with floating vanity desk and glass display cabinet, Achimota",
+          "href": "/projects/achimota-guesthouse"
+        },
+        {
+          "cat": "builtin",
+          "badge": "Built-in",
+          "place": "Agbogba, Accra",
+          "year": "2022",
+          "caption": "Floor-to-ceiling built-in in oak-effect laminate with open shelving tower, hanging rail, and bottom drawers.",
+          "img": "images/projects/agbogba/agbogba-builtin-interior.jpg",
+          "alt": "Floor-to-ceiling built-in wardrobe interior, Agbogba, Accra 2022"
+        },
+        {
+          "cat": "builtin",
+          "badge": "Built-in",
+          "place": "Oyarifa, master bedroom",
+          "year": "2025",
+          "caption": "Wall-to-wall floor-to-ceiling in greige oak laminate with matte black handles and recessed downlight.",
+          "img": "images/projects/oyarifa/oyarifa-master-closed-1.jpg",
+          "alt": "Master bedroom wall-to-wall floor-to-ceiling wardrobe, Oyarifa, Accra 2025"
+        },
+        {
+          "cat": "builtin",
+          "badge": "Built-in",
+          "place": "Oyarifa, guest room",
+          "year": "2025",
+          "caption": "Narrow guest bedroom wardrobe, floor to ceiling, with 6-shelf tower and hanging section with drawers at base.",
+          "img": "images/projects/oyarifa/oyarifa-guest-interior.jpg",
+          "alt": "Guest bedroom floor-to-ceiling wardrobe, Oyarifa, Accra 2025"
+        },
+        {
+          "cat": "sliding",
+          "badge": "Sliding",
+          "place": "Dansoman, Accra",
+          "year": "2024",
+          "caption": "Cherry-effect laminate with 2 large sliding doors on aluminium track, open top shelf, overhead cabinet, and internal drawers.",
+          "img": "images/projects/dansoman/dansoman-closed-1.jpg",
+          "alt": "Freestanding sliding door wardrobe, Dansoman, Accra 2024"
+        },
+        {
+          "cat": "sliding",
+          "badge": "Sliding",
+          "place": "Adenta, Accra",
+          "year": "2024",
+          "caption": "Alcove sliding door wardrobe in light ash laminate. Left: hanging rail and shelf. Right: 5 open shelves and 3 drawers.",
+          "img": "images/projects/adenta/adenta-interior-left.jpg",
+          "alt": "Alcove sliding door wardrobe interior, Adenta, Accra 2024"
+        },
+        {
+          "cat": "sliding",
+          "badge": "Sliding",
+          "place": "Cantonments, Accra",
+          "year": "2026",
+          "caption": "Dark walnut-effect laminate with 2-panel sliding doors above and integrated 4-drawer chest at the base.",
+          "img": "images/projects/zoe-cantonments/zoe-front-closed.jpg",
+          "alt": "Freestanding sliding wardrobe with integrated drawer chest, Cantonments, Accra 2026"
+        },
+        {
+          "cat": "hinged",
+          "badge": "Hinged",
+          "place": "Agbogba, Accra",
+          "year": "2022",
+          "caption": "Full-width freestanding wardrobe with integrated dresser recess, overhead cabinets, and recessed spotlights.",
+          "img": "images/projects/agbogba/agbogba-dresser-lit.jpg",
+          "alt": "Full-width wardrobe with integrated dresser recess, Agbogba, Accra 2022"
+        },
+        {
+          "cat": "hinged",
+          "badge": "Hinged",
+          "place": "Dobro, master bedroom",
+          "year": "2025",
+          "caption": "2 hinged doors above and 6 drawers at base in cherry-effect laminate. One of 4 wardrobes built for this new-build.",
+          "img": "images/projects/dobro/dobro-wide-closed.jpg",
+          "alt": "Master bedroom wardrobe with 6-drawer base, Dobro, Accra 2025"
+        },
+        {
+          "cat": "hinged",
+          "badge": "Hinged",
+          "place": "Dobro, guest room",
+          "year": "2025",
+          "caption": "2 hinged doors with 3 drawers at base. Same cherry-effect laminate carried across all 4 rooms.",
+          "img": "images/projects/dobro/dobro-narrow-closed.jpg",
+          "alt": "Guest bedroom wardrobe, Dobro, Accra 2025"
+        },
+        {
+          "cat": "hinged",
+          "badge": "Hinged",
+          "place": "Dome, Accra",
+          "year": "2025",
+          "caption": "Freestanding in dark rustic walnut-effect laminate with 2 hinged doors and 3 drawers. Part of a full home commission.",
+          "img": "images/projects/nadia-dome/nadia-wardrobe-front.jpg",
+          "alt": "Dark rustic walnut-effect wardrobe, Dome, Accra 2025"
+        },
+        {
+          "cat": "open",
+          "badge": "Open system",
+          "place": "Nmai Dzorn, Accra",
+          "year": "",
+          "caption": "4 white melamine units installed facing each other in pairs, making a dedicated walk-in dressing room with integrated full-length mirror.",
+          "img": "images/projects/seyram-nmai-dzorn/seyram-installed.jpg",
+          "alt": "Open wardrobe system, walk-in dressing room, Nmai Dzorn"
+        }
+      ]
+    },
+    {
+      "kind": "feature",
+      "dark": false,
+      "img": "images/projects/nadia-dome/nadia-wardrobe-front.jpg",
+      "alt": "Full-height fitted wardrobe in dark laminate, Dome, Accra",
+      "label": "Dome, Accra, 2025",
+      "title": "Fitted wardrobe, Nadia Dome",
+      "lede": "Full-height. Dark laminate. Matte black bar handles. Built to exact room dimensions.",
+      "text": "Part of a four-piece home commission: a two-door fitted wardrobe with three drawers below, built to fit a private bedroom in Dome. Same matte black hardware carried across all four pieces.",
+      "link": [
+        "/projects/nadia-dome",
+        "View the full commission"
+      ]
+    },
+    {
+      "kind": "review",
+      "quote": "For your kitchen, wardrobes, TV and all the hardwood works, call him. He’s the best. Seeing is believing.",
+      "who": "Kelly Carl",
+      "role": "Google Local Guide with 53 reviews"
+    },
+    {
+      "kind": "faq",
+      "title": "Common questions about custom wardrobes.",
+      "items": [
+        [
+          "How long does it take to build and install a wardrobe?",
+          "Most wardrobes take between 5 and 15 working days from deposit to installation, depending on size and complexity. We'll give you a specific timeline when we quote."
+        ],
+        [
+          "Do you visit before quoting?",
+          "Yes. For wardrobes we always do a site visit to take accurate measurements and see the space. This helps us give you a precise quote and flag anything that might affect the design."
+        ],
+        [
+          "Can I choose the internal layout?",
+          "Absolutely. We'll discuss how you use your wardrobe (how much hanging space you need, whether you want drawers, shoe storage and so on) and build the interior around that."
+        ],
+        [
+          "Do you install the wardrobe yourselves?",
+          "Yes. Our team builds and installs the wardrobe in your home. We won't leave until it's properly fitted, level, and working correctly."
+        ],
+        [
+          "What areas do you serve?",
+          "We serve Accra and Greater Accra, including East Legon, Cantonments, Labone, Airport Residential, Dzorwulu, Spintex, Tema, Adenta, and surrounding areas."
+        ],
+        [
+          "Do I need to have a design in mind before contacting you?",
+          "No. Many clients come to us with just a rough idea. We'll guide you through the options based on your room, your storage needs, and your budget. Reference photos are helpful but not required."
+        ]
+      ]
+    }
   ],
-  review: { quote: 'For your kitchen, wardrobes, TV and all the hardwood works, call him. He’s the best. Seeing is believing.', who: 'Kelly Carl', role: 'Google Local Guide with 53 reviews' },
-  faq: {
-    title: 'Common questions about custom wardrobes.',
-    items: [
-      ['How long does it take to build and install a wardrobe?', "Most wardrobes take between 5 and 15 working days from deposit to installation, depending on size and complexity. We'll give you a specific timeline when we quote."],
-      ['Do you visit before quoting?', 'Yes. For wardrobes we always do a site visit to take accurate measurements and see the space. This helps us give you a precise quote and flag anything that might affect the design.'],
-      ['Can I choose the internal layout?', "Absolutely. We'll discuss how you use your wardrobe (how much hanging space you need, whether you want drawers, shoe storage and so on) and build the interior around that."],
-      ['Do you install the wardrobe yourselves?', "Yes. Our team builds and installs the wardrobe in your home. We won't leave until it's properly fitted, level, and working correctly."],
-      ['What areas do you serve?', 'We serve Accra and Greater Accra, including East Legon, Cantonments, Labone, Airport Residential, Dzorwulu, Spintex, Tema, Adenta, and surrounding areas.'],
-      ['Do I need to have a design in mind before contacting you?', "No. Many clients come to us with just a rough idea. We'll guide you through the options based on your room, your storage needs, and your budget. Reference photos are helpful but not required."],
-    ],
-  },
-  footer: {
-    title: "Let's talk about<br />your wardrobe.",
-    text: "Send us a WhatsApp or fill in the quote form. Tell us your room dimensions and what you're looking for, and we'll come back to you quickly.",
-    quoteLink: true,
-  },
+  "footer": {
+    "title": "Let's talk about<br />your wardrobe.",
+    "text": "Send us a WhatsApp or fill in the quote form. Tell us your room dimensions and what you're looking for, and we'll come back to you quickly.",
+    "quoteLink": true
+  }
 };

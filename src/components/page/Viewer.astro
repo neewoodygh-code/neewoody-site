@@ -1,0 +1,72 @@
+---
+// One photo viewer per page (native <dialog>: Esc, focus trap, focus return).
+// Any element with data-view opens it:
+//   data-set='[{"src","alt","cap"}]' → steps through that list (a project's photos), data-start = index
+//   otherwise → steps through the visible [data-view] items in the nearest [data-view-group]
+//   data-text → longer write-up shown under the photo
+---
+<dialog class="viewer" id="viewer" aria-label="Photo viewer">
+  <img id="viewerImg" alt="" />
+  <div class="viewer-txt">
+    <p id="viewerCap"></p>
+    <div id="viewerText"></div>
+  </div>
+  <button type="button" class="v-close" id="vClose">Close</button>
+  <button type="button" class="v-prev" id="vPrev" aria-label="Previous photo">←</button>
+  <button type="button" class="v-next" id="vNext" aria-label="Next photo">→</button>
+</dialog>
+
+<script>
+  type Photo = { src: string; alt: string; cap?: string };
+  const dlg = document.getElementById('viewer') as HTMLDialogElement;
+  const vImg = document.getElementById('viewerImg') as HTMLImageElement;
+  const vCap = document.getElementById('viewerCap')!;
+  const vText = document.getElementById('viewerText')!;
+  let list: Photo[] = [];
+  let cur = 0;
+
+  const show = (i: number) => {
+    if (!list.length) return;
+    cur = (i + list.length) % list.length;
+    const p = list[cur];
+    vImg.src = p.src; vImg.alt = p.alt || '';
+    vCap.textContent = (p.cap || '') + (list.length > 1 ? `  (${cur + 1} of ${list.length})` : '');
+  };
+  const fromEl = (el: HTMLElement): Photo => ({
+    src: el.dataset.big!, alt: el.dataset.alt || '', cap: el.dataset.cap || '',
+  });
+
+  document.addEventListener('click', (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-view]');
+    if (!el) return;
+    e.preventDefault();
+    if (el.dataset.set) {
+      list = JSON.parse(el.dataset.set);
+      cur = Number(el.dataset.start || 0);
+    } else {
+      const group = el.closest('[data-view-group]') || document;
+      const els = [...group.querySelectorAll<HTMLElement>('[data-view]')].filter((x) => !x.hidden && !x.dataset.set);
+      list = els.map(fromEl);
+      cur = els.indexOf(el);
+    }
+    vText.innerHTML = '';
+    (el.dataset.text ? JSON.parse(el.dataset.text) : []).forEach((t: string) => {
+      const p = document.createElement('p'); p.textContent = t; vText.appendChild(p);
+    });
+    if (el.dataset.link) {
+      const [href, label] = JSON.parse(el.dataset.link);
+      const a = document.createElement('a'); a.href = href; a.textContent = label; a.className = 'ulink light';
+      const p = document.createElement('p'); p.appendChild(a); vText.appendChild(p);
+    }
+    show(cur);
+    const multi = list.length > 1;
+    (document.getElementById('vPrev') as HTMLElement).hidden = !multi;
+    (document.getElementById('vNext') as HTMLElement).hidden = !multi;
+    dlg.showModal();
+  });
+  document.getElementById('vClose')!.addEventListener('click', () => dlg.close());
+  document.getElementById('vPrev')!.addEventListener('click', () => show(cur - 1));
+  document.getElementById('vNext')!.addEventListener('click', () => show(cur + 1));
+  dlg.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); });
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+</script>

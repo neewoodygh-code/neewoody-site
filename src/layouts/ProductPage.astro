@@ -1,26 +1,37 @@
 ---
 // Product page template (Wardrobes, Kitchens, Beds, …). Each page passes one
-// content object from src/content/<slug>.js; sections appear only if present.
+// content object from src/content/<slug>.js: hero + an ordered `sections` list.
+// Section kinds: intro · feature · types · details · gallery · projects ·
+// statement · review · faq.
 import Base from './Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import PageHero from '../components/page/PageHero.astro';
 import Feature from '../components/page/Feature.astro';
 import Gallery from '../components/page/Gallery.astro';
+import Projects from '../components/page/Projects.astro';
 import Sections from '../components/page/Sections.astro';
+import Viewer from '../components/page/Viewer.astro';
 const { c } = Astro.props;
+let featureN = 0;
 ---
 <Base title={c.seo.title} description={c.seo.description} ogTitle={c.seo.ogTitle} ogDescription={c.seo.ogDescription} path={c.path}>
   <Nav />
   <main id="main">
     <PageHero hero={c.hero} waText={c.waText} />
-    {c.intro && <Sections kind="intro" d={c.intro} />}
-    {(c.features || []).map((f: any, i: number) => <Feature f={f} flip={i % 2 === 1} />)}
-    {c.types && <Sections kind="types" d={c.types} />}
-    {c.gallery && <Gallery g={c.gallery} slug={c.slug} />}
-    {(c.featuresAfter || []).map((f: any, i: number) => <Feature f={f} flip={i % 2 === 0} />)}
-    {c.review && <Sections kind="review" d={c.review} />}
-    {c.faq && <Sections kind="faq" d={c.faq} />}
+    {c.sections.map((s: any) => {
+      if (s.kind === 'feature') return <Feature f={s} flip={featureN++ % 2 === 1} />;
+      if (s.kind === 'gallery') return <Gallery g={s} slug={c.slug} />;
+      if (s.kind === 'projects') return <Projects p={s} />;
+      return <Sections kind={s.kind} d={s} />;
+    })}
+    {!c.sections.some((s: any) => s.kind === 'gallery') && (
+      <Fragment>
+        <section id="cms-posts" data-page={c.slug} hidden class="cms-fallback"></section>
+        <script is:inline src="/js/cms-posts.js?v=20261113"></script>
+      </Fragment>
+    )}
   </main>
   <Footer title={c.footer?.title} text={c.footer?.text} quoteLink={c.footer?.quoteLink} waText={c.waText} />
+  <Viewer />
 </Base>

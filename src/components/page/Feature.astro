@@ -12,7 +12,7 @@ const photo = await img(f.img);
   <div class="feature-txt rv">
     <p class={'label' + (f.dark ? ' light' : '')}>{f.label}</p>
     <h2>{f.title}</h2>
-    <p class="lede">{f.lede}</p>
+    {f.lede && <p class="lede">{f.lede}</p>}
     <p class="feature-body">{f.text}</p>
     <a class={'ulink' + (f.dark ? ' brass' : '')} href={f.link[0]}>{f.link[1]}</a>
   </div>

@@ -38,3 +38,12 @@ export async function img(path) {
   if (!ALL[key]) throw new Error(`photos.js: no image at "${path}"`);
   return (await ALL[key]()).default;
 }
+
+// Viewer-sized (1600px WebP) versions of a list of {img, alt, cap} photos.
+import { getImage } from 'astro:assets';
+export async function bigSet(photos) {
+  return Promise.all(photos.map(async (p) => ({
+    src: (await getImage({ src: await img(p.img), width: 1600, format: 'webp' })).src,
+    alt: p.alt || '', cap: p.cap || '',
+  })));
+}
