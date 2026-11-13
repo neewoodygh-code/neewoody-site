@@ -1,5 +1,5 @@
 ---
-// Full-bleed photo hero for product pages: headline, one sentence, WhatsApp, facts.
+// Split photo hero: headline, one sentence, WhatsApp (or hero.action [href, label]), facts.
 import { Picture } from 'astro:assets';
 import { img } from '../../photos.js';
 import { WA } from '../../data.js';
@@ -16,8 +16,10 @@ const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
     <div class="hero-foot">
       <p>{hero.text}</p>
       <div class="hero-acts">
-        <a class="pill" href={wa}>WhatsApp 024 463 3464 <span aria-hidden="true">↗</span></a>
-        <a class="ulink light" href={hero.workLink || '#gallery'}>{hero.workLabel || 'See the work'}</a>
+        {hero.action
+          ? <a class="pill" href={hero.action[0]}>{hero.action[1]} <span aria-hidden="true">↓</span></a>
+          : <a class="pill" href={wa}>WhatsApp 024 463 3464 <span aria-hidden="true">↗</span></a>}
+        {hero.workLabel !== false && <a class="ulink light" href={hero.workLink || '#gallery'}>{hero.workLabel || 'See the work'}</a>}
       </div>
     </div>
     {hero.facts && (

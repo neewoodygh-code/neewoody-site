@@ -1,11 +1,16 @@
 ---
 // "What we have built" grid: filter chips + photo cards. A card with `href`
 // links to a case study; otherwise it opens the page viewer (one photo, or a
-// project's whole `photos` set plus its `more` write-up). Also hosts the slot
-// js/cms-posts.js fills with admin-posted projects (native cards).
+// project's whole `photos` set plus its `more` write-up). One gallery per page
+// (unless `cms: false`) also hosts the slot js/cms-posts.js fills with
+// admin-posted projects (native cards). Options: tone 'dark' | 'bone',
+// headLink [href, label] or null, an item with `lead` spans two columns.
 import { Picture } from 'astro:assets';
 import { img, bigSet } from '../../photos.js';
 const { g, slug } = Astro.props;
+const id = g.id || 'gallery';
+const gridId = g.cms === false ? id + '-grid' : 'galGrid';
+const headLink = g.headLink === undefined ? ['/portfolio', 'See the full portfolio'] : g.headLink;
 const items = await Promise.all(g.items.map(async (it: any) => {
   const src = await img(it.img);
   const own = (await bigSet([{ img: it.img, alt: it.alt, cap: [it.place, it.caption].filter(Boolean).join('. ') }]))[0];
@@ -13,10 +18,10 @@ const items = await Promise.all(g.items.map(async (it: any) => {
   return { ...it, src, big: own.src, cap: own.cap, set };
 }));
 ---
-<section class="gallery-sec" id={g.id || 'gallery'} data-nav="light" aria-labelledby="gal-h">
+<section class={'gallery-sec' + (g.tone ? ' ' + g.tone : '')} id={id} data-nav={g.tone === 'dark' ? 'dark' : 'light'} aria-labelledby={id + '-h'}>
   <div class="gal-head rv">
-    <h2 id="gal-h" class="display">{g.title}</h2>
-    <a class="ulink" href="/portfolio">See the full portfolio</a>
+    <h2 id={id + '-h'} class="display">{g.title}</h2>
+    {headLink && <a class={'ulink' + (g.tone === 'dark' ? ' light' : '')} href={headLink[0]}>{headLink[1]}</a>}
   </div>
   {g.text && <p class="gal-text rv">{g.text}</p>}
   {g.filters && (
@@ -26,37 +31,43 @@ const items = await Promise.all(g.items.map(async (it: any) => {
       ))}
     </div>
   )}
-  <div class="gal-grid" id="galGrid" data-view-group>
+  <div class="gal-grid" id={gridId} data-view-group>
     {items.map((it: any) => {
+      const cls = 'g-card' + (it.lead ? ' lead' : '');
       const inner = (
         <Fragment>
-          <span class="g-img"><Picture src={it.src} formats={['avif', 'webp']} widths={[500, 800]} sizes="(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw" alt={it.alt} loading="lazy" /></span>
+          <span class="g-img"><Picture src={it.src} formats={['avif', 'webp']} widths={it.lead ? [800, 1300] : [500, 800]} sizes={it.lead ? '(min-width: 640px) 62vw, 92vw' : '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw'} alt={it.alt} loading="lazy" /></span>
           {it.badge && <span class="g-badge">{it.badge}</span>}
           <span class="g-place">{it.place}{it.year && <span class="g-year"> {it.year}</span>}</span>
           {it.caption && <span class="g-cap">{it.caption}</span>}
           {it.set && <span class="g-more">{it.set.length} photos</span>}
         </Fragment>
       );
-      if (it.href) return <a class="g-card" href={it.href} data-cat={it.cat}>{inner}</a>;
+      if (it.href) return <a class={cls} href={it.href} data-cat={it.cat}>{inner}</a>;
       return it.set
-        ? <button type="button" class="g-card" data-cat={it.cat} data-view data-set={JSON.stringify(it.set)} data-text={JSON.stringify(it.more || [])} data-link={it.link ? JSON.stringify(it.link) : undefined}>{inner}</button>
-        : <button type="button" class="g-card" data-cat={it.cat} data-view data-big={it.big} data-alt={it.alt} data-cap={it.cap}>{inner}</button>;
+        ? <button type="button" class={cls} data-cat={it.cat} data-view data-set={JSON.stringify(it.set)} data-text={JSON.stringify(it.more || [])} data-link={it.link ? JSON.stringify(it.link) : undefined}>{inner}</button>
+        : <button type="button" class={cls} data-cat={it.cat} data-view data-big={it.big} data-alt={it.alt} data-cap={it.cap}>{inner}</button>;
     })}
   </div>
 </section>
 
-<section id="cms-posts" data-page={slug} hidden></section>
-<template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
-<script is:inline src="/js/cms-posts.js?v=20261113"></script>
+{g.cms !== false && (
+  <Fragment>
+    <section id="cms-posts" data-page={slug} hidden></section>
+    <template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
+    <script is:inline src="/js/cms-posts.js?v=20261113"></script>
+  </Fragment>
+)}
 
 <script>
-  const grid = document.getElementById('galGrid')!;
-  const chips = document.querySelectorAll<HTMLButtonElement>('.gal-filters .chip');
-  chips.forEach((c) => c.addEventListener('click', () => {
-    const f = c.dataset.filter;
-    chips.forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
-    grid.querySelectorAll<HTMLElement>('.g-card').forEach((card) => {
-      card.hidden = !(f === 'all' || card.dataset.cat === f);
-    });
-  }));
+  document.querySelectorAll<HTMLElement>('.gallery-sec').forEach((sec) => {
+    const chips = sec.querySelectorAll<HTMLButtonElement>('.gal-filters .chip');
+    chips.forEach((c) => c.addEventListener('click', () => {
+      const f = c.dataset.filter;
+      chips.forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
+      sec.querySelectorAll<HTMLElement>('.gal-grid > .g-card').forEach((card) => {
+        card.hidden = !(f === 'all' || card.dataset.cat === f);
+      });
+    }));
+  });
 </script>

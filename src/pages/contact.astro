@@ -1,0 +1,229 @@
+---
+// Contact / quote request. The form, the sidebar and the sending script are the
+// old contact.html markup unchanged (POST /api/lead); only the design is new.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+const waText = "Hi Neewoody, I'd like to get a quote for custom furniture.";
+---
+<Base title="Get a Quote | Contact Neewoody Custom Woodwork in Accra, Ghana"
+  description="Contact Neewoody Custom Woodwork in Accra, Ghana. Request a free quote for custom wardrobes, beds, kitchen cabinets, and shelving. Call 0244 633 464 or WhatsApp."
+  ogTitle="Contact Neewoody — Custom Furniture in Accra"
+  ogDescription="Request a free quote for custom furniture in Accra. Wardrobes, beds, kitchen cabinets, and shelving made to measure."
+  path="/contact" pageEvent="contact_form_view">
+  <Nav />
+  <main id="main">
+    <header class="page-head" data-nav="dark">
+      <h1 class="display">Request a free quote.</h1>
+      <p>Tell us about your project and we'll get back to you within 24 hours, usually much faster on WhatsApp.</p>
+    </header>
+    <div class="ct-layout" data-nav="light">
+      <div>
+    <form id="quote-form" class="ct-form" novalidate data-own-submit>
+      <input type="hidden" name="_subject" value="New Quote Request — Neewoody Custom Woodwork" />
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Full name *</label>
+          <input type="text" id="name" name="name" placeholder="e.g. Kwame Mensah" required autocomplete="name" />
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone / WhatsApp *</label>
+          <input type="tel" id="phone" name="phone" placeholder="e.g. 0244 633 464" required autocomplete="tel" />
+          <span class="field-error" aria-live="polite"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="Optional, for quote documents" autocomplete="email" />
+        <span class="field-error" aria-live="polite"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="project-type">Project type *</label>
+        <select id="project-type" name="project_type" required>
+          <option value="" disabled selected>Select what you need…</option>
+          <option value="Wardrobe">Custom wardrobe</option>
+          <option value="Bed Frame">Bed or bed frame</option>
+          <option value="Kitchen Cabinets">Kitchen cabinets</option>
+          <option value="Shelving">Shelving or bookcase</option>
+          <option value="TV Unit">TV or media unit</option>
+          <option value="Multiple">Several items</option>
+          <option value="Other">Other</option>
+        </select>
+        <span class="field-error" aria-live="polite"></span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dimensions">Rough dimensions</label>
+          <input type="text" id="dimensions" name="dimensions" placeholder="e.g. 3m wide × 2.4m tall" />
+        </div>
+        <div class="form-group">
+          <label for="budget">Budget range</label>
+          <select id="budget" name="budget">
+            <option value="" disabled selected>Select a range…</option>
+            <option value="Under GHS 3,000">Under GHS 3,000</option>
+            <option value="GHS 3,000–6,000">GHS 3,000 to 6,000</option>
+            <option value="GHS 6,000–12,000">GHS 6,000 to 12,000</option>
+            <option value="GHS 12,000–20,000">GHS 12,000 to 20,000</option>
+            <option value="Over GHS 20,000">Over GHS 20,000</option>
+            <option value="Not sure">Not sure yet</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Tell us more about your project *</label>
+        <textarea id="message" name="message" rows="5" placeholder="Describe what you need: style, materials, photos you've seen, anything special…" required></textarea>
+        <span class="field-error" aria-live="polite"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="location">Your area in Accra</label>
+        <input type="text" id="location" name="location" placeholder="e.g. East Legon, Tema, Spintex, Adenta…" />
+      </div>
+
+      <!-- Honeypot spam field -->
+      <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+
+      <button type="submit" class="btn-submit">
+        <span class="btn-label">Send my quote request</span>
+        <span class="btn-loading" aria-hidden="true" style="display:none">Sending…</span>
+      </button>
+
+      <div class="form-success" role="alert" aria-live="polite" style="display:none">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+        Thanks! We'll be in touch within 24 hours.
+      </div>
+    </form>
+      </div>
+  <aside class="ct-sidebar" aria-labelledby="ct-other">
+    <h2 id="ct-other" class="sr-only">Other ways to reach us</h2>
+
+    <div class="ct-card on-green">
+      <h3>Prefer to chat?</h3>
+      <p>Most quotes start on WhatsApp. Send us photos of your space and we'll respond fast.</p>
+      <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%27d%20like%20to%20get%20a%20quote%20for%20custom%20furniture." class="btn ct-card-wa" target="_blank" rel="noopener">WhatsApp 024 463 3464</a>
+    </div>
+
+    <div class="ct-card">
+      <h3>Call us</h3>
+      <p>Monday to Saturday, 8am to 6pm</p>
+      <a href="tel:+233244633464" class="ct-phone">024 463 3464</a>
+    </div>
+
+    <div class="ct-card">
+      <h3>Service area</h3>
+      <p>We serve Accra and surrounding communities.</p>
+      <div class="ct-tags">
+        <span class="ct-tag">East Legon</span>
+        <span class="ct-tag">Spintex</span>
+        <span class="ct-tag">Tema</span>
+        <span class="ct-tag">Adenta</span>
+        <span class="ct-tag">Madina</span>
+        <span class="ct-tag">Labone</span>
+        <span class="ct-tag">Airport Residential</span>
+        <span class="ct-tag">Cantonments</span>
+        <span class="ct-tag">Dansoman</span>
+        <span class="ct-tag">Achimota</span>
+        <span class="ct-tag">Haatso</span>
+        <span class="ct-tag">Kasoa</span>
+      </div>
+      <p class="ct-note">Outside Accra? Contact us anyway. We may still be able to help.</p>
+    </div>
+
+  </aside>
+    </div>
+  </main>
+  <Footer bare waText={waText} />
+<script is:inline>
+/* ── Contact form submission ── */
+(function(){
+  var form    = document.getElementById('quote-form');
+  var btnLabel   = form.querySelector('.btn-label');
+  var btnLoading = form.querySelector('.btn-loading');
+  var successBox = form.querySelector('.form-success');
+  var submitBtn  = form.querySelector('button[type="submit"]');
+
+  // Inline error helper
+  function showFieldError(fieldId, msg) {
+    var el = form.querySelector('#' + fieldId);
+    if (!el) return;
+    var err = el.parentNode.querySelector('.field-error');
+    if (err) err.textContent = msg;
+    el.setAttribute('aria-invalid', 'true');
+  }
+  function clearErrors() {
+    form.querySelectorAll('.field-error').forEach(function(e){ e.textContent = ''; });
+    form.querySelectorAll('[aria-invalid]').forEach(function(e){ e.removeAttribute('aria-invalid'); });
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    clearErrors();
+
+    // Client-side validation
+    var valid = true;
+    var name  = form.querySelector('#name').value.trim();
+    var phone = form.querySelector('#phone').value.trim();
+    var ptype = form.querySelector('#project-type').value;
+    var msg   = form.querySelector('#message').value.trim();
+
+    if (!name)  { showFieldError('name', 'Please enter your name.'); valid = false; }
+    if (!phone) { showFieldError('phone', 'Please enter your phone number.'); valid = false; }
+    if (!ptype) { showFieldError('project-type', 'Please select a project type.'); valid = false; }
+    if (!msg)   { showFieldError('message', 'Please describe your project.'); valid = false; }
+    if (!valid) return;
+
+    // Loading state
+    submitBtn.disabled = true;
+    btnLabel.style.display = 'none';
+    btnLoading.style.display = '';
+
+    var payload = {
+      name:         name,
+      phone:        phone,
+      email:        form.querySelector('#email').value.trim(),
+      project_type: ptype,
+      dimensions:   form.querySelector('#dimensions').value.trim(),
+      budget:       form.querySelector('#budget').value,
+      location:     form.querySelector('#location').value.trim(),
+      message:      msg,
+      _gotcha:      form.querySelector('[name="_gotcha"]').value,
+    };
+
+    fetch('/api/lead', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      if (data.ok) {
+        // Success
+        form.reset();
+        successBox.style.display = 'flex';
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        // GA4 event
+        if (typeof gtag === 'function') {
+          gtag('event', 'form_submit', { event_category: 'lead', event_label: 'contact_form' });
+        }
+      } else {
+        showFieldError('message', data.error || 'Something went wrong — please try WhatsApp instead.');
+      }
+    })
+    .catch(function() {
+      showFieldError('message', 'Could not send — please try WhatsApp or call us directly.');
+    })
+    .finally(function() {
+      submitBtn.disabled = false;
+      btnLabel.style.display = '';
+      btnLoading.style.display = 'none';
+    });
+  });
+})();
+</script>
+</Base>

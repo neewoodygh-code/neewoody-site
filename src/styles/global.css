@@ -17,6 +17,7 @@
   --sans: 'Manrope', system-ui, sans-serif;
   --gut: clamp(1.25rem, 4vw, 4rem);
   --ease: cubic-bezier(.16, 1, .3, 1);
+  --err: #9b3426;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; scroll-padding-top: 5rem; }
@@ -388,3 +389,77 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 300; line-height: .98; lett
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .js .rv { opacity: 1; transform: none; }
 }
+
+/* ---------- gallery tones + lead card (portfolio, 2026-11-13) ---------- */
+.gallery-sec.bone { background: var(--bone); }
+.gallery-sec.dark { background: var(--espresso); color: var(--on-dark); }
+.gallery-sec.dark .gal-text, .gallery-sec.dark .g-cap { color: var(--on-dark-2); }
+.gallery-sec.dark .g-badge { color: var(--brass); }
+.g-card.lead { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; }
+.g-card.lead .g-img { flex: 1; min-height: 20rem; }
+.g-card.lead .g-img img { position: absolute; inset: 0; height: 100%; aspect-ratio: auto; }
+.g-card.lead .g-place { font-size: clamp(1.6rem, 2.6vw, 2.4rem); }
+@media (max-width: 900px) { .g-card.lead { grid-column: 1 / -1; grid-row: auto; } .g-card.lead .g-img { min-height: 0; } .g-card.lead .g-img img { position: static; aspect-ratio: 3 / 2; } }
+.contact.bare { padding-top: clamp(3rem, 6vw, 5rem); }
+.contact.bare .contact-meta { margin-top: 0; }
+
+/* ---------- contact + hire forms (2026-11-13; markup is the old pages', unchanged) ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.page-head { background: var(--espresso); color: var(--on-dark); padding: clamp(9rem, 18vw, 13rem) var(--gut) clamp(3rem, 6vw, 5rem); display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: 2rem clamp(2rem, 5vw, 5rem); align-items: end; }
+.page-head p { color: var(--on-dark-2); font-size: 1.08rem; max-width: 40ch; }
+.ct-layout, .hire-body { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); gap: clamp(2.5rem, 6vw, 6rem); padding: clamp(4rem, 8vw, 7rem) var(--gut); align-items: start; }
+.hire-body { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); }
+/* fields */
+.ct-form, .hire-form { display: grid; gap: 1.4rem; }
+.form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.4rem; }
+.form-group { display: grid; gap: .45rem; }
+.ct-form label, .hire-form label { font-size: .9rem; font-weight: 500; }
+.ct-form input, .ct-form select, .ct-form textarea,
+.hire-form input, .hire-form select, .hire-form textarea { width: 100%; font: 400 1rem var(--sans); color: var(--espresso); background: var(--bone); border: 1px solid var(--stone); border-radius: 2px; padding: .85rem 1rem; }
+.ct-form textarea, .hire-form textarea { min-height: 9rem; resize: vertical; }
+.ct-form :is(input, select, textarea):focus-visible, .hire-form :is(input, select, textarea):focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; border-color: var(--espresso); }
+.ct-form [aria-invalid] { border-color: var(--err, #9b3426); }
+.field-error { color: var(--err, #9b3426); font-size: .86rem; min-height: 0; }
+.field-error:empty { display: none; }
+.btn-submit, .hf-submit { justify-self: start; display: inline-flex; align-items: center; gap: .7rem; padding: 1rem 1.8rem; border: 0; border-radius: 100px; background: var(--espresso); color: var(--bone); font: 500 1rem var(--sans); cursor: pointer; transition: background-color .4s var(--ease); }
+.btn-submit:hover, .hf-submit:hover { background: var(--walnut); }
+.btn-submit:disabled, .hf-submit:disabled { opacity: .6; cursor: progress; }
+.form-success { align-items: center; gap: .7rem; padding: 1rem 1.2rem; background: var(--bone-2); border-left: 2px solid var(--walnut); }
+/* contact sidebar */
+.ct-sidebar { display: grid; gap: 1.2rem; }
+.ct-card { padding: 1.6rem; border-top: 1px solid var(--hair); }
+.ct-card h3 { font-size: clamp(1.5rem, 2vw, 1.9rem); margin-bottom: .5rem; }
+.ct-card p { color: var(--stone); }
+.ct-card.on-green { background: var(--espresso); color: var(--on-dark); border: 0; }
+.ct-card.on-green p { color: var(--on-dark-2); margin-bottom: 1.3rem; }
+.ct-card-wa { display: inline-flex; padding: .9rem 1.4rem; border-radius: 100px; background: var(--bone); color: var(--espresso); font-weight: 500; text-decoration: none; transition: background-color .4s var(--ease); }
+.ct-card-wa:hover { background: var(--brass); }
+.ct-phone { display: inline-block; margin-top: .6rem; font-family: var(--serif); font-size: 1.8rem; text-decoration: none; }
+.ct-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+.ct-tag { font-size: .84rem; padding: .3rem .8rem; border: 1px solid var(--hair); border-radius: 100px; }
+.ct-note { font-size: .92rem; }
+/* hire */
+.hire-how { position: sticky; top: 6rem; }
+.hire-how h2, .hire-form h2, .hire-done h2 { font-size: clamp(2rem, 3.6vw, 3.2rem); margin-bottom: 1.2rem; }
+.hire-steps { list-style: none; counter-reset: s; display: grid; gap: 1.1rem; }
+.hire-steps li { counter-increment: s; display: grid; grid-template-columns: 2.2rem minmax(0, 1fr); color: var(--stone); }
+.hire-steps li::before { content: counter(s); font-family: var(--serif); font-size: 1.5rem; line-height: 1.1; color: var(--walnut); }
+.hire-promise { margin-top: 1.8rem; padding-top: 1.2rem; border-top: 1px solid var(--hair); }
+.hire-form .lede { color: var(--stone); max-width: 58ch; margin-top: -.4rem; }
+.hf-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.3rem; }
+.hf-grid > div { display: grid; gap: .45rem; align-content: start; }
+.hf-full { grid-column: 1 / -1; }
+.opt { color: var(--stone); font-weight: 400; }
+.hf-msg { min-height: 1.2em; }
+.hf-msg.error { color: var(--err, #9b3426); }
+.hf-note { font-size: .86rem; color: var(--stone); max-width: 62ch; }
+.hire-done { display: none; padding: 2.5rem 0; }
+.hire-done.show { display: block; }
+.hire-done .tick { width: 3.4rem; height: 3.4rem; border-radius: 50%; background: var(--espresso); color: var(--brass); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 1.4rem; }
+.hire-done p { color: var(--stone); max-width: 46ch; margin-bottom: 1.5rem; }
+.hire-done .again { font: 500 1rem var(--sans); color: var(--espresso); background: none; border: 1px solid var(--espresso); border-radius: 100px; padding: .8rem 1.4rem; cursor: pointer; }
+@media (max-width: 900px) {
+  .page-head, .ct-layout, .hire-body { grid-template-columns: minmax(0, 1fr); }
+  .hire-how { position: static; }
+}
+@media (max-width: 560px) { .form-row, .hf-grid { grid-template-columns: minmax(0, 1fr); } }

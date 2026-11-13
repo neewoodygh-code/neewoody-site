@@ -15,7 +15,7 @@ import Viewer from '../components/page/Viewer.astro';
 const { c } = Astro.props;
 let featureN = 0;
 ---
-<Base title={c.seo.title} description={c.seo.description} ogTitle={c.seo.ogTitle} ogDescription={c.seo.ogDescription} path={c.path}>
+<Base title={c.seo.title} description={c.seo.description} ogTitle={c.seo.ogTitle} ogDescription={c.seo.ogDescription} path={c.path} pageEvent={c.pageEvent}>
   <Nav />
   <main id="main">
     <PageHero hero={c.hero} waText={c.waText} />

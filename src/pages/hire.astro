@@ -1,0 +1,155 @@
+---
+// Hire a carpenter (Carpentry Concierge, public). The form and its script are the
+// old hire.html markup unchanged (POST concierge-api /api/public/jobs, moderated).
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/page/PageHero.astro';
+const hero = {
+  lines: ['Hire a carpenter', 'in your neighbourhood.'],
+  text: 'Post the job you need doing: a repair, a fitting, a full build, or extra hands for the week. Carpenters near you, vetted by Neewoody, get in touch on WhatsApp.',
+  img: 'images/projects/bortianor/bortianor-living-halfway.jpg',
+  alt: 'Two carpenters fitting a TV wall on site',
+  caption: 'Our crew on site, Bortianor',
+  action: ['#post', 'Post a job'],
+  workLabel: false,
+  facts: [['Cost', 'Free, and no account needed'], ['Who replies', 'Carpenters vetted by Neewoody, near you'], ['How', 'They message you on WhatsApp']],
+};
+---
+<Base title="Hire a Carpenter Near You in Accra | Neewoody Carpentry Concierge"
+  description="Need a carpenter in your neighbourhood? Post your job free and trusted, vetted carpenters near you in Accra and across Ghana get in touch on WhatsApp. No sign-up."
+  ogTitle="Hire a Carpenter Near You | Neewoody Carpentry Concierge"
+  ogDescription="Post your job free — vetted carpenters near you in Ghana get in touch. No sign-up needed."
+  path="/hire">
+  <Nav />
+  <main id="main">
+    <PageHero hero={hero} />
+    <div class="hire-body" data-nav="light">
+  <aside class="hire-how">
+    <h2>How it works</h2>
+    <ol class="hire-steps">
+      <li>Tell us what you need and where. It takes a minute.</li>
+      <li>We review each request, then share it with carpenters in your area.</li>
+      <li>Carpenters near you message you on WhatsApp. You choose who to work with.</li>
+    </ol>
+    <p class="hire-promise">We never charge you a fee, and we never post your number publicly.</p>
+  </aside>
+
+  <div class="hire-form-wrap" id="post">
+    <form class="hire-form" id="hireForm">
+      <h2>Post your job</h2>
+      <p class="lede">The more detail you give, the better the carpenters who reach out will fit the job. Prices are discussed directly with each carpenter on WhatsApp.</p>
+      <div class="hf-grid">
+        <div class="hf-full">
+          <label for="h_name">Your name</label>
+          <input id="h_name" maxlength="80" required />
+        </div>
+        <div>
+          <label for="h_phone">WhatsApp number</label>
+          <input id="h_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
+        </div>
+        <div>
+          <label for="h_zone">Where is the work?</label>
+          <select id="h_zone" required></select>
+        </div>
+        <div>
+          <label for="h_trade">Type of work <span class="opt">(optional)</span></label>
+          <select id="h_trade"><option value="">Not sure / any</option></select>
+        </div>
+        <div>
+          <label for="h_lvl">Experience needed <span class="opt">(optional)</span></label>
+          <select id="h_lvl"><option value="">Any</option></select>
+        </div>
+        <div>
+          <label for="h_workers">How many carpenters?</label>
+          <input id="h_workers" type="number" inputmode="numeric" min="1" max="50" step="1" value="1" />
+        </div>
+        <div>
+          <label for="h_start">When? <span class="opt">(optional)</span></label>
+          <input id="h_start" maxlength="40" placeholder="e.g. This weekend, or ASAP" />
+        </div>
+        <div class="hf-full">
+          <label for="h_dur">How long will it take? <span class="opt">(optional)</span></label>
+          <input id="h_dur" maxlength="40" placeholder="e.g. One day, a week" />
+        </div>
+        <div class="hf-full">
+          <label for="h_desc">Describe the job</label>
+          <textarea id="h_desc" maxlength="1000" placeholder="What needs doing? Any measurements, materials, or details the carpenter should know."></textarea>
+        </div>
+      </div>
+      <button class="hf-submit" id="hireSubmit" type="submit">Post my job</button>
+      <div class="hf-msg" id="hireMsg"></div>
+      <p class="hf-note">By posting, you agree that carpenters may contact you on the number you provide. Neewoody reviews every request before it's shared. We never charge you a fee, and we never post your number publicly.</p>
+    </form>
+
+    <div class="hire-done" id="hireDone">
+      <div class="tick">✓</div>
+      <h2>Your job is in.</h2>
+      <p>We'll review it shortly, and carpenters near you will reach out on WhatsApp. Keep an eye on your messages.</p>
+      <button class="again" id="postAnother" type="button">Post another job</button>
+    </div>
+  </div>
+      </div>
+  </main>
+  <Footer bare />
+<script is:inline src="/js/concierge.js?v=20261113b"></script>
+<script is:inline>
+(function () {
+  var C = window.Concierge;
+  var form = document.getElementById('hireForm');
+  var msg = document.getElementById('hireMsg');
+  var btn = document.getElementById('hireSubmit');
+
+  // Populate zone / trade / level selects from the shared vocabulary.
+  C.fillZoneSelect(document.getElementById('h_zone'), '', '— select your area —');
+  var trade = document.getElementById('h_trade');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.specialtyLabel(k); trade.appendChild(o);
+  });
+  var lvl = document.getElementById('h_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); lvl.appendChild(o);
+  });
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var name = document.getElementById('h_name').value.trim();
+    var phone = C.normalizePhone(document.getElementById('h_phone').value);
+    var zone = document.getElementById('h_zone').value;
+    if (!name) { msg.className = 'hf-msg error'; msg.textContent = 'Please enter your name.'; return; }
+    if (!phone) { msg.className = 'hf-msg error'; msg.textContent = 'Enter a valid Ghana WhatsApp number.'; return; }
+    if (!zone) { msg.className = 'hf-msg error'; msg.textContent = 'Choose the area where the work is.'; return; }
+    btn.disabled = true; msg.className = 'hf-msg'; msg.textContent = 'Posting…';
+    try {
+      await C.api('/public/jobs', { auth: false, method: 'POST', body: {
+        client_name: name,
+        client_contact: phone,
+        zone: zone,
+        trade: trade.value,
+        skill_level: lvl.value,
+        workers: Number(document.getElementById('h_workers').value || 1),
+        start_when: document.getElementById('h_start').value.trim(),
+        duration: document.getElementById('h_dur').value.trim(),
+        description: document.getElementById('h_desc').value.trim()
+      }});
+      form.style.display = 'none';
+      document.getElementById('hireDone').classList.add('show');
+      document.getElementById('hireDone').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch (err) {
+      msg.className = 'hf-msg error';
+      msg.textContent = err.message || 'Could not post your job — please try again.';
+    } finally { btn.disabled = false; }
+  });
+
+  document.getElementById('postAnother').addEventListener('click', function () {
+    form.reset();
+    C.fillZoneSelect(document.getElementById('h_zone'), '', '— select your area —');
+    document.getElementById('h_workers').value = '1';
+    msg.textContent = ''; msg.className = 'hf-msg';
+    document.getElementById('hireDone').classList.remove('show');
+    form.style.display = '';
+    document.getElementById('post').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+</script>
+</Base>

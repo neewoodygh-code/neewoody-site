@@ -3,17 +3,17 @@
 import { Image } from 'astro:assets';
 import logoLight from '../assets/brand/logo-light.png';
 import { SERVICES, WA, PHONE, EMAIL } from '../data.js';
-const { title = 'Tell us about<br />the room.', text = '', quoteLink = false, waText = '' } = Astro.props;
+const { title = 'Tell us about<br />the room.', text = '', quoteLink = false, waText = '', bare = false } = Astro.props;
 const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
 ---
-  <footer class="contact" id="contact" data-nav="dark">
-  <h2 class="contact-h rv" set:html={title} />
-  {text && <p class="contact-lede rv">{text}</p>}
-  <div class="contact-row rv">
+  <footer class={'contact' + (bare ? ' bare' : '')} id="contact" data-nav="dark">
+  {!bare && <h2 class="contact-h rv" set:html={title} />}
+  {!bare && text && <p class="contact-lede rv">{text}</p>}
+  {!bare && <div class="contact-row rv">
     <a class="pill" href={wa}>WhatsApp {PHONE} <span aria-hidden="true">↗</span></a>
     {quoteLink && <a class="ulink light" href="/contact">Request a quote</a>}
     <a class="ulink light" href={'mailto:' + EMAIL}>{EMAIL}</a>
-  </div>
+  </div>}
   <div class="contact-meta">
     <p>Workshop<span>Amugi Avenue, Accra</span></p>
     <p>Hours<span>Monday to Saturday, 8am to 6pm</span></p>

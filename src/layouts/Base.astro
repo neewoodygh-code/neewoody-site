@@ -12,7 +12,7 @@ import { getImage } from 'astro:assets';
 import { SITE, EMAIL } from '../data.js';
 import { photo } from '../photos.js';
 
-const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero' } = Astro.props;
+const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero', pageEvent = '' } = Astro.props;
 const url = SITE + path;
 const og = await getImage({ src: photo(ogPhoto), width: 1200, height: 630, fit: 'cover', format: 'jpg' });
 const ld = {
@@ -71,6 +71,7 @@ const ld = {
 <body>
   <a class="skip" href="#main">Skip to content</a>
   <slot />
+  {pageEvent && <script is:inline define:vars={{ pageEvent }}>gtag('event', pageEvent, { page: location.pathname.replace(/^\/|\.html$/g, '') || 'home' });</script>}
   <script>
     import Lenis from 'lenis';
     import 'lenis/dist/lenis.css';
