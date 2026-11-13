@@ -143,7 +143,10 @@ export default {
   async scheduled(event, env, ctx) {
     // Cloudflare numbers Sunday as 1 / SUN (not 0); '0 3 * * 0' is rejected as invalid.
     if (event.cron === '0 3 * * SUN') {
-      ctx.waitUntil(backupDatabase(env).catch((e) => console.error('db backup failed:', e && e.message)));
+      // Logged like the manual backup, so scripts/check-live.mjs can confirm backups are happening.
+      ctx.waitUntil(backupDatabase(env)
+        .then((r) => audit(env, 'system', 'system', 'backup', null, { tables: r.tables, key: r.key, scheduled: true }))
+        .catch((e) => console.error('db backup failed:', e && e.message)));
       return;
     }
     ctx.waitUntil(scanOverdueCallouts(env).catch((e) => console.error('callout scan failed:', e && e.message)));
