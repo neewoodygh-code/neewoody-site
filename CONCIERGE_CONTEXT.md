@@ -48,6 +48,7 @@ Nuer runs Neewoody Custom Woodwork (neewoodygh.com), a bespoke furniture busines
 ## Known technical debts / accepted trade-offs (do not "fix" without instruction)
 
 - **Stateless tokens can't be revoked** — a PIN change doesn't kill an existing token (valid until 30-day expiry). Accepted at 50-vetted-founder scale. Revisit (sessions in D1) only if Concierge ever handles money or messaging directly.
+  - **Superseded 2026-11-13 (owner: "fix and deploy" after a security review):** tokens now carry a keyed stamp of the member's PIN hash, so a PIN change or admin PIN reset ends every other session; changing your own PIN needs the current PIN; failed logins are also capped at 10 per phone per day with an admin alert. Still stateless (no D1 sessions table). See CLAUDE.md.
 - Payment recording upserts on (member, period) — deliberate, lets Nuer correct mistakes.
 - CORS allows bare + www domain. Admin `PUT /members/:phone` can edit profile fields — deliberate, optimizes for owner speed.
 - Phone numbers ARE exposed inside the members-only directory — that IS the product (members hire members). Founders are told at intake that joining = being findable.
