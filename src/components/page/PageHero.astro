@@ -1,0 +1,30 @@
+---
+// Full-bleed photo hero for product pages: headline, one sentence, WhatsApp, facts.
+import { Picture } from 'astro:assets';
+import { img } from '../../photos.js';
+import { WA } from '../../data.js';
+const { hero, waText = '' } = Astro.props;
+const photo = await img(hero.img);
+const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
+---
+<section class="hero hero-page hero-split" id="top" data-nav="dark">
+  <Picture pictureAttributes={{ class: 'hero-img' }} src={photo} formats={['avif', 'webp']} widths={[700, 1100, 1500]} sizes="(min-width: 900px) 50vw, 100vw"
+    alt={hero.alt} loading="eager" fetchpriority="high" />
+  <div class="hero-shade"></div>
+  <div class="hero-copy">
+    <h1 class="hero-h">{hero.lines.map((l: string) => <span class="mask"><span>{l}</span></span>)}</h1>
+    <div class="hero-foot">
+      <p>{hero.text}</p>
+      <div class="hero-acts">
+        <a class="pill" href={wa}>WhatsApp 024 463 3464 <span aria-hidden="true">↗</span></a>
+        <a class="ulink light" href="#gallery">See the work</a>
+      </div>
+    </div>
+    {hero.facts && (
+      <dl class="hero-facts">
+        {hero.facts.map(([k, v]: [string, string]) => <div><dt>{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+    )}
+  </div>
+  {hero.caption && <p class="hero-cap">{hero.caption}</p>}
+</section>

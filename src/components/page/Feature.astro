@@ -1,0 +1,19 @@
+---
+// One featured project: big photo + label, title, lede, text, link. Dark or light band.
+import { Picture } from 'astro:assets';
+import { img } from '../../photos.js';
+const { f, flip = false } = Astro.props;
+const photo = await img(f.img);
+---
+<section class={'feature' + (f.dark ? ' dark' : '') + (flip ? ' flip' : '')} data-nav={f.dark ? 'dark' : 'light'}>
+  <a class="feature-img rv" href={f.link[0]} tabindex="-1" aria-hidden="true">
+    <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt="" loading="lazy" />
+  </a>
+  <div class="feature-txt rv">
+    <p class={'label' + (f.dark ? ' light' : '')}>{f.label}</p>
+    <h2>{f.title}</h2>
+    <p class="lede">{f.lede}</p>
+    <p class="feature-body">{f.text}</p>
+    <a class={'ulink' + (f.dark ? ' brass' : '')} href={f.link[0]}>{f.link[1]}</a>
+  </div>
+</section>

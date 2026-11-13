@@ -29,3 +29,12 @@ export function photo(name) {
   if (!p) throw new Error(`photos.js: no photo named "${name}"`);
   return p;
 }
+
+// Any photo under images/projects by its site path, e.g. img('images/projects/oyarifa/x.jpg').
+// Lazy: only the photos a page actually uses get processed at build time.
+const ALL = import.meta.glob('../images/projects/**/*.{jpg,jpeg,png,JPG}');
+export async function img(path) {
+  const key = '../' + path.replace(/^\/+/, '');
+  if (!ALL[key]) throw new Error(`photos.js: no image at "${path}"`);
+  return (await ALL[key]()).default;
+}

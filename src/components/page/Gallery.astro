@@ -1,0 +1,88 @@
+---
+// "What we have built" grid: filter chips, photo cards, a native <dialog> viewer,
+// and the slot js/cms-posts.js fills with admin-posted projects (native cards).
+import { Picture, getImage } from 'astro:assets';
+import { img } from '../../photos.js';
+const { g, slug } = Astro.props;
+const items = await Promise.all(g.items.map(async (it: any) => {
+  const src = await img(it.img);
+  const big = await getImage({ src, width: 1600, format: 'webp' });
+  return { ...it, src, big: big.src };
+}));
+---
+<section class="gallery-sec" id="gallery" data-nav="light" aria-labelledby="gal-h">
+  <div class="gal-head rv">
+    <h2 id="gal-h" class="display">{g.title}</h2>
+    <a class="ulink" href="/portfolio">See the full portfolio</a>
+  </div>
+  {g.filters && (
+    <div class="gal-filters" role="group" aria-label="Filter by type">
+      {g.filters.map(([k, label]: [string, string], i: number) => (
+        <button type="button" class={'chip' + (i === 0 ? ' on' : '')} data-filter={k} aria-pressed={i === 0 ? 'true' : 'false'}>{label}</button>
+      ))}
+    </div>
+  )}
+  <div class="gal-grid" id="galGrid">
+    {items.map((it: any, i: number) => {
+      const inner = (
+        <Fragment>
+          <span class="g-img"><Picture src={it.src} formats={['avif', 'webp']} widths={[500, 800]} sizes="(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw" alt={it.alt} loading="lazy" /></span>
+          {it.badge && <span class="g-badge">{it.badge}</span>}
+          <span class="g-place">{it.place}{it.year && <span class="g-year"> {it.year}</span>}</span>
+          <span class="g-cap">{it.caption}</span>
+        </Fragment>
+      );
+      return it.href
+        ? <a class="g-card" href={it.href} data-cat={it.cat}>{inner}</a>
+        : <button type="button" class="g-card" data-cat={it.cat} data-big={it.big} data-alt={it.alt} data-i={i}>{inner}</button>;
+    })}
+  </div>
+</section>
+
+<dialog class="viewer" id="viewer" aria-label="Photo viewer">
+  <img id="viewerImg" alt="" />
+  <p id="viewerCap"></p>
+  <button type="button" class="v-close" id="vClose">Close</button>
+  <button type="button" class="v-prev" id="vPrev" aria-label="Previous photo">←</button>
+  <button type="button" class="v-next" id="vNext" aria-label="Next photo">→</button>
+</dialog>
+
+<section id="cms-posts" data-page={slug} hidden></section>
+<template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
+<script is:inline src="/js/cms-posts.js?v=20261113"></script>
+
+<script>
+  const grid = document.getElementById('galGrid')!;
+  const chips = document.querySelectorAll<HTMLButtonElement>('.gal-filters .chip');
+  chips.forEach((c) => c.addEventListener('click', () => {
+    const f = c.dataset.filter;
+    chips.forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
+    grid.querySelectorAll<HTMLElement>('.g-card').forEach((card) => {
+      card.hidden = !(f === 'all' || card.dataset.cat === f);
+    });
+  }));
+
+  // Photo viewer: native <dialog> gives Esc, focus trapping and focus return.
+  const dlg = document.getElementById('viewer') as HTMLDialogElement;
+  const vImg = document.getElementById('viewerImg') as HTMLImageElement;
+  const vCap = document.getElementById('viewerCap')!;
+  const photos = () => [...grid.querySelectorAll<HTMLButtonElement>('button.g-card[data-big]')].filter((b) => !b.hidden);
+  let cur = 0;
+  const show = (i: number) => {
+    const list = photos(); if (!list.length) return;
+    cur = (i + list.length) % list.length;
+    const b = list[cur];
+    vImg.src = b.dataset.big!; vImg.alt = b.dataset.alt || '';
+    vCap.textContent = [b.querySelector('.g-place')?.textContent, b.querySelector('.g-cap')?.textContent].filter(Boolean).join('. ');
+  };
+  grid.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button.g-card[data-big]');
+    if (!b) return;
+    show(photos().indexOf(b)); dlg.showModal();
+  });
+  document.getElementById('vClose')!.addEventListener('click', () => dlg.close());
+  document.getElementById('vPrev')!.addEventListener('click', () => show(cur - 1));
+  document.getElementById('vNext')!.addEventListener('click', () => show(cur + 1));
+  dlg.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); });
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+</script>

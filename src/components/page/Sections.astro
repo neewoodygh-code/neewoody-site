@@ -1,0 +1,52 @@
+---
+// Small text sections shared by product pages: intro, types list, review, FAQ.
+const { kind, d } = Astro.props;
+---
+{kind === 'intro' && (
+  <section class="intro-sec" data-nav="light" aria-labelledby="intro-h">
+    <div class="intro-grid">
+      <h2 id="intro-h" class="intro-title rv">{d.title}</h2>
+      <div class="intro-body rv">
+        {d.paras.map((p: string) => <p>{p}</p>)}
+        {d.link && <a class="ulink" href={d.link[0]}>{d.link[1]}</a>}
+      </div>
+    </div>
+  </section>
+)}
+
+{kind === 'types' && (
+  <section class="types-sec" data-nav="light" aria-labelledby="types-h">
+    <div class="types-head rv">
+      <h2 id="types-h" class="display">{d.title}</h2>
+      <p>{d.text}</p>
+    </div>
+    <ul class="types-list">
+      {d.items.map(([name, text]: [string, string]) => <li class="rv"><h3>{name}</h3><p>{text}</p></li>)}
+    </ul>
+  </section>
+)}
+
+{kind === 'review' && (
+  <section class="voice" data-nav="light" aria-labelledby="rev-h">
+    <h2 id="rev-h" class="sr">What clients say</h2>
+    <figure class="voice-in rv">
+      <blockquote>“{d.quote}”</blockquote>
+      <figcaption>{d.who}<span class="slash" aria-hidden="true"></span>{d.role}</figcaption>
+    </figure>
+  </section>
+)}
+
+{kind === 'faq' && (
+  <section class="faq-sec" data-nav="light" aria-labelledby="faq-h">
+    <h2 id="faq-h" class="display rv">{d.title}</h2>
+    <div class="faq-list">
+      {d.items.map(([q, a]: [string, string]) => (
+        <details class="faq-item"><summary>{q}</summary><p>{a}</p></details>
+      ))}
+    </div>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org', '@type': 'FAQPage',
+      mainEntity: d.items.map(([q, a]: [string, string]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })),
+    })} />
+  </section>
+)}

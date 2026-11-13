@@ -1,0 +1,29 @@
+---
+// Shared closing section + site footer for every Astro page.
+import { Image } from 'astro:assets';
+import logoLight from '../assets/brand/logo-light.png';
+import { SERVICES, WA, PHONE, EMAIL } from '../data.js';
+const { title = 'Tell us about<br />the room.', text = '', quoteLink = false, waText = '' } = Astro.props;
+const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
+---
+  <footer class="contact" id="contact" data-nav="dark">
+  <h2 class="contact-h rv" set:html={title} />
+  {text && <p class="contact-lede rv">{text}</p>}
+  <div class="contact-row rv">
+    <a class="pill" href={wa}>WhatsApp {PHONE} <span aria-hidden="true">↗</span></a>
+    {quoteLink && <a class="ulink light" href="/contact">Request a quote</a>}
+    <a class="ulink light" href={'mailto:' + EMAIL}>{EMAIL}</a>
+  </div>
+  <div class="contact-meta">
+    <p>Workshop<span>Amugi Avenue, Accra</span></p>
+    <p>Hours<span>Monday to Saturday, 8am to 6pm</span></p>
+    <p>Call<a href="tel:+233244633464">024 463 3464</a></p>
+  </div>
+  <nav class="foot-links" aria-label="Footer">
+    <div><p>What we make</p>{SERVICES.map((s) => <a href={s.href}>{s.name}</a>)}</div>
+    <div><p>Our work</p><a href="/portfolio">Portfolio</a><a href="/projects/sage-centre">Sage Centre</a><a href="/projects/bortianor">Bortianor</a></div>
+    <div><p>More</p><a href="/hire">Hire a carpenter</a><a href="/concierge/">Carpentry Concierge</a><a href="/contact">Contact</a><a href="https://www.instagram.com/neewoodygh">Instagram</a><a href="/privacy">Privacy</a></div>
+  </nav>
+  <Image class="contact-logo" src={logoLight} alt="Neewoody Custom Woodwork" width={1000} />
+  <p class="fine">© Neewoody Custom Woodwork, Accra. Registered 2017.</p>
+</footer>

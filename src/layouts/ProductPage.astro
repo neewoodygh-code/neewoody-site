@@ -1,0 +1,26 @@
+---
+// Product page template (Wardrobes, Kitchens, Beds, …). Each page passes one
+// content object from src/content/<slug>.js; sections appear only if present.
+import Base from './Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import PageHero from '../components/page/PageHero.astro';
+import Feature from '../components/page/Feature.astro';
+import Gallery from '../components/page/Gallery.astro';
+import Sections from '../components/page/Sections.astro';
+const { c } = Astro.props;
+---
+<Base title={c.seo.title} description={c.seo.description} ogTitle={c.seo.ogTitle} ogDescription={c.seo.ogDescription} path={c.path}>
+  <Nav />
+  <main id="main">
+    <PageHero hero={c.hero} waText={c.waText} />
+    {c.intro && <Sections kind="intro" d={c.intro} />}
+    {(c.features || []).map((f: any, i: number) => <Feature f={f} flip={i % 2 === 1} />)}
+    {c.types && <Sections kind="types" d={c.types} />}
+    {c.gallery && <Gallery g={c.gallery} slug={c.slug} />}
+    {(c.featuresAfter || []).map((f: any, i: number) => <Feature f={f} flip={i % 2 === 0} />)}
+    {c.review && <Sections kind="review" d={c.review} />}
+    {c.faq && <Sections kind="faq" d={c.faq} />}
+  </main>
+  <Footer title={c.footer?.title} text={c.footer?.text} quoteLink={c.footer?.quoteLink} waText={c.waText} />
+</Base>

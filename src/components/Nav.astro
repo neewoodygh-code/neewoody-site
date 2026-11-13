@@ -3,10 +3,12 @@ import { Image } from 'astro:assets';
 import logoLight from '../assets/brand/logo-light.png';
 import logoDark from '../assets/brand/logo-dark.png';
 import { WA, PHONE } from '../data.js';
-const links = [['Services', '#services'], ['Work', '#work'], ['Portfolio', '/portfolio'], ['Concierge', '/concierge/'], ['Contact', '#contact']];
+// On the homepage the section links stay in-page; elsewhere they lead back to it.
+const home = Astro.url.pathname === '/' || Astro.url.pathname === '/index.html';
+const links = [['Services', home ? '#services' : '/#services'], ['Work', home ? '#work' : '/#work'], ['Portfolio', '/portfolio'], ['Concierge', '/concierge/'], ['Contact', '#contact']];
 ---
 <header class="nav" data-tone="dark" id="nav">
-  <a class="nav-brand" href="#top" aria-label="Neewoody Custom Woodwork, home">
+  <a class="nav-brand" href="/" aria-label="Neewoody Custom Woodwork, home">
     <Image class="nav-logo on-dark" src={logoLight} alt="" width={180} />
     <Image class="nav-logo on-light" src={logoDark} alt="" width={180} />
   </a>
