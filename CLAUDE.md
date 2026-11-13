@@ -27,7 +27,7 @@ npx serve .
 python -m http.server 8080
 ```
 
-**Deployment:** Push to the `main` branch — the site deploys via Cloudflare Pages. The `functions/` directory is automatically picked up as Cloudflare Workers.
+**Deployment:** Push to the `main` branch — the site deploys via Cloudflare Pages. **Deploy link (2026-11-13):** pushes silently stopped deploying after 12 Nov (GitHub showed no Cloudflare check run on new commits). Fixed by the owner reconnecting the Pages project `neewoody-site` to GitHub (Settings → Build → Git repository → Connect; production branch `main`, no build command, output dir empty). To make the Connect dialog list the repo, the **Cloudflare Workers and Pages GitHub app** (installed on the personal account `neewoodygh-code`) had its Repository access changed from **"All repositories" to "Only select repositories: neewoody-site"**. **If any other repo ever needs Cloudflare Git builds (a new Pages/Workers project), it must be added in GitHub → Settings → Applications → Cloudflare Workers and Pages → Repository access, or Cloudflare won't see it.** To check a deploy happened: the commit gets a "Cloudflare Pages" check run on GitHub; no check run = Cloudflare never saw the push. The `functions/` directory is automatically picked up as Cloudflare Workers.
 
 **Cloudflare Worker env vars:** The Instagram feed function (`functions/api/instagram.js`) requires `IG_TOKEN` set in the Cloudflare Pages dashboard (not in code).
 
