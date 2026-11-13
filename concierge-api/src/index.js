@@ -526,7 +526,13 @@ async function updateMe(request, env, member) {
   }
   if ('business_name' in body) fields.business_name = nullableStr(body.business_name);
   if ('area' in body) fields.area = nullableStr(body.area);
-  if ('photo_url' in body) fields.photo_url = nullableStr(body.photo_url);
+  if ('photo_url' in body) {
+    // Only clearing it, or this member's own uploaded photo; an outside address
+    // would let a member log the IP of everyone who views their card.
+    const u = ownMediaUrl(body.photo_url, request, 'members', member.phone);
+    if (u === false) return json({ error: 'invalid_photo_url' }, 400);
+    fields.photo_url = u;
+  }
   if ('skill_level' in body) {
     const lvl = validateSkillLevel(body.skill_level);
     if (lvl === false) return json({ error: 'invalid_skill_level' }, 400);
@@ -775,7 +781,11 @@ async function adminUpdateMember(request, env, rawPhone, admin) {
   }
   if ('business_name' in body) fields.business_name = nullableStr(body.business_name);
   if ('area' in body) fields.area = nullableStr(body.area);
-  if ('photo_url' in body) fields.photo_url = nullableStr(body.photo_url);
+  if ('photo_url' in body) {
+    const u = ownMediaUrl(body.photo_url, request, 'members', phone);
+    if (u === false) return json({ error: 'invalid_photo_url' }, 400);
+    fields.photo_url = u;
+  }
   if ('skill_level' in body) {
     const lvl = validateSkillLevel(body.skill_level);
     if (lvl === false) return json({ error: 'invalid_skill_level' }, 400);
@@ -939,45 +949,42 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
 // Guarded by an explicit {confirm:'purge-pending'} body; the admin UI adds its
 // own count-echo prompts on top. NOTE: table list mirrors adminDeleteMember —
 // keep both in sync on schema changes.
-async function adminPurgePending(env, request, admin) {
-  const body = await readJson(request);
-  if (body.confirm !== 'purge-pending') return json({ error: 'confirm_required' }, 400);
-
-  const sub = "(SELECT phone FROM members WHERE status='pending' AND role != 'admin')";
-  const { results: pend } = await env.DB.prepare(
-    "SELECT phone, photo_url, logo_url FROM members WHERE status='pending' AND role != 'admin'"
-  ).all();
-  if (!pend || !pend.length) return json({ purged: 0 });
-
+// Delete unpaid ('pending', non-admin) accounts and everything they own.
+// All of them (admin "Purge pending" button) or just one phone (a stale squat
+// being replaced at sign-up). Table list mirrors adminDeleteMember — keep in sync.
+async function purgePending(env, onlyPhone) {
+  const cond = "status='pending' AND role != 'admin'" + (onlyPhone ? ' AND phone = ?' : '');
+  const sub = `(SELECT phone FROM members WHERE ${cond})`;
+  const q = (sql) => {
+    const st = env.DB.prepare(sql);
+    const n = onlyPhone ? (sql.match(/\?/g) || []).length : 0;
+    return n ? st.bind(...Array(n).fill(onlyPhone)) : st;
+  };
+  const { results: pend } = await q(`SELECT phone, photo_url, logo_url FROM members WHERE ${cond}`).all();
+  if (!pend || !pend.length) return [];
   // Gather R2 keys BEFORE the rows are deleted.
-  const { results: sfItems } = await env.DB.prepare(
-    `SELECT id, member_phone FROM storefront_items WHERE member_phone IN ${sub}`
-  ).all();
-  const { results: cophotos } = await env.DB.prepare(
-    `SELECT id FROM callouts WHERE has_photo = 1 AND member_phone IN ${sub}`
-  ).all();
-
+  const { results: sfItems } = await q(`SELECT id, member_phone FROM storefront_items WHERE member_phone IN ${sub}`).all();
+  const { results: cophotos } = await q(`SELECT id FROM callouts WHERE has_photo = 1 AND member_phone IN ${sub}`).all();
   await env.DB.batch([
-    env.DB.prepare(`DELETE FROM payments WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM payment_intents WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM saved_cutlists WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM login_attempts WHERE phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM jobs WHERE poster_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM buy_requests WHERE poster_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM orders WHERE vendor_phone IN ${sub} OR buyer_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM suggestions WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM callouts WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM notifications WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM push_subs WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM clients WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM invoice_data WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
-    env.DB.prepare(`DELETE FROM members WHERE status='pending' AND role != 'admin'`),
+    q(`DELETE FROM payments WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM payment_intents WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM saved_cutlists WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM login_attempts WHERE phone IN ${sub}`),
+    q(`DELETE FROM jobs WHERE poster_phone IN ${sub}`),
+    q(`DELETE FROM buy_requests WHERE poster_phone IN ${sub}`),
+    q(`DELETE FROM orders WHERE vendor_phone IN ${sub} OR buyer_phone IN ${sub}`),
+    q(`DELETE FROM suggestions WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM callouts WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM notifications WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM push_subs WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM pricing_configs WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM pricing_quotes WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM clients WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM invoice_data WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM members WHERE ${cond}`),
   ]);
-
   const keys = [];
   pend.forEach((r) => { if (r.photo_url) keys.push(photoKey(r.phone)); if (r.logo_url) keys.push(logoKey(r.phone)); });
   (sfItems || []).forEach((i) => keys.push(`concierge/storefront/${i.member_phone}/${i.id}.jpg`));
@@ -986,6 +993,22 @@ async function adminPurgePending(env, request, admin) {
     try { await Promise.all(keys.map((k) => env.MEDIA.delete(k))); }
     catch (e) { console.error('purge R2 cleanup failed:', e && e.message); }
   }
+  return pend;
+}
+
+// '' / null clears; otherwise only this Worker's own media URL for that phone.
+function ownMediaUrl(v, request, kind, phone) {
+  if (v == null || String(v).trim() === '') return null;
+  const s = String(v).trim();
+  const base = `${new URL(request.url).origin}/api/media/${kind}/${phone}.`;
+  return s.startsWith(base) && /^[a-z]{3,4}(\?v=\d+)?$/.test(s.slice(base.length)) ? s : false;
+}
+
+async function adminPurgePending(env, request, admin) {
+  const body = await readJson(request);
+  if (body.confirm !== 'purge-pending') return json({ error: 'confirm_required' }, 400);
+  const pend = await purgePending(env);
+  if (!pend.length) return json({ purged: 0 });
 
   await audit(env, admin && admin.phone, 'admin', 'purge_pending', null, { count: pend.length });
   return json({ purged: pend.length });
@@ -1388,8 +1411,21 @@ async function publicRegister(request, env, ctx) {
   const wantsFounder = String(body.requested_tier || 'regular') === 'founder';
   const requested_tier = (wantsFounder && (await foundersCount(env)) < FOUNDER_CAP) ? 'founder' : 'regular';
 
-  const existing = await env.DB.prepare('SELECT phone FROM members WHERE phone = ?').bind(phone).first();
-  if (existing) return json({ error: 'member_exists' }, 409);
+  const existing = await env.DB.prepare('SELECT phone, status, role, joined_at FROM members WHERE phone = ?').bind(phone).first();
+  if (existing) {
+    // Anyone can type any number here, so an unpaid sign-up must not block the
+    // number's real owner forever. A pending (never paid) account older than a
+    // day, with no payment started in the last 2 hours, is treated as abandoned
+    // and replaced. Approved, suspended and admin accounts are never touched.
+    if (existing.status !== 'pending' || existing.role === 'admin') return json({ error: 'member_exists' }, 409);
+    const ageMs = Date.now() - Date.parse(existing.joined_at || '');
+    const recentPay = await env.DB.prepare(
+      `SELECT 1 AS x FROM payment_intents WHERE member_phone = ? AND created_at >= datetime('now', '-2 hours')`
+    ).bind(phone).first();
+    if (!(ageMs > 24 * 3600 * 1000) || recentPay) return json({ error: 'pending_recent' }, 409);
+    await purgePending(env, phone);
+    await audit(env, phone, 'public', 'pending_replaced', phone, { joined_at: existing.joined_at });
+  }
 
   const pin_hash = await hashPin(pin);
   await env.DB.prepare(

@@ -235,7 +235,7 @@ button.submit:disabled{ opacity:.6; cursor:default; }
   <p class="help">Already a member? <a href="login.html">Log in →</a></p>
 </div>
 
-<script src="../js/concierge.js?v=20261113"></script>
+<script src="../js/concierge.js?v=20261113b"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -405,7 +405,8 @@ button.submit:disabled{ opacity:.6; cursor:default; }
       document.getElementById('regDone').classList.add('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err) {
-      showErr(err.message === 'member_exists' ? 'That number is already registered — log in instead.' : (err.message || 'Could not submit — please try again.'));
+      var code = err && err.data && err.data.error;
+      showErr(code === 'member_exists' ? 'That number is already registered. Log in instead.' : (err.message || 'Could not submit. Please try again.'));
       btn.disabled = false; btn.textContent = 'Join & pay';
     }
   });

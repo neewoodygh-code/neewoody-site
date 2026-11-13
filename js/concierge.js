@@ -325,6 +325,8 @@
     }
     var map = {
       wrong_current_pin: 'Your current PIN is not correct, so the PIN was not changed.',
+      pending_recent: 'This number started signing up in the last day. If that was you, log in with the PIN you chose and finish paying. If it was not you, try again tomorrow or WhatsApp us on 024 463 3464.',
+      invalid_photo_url: 'That photo address is not allowed. Upload a photo instead.',
       invalid_credentials: 'That phone number or PIN is not correct.',
       too_many_attempts: 'Too many attempts. Please wait 15 minutes and try again.',
       unauthorized: 'Please log in again.',
