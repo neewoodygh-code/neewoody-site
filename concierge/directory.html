@@ -975,6 +975,10 @@ a.tool-card:hover .go{ color:var(--navy); }
       </div>
       <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
       <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
+      <div id="p_curpin_wrap" hidden>
+        <label for="p_curpin" style="margin-top:.9rem">Current PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— needed to change it</span></label>
+        <input id="p_curpin" type="password" inputmode="numeric" maxlength="5" autocomplete="current-password" />
+      </div>
       <button class="save" id="saveBtn" type="submit">Save changes</button>
       <div class="mmsg" id="mmsg"></div>
     </form>
@@ -1104,7 +1108,7 @@ a.tool-card:hover .go{ color:var(--navy); }
   </div>
 </div>
 
-<script src="../js/concierge.js?v=20261005"></script>
+<script src="../js/concierge.js?v=20261113"></script>
 <script>
 (function () {
   var C = window.Concierge;
@@ -1686,6 +1690,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     var svcSet = new Set(me.vendor_services || []);
     svcGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = svcSet.has(cb.value); });
     document.getElementById('p_pin').value = '';
+    document.getElementById('p_curpin').value = ''; document.getElementById('p_curpin_wrap').hidden = true;
     mmsg.textContent = ''; mmsg.className = 'mmsg';
     overlay.classList.add('open');
   }
@@ -1694,7 +1699,11 @@ a.tool-card:hover .go{ color:var(--navy); }
   document.getElementById('closeModal').addEventListener('click', closeModal);
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
 
-  document.getElementById('p_pin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
+  document.getElementById('p_pin').addEventListener('input', function (e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    document.getElementById('p_curpin_wrap').hidden = !e.target.value; // ask for the current PIN only when changing it
+  });
+  document.getElementById('p_curpin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
 
   // Optional profile location pin (all members). Same columns as the vendor
   // shop location; here surfaced generally so anyone can pin where they're based.
@@ -1738,6 +1747,8 @@ a.tool-card:hover .go{ color:var(--navy); }
     if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
     var newPin = document.getElementById('p_pin').value;
     if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
+    var curPin = document.getElementById('p_curpin').value;
+    if (newPin && !/^\d{5}$/.test(curPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Enter your current 5-digit PIN to change it.'; document.getElementById('p_curpin').focus(); return; }
     saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
     try {
       var body = {
@@ -1765,11 +1776,14 @@ a.tool-card:hover .go{ color:var(--navy); }
         years_experience: isCarpEdit && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
         specialties: isCarpEdit ? specs : []
       };
-      if (newPin) body.pin = newPin;
+      if (newPin) { body.pin = newPin; body.current_pin = curPin; }
       var r = await C.api('/me', { method: 'PUT', body: body });
       me = r.member;
+      if (r.token) C.setToken(r.token); // a new PIN signs out other devices; keep this one signed in
       document.getElementById('p_pin').value = '';
-      mmsg.className = 'mmsg ok'; mmsg.textContent = newPin ? 'Saved — use your new PIN next time you log in.' : 'Saved.';
+      document.getElementById('p_curpin').value = '';
+      document.getElementById('p_curpin_wrap').hidden = true;
+      mmsg.className = 'mmsg ok'; mmsg.textContent = newPin ? 'Saved. Your new PIN is set, and any other phone signed in to your account has been signed out.' : 'Saved.';
       await load(); // refresh directory (own card may have changed)
       setTimeout(closeModal, newPin ? 1400 : 700);
     } catch (err) {
@@ -2855,6 +2869,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     { id: 33, date: '2026-08-24', title: 'New tool: Cut Sheet Generator', body: 'In “Your member tools” open the Cut Sheet Generator. Type in your parts — or switch to Quick grid and enter measurements straight in, no names needed — and get a printable sheet of boxes with edge-band marks plus how many boards you need. It prints with YOUR logo and number to hand to the cutting shop.' },
     { id: 34, date: '2026-10-11', title: 'Make your invoices look like yours', body: 'In the Invoice & Quote Generator open “Document style” to pick your fonts, colour, header layout and logo size, add your own tagline under your name, and hide your business name if your logo already shows it. Quotes can now also offer options the client picks between (e.g. laminate, plywood or drywall) and show the price as a range.' },
     { id: 35, date: '2026-11-11', title: 'Academy: take a cabinet apart', body: 'The first Academy lesson is live. Open the Academy tab and pull apart a Euro-style base cabinet: 18 mm sides, the 37 mm line with fixing points every 32 mm, screwed-in shelf, hinges, legs, kicker and finishing panel. Tap any part to see how it goes together.' },
+    { id: 36, date: '2026-11-13', title: 'Your account is safer', body: 'Changing your PIN now asks for your current PIN first, and it signs out any other phone that was logged in to your account. After too many wrong PINs in one day, logins for that number pause until the next day and the owner is told, so nobody can keep guessing.' },
   ];
   var WN_KEY = 'nwd-changelog-seen';
 

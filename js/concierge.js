@@ -284,8 +284,8 @@
     if (!t) return false;
     try {
       var payload = decodeURIComponent(escape(atob(t.split('.')[0])));
-      var i = payload.lastIndexOf('.');
-      var exp = Number(payload.slice(i + 1));
+      // phone.expiry (old) or phone.expiry.stamp (2026-11-13): expiry is always the 2nd part
+      var exp = Number(payload.split('.')[1]);
       return isFinite(exp) && exp > Date.now();
     } catch (e) { return false; }
   }
@@ -319,7 +319,12 @@
 
   function errorMessage(status, data) {
     var code = data && data.error;
+    // Daily lockout (2026-11-13): the server says how long; 15 minutes vs a full day.
+    if (code === 'too_many_attempts' && data.retry_after_minutes >= 60) {
+      return 'Too many wrong PINs today. Try again tomorrow, or WhatsApp the owner on 024 463 3464 to reset your PIN.';
+    }
     var map = {
+      wrong_current_pin: 'Your current PIN is not correct, so the PIN was not changed.',
       invalid_credentials: 'That phone number or PIN is not correct.',
       too_many_attempts: 'Too many attempts. Please wait 15 minutes and try again.',
       unauthorized: 'Please log in again.',

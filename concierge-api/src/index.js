@@ -100,6 +100,10 @@ const TOKEN_TTL_MS   = 30 * 24 * 60 * 60 * 1000; // 30 days
 const PBKDF2_ITERS   = 100_000;
 const RATE_LIMIT_MAX = 5;                         // failed PINs
 const RATE_WINDOW    = "-15 minutes";            // per phone
+// 2026-11-13: a 5-digit PIN has 100,000 values; 5 per 15 min alone still allowed
+// 480 guesses/day per phone. Cap failures per day too, and alert the owner.
+const DAILY_FAIL_MAX = 10;                        // failed PINs per phone per day
+const DAILY_WINDOW   = "-1 day";
 
 const ALLOWED_ORIGINS = [
   'https://neewoodygh.com',
@@ -270,7 +274,7 @@ async function route(request, env, ctx) {
   const method = request.method;
 
   // ---- public ----
-  if (path === '/api/auth/login' && method === 'POST') return login(request, env);
+  if (path === '/api/auth/login' && method === 'POST') return login(request, env, ctx);
   if (path === '/api/health' && method === 'GET') return json({ ok: true });
 
   // Paystack webhook (server-to-server; verified by HMAC signature, not auth).
@@ -450,7 +454,7 @@ async function route(request, env, ctx) {
 //  Handlers
 // ═══════════════════════════════════════════════════════════════════════
 
-async function login(request, env) {
+async function login(request, env, ctx) {
   const body = await readJson(request);
   const phone = normalizePhone(body.phone);
   const pin = String(body.pin || '');
@@ -460,18 +464,21 @@ async function login(request, env) {
 
   if (!phone || !/^\d{5}$/.test(pin)) return fail();
 
-  // Prune this phone's attempts older than the window while we're here — keeps
-  // login_attempts self-cleaning so it never grows unbounded.
+  // Prune this phone's attempts older than a day while we're here — keeps
+  // login_attempts self-cleaning (kept a day so the daily cap can count them).
   await env.DB.prepare(
     `DELETE FROM login_attempts WHERE phone = ? AND attempted_at < datetime('now', ?)`
-  ).bind(phone, RATE_WINDOW).run();
+  ).bind(phone, DAILY_WINDOW).run();
 
-  // rate limit: failed attempts for this phone in the window
+  // rate limits: failed attempts for this phone in the last 15 minutes and last day
   const rl = await env.DB.prepare(
-    `SELECT COUNT(*) AS c FROM login_attempts
-     WHERE phone = ? AND success = 0 AND attempted_at >= datetime('now', ?)`
-  ).bind(phone, RATE_WINDOW).first();
-  if (rl && rl.c >= RATE_LIMIT_MAX) {
+    `SELECT COALESCE(SUM(attempted_at >= datetime('now', ?)), 0) AS recent, COUNT(*) AS day
+     FROM login_attempts WHERE phone = ? AND success = 0`
+  ).bind(RATE_WINDOW, phone).first();
+  if (rl && rl.day >= DAILY_FAIL_MAX) {
+    return json({ error: 'too_many_attempts', retry_after_minutes: 24 * 60 }, 429);
+  }
+  if (rl && rl.recent >= RATE_LIMIT_MAX) {
     return json({ error: 'too_many_attempts', retry_after_minutes: 15 }, 429);
   }
 
@@ -480,7 +487,19 @@ async function login(request, env) {
 
   const ok = await verifyPin(pin, member.pin_hash);
   await recordAttempt(env, phone, ok);
-  if (!ok) return fail();
+  if (!ok) {
+    // Alert admins once, the moment a real account reaches the daily cap.
+    if (rl && (rl.day || 0) + 1 === DAILY_FAIL_MAX) {
+      const alert = notifyAdmins(env, {
+        type: 'security', title: 'Login locked for a day',
+        body: `${DAILY_FAIL_MAX} wrong PINs today for ${member.name || 'a member'} (${phone}). If that wasn't them, reset their PIN.`,
+        link: '#members',
+      }).catch((e) => console.error('lockout notify failed:', e && e.message));
+      if (ctx && ctx.waitUntil) ctx.waitUntil(alert);
+      await audit(env, phone, member.role, 'login_locked', phone, { failures: DAILY_FAIL_MAX });
+    }
+    return fail();
+  }
 
   // Pay-to-join: suspended members are blocked; pending (unpaid) members CAN log
   // in, but the session is gated server-side (withAuth) to profile + payment
@@ -493,7 +512,7 @@ async function login(request, env) {
   // Record last successful login (activity visibility for the admin).
   await env.DB.prepare(`UPDATE members SET last_login = datetime('now') WHERE phone = ?`).bind(phone).run();
 
-  const token = await signToken(phone, env);
+  const token = await signToken(phone, env, member.pin_hash);
   return json({ token, member: sanitize(member) });
 }
 
@@ -603,6 +622,13 @@ async function updateMe(request, env, member) {
   // the owner no longer knows a member's PIN after handing out the initial one.
   if ('pin' in body && body.pin != null && body.pin !== '') {
     if (!/^\d{5}$/.test(String(body.pin))) return json({ error: 'pin_must_be_5_digits' }, 400);
+    // The current PIN is required, so a borrowed phone or stolen session can't
+    // silently lock the real member out. Wrong answers count toward the login caps.
+    const cur = String(body.current_pin || '');
+    if (!/^\d{5}$/.test(cur) || !(await verifyPin(cur, member.pin_hash))) {
+      await recordAttempt(env, member.phone, false);
+      return json({ error: 'wrong_current_pin' }, 403);
+    }
     fields.pin_hash = await hashPin(String(body.pin));
     await audit(env, member.phone, 'member', 'pin_change', member.phone, { self: true });
   }
@@ -614,6 +640,9 @@ async function updateMe(request, env, member) {
   await env.DB.prepare(`UPDATE members SET ${set} WHERE phone = ?`).bind(...vals, member.phone).run();
 
   const updated = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(member.phone).first();
+  // A new PIN ends every other session (their stamp no longer matches); hand this
+  // device a fresh token so the member who just changed it stays signed in.
+  if (fields.pin_hash) return json({ member: sanitize(updated), token: await signToken(member.phone, env, updated.pin_hash) });
   return json({ member: sanitize(updated) });
 }
 
@@ -2807,9 +2836,19 @@ async function authenticate(request, env) {
   const auth = request.headers.get('Authorization') || '';
   const m = auth.match(/^Bearer\s+(.+)$/i);
   if (!m) return null;
-  const phone = await verifyToken(m[1].trim(), env);
-  if (!phone) return null;
-  return env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(phone).first();
+  const t = await verifyToken(m[1].trim(), env);
+  if (!t) return null;
+  const member = await env.DB.prepare('SELECT * FROM members WHERE phone = ?').bind(t.phone).first();
+  if (!member) return null;
+  if (t.stamp) {
+    // Session is tied to the PIN it was issued under: a PIN change or admin reset ends it.
+    if (!timingSafeEqual(t.stamp, await pinStamp(member.pin_hash, env))) return null;
+  } else if (member.role === 'admin') {
+    // Tokens issued before 2026-11-13 carry no stamp. Members keep theirs until
+    // they expire (max 30 days); admin sessions must sign in again.
+    return null;
+  }
+  return member;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -2838,9 +2877,14 @@ async function pbkdf2Bits(pin, salt) {
   return new Uint8Array(bits);
 }
 
-async function signToken(phone, env) {
+// Short keyed fingerprint of the member's current PIN hash (never the hash itself).
+async function pinStamp(pinHash, env) {
+  return b64(await hmac('pin:' + String(pinHash || ''), env.SESSION_SECRET)).slice(0, 16);
+}
+
+async function signToken(phone, env, pinHash) {
   const expiry = Date.now() + TOKEN_TTL_MS;
-  const payload = `${phone}.${expiry}`;
+  const payload = `${phone}.${expiry}.${await pinStamp(pinHash, env)}`;
   const sig = await hmac(payload, env.SESSION_SECRET);
   return `${b64str(payload)}.${b64(sig)}`;
 }
@@ -2854,12 +2898,13 @@ async function verifyToken(token, env) {
   const expected = b64(await hmac(payload, env.SESSION_SECRET));
   if (!timingSafeEqual(expected, sigB64)) return null;
 
-  const dot = payload.lastIndexOf('.');
-  if (dot < 0) return null;
-  const phone = payload.slice(0, dot);
-  const expiry = Number(payload.slice(dot + 1));
-  if (!phone || !Number.isFinite(expiry) || expiry < Date.now()) return null;
-  return phone;
+  // phone.expiry (before 2026-11-13) or phone.expiry.stamp
+  const bits = payload.split('.');
+  if (bits.length !== 2 && bits.length !== 3) return null;
+  const [phone, exp, stamp] = bits;
+  const expiry = Number(exp);
+  if (!/^\d+$/.test(phone) || !Number.isFinite(expiry) || expiry < Date.now()) return null;
+  return { phone, stamp: stamp || null };
 }
 
 async function hmac(message, secret) {
