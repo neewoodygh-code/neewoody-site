@@ -67,3 +67,10 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
 
 ## Still open from earlier sessions
 - `scripts/check-live.mjs` + weekly run (owner said yes; not built). See CLAUDE.md "In progress".
+
+## Photo editing (2026-11-14, owner: "Yes, heroes first")
+- Tool: `scripts/straighten.py` (needs `numpy` + `opencv-python-headless`; installed to a scratch folder, not the repo). It measures lean from a photo's own vertical lines, removes the roll and 75% of the converging-walls effect, crops back to the same pixel size, and refuses to act when there are too few lines, no clear gain, or the crop would lose more than 14%. `tone()` adds an optional partial white balance and shadow lift. It never alters the furniture.
+- Edited in place (same file names and sizes, originals in git history): `bortianor-kitchen-wide`, `bortianor-living-tv-wall` (also less yellow), `bortianor-master-wardrobe`, `achimota-hero-wide`, `golf-hills-installed-6`, `how-hero` (+ `how-gallery-1`, the same photo), `judith-set-installed-2` (shadows lifted only). Before/after sheets: `docs/review/hero-edits-1.jpg`, `-2.jpg`.
+- Left alone on purpose: the Sage photos (professional), the three shots looking down at a table (Afromosia, Roman Ridge, East Legon: correcting them would distort the table), Jerksoul and the Dome chest (too few straight lines to measure).
+- Honest limits: a light automatic colour clean-up changes little (`docs/review/photo-cleanup-demo.jpg`); the bigger gains are straightening, cropping and how new photos are taken. Removing objects (the cable in the TV wall photo, the protective stickers on the glass wardrobe) needs a retouching tool and the owner's OK to upload photos to it. Not done.
+- Next if wanted: run the same tool over gallery photos.
