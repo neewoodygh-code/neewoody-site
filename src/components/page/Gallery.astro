@@ -5,12 +5,16 @@
 // (unless `cms: false`) also hosts the slot js/cms-posts.js fills with
 // admin-posted projects (native cards). Options: tone 'dark' | 'bone',
 // headLink [href, label] or null, an item with `lead` spans two columns.
+// Long galleries show the first `limit` cards (default 6; 0 = no limit) with a
+// "Show all" button; without JavaScript every card shows.
 import { Picture } from 'astro:assets';
 import { img, bigSet } from '../../photos.js';
 const { g, slug } = Astro.props;
 const id = g.id || 'gallery';
 const gridId = g.cms === false ? id + '-grid' : 'galGrid';
 const headLink = g.headLink === undefined ? ['/portfolio', 'See the full portfolio'] : g.headLink;
+const limit = g.limit ?? 6;
+const limited = limit > 0 && g.items.length > limit + 2;
 const items = await Promise.all(g.items.map(async (it: any) => {
   const src = await img(it.img);
   const own = (await bigSet([{ img: it.img, alt: it.alt, cap: [it.place, it.caption].filter(Boolean).join('. ') }]))[0];
@@ -31,9 +35,9 @@ const items = await Promise.all(g.items.map(async (it: any) => {
       ))}
     </div>
   )}
-  <div class="gal-grid" id={gridId} data-view-group>
-    {items.map((it: any) => {
-      const cls = 'g-card' + (it.lead ? ' lead' : '');
+  <div class={'gal-grid' + (limited ? ' limited' : '')} id={gridId} data-view-group style={limited ? `--show:${limit}` : undefined}>
+    {items.map((it: any, i: number) => {
+      const cls = 'g-card' + (it.lead ? ' lead' : '') + (limited && i >= limit ? ' g-extra' : '');
       const inner = (
         <Fragment>
           <span class="g-img"><Picture src={it.src} formats={['avif', 'webp']} widths={it.lead ? [800, 1300] : [500, 800]} sizes={it.lead ? '(min-width: 640px) 62vw, 92vw' : '(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw'} alt={it.alt} loading="lazy" /></span>
@@ -49,20 +53,30 @@ const items = await Promise.all(g.items.map(async (it: any) => {
         : <button type="button" class={cls} data-cat={it.cat} data-view data-big={it.big} data-alt={it.alt} data-cap={it.cap}>{inner}</button>;
     })}
   </div>
+  {limited && <button type="button" class="gal-all" aria-controls={gridId}>Show all {g.items.length}</button>}
 </section>
 
 {g.cms !== false && (
   <Fragment>
     <section id="cms-posts" data-page={slug} hidden></section>
-    <template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
+    <template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card g-cms"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
     <script is:inline src="/js/cms-posts.js?v=20261113"></script>
   </Fragment>
 )}
 
 <script>
   document.querySelectorAll<HTMLElement>('.gallery-sec').forEach((sec) => {
+    const grid = sec.querySelector<HTMLElement>('.gal-grid')!;
+    const all = sec.querySelector<HTMLButtonElement>('.gal-all');
+    const expand = () => { grid.classList.remove('limited'); if (all) all.hidden = true; };
+    all?.addEventListener('click', () => {
+      const first = grid.querySelector<HTMLElement>('.g-extra');
+      expand();
+      first?.focus({ preventScroll: true });
+    });
     const chips = sec.querySelectorAll<HTMLButtonElement>('.gal-filters .chip');
     chips.forEach((c) => c.addEventListener('click', () => {
+      expand();
       const f = c.dataset.filter;
       chips.forEach((x) => { x.classList.toggle('on', x === c); x.setAttribute('aria-pressed', String(x === c)); });
       sec.querySelectorAll<HTMLElement>('.gal-grid > .g-card').forEach((card) => {

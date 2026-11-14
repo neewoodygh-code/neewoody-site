@@ -39,7 +39,7 @@ export default {
         { place: 'Guesthouse room, Achimota', caption: 'One room brought up to Airbnb standard, from the bed to the hallway wainscotting.',
           img: P + 'achimota-guesthouse/achimota-hero-wide.jpg', alt: 'Achimota guesthouse room conversion — wardrobe, vanity, and lit glass display cabinet, Accra', href: '/projects/achimota-guesthouse' },
       ] },
-    { kind: 'gallery', id: 'workshop', tone: 'bone', cms: false, headLink: ['/contact', 'Start your project'], title: 'From the workshop',
+    { kind: 'gallery', id: 'workshop', tone: 'bone', limit: 0, cms: false, headLink: ['/contact', 'Start your project'], title: 'From the workshop',
       items: [
         { badge: 'With a built-in banquette', place: 'Dining set, Golf Hills Estate', img: P + 'golf-hills-estate/golf-hills-installed-6.jpg',
           alt: 'X-frame pine dining table and built-in banquette, Golf Hills Estate, Accra', href: '/projects/golf-hills-estate' },
@@ -55,7 +55,7 @@ export default {
         { badge: 'Kitchens', place: 'Kitchen, Spintex', img: P + 'spintex-kitchen/spintex-kitchen-hero.jpg', alt: 'L-shaped kitchen, dark laminate, marble countertop, Spintex, Accra' },
         { badge: 'With an island', place: 'Kitchen, Dansoman', img: P + 'dansoman-kitchen/dansoman-kitchen-layout.jpg', alt: 'Kitchen with freestanding island, Dansoman, Accra' },
       ] },
-    { kind: 'gallery', id: 'made', headLink: null, title: 'Made to order', text: 'Tap any piece to see more photos.',
+    { kind: 'gallery', id: 'made', limit: 9, headLink: null, title: 'Made to order', text: 'Tap any piece to see more photos.',
       items: [
         { badge: "Solid wood, Roman Ridge", place: "Live-edge Hyedua table", caption: "Private residence, Roman Ridge, 2026, Hyedua (Ovangkol)",
           img: "images/projects/roman-ridge-live-edge/live-edge-table-hero.jpg", alt: "Live-edge Hyedua table in a dining room, Roman Ridge, Accra",
