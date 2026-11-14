@@ -5,7 +5,7 @@
 const { v } = Astro.props;
 const thumb = (embed: string) => {
   const id = embed.match(/embed\/([\w-]{11})(?:$|\?)/)?.[1];
-  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+  return id && id !== 'videoseries' ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null; // a playlist has no thumbnail of its own
 };
 const items = v.items.map((it: any, i: number) => ({ ...it, thumb: thumb(it.embed) || thumb(v.items.find((x: any) => thumb(x.embed))?.embed || '') }));
 ---

@@ -8,11 +8,12 @@ import '@fontsource/manrope/600.css';
 import '../styles/global.css';
 import { getImage } from 'astro:assets';
 import { SITE, EMAIL } from '../data.js';
-import { photo } from '../photos.js';
+import { photo, img } from '../photos.js';
 
-const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero', pageEvent = '' } = Astro.props;
+const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero', ogImg = '', noindex = false, pageEvent = '' } = Astro.props;
 const url = SITE + path;
-const og = await getImage({ src: photo(ogPhoto), width: 1200, height: 630, fit: 'cover', format: 'jpg' });
+// share image: a page's own photo (ogImg = its site path) or one of the named homepage photos
+const og = await getImage({ src: ogImg ? await img(ogImg) : photo(ogPhoto), width: 1200, height: 630, fit: 'cover', format: 'jpg' });
 const ld = {
   '@context': 'https://schema.org',
   '@type': 'LocalBusiness',
@@ -44,6 +45,7 @@ const ld = {
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  {noindex && <meta name="robots" content="noindex" />}
   <link rel="canonical" href={url} />
   <meta property="og:type" content="website" />
   <meta property="og:url" content={url} />

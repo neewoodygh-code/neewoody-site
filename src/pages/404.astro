@@ -1,0 +1,29 @@
+---
+// Not-found page: Cloudflare Pages serves dist/404.html with a real 404 for any
+// unknown address, at any depth, so every link here is root-absolute.
+import Base from '../layouts/Base.astro';
+import '../styles/forms.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base title="Page Not Found — Neewoody Custom Woodwork"
+  description="This page doesn't exist. Find your way back to Neewoody Custom Woodwork — bespoke furniture and carpentry in Accra, Ghana."
+  path="/404" noindex>
+  <Nav />
+  <main id="main">
+    <section class="page-head nf" data-nav="dark">
+      <h1 class="display">This one didn't make it off the workbench.</h1>
+      <div>
+        <p>404 — Page not found</p>
+        <p>The page you're looking for doesn't exist — it may have been moved, renamed, or the link you followed is out of date. No harm done. Here's the way back:</p>
+        <p class="nf-links">
+          <a class="pill" href="/">Back to the homepage</a>
+          <a class="ulink light" href="/portfolio">See our work</a>
+          <a class="ulink light" href="/contact">Get in touch</a>
+          <a class="ulink light" href="/tools">Carpentry Concierge — free tools &amp; membership</a>
+        </p>
+      </div>
+    </section>
+  </main>
+  <Footer bare />
+</Base>

@@ -43,9 +43,18 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
   - Galleries: show 6 with a "Show all" control, or two-column compact cards on phones; shorter captions on cards (full text stays in the viewer).
   - Homepage process section: remove the dead space.
   - Choose each product page's hero by photo quality (show the owner candidates before changing).
-- [ ] **Step 3. Finish the migration** PART DONE 2026-11-14: all 9 case studies are Astro pages (`src/content/projects/<slug>.js` via `src/pages/projects/[slug].astro` on ProductPage; old files in `docs/legacy/projects/`; converter kept every sentence and photo, eyebrow labels dropped on purpose, duplicate `how-gallery-6` left out). New: Feature takes `paras` and opens the viewer when it has no link; `Videos.astro` (YouTube in a dialog); `related` section; long quotes and long footer titles shrink. React removed (`WorkGallery.astro` plain script; no JS bundles ship). `stage-site.mjs` now skips old files owned by dynamic pages. **Not yet checked in a browser: the homepage Selected work scroller after the rewrite, Lighthouse on case studies.** STILL TO DO: privacy + remaining legacy pages, split global.css, content collections with schema, @astrojs/sitemap, per-page share images, update sitemap check.
-  - Case studies (`projects/*`, 9 pages) as a content collection with a schema and one case-study layout; then privacy and the remaining legacy marketing pages. Tools and Concierge stay as they are unless the owner says otherwise.
-  - Along the way: replace `WorkGallery.jsx` with plain script and remove React; split `global.css` into components; move product content to validated collections; `@astrojs/sitemap`; per-page share images.
+- [x] **Step 3. Finish the migration** DONE 2026-11-14.
+  - Case studies: all 9 are Astro pages (`src/content/projects/<slug>.js` via `src/pages/projects/[slug].astro` on `ProductPage.astro`; old files in `docs/legacy/projects/`). A converter kept every sentence and photo; eyebrow labels were dropped on purpose; `how-gallery-6` (same file as `how-gallery-2`) left out. New pieces: Feature takes `paras` and opens the viewer when it has no link; `Videos.astro` (YouTube in a dialog, nothing loads until pressed); `related` links section; long quotes and long footer titles shrink.
+  - Privacy and 404: `src/pages/privacy.astro` (policy wording unchanged, noindex) and `src/pages/404.astro` (root-absolute links, noindex). Old files in `docs/legacy/`.
+  - React removed: `WorkGallery.astro` is plain script; the site ships no JavaScript bundles.
+  - Stylesheet split into `src/styles/global.css` (every page), `home.css`, `page.css` (product pages, portfolio, case studies), `forms.css` (contact, hire, privacy, 404), each imported where it is used. Verified with a computed-style snapshot of 10 pages at 1440px and 375px: identical before and after.
+  - Content check: `src/content/check.js` stops the build with a plain message when a content file has an unknown section kind or a missing field. (Chosen over Astro content collections: same protection, far less churn.)
+  - Share images: every template page now uses its own hero photo (`Base` prop `ogImg`); `Base` also takes `noindex`.
+  - `scripts/stage-site.mjs` skips old files owned by dynamic pages (`[slug]`).
+  - Sitemap: **kept hand-maintained on purpose.** `@astrojs/sitemap` only knows Astro pages and would drop the tools, catalogue and Concierge entries; the current `sitemap.xml` already lists every public page with clean addresses.
+  - Verified: 3,058 links checked (only script-built Concierge strings flagged, as before); Lighthouse phone 94 to 99 speed, 100 accessibility / best practices / SEO on home, Wardrobes, Sage, Nadia, House of Walker, Jerksoul.
+  - Left as they are (not marketing pages): tools hub, catalogue, estimator, cutlist, cut sheet, pricing, Concierge.
+  - **Owner to confirm:** the privacy policy still says the contact form goes through Formspree. It has posted to the site's own `/api/lead` for a long time. The wording was kept unchanged because it is a legal text.
 - [ ] **Step 4. One voice**
   - Rewrite product-page copy to match the homepage's spare voice (humanize-copy skill), keeping every fact and the SEO titles/descriptions.
 - [ ] **Step 5. Needs owner decisions**
