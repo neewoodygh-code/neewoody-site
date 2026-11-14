@@ -177,7 +177,7 @@ export default {
         ],
         [
           "/projects/golf-hills-estate",
-          "Next: Golf Hills Estate"
+          "Dining corner, Golf Hills Estate"
         ],
         [
           "/portfolio",

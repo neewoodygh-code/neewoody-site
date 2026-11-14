@@ -42,7 +42,7 @@ export default {
       "dark": false,
       "img": "images/projects/french-embassy/afromosia-table-outdoor-1.jpg",
       "alt": "Afromosia live-edge dining table photographed outdoors before delivery, with the natural grain and live edge visible",
-      "title": "A statement table for a considered home",
+      "title": "A live-edge table for a home in Ridge",
       "paras": [
         "French expatriates on posting in Ghana commissioned a centrepiece dining table for their home in Ridge, Accra. The brief was clear: a live-edge solid hardwood table that felt like it belonged to this part of the world, something that couldn't be bought from a furniture shop.",
         "The client chose Afromosia, a West African hardwood prized for its durability, fine grain and warm honey tone, and brought the commission to Neewoody. The table was designed, built and finished in our workshop before delivery and installation in Ridge.",
@@ -98,7 +98,7 @@ export default {
         ],
         [
           "/projects/judith-east-legon",
-          "Next: Judith, East Legon"
+          "Hyedua dining room, East Legon"
         ],
         [
           "/portfolio",
@@ -108,8 +108,8 @@ export default {
     }
   ],
   "footer": {
-    "title": "Looking for a statement dining table in Accra?",
-    "text": "Whether you have a particular timber in mind or just a room that needs a centrepiece, get in touch and we'll talk through what's possible.",
+    "title": "Looking for a live-edge dining table in Accra?",
+    "text": "If you have a timber in mind, or just a room that needs a centrepiece, get in touch and we'll talk through what's possible.",
     "quoteLink": true
   }
 };

@@ -45,7 +45,7 @@ export default {
       "title": "An entire centre in solid teak",
       "paras": [
         "Sage Experience is a US-based educational NGO founded to build bridges between Ghanaian communities and students and alumni from America's leading universities. Its centre in Wli, in Ghana's Volta Region, was conceived as a residential hub for cultural exchange: a place where Ivy League students and Ghanaian youth could live, learn and work alongside each other.",
-        "The founder, Ben Schwartz, a former Dartmouth College admissions officer with postgraduate degrees from MIT and Harvard, had a clear and uncompromising vision for the space. Every piece of furniture, every surface and every fitting would be built from solid Ghanaian teak. Nothing prefabricated, nothing from a showroom floor. The entire centre, from the hostel rooms to the dining hall to the outdoor terraces, would be furnished by hand.",
+        "The founder, Ben Schwartz, a former Dartmouth College admissions officer with postgraduate degrees from MIT and Harvard, had a clear vision for the space. Every piece of furniture, every surface and every fitting would be built from solid Ghanaian teak, with nothing prefabricated and nothing from a showroom floor. The entire centre, from the hostel rooms to the dining hall to the outdoor terraces, would be furnished by hand.",
         "The scope was unlike anything typically commissioned in Ghana, and the standard expected was international."
       ]
     },
@@ -57,7 +57,7 @@ export default {
       "title": "The only contractor who stayed",
       "paras": [
         "Projects like Sage Centre are rare in Ghana, and rarely straightforward. Before Neewoody was brought in, other contractors had taken deposits and left the work incomplete. The client was left exposed, behind schedule and understandably cautious.",
-        "Neewoody arrived and stayed. Working on this project also forced a real raising of standards. Ben Schwartz had an eye for detail that most Ghanaian carpenters, trained in a market that often puts speed before precision, were not equipped to meet. Every joint, every surface and every dimension was checked. Problems were found before they became expensive, and solutions were expected, not excuses.",
+        "Neewoody arrived and stayed. Working on this project also forced a real raising of standards. Ben Schwartz had an eye for detail that most Ghanaian carpenters, trained in a market that often puts speed before precision, were not equipped to meet. Every joint, every surface and every dimension was checked. Problems were found before they became expensive, and he expected solutions.",
         "What could have been a difficult relationship became something more valuable: 26 months of learning to build to a different standard. The craftsmanship that left Wli in October 2024 was measurably better than what arrived in June 2022, and that improvement carries into every Neewoody project since."
       ]
     },
@@ -203,7 +203,7 @@ export default {
   ],
   "footer": {
     "title": "Have a project that needs this level of commitment?",
-    "text": "Whether you're a developer, an institution or a homeowner, if your brief needs precision, durability and a team that will see it through, get in touch.",
+    "text": "Developer, institution or homeowner: if your brief needs precise, durable work and a team that will see it through, get in touch.",
     "quoteLink": true
   }
 };

@@ -55,8 +55,12 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
   - Verified: 3,058 links checked (only script-built Concierge strings flagged, as before); Lighthouse phone 94 to 99 speed, 100 accessibility / best practices / SEO on home, Wardrobes, Sage, Nadia, House of Walker, Jerksoul.
   - Left as they are (not marketing pages): tools hub, catalogue, estimator, cutlist, cut sheet, pricing, Concierge.
   - **Owner to confirm:** the privacy policy still says the contact form goes through Formspree. It has posted to the site's own `/api/lead` for a long time. The wording was kept unchanged because it is a legal text.
-- [ ] **Step 4. One voice**
-  - Rewrite product-page copy to match the homepage's spare voice (humanize-copy skill), keeping every fact and the SEO titles/descriptions.
+- [x] **Step 4. One voice** DONE 2026-11-14 (humanize-copy skill; SEO titles and descriptions untouched).
+  - Rewritten in full: the four oldest case studies (House of Walker, Jerksoul, East Legon dining room, Achimota guesthouse). Title Case headings, 88 dashes, stacked fragments and sales phrasing removed; headlines now say what the job was. Their content files are now hand-written (`src/content/projects/*.js`), no longer converter output.
+  - Their old facts strips (client, venue, timber, finish), which the Step 3 converter had missed, are back as hero facts.
+  - Light pass on the product pages and the other case studies: about 35 sentences changed (not-X-but-Y lines, "statement", "premium", "seamless", "perfectly", "Whether you want...", one-line closers). "Next:" removed from related links.
+  - The East Legon client's first name is no longer in visible copy (standing rule: no client names unless approved); the page address `/projects/judith-east-legon` is unchanged.
+  - Checked: every number from the four old pages is still present; build passes; Lighthouse 98 to 99 / 100 / 100 / 100 on two of them.
 - [ ] **Step 5. Needs owner decisions**
   - Build admin-posted projects into the pages (dispatch side, explicit go-ahead required) and fix the 5 MB photo.
   - A professional photo shoot of three or four jobs.

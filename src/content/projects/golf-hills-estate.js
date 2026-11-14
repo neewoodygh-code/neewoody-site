@@ -137,7 +137,7 @@ export default {
         ],
         [
           "/projects/french-embassy",
-          "Next: Afromosia table, Ridge"
+          "Afromosia table, Ridge"
         ],
         [
           "/portfolio",

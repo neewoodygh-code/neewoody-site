@@ -37,10 +37,10 @@ export default {
   "sections": [
     {
       "kind": "intro",
-      "title": "A wardrobe built for your room, not borrowed from a showroom.",
+      "title": "A wardrobe built for your room.",
       "paras": [
-        "Most homes in Accra don't have standard dimensions. Ceilings are higher or lower than expected, walls aren't perfectly square, and alcoves create awkward spaces that off-the-shelf wardrobes never quite fill.",
-        "A Neewoody custom wardrobe is designed around your actual room: measured, drawn up, built, and installed to fit perfectly from wall to wall and floor to ceiling. No filler panels, no gaps, no half-measures.",
+        "Most homes in Accra don't have standard dimensions. Ceilings are higher or lower than expected, walls aren't quite square, and alcoves create awkward spaces that off-the-shelf wardrobes never quite fill.",
+        "We design each wardrobe around your actual room. We measure it, draw it up, build it and install it to fit from wall to wall and floor to ceiling, with no filler panels and no gaps.",
         "We build wardrobes for bedrooms across Accra, from single-room apartments to master bedrooms in larger homes. Every project gets the same level of care."
       ],
       "link": [
@@ -85,7 +85,7 @@ export default {
         ],
         [
           "Alcove and fitted storage",
-          "Awkward recesses and narrow alcoves turned into fitted, seamless storage."
+          "Awkward recesses and narrow alcoves turned into fitted storage."
         ],
         [
           "Custom interiors",

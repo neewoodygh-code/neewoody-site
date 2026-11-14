@@ -22,23 +22,23 @@ export default {
   },
   sections: [
     { kind: 'intro', title: 'A bed that actually fits your room.', paras: [
-      'Standard bed sizes rarely work perfectly in real homes. Odd-shaped rooms, low ceilings, awkward corners: we build around all of it. Every Neewoody bed is made to your exact measurements, in the style you choose, using materials that last.',
-      'Whether you want a sleek platform frame, a storage bed to maximise a small room, or a grand statement piece with an upholstered headboard, we handle the full build, delivery, and assembly in Accra.',
+      'Standard bed sizes rarely fit real homes. We build around odd-shaped rooms, low ceilings and awkward corners. Every Neewoody bed is made to your exact measurements, in the style you choose, from materials that last.',
+      'A plain platform frame, a storage bed for a small room, or a large bed with an upholstered headboard: we build it, deliver it and assemble it in Accra.',
       "We've built bunk beds for an international retreat centre in the Volta Region and bed frames for private homes across Accra. The brief tells us what to build. The rest is craft.",
     ], link: ['/contact', 'Get a free quote'] },
-    { kind: 'types', id: 'types', title: 'Every style, built to your specification.', text: 'From minimalist platform frames to storage-integrated designs and handcrafted solid wood pieces, we build around your room, your mattress, and your brief.', items: [
+    { kind: 'types', id: 'types', title: 'Every style, built to your specification.', text: 'Platform frames, storage beds and solid wood pieces, each built around your room and your mattress.', items: [
       ['Platform beds', 'Low-profile frames with solid or slatted bases. No box spring needed. Clean lines, good airflow, built to your mattress size.'],
-      ['Storage beds', 'Maximise every centimetre. Side-opening drawers or a hydraulic lift-up base, ideal for smaller bedrooms where wardrobe space is limited.'],
+      ['Storage beds', 'Side-opening drawers or a hydraulic lift-up base. Good for smaller bedrooms where wardrobe space is limited.'],
       ['Bunks and triple bunks', 'Solid construction, fitted ladders and guard rails, designed for safety as much as space-saving. Sized for the room and the people using them.'],
       ['Upholstered headboard beds', 'A solid wood frame paired with a padded, fabric-covered headboard. Choose your fabric colour and texture to match your bedroom.'],
-      ['Poster and statement beds', 'Four-poster and column-post designs that command attention, in solid hardwood, traditional or contemporary interpretations.'],
+      ['Four-poster beds', 'Four-poster and column-post designs in solid hardwood, traditional or contemporary.'],
       ['Cabin and loft beds', "Elevated sleeping platform with usable space below for a desk, wardrobe or sofa. Popular for children's rooms and studio apartments."],
     ] },
     { kind: 'statement', text: 'Standard sizes are for showrooms. We measure your room, your mattress, and the way you use your bedroom, then we build.' },
     { kind: 'feature', dark: true, img: P + 'sage-centre/sage-bed-room.jpg', alt: 'A teak bedroom at the Sage Centre, Wli: bed, armchair and louvred wall',
       label: 'Wli, Volta Region, 2022 to 2024', title: '18 bunk beds for the Sage Centre',
       lede: 'Solid Ghanaian teak. Built to international hospitality standards in a remote location.',
-      text: 'A US-based NGO needed beds built to outlast years of heavy use by guests and students from around the world. We designed and built 18 bunk beds in solid teak, sourced, crafted and finished entirely in Ghana and delivered to the Volta Region. Every joint, every rail, built for the long term.',
+      text: 'A US-based NGO needed beds built to outlast years of heavy use by guests and students from around the world. We designed and built 18 bunk beds in solid teak, sourced, made and finished entirely in Ghana and delivered to the Volta Region.',
       link: ['/projects/sage-centre', 'Read the full case study'] },
     { kind: 'gallery', id: 'work', title: 'Beds we have built', items: [
       { badge: 'Bunk beds for a school', place: 'Four-pod bunk unit, Montessori school', img: P + 'montessori-bunk/montessori-bunk-overview.jpg', alt: 'Custom 4-pod bunk unit with arched entries and under-bed drawers, built for a Montessori school, Accra' },
@@ -59,7 +59,7 @@ export default {
     ] },
     { kind: 'faq', title: 'Common questions about custom beds.', items: [
       ['How long does it take to build a custom bed?', "Most bed frames take 2 to 4 weeks from order confirmation to delivery. More complex builds with storage, upholstery, or intricate detailing may take up to 6 weeks. We'll give you a realistic timeline when you confirm your order."],
-      ['Can you match an existing bedroom set?', "Yes. If you have existing bedroom furniture, share photos and dimensions with us. We'll match the stain colour, wood grain, and finish as closely as possible so the new piece blends in seamlessly."],
+      ['Can you match an existing bedroom set?', "Yes. If you have existing bedroom furniture, share photos and dimensions with us. We'll match the stain colour, wood grain, and finish as closely as possible so the new piece sits with the rest."],
       ['Do you build beds for children?', "Absolutely. We build bunk beds, cabin beds, and loft beds with children's safety as a top priority: solid joints, fitted guard rails, and smooth edges throughout."],
       ['What mattress sizes do you build for?', 'We build for any mattress size: standard single (90×190cm), double (135×190cm), queen (150×200cm), king (160×200cm), or completely custom dimensions. Tell us your mattress size and we build around it.'],
       ['Can I add a headboard later?', "It's easier and often cheaper to include the headboard in the original build. Retrofitting requires re-working the frame. We'd recommend deciding upfront. Show us inspiration photos and we'll quote both options."],

@@ -23,7 +23,7 @@ export default {
     { kind: 'intro', title: 'Shelving that belongs to the room.', paras: [
       "A freestanding shelf never quite reaches the ceiling. A flat-pack unit comes in fixed widths that don't match your wall. Alcoves always have that awkward gap at the sides or the top. Built-in shelving solves all of it: wall to wall, floor to ceiling, every centimetre used.",
       "We build shelving for home offices, living rooms, studies, children's rooms and corridors, anywhere you need organised storage that looks like it was always meant to be there. Open, closed, or a mix.",
-      "Every shelving job starts with your wall dimensions and what you're storing. From there we design the layout: shelf depths and spacing sized for what you actually own, not a generic pitch.",
+      "Every shelving job starts with your wall dimensions and what you're storing. From there we design the layout: shelf depths and spacing sized for what you actually own.",
     ], link: ['/contact', 'Get a free quote'] },
     { kind: 'gallery', id: 'work', title: 'Shelving we have built', items: [
       { badge: 'Light strips built into the shelves', place: 'Lit shelving, Bortianor', img: P + 'bortianor/bortianor-living-tv-wall.jpg', alt: 'Lit walnut-grain shelving either side of a TV wall, Bortianor', href: '/projects/bortianor' },
@@ -34,11 +34,11 @@ export default {
     { kind: 'types', id: 'types', title: 'Every kind of built-in storage.', text: 'Alcoves, home offices, full walls, corridors: we build around your walls, your storage requirements, and your brief.', items: [
       ['Alcove shelving', 'Chimney breast alcoves, recessed walls, and awkward nooks: we fill them exactly. Open shelves above, cupboards below, or a full open bookcase from floor to ceiling. No gap at the sides, no visible end panels.'],
       ['Home office shelving', 'Integrated shelving around a desk, above a workstation, or across a full wall, with filing, books and equipment all in reach and organised. We design around your monitor height, your equipment, and how you work.'],
-      ['Display and feature shelving', "Open floating shelves for décor, books and plants, with shelf depths and spacing sized for what you're displaying, not a standard pitch. In the right materials to complement your interior."],
-      ['Utility and laundry storage', "Shelving for store rooms, pantries, laundry areas, and garages, built to handle the weight of what you're storing, properly supported, properly finished. Not just particleboard and dowels."],
+      ['Display and feature shelving', "Open floating shelves for décor, books and plants, with shelf depths and spacing sized for what you're displaying, in materials that suit the room."],
+      ['Utility and laundry storage', "Shelving for store rooms, pantries, laundry areas, and garages, built to carry the weight of what you're storing, properly supported and properly finished."],
     ] },
     { kind: 'details', title: 'What goes into every shelving job.', items: [
-      ['Fixed shelf depths', "Sized for what you're storing, not a catalogue size."],
+      ['Fixed shelf depths', "Sized for what you're storing."],
       ['Cable management', 'Wire routing for AV and office setups built in from the start.'],
       ['Adjustable configurations', 'Shelves that move as your needs change.'],
       ['Finish to match', 'Painted, wrapped, veneered to match your existing interior.'],

@@ -24,8 +24,8 @@ export default {
   },
   sections: [
     { kind: 'intro', title: 'Built to last. Built to be passed on.', paras: [
-      "Most furniture in Accra is particle board with a laminate surface: functional, affordable, but with a lifespan measured in years rather than decades. Solid wood is different. A well-built solid wood table or bed frame doesn't just survive daily use; it develops character over time, can be sanded and refinished, and holds its structural integrity for generations.",
-      "We work with locally sourced and imported timber depending on the piece and the client's brief: sapele, teak, mahogany, iroko, Guarea, afromosia, and others on request. Every piece is jointed, not just screwed, and finished for the humidity and temperature of the Accra climate.",
+      "Most furniture in Accra is particle board with a laminate surface. It is functional and affordable, and it lasts years. A well-built solid wood table or bed frame lasts decades: it takes daily use, gains character with age, and can be sanded and refinished.",
+      "We work with locally sourced and imported timber depending on the piece and the client's brief: sapele, teak, mahogany, iroko, Guarea, afromosia, and others on request. Every piece is properly jointed and finished for the heat and humidity of Accra.",
       "Solid wood commissions take longer than laminate-based work: timber needs to be selected, dried properly, jointed, and finished in stages. Lead times are typically 4 to 8 weeks. If you're working to a deadline, tell us early.",
     ], link: ['/contact', 'Discuss your project'] },
     { kind: 'projects', id: 'khaya-spintex', tone: 'dark', label: 'Spintex, Accra', title: 'Khaya in the bathroom, for a client in New York',
@@ -72,7 +72,7 @@ export default {
           ] },
         { badge: 'Afromosia, Ridge, Accra', place: 'Live-edge dining table', caption: 'A live-edge dining table on solid timber U-frame legs, in honey-toned Afromosia, for a private residence in Ridge.',
           img: P + 'french-embassy/afromosia-table-installed-1.jpg', alt: 'Afromosia live-edge dining table, Ridge, Accra', link: ['/projects/french-embassy', 'See the full case study'],
-          more: ['A live-edge dining table in solid Afromosia, a premium West African hardwood with natural oil content, fine grain, and a warm honey tone, built on solid timber U-frame legs for French expatriate clients on posting in Accra.', 'The natural edge of the slab is kept and finished, celebrating the grain. Stable in the humid Accra climate and built to be passed on.'],
+          more: ['A live-edge dining table in solid Afromosia, a West African hardwood with natural oil content, fine grain and a warm honey tone, built on solid timber U-frame legs for French expatriate clients on posting in Accra.', 'We kept the natural edge of the slab and finished it. The timber is stable in the humid Accra climate, and the table is built to be passed on.'],
           photos: [
             ph('french-embassy/afromosia-table-installed-1.jpg', 'Afromosia live-edge dining table installed at a private residence in Ridge, Accra', 'Installed'),
             ph('french-embassy/afromosia-table-outdoor-1.jpg', 'Afromosia live-edge dining table photographed outdoors before delivery', 'Before delivery'),
@@ -85,7 +85,7 @@ export default {
           ] },
         { badge: 'Hyedua, East Legon', place: 'Six-seat dining set', caption: 'Dining table, six upholstered chairs, and a waterfall-edge console: a full set in rich espresso Hyedua.',
           img: P + 'judith-east-legon/judith-set-installed-2.jpg', alt: 'Hyedua dining table, chairs, and console, East Legon', link: ['/projects/judith-east-legon', 'See the full case study'],
-          more: ['A full Hyedua dining-room commission: a large-format dining table, six upholstered chairs with linen panels, and a console with full-extension drawers and waterfall edges, all built to one brief in the same timber, finished in a rich espresso.', 'Hyedua is dense and heavy with a naturally deep tone and tight, even grain that takes a dark stain richly, ideal for a unified premium finish across multiple pieces.'],
+          more: ['A full Hyedua dining-room commission: a large-format dining table, six upholstered chairs with linen panels, and a console with full-extension drawers and waterfall edges, all built to one brief in the same timber, finished in a rich espresso.', 'Hyedua is dense and heavy with a naturally deep tone and tight, even grain that takes a dark stain well, so several pieces can share one finish.'],
           photos: [
             ph('judith-east-legon/judith-set-installed-2.jpg', 'Full Hyedua dining room commission installed in East Legon', 'Installed'),
             ph('judith-east-legon/judith-set-installed-1.jpg', 'Hyedua dining set installed in the East Legon home', 'The room'),
@@ -122,7 +122,7 @@ export default {
             ph('barbecue-trolley/barbecue-trolley-4.jpg', 'Barbecue trolley, side view'),
           ] },
       ] },
-    { kind: 'statement', text: "Solid wood takes longer. That's part of the point. We select the timber, dry it properly, joint it, and finish it in stages, because the result is furniture that belongs to your home for decades, not years." },
+    { kind: 'statement', text: "Solid wood takes longer. We select the timber, dry it properly, joint it and finish it in stages, and the furniture stays in your home for decades." },
   ],
   footer: {
     title: "Let's talk about<br />your project.",

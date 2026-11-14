@@ -20,8 +20,8 @@ export default {
     facts: [['Fit-out time', 'Usually 4 to 8 weeks'], ['Site visit', 'Free, with measurements, before we quote'], ['Workshop', 'Amugi Avenue, Accra']],
   },
   sections: [
-    { kind: 'intro', title: 'Designed around your layout, not the other way around.', paras: [
-      "Off-the-shelf kitchen units are designed for average kitchens. Yours isn't average. Whether your kitchen is long and narrow, open-plan, or has a complex layout, we design and build cabinetry that makes the most of every centimetre.",
+    { kind: 'intro', title: 'Designed around your kitchen.', paras: [
+      "Off-the-shelf kitchen units are made for average kitchens. If yours is long and narrow, open-plan or an awkward shape, we design and build cabinetry that uses every centimetre.",
       'From a simple set of lower cabinets to a full fitted kitchen with island, we manage the full project in Accra: design, build, installation and finishing. One supplier, one point of contact, no guesswork.',
       "We've built kitchens across Accra and into the Eastern Region. Dark laminate or light oak, marble-effect countertop or sealed concrete: you set the brief and we build to it.",
     ], link: ['/contact', 'Get a free quote'] },

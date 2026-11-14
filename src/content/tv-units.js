@@ -24,7 +24,7 @@ export default {
     { kind: 'intro', title: 'A TV unit designed for your space.', paras: [
       'Most Accra living rooms share the same problem: the TV is fighting the room. Wrong height, wrong width, cables taped along the skirting, storage that never quite fits the decoder, router, and streaming box together. A shelf from the market rarely solves any of it.',
       'We measure your wall, understand how you use the space (the screens you own, the equipment you need to house, where you sit) and build a unit that puts everything where it belongs. Clean, functional, and finished to match your interior.',
-      'Whether you want a minimal floating panel, a full-wall entertainment build, or a low console with drawer storage, we scope and price it to your brief.',
+      'A minimal floating panel, a full-wall build or a low console with drawers: we scope and price it to your brief.',
     ], link: ['/contact', 'Get a free quote'] },
     { kind: 'projects', id: 'bortianor', tone: 'dark', label: 'Bortianor, Accra, 2026', title: 'Two TV walls in one new house',
       text: 'In the living room, a cream wall with fluted panels between two columns of lit walnut-grain shelving, over a long low cabinet. In the master bedroom, stone-look panels with walnut-grain strips and a matching console. Both are part of a whole-house fit-out, alongside the kitchen, a bar and a glass-front wardrobe.',
@@ -41,7 +41,7 @@ export default {
       ['Alcove and recessed builds', 'If your room has an alcove or a recess in the wall, we build a unit that fills it exactly, with no visible side gaps, no awkward overhang. Fully integrated.'],
     ] },
     { kind: 'details', title: 'Built to handle everything in your living room.', items: [
-      ['Cable management', 'Routed from screen to decoder to wall socket, hidden inside the unit from the start, not taped on afterwards.'],
+      ['Cable management', 'Routed from screen to decoder to wall socket, hidden inside the unit from the start.'],
       ['The right viewing height', 'We calculate the correct screen height based on your seating arrangement and screen size. No neck strain, no awkward tilt.'],
       ['Equipment storage', 'Dedicated bays sized for your decoder, streaming box, game console and router, so everything fits and ventilates properly.'],
       ['Ventilation', "Decoders and amplifiers run hot. We design open bays or vented backs so equipment doesn't overheat over time."],
@@ -100,7 +100,7 @@ export default {
     { kind: 'statement', text: "A TV unit built to your wall hides the cables, holds your equipment, and centres the screen at exactly the right height. When it's done right, the technology disappears into the room." },
     { kind: 'faq', title: 'Common questions about custom TV units.', items: [
       ['How long does it take to build a custom TV unit?', "Most TV units take 2 to 4 weeks from order confirmation to installation. Larger feature wall builds may take up to 6 weeks. We'll give you a realistic timeline when we confirm your order. We'd rather under-promise and deliver early than the reverse."],
-      ['Do you handle cable management as part of the build?', "Yes. Cable routing is planned during the design phase, not added as an afterthought. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too."],
+      ['Do you handle cable management as part of the build?', "Yes. We plan the cable routes at the design stage. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too."],
       ['Can I choose the finish and colour?', "Completely. We work in PVC wrap laminates (hundreds of finishes: wood grain, solid colour, matte, gloss), painted MDF, or veneer. If you want to match an existing wardrobe or kitchen, bring a photo and we'll find the closest match."],
       ['What if I want to add open shelving for books or display items?', "That's a natural part of the design conversation. We commonly build units that combine a closed lower section for equipment with open shelving above for books, plants, or ornaments. Tell us what you want to display and we design around it."],
       ['Do you install as well as build?', 'Yes. Installation is included for all locations within Accra. We bring the unit, mount or position it, run the cables, and leave the room tidy. For locations outside Accra, contact us for a quote that includes travel.'],
