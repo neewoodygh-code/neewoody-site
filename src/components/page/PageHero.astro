@@ -9,7 +9,7 @@ const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
 ---
 <section class="hero hero-page hero-split" id="top" data-nav="dark">
   <Picture pictureAttributes={{ class: 'hero-img' }} src={photo} formats={['avif', 'webp']} widths={[700, 1100, 1500]} sizes="(min-width: 900px) 50vw, 100vw"
-    alt={hero.alt} loading="eager" fetchpriority="high" />
+    alt={hero.alt} loading="eager" fetchpriority="high" style={hero.position ? `object-position:${hero.position}` : undefined} />
   <div class="hero-shade"></div>
   <div class="hero-copy">
     <h1 class="hero-h">{hero.lines.map((l: string) => <span class="mask"><span>{l}</span></span>)}</h1>

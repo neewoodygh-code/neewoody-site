@@ -16,9 +16,9 @@ export default {
       "from floor to ceiling."
     ],
     "text": "Made-to-measure wardrobes for Accra homes: sliding, hinged, walk-in and fitted into awkward alcoves.",
-    "img": "images/projects/oyarifa/oyarifa-master-closed-1.jpg",
-    "alt": "Floor-to-ceiling built-in wardrobes in greige oak laminate, Oyarifa, Accra",
-    "caption": "Floor-to-ceiling wardrobe, Oyarifa",
+    "img": "images/projects/bortianor/bortianor-master-wardrobe.jpg",
+    "alt": "A black-framed glass-front wardrobe with lit shelves in a master bedroom, Bortianor",
+    "caption": "Glass-front wardrobe, Bortianor",
     "facts": [
       [
         "Build time",
@@ -51,8 +51,8 @@ export default {
     {
       "kind": "feature",
       "dark": true,
-      "img": "images/projects/bortianor/bortianor-master-wardrobe.jpg",
-      "alt": "A black-framed glass-front wardrobe with lit shelves in a master bedroom, Bortianor",
+      "img": "images/projects/bortianor/bortianor-master-room.jpg",
+      "alt": "The master bedroom in Bortianor: the lit glass-front wardrobe beside the panelled TV wall",
       "label": "Bortianor, Accra, 2026",
       "title": "A glass-front wardrobe, lit from inside",
       "lede": "Black-framed glass doors, walnut-grain shelves and light strips that run up every frame.",
