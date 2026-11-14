@@ -210,6 +210,8 @@
     .then(function (r) { return r.json(); })
     .then(function (data) {
       var posts = (data.posts || []).filter(function (p) { return p.images && p.images[0]; });
+      // Posts the site build already put on the page (data-cms-id) are skipped; only newer ones are added here.
+      posts = posts.filter(function (p) { return !document.querySelector('[data-cms-id="' + p.id + '"]'); });
       if (!posts.length) return;
 
       // Native mode (2026-11-11): if the page supplies <template id="cms-card-tpl" data-into="<grid selector>">,

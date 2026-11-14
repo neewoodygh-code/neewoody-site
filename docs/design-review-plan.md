@@ -61,7 +61,7 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
   - Light pass on the product pages and the other case studies: about 35 sentences changed (not-X-but-Y lines, "statement", "premium", "seamless", "perfectly", "Whether you want...", one-line closers). "Next:" removed from related links.
   - The East Legon client's first name is no longer in visible copy (standing rule: no client names unless approved); the page address `/projects/judith-east-legon` is unchanged.
   - Checked: every number from the four old pages is still present; build passes; Lighthouse 98 to 99 / 100 / 100 / 100 on two of them.
-- [ ] **Step 5. Needs owner decisions**
+- [ ] **Step 5. Needs owner decisions** (admin-posted projects DONE 2026-11-14: built into the pages at build time with web-sized photos, uploads shrunk in `admin.html`; details in `docs/tools/cms-posts.md`. Photo shoot still open; photo-editing advice given the same day.)
   - Build admin-posted projects into the pages (dispatch side, explicit go-ahead required) and fix the 5 MB photo.
   - A professional photo shoot of three or four jobs.
 

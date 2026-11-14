@@ -11,4 +11,6 @@ export default defineConfig({
   publicDir: '.stage',
   outDir: 'dist',
   build: { format: 'file' },
+  // admin-posted project photos are fetched from our own domain at build time (src/cms.js)
+  image: { domains: ['neewoodygh.com'] },
 });

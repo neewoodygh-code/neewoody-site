@@ -196,6 +196,25 @@ function GateScreen({ onAuth }) {
 }
 
 // ── ImageSlot ─────────────────────────────────────────────────────────
+// Photos straight off a phone are 3 to 8 MB. Before upload, shrink anything large to
+// web size (longest side 2000 px, JPEG) in the browser. If anything goes wrong the
+// original file is uploaded unchanged.
+async function shrinkImage(file) {
+  try {
+    if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+    const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const MAX = 2000;
+    const scale = Math.min(1, MAX / Math.max(bmp.width, bmp.height));
+    if (scale === 1 && file.size < 700 * 1024) return file;
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise(res => c.toBlob(res, 'image/jpeg', 0.82));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch { return file; }
+}
+
 function ImageSlot({ url, uploading, onSelect, onRemove }) {
   const ref = useRef();
   const base = { height:148, position:'relative', overflow:'hidden' };
@@ -259,6 +278,7 @@ function PostForm({ post, onSave, onClose, showToast }) {
   async function handleFileSelect(idx, file) {
     setUploading(u => { const n=[...u]; n[idx]=true; return n; });
     try {
+      file = await shrinkImage(file);
       const form = new FormData();
       form.append('file', file);
       form.append('postId', tmpId.current);

@@ -15,8 +15,12 @@ import Sections from '../components/page/Sections.astro';
 import Viewer from '../components/page/Viewer.astro';
 import Videos from '../components/page/Videos.astro';
 import { checkContent } from '../content/check.js';
+import { getPosts } from '../cms.js';
 const c = checkContent(Astro.props.c);
 let featureN = 0;
+// a page with no gallery of its own still shows admin-posted projects, as a small gallery
+const hasGallery = c.sections.some((s: any) => s.kind === 'gallery');
+const loosePosts = c.cms !== false && !hasGallery ? await getPosts(c.slug) : [];
 ---
 <Base title={c.seo.title} description={c.seo.description} ogTitle={c.seo.ogTitle} ogDescription={c.seo.ogDescription} path={c.path} pageEvent={c.pageEvent} ogImg={c.hero.img}>
   <Nav />
@@ -29,10 +33,11 @@ let featureN = 0;
       if (s.kind === 'videos') return <Videos v={s} />;
       return <Sections kind={s.kind} d={s} />;
     })}
-    {c.cms !== false && !c.sections.some((s: any) => s.kind === 'gallery') && (
+    {loosePosts.length > 0 && <Gallery g={{ id: 'recent', title: 'Recently finished', headLink: null, items: [] }} slug={c.slug} />}
+    {c.cms !== false && !hasGallery && loosePosts.length === 0 && (
       <Fragment>
         <section id="cms-posts" data-page={c.slug} hidden class="cms-fallback"></section>
-        <script is:inline src="/js/cms-posts.js?v=20261113"></script>
+        <script is:inline src="/js/cms-posts.js?v=20261114"></script>
       </Fragment>
     )}
   </main>

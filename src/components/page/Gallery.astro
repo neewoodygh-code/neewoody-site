@@ -9,10 +9,13 @@
 // "Show all" button; without JavaScript every card shows.
 import { Picture } from 'astro:assets';
 import { img, bigSet } from '../../photos.js';
+import { getPosts } from '../../cms.js';
 const { g, slug } = Astro.props;
 const id = g.id || 'gallery';
 const gridId = g.cms === false ? id + '-grid' : 'galGrid';
 const headLink = g.headLink === undefined ? ['/portfolio', 'See the full portfolio'] : g.headLink;
+// admin-posted projects for this page, built in (newest first, ahead of the page's own cards)
+const posts = g.cms === false ? [] : await getPosts(slug);
 const limit = g.limit ?? 6;
 const limited = limit > 0 && g.items.length > limit + 2;
 const items = await Promise.all(g.items.map(async (it: any) => {
@@ -36,6 +39,15 @@ const items = await Promise.all(g.items.map(async (it: any) => {
     </div>
   )}
   <div class={'gal-grid' + (limited ? ' limited' : '')} id={gridId} data-view-group style={limited ? `--show:${limit}` : undefined}>
+    {posts.map((p: any) => (
+      <button type="button" class="g-card g-cms" data-cms-id={p.id} data-view data-set={JSON.stringify(p.set)} data-text={JSON.stringify(p.more)}>
+        <span class="g-img"><img src={p.img.src} srcset={p.img.srcset} sizes="(min-width: 1100px) 30vw, (min-width: 640px) 46vw, 92vw" width={p.img.width} height={p.img.height} alt={p.alt} loading="lazy" decoding="async" /></span>
+        {p.badge && <span class="g-badge">{p.badge}</span>}
+        <span class="g-place">{p.place}{p.year && <span class="g-year"> {p.year}</span>}</span>
+        {p.caption && <span class="g-cap">{p.caption}</span>}
+        {p.set.length > 1 && <span class="g-more">{p.set.length} photos</span>}
+      </button>
+    ))}
     {items.map((it: any, i: number) => {
       const cls = 'g-card' + (it.lead ? ' lead' : '') + (limited && i >= limit ? ' g-extra' : '');
       const inner = (
@@ -60,7 +72,7 @@ const items = await Promise.all(g.items.map(async (it: any) => {
   <Fragment>
     <section id="cms-posts" data-page={slug} hidden></section>
     <template id="cms-card-tpl" data-into="#galGrid" data-join=", "><button type="button" class="g-card g-cms"><span class="g-img"><img data-cms-img alt="" /></span><span class="g-badge" data-cms-category></span><span class="g-place"><span data-cms-title></span> <span class="g-year" data-cms-year></span></span><span class="g-cap" data-cms-caption></span></button></template>
-    <script is:inline src="/js/cms-posts.js?v=20261113"></script>
+    <script is:inline src="/js/cms-posts.js?v=20261114"></script>
   </Fragment>
 )}
 
