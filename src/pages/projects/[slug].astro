@@ -1,0 +1,13 @@
+---
+// One page per case study: src/content/projects/<slug>.js -> /projects/<slug>
+import ProductPage from '../../layouts/ProductPage.astro';
+export function getStaticPaths() {
+  const files = import.meta.glob('../../content/projects/*.js', { eager: true });
+  return Object.entries(files).map(([path, mod]: [string, any]) => ({
+    params: { slug: path.split('/').pop()!.replace('.js', '') },
+    props: { c: mod.default },
+  }));
+}
+const { c } = Astro.props;
+---
+<ProductPage c={c} />

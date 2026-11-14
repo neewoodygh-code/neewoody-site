@@ -42,6 +42,7 @@ function trackedFiles() {
 // Files an Astro page now produces (src/pages/kitchens.astro -> kitchens.html).
 // The old hand-written file of that name must not ship as well.
 const owned = new Set();
+const ownedDyn = [];
 const walkPages = (d) => {
   if (!existsSync(d)) return;
   for (const n of readdirSync(d)) {
@@ -49,6 +50,12 @@ const walkPages = (d) => {
     if (statSync(p).isDirectory()) { walkPages(p); continue; }
     const m = p.match(/^src\/pages\/(.+)\.(astro|md|mdx|html)$/);
     if (!m) continue;
+    // a dynamic page (src/pages/projects/[slug].astro) owns every projects/*.html
+    if (m[1].includes('[')) {
+      const segs = m[1].split('/');
+      ownedDyn.push({ test: (f) => { const a = f.endsWith('.html') ? f.slice(0, -5).split('/') : []; return a.length === segs.length && segs.every((s, i) => s.startsWith('[') || s === a[i]); } });
+      continue;
+    }
     const route = m[1].replace(/(^|\/)index$/, '$1').replace(/\/$/, '');
     owned.add(route === '' ? 'index.html' : `${route}.html`);
   }
@@ -58,7 +65,7 @@ walkPages('src/pages');
 rmSync(STAGE, { recursive: true, force: true });
 let n = 0;
 for (const f of trackedFiles()) {
-  if (skip(f) || !existsSync(f) || owned.has(f)) continue; // existsSync: tracked but deleted locally
+  if (skip(f) || !existsSync(f) || owned.has(f) || ownedDyn.some((re) => re.test(f))) continue; // existsSync: tracked but deleted locally
   mkdirSync(join(STAGE, dirname(f)), { recursive: true });
   cpSync(f, join(STAGE, f));
   n++;

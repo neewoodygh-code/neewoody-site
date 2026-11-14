@@ -1,19 +1,27 @@
 ---
-// One featured project: big photo + label, title, lede, text, link. Dark or light band.
+// One photo beside text: optional label, title, lede, one or more paragraphs
+// (`text` or `paras`), optional link. Dark or light band. With a link the photo
+// follows it; without one the photo opens in the viewer.
 import { Picture } from 'astro:assets';
-import { img } from '../../photos.js';
+import { img, bigSet } from '../../photos.js';
 const { f, flip = false } = Astro.props;
 const photo = await img(f.img);
+const paras: string[] = f.paras || (f.text ? [f.text] : []);
+const big = f.link ? null : (await bigSet([{ img: f.img, alt: f.alt, cap: f.alt }]))[0];
 ---
-<section class={'feature' + (f.dark ? ' dark' : '') + (flip ? ' flip' : '')} data-nav={f.dark ? 'dark' : 'light'}>
-  <a class="feature-img rv" href={f.link[0]} tabindex="-1" aria-hidden="true">
-    <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt="" loading="lazy" />
-  </a>
+<section class={'feature' + (f.dark ? ' dark' : '') + (flip ? ' flip' : '')} id={f.id} data-nav={f.dark ? 'dark' : 'light'}>
+  {f.link
+    ? <a class="feature-img rv" href={f.link[0]} tabindex="-1" aria-hidden="true">
+        <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt="" loading="lazy" />
+      </a>
+    : <button type="button" class="feature-img rv" data-view data-big={big!.src} data-alt={f.alt} data-cap={f.alt} aria-label={'Open photo: ' + f.alt}>
+        <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt={f.alt} loading="lazy" />
+      </button>}
   <div class="feature-txt rv">
-    <p class={'label' + (f.dark ? ' light' : '')}>{f.label}</p>
+    {f.label && <p class={'label' + (f.dark ? ' light' : '')}>{f.label}</p>}
     <h2>{f.title}</h2>
     {f.lede && <p class="lede">{f.lede}</p>}
-    <p class="feature-body">{f.text}</p>
-    <a class={'ulink' + (f.dark ? ' brass' : '')} href={f.link[0]}>{f.link[1]}</a>
+    {paras.map((t) => <p class="feature-body">{t}</p>)}
+    {f.link && <a class={'ulink' + (f.dark ? ' brass' : '')} href={f.link[0]}>{f.link[1]}</a>}
   </div>
 </section>

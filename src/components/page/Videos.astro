@@ -1,0 +1,56 @@
+---
+// A row of YouTube videos. Nothing loads from YouTube except the thumbnail until
+// a card is pressed; then the video plays in a native <dialog>.
+// v = { title?, text?, tone?, items: [{ embed, title, text? }] }
+const { v } = Astro.props;
+const thumb = (embed: string) => {
+  const id = embed.match(/embed\/([\w-]{11})(?:$|\?)/)?.[1];
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+};
+const items = v.items.map((it: any, i: number) => ({ ...it, thumb: thumb(it.embed) || thumb(v.items.find((x: any) => thumb(x.embed))?.embed || '') }));
+---
+<section class={'videos-sec' + (v.tone ? ' ' + v.tone : '')} data-nav={v.tone === 'dark' ? 'dark' : 'light'}>
+  {v.title && <h2 class="rv">{v.title}</h2>}
+  {v.text && <p class="videos-text rv">{v.text}</p>}
+  <div class={'videos-grid n' + Math.min(items.length, 4)}>
+    {items.map((it: any) => (
+      <figure class="video-card">
+        <button type="button" class="video-thumb" data-video={it.embed} data-title={it.title} aria-label={'Play video: ' + it.title}>
+          {it.thumb && <img src={it.thumb} alt="" width="480" height="360" loading="lazy" />}
+          <span class="video-play" aria-hidden="true">Play</span>
+        </button>
+        {it.text && <figcaption>{it.text}</figcaption>}
+      </figure>
+    ))}
+  </div>
+</section>
+
+<script>
+  // one player dialog per page, built on first use (a page can have several video rows)
+  let dlg: HTMLDialogElement | null = null;
+  let frame: HTMLElement;
+  const player = () => {
+    if (dlg) return dlg;
+    dlg = document.createElement('dialog');
+    dlg.className = 'video-dlg'; dlg.setAttribute('aria-label', 'Video');
+    frame = document.createElement('div'); frame.className = 'video-frame';
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'v-close'; close.textContent = 'Close';
+    dlg.append(frame, close);
+    document.body.append(dlg);
+    // removing the iframe stops the video
+    dlg.addEventListener('close', () => frame.replaceChildren());
+    close.addEventListener('click', () => dlg!.close());
+    dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg!.close(); });
+    return dlg;
+  };
+  document.querySelectorAll<HTMLButtonElement>('.video-thumb').forEach((b) => b.addEventListener('click', () => {
+    const src = b.dataset.video! + (b.dataset.video!.includes('?') ? '&' : '?') + 'autoplay=1';
+    const f = document.createElement('iframe');
+    f.src = src; f.title = b.dataset.title || 'Video';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true;
+    const d = player();
+    frame.replaceChildren(f);
+    d.showModal();
+  }));
+</script>

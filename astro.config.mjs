@@ -5,12 +5,10 @@
 // Pages publishes dist/. New Astro pages go in src/pages/ and replace the old
 // file of the same name only once that file is removed from the site.
 import { defineConfig } from 'astro/config';
-import react from '@astrojs/react';
 
 export default defineConfig({
   site: 'https://neewoodygh.com',
   publicDir: '.stage',
   outDir: 'dist',
   build: { format: 'file' },
-  integrations: [react()],
 });

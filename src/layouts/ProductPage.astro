@@ -2,7 +2,7 @@
 // Product page template (Wardrobes, Kitchens, Beds, …). Each page passes one
 // content object from src/content/<slug>.js: hero + an ordered `sections` list.
 // Section kinds: intro · feature · types · details · gallery · projects ·
-// statement · review · faq.
+// statement · review · faq · videos · related. Case studies use the same template.
 import Base from './Base.astro';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
@@ -12,6 +12,7 @@ import Gallery from '../components/page/Gallery.astro';
 import Projects from '../components/page/Projects.astro';
 import Sections from '../components/page/Sections.astro';
 import Viewer from '../components/page/Viewer.astro';
+import Videos from '../components/page/Videos.astro';
 const { c } = Astro.props;
 let featureN = 0;
 ---
@@ -23,9 +24,10 @@ let featureN = 0;
       if (s.kind === 'feature') return <Feature f={s} flip={featureN++ % 2 === 1} />;
       if (s.kind === 'gallery') return <Gallery g={s} slug={c.slug} />;
       if (s.kind === 'projects') return <Projects p={s} />;
+      if (s.kind === 'videos') return <Videos v={s} />;
       return <Sections kind={s.kind} d={s} />;
     })}
-    {!c.sections.some((s: any) => s.kind === 'gallery') && (
+    {c.cms !== false && !c.sections.some((s: any) => s.kind === 'gallery') && (
       <Fragment>
         <section id="cms-posts" data-page={c.slug} hidden class="cms-fallback"></section>
         <script is:inline src="/js/cms-posts.js?v=20261113"></script>

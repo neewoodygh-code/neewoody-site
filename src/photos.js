@@ -44,6 +44,6 @@ import { getImage } from 'astro:assets';
 export async function bigSet(photos) {
   return Promise.all(photos.map(async (p) => ({
     src: (await getImage({ src: await img(p.img), width: 1600, format: 'webp' })).src,
-    alt: p.alt || '', cap: p.cap || '',
+    alt: p.alt || '', cap: p.cap || p.alt || '',
   })));
 }

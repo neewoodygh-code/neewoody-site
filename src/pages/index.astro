@@ -1,23 +1,14 @@
 ---
-import { Picture, Image, getImage } from 'astro:assets';
+import { Picture } from 'astro:assets';
 import Base from '../layouts/Base.astro';
 import Nav from '../components/Nav.astro';
 import Services from '../components/Services.astro';
-import WorkGallery from '../components/WorkGallery.jsx';
+import WorkGallery from '../components/WorkGallery.astro';
 import Footer from '../components/Footer.astro';
 import { WORK, STEPS, SERVICES, WA, PHONE, EMAIL } from '../data.js';
 import logoLight from '../assets/brand/logo-light.png';
 import { photo } from '../photos.js';
 
-
-// The gallery is a React island, so hand it ready-made responsive image sources
-const work = await Promise.all(WORK.map(async (w) => {
-  const src = photo(w.img);
-  const sizes = w.wide ? '(min-width: 900px) 60vw, 82vw' : '(min-width: 900px) 30vw, 82vw';
-  const webp = await getImage({ src, widths: [500, 800, 1200], format: 'webp' });
-  const avif = await getImage({ src, widths: [500, 800, 1200], format: 'avif' });
-  return { ...w, sizes, src: webp.src, webp: webp.srcSet.attribute, avif: avif.srcSet.attribute, w: webp.attributes.width, h: webp.attributes.height };
-}));
 
 const statement = 'Every piece starts as a rough slab in our yard and ends in someone’s home. We draw it, cut it, finish it and fit it ourselves.';
 ---
@@ -97,7 +88,7 @@ const statement = 'Every piece starts as a rough slab in our yard and ends in so
         <h2 id="work-h" class="display">Selected work</h2>
         <a class="ulink" href="/portfolio">The full portfolio</a>
       </div>
-      <WorkGallery client:visible items={work} />
+      <WorkGallery items={WORK} />
     </section>
 
     <section class="process" id="process" data-nav="light" aria-labelledby="proc-h">

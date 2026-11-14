@@ -1,0 +1,55 @@
+---
+// Selected work: a native sideways scroller (no scroll hijacking, no framework).
+// Swipe on phones; drag, arrow buttons or the keyboard on desktop.
+import { Picture } from 'astro:assets';
+import { photo } from '../photos.js';
+const { items } = Astro.props;
+---
+<div class="gallery">
+  <div class="gallery-track" id="workTrack" tabindex="0" role="region" aria-label="Selected work, scroll sideways">
+    {items.map((w: any) => (
+      <a class={'card' + (w.wide ? ' wide' : '')} href={w.href} draggable="false">
+        <div class="card-img">
+          <Picture src={photo(w.img)} formats={['avif', 'webp']} widths={[500, 800, 1200]}
+            sizes={w.wide ? '(min-width: 900px) 60vw, 82vw' : '(min-width: 900px) 30vw, 82vw'}
+            alt={`${w.title}, ${w.place}`} loading="lazy" draggable="false" />
+        </div>
+        <h3>{w.title}</h3>
+        <p>{w.place}<span class="slash" aria-hidden="true"></span>{w.wood}</p>
+      </a>
+    ))}
+  </div>
+  <div class="gallery-ctrl">
+    <div class="gallery-bar" aria-hidden="true"><span id="workBar"></span></div>
+    <button type="button" id="workPrev" aria-label="Previous project" disabled>←</button>
+    <button type="button" id="workNext" aria-label="Next project">→</button>
+  </div>
+</div>
+
+<script>
+  const t = document.getElementById('workTrack')!;
+  const bar = document.getElementById('workBar')!;
+  const prev = document.getElementById('workPrev') as HTMLButtonElement;
+  const next = document.getElementById('workNext') as HTMLButtonElement;
+  const update = () => {
+    const max = t.scrollWidth - t.clientWidth;
+    prev.disabled = t.scrollLeft < 8;
+    next.disabled = t.scrollLeft > max - 8;
+    bar.style.transform = `scaleX(${0.12 + (max ? t.scrollLeft / max : 0) * 0.88})`;
+  };
+  update();
+  t.addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  const step = (dir: number) => {
+    const card = t.querySelector<HTMLElement>('.card');
+    t.scrollBy({ left: dir * (card ? card.offsetWidth + 40 : t.clientWidth * 0.8), behavior: 'smooth' });
+  };
+  prev.addEventListener('click', () => step(-1));
+  next.addEventListener('click', () => step(1));
+  // drag to scroll with a mouse (touch already scrolls natively)
+  let down = false, x0 = 0, s0 = 0, moved = false;
+  t.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') return; down = true; moved = false; x0 = e.clientX; s0 = t.scrollLeft; t.classList.add('dragging'); });
+  addEventListener('pointermove', (e) => { if (!down) return; const dx = e.clientX - x0; if (Math.abs(dx) > 4) moved = true; t.scrollLeft = s0 - dx; });
+  addEventListener('pointerup', () => { down = false; t.classList.remove('dragging'); });
+  t.addEventListener('click', (e) => { if (moved) { e.preventDefault(); moved = false; } }, true);
+</script>
