@@ -1,5 +1,7 @@
 ---
-// Privacy policy. The policy text is the old privacy.html wording, unchanged.
+// Privacy policy. The wording is the old privacy.html text, except section 4's
+// contact-form paragraph, corrected 2026-11-14 (the form posts to /api/lead on
+// Cloudflare, not Formspree; owner-approved).
 import Base from '../layouts/Base.astro';
 import '../styles/forms.css';
 import Nav from '../components/Nav.astro';
@@ -12,7 +14,7 @@ import Footer from '../components/Footer.astro';
   <main id="main">
     <header class="page-head" data-nav="dark">
       <h1 class="display">Privacy Policy</h1>
-      <p>Last updated: April 2026</p>
+      <p>Last updated: November 2026</p>
     </header>
     <div class="prose" data-nav="light">
 
@@ -42,7 +44,7 @@ import Footer from '../components/Footer.astro';
           <p>If you contact us via WhatsApp, your messages are subject to WhatsApp's own privacy policy in addition to this one. We use WhatsApp solely to communicate about your project and will not add you to group chats or broadcast lists without your permission.</p>
 
           <h2>4. Contact Form &amp; Third-Party Services</h2>
-          <p>Our contact form is processed via Formspree (formspree.io), a third-party form handling service. When you submit a quote request, your form data is transmitted through Formspree's servers before being delivered to us by email. Formspree has its own privacy policy which governs how they handle this data in transit.</p>
+          <p>Our contact form is processed by our own website, which is hosted on Cloudflare. When you submit a quote request, your form data is sent over an encrypted connection to our system on Cloudflare's servers, stored there, and we are notified so we can reply. We do not use a separate third-party form service. Cloudflare handles this data on our behalf as our hosting provider.</p>
           <p>This website may also use basic analytics tools (such as Google Analytics) to understand how visitors use our site — for example, which pages are most visited. This data is anonymous and aggregated; it does not identify you personally. You can opt out of Google Analytics tracking by installing the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">Google Analytics Opt-out Browser Add-on</a>.</p>
 
           <h2>5. Data Retention</h2>

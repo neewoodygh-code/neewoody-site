@@ -54,7 +54,7 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
   - Sitemap: **kept hand-maintained on purpose.** `@astrojs/sitemap` only knows Astro pages and would drop the tools, catalogue and Concierge entries; the current `sitemap.xml` already lists every public page with clean addresses.
   - Verified: 3,058 links checked (only script-built Concierge strings flagged, as before); Lighthouse phone 94 to 99 speed, 100 accessibility / best practices / SEO on home, Wardrobes, Sage, Nadia, House of Walker, Jerksoul.
   - Left as they are (not marketing pages): tools hub, catalogue, estimator, cutlist, cut sheet, pricing, Concierge.
-  - **Owner to confirm:** the privacy policy still says the contact form goes through Formspree. It has posted to the site's own `/api/lead` for a long time. The wording was kept unchanged because it is a legal text.
+  - Privacy policy section 4 corrected 2026-11-14 (owner said yes): the contact-form paragraph now says the form is handled by our own site on Cloudflare, not Formspree; "Last updated" is now November 2026.
 - [x] **Step 4. One voice** DONE 2026-11-14 (humanize-copy skill; SEO titles and descriptions untouched).
   - Rewritten in full: the four oldest case studies (House of Walker, Jerksoul, East Legon dining room, Achimota guesthouse). Title Case headings, 88 dashes, stacked fragments and sales phrasing removed; headlines now say what the job was. Their content files are now hand-written (`src/content/projects/*.js`), no longer converter output.
   - Their old facts strips (client, venue, timber, finish), which the Step 3 converter had missed, are back as hero facts.
