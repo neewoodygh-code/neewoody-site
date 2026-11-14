@@ -32,7 +32,7 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
 
 ## Game plan (one step per session, in this order)
 
-- [ ] **Step 1. Calm it down** (shared files, changes every page at once)
+- [x] **Step 1. Calm it down** DONE 2026-11-14 (shared files, changes every page at once). What shipped: Lenis removed (dependency uninstalled, native `scroll-behavior: smooth` instead); mask rise, hero zoom, word-by-word statement, parallax, band reveal and every hover zoom removed; `.rv` is now a plain 0.8s opacity fade; links underline plainly. Type: seven tokens `--t-small/body/lead/h3/h2/display/hero` in `global.css` (was 42 sizes), body 17px, `--stone` darkened to `#554d43`, all serif at weight 400 (300 and italic font files dropped). Labels: only `.label` is tracked capitals; badges, captions, facts and footer headings are plain text. Footer logo 170px. Nav: "What we make" dropdown (the 7 `SERVICES` links) + Portfolio + Contact (`/contact`); Concierge and Hire are footer-only; phone menu lists the same. Homepage hero caption sits flat at top right. Verified: 750 links OK, no sideways scroll at 375px, Lighthouse phone 100/100/100/100 on home, Wardrobes, Contact and 99 on Portfolio (was 94 to 95).
   - Motion: remove Lenis, mask rise, hero zoom, word-by-word statement, parallax, hover zooms. Keep `.rv` fade.
   - Type: define a 6 to 7 step size scale as tokens; body 17 to 18px in a darker tone; headline weight 400.
   - Labels: keep tracked capitals in at most two places; the rest become plain sentence-case text.

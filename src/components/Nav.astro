@@ -1,11 +1,11 @@
 ---
+// Site header: logo, "What we make" (every product page), Portfolio, Contact, WhatsApp.
+// Desktop: a small dropdown. Phones: a full-screen native <dialog>.
 import { Image } from 'astro:assets';
 import logoLight from '../assets/brand/logo-light.png';
 import logoDark from '../assets/brand/logo-dark.png';
-import { WA, PHONE } from '../data.js';
-// On the homepage the section links stay in-page; elsewhere they lead back to it.
-const home = Astro.url.pathname === '/' || Astro.url.pathname === '/index.html';
-const links = [['Services', home ? '#services' : '/#services'], ['Work', home ? '#work' : '/#work'], ['Portfolio', '/portfolio'], ['Concierge', '/concierge/'], ['Contact', '#contact']];
+import { WA, PHONE, SERVICES } from '../data.js';
+const more = [['Portfolio', '/portfolio'], ['Contact', '/contact']];
 ---
 <header class="nav" data-tone="dark" id="nav">
   <a class="nav-brand" href="/" aria-label="Neewoody Custom Woodwork, home">
@@ -13,7 +13,13 @@ const links = [['Services', home ? '#services' : '/#services'], ['Work', home ? 
     <Image class="nav-logo on-light" src={logoDark} alt="" width={180} />
   </a>
   <nav aria-label="Main" class="nav-links">
-    {links.map(([t, h]) => <a href={h}>{t}</a>)}
+    <div class="nav-drop" id="navDrop">
+      <button type="button" class="nav-drop-btn" id="navDropBtn" aria-expanded="false" aria-controls="navDropList">What we make</button>
+      <ul class="nav-drop-list" id="navDropList" hidden>
+        {SERVICES.map((s) => <li><a href={s.href}>{s.name}</a></li>)}
+      </ul>
+    </div>
+    {more.map(([t, h]) => <a href={h}>{t}</a>)}
   </nav>
   <a class="nav-wa" href={WA}>WhatsApp <span class="nav-num">{PHONE}</span></a>
   <button class="nav-menu" type="button" aria-haspopup="dialog" id="menuOpen">Menu</button>
@@ -25,7 +31,10 @@ const links = [['Services', home ? '#services' : '/#services'], ['Work', home ? 
     <button type="button" class="menu-close" id="menuClose">Close</button>
   </div>
   <nav aria-label="Menu">
-    {links.map(([t, h]) => <a href={h}>{t}</a>)}
+    <p class="menu-head">What we make</p>
+    {SERVICES.map((s) => <a href={s.href}>{s.name}</a>)}
+    <p class="menu-head">More</p>
+    {more.map(([t, h]) => <a href={h}>{t}</a>)}
   </nav>
   <a class="menu-wa" href={WA}>WhatsApp {PHONE}</a>
 </dialog>
@@ -44,6 +53,16 @@ const links = [['Services', home ? '#services' : '/#services'], ['Work', home ? 
   };
   addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(check); }, { passive: true });
   check();
+
+  // "What we make" dropdown: click to open; Esc, a click elsewhere or tabbing away closes it
+  const drop = document.getElementById('navDrop')!;
+  const dropBtn = document.getElementById('navDropBtn')!;
+  const dropList = document.getElementById('navDropList')!;
+  const setDrop = (open: boolean) => { dropList.hidden = !open; dropBtn.setAttribute('aria-expanded', String(open)); };
+  dropBtn.addEventListener('click', () => setDrop(dropList.hidden));
+  document.addEventListener('click', (e) => { if (!drop.contains(e.target as Node)) setDrop(false); });
+  drop.addEventListener('focusout', (e) => { if (!drop.contains(e.relatedTarget as Node)) setDrop(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !dropList.hidden) { setDrop(false); dropBtn.focus(); } });
 
   // Phone menu: native <dialog> gives focus trapping and Esc for free
   const menu = document.getElementById('menu') as HTMLDialogElement;

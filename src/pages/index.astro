@@ -50,7 +50,7 @@ const statement = 'Every piece starts as a rough slab in our yard and ends in so
     <section class="manifesto" data-nav="light" aria-label="About the workshop">
       <div class="mf-grid">
         <p class="label">The workshop</p>
-        <p class="mf-text" id="mfText">{statement.split(' ').map((w) => <span>{w} </span>)}</p>
+        <p class="mf-text">{statement}</p>
       </div>
       <div class="mf-row">
         <figure class="mf-img rv">
@@ -73,7 +73,7 @@ const statement = 'Every piece starts as a rough slab in our yard and ends in so
         <h2 id="sage-h" class="display">A whole retreat,<br />in solid teak.</h2>
       </div>
       <div class="sage-grid">
-        <figure class="sage-main par-slow">
+        <figure class="sage-main">
           <Picture src={photo('sage-lounge')} formats={['avif', 'webp']} widths={[800, 1300]} sizes="(min-width: 900px) 58vw, 92vw" alt="Teak-framed sofas around a glass-topped teak coffee table at Sage Centre" loading="lazy" />
         </figure>
         <div class="sage-side">
@@ -81,7 +81,7 @@ const statement = 'Every piece starts as a rough slab in our yard and ends in so
             <p class="lede">Beds, dining tables, sofas, shelving and staircase rails for an educational retreat in the Volta hills. Twenty-six months of work, built to an international standard.</p>
             <a class="ulink brass" href="/projects/sage-centre">Read how we built it</a>
           </div>
-          <figure class="sage-small par-fast">
+          <figure class="sage-small">
             <Picture src={photo('sage-louvres')} formats={['avif', 'webp']} widths={[500, 800]} sizes="(min-width: 900px) 30vw, 64vw" alt="Teak louvred windows and a lounge chair in a quiet corridor" loading="lazy" />
           </figure>
         </div>
@@ -135,20 +135,6 @@ const statement = 'Every piece starts as a rough slab in our yard and ends in so
   <Footer />
 
   <script>
-    // Statement: each word darkens as it scrolls through the screen (stays readable at every step)
-    const words = document.querySelectorAll('#mfText span');
-    const mf = document.getElementById('mfText')!;
-    let ticking = false;
-    const ink = () => {
-      ticking = false;
-      const r = mf.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, (innerHeight * 0.85 - r.top) / (r.height + innerHeight * 0.4)));
-      const n = Math.round(p * words.length);
-      words.forEach((w, i) => w.classList.toggle('ink', i < n));
-    };
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) words.forEach((w) => w.classList.add('ink'));
-    else { addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(ink); } }, { passive: true }); ink(); }
-
     // Process: the sticky photo follows whichever step is in the middle of the screen
     const imgs = document.querySelectorAll('.proc-frame .proc-img');
     const tag = document.getElementById('frameTag')!;
