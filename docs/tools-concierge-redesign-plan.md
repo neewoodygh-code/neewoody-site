@@ -34,6 +34,8 @@ Every marketing page is now Astro in the new design (bone `#efe9df`, espresso `#
 
 ## Two decisions for the owner before Step 1
 
+**DECIDED 2026-11-15 (owner: "Yes, both"): A = Concierge keeps navy with the new neutrals; B = the public front doors are rebuilt as Astro pages with their scripts embedded unchanged.** Step 1 is clear to start.
+
 - **A. Concierge colour:** keep navy with the new neutrals (recommended), or move Concierge to espresso like Neewoody.
 - **B. Public front doors:** rebuild `tools.html`, the estimator and the Concierge landing/login/register as Astro pages sharing the site's header and footer, with their scripts embedded unchanged, the way Contact and Hire were done (recommended, since these are the pages a visitor crosses into from the new site), or only re-skin them in place.
 
