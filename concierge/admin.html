@@ -6,14 +6,15 @@
 <meta name="robots" content="noindex,nofollow" />
 <title>Concierge Admin · Neewoody</title>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;700&family=Lora:wght@400;500&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/app.css?v=20261115b">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --navy:#1f2f58; --gold:#c8922a; --cream:#f0e8d0; --cream-dark:#e8dfc4;
-  --ink:#1c1c1a; --muted:#5e584b;
-  --display:'Playfair Display',Georgia,serif; --body:'Lora',Georgia,serif; --ui:'Jost',sans-serif;
+  /* 2026-11-15 re-skin: Concierge navy with the site's new neutrals; one font (Manrope, from css/app.css).
+     --gold is brass (fills, and text on navy); --gold-ink is walnut, for small gold text on light backgrounds. */
+  --navy:#1f2f58; --gold:#c49455; --gold-ink:#6b4a33; --cream:#efe9df; --cream-dark:#e4dccf;
+  --ink:#17130f; --muted:#554d43;
+  --display:'Manrope',system-ui,sans-serif; --body:'Manrope',system-ui,sans-serif; --ui:'Manrope',system-ui,sans-serif;
 }
 html{font-size:16px}
 body{ background:var(--cream); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased; }
@@ -55,7 +56,7 @@ textarea{ font-family:var(--body); resize:vertical; min-height:70px; line-height
 .spec-grid input{ width:auto; }
 .btn{ font-family:var(--ui); font-weight:500; font-size:.74rem; letter-spacing:.12em; text-transform:uppercase;
   color:var(--cream); background:var(--navy); border:none; border-radius:3px; padding:.75rem 1.1rem; cursor:pointer; }
-.btn:hover{ background:#12300f; } .btn:disabled{ opacity:.6; cursor:default; }
+.btn:hover{ background:var(--ink); } .btn:disabled{ opacity:.6; cursor:default; }
 .btn.ghost{ background:transparent; color:var(--navy); border:1px solid rgba(31,47,88,.3); }
 .btn.gold{ background:var(--gold); color:#241500; }
 .msg{ font-size:.85rem; margin-top:.75rem; min-height:1.1em; } .msg.error{ color:#a52a2a; } .msg.ok{ color:#2e6b2e; }
@@ -161,6 +162,17 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
   #app{ flex-direction:column; }
   .adm-rail{ position:static; flex:0 0 auto; flex-direction:row; overflow-x:auto; width:100%; }
   .rail-item{ white-space:nowrap; width:auto; }
+}
+
+/* ── 2026-11-15 re-skin: gold text on light backgrounds uses walnut (--gold-ink); gold on navy stays brass. ── */
+a, .ins-list li b { color: var(--gold-ink); }
+.pill.pending { color: var(--gold-ink); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* the new font is wider than the old one: keep the header buttons on one line on phones */
+@media (max-width: 520px){
+  .top{ gap:.5rem; } .top-actions{ gap:.3rem; }
+  .tbtn{ letter-spacing:.03em; padding-left:.5rem; padding-right:.5rem; white-space:nowrap; }
+  .top .name, .top .brand .name{ font-size:1rem; }
 }
 </style>
 </head>
