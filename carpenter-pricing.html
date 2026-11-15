@@ -10,16 +10,41 @@
   <title>Job Pricing Tool — Neewoody</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/app.css?v=20261115b"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     :root{
-      --bg:#f0e8d0; --bg-alt:#e8dfc4; --surface:#f0e8d0;
-      --dark:#1c1c1a; --mid:#4A4540; --muted:#5e584b;
-      --accent:#c8922a; --accent-dk:#b07d20; --accent-lt:rgba(200,146,42,.12);
-      --border:#d4c9b0; --border-dk:#c4b898;
-      --ok:#5a8a5a; --err:#b04030; --warn:#8a6020;
+      /* 2026-11-15 re-skin: bone, espresso, stone; walnut accent (readable as small text and under
+         white button text); one interface font (Manrope, from css/app.css). The script reads the --jp-* values. */
+      --bg:#efe9df; --bg-alt:#e4dccf; --surface:#efe9df;
+      --dark:#17130f; --mid:#554d43; --muted:#554d43;
+      --accent:#6b4a33; --accent-dk:#6b4a33; --accent-lt:rgba(107,74,51,.1);
+      --border:#d6cdbf; --border-dk:#c9bfb0;
+      --ok:#2e6b2e; --err:#9b3426; --warn:#6b4a33; /* darker than before so small figures are readable on bone */
+      --jp-bg:var(--bg); --jp-bg-alt:var(--bg-alt); --jp-surface:var(--surface);
+      --jp-dark:var(--dark); --jp-mid:var(--mid); --jp-muted:var(--muted); --jp-green:#1f2f58; --jp-cream:#efe9df;
+      --jp-accent:var(--accent); --jp-accent-dk:var(--accent-dk); --jp-accent-lt:var(--accent-lt);
+      --jp-border:var(--border); --jp-border-dk:var(--border-dk);
+      --jp-ok:var(--ok); --jp-err:var(--err); --jp-warn:var(--warn);
+      --jp-fd:'Manrope',system-ui,sans-serif; --jp-fb:'Manrope',system-ui,sans-serif; --jp-fm:'Manrope',system-ui,sans-serif;
     }
-    body{font-family:'Jost',system-ui,sans-serif;background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
+    /* on navy or espresso panels the accent is brass (walnut would disappear) */
+    [style*="background: var(--jp-green)"], [style*="background: var(--jp-dark)"]{ --jp-accent:#c49455; --jp-accent-dk:#c49455; }
+    /* brass buttons on those dark panels: the script gives every button white text, which is too faint on brass */
+    [style*="background: var(--jp-green)"] button[style*="background: var(--jp-accent)"],
+    [style*="background: var(--jp-dark)"] button[style*="background: var(--jp-accent)"]{ color:#17130f !important; }
+    /* the printable client copy keeps the colours and fonts it has always had */
+    #client-copy{
+      --jp-bg:#f0e8d0; --jp-bg-alt:#e8dfc4; --jp-surface:#f0e8d0;
+      --jp-dark:#1c1c1a; --jp-mid:#4A4540; --jp-muted:#6b6557; --jp-green:#1f2f58; --jp-cream:#f0e8d0;
+      --jp-accent:#c8922a; --jp-accent-dk:#b07d20; --jp-accent-lt:rgba(200,146,42,.12);
+      --jp-border:#d4c9b0; --jp-border-dk:#c4b898;
+      --jp-ok:#5a8a5a; --jp-err:#b04030; --jp-warn:#8a6020;
+      --jp-fd:'Playfair Display',Georgia,serif; --jp-fb:'Jost',system-ui,sans-serif; --jp-fm:'Jost',system-ui,sans-serif;
+      font-family:'Jost',system-ui,sans-serif; color:#1c1c1a;
+    }
+    :focus-visible{outline:2px solid #c49455;outline-offset:2px}
+    body{font-family:var(--jp-fb);background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
     input,select,textarea,button{font-family:inherit;}
     ::-webkit-scrollbar{width:4px;}
     ::-webkit-scrollbar-track{background:var(--bg-alt);}
@@ -290,16 +315,19 @@ function calcActual(exp=[]) {
 }
 
 // ── Design tokens ─────────────────────────────────────────────────────
+// 2026-11-15: the values live in CSS (:root in the <style> above) so the screen can be
+// re-skinned without touching this script; #client-copy restores the original values,
+// so the printable client copy is unchanged.
 const S  = {
-  bg:'#f0e8d0', bgAlt:'#e8dfc4', surface:'#f0e8d0',
-  dark:'#1c1c1a', mid:'#4A4540', muted:'#6b6557', green:'#1f2f58', cream:'#f0e8d0',
-  accent:'#c8922a', accentDk:'#b07d20', accentLt:'rgba(200,146,42,.12)',
-  border:'#d4c9b0', borderDk:'#c4b898',
-  ok:'#5a8a5a', err:'#b04030', warn:'#8a6020',
+  bg:'var(--jp-bg)', bgAlt:'var(--jp-bg-alt)', surface:'var(--jp-surface)',
+  dark:'var(--jp-dark)', mid:'var(--jp-mid)', muted:'var(--jp-muted)', green:'var(--jp-green)', cream:'var(--jp-cream)',
+  accent:'var(--jp-accent)', accentDk:'var(--jp-accent-dk)', accentLt:'var(--jp-accent-lt)',
+  border:'var(--jp-border)', borderDk:'var(--jp-border-dk)',
+  ok:'var(--jp-ok)', err:'var(--jp-err)', warn:'var(--jp-warn)',
 };
-const FD = "'Playfair Display',Georgia,serif";
-const FB = "'Jost',system-ui,sans-serif";
-const FM = "'Jost',system-ui,sans-serif"; // was DM Mono — softened to match the editorial system; numeric readouts stay right-aligned
+const FD = "var(--jp-fd)";
+const FB = "var(--jp-fb)";
+const FM = "var(--jp-fm)";
 
 // ── UI primitives ─────────────────────────────────────────────────────
 const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{

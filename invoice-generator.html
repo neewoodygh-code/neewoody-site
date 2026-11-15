@@ -8,18 +8,22 @@
 <title>Invoice &amp; Quote Generator — Carpentry Concierge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/app.css?v=20261115b" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
+    /* 2026-11-15 re-skin (screen chrome only): Concierge navy with the site's new neutrals,
+       one interface font (Manrope, from css/app.css). The document (#doc) has its own
+       --d-* settings and fixed colours below, so what prints is unchanged. */
     --navy:#1f2f58; --navy-lt:#2a3d6e;
-    --gold:#c8922a; --gold-dk:#b07d20; --gold-lt:rgba(200,146,42,.14);
-    --cream:#f0e8d0; --cream-dk:#e8dfc4;
-    --ink:#1c1c1a; --mid:#4a4540; --muted:#5e584b;
-    --border:#d4c9b0; --border-dk:#c4b898;
-    --ok:#5a8a5a; --err:#b04030;
+    --gold:#c49455; --gold-dk:#c49455; --gold-lt:rgba(196,148,85,.16);
+    --cream:#efe9df; --cream-dk:#e4dccf;
+    --ink:#17130f; --mid:#554d43; --muted:#554d43;
+    --border:#d6cdbf; --border-dk:#d6cdbf;
+    --ok:#2e6b2e; --err:#9b3426;
     --mono:'Roboto Mono',monospace;
-    --body:'Jost',system-ui,sans-serif;
-    --serif:'Playfair Display',Georgia,serif;
+    --body:'Manrope',system-ui,sans-serif;
+    --serif:'Manrope',system-ui,sans-serif;
     --r:8px;
   }
   body{font-family:var(--body);background:var(--cream);color:var(--ink);line-height:1.55;-webkit-tap-highlight-color:transparent}
@@ -238,6 +242,12 @@
   .sw-custom{width:34px;height:30px;border:1.5px solid var(--border);border-radius:6px;padding:1px;background:#fff;cursor:pointer}
   .sty-checks{display:flex;flex-wrap:wrap;gap:.35rem 1rem}
   .sty-row .hint{font-size:.7rem;color:var(--muted);line-height:1.4}
+
+  /* re-skin: flat navy opening band, no badge, calmer title */
+  .ig-hero::before,.ig-badge{display:none}
+  .ig-hero h1{font-weight:600;letter-spacing:-.01em}
+  #gate h2,.ig-panel h3,.items-foot .gt,.lib-row .li-tot{font-weight:600}
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 
   @media print{
     .ig-top,.ig-hero,#inputCol,.ig-actions,.prev-note,.ig-foot,.ig-overlay,.warnbar{display:none!important}
