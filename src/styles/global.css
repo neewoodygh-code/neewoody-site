@@ -8,6 +8,7 @@
   --walnut: #6b4a33;
   --brass: #c49455;
   --stone: #554d43;
+  --navy: #1f2f58; /* Carpentry Concierge anchor colour (also in css/app.css) */
   /* names js/cms-posts.js reads for its fallback cards (otherwise it falls back to a too-faint grey) */
   --muted: #554d43;
   --ink: #17130f;

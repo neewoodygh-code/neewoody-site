@@ -1,0 +1,119 @@
+---
+// Carpentry Concierge member login. The script is the old login.html script, unchanged.
+import Base from '../../layouts/Base.astro';
+import '../../styles/forms.css';
+import '../../styles/doors.css';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+---
+<Base title="Member Login · Carpentry Concierge" description="Log in to Carpentry Concierge with your phone number and PIN." path="/concierge/login" noindex concierge>
+  <Nav />
+  <main id="main" class="cc-auth" data-nav="dark">
+    <div class="card">
+      <div class="brand">
+        <img src="/images/concierge/cc-mark.svg" alt="" width="56" height="56" />
+        <h1>Carpentry Concierge</h1>
+        <p>Members’ login</p>
+      </div>
+
+      <form class="cc-form" id="loginForm" autocomplete="off" onsubmit="return false">
+        <div class="field">
+          <label for="phone">Phone number</label>
+          <input id="phone" name="phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" required />
+        </div>
+        <div class="field">
+          <label for="pin">5-digit PIN</label>
+          <input id="pin" class="pin" name="pin" type="password" inputmode="numeric" maxlength="5" pattern="\d{5}" placeholder="•••••" required />
+        </div>
+        <button class="pill navy wide" id="submitBtn" type="submit">Log in</button>
+        <div class="msg" id="msg" role="status"></div>
+      </form>
+
+      <p class="help">
+        Not a member yet? <a href="register.html">Register here</a><br />
+        Forgotten your PIN? Message us on <a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp</a>.
+      </p>
+    </div>
+  </main>
+  <Footer bare />
+  <script is:inline src="/js/concierge.js?v=20261113b"></script>
+  <script is:inline>
+(function () {
+  var C = window.Concierge;
+  // Weak connection: the shared script didn't load, so nothing below can run.
+  // Say so (and offer a reload) instead of the form silently reloading the page.
+  if (!C) {
+    var m0 = document.getElementById('msg');
+    if (m0) { m0.className = 'msg error'; m0.innerHTML = 'The page did not load fully, so you cannot log in yet. Check your internet (try switching between Wi-Fi and mobile data), then <a href="#" onclick="location.reload();return false" style="color:inherit;text-decoration:underline">tap here to reload</a>.'; }
+    return;
+  }
+
+  // Optional ?next= return path (same-site relative paths only — no open redirect)
+  function dest() {
+    var next = new URLSearchParams(location.search).get('next') || '';
+    return /^\/(?!\/)/.test(next) ? next : 'directory.html';
+  }
+
+  // Already logged in? Go straight to the destination.
+  if (C.tokenAlive()) { location.replace(dest()); return; }
+
+  var form = document.getElementById('loginForm');
+  var btn = document.getElementById('submitBtn');
+  var msg = document.getElementById('msg');
+  var phoneEl = document.getElementById('phone');
+  var pinEl = document.getElementById('pin');
+
+  pinEl.addEventListener('input', function () { pinEl.value = pinEl.value.replace(/\D/g, '').slice(0, 5); });
+
+  // Returning from pay-to-join checkout: verify the transaction (so approval
+  // doesn't depend on the webhook alone), then prompt them to log in.
+  if (/[?&]joined=1/.test(location.search)) {
+    msg.className = 'msg'; msg.style.color = '#2e6b2e';
+    msg.textContent = 'Confirming your payment…';
+    var jqp = new URLSearchParams(location.search);
+    var jref = jqp.get('reference') || jqp.get('trxref');
+    (async function () {
+      if (jref) { try { await C.api('/pay/verify', { auth: false, method: 'POST', body: { reference: jref } }); } catch (e) {} }
+      msg.textContent = 'Payment received — log in with your phone and PIN to enter.';
+    })();
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    msg.className = 'msg'; msg.textContent = '';
+
+    var phone = C.normalizePhone(phoneEl.value);
+    if (!phone) { msg.className = 'msg error'; msg.textContent = 'Enter a valid Ghana phone number.'; return; }
+    if (!/^\d{5}$/.test(pinEl.value)) { msg.className = 'msg error'; msg.textContent = 'PIN must be 5 digits.'; return; }
+
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    try {
+      var data = await C.api('/auth/login', { auth: false, method: 'POST', body: { phone: phone, pin: pinEl.value } });
+      C.setToken(data.token);
+      // Device-side loop guards: the PIN was right, but if this browser can't
+      // keep the login (blocked storage / in-app browser) or the phone's clock
+      // is far off, the next page would bounce straight back here.
+      if (C.getToken() !== data.token) {
+        msg.className = 'msg error';
+        msg.textContent = 'Your PIN is correct, but this browser is not saving your login. Open neewoodygh.com/concierge/login.html in Chrome (not inside WhatsApp or Facebook, and not a private/incognito tab), then log in again.';
+        btn.disabled = false; btn.textContent = 'Log in';
+        return;
+      }
+      if (!C.tokenAlive()) {
+        C.clearToken();
+        msg.className = 'msg error';
+        msg.textContent = 'Your PIN is correct, but your phone\'s date and time look wrong. Go to Settings > Date & time, turn on "Automatic", then log in again.';
+        btn.disabled = false; btn.textContent = 'Log in';
+        return;
+      }
+      location.replace(dest());
+    } catch (err) {
+      msg.className = 'msg error';
+      msg.textContent = err.message || 'Login failed.';
+      btn.disabled = false; btn.textContent = 'Log in';
+      pinEl.value = ''; pinEl.focus();
+    }
+  });
+})();
+</script>
+</Base>

@@ -1,0 +1,254 @@
+---
+// Wardrobe price estimator (public, free). Field ids and the pricing script are the old wardrobe-estimator.html, unchanged.
+import Base from '../layouts/Base.astro';
+import '../styles/forms.css';
+import '../styles/doors.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base title="Wardrobe Price Estimator Accra | Neewoody Custom Woodwork"
+  description="Estimate the cost of a custom wardrobe in Accra with Neewoody's free calculator. Enter your dimensions and style — get a realistic price range in seconds."
+  ogTitle="Wardrobe Price Estimator — Neewoody Custom Woodwork"
+  ogDescription="Get a rough price estimate for a custom wardrobe in Accra. Free tool — no sign-up required."
+  path="/wardrobe-estimator">
+  <Nav />
+  <main id="main">
+    <header class="page-head" data-nav="dark">
+      <h1 class="display">Wardrobe price estimator</h1>
+      <p>Enter your dimensions and preferred style. Get a realistic price range based on current Accra carpentry costs, in seconds, with no sign-up.</p>
+    </header>
+    <section class="est-body" data-nav="light">
+      <div class="est-wrap">
+    {/* DIMENSIONS */}
+    <div class="est-group">
+      <span class="est-group-label">Dimensions</span>
+      <div class="est-grid">
+        <div class="est-field">
+          <label for="est-width">Width (mm)</label>
+          <input type="number" id="est-width" placeholder="e.g. 2400" min="600" max="6000" />
+          <small>Total wall width</small>
+        </div>
+        <div class="est-field">
+          <label for="est-height">Height (mm)</label>
+          <input type="number" id="est-height" placeholder="e.g. 2400" min="1200" max="3200" />
+          <small>Floor to ceiling</small>
+        </div>
+        <div class="est-field">
+          <label for="est-depth">Depth (mm)</label>
+          <input type="number" id="est-depth" placeholder="e.g. 600" min="300" max="900" value="600" />
+          <small>Standard 600 mm</small>
+        </div>
+      </div>
+    </div>
+
+    {/* TYPE & DOORS */}
+    <div class="est-group">
+      <span class="est-group-label">Type and doors</span>
+      <div class="est-grid-2">
+        <div class="est-field">
+          <label for="est-type">Wardrobe type</label>
+          <select id="est-type">
+            <option value="hinged">Hinged doors (standard)</option>
+            <option value="sliding">Sliding doors (+15%)</option>
+            <option value="open">Open / no doors</option>
+          </select>
+        </div>
+        <div class="est-field">
+          <label for="est-doors">Number of doors</label>
+          <select id="est-doors">
+            <option value="2">2 doors</option>
+            <option value="3">3 doors</option>
+            <option value="4">4 doors</option>
+            <option value="5">5 doors (+5%)</option>
+            <option value="6">6 doors (+10%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {/* INTERIOR & FINISH */}
+    <div class="est-group">
+      <span class="est-group-label">Interior and finish</span>
+      <div class="est-grid-2">
+        <div class="est-field">
+          <label for="est-interior">Internal layout</label>
+          <select id="est-interior">
+            <option value="basic">Basic — rail and shelves</option>
+            <option value="standard" selected>Standard — rail, shelves, small drawers</option>
+            <option value="premium">Premium — full drawers, shoe rack, tie rails (+20%)</option>
+          </select>
+        </div>
+        <div class="est-field">
+          <label for="est-finish">Finish</label>
+          <select id="est-finish">
+            <option value="laminate">Laminate (standard)</option>
+            <option value="painted">Painted MDF (+10%)</option>
+            <option value="veneer">Wood veneer (+20%)</option>
+            <option value="gloss">High-gloss (+25%)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {/* LOCATION */}
+    <div class="est-group">
+      <span class="est-group-label">Installation area</span>
+      <div class="est-field">
+        <label for="est-location">Where in Accra?</label>
+        <select id="est-location">
+          <option value="central">Central Accra (East Legon, Cantonments, Airport, Labone, Spintex, Adenta)</option>
+          <option value="outer">Outer Accra / Tema / Kasoa (+8%)</option>
+          <option value="outside">Outside Greater Accra — contact us for quote</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="pill ink wide" id="est-calculate-btn" type="button">Calculate estimate</button>
+
+    {/* RESULT */}
+    <div class="est-result" id="est-result" role="region" aria-live="polite" aria-label="Estimate result">
+      <span class="est-result-label">Estimated price range</span>
+      <div class="est-result-range" id="est-range-display">GH₵ — – GH₵ —</div>
+      <p class="est-result-note">
+        This is an indicative estimate only. Final pricing depends on exact specifications,
+        site conditions, and current material costs. A site visit gives the most accurate quote.
+      </p>
+      <div class="est-result-summary" id="est-summary"></div>
+      <a href="#" class="pill" id="est-wa-link" target="_blank" rel="noopener">
+        Send this to Neewoody on WhatsApp
+      </a>
+    </div>
+
+    <div class="est-disclaimer">
+      <strong>How estimates are calculated</strong><br />
+      This tool uses size-band pricing based on Ghana carpentry realities: laminate panels at approximately
+      GH₵&nbsp;500 each, edge banding at GH₵&nbsp;7/m, with allowances for labour, hardware (hinges, rails, handles),
+      installation, transport, and material waste. Prices shown are conservative ranges. Actual quotes may vary
+      based on current material availability and your specific requirements.
+    </div>
+      </div>
+    </section>
+  </main>
+  <Footer quoteLink />
+  <script is:inline>
+
+  /* ══════════════════════════════════════════════════════════════
+     PRICING ENGINE — Neewoody Wardrobe Estimator v1
+     All adjustable values are in the CONSTANTS block below.
+     ══════════════════════════════════════════════════════════════ */
+
+  (function () {
+
+    /* ── PRICING CONSTANTS ── edit these to adjust estimates ── */
+    const PANEL_COST_GHS = 500;
+    const EDGEBAND_PER_M = 7;
+
+    // Base prices calibrated to Neewoody's actual cost model at Basic Build tier (×1.45).
+    // Derived from: overhead (GH₵274/day) + crew labour (supervisor + hand + Nuer basic)
+    // + cabinetry materials + logistics, multiplied by 1.45.
+    // Updated 2026-05-31 — previously understated by ~40%.
+    const BASE = {
+      small:  12000,  // < 1500mm wide, ~5 job days
+      medium: 15500,  // 1500–2500mm wide, ~6 job days
+      large:  23000,  // 2500–3500mm wide, ~9 job days
+      xlarge: 34000   // > 3500mm wide, ~12 job days
+    };
+
+    const RANGE_SPREAD  = 0.12;
+    const BASE_HEIGHT_MM = 2400;
+    const BASE_DEPTH_MM  = 600;
+
+    const TYPE_MULT = { hinged:1.00, sliding:1.15, open:0.82 };
+    const DOOR_MULT = { 2:1.00, 3:1.00, 4:1.00, 5:1.05, 6:1.10 };
+    const INTERIOR_MULT = { basic:0.90, standard:1.00, premium:1.20 };
+    const FINISH_MULT   = { laminate:1.00, painted:1.10, veneer:1.20, gloss:1.25 };
+    const LOCATION_MULT = { central:1.00, outer:1.08, outside:null };
+
+    function estimate(inputs) {
+      const { widthMm, heightMm, depthMm, type, doors, interior, finish, location } = inputs;
+      if (location === 'outside') return null;
+      let base;
+      if (widthMm < 1500)      base = BASE.small;
+      else if (widthMm < 2500) base = BASE.medium;
+      else if (widthMm < 3500) base = BASE.large;
+      else                      base = BASE.xlarge;
+      base *= (heightMm / BASE_HEIGHT_MM);
+      base *= (depthMm  / BASE_DEPTH_MM);
+      const mult = TYPE_MULT[type] * (DOOR_MULT[doors]||1.00) * INTERIOR_MULT[interior] * FINISH_MULT[finish] * LOCATION_MULT[location];
+      const mid  = base * mult;
+      return {
+        low:  Math.round(mid * (1 - RANGE_SPREAD) / 500) * 500,
+        high: Math.round(mid * (1 + RANGE_SPREAD) / 500) * 500,
+      };
+    }
+
+    function fmt(n) { return 'GH₵ ' + n.toLocaleString('en-GH'); }
+    function lbl(el) { return el.options[el.selectedIndex].text; }
+
+    document.getElementById('est-calculate-btn').addEventListener('click', function () {
+      const wMm  = parseInt(document.getElementById('est-width').value)  || 0;
+      const hMm  = parseInt(document.getElementById('est-height').value) || 0;
+      const dMm  = parseInt(document.getElementById('est-depth').value)  || 600;
+      const type = document.getElementById('est-type').value;
+      const doors= parseInt(document.getElementById('est-doors').value);
+      const int_ = document.getElementById('est-interior').value;
+      const fin  = document.getElementById('est-finish').value;
+      const loc  = document.getElementById('est-location').value;
+
+      if (!wMm || wMm < 600 || wMm > 6000) {
+        alert('Please enter a valid width between 600 mm and 6000 mm.');
+        document.getElementById('est-width').focus(); return;
+      }
+      if (!hMm || hMm < 1200 || hMm > 3200) {
+        alert('Please enter a valid height between 1200 mm and 3200 mm.');
+        document.getElementById('est-height').focus(); return;
+      }
+
+      const res     = estimate({ widthMm:wMm, heightMm:hMm, depthMm:dMm, type, doors, interior:int_, finish:fin, location:loc });
+      const resultEl  = document.getElementById('est-result');
+      const rangeEl   = document.getElementById('est-range-display');
+      const summaryEl = document.getElementById('est-summary');
+      const waEl      = document.getElementById('est-wa-link');
+
+      if (!res) {
+        rangeEl.textContent = 'Please contact us directly';
+        summaryEl.innerHTML = 'We serve clients outside Greater Accra — reach out on WhatsApp and we\'ll discuss your project personally.';
+        resultEl.classList.add('visible');
+        resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+        return;
+      }
+
+      rangeEl.textContent = fmt(res.low) + ' – ' + fmt(res.high);
+      summaryEl.innerHTML =
+        '<strong style="font-family:\'Jost\',sans-serif;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(240,232,208,0.5)">Your inputs</strong><br><br>' +
+        wMm + ' mm W × ' + hMm + ' mm H × ' + dMm + ' mm D<br>' +
+        lbl(document.getElementById('est-type')) + ' · ' + doors + ' doors<br>' +
+        lbl(document.getElementById('est-interior')) + '<br>' +
+        lbl(document.getElementById('est-finish')) + '<br>' +
+        lbl(document.getElementById('est-location'));
+
+      const waText = encodeURIComponent(
+        'Hi Neewoody, I used your wardrobe estimator and got this result:\n\n' +
+        'Size: ' + wMm + 'mm W × ' + hMm + 'mm H × ' + dMm + 'mm D\n' +
+        'Type: ' + lbl(document.getElementById('est-type')) + '\n' +
+        'Doors: ' + doors + '\n' +
+        'Interior: ' + lbl(document.getElementById('est-interior')) + '\n' +
+        'Finish: ' + lbl(document.getElementById('est-finish')) + '\n' +
+        'Estimated range: ' + fmt(res.low) + ' – ' + fmt(res.high) + '\n\n' +
+        'Can you confirm pricing for a site visit?'
+      );
+      waEl.href = 'https://wa.me/233244633464?text=' + waText;
+
+      resultEl.classList.add('visible');
+      resultEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    });
+
+    document.querySelectorAll('.est-field input').forEach(function (el) {
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') document.getElementById('est-calculate-btn').click();
+      });
+    });
+
+  })();
+</script>
+</Base>

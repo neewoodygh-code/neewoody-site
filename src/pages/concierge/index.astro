@@ -1,0 +1,52 @@
+---
+// Carpentry Concierge front door: two doors, client (hire) and artisan (join). No script.
+import Base from '../../layouts/Base.astro';
+import '../../styles/forms.css';
+import '../../styles/doors.css';
+import Nav from '../../components/Nav.astro';
+import Footer from '../../components/Footer.astro';
+---
+<Base title="Carpentry Concierge — hire a vetted carpenter, or join the network | Ghana"
+  description="Carpentry Concierge by Neewoody — Ghana's network of vetted carpenters, vendors and couriers. Clients hire a trusted artisan; carpenters join to get listed, find work and use the tools."
+  path="/concierge/" concierge>
+  <Nav />
+  <main id="main">
+    <header class="cc-hero" data-nav="dark">
+      <img src="/images/concierge/cc-mark.svg" alt="" width="88" height="88" />
+      <h1>Carpentry Concierge</h1>
+      <p>Ghana’s network of vetted carpenters, vendors and couriers, and the easiest way to hire one.</p>
+    </header>
+
+    <section class="doors" data-nav="light">
+      <div class="door">
+        <p class="who">I need work done</p>
+        <h2>Hire a carpenter</h2>
+        <p class="say">Post your job free, with no account needed. We match it to vetted artisans in your area and they reach out on WhatsApp.</p>
+        <a class="pill navy" href="/hire">Hire a carpenter</a>
+      </div>
+      <div class="door">
+        <p class="who">I’m a carpenter or vendor</p>
+        <h2>Join the network</h2>
+        <p class="say">Get listed where clients look, find jobs and materials, and use the members’ tools. Founding membership is open now.</p>
+        <a class="pill navy" href="/concierge/register">Join Carpentry Concierge</a>
+        <p class="after">Already a member? <a class="ulink" href="/concierge/login">Log in</a></p>
+      </div>
+    </section>
+
+    <section class="cc-about" data-nav="light">
+      <h2>What is Carpentry Concierge?</h2>
+      <p>A members’ network for Ghanaian carpenters, vendors and couriers, built by Neewoody. Clients get a trusted artisan without the guesswork. Artisans get visibility, work, sourcing and safety tools in one place.</p>
+      <dl class="cc-three">
+        <div><dt>Vetted directory</dt><dd>Real, verified artisans by trade and area. Members hire members.</dd></div>
+        <div><dt>Jobs and sourcing</dt><dd>A jobs board, a “buy for me” errand board, and vendor storefronts.</dd></div>
+        <div><dt>Tools and safety</dt><dd>Job pricing, cut lists, and a lone-worker safety check-in.</dd></div>
+      </dl>
+      <p class="cc-links">
+        <a class="ulink" href="/tools">Free tools</a>
+        <a class="ulink" href="/concierge/login">Member login</a>
+        <a class="ulink" href="/hire">Post a job</a>
+      </p>
+    </section>
+  </main>
+  <Footer bare />
+</Base>

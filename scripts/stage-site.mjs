@@ -56,8 +56,7 @@ const walkPages = (d) => {
       ownedDyn.push({ test: (f) => { const a = f.endsWith('.html') ? f.slice(0, -5).split('/') : []; return a.length === segs.length && segs.every((s, i) => s.startsWith('[') || s === a[i]); } });
       continue;
     }
-    const route = m[1].replace(/(^|\/)index$/, '$1').replace(/\/$/, '');
-    owned.add(route === '' ? 'index.html' : `${route}.html`);
+    owned.add(`${m[1]}.html`); // build.format 'preserve': concierge/index.astro -> concierge/index.html
   }
 };
 walkPages('src/pages');

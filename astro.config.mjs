@@ -10,7 +10,8 @@ export default defineConfig({
   site: 'https://neewoodygh.com',
   publicDir: '.stage',
   outDir: 'dist',
-  build: { format: 'file' },
+  // 'preserve': kitchens.astro -> kitchens.html, concierge/index.astro -> concierge/index.html
+  build: { format: 'preserve' },
   // admin-posted project photos are fetched from our own domain at build time (src/cms.js)
   image: { domains: ['neewoodygh.com'] },
 });

@@ -10,7 +10,7 @@ import { getImage } from 'astro:assets';
 import { SITE, EMAIL } from '../data.js';
 import { photo, img } from '../photos.js';
 
-const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero', ogImg = '', noindex = false, pageEvent = '' } = Astro.props;
+const { title, description, path = '/', ogTitle, ogDescription, ogPhoto = 'hero', ogImg = '', noindex = false, pageEvent = '', concierge = false } = Astro.props;
 const url = SITE + path;
 // share image: a page's own photo (ogImg = its site path) or one of the named homepage photos
 const og = await getImage({ src: ogImg ? await img(ogImg) : photo(ogPhoto), width: 1200, height: 630, fit: 'cover', format: 'jpg' });
@@ -53,9 +53,10 @@ const ld = {
   <meta property="og:description" content={ogDescription || description} />
   <meta property="og:image" content={SITE + og.src} />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="theme-color" content="#17130f" />
-  <link rel="icon" href="/images/favicon.ico" />
-  <link rel="apple-touch-icon" href="/images/logo.png" />
+  <meta name="theme-color" content={concierge ? '#1f2f58' : '#17130f'} />
+  {concierge
+    ? <Fragment><link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml" /><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png" /><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png" /></Fragment>
+    : <Fragment><link rel="icon" href="/images/favicon.ico" /><link rel="apple-touch-icon" href="/images/logo.png" /></Fragment>}
   <script type="application/ld+json" set:html={JSON.stringify(ld)} />
   <script is:inline>document.documentElement.classList.add('js')</script>
   <!-- Google Analytics (G-ZP77WR6BNH): real domain only, never local previews -->
