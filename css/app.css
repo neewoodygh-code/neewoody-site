@@ -1,0 +1,66 @@
+/* Shared look for the tool and Concierge pages (plain HTML, not built by Astro).
+   The tokens mirror src/styles/global.css: change both together.
+   Opt in with <body class="app">; add "app-navy" for the Concierge navy page.
+   Base rules use :where() so they never out-rank a page's own styles.
+   Rules: only the --t-* sizes, no animations, no uppercase labels. Bump ?v= on every change. */
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/manrope-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 500; font-display: swap; src: url(../fonts/manrope-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'Manrope'; font-style: normal; font-weight: 600; font-display: swap; src: url(../fonts/manrope-latin-600-normal.woff2) format('woff2'); }
+/* the serif is for public front doors only; member screens never use it, so it is never downloaded there */
+@font-face { font-family: 'Cormorant Garamond'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/cormorant-garamond-latin-400-normal.woff2) format('woff2'); }
+
+:root {
+  --bone: #efe9df;
+  --bone-2: #e4dccf;
+  --espresso: #17130f;
+  --walnut: #6b4a33;
+  --brass: #c49455;
+  --stone: #554d43;
+  --navy: #1f2f58;            /* Carpentry Concierge anchor colour */
+  --on-dark: #efe9df;
+  --on-dark-2: rgba(239, 233, 223, .78);
+  --hair: rgba(23, 19, 15, .16);
+  --hair-dark: rgba(239, 233, 223, .18);
+  --serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --sans: 'Manrope', system-ui, sans-serif;
+  --err: #9b3426;
+  --ok: #2e6b2e;
+  --t-small: .9375rem;
+  --t-body: 1.0625rem;
+  --t-lead: clamp(1.3rem, 1.7vw, 1.6rem);
+  --t-h3: clamp(1.6rem, 2.3vw, 2.2rem);
+  --t-h2: clamp(2.1rem, 4vw, 3.8rem);
+}
+
+:where(.app), :where(.app) *, :where(.app) *::before, :where(.app) *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:where(.app) { background: var(--bone); color: var(--espresso); font-family: var(--sans); font-size: var(--t-body); line-height: 1.65; overflow-x: clip; -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; }
+:where(.app.app-navy) { background: var(--navy); color: var(--on-dark); }
+:where(.app) a { color: inherit; }
+:where(.app) img { max-width: 100%; height: auto; }
+:where(.app) :focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+
+/* panel: the bone sheet a form or a block of content sits on */
+.ui-panel { background: var(--bone); color: var(--espresso); border-radius: 6px; padding: 2rem 1.75rem; }
+
+/* form fields */
+.ui-field { margin-bottom: 1.25rem; }
+.ui-label { display: block; font-size: var(--t-small); font-weight: 500; color: var(--stone); margin-bottom: .4rem; }
+.ui-input { width: 100%; font: 400 var(--t-body) var(--sans); color: var(--espresso); background: #fff; border: 1px solid var(--hair); border-radius: 6px; padding: .8rem .9rem; }
+.ui-input:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; border-color: var(--brass); }
+.ui-input::placeholder { color: #8a8278; }
+
+/* buttons: one shape. Navy on light, bone on dark. */
+.ui-btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; font: 500 var(--t-body) var(--sans); text-decoration: none; color: var(--bone); background: var(--navy); border: 0; border-radius: 100px; padding: .9rem 1.6rem; cursor: pointer; transition: background-color .3s ease, color .3s ease; }
+.ui-btn:hover { background: var(--brass); color: var(--espresso); }
+.ui-btn:disabled { opacity: .6; cursor: default; background: var(--navy); color: var(--bone); }
+.ui-btn.wide { width: 100%; }
+.ui-btn.on-dark { background: var(--bone); color: var(--espresso); }
+.ui-btn.on-dark:hover { background: var(--brass); }
+
+/* status line under a form. Scripts set class "msg", "msg error" or "msg ok". */
+.app .msg { font-size: var(--t-small); min-height: 1.5em; margin-top: 1rem; }
+.app .msg.error { color: var(--err); }
+.app .msg.ok { color: var(--ok); }
+
+.ui-link { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.ui-link:hover { color: var(--brass); }
