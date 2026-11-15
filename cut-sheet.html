@@ -16,7 +16,37 @@ gtag('js', new Date());
 gtag('config', 'G-ZP77WR6BNH');
 </script>
 
-<link rel="stylesheet" href="css/styles.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&amp;family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&amp;display=swap">
+<style>
+/* Carried over from the old css/styles.css (reset, base type, .container, .btn, .breadcrumb):
+   only the rules this page uses, so the printed sheet is unchanged. */
+:root{--clr-bg: #F7F4EF; --clr-bg-alt: #EFEBE3; --clr-surface: #FFFFFF; --clr-dark: #1C1A17; --clr-mid: #4A4540; --clr-muted: #8A8178; --clr-accent: #A0784A; --clr-accent-dk: #7D5C34; --clr-accent-lt: rgba(160,120,74,.12); --clr-wa: #25D366; --clr-wa-dk: #1EAA52; --clr-border: #DDD5C8; --clr-text: #1C1A17; --font-display: 'Playfair Display', Georgia, serif; --font-body: 'DM Sans', system-ui, sans-serif; --space-xs: 0.5rem; --space-sm: 1rem; --space-md: 1.5rem; --space-lg: 2.5rem; --space-xl: 4rem; --space-2xl: 6rem; --max-w: 1300px; --radius: 4px; --radius-lg: 10px; --shadow-sm: 0 1px 4px rgba(28,26,23,.07); --shadow-md: 0 4px 16px rgba(28,26,23,.10); --shadow-lg: 0 8px 32px rgba(28,26,23,.13); --ease: 0.25s ease;}
+*, *::before, *::after{box-sizing: border-box; margin: 0; padding: 0;}
+html{scroll-behavior: smooth; -webkit-text-size-adjust: 100%;}
+body{font-family: var(--font-body); background: var(--clr-bg); color: var(--clr-dark); line-height: 1.65; font-size: 1rem; -webkit-font-smoothing: antialiased;}
+img{max-width: 100%; height: auto; display: block;}
+a{color: inherit; text-decoration: none;}
+ul{list-style: none;}
+button{cursor: pointer; border: none; background: none; font-family: inherit;}
+.container{width: 100%; max-width: var(--max-w); margin-inline: auto; padding-inline: 1.25rem;}
+h1, h2, h3, h4, h5{font-family: var(--font-display); font-weight: 600; line-height: 1.2; color: var(--clr-dark);}
+h1{font-size: clamp(1.9rem, 5vw, 3.2rem);}
+h2{font-size: clamp(1.55rem, 3.5vw, 2.35rem);}
+h3{font-size: clamp(1.15rem, 2.5vw, 1.55rem);}
+h4{font-size: 1.05rem;}
+.section-label{display: inline-block; font-family: var(--font-body); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--clr-accent); margin-bottom: 0.75rem;}
+.btn{display: inline-flex; align-items: center; gap: .5rem; padding: .82rem 1.7rem; border-radius: var(--radius); font-family: var(--font-body); font-size: .9rem; font-weight: 600; letter-spacing: .02em; transition: background var(--ease), color var(--ease), transform var(--ease), box-shadow var(--ease); white-space: nowrap; line-height: 1;}
+.btn-outline{border: 1.5px solid var(--clr-dark); color: var(--clr-dark);}
+.btn-outline:hover{background: var(--clr-dark); color: #fff; transform: translateY(-2px);}
+.btn-wa{background: var(--clr-wa); color: #fff;}
+.btn-wa:hover{background: var(--clr-wa-dk); transform: translateY(-2px); box-shadow: 0 4px 18px rgba(37,211,102,.32);}
+.breadcrumb{display: flex; align-items: center; gap: .5rem; font-size: .78rem; color: rgba(255,255,255,.45); margin-bottom: 1.5rem;}
+.breadcrumb a{color: rgba(255,255,255,.55); transition: color var(--ease);}
+.breadcrumb a:hover{color: var(--clr-accent);}
+.breadcrumb-sep{opacity: .4;}
+@media (max-width: 768px){:root{--space-2xl: 4rem; --space-xl: 2.5rem;}}
+</style>
+<link rel="stylesheet" href="css/app.css?v=20261115b" />
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -369,58 +399,45 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   #sheetOut,#sheetOut *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .eb-edge:hover,.eb-grain:hover{fill:transparent}
 }
+
+/* ══ Screen skin (2026-11-15, tools and Concierge redesign step 3) ══
+   New colours and fonts for the screen only. Everything is inside @media screen,
+   so the printed sheets keep the colours and fonts they have always had. */
+@media screen {
+  :root {
+    --clr-bg: #efe9df; --clr-bg-alt: #e4dccf; --clr-surface: #fff;
+    --clr-dark: #17130f; --clr-text: #17130f; --clr-mid: #554d43; --clr-muted: #554d43;
+    --clr-accent: #6b4a33; --clr-accent-dk: #6b4a33; --clr-accent-lt: rgba(107, 74, 51, .1);
+    --clr-border: #d6cdbf; --gold: #c49455;
+    --font-body: 'Manrope', system-ui, sans-serif; --font-display: 'Manrope', system-ui, sans-serif;
+  }
+  body { font-family: var(--font-body); }
+  h1, h2, h3, h4, h5 { font-family: var(--font-display); font-weight: 600; letter-spacing: -.01em; }
+  /* hero: flat navy, serif title, no badge or mini logo (the header carries the brand) */
+  .cs-hero, .carpenter-hero { background: #1f2f58; padding: 2.6rem 0 2.4rem; }
+  .cs-hero::before, .carpenter-hero::before, .carpenter-hero-accent { display: none; }
+  .cs-hero h1, .carpenter-hero h1 { font-family: 'Cormorant Garamond', 'Times New Roman', serif; font-weight: 400; letter-spacing: -.015em; line-height: 1.05; }
+  .cs-hero img, .carpenter-hero img, .cs-badge, .carpenter-badge { display: none !important; }
+  .breadcrumb a:hover { color: #c49455; }
+  /* accent used as a fill under dark text sits on navy bars: brass there */
+  #libPrintBar .lpb-print, .first-run .fr-steps b { background: #c49455; }
+  /* titles the pages set in the old display serif */
+  .result-bar .rb-num, .qg-title, .lib-phd .lp-name, .cost-row.total b, .brand-prev .bp-name, .bf-name { font-family: var(--font-display); font-weight: 600; }
+  .alpha-banner { background: #6b4a33; }
+  .calc-tab.active, .sh-txt, .unit-toggle-lbl, .unit-pill.active { color: #6b4a33; }
+  #guest-bar { background: #e4dccf !important; color: #554d43 !important; }
+  :focus-visible { outline: 2px solid #c49455; outline-offset: 2px; }
+}
 </style>
 </head>
 <body>
 
-<!-- ════ HEADER ════ -->
-<header class="site-header" role="banner">
-  <div class="container">
-    <div class="header-inner">
-      <a href="index.html" class="logo" aria-label="Neewoody Custom Woodwork — Home">
-        Neewoody
-        <span class="logo-sub">Custom Woodwork · Accra</span>
-      </a>
-      <nav class="nav-links" aria-label="Main navigation">
-        <a href="index.html">Home</a>
-        <a href="wardrobes.html">Wardrobes</a>
-        <a href="kitchens.html">Kitchens</a>
-        <a href="beds.html">Beds</a>
-        <div class="nav-services-wrap">
-          <span class="nav-services-trigger">More &#9663;</span>
-          <div class="nav-services-dropdown">
-            <div class="nav-services-col">
-              <span class="nav-services-col-label">More Services</span>
-              <a href="dining-living.html">Dining &amp; Living</a>
-              <a href="tv-units.html">TV Units</a>
-              <a href="solid-wood.html">Solid Wood</a>
-              <a href="hire.html">Hire a Carpenter</a>
-            </div>
-          </div>
-        </div>
-        <a href="portfolio.html">Portfolio</a>
-        <a href="contact.html">Contact</a>
-      </nav>
-      <a href="/concierge/" class="nav-cc" aria-label="Carpentry Concierge" title="Carpentry Concierge" style="display:inline-flex;align-items:center;padding:0;margin:0 .55rem 0 0;border:0;background:none;flex:none"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#1f2f58"/><g fill="none" stroke-linecap="round" stroke-width="8" transform="translate(3 0)"><path d="M77 34A31 31 0 1 0 77 66" stroke="#c8922a"/><path d="M64.5 41.5A16.5 16.5 0 1 0 64.5 58.5" stroke="#f0e8d0"/></g></svg></a><button class="nav-toggle" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </div>
+<header class="app-head navy">
+  <a class="brand" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="images/brand/logo-light.png" alt="" width="102" height="34"></a>
+  <a class="cc" href="/concierge/" aria-label="Carpentry Concierge"><img src="images/concierge/cc-mark.svg" alt="" width="30" height="30"></a>
+  <nav aria-label="Site"><a href="/tools">All tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
 </header>
 
-<nav class="mobile-nav" aria-label="Mobile navigation">
-  <a href="index.html">Home</a>
-  <a href="wardrobes.html">Wardrobes</a>
-  <a href="beds.html">Beds</a>
-  <a href="kitchens.html">Kitchens</a>
-  <a href="portfolio.html">Portfolio</a>
-  <a href="hire.html">Hire a Carpenter</a>
-  <a href="contact.html">Contact</a>
-  <div class="mobile-nav-ctas">
-    <a href="https://wa.me/233244633464" class="btn btn-wa" target="_blank" rel="noopener">WhatsApp Us</a>
-    <a href="contact.html" class="btn btn-outline">Request a Quote</a>
-  </div>
-</nav>
 
 <!-- Running print header is rendered as a repeating <thead> inside #sheetOut
      (buildPrintHead) — the browser repeats it on every printed page and reserves
@@ -647,47 +664,14 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 </div>
 
-<!-- ════ FOOTER ════ -->
-<footer class="site-footer" role="contentinfo">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="index.html" class="logo">Neewoody<span class="logo-sub">Custom Woodwork · Accra</span></a>
-        <p>Custom wardrobes, beds, kitchen cabinets, and bespoke furniture in Accra, Ghana.</p>
-      </div>
-      <div class="footer-col">
-        <h5>Tools</h5>
-        <ul>
-          <li><a href="cutlist.html">&#9874; Wardrobe Cutlist</a></li>
-          <li><a href="cut-sheet.html">&#9874; Cut Sheet Generator</a></li>
-          <li><a href="wardrobe-estimator.html">Price Estimator</a></li>
-          <li><a href="carpenter-pricing.html">Job Pricing</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Company</h5>
-        <ul>
-          <li><a href="portfolio.html">Portfolio</a></li>
-          <li><a href="shelving.html">Shelving</a></li>
-          <li><a href="contact.html">Contact Us</a></li>
-          <li><a href="/concierge/">Carpentry Concierge</a></li>
-          <li><a href="privacy.html">Privacy Policy</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Contact</h5>
-        <div class="footer-contact-item"><a href="tel:+233244633464">0244 633 464</a></div>
-        <div class="footer-contact-item"><a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp Us</a></div>
-        <div class="footer-contact-item"><a href="https://www.instagram.com/neewoodygh" target="_blank" rel="noopener">@neewoodygh</a></div>
-        <div class="footer-contact-item">Accra, Ghana</div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© <span id="footer-year"></span> Neewoody Custom Woodwork. All rights reserved.</span>
-      <div class="footer-bottom-links"><a href="privacy.html">Privacy Policy</a><a href="contact.html">Contact</a></div>
-    </div>
-  </div>
+<footer class="app-foot">
+  <a href="/tools">All tools</a>
+  <a href="/concierge/">Carpentry Concierge</a>
+  <a href="/contact">Contact</a>
+  <a href="/privacy">Privacy</a>
+  <span class="copy">&copy; <span id="footer-year"></span> Neewoody Custom Woodwork, Accra</span>
 </footer>
+
 
 </main>
 
@@ -733,7 +717,6 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   </div>
 </div>
 
-<script src="js/main.js?v=20261113"></script>
 <script src="js/concierge.js?v=20261113b"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -1871,6 +1854,14 @@ function clearAll(){
   fetchSession();   // async: adopt the member's own logo & number if signed in
 })();
 function memberLogout(){ if(window.Concierge) Concierge.clearToken(); location.reload(); }
+</script>
+<script>
+/* The printed sheet keeps its original fonts, which the screen no longer uses.
+   Fetch them quietly once the page has loaded, so a print never falls back to a default font. */
+window.addEventListener('load', function () {
+  if (!document.fonts || !document.fonts.load) return;
+  ['400 16px Jost', '500 16px Jost', '600 16px Jost', '600 16px "Playfair Display"', '700 16px "Playfair Display"'].forEach(function (f) { document.fonts.load(f); });
+});
 </script>
 </body>
 </html>
