@@ -587,6 +587,10 @@ select {
   .alpha-banner { background: #6b4a33; }
   .calc-tab.active, .sh-txt, .unit-toggle-lbl, .unit-pill.active { color: #6b4a33; }
   #guest-bar { background: #e4dccf !important; color: #554d43 !important; }
+  /* readable small text (Lighthouse contrast, 2026-11-16) */
+  #guest-bar span, #guest-bar b { opacity: 1 !important; color: #554d43 !important; }
+  .breadcrumb, .breadcrumb span { color: rgba(239, 233, 223, .78); }
+  .carpenter-cta .section-label { color: #c49455 !important; }
   :focus-visible { outline: 2px solid #c49455; outline-offset: 2px; }
 }
 </style>
