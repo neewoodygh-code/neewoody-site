@@ -44,6 +44,9 @@
       font-family:'Jost',system-ui,sans-serif; color:#1c1c1a;
     }
     :focus-visible{outline:2px solid #c49455;outline-offset:2px}
+    /* workshop print-outs: on a phone the tables scroll inside the sheet; on paper they print whole */
+    #internal-sheet .is-scroll{overflow-x:auto}
+    @media (max-width:600px){ #internal-sheet{padding:18px 14px !important} }
     body{font-family:var(--jp-fb);background:var(--bg);color:var(--dark);-webkit-tap-highlight-color:transparent;font-size:.95rem;line-height:1.6;}
     input,select,textarea,button{font-family:inherit;}
     ::-webkit-scrollbar{width:4px;}
@@ -64,6 +67,11 @@
       body > *:not(.cc-overlay) { display: none !important; }
       .cc-overlay { position: static !important; overflow: visible !important; background: #fff !important; padding: 0 !important; }
       #client-copy { margin: 0 auto !important; max-width: 100% !important; box-shadow: none !important; }
+      #internal-sheet { margin: 0 auto !important; max-width: 100% !important; padding: 0 !important; }
+      #internal-sheet tr { break-inside: avoid; page-break-inside: avoid; }
+      #internal-sheet .is-scroll { overflow: visible !important; }
+      html, body { background: #fff !important; }
+      #internal-sheet, #internal-sheet * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .no-print { display: none !important; }
       @page { margin: 14mm; }
     }
@@ -1270,7 +1278,7 @@ function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, sessio
         {tab==='setup'     && <SetupTab q={q} upd={upd} calc={calc} overheadCfg={overheadCfg} clients={clients}/>}
         {tab==='materials' && <MaterialsTab q={q} upd={upd}/>}
         {tab==='logistics' && <LogisticsTab q={q} upd={upd}/>}
-        {tab==='summary'   && <SummaryTab q={q} calc={calc} session={session} brand={overheadCfg?.brand} onStatusChange={s=>upd({status:s})} onSave={save}/>}
+        {tab==='summary'   && <SummaryTab q={q} calc={calc} cfg={overheadCfg} session={session} brand={overheadCfg?.brand} onStatusChange={s=>upd({status:s})} onSave={save}/>}
         {tab==='costs'     && <CostsTab q={q} upd={upd} calc={calc}/>}
         {tab==='notes'     && <div><Lbl ch="Notes"/><CtrlTA value={q.notes} onChange={e=>upd({notes:e.target.value})} rows={8} placeholder="Client context, special requirements, follow-up notes…"/></div>}
         {(() => {
@@ -1656,6 +1664,200 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
   );
 }
 
+// ── Workshop print-outs (2026-11-16) ──────────────────────────────────
+// Two internal sheets, never for the client (the client copy is above):
+//  • Market list: what to buy, how many and the budget, with blank columns
+//    the person shopping fills in by hand (bought, paid), plus cash and
+//    sign-off lines. Prices can be hidden.
+//  • Cost sheet: the full cost build-up (materials, crew, logistics,
+//    overhead) to share with a partner. Price and margin only when ticked.
+function InternalSheet({ kind, q, calc, cfg, session, brand, onClose }) {
+  const market   = kind === 'market';
+  const bName    = (brand && brand.name) || session?.workshopName || 'My Workshop';
+  const bContact = [brand && brand.phone, brand && brand.location].filter(Boolean).join('  ·  ');
+  const bLogo    = brand && brand.logoUrl;
+  const [showPrices, setShowPrices] = useState(true);
+  const [showMargin, setShowMargin] = useState(false);
+
+  // materials: every ticked line that has been priced (the defaults start at qty 1, price 0,
+  // so unpriced lines are ones the member has not used); sub-items become their own lines
+  const lines = [];
+  [...(q.materials||[]), ...(q.optionals||[])].filter(m => m.on).forEach(m => {
+    if (m.subItems && m.subItems.length) {
+      m.subItems.forEach(si => { if ((si.qty||0) > 0 && (si.unitPrice||0) > 0) lines.push({ key:m.id+'-'+si.id, group:m.name, name:si.name||m.name, qty:si.qty||0, unit:si.unitPrice||0 }); });
+    } else if ((m.qty||0) > 0 && (m.unitPrice||0) > 0) {
+      lines.push({ key:m.id, group:'', name:m.name, qty:m.qty||0, unit:m.unitPrice||0 });
+    }
+  });
+  const rates     = (cfg && cfg.labourRates) || LABOUR_RATES;
+  const ownerRate = (cfg && cfg.ownerRate != null) ? cfg.ownerRate : DEFAULT_OVERHEAD.ownerRate;
+  const crew = (q.crew||[]).filter(r => (r.count||0) > 0).map(r => {
+    const days = r.days || calc.effectiveDays, rate = rates[r.roleId] || 0;
+    const role = (LABOUR_ROLES.find(x => x.id === r.roleId) || {}).label || r.roleId;
+    return { key:r.id, label:role, count:r.count, days, rate, total:rate * r.count * days };
+  });
+  if (q.includeOwner) { const d = q.ownerDays || calc.effectiveDays; crew.push({ key:'owner', label:'Owner / supervision', count:1, days:d, rate:ownerRate, total:ownerRate * d }); }
+  const log = q.logistics || {};
+  const logLines = [
+    ['Materials to workshop', +log.primary||0],
+    ['Delivery to site' + (log.secondaryReturn ? ', with return trip' : ''), (+log.secondary||0) * (log.secondaryReturn ? 2 : 1)],
+    [`Site visits, ${+log.siteVisits||0} × ${GHS(+log.siteVisitCost||0)}`, (+log.siteVisits||0) * (+log.siteVisitCost||0)],
+    [`Accommodation, ${+log.stayNights||0} nights × ${+log.stayRooms||1} room(s)`, (+log.stayNights||0) * (+log.stayRooms||1) * (+log.stayRate||0)],
+  ].filter(l => l[1] > 0);
+
+  const ink = '#17130f', muted = '#554d43', rule = '#cfc6b8';
+  const th  = { textAlign:'left', fontFamily:FB, fontSize:'.68rem', fontWeight:600, letterSpacing:'.04em', color:muted, padding:'6px 6px', borderBottom:`1.5px solid ${ink}` };
+  const td  = { fontFamily:FB, fontSize:'.82rem', color:ink, padding:'7px 6px', borderBottom:`1px solid ${rule}`, verticalAlign:'top' };
+  const R   = { textAlign:'right', whiteSpace:'nowrap' };
+  const blank = { ...td, borderBottom:`1px solid ${rule}`, minWidth:70 };
+  const H2  = ({ch}) => <div style={{fontFamily:FB,fontSize:'.78rem',fontWeight:600,color:ink,margin:'18px 0 4px'}}>{ch}</div>;
+  const Sum = ({label, value, strong}) => (
+    <div style={{display:'flex',justifyContent:'space-between',padding:'7px 6px',borderTop:strong?`2px solid ${ink}`:'none',marginTop:strong?6:0}}>
+      <span style={{fontFamily:FB,fontSize:strong?'.95rem':'.82rem',fontWeight:600,color:ink}}>{label}</span>
+      <span style={{fontFamily:FM,fontSize:strong?'.95rem':'.82rem',fontWeight:600,color:ink}}>{value}</span>
+    </div>
+  );
+  const Fill = ({label}) => (
+    <div style={{display:'flex',alignItems:'flex-end',gap:8,flex:'1 1 200px'}}>
+      <span style={{fontFamily:FB,fontSize:'.8rem',color:muted,whiteSpace:'nowrap'}}>{label}</span>
+      <span style={{flex:1,borderBottom:`1px solid ${ink}`,height:18}}/>
+    </div>
+  );
+  const matBudget = lines.reduce((s, l) => s + l.qty * l.unit, 0);
+  const transport = +log.primary || 0;
+
+  return ReactDOM.createPortal(
+    <div className="cc-overlay" style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
+      <div className="no-print" style={{maxWidth:720,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
+        <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',color:'#fff',fontFamily:FB,fontSize:'.8rem'}}>
+          {market
+            ? <input type="checkbox" checked={showPrices} onChange={e=>setShowPrices(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>
+            : <input type="checkbox" checked={showMargin} onChange={e=>setShowMargin(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>}
+          {market ? 'Show budget prices' : 'Include price and margin'}
+        </label>
+        <div style={{display:'flex',gap:8}}>
+          <Btn ch="Print / Save PDF" onClick={()=>window.print()} color={S.accent} size="sm"/>
+          <Btn ch="Close" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.5)'}}/>
+        </div>
+      </div>
+      <div id="internal-sheet" style={{maxWidth:720,margin:'0 auto',background:'#fff',color:ink,padding:'26px 28px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:12,borderBottom:`1px solid ${rule}`,paddingBottom:12}}>
+          <div style={{display:'flex',gap:12,alignItems:'flex-start',minWidth:0}}>
+            {bLogo ? <img src={bLogo} alt="" style={{width:42,height:42,borderRadius:6,objectFit:'cover',flex:'none'}}/> : null}
+            <div style={{minWidth:0}}>
+              <div style={{fontFamily:FB,fontSize:'1.05rem',fontWeight:700,lineHeight:1.15}}>{bName}</div>
+              {bContact ? <div style={{fontSize:'.72rem',color:muted,fontFamily:FB,marginTop:3}}>{bContact}</div> : null}
+            </div>
+          </div>
+          <div style={{textAlign:'right',flex:'none'}}>
+            <div style={{fontFamily:FB,fontSize:'1.15rem',fontWeight:700}}>{market ? 'Market list' : 'Cost sheet'}</div>
+            <div style={{fontFamily:FB,fontSize:'.72rem',color:muted,marginTop:2}}>Internal, not for the client</div>
+          </div>
+        </div>
+        <div style={{display:'flex',flexWrap:'wrap',gap:'4px 24px',fontFamily:FB,fontSize:'.8rem',color:muted,marginTop:10}}>
+          <span>Job: <b style={{color:ink,fontWeight:600}}>{q.item || '—'}</b></span>
+          <span>Client: <b style={{color:ink,fontWeight:600}}>{q.client || '—'}</b></span>
+          <span>Ref: <b style={{color:ink,fontWeight:600}}>{q.refId}</b></span>
+          <span>Printed: <b style={{color:ink,fontWeight:600}}>{fmtDate(new Date().toISOString())}</b></span>
+          {!market && <span>Days: <b style={{color:ink,fontWeight:600}}>{q.workshopDays||0} workshop + {q.siteDays||0} site{calc.effectiveDays!==(q.workshopDays||0)+(q.siteDays||0)?` (${calc.effectiveDays} with buffer)`:''}</b></span>}
+        </div>
+
+        {market ? (
+          <div>
+            <H2 ch="To buy"/>
+            {lines.length === 0
+              ? <div style={{...td,color:muted}}>No priced materials yet. Fill in quantities and prices in the Materials tab first.</div>
+              : <div className="is-scroll"><table style={{width:'100%',borderCollapse:'collapse'}}>
+                  <thead><tr>
+                    <th style={{...th,width:22}} aria-label="Done"></th>
+                    <th style={th}>Item</th>
+                    <th style={{...th,...R}}>Qty</th>
+                    {showPrices && <th style={{...th,...R}}>Budget each</th>}
+                    {showPrices && <th style={{...th,...R}}>Budget total</th>}
+                    <th style={{...th,...R}}>Bought</th>
+                    <th style={{...th,...R}}>Paid (GH₵)</th>
+                  </tr></thead>
+                  <tbody>{lines.map(l => (
+                    <tr key={l.key}>
+                      <td style={td}><span style={{display:'inline-block',width:13,height:13,border:`1.5px solid ${ink}`,borderRadius:2,marginTop:2}}/></td>
+                      <td style={td}>{l.name}{l.group ? <div style={{fontSize:'.7rem',color:muted}}>{l.group}</div> : null}</td>
+                      <td style={{...td,...R,fontFamily:FM}}>{l.qty}</td>
+                      {showPrices && <td style={{...td,...R,fontFamily:FM}}>{l.unit ? GHS(l.unit) : '—'}</td>}
+                      {showPrices && <td style={{...td,...R,fontFamily:FM}}>{l.unit ? GHS(l.qty * l.unit) : '—'}</td>}
+                      <td style={blank}></td>
+                      <td style={blank}></td>
+                    </tr>
+                  ))}</tbody>
+                </table></div>}
+            {showPrices && lines.length > 0 && <Sum label="Materials budget" value={GHS(matBudget)}/>}
+            {showPrices && transport > 0 && <Sum label="Transport budget (materials to workshop)" value={GHS(transport)}/>}
+            {showPrices && lines.length > 0 && <Sum label="Total to take" value={GHS(matBudget + transport)} strong/>}
+            <div style={{display:'flex',flexWrap:'wrap',gap:'18px 28px',marginTop:26}}>
+              <Fill label="Cash given"/><Fill label="Spent"/><Fill label="Change returned"/>
+            </div>
+            <div style={{display:'flex',flexWrap:'wrap',gap:'18px 28px',marginTop:22}}>
+              <Fill label="Sent by"/><Fill label="Shopped by"/><Fill label="Date"/>
+            </div>
+            <div style={{fontSize:'.72rem',color:muted,fontFamily:FB,marginTop:18,lineHeight:1.5}}>Keep the receipts with this sheet. Write what was actually bought and paid in the last two columns.</div>
+          </div>
+        ) : (
+          <div>
+            <H2 ch="Materials"/>
+            <div className="is-scroll"><table style={{width:'100%',borderCollapse:'collapse'}}>
+              <thead><tr><th style={th}>Item</th><th style={{...th,...R}}>Qty</th><th style={{...th,...R}}>Unit</th><th style={{...th,...R}}>Total</th></tr></thead>
+              <tbody>{lines.filter(l => l.qty * l.unit > 0).map(l => (
+                <tr key={l.key}>
+                  <td style={td}>{l.name}{l.group ? <div style={{fontSize:'.7rem',color:muted}}>{l.group}</div> : null}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{l.qty}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{GHS(l.unit)}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{GHS(l.qty * l.unit)}</td>
+                </tr>
+              ))}</tbody>
+            </table></div>
+            <Sum label="Materials" value={GHS(calc.matAmt)}/>
+
+            <H2 ch="Crew"/>
+            <div className="is-scroll"><table style={{width:'100%',borderCollapse:'collapse'}}>
+              <thead><tr><th style={th}>Role</th><th style={{...th,...R}}>People</th><th style={{...th,...R}}>Days</th><th style={{...th,...R}}>Day rate</th><th style={{...th,...R}}>Total</th></tr></thead>
+              <tbody>{crew.map(c => (
+                <tr key={c.key}>
+                  <td style={td}>{c.label}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{c.count}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{c.days}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{GHS(c.rate)}</td>
+                  <td style={{...td,...R,fontFamily:FM}}>{GHS(c.total)}</td>
+                </tr>
+              ))}</tbody>
+            </table></div>
+            <Sum label="Labour" value={GHS(calc.labour)}/>
+
+            {logLines.length > 0 && <React.Fragment>
+              <H2 ch="Logistics"/>
+              <div className="is-scroll"><table style={{width:'100%',borderCollapse:'collapse'}}><tbody>{logLines.map(l => (
+                <tr key={l[0]}><td style={td}>{l[0]}</td><td style={{...td,...R,fontFamily:FM}}>{GHS(l[1])}</td></tr>
+              ))}</tbody></table></div>
+              <Sum label="Logistics" value={GHS(calc.logistics)}/>
+            </React.Fragment>}
+
+            <H2 ch="Workshop overhead"/>
+            <div className="is-scroll"><table style={{width:'100%',borderCollapse:'collapse'}}><tbody>
+              <tr><td style={td}>{calc.effectiveDays} days × {GHS(calc.dayRate)} a day (rent, power, tools, transport and the rest)</td><td style={{...td,...R,fontFamily:FM}}>{GHS(calc.overhead)}</td></tr>
+            </tbody></table></div>
+
+            <Sum label="Total cost of the job" value={GHS(calc.rawCost)} strong/>
+            {showMargin && <React.Fragment>
+              <Sum label="Price quoted to the client" value={GHS(calc.quotedPrice)}/>
+              <Sum label={`Margin (${calc.marginPct.toFixed(1)}% of the price)`} value={GHS(calc.grossMargin)}/>
+            </React.Fragment>}
+            <div style={{fontSize:'.72rem',color:muted,fontFamily:FB,marginTop:18,lineHeight:1.5}}>Prepared by {bName} · {q.refId}. Figures are the planned costs from the quote; actual spending is tracked under Actual Costs.</div>
+          </div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 // ── Push a priced quote across to the admin Invoice Generator ──────────
 // Both tools are same-origin, so we hand off via localStorage and navigate.
 // The invoice tool seeds a new draft on load, then the member itemises /
@@ -1690,8 +1892,9 @@ function sendMultipleToInvoice(quotes, clientName, overheadCfg, asOptions) {
 }
 
 // ── Summary Tab ───────────────────────────────────────────────────────
-function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
+function SummaryTab({ q, calc, cfg, session, brand, onStatusChange, onSave }) {
   const [showClient, setShowClient] = useState(false);
+  const [sheet, setSheet] = useState(null); // 'market' | 'cost' | null
   const [sendQty, setSendQty] = useState(1);
   const totalDays   = (q.workshopDays||0)+(q.siteDays||0);
   const activeAddOns= ADDONS.filter(a=>q.addOns?.[a.id]);
@@ -1747,6 +1950,14 @@ function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
         <Btn ch="Open client copy →" onClick={()=>setShowClient(true)} full outline color={S.dark}/>
       </div>}/>
       <Card ch={<div>
+        <Lbl ch="Workshop print-outs"/>
+        <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>For your own team, never the client. The <strong>market list</strong> tells whoever goes shopping what to buy, how many and the budget, with space to write what was paid. The <strong>cost sheet</strong> lays out every cost of the job for a partner or investor.</div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+          <Btn ch="Market list →" onClick={()=>setSheet('market')} full outline color={S.dark}/>
+          <Btn ch="Cost sheet →" onClick={()=>setSheet('cost')} full outline color={S.dark}/>
+        </div>
+      </div>}/>
+      <Card ch={<div>
         <Lbl ch="Invoice & Quote Generator"/>
         <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>Send this quote's total to the <strong>Invoice &amp; Quote Generator</strong> as a new draft — on your own letterhead — then itemise the pieces, add your terms and print.</div>
         <div style={{display:'grid',gridTemplateColumns:'1fr 2fr',gap:10,alignItems:'end',marginBottom:10}}>
@@ -1772,6 +1983,7 @@ function SummaryTab({ q, calc, session, brand, onStatusChange, onSave }) {
         <Btn ch="Save quote" onClick={onSave} full color={S.accent}/>
       </div>}/>
       {showClient && <ClientCopy q={q} calc={calc} session={session} brand={brand} onClose={()=>setShowClient(false)}/>}
+      {sheet && <InternalSheet kind={sheet} q={q} calc={calc} cfg={cfg} session={session} brand={brand} onClose={()=>setSheet(null)}/>}
     </div>
   );
 }
