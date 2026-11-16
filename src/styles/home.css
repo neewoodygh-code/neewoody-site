@@ -5,7 +5,7 @@
 .mf-text { font-family: var(--serif); font-weight: 400; font-size: var(--t-h2); line-height: 1.1; letter-spacing: -.015em; }
 .mf-row { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 5fr) minmax(0, 4fr); gap: 2rem; margin-top: clamp(4rem, 8vw, 7rem); align-items: end; }
 .mf-img { grid-column: 2; }
-.mf-img img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.mf-img img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: 50% 36%; } /* the staining photo is portrait: show the face and the slab together */
 .mf-facts { border-top: 1px solid var(--hair); }
 .mf-facts div { display: grid; grid-template-columns: 7rem 1fr; padding: .95rem 0; border-bottom: 1px solid var(--hair); font-size: var(--t-body); }
 .mf-facts dt { color: var(--stone); }
