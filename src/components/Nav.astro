@@ -1,5 +1,5 @@
 ---
-// Site header: logo, "What we make" (every product page), Portfolio, Contact, WhatsApp.
+// Site header: logo, the Carpentry Concierge mark beside it (owner wants it on every page), "What we make" (every product page), Portfolio, Contact, WhatsApp.
 // Desktop: a small dropdown. Phones: a full-screen native <dialog>.
 import { Image } from 'astro:assets';
 import logoLight from '../assets/brand/logo-light.png';
@@ -12,6 +12,7 @@ const more = [['Portfolio', '/portfolio'], ['Contact', '/contact']];
     <Image class="nav-logo on-dark" src={logoLight} alt="" width={180} />
     <Image class="nav-logo on-light" src={logoDark} alt="" width={180} />
   </a>
+  <a class="nav-cc" href="/concierge/" aria-label="Carpentry Concierge" title="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="30" height="30" /></a>
   <nav aria-label="Main" class="nav-links">
     <div class="nav-drop" id="navDrop">
       <button type="button" class="nav-drop-btn" id="navDropBtn" aria-expanded="false" aria-controls="navDropList">What we make</button>
@@ -35,6 +36,7 @@ const more = [['Portfolio', '/portfolio'], ['Contact', '/contact']];
     {SERVICES.map((s) => <a href={s.href}>{s.name}</a>)}
     <p class="menu-head">More</p>
     {more.map(([t, h]) => <a href={h}>{t}</a>)}
+    <a href="/concierge/">Carpentry Concierge</a>
   </nav>
   <a class="menu-wa" href={WA}>WhatsApp {PHONE}</a>
 </dialog>
