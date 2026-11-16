@@ -98,5 +98,6 @@
   .lockup-cc span { font-size: 8.5px; letter-spacing: .14em; }
   .app-head nav { gap: .9rem; }
   .app-head nav a + a { display: none; } /* one link on phones; the logos link home */
+  .app-head { padding: .5rem 1rem; }
 }
 @media (max-width: 350px) { .lockup-cc span { display: none; } }

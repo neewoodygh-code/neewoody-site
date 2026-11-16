@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow" />
 <title>Members Directory · Carpentry Concierge</title>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
-<link rel="stylesheet" href="../css/app.css?v=20261116c">
+<link rel="stylesheet" href="../css/app.css?v=20261116d">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -576,6 +576,11 @@ a.tool-card:hover .go{ color:var(--navy); }
 .md-biz, .sf-price, .svc-n { color: var(--gold-ink); }
 .bdg-av.giver, .sug-status.planned, .co-status.active { color: var(--gold-ink); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* phones: every tab visible at once (two rows of four) instead of a sideways strip that hides half of them */
+@media (max-width: 600px){
+  .tabbar{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; padding:.2rem .4rem; overflow:visible; }
+  .tab{ padding:.65rem .15rem; font-size:.62rem; letter-spacing:.05em; text-align:center; overflow:hidden; text-overflow:ellipsis; }
+}
 /* phones: the logo lockup and the buttons each get their own row; the header scrolls away so the tab bar can stay at the top */
 @media (max-width: 600px){
   header.top{ position:static; flex-wrap:wrap; row-gap:.65rem; padding:.75rem 1rem; }

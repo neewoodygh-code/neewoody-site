@@ -59,3 +59,12 @@ Every marketing page is now Astro in the new design (bone `#efe9df`, espresso `#
 - Bump `?v=` on any changed js/css; bump `concierge.js?v=` only if it changes.
 - No Worker deploy is needed for any step. If one turns out to be needed, announce it first.
 - The site will look mixed between steps; that is expected, as it was during the marketing migration.
+
+## After the plan: phone ease-of-use fixes (2026-11-16, owner: "yes fix them")
+From the walk-through of Concierge and the tools (rated about 7 out of 10 after the logo lockup):
+- Member area tabs on phones are now two rows of four (`.tabbar` grid at 600 px and below) instead of a sideways strip that hid Safety, Sourcing, Academy and Support. Checked at 375 and 320 px: all tabs visible, none cut off.
+- Cut sheet: the single column could not shrink, so the page was 24 px wider than a 375 px phone. Fixed in the screen skin (`.cs-cols` uses `minmax(0, 1fr)`); print re-proven identical (123/123, cutlist 654/654).
+- Invoices: item rows had fixed column widths that pushed a 320 px phone sideways; at 400 px and below they shrink. The document `#doc` is untouched.
+- Public tool pages now say "Free tools" (the public /tools page) so it is not confused with the members' "Member tools" tab.
+- The slim brand bar is tighter on phones (job pricing stacks it above its own toolbar).
+Still to consider: job pricing on a phone shows the brand bar and its own two-row toolbar together; the toolbar is inside its script, so slimming it means a script edit.
