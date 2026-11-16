@@ -67,9 +67,14 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.02; let
 .nav-brand { position: relative; display: block; width: 180px; }
 .nav-logo { width: 180px; transition: opacity .5s var(--ease); }
 .nav-logo.on-light { position: absolute; inset: 0; opacity: 0; }
-/* Carpentry Concierge mark, right beside the logo on every page */
-.nav-cc { display: block; flex: none; margin-left: -1.3rem; border-radius: 7px; }
-.nav-cc img { width: 30px; height: 30px; }
+/* Neewoody | Carpentry Concierge lockup: same height, thin line between (also in css/app.css .lockup) */
+.nav-lockup { display: flex; align-items: center; gap: 18px; flex: none; }
+.nav-rule { flex: none; width: 1px; height: 40px; background: currentColor; opacity: .35; }
+.nav-cc { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; }
+.nav-cc img { width: 46px; height: 46px; }
+.nav-cc span { font: 600 11px/1.3 var(--sans); letter-spacing: .18em; text-transform: uppercase; white-space: nowrap; }
+.nav-wa { display: inline-flex; align-items: center; gap: .5rem; }
+.nav-wa-ic { display: none; }
 .nav[data-tone='light'] .on-light { opacity: 1; }
 .nav[data-tone='light'] .on-dark { opacity: 0; }
 .nav-links { display: flex; gap: 2.2rem; margin-left: auto; font-size: var(--t-small); }
@@ -134,20 +139,33 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.02; let
   .nav-num { display: none; }
   .nav-menu { display: block; }
   .nav-brand, .nav-logo { width: 132px; }
+  .nav-lockup { gap: 12px; }
+  .nav-rule { height: 30px; }
+  .nav-cc { gap: 8px; }
+  .nav-cc img { width: 34px; height: 34px; }
+  .nav-cc span { font-size: 9.5px; letter-spacing: .16em; }
   .hero-cap { display: none; }
   .contact-meta, .foot-links { grid-template-columns: minmax(0, 1fr); }
 }
+@media (max-width: 560px) {
+  .nav-wa { padding: .55rem; }
+  .nav-wa-ic { display: block; }
+  .nav-wa-t { display: none; }
+}
 @media (max-width: 400px) {
   .nav-brand, .nav-logo { width: 112px; }
+  .nav-lockup { gap: 9px; }
+  .nav-rule { height: 24px; }
+  .nav-cc img { width: 28px; height: 28px; }
+  .nav-cc span { font-size: 8.5px; letter-spacing: .13em; }
   .nav { gap: 1rem; }
-  .nav-cc { margin-left: -.4rem; }
-  .nav-cc img { width: 26px; height: 26px; }
 }
 /* very narrow phones: keep the logo a readable size beside the Concierge mark */
-@media (max-width: 360px) {
+@media (max-width: 380px) {
   .nav { gap: .6rem; }
-  .nav-cc { margin-left: 0; }
-  .nav-wa { padding: .45rem .7rem; }
+}
+@media (max-width: 350px) {
+  .nav-cc span { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

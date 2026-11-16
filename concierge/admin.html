@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow" />
 <title>Concierge Admin · Neewoody</title>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
-<link rel="stylesheet" href="../css/app.css?v=20261115b">
+<link rel="stylesheet" href="../css/app.css?v=20261116c">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -168,6 +168,11 @@ td select{ font-size:.82rem; padding:.35rem .4rem; width:auto; }
 a, .ins-list li b { color: var(--gold-ink); }
 .pill.pending { color: var(--gold-ink); }
 :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+/* phones: the logo lockup and the buttons each get their own row; the header scrolls away so the tab bar can stay at the top */
+@media (max-width: 600px){
+  header.top{ position:static; flex-wrap:wrap; row-gap:.65rem; padding:.75rem 1rem; }
+  .top-actions, header.top > div:last-child{ margin-left:auto; }
+}
 /* the new font is wider than the old one: keep the header buttons on one line on phones */
 @media (max-width: 520px){
   .top{ gap:.5rem; } .top-actions{ gap:.3rem; }
@@ -178,9 +183,11 @@ a, .ins-list li b { color: var(--gold-ink); }
 </head>
 <body>
 <header class="top">
-  <div>
-    <div class="eyebrow">Carpentry Concierge</div>
-    <div class="name">Admin</div>
+  <div class="lockup">
+    <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
+    <span class="lockup-rule" aria-hidden="true"></span>
+    <a class="lockup-cc" href="/concierge/directory.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Admin</span>
   </div>
   <div>
     <a class="tbtn" href="directory.html">Directory</a>

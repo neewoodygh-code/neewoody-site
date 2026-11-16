@@ -46,7 +46,7 @@ h4{font-size: 1.05rem;}
 .breadcrumb-sep{opacity: .4;}
 @media (max-width: 768px){:root{--space-2xl: 4rem; --space-xl: 2.5rem;}}
 </style>
-<link rel="stylesheet" href="css/app.css?v=20261115b" />
+<link rel="stylesheet" href="css/app.css?v=20261116c" />
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -437,8 +437,12 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 <body>
 
 <header class="app-head navy">
-  <a class="brand" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="images/brand/logo-light.png" alt="" width="102" height="34"></a>
-  <a class="cc" href="/concierge/" aria-label="Carpentry Concierge"><img src="images/concierge/cc-mark.svg" alt="" width="30" height="30"></a>
+  <div class="lockup">
+    <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
+    <span class="lockup-rule" aria-hidden="true"></span>
+    <a class="lockup-cc" href="/concierge/" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Cut sheet</span>
+  </div>
   <nav aria-label="Site"><a href="/tools">All tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
 </header>
 
