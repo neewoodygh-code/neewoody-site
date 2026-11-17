@@ -54,7 +54,9 @@
 .viewer { border: 0; padding: 0; margin: auto; max-width: min(96vw, 1400px); max-height: 94vh; background: transparent; color: var(--on-dark); overflow: visible; }
 .viewer::backdrop { background: rgba(23, 19, 15, .92); }
 .viewer[open] { display: flex; flex-direction: column; align-items: center; }
-.viewer img { max-width: min(92vw, 1400px); max-height: 82vh; object-fit: contain; }
+.viewer img, .viewer video { max-width: min(92vw, 1400px); max-height: 82vh; object-fit: contain; }
+.viewer video { background: #000; }
+.viewer [hidden] { display: none; }
 .viewer p { margin-top: .9rem; max-width: 70ch; text-align: center; font-size: var(--t-small); color: var(--on-dark-2); }
 .v-close, .v-prev, .v-next { position: fixed; background: none; border: 1px solid var(--hair-dark); color: var(--on-dark); border-radius: 100px; cursor: pointer; font: 500 var(--t-body) var(--sans); }
 .v-close { top: 1.2rem; right: 1.2rem; padding: .5rem 1rem; }

@@ -47,5 +47,7 @@ export async function bigSet(photos) {
   return Promise.all(photos.map(async (p) => ({
     src: (await getImage({ src: await img(p.img), width: 1600, format: 'webp' })).src,
     alt: p.alt || '', cap: p.cap || p.alt || '',
+    // a set entry may be a short clip: `img` is its cover still, `video` the .mp4 (served as is)
+    ...(p.video ? { video: '/' + p.video.replace(/^\//, '') } : {}),
   })));
 }

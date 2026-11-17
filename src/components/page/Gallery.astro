@@ -18,6 +18,11 @@ const headLink = g.headLink === undefined ? ['/portfolio', 'See the full portfol
 const posts = g.cms === false ? [] : await getPosts(slug);
 const limit = g.limit ?? 6;
 const limited = limit > 0 && g.items.length > limit + 2;
+// "5 photos, 3 videos" under a card whose set holds clips
+const morePhotos = (set: any[]) => {
+  const v = set.filter((p) => p.video).length, ph = set.length - v;
+  return [ph && `${ph} photo${ph > 1 ? 's' : ''}`, v && `${v} video${v > 1 ? 's' : ''}`].filter(Boolean).join(', ');
+};
 const items = await Promise.all(g.items.map(async (it: any) => {
   const src = await img(it.img);
   const own = (await bigSet([{ img: it.img, alt: it.alt, cap: [it.place, it.caption].filter(Boolean).join('. ') }]))[0];
@@ -56,7 +61,7 @@ const items = await Promise.all(g.items.map(async (it: any) => {
           {it.badge && <span class="g-badge">{it.badge}</span>}
           <span class="g-place">{it.place}{it.year && <span class="g-year"> {it.year}</span>}</span>
           {it.caption && <span class="g-cap">{it.caption}</span>}
-          {it.set && <span class="g-more">{it.set.length} photos</span>}
+          {it.set && <span class="g-more">{morePhotos(it.set)}</span>}
         </Fragment>
       );
       if (it.href) return <a class={cls} href={it.href} data-cat={it.cat}>{inner}</a>;

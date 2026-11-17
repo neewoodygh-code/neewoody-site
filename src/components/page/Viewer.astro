@@ -4,9 +4,11 @@
 //   data-set='[{"src","alt","cap"}]' → steps through that list (a project's photos), data-start = index
 //   otherwise → steps through the visible [data-view] items in the nearest [data-view-group]
 //   data-text → longer write-up shown under the photo
+//   an entry with "video" plays that clip (with controls, sound off, never by itself)
 ---
 <dialog class="viewer" id="viewer" aria-label="Photo viewer">
   <img id="viewerImg" alt="" />
+  <video id="viewerVid" controls playsinline muted preload="none" hidden></video>
   <div class="viewer-txt">
     <p id="viewerCap"></p>
     <div id="viewerText"></div>
@@ -17,9 +19,10 @@
 </dialog>
 
 <script>
-  type Photo = { src: string; alt: string; cap?: string };
+  type Photo = { src: string; alt: string; cap?: string; video?: string };
   const dlg = document.getElementById('viewer') as HTMLDialogElement;
   const vImg = document.getElementById('viewerImg') as HTMLImageElement;
+  const vVid = document.getElementById('viewerVid') as HTMLVideoElement;
   const vCap = document.getElementById('viewerCap')!;
   const vText = document.getElementById('viewerText')!;
   let list: Photo[] = [];
@@ -29,7 +32,15 @@
     if (!list.length) return;
     cur = (i + list.length) % list.length;
     const p = list[cur];
-    vImg.src = p.src; vImg.alt = p.alt || '';
+    vVid.pause();
+    if (p.video) {
+      vImg.hidden = true; vImg.removeAttribute('src');
+      vVid.hidden = false; vVid.poster = p.src; vVid.src = p.video; vVid.setAttribute('aria-label', 'Video: ' + (p.alt || ''));
+      vVid.play().catch(() => {}); // the visitor chose this clip, so it starts; they can pause it
+    } else {
+      vVid.hidden = true; vVid.removeAttribute('src'); vVid.load();
+      vImg.hidden = false; vImg.src = p.src; vImg.alt = p.alt || '';
+    }
     vCap.textContent = (p.cap || '') + (list.length > 1 ? `  (${cur + 1} of ${list.length})` : '');
   };
   const fromEl = (el: HTMLElement): Photo => ({
@@ -65,6 +76,7 @@
     dlg.showModal();
   });
   document.getElementById('vClose')!.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('close', () => vVid.pause());
   document.getElementById('vPrev')!.addEventListener('click', () => show(cur - 1));
   document.getElementById('vNext')!.addEventListener('click', () => show(cur + 1));
   dlg.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') show(cur - 1); if (e.key === 'ArrowRight') show(cur + 1); });
