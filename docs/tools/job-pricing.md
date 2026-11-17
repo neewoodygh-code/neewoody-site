@@ -12,3 +12,6 @@ Summary tab, card "Workshop print-outs", two buttons. Component `InternalSheet` 
 - Both say "Internal, not for the client", use the member's own name, contact and logo. Tables scroll sideways inside the sheet on phones and print whole on paper; page background forced white in print.
 - Unpriced default lines (qty 1, price 0) are left off both sheets.
 - `SummaryTab` now receives `cfg` (the member's overhead settings) for crew day rates and the owner rate.
+
+## Fix 2026-11-17: blank Summary tab
+The Summary tab went blank (React crash) after the price-method switch: its Pricing card called `tierLabel(overheadCfg, ...)`, but inside `SummaryTab` the settings arrive as `cfg`. Now `tierLabel(cfg, ...)`. Tested locally with stubbed API data: Summary, client copy, market list and cost sheet all open.

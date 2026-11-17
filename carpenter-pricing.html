@@ -1958,7 +1958,7 @@ function SummaryTab({ q, calc, cfg, session, brand, onStatusChange, onSave }) {
       </div>}/>
       <Card ch={<div>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Pricing</div>
-        <Row label={`Tier: ${calc.tier.label}`} value={tierLabel(overheadCfg, calc.tier.id)}/>
+        <Row label={`Tier: ${calc.tier.label}`} value={tierLabel(cfg, calc.tier.id)}/>
         {activeAddOns.map(a=><Row key={a.id} label={a.label} value={`+${a.pct}%`} indent/>)}
         {activeAddOns.length>0&&<Row label="Combined add-on multiplier" value={`×${calc.addOnMult.toFixed(3)}`}/>}
         <div style={{borderTop:`1.5px solid ${S.accent}`,marginTop:12,paddingTop:12}}>
