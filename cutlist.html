@@ -606,10 +606,10 @@ select {
   <div class="lockup">
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
     <span class="lockup-rule" aria-hidden="true"></span>
-    <a class="lockup-cc" href="/concierge/" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <a class="lockup-cc" data-cc-home href="/concierge/" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
     <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Cutlist</span>
   </div>
-  <nav aria-label="Site"><a href="/tools">Free tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
+  <nav aria-label="Site"><a href="/tools" data-cc-tools>Free tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
 </header>
 
 
@@ -620,7 +620,7 @@ select {
   <div class="carpenter-hero-accent" aria-hidden="true"></div>
   <div class="container">
     <nav class="breadcrumb" aria-label="Breadcrumb">
-      <a href="index.html">Home</a>
+      <a href="/concierge/" data-cc-home>Carpentry Concierge</a>
       <span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span aria-current="page">Carpenter Tools</span>
     </nav>
@@ -927,6 +927,14 @@ select {
 </main>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script>
+/* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
+   members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
+(function(){ var m = window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive();
+  document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/directory.html' : '/concierge/'; });
+  if (m) document.querySelectorAll('[data-cc-tools]').forEach(function(a){ a.href = '/concierge/directory.html#tools'; a.textContent = 'Member tools'; });
+})();
+</script>
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
