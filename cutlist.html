@@ -821,8 +821,7 @@ select {
           <div class="hint" id="mod-note">—</div>
         </div>
         <div class="ig">
-          <label for="mod-join">Unit Join</label>
-          <select id="mod-join" onchange="live()"><option value="butt">Butt join (2 panels)</option><option value="shared">Shared divider (1 panel)</option></select>
+          <div class="hint" style="margin-top:1.6rem">Units stand side by side, each with its own two sides (two panels at every join). One panel shared between two units is just one carcass with a divider: use Sections for that.</div>
         </div>
       </div>
     </div>
@@ -986,7 +985,7 @@ function sync(){
   S.tkH=gi('tk-h',100);S.tkStyle=gv('tk-style')||'setback';S.tkSetback=gi('tk-setback',60);
   S.tkThick=gi('tk-thick',18);S.tkGap=gi('tk-gap',3);
   S.tkMrMode=gv('tk-mr-mode')||'auto';S.tkMrQty=gi('tk-mr-qty',3);
-  S.modUnits=parseInt(gv('mod-units'))||1;S.modJoin=gv('mod-join')||'butt';
+  S.modUnits=parseInt(gv('mod-units'))||1;S.modJoin='butt';  // shared-divider join removed 2026-11-17
   S.spL=parseInt(gv('sp-l'))||0;S.spR=parseInt(gv('sp-r'))||0;S.spThick=gi('sp-thick',18);
   S.spEH=gi('sp-eh',50);S.spED=gi('sp-ed',0);S.spSW=gi('sp-sw',30);
   var pe=document.getElementById('pel-en');S.pelEn=pe?pe.checked:false;S.pelH=gi('pel-h',80);
@@ -1415,7 +1414,7 @@ function calculate(){
   var mrLen=R(d-2*tkThick);
 
   // ── CARCASS ──
-  var joinP=modUnits>1?(modJoin==='butt'?(modUnits-1)*2:(modUnits-1)):0;
+  var joinP=modUnits>1?(modUnits-1)*2:0;  // two panels at every unit join
   parts.push({
     name:'Side Panel', qty:2+joinP,
     w:R(h), d:R(d),
@@ -1461,13 +1460,13 @@ function calculate(){
 
   // ── FRONT SPANS (full overlay) ──
   // Outer edge (carcass side, or unit end on a butt join): the front stops `overlay` mm in from the side's face.
-  // Shared panel (divider, or a shared-divider unit join) with a front on both sides: each front covers half
+  // Shared divider with a front on both sides: each front covers half
   // the panel less half the door gap, so neighbouring doors never overlap.
   function hasFront(s){return !!s&&((s.door&&s.door.on)||s.zones.some(function(z){return z.type==='drawers'&&z.drawers>0;}));}
   function edgeOv(si,side){
     var nb=si+side;
     if(nb<0||nb>=n)return t-overlay;
-    if(Math.floor(si/secsPerUnit)!==Math.floor(nb/secsPerUnit)&&modJoin==='butt')return t-overlay;
+    if(Math.floor(si/secsPerUnit)!==Math.floor(nb/secsPerUnit))return t-overlay;  // unit join: each unit has its own side
     return hasFront(S.secs[nb])?(t-dgap)/2:t-overlay;
   }
   function frontSpan(si){return unitOpenW+edgeOv(si,-1)+edgeOv(si,1);}
@@ -1762,7 +1761,7 @@ function generate(){
   mh+='<div class="info-row"><span class="ik">Back Panel</span><span class="iv">'+(S.backType==='inset'?'Inset '+S.backThick+'mm, '+S.groove+'mm groove':'Nail-on '+S.backThick+'mm')+'</span></div>';
   mh+='<div class="info-row"><span class="ik">Board Thickness</span><span class="iv">'+S.thick+'mm</span></div>';
   mh+='<div class="info-row"><span class="ik">Door Edge Clearance</span><span class="iv">'+S.overlay+'mm — T'+S.topgap+'/B'+S.botgap+'/G'+S.dgap+'mm</span></div>';
-  if(S.modUnits>1)mh+='<div class="info-row"><span class="ik">Modular Units</span><span class="iv">'+S.modUnits+'× '+r.unitW+'mm — '+(S.modJoin==='butt'?'Butt join':'Shared divider')+'</span></div>';
+  if(S.modUnits>1)mh+='<div class="info-row"><span class="ik">Modular Units</span><span class="iv">'+S.modUnits+'× '+r.unitW+'mm — Butt join</span></div>';
   if(r.spDepth)mh+='<div class="info-row"><span class="ik">Side Panel Depth</span><span class="iv">'+r.spDepth+'mm ('+S.d+' carcass + '+S.doorThick+' door + '+S.clear+' clearance)</span></div>';
   mh+='</div></div>';
 
@@ -1773,7 +1772,7 @@ function generate(){
   nh+='<div class="note-item"><div class="nbullet">3.</div><div class="ntext"><strong>DIVIDERS:</strong> '+r.divH+'mm — sit between top and bottom carcass panels only. Do not enter the subframe zone.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">4.</div><div class="ntext"><strong>BACK PANEL:</strong> '+(S.backType==='inset'?'Inset '+S.backThick+'mm — cut a groove '+S.backThick+'mm wide and '+S.groove+'mm deep into side panels and top/bottom panels before assembly. Back is cut 1mm short of the groove bottom each side.':'Nail-on '+S.backThick+'mm — screw to back face of assembled carcass.')+'</div></div>';
   nh+='<div class="note-item"><div class="nbullet">5.</div><div class="ntext"><strong>FACE PANEL / TOE KICK:</strong> '+r.topBotW+'×'+R(S.tkH-S.tkGap)+'mm. '+S.tkGap+'mm gap prevents door binding on close. '+(S.tkStyle==='setback'?'Frame set back '+S.tkSetback+'mm — creates the toe kick recess.':'Flush with front.')+'</div></div>';
-  if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> '+(S.modJoin==='butt'?'Butt join — two side panels face-to-face at each join. Screw through to connect.':'Shared divider — one panel serves both adjacent units.')+'</div></div>';
+  if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> Butt join — two side panels face-to-face at each join. Screw through to connect.</div></div>';
   if(S.spType!=='none')nh+='<div class="note-item"><div class="nbullet">'+(S.modUnits>1?'7.':'6.')+'</div><div class="ntext"><strong>APPLIED SIDE PANELS:</strong> '+r.spDepth+'mm deep. Full height — covers carcass sides and subframe, extends past door face.</div></div>';
   nh+='</div>';
 
@@ -1995,7 +1994,7 @@ function restoreConfig(cfg){
   setV('tk-h', S.tkH); setV('tk-style', S.tkStyle); setV('tk-setback', S.tkSetback);
   setV('tk-thick', S.tkThick); setV('tk-gap', S.tkGap);
   setV('tk-mr-mode', S.tkMrMode); setV('tk-mr-qty', S.tkMrQty);
-  setV('mod-units', S.modUnits); setV('mod-join', S.modJoin);
+  setV('mod-units', S.modUnits); S.modJoin='butt';
   setV('sp-l', S.spL); setV('sp-r', S.spR); setV('sp-thick', S.spThick);
   setV('sp-eh', S.spEH); setV('sp-ed', S.spED); setV('sp-sw', S.spSW);
   setC('pel-en', S.pelEn); setV('pel-h', S.pelH);
