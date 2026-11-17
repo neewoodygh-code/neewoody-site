@@ -37,7 +37,8 @@ await check('Latest main commit deployed', async () => {
   const short = sha.slice(0, 7);
   if (!cf) return age < 15 ? ok('Latest main commit deployed', `${short}: pushed ${Math.round(age)} min ago, no check yet`)
     : bad('Latest main commit deployed', `${short}: no Cloudflare Pages check run (Cloudflare never saw the push)`);
-  if (cf.status !== 'completed') return ok('Latest main commit deployed', `${short}: build ${cf.status}`);
+  if (cf.status !== 'completed') return age < 20 ? ok('Latest main commit deployed', `${short}: build ${cf.status} (pushed ${Math.round(age)} min ago, run again shortly)`)
+    : bad('Latest main commit deployed', `${short}: build still ${cf.status} after ${Math.round(age)} min`);
   if (cf.conclusion === 'success') return ok('Latest main commit deployed', `${short}: ${cf.name} success`);
   bad('Latest main commit deployed', `${short}: ${cf.name} ${cf.conclusion}`);
 });
