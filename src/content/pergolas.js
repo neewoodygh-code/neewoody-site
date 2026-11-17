@@ -1,0 +1,125 @@
+// Everything the Pergolas page says, in page order. Layout: src/layouts/ProductPage.astro.
+// Built 2026-11-17 (owner: "go ahead with the pergola page") around the Oyibi job, which has a
+// professional shoot (Pictures/Pergola/Oyibi/Professional) and about 35 build videos.
+// Copy states only what the photos show: no timber species, no client names.
+const P = 'images/projects/';
+const vid = (dir, name, alt) => ({ img: P + dir + '/' + name + '.jpg', video: P + dir + '/' + name + '.mp4', alt });
+export default {
+  slug: 'pergolas',
+  path: '/pergolas',
+  seo: {
+    title: 'Timber Pergolas, Carports & Canopies in Accra | Neewoody',
+    description: 'Timber pergolas, carports, walkway canopies and shop-front canopies built and fitted in Accra, Ghana. Open slats for shade or a roof for the rain, made to your space.',
+    ogTitle: 'Timber Pergolas, Carports & Canopies in Accra | Neewoody Custom Woodwork',
+    ogDescription: 'Pergolas, carports and canopies in timber, cut and stained in our workshop and put up on site by our own crew.',
+  },
+  waText: "Hi Neewoody, I'm interested in a pergola, carport or canopy.",
+  hero: {
+    lines: ['Pergolas, carports', 'and canopies.'],
+    text: 'Timber shade for a garden, a driveway, a side walkway or a shop front, cut and stained in our workshop and put up on site by our own crew.',
+    img: P + 'oyibi-pergola/oyibi-walkway-canopy.jpg',
+    alt: 'Timber canopy with a roof running along the side walkway of a house in Oyibi, over a stepping-stone path',
+    caption: 'Walkway canopy, Oyibi',
+    workLink: '#work',
+    facts: [['We build', 'Pergolas, carports, walkway and door canopies, shop-front canopies'], ['Roof', 'Open slats, clear sheets or roofing sheets'], ['Workshop', 'Amugi Avenue, Accra']],
+  },
+  sections: [
+    { kind: 'intro', title: 'Shade that is built to stay up.', paras: [
+      'A pergola stands outside in the sun and the rain all year. The posts have to be set firm, the joints have to stay tight, and the finish has to keep the water out.',
+      'We start with a visit to measure the space and see where the sun falls. Then we draw it, cut and stain the timber in our workshop, and bring it to site to put it up.',
+      'You choose how much cover you want: open slats for broken shade, clear sheets to keep the light, or roofing sheets under the rafters for a dry carport or walkway.',
+    ], link: ['/contact', 'Get a free quote'] },
+    { kind: 'projects', id: 'oyibi', tone: 'dark', label: 'Oyibi, 2024', title: 'A carport, a walkway and a front-door canopy',
+      text: ['Three timber structures for one house: a carport over the driveway, a roofed canopy down the side walkway, and a canopy on shaped brackets over the front door.',
+        'A lattice gate closes off the walkway. Open the photos to see the build, with short clips of the crew at work.'],
+      more: [
+        'The carport stands on its own posts across the paved driveway, with rafters running over the beams and a roof fixed on top, so cars stay dry and out of the sun.',
+        'Along the side of the house a long canopy covers the stepping-stone path from front to back. At the front door, the canopy is carried on shaped timber brackets fixed to the wall.',
+        'The timber was cut and pre-stained in our workshop, then put up on site over several weeks: posts first, then beams, rafters and the roof.',
+      ],
+      photos: [
+        { img: P + 'oyibi-pergola/oyibi-carport.jpg', alt: 'Timber carport with a roof over a paved driveway, Oyibi', cap: 'The carport' },
+        { img: P + 'oyibi-pergola/oyibi-on-the-rafters.jpg', alt: 'Fixing the rafters on top of the timber frame, Oyibi', cap: 'On the rafters' },
+        { img: P + 'oyibi-pergola/oyibi-walkway-gate.jpg', alt: 'Walkway canopy and lattice gate at the side of the house, Oyibi', cap: 'Walkway and gate' },
+      ],
+      extra: [
+        { img: P + 'oyibi-pergola/oyibi-carport-wide.jpg', alt: 'The finished carport from across the driveway, Oyibi', cap: 'Carport, wide' },
+        vid('pergolas', 'pergolas-video-oyibi-brackets', 'Video: fixing the shaped brackets over the front door, Oyibi'),
+        { img: P + 'oyibi-pergola/oyibi-raising-the-frame.jpg', alt: 'The crew raising a beam onto the posts, Oyibi', cap: 'Raising the frame' },
+        vid('pergolas', 'pergolas-video-oyibi-rafters', 'Video: the crew fixing rafters on top of the frame, Oyibi'),
+        { img: P + 'oyibi-pergola/oyibi-rafters-going-up.jpg', alt: 'Rafters going up over the side walkway, Oyibi', cap: 'Rafters going up' },
+        { img: P + 'oyibi-pergola/oyibi-rafter-joint.jpg', alt: 'Close-up of a rafter crossing a beam against the sky, Oyibi', cap: 'Rafter and beam' },
+        vid('pergolas', 'pergolas-video-oyibi-carport-frame', 'Video: the rafter grid of the carport, Oyibi'),
+        { img: P + 'oyibi-pergola/oyibi-carport-finishing.jpg', alt: 'Finishing work under the carport roof, Oyibi', cap: 'Finishing the carport' },
+        vid('pergolas', 'pergolas-video-oyibi-carport', 'Video: the finished carport, Oyibi'),
+        { img: P + 'oyibi-pergola/oyibi-walkway-end.jpg', alt: 'The walkway canopy from the back of the house, Oyibi', cap: 'Walkway from the back' },
+        vid('pergolas', 'pergolas-video-oyibi-walkway', 'Video: the finished canopy along the side walkway, Oyibi'),
+        { img: P + 'oyibi-pergola/oyibi-lattice-gate.jpg', alt: 'Timber lattice gate and screens at the end of the walkway, Oyibi', cap: 'Lattice gate' },
+      ] },
+    { kind: 'feature', dark: false, img: P + 'oyibi-pergola/oyibi-setting-a-post.jpg',
+      alt: 'Standing a timber post upright before the beams go on, Oyibi',
+      label: 'How we build them', title: 'Cut in the workshop, put up on site',
+      lede: 'Most of the work happens before we reach your house.',
+      paras: [
+        'The timber is dried, cut to length, and the rafter tails are shaped in our workshop. It gets its first coats of stain there too, while every face can still be reached.',
+        'On site we set the posts, lift the beams, fix the rafters and fit the roof, then touch up the finish. We give you the timeline with the quote.',
+      ] },
+    { kind: 'gallery', id: 'work', title: 'More pergolas and canopies', items: [
+      { badge: 'Clear roof', place: 'Black pergola over a garden patio', caption: 'A black pergola with a clear roof, built against the side of the house.',
+        img: P + 'pergolas/pergola-1.jpg', alt: 'Black pergola with a clear roof over a garden patio',
+        more: ['A pergola finished in black, with clear roof sheets so the patio stays bright, built along the side wall of the house.'],
+        photos: [
+          { img: P + 'pergolas/pergola-1.jpg', alt: 'Black pergola with a clear roof over a garden patio' },
+          { img: P + 'pergolas/pergola-2.jpg', alt: 'The black pergola from the side' },
+          { img: P + 'pergolas/pergola-3.jpg', alt: 'The black pergola frame before the roof went on' },
+          vid('pergolas', 'pergolas-video-black-pergola', 'Video: the black pergola over the garden patio'),
+        ] },
+      { badge: 'Terrace', place: 'Pergola over a tiled terrace, Mile 7', caption: 'A dark pergola with a clear roof over a roadside terrace.',
+        img: P + 'mile7-pergola/mile7-pergola-1.jpg', alt: 'Dark pergola with a clear roof over a tiled terrace, Mile 7',
+        more: ['A dark pergola with a clear roof over a tiled terrace beside the road at Mile 7.'],
+        photos: [
+          { img: P + 'mile7-pergola/mile7-pergola-1.jpg', alt: 'Dark pergola with a clear roof over a tiled terrace, Mile 7' },
+          { img: P + 'mile7-pergola/mile7-pergola-2.jpg', alt: 'The Mile 7 pergola from the front' },
+          vid('mile7-pergola', 'mile7-pergola-video', 'Video: walking across the terrace under the pergola, Mile 7'),
+        ] },
+      { badge: 'Shop front', place: 'Shop-front canopy, Adabraka', caption: 'A timber canopy with a roof along the front of a shop.',
+        img: P + 'pergolas/pergolas-video-adabraka-canopy.jpg', alt: 'Timber canopy along a shop front, Adabraka',
+        more: ['A timber canopy along the front of a shop in Adabraka, with roofing sheets over the rafters and a lamp on the corner post.'],
+        photos: [
+          vid('pergolas', 'pergolas-video-adabraka-frame', 'Video: putting up the frame of the canopy, Adabraka'),
+          vid('pergolas', 'pergolas-video-adabraka-canopy', 'Video: the finished canopy along the shop front, Adabraka'),
+        ] },
+      { badge: 'Garden joinery', place: 'Lattice gates and screens', caption: 'Timber lattice gates and screens to close off a walkway or a garden.',
+        img: P + 'oyibi-pergola/oyibi-lattice-gate.jpg', alt: 'Timber lattice gate and screens, Oyibi', href: '/portfolio' },
+    ] },
+    { kind: 'types', title: 'What we build.', text: 'Every structure starts with a site visit: the space, the sun, and what you want under it.', items: [
+      ['Garden pergolas', 'Open-slat pergolas over a patio or a seating area, freestanding or fixed to the house.'],
+      ['Carports', 'Freestanding timber carports over a driveway, with a roof so the cars stay dry and cool.'],
+      ['Walkway canopies', 'Long covered walkways down the side of a house or between buildings.'],
+      ['Door and window canopies', 'Small canopies on shaped brackets, fixed to the wall over a door or a window.'],
+      ['Shop-front canopies', 'Covered frontage for shops, restaurants and offices, with room for signs and lights.'],
+      ['Lattice gates and screens', 'Timber lattice to close off a walkway, hide a tank, or give a garden some privacy.'],
+    ] },
+    { kind: 'details', title: 'What to decide before we start.', items: [
+      ['How much cover', 'Open slats for broken shade, clear sheets for light, roofing sheets for rain.'],
+      ['Freestanding or fixed', 'On its own posts, or carried on the wall of the house on one side.'],
+      ['Size', 'For a carport, allow about 3 m of width per car and enough height for the tallest vehicle.'],
+      ['Finish', 'Stained in a wood tone or painted dark. Both are done in the workshop first.'],
+      ['Footings', 'Posts are set into concrete footings, or bolted to an existing slab or paving.'],
+      ['Upkeep', 'A fresh coat of finish every year or two keeps the timber looking after the weather.'],
+    ] },
+    { kind: 'faq', title: 'Common questions about pergolas.', items: [
+      ['How much does a pergola cost in Accra?', 'It depends on the size, the roof and the finish. Send us the measurements and a photo of the space and we will give you one clear price after a site visit.'],
+      ['Can a pergola keep the rain off?', 'Yes. An open-slat pergola gives shade only, but we can fix clear sheets or roofing sheets over the rafters so it stays dry underneath.'],
+      ['Can you build a carport in timber?', 'Yes. We built a timber carport over a paved driveway in Oyibi, on its own posts with a full roof.'],
+      ['How long does it take?', 'It depends on the size and the roof. Most of the cutting and staining is done in our workshop first, so the time on site is shorter. We give you the timeline with the quote.'],
+      ['Does timber last outside?', 'Yes, when it is dried properly, finished on every face and set clear of standing water. A fresh coat of finish every year or two keeps it in good condition.'],
+      ['Do you build shop-front canopies?', 'Yes. We built a timber canopy along a shop front in Adabraka. Send us a photo of the frontage and the length you need covered.'],
+    ] },
+  ],
+  footer: {
+    title: "Let's talk about<br />your pergola.",
+    text: 'Send us a photo of the space, rough measurements and how much cover you want. We will visit, measure and give you one clear price.',
+    quoteLink: true,
+  },
+};

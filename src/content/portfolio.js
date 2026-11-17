@@ -86,6 +86,7 @@ export default {
             ph("prampram-kitchen/prampram-tv-unit-angle.jpg", "Floating TV console, full length, Prampram"),
           ] },
         { badge: "Outdoor, pergolas", place: "Pergolas and patio canopies", caption: "Garden pergolas & patio canopies, Accra",
+          link: ["/pergolas", "See the pergolas page"],
           img: "images/projects/pergolas/pergola-1.jpg", alt: "Timber pergola over a patio, Accra",
           more: ["Timber pergolas and patio canopies built to shade and frame outdoor spaces: from freestanding garden structures to lean-to canopies running along a wall or walkway.", "Air-dried, with rafter tails cut and shaped and a pre-stain done in the workshop, then assembled and finished on site. We build them to suit the space and the sun: open-slat for dappled light, or part-roofed for rain cover.", "The clips show three jobs: a black pergola over a garden patio, a house in Oyibi with a front-door canopy, a side walkway and a carport, and a shop-front canopy in Adabraka."],
           photos: [

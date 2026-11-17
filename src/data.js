@@ -13,6 +13,7 @@ export const SERVICES = [
   { name: 'Chairs, stools and benches', line: 'Bar stools, dining chairs, benches and banquettes.', href: '/seating', img: 'stools', alt: 'Three solid wood bar stools with dark velvet seats, Dome' },
   { name: 'Solid wood', line: 'Live-edge slabs of teak, Hyedua and Afromosia.', href: '/solid-wood', img: 'afromosia', alt: 'A live-edge Afromosia table in a bright room, Ridge' },
   { name: 'TV walls and shelving', line: 'Panelled walls, lit shelves, long low consoles.', href: '/tv-units', img: 'tvwall', alt: 'A panelled TV wall with lit shelving, Bortianor' },
+  { name: 'Pergolas and carports', line: 'Pergolas, carports and canopies in timber.', href: '/pergolas', img: 'pergola', alt: 'A timber carport with a roof over a paved driveway, Oyibi' },
   { name: 'Shops and offices', line: 'Display units, counters and reception desks.', href: '/portfolio', img: 'shop', alt: 'A retail fit-out with lit shelving and glass counters' },
 ];
 

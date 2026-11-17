@@ -18,12 +18,13 @@ import legonDining from '../images/projects/judith-east-legon/judith-set-install
 import afromosia from '../images/projects/french-embassy/afromosia-table-installed-6.jpg';
 import walnutBed from '../images/projects/dansoman-walnut-bed/walnut-bed-angle.jpg';
 import stools from '../images/projects/nadia-dome/nadia-bar-stools.jpg';
+import pergola from '../images/projects/oyibi-pergola/oyibi-carport.jpg';
 import shop from '../images/projects/commercial-fitout/commercial-1.jpg';
 
 const PHOTOS = {
   hero, 'sage-dining': sageDining, 'sage-louvres': sageLouvres, 'sage-bookcase': sageBookcase,
   'sage-lounge': sageLounge, wli, wardrobe, kitchen, halfway, tvwall, 'ridge-table': ridgeTable,
-  spraying, grain, staining, 'legon-dining': legonDining, afromosia, 'walnut-bed': walnutBed, shop, stools,
+  spraying, grain, staining, 'legon-dining': legonDining, afromosia, 'walnut-bed': walnutBed, shop, stools, pergola,
 };
 
 export function photo(name) {
