@@ -50,11 +50,29 @@ export default {
         photos: [
           { img: P + 'golf-hills-bed/golf-hills-bed-overview.jpg', alt: 'Custom storage bed with under-bed drawers and wall-mounted upper cabinet, Golf Hills, Accra', cap: 'Storage bed with upper cabinet' },
           { img: P + 'golf-hills-bed/golf-hills-bed-angle.jpg', alt: 'Custom storage bed with drawers and a shelf headboard, Golf Hills, Accra', cap: 'Drawers and shelf headboard' },
+          { img: P + 'golf-hills-bed/golf-hills-bed-video-drawers.jpg', video: P + 'golf-hills-bed/golf-hills-bed-video-drawers.mp4', alt: 'Video: the bed and upper cabinet, then a drawer pulled out' },
         ] },
       { badge: 'Platform bed', place: 'Sink-in platform bed, Dansoman', img: P + 'dansoman-bed/dansoman-bed-overview.jpg', alt: 'Custom sink-in platform bed with integrated nightstand, Dansoman, Accra' },
-      { badge: 'Platform bed', place: 'Platform bed in dark walnut', img: P + 'platform-walnut/platform-walnut-overview.jpg', alt: 'Custom platform bed in dark walnut stain with upholstered linen headboard panels, Accra' },
-      { badge: 'Platform bed', place: 'Platform bed in weathered grey', img: P + 'platform-grey/platform-grey-overview.jpg', alt: 'Custom platform bed in grey weathered finish with linen upholstered headboard, Accra' },
-      { badge: 'Solid wood', place: 'Platform bed in natural iroko', img: P + 'platform-iroko/platform-iroko-headboard.jpg', alt: 'Custom platform bed in natural iroko with solid timber slab headboard, Accra' },
+      { badge: 'Platform bed', place: 'Platform bed in dark walnut', img: P + 'platform-walnut/platform-walnut-overview.jpg', alt: 'Custom platform bed in dark walnut stain with upholstered linen headboard panels, Accra',
+        photos: [
+          { img: P + 'platform-walnut/platform-walnut-overview.jpg', alt: 'Custom platform bed in dark walnut stain with upholstered linen headboard panels, Accra' },
+          { img: P + 'platform-walnut/platform-walnut-video.jpg', video: P + 'platform-walnut/platform-walnut-video.mp4', alt: 'Video: walking round the walnut platform bed in the yard' },
+          { img: P + 'platform-walnut/platform-walnut-base.jpg', alt: 'Walnut platform bed, the slatted base' },
+        ] },
+      { badge: 'Platform bed', place: 'Platform bed in weathered grey', img: P + 'platform-grey/platform-grey-overview.jpg', alt: 'Custom platform bed in grey weathered finish with linen upholstered headboard, Accra',
+        photos: [
+          { img: P + 'platform-grey/platform-grey-overview.jpg', alt: 'Custom platform bed in grey weathered finish with linen upholstered headboard, Accra' },
+          { img: P + 'platform-grey/platform-grey-video.jpg', video: P + 'platform-grey/platform-grey-video.mp4', alt: 'Video: walking round the grey platform bed in the yard' },
+        ] },
+      { badge: 'Solid wood', place: 'Platform bed in natural iroko', img: P + 'platform-iroko/platform-iroko-headboard.jpg', alt: 'Custom platform bed in natural iroko with solid timber slab headboard, Accra',
+        more: ['A low platform bed in natural iroko, with a solid timber headboard and a slatted base. The clips show it being put together in our yard and the finished bed in the sun.'],
+        photos: [
+          { img: P + 'platform-iroko/platform-iroko-headboard.jpg', alt: 'Custom platform bed in natural iroko with solid timber slab headboard, Accra' },
+          { img: P + 'platform-iroko/platform-iroko-video-assembly.jpg', video: P + 'platform-iroko/platform-iroko-video-assembly.mp4', alt: 'Video: fitting the side rails to the headboard in the yard' },
+          { img: P + 'platform-iroko/platform-iroko-video-finished.jpg', video: P + 'platform-iroko/platform-iroko-video-finished.mp4', alt: 'Video: the finished frame and slats, close up' },
+          { img: P + 'platform-iroko/platform-iroko-angle.jpg', alt: 'Iroko platform bed from an angle' },
+          { img: P + 'platform-iroko/platform-iroko-video-reveal.jpg', video: P + 'platform-iroko/platform-iroko-video-reveal.mp4', alt: 'Video: the finished iroko bed in the sun' },
+        ] },
       { badge: 'Guesthouse room', place: 'Queen bed, Achimota guesthouse', img: P + 'achimota-guesthouse/achimota-bed-wardrobe-wide.jpg', alt: 'Queen bed with built-in wardrobe and vanity, Achimota guesthouse room conversion', href: '/projects/achimota-guesthouse' },
     ] },
     { kind: 'faq', title: 'Common questions about custom beds.', items: [
