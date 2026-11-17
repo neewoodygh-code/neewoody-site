@@ -21,7 +21,10 @@ export default {
     caption: 'Sage Centre, Wli',
     workLink: '#case-studies',
     workLabel: 'See the case studies',
-    extra: ['/neewoody-catalogue.pdf', 'Download the catalogue (PDF, 6 MB)', 'Neewoody-Catalogue.pdf'],
+    extra: [
+      ['/neewoody-catalogue.pdf', 'Catalogue, Volume Two (PDF, 6 MB)', 'Neewoody-Catalogue-Volume-Two.pdf'],
+      ['/neewoody-catalogue-volume-one.pdf', 'Volume One (PDF, 2 MB)', 'Neewoody-Catalogue-Volume-One.pdf'],
+    ],
   },
   sections: [
     { kind: 'gallery', id: 'case-studies', tone: 'dark', cms: false, headLink: null, title: 'Case studies',
