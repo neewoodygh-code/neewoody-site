@@ -201,9 +201,9 @@ export default {
             ph("reception-desks/reception-3.jpg", "Glass-top desk, side view"),
             ph("reception-desks/reception-4.jpg", "Reception desk, full"),
           ] },
-        { badge: "Outdoor, lounge seating", place: "Outdoor lounge and patio", caption: "Patio sofas and tables in solid wood",
-          img: "images/projects/outdoor-lounge/outdoor-lounge-1.jpg", alt: "Wood-framed outdoor sofa with grey cushions and a timber coffee table on a slate patio",
-          more: ["Solid-wood patio furniture: an L-shaped sofa with grey cushions, a square coffee table with a timber top in a black frame, and a live-edge table with a glass centre on a steel base, with a matching bench.", "Built and finished for an open slate patio."],
+        { badge: "Outdoor, lounge seating", place: "Outdoor lounge and patio", caption: "Patio sofas and tables, Sage Centre terrace, Wli",
+          img: "images/projects/outdoor-lounge/outdoor-lounge-1.jpg", alt: "Wood-framed outdoor sofa with grey cushions and a timber coffee table on the slate terrace of the Sage Centre, Wli",
+          more: ["Solid-wood patio furniture: an L-shaped sofa with grey cushions, a square coffee table with a timber top in a black frame, and a live-edge table with a glass centre on a steel base, with a matching bench.", "Built and finished for the open slate terrace of the Sage Centre in Wli."],
           photos: [
             ph("outdoor-lounge/outdoor-lounge-1.jpg", "Outdoor sofa with a timber coffee table"),
             ph("outdoor-lounge/outdoor-lounge-2.jpg", "Wood-framed L-shaped outdoor sofa with grey cushions"),

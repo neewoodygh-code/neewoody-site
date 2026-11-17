@@ -65,8 +65,8 @@ export default {
           ph('picnic-tables/picnic-table-3.jpg', 'Picnic table and benches, seen from the side'),
           ph('picnic-tables/picnic-table-4.jpg', 'Picnic table and benches, angle'),
         ] },
-      { badge: 'Outdoor', place: 'Patio sofas and a bench', caption: 'Wood-framed outdoor sofas, and a solid bench beside a live-edge table.',
-        img: P + 'outdoor-lounge/outdoor-lounge-2.jpg', alt: 'Wood-framed outdoor L-shaped sofa with grey cushions on a slate patio',
+      { badge: 'Outdoor', place: 'Terrace sofas and a bench, Sage Centre', caption: 'Wood-framed outdoor sofas, and a solid bench beside a live-edge table.',
+        img: P + 'outdoor-lounge/outdoor-lounge-2.jpg', alt: 'Wood-framed outdoor L-shaped sofa with grey cushions on the Sage Centre terrace, Wli',
         more: ['Solid wood outdoor seating: an L-shaped sofa with weather-ready cushions, and a timber bench on a black steel frame beside a live-edge table.'],
         photos: [
           ph('outdoor-lounge/outdoor-lounge-2.jpg', 'Wood-framed outdoor L-shaped sofa with grey cushions'),
