@@ -1,6 +1,8 @@
 # Smart generator: plan and construction standard (draft)
 
-> Drafted 2026-11-17 from a conversation with the owner. **Nothing is built.** Status: waiting for the owner to correct the rule book (section 4) from his own practice. Everything marked **[OWNER]** is a question only he can answer.
+> Drafted 2026-11-17 from a conversation with the owner. **Nothing is built.**
+>
+> **Owner decisions 2026-11-17:** (1) the Smart Generator is its **own build**, listed under Tools as **Experimental**; it does NOT refactor `cutlist.html`. If it proves itself, it replaces the existing tools later. (2) **Groove depth is the member's own setting**, not a standard (router or saw, depth varies): it belongs in the Construction tab of shop settings. (3) F1–F3 below are fixed in `cutlist.html` (see `docs/tools/cutlist.md`). Status: waiting for the owner to correct the rule book (section 4) from his own practice. Everything marked **[OWNER]** is a question only he can answer.
 
 ## 1. What it is
 
@@ -70,7 +72,7 @@ The guiding principle, from the owner: **load should put screws in shear (pushed
 | J3 | Wall unit top | Between the sides | Same as J2; also lets the hanging rail sit under the top | Top width = W − 2T | Some shops put the top over the sides for a clean top line. Which do you use? |
 | J4 | Fixed shelves | Fixed **through the sides** into the shelf ends with confirmats (or dowels + glue) | Shelf load in shear on the fixing; the owner's example | Shelf width = opening width exactly | Confirmat or dowel as default? Screw size? |
 | J5 | Adjustable shelves | Sit on pins, **2 mm clearance each side**, set back from the front | Easy to lift in and out | Shelf width = opening − 4; depth = carcass depth − set-back | Set-back now 50 mm from the front in the wardrobe tool. Right for kitchens too? |
-| J6 | Back panel | 3 mm hardboard **in a groove** in sides, top and bottom | Squares the carcass and hides the edge | Back size = opening + 2 × groove depth; top/bottom depth = D − (groove set-in + back) | **Groove depth?** See finding F1. Also: how far in from the back edge is the groove? |
+| J6 | Back panel | 3 mm hardboard **in a groove** in sides, top and bottom | Squares the carcass and hides the edge | Back size = opening + 2 × (groove depth − 1 mm play); top/bottom depth = D − (groove set-in + back) | **Decided:** groove depth is the member's own setting (default 8). Still open: how far in from the back edge is the groove? |
 | J7 | Hanging (wall units) | Hanging rail (18 mm, about 80 mm tall) across the back under the top, screwed to the wall; back panel stops at or is notched for the rail | The rail carries the unit, not screws through a 3 mm back | Adds a rail part; back height shortened | Rail, French cleat or hanging brackets as your default? |
 | J8 | Base units: plinth | Separate subframe/plinth (as the wardrobe tool: front, back and mid rails, face panel with 3 mm gap, optional set-back) | Levels on uneven floors, protects the carcass from mopping water | Side height = H − plinth (kitchen) | Kitchens: subframe like wardrobes, or adjustable legs? Same set-back? |
 | J9 | Doors | **Full overlay**: outer edge 2 mm in from the side's outer face; over a shared divider each door covers **half the divider less half the door gap** | Clean, even reveals; doors on a shared divider must not overlap each other | Door width (see F2) | Confirm 2 mm. Inset doors needed as an option? |
@@ -99,13 +101,13 @@ Board thickness (18/16), back thickness (3/6), sheet size (2440 × 1220), kerf, 
 
 ## 5. Findings in the current wardrobe cutlist (`cutlist.html`)
 
-Found while drafting this plan, 2026-11-17. **Not fixed yet**; waiting for the owner.
+Found while drafting this plan, 2026-11-17. **F1–F3 FIXED 2026-11-17** (details in `docs/tools/cutlist.md`). Two more found while fixing, left for the owner: the shared-divider unit join sizes each unit as if it had two sides (tops ~9 mm short), and drawers behind a full-height door get external-size fronts.
 
 - **F1. Groove depth equals back thickness.** The inset back is cut at opening + 2 × back thickness, so a 3 mm back assumes a 3 mm-deep groove. Grooves are usually about 8–10 mm deep in 18 mm board. If the workshop cuts deeper grooves, the back panel comes out up to about 12 mm short each way and rattles. Needs a separate "groove depth" setting. **[OWNER]: how deep do you groove?**
 - **F2. Doors overlap on dividers (real bug).** Every hinged door gets the full outer overlay (board − clearance, 16 mm) on **both** sides, even where it meets a shared divider. On the default wardrobe (one carcass, 3 sections, 18 mm board) the three doors add up to **24 mm wider than the carcass**, and neighbouring doors overlap by about 14 mm on each divider. A member cutting the default would have to trim the doors. Fix: over a divider each door covers (divider − door gap) / 2. Small change in `calculate()`, needs a before/after check on a printed sheet.
 - F3 (minor). The drawer-front formula uses the "Edge clearance" input as overlay (default 11 in the code, 2 in the field), while doors use board − clearance. Drawer fronts and doors in the same section can come out different widths. Fold into the J9 rule.
 
-The parity test in build step 2 must **not** copy these. The engine should match the current tool everywhere except F1–F3, and those differences are listed in the test.
+The engine is a separate build (owner decision), so there is no part-for-part parity requirement; the fixed `cutlist.html` is still a useful cross-check for plain wardrobes.
 
 ## 6. Where the AI helps (and where it does not)
 
@@ -126,8 +128,8 @@ Later: keep each member's edits to AI-suggested specs (with their consent) and u
 ## 7. Build order (one step per session)
 
 0. **Owner:** correct section 4 (and answer F1). Check the cutlist/cut-sheet usage numbers in Concierge admin Insights to confirm the demand is there.
-1. **Fix F2 (and F1 once answered) in the current wardrobe tool.** Members are using it now.
-2. **Spec format + engine** (`js/smart/engine.js`, no UI): wardrobe units first. Test: the engine matches the fixed `cutlist.html` part for part on 10 sample wardrobes.
+1. ~~Fix F1–F3 in the current wardrobe tool.~~ ✅ DONE 2026-11-17.
+2. **Spec format + engine** (`js/smart/engine.js`, no UI): wardrobe units first, written fresh against the construction standard. Cross-check plain wardrobes against the fixed `cutlist.html`. New page `smart-generator.html` listed under Tools as **Experimental** (member-first).
 3. **Kitchen units:** base, wall, tall, drawers, plinth, hanging rail. Test against a real past Neewoody kitchen's cut list.
 4. **Checks** (section 4b) + **Construction tab** in the shared Settings panel.
 5. **Spec editor + front-view drawing** (new member tool page), sending parts straight into the Cut Sheet (one cut list per material).
