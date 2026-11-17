@@ -1,5 +1,6 @@
 ---
 // Split photo hero: headline, one sentence, WhatsApp (or hero.action [href, label]), facts.
+// hero.extra [href, label, downloadName?] adds one more quiet link (Portfolio: the catalogue PDF).
 import '../../styles/page.css';
 import { Picture } from 'astro:assets';
 import { img } from '../../photos.js';
@@ -21,6 +22,7 @@ const wa = waText ? `${WA}?text=${encodeURIComponent(waText)}` : WA;
           ? <a class="pill" href={hero.action[0]}>{hero.action[1]} <span aria-hidden="true">↓</span></a>
           : <a class="pill" href={wa}>WhatsApp 024 463 3464 <span aria-hidden="true">↗</span></a>}
         {hero.workLabel !== false && <a class="ulink light" href={hero.workLink || '#gallery'}>{hero.workLabel || 'See the work'}</a>}
+        {hero.extra && <a class="ulink light" href={hero.extra[0]} download={hero.extra[2] || undefined}>{hero.extra[1]}</a>}
       </div>
     </div>
     {hero.facts && (

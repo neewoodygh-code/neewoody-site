@@ -25,6 +25,13 @@ img{display:block;max-width:100%;width:100%;height:100%;object-fit:cover;backgro
 .folio{position:absolute;right:12mm;bottom:7mm;z-index:3}
 .folio::after{content:counter(pg)}
 
+.tabs{position:absolute;left:12mm;bottom:6.4mm;z-index:3;display:flex;gap:3.4mm}
+.tabs a{font-family:var(--sans);font-weight:500;font-size:6.3pt;letter-spacing:.12em;text-transform:uppercase;color:var(--stone);text-decoration:none;opacity:.75}
+.tabs a.on{opacity:1;color:var(--walnut);box-shadow:0 1px 0 var(--brass)}
+.dark .tabs a{color:var(--on-dark-2)}
+.dark .tabs a.on{color:var(--brass)}
+.toc a{display:flex;justify-content:space-between;align-items:baseline;width:100%;color:inherit;text-decoration:none}
+
 /* type */
 .label,.yr,.mt,.specs dt,.contact .l,.cover-meta,.sign,.folio,.toc .n{font-family:var(--sans);font-weight:500;font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
 .slash{display:inline-block;width:1px;height:.95em;background:currentColor;transform:skewX(-24deg);margin:0 .7em;vertical-align:-.12em;opacity:.6}
@@ -69,12 +76,12 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
 .opener h2{font-size:42pt;margin:3mm 0 4mm}
 .opener p{font-size:10pt;max-width:150mm}
 .opener .ph{position:relative;min-height:0}
-.opener .ph .cap{position:absolute;left:0;right:0;bottom:0;padding:22mm 18mm 9mm;background:linear-gradient(180deg,rgba(23,19,15,0),rgba(23,19,15,.82));color:var(--on-dark)}
+.opener .ph .cap{position:absolute;left:0;right:0;bottom:0;padding:22mm 18mm 15mm;background:linear-gradient(180deg,rgba(23,19,15,0),rgba(23,19,15,.82));color:var(--on-dark)}
 .opener .ph .cap h3{font-size:20pt;color:var(--on-dark);margin-top:1.5mm}
 .opener .ph .cap .label{color:var(--on-dark-2)}
 
 /* story: main photo, two smaller, then text */
-.story{display:grid;grid-template-rows:148mm 78mm 1fr;gap:4mm;padding:12mm 12mm 0}
+.story{display:grid;grid-template-rows:143mm 76mm 1fr;gap:4mm;padding:12mm 12mm 0}
 .story .row{display:grid;grid-template-columns:1fr 1fr;gap:4mm;min-height:0}
 .story .body{padding:2mm 4mm 12mm;display:flex;flex-direction:column}
 .head{display:flex;justify-content:space-between;align-items:baseline;gap:6mm}
@@ -84,7 +91,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
 .specs{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 6mm;margin-top:4mm;padding-top:3.5mm;border-top:1px solid var(--hair)}
 .specs div{display:flex;flex-direction:column;gap:1mm}
 .specs dd{font-size:8.5pt;line-height:1.35;color:var(--espresso)}
-.story.two{grid-template-rows:230mm 1fr}
+.story.two{grid-template-rows:224mm 1fr}
 
 /* six to a page */
 .grid{display:grid;grid-template-rows:auto 1fr;padding:13mm 12mm 13mm;height:100%}
@@ -153,7 +160,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
 </section>
 
 <!-- ════════════ ABOUT + CONTENTS ════════════ -->
-<section class="page">
+<section class="page" id="contents">
   <div class="about">
     <div class="about-text">
       <div class="label">The Workshop</div>
@@ -174,14 +181,14 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
       <div class="toc">
         <div class="label">Contents</div>
         <ol>
-          <li>Whole homes <span class="n">3</span></li>
-          <li>TV walls and shelving <span class="n">20</span></li>
-          <li>Wardrobes <span class="n">6</span></li>
-          <li>Dining and living <span class="n">23</span></li>
-          <li>Kitchens <span class="n">12</span></li>
-          <li>Solid wood <span class="n">25</span></li>
-          <li>Beds <span class="n">16</span></li>
-          <li>Commercial <span class="n">29</span></li>
+          <li><a href="#homes">Whole homes <span class="n">3</span></a></li>
+          <li><a href="#tv">TV walls and shelving <span class="n">20</span></a></li>
+          <li><a href="#wardrobes">Wardrobes <span class="n">6</span></a></li>
+          <li><a href="#dining">Dining and living <span class="n">23</span></a></li>
+          <li><a href="#kitchens">Kitchens <span class="n">12</span></a></li>
+          <li><a href="#solid">Solid wood <span class="n">25</span></a></li>
+          <li><a href="#beds">Beds <span class="n">16</span></a></li>
+          <li><a href="#commercial">Commercial <span class="n">29</span></a></li>
         </ol>
       </div>
     </div>
@@ -191,7 +198,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
 </section>
 
 <!-- ════════════ WHOLE HOMES ════════════ -->
-<section class="page opener dark">
+<section id="homes" class="page opener dark">
   <div class="top">
     <div class="label">Whole homes</div>
     <h2>One house, every room</h2>
@@ -202,6 +209,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Bortianor, Accra<i class="slash"></i>2026</div><h3>The kitchen of a new house we fitted from front to back</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes" class="on">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -220,6 +228,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes" class="on">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -237,10 +246,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes" class="on">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ WARDROBES ════════════ -->
-<section class="page opener dark">
+<section id="wardrobes" class="page opener dark">
   <div class="top">
     <div class="label">Wardrobes</div>
     <h2>Fitted to the wall</h2>
@@ -251,6 +261,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Agbogba<i class="slash"></i>2022</div><h3>Shelving, hanging space and a dresser desk across one wall</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story two">
@@ -269,6 +280,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -288,6 +300,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story two">
@@ -306,6 +319,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -321,6 +335,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -336,10 +351,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes" class="on">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ KITCHENS ════════════ -->
-<section class="page opener dark">
+<section id="kitchens" class="page opener dark">
   <div class="top">
     <div class="label">Kitchens</div>
     <h2>Built around how you cook</h2>
@@ -350,6 +366,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Spintex<i class="slash"></i>2024</div><h3>Espresso cabinets under a gold-veined marble-effect worktop</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens" class="on">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -369,6 +386,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens" class="on">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -388,6 +406,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens" class="on">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -403,10 +422,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens" class="on">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ BEDS ════════════ -->
-<section class="page opener dark">
+<section id="beds" class="page opener dark">
   <div class="top">
     <div class="label">Beds</div>
     <h2>Beds and bedroom pieces</h2>
@@ -417,6 +437,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Bedroom set</div><h3>A low platform bed and its matching nightstand</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds" class="on">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -436,6 +457,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds" class="on">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -455,6 +477,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds" class="on">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -470,10 +493,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds" class="on">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ TV WALLS AND SHELVING ════════════ -->
-<section class="page opener dark">
+<section id="tv" class="page opener dark">
   <div class="top">
     <div class="label">TV walls and shelving</div>
     <h2>Walls that work</h2>
@@ -484,6 +508,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Achimota guesthouse</div><h3>A marble feature wall, floating bench and lit glass cabinet</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv" class="on">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -503,6 +528,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv" class="on">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -518,10 +544,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv" class="on">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ DINING AND LIVING ════════════ -->
-<section class="page opener dark">
+<section id="dining" class="page opener dark">
   <div class="top">
     <div class="label">Dining and living</div>
     <h2>Rooms, not single pieces</h2>
@@ -532,6 +559,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">East Legon<i class="slash"></i>2022</div><h3>A whole dining room in Hyedua: table, six chairs and a console</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining" class="on">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -551,10 +579,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining" class="on">Dining</a><a href="#solid">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ SOLID WOOD ════════════ -->
-<section class="page opener dark">
+<section id="solid" class="page opener dark">
   <div class="top">
     <div class="label">Solid wood</div>
     <h2>Hardwood with character</h2>
@@ -565,6 +594,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Roman Ridge<i class="slash"></i>2026</div><h3>“A rugged table, wood with character”: a live-edge Hyedua slab</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid" class="on">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -584,6 +614,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid" class="on">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -603,6 +634,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid" class="on">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -622,10 +654,11 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid" class="on">Solid wood</a><a href="#commercial">Commercial</a></nav>
 </section>
 
 <!-- ════════════ COMMERCIAL ════════════ -->
-<section class="page opener dark">
+<section id="commercial" class="page opener dark">
   <div class="top">
     <div class="label">Commercial and institutional</div>
     <h2>Larger commissions</h2>
@@ -636,6 +669,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     <div class="cap"><div class="label">Sage Centre, Wli<i class="slash"></i>2022 to 2024</div><h3>Twenty-six months of teak for a retreat centre in the Volta Region</h3></div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial" class="on">Commercial</a></nav>
 </section>
 
 <section class="page">
@@ -654,6 +688,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </div>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial" class="on">Commercial</a></nav>
 </section>
 
 <section class="page story">
@@ -673,6 +708,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial" class="on">Commercial</a></nav>
 </section>
 
 <section class="page story two">
@@ -691,6 +727,7 @@ p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
     </dl>
   </div>
   <div class="folio"></div>
+  <nav class="tabs"><a href="#contents">Contents</a><a href="#homes">Homes</a><a href="#wardrobes">Wardrobes</a><a href="#kitchens">Kitchens</a><a href="#beds">Beds</a><a href="#tv">TV and shelving</a><a href="#dining">Dining</a><a href="#solid">Solid wood</a><a href="#commercial" class="on">Commercial</a></nav>
 </section>
 
 <!-- ════════════ BACK COVER ════════════ -->
