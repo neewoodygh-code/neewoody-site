@@ -10,6 +10,7 @@ export const SERVICES = [
   { name: 'Kitchens', line: 'Full fit-outs planned around how you cook.', href: '/kitchens', img: 'kitchen', alt: 'A walnut-grain kitchen with a dark stone island, Bortianor' },
   { name: 'Beds', line: 'Frames, platforms and storage beds in solid wood.', href: '/beds', img: 'walnut-bed', alt: 'A king-size walnut bed frame in our yard' },
   { name: 'Dining and living', line: 'Tables, chairs and the pieces around them.', href: '/dining-living', img: 'legon-dining', alt: 'A Hyedua dining table with upholstered chairs, East Legon' },
+  { name: 'Chairs, stools and benches', line: 'Bar stools, dining chairs, benches and banquettes.', href: '/seating', img: 'stools', alt: 'Three solid wood bar stools with dark velvet seats, Dome' },
   { name: 'Solid wood', line: 'Live-edge slabs of teak, Hyedua and Afromosia.', href: '/solid-wood', img: 'afromosia', alt: 'A live-edge Afromosia table in a bright room, Ridge' },
   { name: 'TV walls and shelving', line: 'Panelled walls, lit shelves, long low consoles.', href: '/tv-units', img: 'tvwall', alt: 'A panelled TV wall with lit shelving, Bortianor' },
   { name: 'Shops and offices', line: 'Display units, counters and reception desks.', href: '/portfolio', img: 'shop', alt: 'A retail fit-out with lit shelving and glass counters' },

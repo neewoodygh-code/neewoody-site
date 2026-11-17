@@ -17,12 +17,13 @@ import staining from '../images/projects/roman-ridge-live-edge/live-edge-table-s
 import legonDining from '../images/projects/judith-east-legon/judith-set-installed-2.jpg';
 import afromosia from '../images/projects/french-embassy/afromosia-table-installed-6.jpg';
 import walnutBed from '../images/projects/dansoman-walnut-bed/walnut-bed-angle.jpg';
+import stools from '../images/projects/nadia-dome/nadia-bar-stools.jpg';
 import shop from '../images/projects/commercial-fitout/commercial-1.jpg';
 
 const PHOTOS = {
   hero, 'sage-dining': sageDining, 'sage-louvres': sageLouvres, 'sage-bookcase': sageBookcase,
   'sage-lounge': sageLounge, wli, wardrobe, kitchen, halfway, tvwall, 'ridge-table': ridgeTable,
-  spraying, grain, staining, 'legon-dining': legonDining, afromosia, 'walnut-bed': walnutBed, shop,
+  spraying, grain, staining, 'legon-dining': legonDining, afromosia, 'walnut-bed': walnutBed, shop, stools,
 };
 
 export function photo(name) {
