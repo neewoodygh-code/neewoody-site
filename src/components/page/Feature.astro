@@ -11,10 +11,10 @@ const big = f.link ? null : (await bigSet([{ img: f.img, alt: f.alt, cap: f.alt 
 ---
 <section class={'feature' + (f.dark ? ' dark' : '') + (flip ? ' flip' : '')} id={f.id} data-nav={f.dark ? 'dark' : 'light'}>
   {f.link
-    ? <a class="feature-img rv" href={f.link[0]} tabindex="-1" aria-hidden="true">
+    ? <a class="feature-img rv unveil" href={f.link[0]} tabindex="-1" aria-hidden="true">
         <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt="" loading="lazy" />
       </a>
-    : <button type="button" class="feature-img rv" data-view data-big={big!.src} data-alt={f.alt} data-cap={f.alt} aria-label={'Open photo: ' + f.alt}>
+    : <button type="button" class="feature-img rv unveil" data-view data-big={big!.src} data-alt={f.alt} data-cap={f.alt} aria-label={'Open photo: ' + f.alt}>
         <Picture src={photo} formats={['avif', 'webp']} widths={[700, 1200]} sizes="(min-width: 900px) 55vw, 92vw" alt={f.alt} loading="lazy" />
       </button>}
   <div class="feature-txt rv">

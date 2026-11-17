@@ -1,6 +1,6 @@
 /* Neewoody: colours from the wood, one motif (the slash) from the logo's slanted N.
    Shared by every page: tokens, reset, type atoms, nav, homepage hero, quote, footer.
-   Rules: only the --t-* sizes, no hover zooms, motion only the quiet kind (see QUIET MOTION in home.css), one uppercase style (.label). */
+   Rules: only the --t-* sizes, no hover zooms, motion only the quiet kind (see QUIET MOTION at the end of this file), one uppercase style (.label). */
 :root {
   --bone: #efe9df;
   --bone-2: #e4dccf;
@@ -176,3 +176,36 @@ h1, h2, h3 { font-family: var(--serif); font-weight: 400; line-height: 1.02; let
 .voice.long blockquote { font-size: var(--t-lead); line-height: 1.5; max-width: 62ch; }
 .voice.long { padding-top: clamp(4rem, 8vw, 6rem); padding-bottom: clamp(4rem, 8vw, 6rem); }
 .contact-h.long { font-size: var(--t-display); line-height: 1.02; max-width: 18ch; }
+/* QUIET MOTION (2026-11-17, owner: "timeless but flat"; every Astro page). Rules: nothing loops, nothing
+   follows the scroll, each effect plays once and is done in under a second (the hero photo is
+   the one slow exception), and reduced-motion visitors get the still page. */
+/* 1. hero photo eases back into place as the page opens, like a camera settling */
+.js .hero-img img { animation: nw-settle 7s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes nw-settle { from { transform: scale(1.05); } to { transform: none; } }
+/* 4. big headlines settle: fade in while moving up 8px */
+.js .hero-h .mask > span { animation: nw-rise .9s var(--ease) .15s both; }
+@keyframes nw-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.js .display.rv, .js .rv .display, .js h2.rv, .js .rv h2 { transform: translateY(8px); transition: opacity .8s ease, transform .9s var(--ease); }
+.js .display.rv.in, .js .rv.in .display, .js h2.rv.in, .js .rv.in h2 { transform: none; }
+/* 2. big photos are uncovered once, top to bottom, like a dust sheet pulled away */
+.js .unveil.rv { opacity: 1; clip-path: inset(0 0 100% 0); transition: clip-path .9s var(--ease); }
+.js .unveil.rv.in { clip-path: inset(0); }
+.js .unveil img { transform: scale(1.04); transition: transform 1.4s var(--ease); }
+.js .unveil.in img { transform: none; }
+/* 5. the slash from the logo draws itself once */
+.js .draw .slash, .js .voice-in .slash { transform: skewX(-24deg) scaleY(0); transform-origin: 50% 100%; transition: transform .6s var(--ease) .35s; }
+.js .draw .slash { animation: nw-draw .6s var(--ease) .9s both; }
+@keyframes nw-draw { from { transform: skewX(-24deg) scaleY(0); } to { transform: skewX(-24deg) scaleY(1); } }
+.js .voice-in.in .slash { transform: skewX(-24deg) scaleY(1); }
+/* 3. photo cards: the photo brightens a touch and the title's underline draws in from the left */
+.card-img img, .g-img img { transition: filter .5s ease; }
+.card:hover .card-img img, .card:focus-visible .card-img img, .g-card:hover .g-img img, .g-card:focus-visible .g-img img { filter: brightness(1.07) saturate(1.05); }
+.uline, .svc-name, .g-place { background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .5s var(--ease); padding-bottom: 2px; }
+.svc-name { justify-self: start; }
+.g-place { max-width: fit-content; }
+.card:hover .uline, .card:focus-visible .uline, .g-card:hover .g-place, .g-card:focus-visible .g-place, .svc-list a:hover .svc-name, .svc-list a:focus-visible .svc-name { background-size: 100% 1px; }
+@media (prefers-reduced-motion: reduce) {
+  .js .unveil.rv { clip-path: none; }
+  .js .unveil img, .js .display.rv, .js .rv .display, .js h2.rv, .js .rv h2, .js .hero-h .mask > span { transform: none; opacity: 1; }
+  .js .draw .slash, .js .voice-in .slash { transform: skewX(-24deg); }
+}
