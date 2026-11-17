@@ -99,6 +99,7 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | DELETE | `/api/admin/client-jobs/:id` | admin | remove a client request |
 | POST | `/api/me/push` | member | save this device's Web Push subscription (job alerts) |
 | DELETE | `/api/me/push` | member | remove a push subscription by `{endpoint}` |
+| GET/PUT | `/api/settings` | member (PUT paid) | shared workshop settings: business details printed by every tool (migration 0035; whitelisted, length-capped fields) |
 | GET/PUT | `/api/pricing/config` | member | this member's own pricing config (overhead/rates/tiers) |
 | GET/PUT | `/api/pricing/quotes` | member | this member's quotes (bulk JSON array) |
 | GET | `/api/jobs` | member | open + filled jobs (approved posters) incl. own posts |

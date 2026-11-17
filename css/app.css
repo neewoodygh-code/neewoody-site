@@ -101,3 +101,46 @@
   .app-head { padding: .5rem 1rem; }
 }
 @media (max-width: 350px) { .lockup-cc span { display: none; } }
+
+/* Shared tool settings panel (js/tool-settings.js, 2026-11-17): a gear at the end of the
+   tool header opens a side panel (full screen on phones) over the work in progress. */
+.ts-gear { display: inline-flex; align-items: center; gap: .45rem; margin-left: auto; padding: .45rem .8rem; border: 1px solid var(--hair-dark); border-radius: 100px; background: transparent; color: inherit; font: 500 var(--t-small)/1 var(--sans); cursor: pointer; white-space: nowrap; }
+.app-head nav + .ts-gear { margin-left: 1.2rem; }
+.ts-gear:hover { border-color: var(--brass); color: var(--brass); }
+.ts-gear:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+.ts { position: fixed; inset: 0 0 0 auto; margin: 0; width: min(460px, 100%); max-width: 100%; height: 100%; max-height: 100%; border: 0; padding: 0; background: var(--bone); color: var(--espresso); font: 400 var(--t-small)/1.5 var(--sans); box-shadow: -12px 0 40px rgba(0,0,0,.25); }
+.ts[open] { display: flex; flex-direction: column; }
+.ts::backdrop { background: rgba(23,19,15,.45); }
+.ts-head { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem .6rem; }
+.ts-head h2 { font: 600 var(--t-body)/1.2 var(--sans); }
+.ts-x { border: 0; background: none; font-size: 1.6rem; line-height: 1; color: var(--stone); cursor: pointer; padding: .2rem .5rem; }
+.ts-tabs { display: flex; gap: .4rem; padding: 0 1.2rem; border-bottom: 1px solid var(--hair); }
+.ts-tabs button { border: 0; background: none; padding: .6rem .2rem; margin-right: .9rem; font: 500 var(--t-small)/1 var(--sans); color: var(--stone); cursor: pointer; border-bottom: 2px solid transparent; }
+.ts-tabs button[aria-selected="true"] { color: var(--espresso); border-bottom-color: var(--brass); }
+.ts-body { flex: 1; overflow-y: auto; padding: 1rem 1.2rem 1.4rem; }
+.ts-group { border: 0; margin: 0 0 1.3rem; padding: 0; }
+.ts-group legend { font: 600 var(--t-small)/1.3 var(--sans); margin-bottom: .6rem; }
+.ts-seg { display: flex; flex-wrap: wrap; gap: .4rem; }
+.ts-seg button { flex: 1 1 auto; padding: .55rem .7rem; border: 1px solid var(--hair); border-radius: 6px; background: #fff; color: var(--espresso); font: 500 var(--t-small)/1.2 var(--sans); cursor: pointer; }
+.ts-seg button[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: var(--on-dark); }
+.ts-hint, .ts-note { color: var(--stone); margin-top: .5rem; }
+.ts-note { background: var(--bone-2); padding: .6rem .8rem; border-radius: 6px; margin-bottom: 1rem; }
+.ts-hint a { color: var(--walnut); }
+.ts-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: .2rem 1rem; padding: .45rem 0; border-bottom: 1px solid var(--hair); }
+.ts-row label { color: var(--espresso); }
+.ts-num { display: inline-flex; align-items: center; gap: .3rem; }
+.ts-num i { font-style: normal; color: var(--stone); }
+.ts-num input, .ts-field input, .ts-field textarea { font: 400 var(--t-small)/1.4 var(--sans); color: var(--espresso); background: #fff; border: 1px solid var(--hair); border-radius: 6px; padding: .45rem .55rem; }
+.ts-num input { width: 6.5rem; text-align: right; }
+.ts-num input:focus-visible, .ts-field input:focus-visible, .ts-field textarea:focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.ts-eq { grid-column: 1 / -1; color: var(--stone); }
+.ts-field { display: flex; flex-direction: column; gap: .3rem; margin-bottom: .8rem; }
+.ts-field textarea { resize: vertical; }
+.ts-foot { display: flex; align-items: center; gap: .8rem; padding: .8rem 1.2rem; border-top: 1px solid var(--hair); background: var(--bone); }
+.ts-status { flex: 1; color: var(--stone); }
+.ts-save { padding: .65rem 1.4rem; border: 0; border-radius: 100px; background: var(--navy); color: var(--on-dark); font: 500 var(--t-small)/1 var(--sans); cursor: pointer; }
+.ts-save:hover { background: var(--brass); color: var(--espresso); }
+.ts-save:disabled { opacity: .6; cursor: default; }
+.ts-local { border: 0; background: none; color: var(--walnut); font: 500 var(--t-small)/1.3 var(--sans); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-align: left; }
+@media (max-width: 640px) { .ts-gear span { display: none; } .ts-gear { padding: .45rem; } .ts { width: 100%; } }
+@media print { .ts-gear, .ts { display: none !important; } }

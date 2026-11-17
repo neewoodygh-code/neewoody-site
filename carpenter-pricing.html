@@ -10,7 +10,7 @@
   <title>Job Pricing Tool — Neewoody</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="css/app.css?v=20261116d"/>
+  <link rel="stylesheet" href="css/app.css?v=20261117"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     :root{
@@ -89,6 +89,7 @@
   <nav aria-label="Site"><a href="/concierge/directory.html#tools">Member tools</a><a href="/concierge/directory.html">Members area</a></nav>
 </header>
 <div id="root"></div>
+<script src="js/tool-settings.js?v=20261117"></script>
 <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
@@ -409,10 +410,50 @@ const MarginBar=({pct,label='Gross margin'})=>{
       <div style={{height:4,background:S.bgAlt,borderRadius:2,overflow:'hidden'}}>
         <div style={{height:'100%',width:`${Math.min(pct,100)}%`,background:color,transition:'width .3s,background .3s'}}/>
       </div>
-      {pct<30&&<div style={{fontSize:'.68rem',color:S.warn,fontFamily:FM,marginTop:4}}>Margin below 30% — consider raising tier or add-ons</div>}
+      {pct<30&&<div style={{fontSize:'.68rem',color:S.warn,fontFamily:FM,marginTop:4}}>Margin below 30% — consider raising tier or add-ons
+        {window.ToolSettings && <button type="button" onClick={()=>window.ToolSettings.open('pricing','ts-tier-standard')} style={{marginLeft:8,background:'none',border:0,padding:0,color:S.accentDk,fontFamily:FM,fontSize:'.68rem',textDecoration:'underline',cursor:'pointer'}}>Change your rates</button>}</div>}
     </div>
   );
 };
+
+// ── Pricing method (2026-11-17): members price with a multiplier, a markup on cost
+// or a profit margin. Tiers are ALWAYS stored as multipliers (calcQuote is unchanged,
+// old configs and quotes stay valid); the method only changes how a tier is shown and
+// typed. Conversions live in js/tool-settings.js (window.PriceMethod) so the shared
+// settings panel and this tool agree exactly.
+const methodOf = cfg => (cfg && cfg.priceMethod) || 'multiplier';
+const PM = () => window.PriceMethod || { shown:(m)=>m, toMult:(v)=>(+v>0?+v:null), equiv:()=>'', label:(m)=>'×'+m, METHODS:[['multiplier','Multiplier','']] };
+const tierLabel = (cfg, id) => PM().label(tierMultFor(cfg, id), methodOf(cfg));
+function TierInput({ mult, method, onChange, width=96 }) {
+  const [txt, setTxt] = useState(String(PM().shown(mult, method)));
+  const [focus, setFocus] = useState(false);
+  useEffect(() => { if (!focus) setTxt(String(PM().shown(mult, method))); }, [mult, method, focus]);
+  return (
+    <div style={{display:'flex',alignItems:'center',gap:6}}>
+      {method==='multiplier' && <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>×</span>}
+      {/* controlled (NumInp only reads its first value), same look as NumInp */}
+      <input type="number" inputMode="decimal" value={txt} step={method==='multiplier'?'0.01':'0.5'} onFocus={()=>setFocus(true)} onBlur={()=>setFocus(false)}
+        onChange={e=>{ setTxt(e.target.value); const m = PM().toMult(e.target.value, method); if (m) onChange(m); }}
+        style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:4,color:S.dark,padding:'7px 10px',fontFamily:FM,fontSize:'.88rem',outline:'none',width}}/>
+      {method!=='multiplier' && <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>%</span>}
+    </div>
+  );
+}
+function MethodSwitch({ method, onChange }) {
+  const cur = PM().METHODS.find(m => m[0] === method) || PM().METHODS[0];
+  return (
+    <div>
+      <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+        {PM().METHODS.map(m => (
+          <button key={m[0]} type="button" aria-pressed={m[0]===method} onClick={()=>onChange(m[0])}
+            style={{flex:'1 1 auto',padding:'8px 10px',borderRadius:4,cursor:'pointer',fontFamily:FB,fontSize:'.8rem',fontWeight:600,
+              border:`1px solid ${m[0]===method?S.dark:S.border}`,background:m[0]===method?S.dark:S.surface,color:m[0]===method?'#fff':S.dark}}>{m[1]}</button>
+        ))}
+      </div>
+      <div style={{fontSize:'.74rem',color:S.muted,fontFamily:FB,marginTop:6,lineHeight:1.5}}>{cur[2]}</div>
+    </div>
+  );
+}
 const Row=({label,value,bold,color,indent})=>(
   <div style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:`1px solid ${S.border}`,paddingLeft:indent?10:0}}>
     <span style={{fontSize:'.82rem',fontFamily:FB,color:S.muted}}>{label}</span>
@@ -586,6 +627,7 @@ function OverheadSettings({ cfg, member, onMember, onSave, onBack }) {
     labourRates:  cfg?.labourRates  ? {...cfg.labourRates} : {...DEFAULT_OVERHEAD.labourRates},
     tierMults:    cfg?.tierMults    ? {...cfg.tierMults}   : {...DEFAULT_OVERHEAD.tierMults},
     addOnPcts:    cfg?.addOnPcts    ? {...cfg.addOnPcts}   : {...DEFAULT_OVERHEAD.addOnPcts},
+    priceMethod:  methodOf(cfg),
     running: cfg?.running ? cfg.running.map(r=>({...r})) : DEFAULT_OVERHEAD.running.map(r=>({...r})),
     capital: cfg?.capital ? cfg.capital.map(x=>({...x})) : DEFAULT_OVERHEAD.capital.map(x=>({...x})),
     brand: {
@@ -779,18 +821,17 @@ function OverheadSettings({ cfg, member, onMember, onSave, onBack }) {
         </div>} style={{marginBottom:14}}/>
 
         <Card ch={<div>
-          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>Build tier multipliers</div>
-          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:12,lineHeight:1.5}}>How much you charge above cost at each tier — 1.50 means cost + 50%. Set these to your own market; what one workshop can charge, another can't.</div>
+          <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:4}}>How you set your price</div>
+          <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>Pick the way you think about your price, then set each tier. Set these to your own market; what one workshop can charge, another can't.</div>
+          <div style={{marginBottom:14}}><MethodSwitch method={c.priceMethod} onChange={v=>setC(p=>({...p, priceMethod:v}))}/></div>
           {TIERS.map(t=>(
             <div key={t.id} style={{display:'grid',gridTemplateColumns:'1fr 96px',gap:8,alignItems:'center',marginBottom:8}}>
               <div>
                 <div style={{fontSize:'.88rem',fontFamily:FB,fontWeight:600,color:S.dark}}>{t.label}</div>
                 <div style={{fontSize:'.7rem',color:S.muted,fontFamily:FB}}>{t.sub}</div>
               </div>
-              <div style={{display:'flex',alignItems:'center',gap:6}}>
-                <span style={{fontSize:'.82rem',color:S.muted,fontFamily:FM}}>×</span>
-                <NumInp value={c.tierMults?.[t.id] ?? DEFAULT_OVERHEAD.tierMults[t.id]} step="0.01" onChange={e=>updTier(t.id,+e.target.value||0)}/>
-              </div>
+              <TierInput mult={c.tierMults?.[t.id] ?? DEFAULT_OVERHEAD.tierMults[t.id]} method={c.priceMethod} onChange={m=>updTier(t.id,m)}/>
+              <div style={{gridColumn:'1 / -1',fontSize:'.7rem',color:S.muted,fontFamily:FM,marginTop:-4}}>{PM().equiv(c.tierMults?.[t.id] ?? DEFAULT_OVERHEAD.tierMults[t.id])}</div>
             </div>
           ))}
         </div>} style={{marginBottom:14}}/>
@@ -864,12 +905,13 @@ function QuickSettingsPanel({ overheadCfg, onSave, onFullSettings, session }) {
         <NumInp value={cfg.billableDays ?? DEFAULT_OVERHEAD.billableDays} onChange={e=>patch({billableDays:Math.min(30,Math.max(1,+e.target.value||20))})}/>
       </div>
       <div>
-        <Lbl ch="Tier multipliers"/>
+        <Lbl ch="Price tiers"/>
+        <div style={{marginBottom:8}}><MethodSwitch method={methodOf(cfg)} onChange={v=>patch({priceMethod:v})}/></div>
         <div style={{display:'flex',flexDirection:'column',gap:6}}>
           {TIERS.map(t=>(
             <div key={t.id} style={{display:'flex',justifyContent:'space-between',alignItems:'center',gap:8}}>
               <span style={{fontSize:'.78rem',color:S.mid,fontFamily:FB}}>{t.label}</span>
-              <NumInp value={cfg.tierMults?.[t.id] ?? t.mult} step="0.01" style={{width:72}} onChange={e=>patch({tierMults:{...(cfg.tierMults||DEFAULT_OVERHEAD.tierMults),[t.id]:+e.target.value||0}})}/>
+              <TierInput mult={cfg.tierMults?.[t.id] ?? t.mult} method={methodOf(cfg)} width={72} onChange={m=>patch({tierMults:{...(cfg.tierMults||DEFAULT_OVERHEAD.tierMults),[t.id]:m}})}/>
             </div>
           ))}
         </div>
@@ -1372,7 +1414,7 @@ function SetupTab({ q, upd, calc, overheadCfg, clients }) {
                   <div style={{fontFamily:FD,fontSize:'1rem',fontWeight:600,color:q.tierId===t.id?'#fff':S.dark}}>{t.label}</div>
                   <div style={{fontSize:'.75rem',color:q.tierId===t.id?'rgba(255,255,255,.65)':S.muted,fontFamily:FB,marginTop:2}}>{t.sub}</div>
                 </div>
-                <div style={{fontFamily:FM,fontSize:'.82rem',color:q.tierId===t.id?'rgba(255,255,255,.7)':S.muted,fontWeight:600}}>×{tierMultFor(overheadCfg,t.id)}</div>
+                <div style={{fontFamily:FM,fontSize:'.82rem',color:q.tierId===t.id?'rgba(255,255,255,.7)':S.muted,fontWeight:600}}>{tierLabel(overheadCfg,t.id)}</div>
               </div>
             </button>
           ))}
@@ -1916,7 +1958,7 @@ function SummaryTab({ q, calc, cfg, session, brand, onStatusChange, onSave }) {
       </div>}/>
       <Card ch={<div>
         <div style={{fontFamily:FM,fontSize:'.65rem',letterSpacing:'.14em',color:S.muted,textTransform:'uppercase',marginBottom:10}}>Pricing</div>
-        <Row label={`Tier: ${calc.tier.label}`} value={`×${calc.tierMult}`}/>
+        <Row label={`Tier: ${calc.tier.label}`} value={tierLabel(overheadCfg, calc.tier.id)}/>
         {activeAddOns.map(a=><Row key={a.id} label={a.label} value={`+${a.pct}%`} indent/>)}
         {activeAddOns.length>0&&<Row label="Combined add-on multiplier" value={`×${calc.addOnMult.toFixed(3)}`}/>}
         <div style={{borderTop:`1.5px solid ${S.accent}`,marginTop:12,paddingTop:12}}>
@@ -2198,7 +2240,16 @@ function App() {
   const saveOverhead = async cfg => {
     setOverheadCfg(cfg);
     await carpFetch('/pricing/config', 'PUT', { config: cfg });
+    // keep the shared letterhead (Settings > Business details) in step with this tool's branding
+    if (window.ToolSettings && cfg.brand) window.ToolSettings.mergeBusiness({ bizName: cfg.brand.name || '', tagline: cfg.brand.tagline || '', phone: cfg.brand.phone || '', addr2: cfg.brand.location || '' });
   };
+  useEffect(() => {
+    const onShared = e => { if (e.detail && e.detail.pricing) setOverheadCfg(e.detail.pricing); };
+    window.addEventListener('nw-settings', onShared);
+    if (window.ToolSettings) window.ToolSettings.local('Overhead costs, tools and letterhead options →', () => setScreen('settings'));
+    return () => window.removeEventListener('nw-settings', onShared);
+  }, []);
+  useEffect(() => { if (screen === 'dashboard' && location.hash === '#settings-overhead') { history.replaceState(null, '', location.pathname); setScreen('settings'); } }, [screen]);
 
   // `client` is optional — {id, name} to start the quote already linked to a
   // client (from a client's "+ Quote" button), or omitted for a blank quote.

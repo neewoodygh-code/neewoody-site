@@ -375,6 +375,8 @@ async function route(request, env, ctx) {
   if (mOrder && method === 'PUT') return withAuth(request, env, (m) => updateOrder(request, env, m, Number(mOrder[1]), ctx));
 
   // ---- member: pricing tool (per-member config + quotes) ----
+  if (path === '/api/settings' && method === 'GET') return withAuth(request, env, (m) => getSettings(env, m));
+  if (path === '/api/settings' && method === 'PUT') return withPaid(request, env, (m) => saveSettings(request, env, m));
   if (path === '/api/pricing/config' && method === 'GET') return withAuth(request, env, (m) => getPricingConfig(env, m));
   if (path === '/api/pricing/config' && method === 'PUT') return withPaid(request, env, (m) => savePricingConfig(request, env, m));
   if (path === '/api/pricing/quotes' && method === 'GET') return withAuth(request, env, (m) => getQuotes(env, m));
@@ -927,6 +929,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM clients WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM cutsheet_data WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM invoice_data WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM member_settings WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM storefront_items WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM members WHERE phone = ?').bind(phone),
   ]);
@@ -985,6 +988,7 @@ async function purgePending(env, onlyPhone) {
     q(`DELETE FROM clients WHERE member_phone IN ${sub}`),
     q(`DELETE FROM cutsheet_data WHERE member_phone IN ${sub}`),
     q(`DELETE FROM invoice_data WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM member_settings WHERE member_phone IN ${sub}`),
     q(`DELETE FROM storefront_items WHERE member_phone IN ${sub}`),
     q(`DELETE FROM members WHERE ${cond}`),
   ]);
@@ -2265,6 +2269,38 @@ function safeJsonStr(v, max) {
   if (!s || s === 'null' || typeof v !== 'object') return null;
   if (s.length > max) return 'TOO_LARGE';
   return s;
+}
+
+// Shared workshop settings (migration 0035): the business details every tool
+// prints. Only whitelisted string fields are kept, each length-capped, so the
+// blob stays small and can never carry anything but letterhead text.
+const SETTINGS_BUSINESS_FIELDS = {
+  bizName: 120, tagline: 160, addr1: 160, addr2: 160, email: 120, phone: 40, whatsapp: 40, instagram: 80,
+  payTitle1: 80, payBody1: 600, payTitle2: 80, payBody2: 600, payTitle3: 80, payBody3: 600, terms: 4000,
+};
+function cleanBusiness(src) {
+  const out = {};
+  if (!src || typeof src !== 'object') return out;
+  for (const [k, max] of Object.entries(SETTINGS_BUSINESS_FIELDS)) {
+    if (typeof src[k] === 'string') out[k] = src[k].slice(0, max);
+  }
+  return out;
+}
+async function getSettings(env, member) {
+  const row = await env.DB.prepare('SELECT data, updated_at FROM member_settings WHERE member_phone = ?').bind(member.phone).first();
+  if (!row) return json({ settings: null });
+  let settings; try { settings = JSON.parse(row.data); } catch { settings = null; }
+  return json({ settings, updated_at: row.updated_at });
+}
+async function saveSettings(request, env, member) {
+  const body = await readJson(request);
+  if (!body || typeof body.settings !== 'object' || !body.settings) return json({ error: 'settings_required' }, 400);
+  const data = JSON.stringify({ v: 1, business: cleanBusiness(body.settings.business) });
+  await env.DB.prepare(
+    `INSERT INTO member_settings (member_phone, data) VALUES (?, ?)
+     ON CONFLICT(member_phone) DO UPDATE SET data = excluded.data, updated_at = datetime('now')`
+  ).bind(member.phone, data).run();
+  return json({ ok: true, settings: JSON.parse(data) });
 }
 
 async function getPricingConfig(env, member) {

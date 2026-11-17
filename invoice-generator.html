@@ -8,7 +8,7 @@
 <title>Invoice &amp; Quote Generator — Carpentry Concierge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Jost:wght@300;400;500;600&family=Roboto+Mono:wght@400;500;600&family=Montserrat:wght@500;600;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="css/app.css?v=20261116d" />
+<link rel="stylesheet" href="css/app.css?v=20261117" />
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   :root{
@@ -500,6 +500,7 @@
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/tool-settings.js?v=20261117"></script>
 <script>
 /* ============================================================
    INVOICE & QUOTE GENERATOR — open to all paid Concierge members,
@@ -729,7 +730,25 @@ function onField(k,v){
   if(k==='discountValue') v=+v||0, INV.discountValue=v;
   persist(); renderDoc(); if(k==='paid'||k==='discountValue') syncBalance();
 }
-function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); if(k==='bizName') renderStyleControls(); }
+function onSetting(k,v){ SETTINGS[k]=v; SETTINGS.updatedAt=Date.now(); persistSettings(); renderDoc(); if(k==='bizName') renderStyleControls();
+  if(BIZ_KEYS.indexOf(k)>=0 && window.ToolSettings){ var o={}; o[k]=v; window.ToolSettings.mergeBusiness(o); } }
+
+/* Shared business details (2026-11-17): the letterhead lives once on the account
+   (Settings > Business details, the gear in the header) and every tool prints it.
+   Here: a filled-in shared value wins; a value only this invoice tool has is sent
+   up to the shared details, so the two converge without anyone retyping. */
+var BIZ_KEYS=['bizName','tagline','addr1','addr2','email','phone','whatsapp','instagram','payTitle1','payBody1','payTitle2','payBody2','payTitle3','payBody3','terms'];
+function applySharedBusiness(b){
+  var changed=false, up={};
+  BIZ_KEYS.forEach(function(k){
+    var shared=(b&&typeof b[k]==='string')?b[k]:'', mine=SETTINGS[k]||'';
+    if(shared && shared!==mine){ SETTINGS[k]=shared; changed=true; }
+    else if(!shared && mine){ up[k]=mine; }
+  });
+  if(changed){ SETTINGS.updatedAt=Date.now(); persistSettings(); syncForm(); renderDoc(); renderStyleControls(); }
+  if(Object.keys(up).length && window.ToolSettings) window.ToolSettings.mergeBusiness(up);
+}
+window.addEventListener('nw-settings', function(e){ if(e.detail&&e.detail.business) applySharedBusiness(e.detail.business); });
 function setType(t){ INV.docType=t; persist();
   document.querySelectorAll('#typeSeg button').forEach(function(b){ b.classList.toggle('on', b.dataset.t===t); });
   renderDoc(); updateOptWarn();
@@ -1354,7 +1373,15 @@ async function boot(){
   if(!INV.currency) INV.currency='GH₵';
   syncForm(); renderItems(); renderDoc(); syncBalance();
   checkHandoff();  // a quote pushed from the Pricing tool → seed a new draft
-  cloudSync();     // pull the account blob, merge, and keep it in sync across devices
+  // pull the account blob, merge, keep it in sync; then lay the shared business details on top
+  Promise.resolve(cloudSync()).catch(function(){}).then(function(){
+    if(window.ToolSettings) window.ToolSettings.loadBusiness().then(function(b){ applySharedBusiness(b); });
+  });
+  if(window.ToolSettings) window.ToolSettings.seedBusiness=function(){ var o={}; BIZ_KEYS.forEach(function(k){ o[k]=SETTINGS[k]||''; }); return o; };
+  if(window.ToolSettings) window.ToolSettings.local('Document style, logo, signature and payment layout →', function(){
+    ['setBiz','setStyle'].forEach(function(id){ var d=document.getElementById(id); if(d) d.open=true; });
+    var d=document.getElementById('setBiz'); if(d) d.scrollIntoView({behavior:'smooth',block:'start'});
+  });
 }
 boot();
 </script>

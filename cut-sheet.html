@@ -46,7 +46,7 @@ h4{font-size: 1.05rem;}
 .breadcrumb-sep{opacity: .4;}
 @media (max-width: 768px){:root{--space-2xl: 4rem; --space-xl: 2.5rem;}}
 </style>
-<link rel="stylesheet" href="css/app.css?v=20261116d" />
+<link rel="stylesheet" href="css/app.css?v=20261117" />
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
@@ -559,7 +559,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div class="setup-body">
 
     <!-- BOARD SETTINGS -->
-    <div class="card">
+    <div class="card" id="boardCard">
       <div class="card-t"><span class="dot"></span>Board</div>
       <div class="fld big" style="margin-bottom:.7rem">
         <label for="s-code">Board / colour code</label>
@@ -729,6 +729,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/tool-settings.js?v=20261117"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  CUT SHEET GENERATOR — standalone, vanilla JS
@@ -913,8 +914,25 @@ async function fetchSession(){
     if(!U.brandTouched) applyBrandDefaults();  // adopt member branding until the user customises
     renderBrand(); renderAll(); save();
     cloudSync();   // pull the member's projects from their account + merge (cross-device)
+    // shared business details (Settings, the gear in the header) name the sheet header
+    if(window.ToolSettings) window.ToolSettings.loadBusiness().then(applySharedBusiness);
   }catch(e){ /* stay on default branding */ }
 }
+
+// Shared business details (2026-11-17): the name and phone from Settings > Business
+// details head the sheet, unless this sheet's header was customised by hand.
+function applySharedBusiness(b){
+  if(!b || U.brandTouched) return;
+  if(b.bizName) session.name=b.bizName;
+  if(b.phone) session.phone=b.phone;
+  if(b.bizName) U.brandName=b.bizName;
+  if(b.phone) U.brandPhone=b.phone;
+  renderBrand(); renderAll(); save();
+}
+window.addEventListener('nw-settings', function(e){ if(e.detail&&e.detail.business) applySharedBusiness(e.detail.business); });
+if(window.ToolSettings) window.ToolSettings.local('Board size, kerf, waste and prices for this tool →', function(){
+  var c=document.getElementById('boardCard'); if(c) c.scrollIntoView({behavior:'smooth',block:'start'});
+});
 
 // ── CLOUD SYNC (Concierge members: projects follow you across devices) ──
 var cloudEnabled=false, cloudPushTimer=null;
