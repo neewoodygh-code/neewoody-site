@@ -14,7 +14,7 @@ const { items } = Astro.props;
             sizes={w.wide ? '(min-width: 900px) 60vw, 82vw' : '(min-width: 900px) 30vw, 82vw'}
             alt={`${w.title}, ${w.place}`} loading="lazy" draggable="false" />
         </div>
-        <h3>{w.title}</h3>
+        <h3><span class="uline">{w.title}</span></h3>
         <p>{w.place}<span class="slash" aria-hidden="true"></span>{w.wood}</p>
       </a>
     ))}

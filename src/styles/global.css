@@ -1,6 +1,6 @@
 /* Neewoody: colours from the wood, one motif (the slash) from the logo's slanted N.
    Shared by every page: tokens, reset, type atoms, nav, homepage hero, quote, footer.
-   Rules: only the --t-* sizes, no new animations or hover zooms, one uppercase style (.label). */
+   Rules: only the --t-* sizes, no hover zooms, motion only the quiet kind (see QUIET MOTION in home.css), one uppercase style (.label). */
 :root {
   --bone: #efe9df;
   --bone-2: #e4dccf;
