@@ -61,7 +61,7 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
   - Light pass on the product pages and the other case studies: about 35 sentences changed (not-X-but-Y lines, "statement", "premium", "seamless", "perfectly", "Whether you want...", one-line closers). "Next:" removed from related links.
   - The East Legon client's first name is no longer in visible copy (standing rule: no client names unless approved); the page address `/projects/judith-east-legon` is unchanged.
   - Checked: every number from the four old pages is still present; build passes; Lighthouse 98 to 99 / 100 / 100 / 100 on two of them.
-- [ ] **Step 5. Needs owner decisions** (admin-posted projects DONE 2026-11-14: built into the pages at build time with web-sized photos, uploads shrunk in `admin.html`; details in `docs/tools/cms-posts.md`. Photo shoot still open; photo-editing advice given the same day.)
+- [ ] **Step 5. Needs owner decisions** (admin-posted projects DONE 2026-11-14: built into the pages at build time with web-sized photos, uploads shrunk in `admin.html`; details in `docs/tools/cms-posts.md`. Photo shoot: the owner is arranging it (2026-11-17), so it is no longer tracked here; photo-editing advice given the same day.)
   - Build admin-posted projects into the pages (dispatch side, explicit go-ahead required) and fix the 5 MB photo.
   - A professional photo shoot of three or four jobs.
 
@@ -104,3 +104,11 @@ Working well: the bone / espresso / walnut palette with brass used sparingly; re
 
 ### Homepage Workshop photo replaced (2026-11-16, owner: "a lay man would not get the point of it")
 The section showed a close-up of Hyedua grain (`live-edge-table-grain-wide.jpg`), chosen in the first prototype as a texture; without context it reads as an abstract shiny surface and does not back up the sentence about the yard and doing the work ourselves. Replaced with the owner's pick from `docs/review/workshop-photo-options.jpg`: E, `live-edge-table-staining.jpg` (crew member staining the Hyedua slab by hand in the yard, timber stacked behind). Portrait photo, so the crop is set with `object-position: 50% 36%` in `home.css` to keep the face and the slab together. Alt text: "Staining a Hyedua table top by hand in our yard". Result: `docs/review/workshop-photo-new.png`. Lesson: every photo on a page must show a reader what the words next to it say; texture shots only work next to a photo that shows the whole piece.
+
+
+### Bad photos fixed (2026-11-17, owner: "fix any bad photos as best we can")
+Edited in place (originals in git history), so the site and the catalogue both get the clean versions:
+- `dansoman-kitchen/dansoman-kitchen-{island,overview,layout}.jpg`: the old NW logo stamp in the bottom-left corner is cut off (`scripts/remove-stamp.py`). A clone patch over the wood grain left a visible seam, so cropping won; each photo loses only a strip of floor.
+- `zoe-cantonments/zoe-front-closed.jpg`: the clothes rail beside the wardrobe is cropped off and a 10 px sliver of rug covered with the floor below it (`scripts/crop-clutter.py`).
+- `golf-hills-estate/golf-hills-installed-1.jpg`: the broom and dish rack at the right edge are cropped off (same script).
+- Agbogba visualisation published on Wardrobes and in the catalogue, labelled as a visualisation.

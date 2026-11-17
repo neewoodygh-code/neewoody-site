@@ -136,7 +136,15 @@ export default {
           "year": "2022",
           "caption": "Floor-to-ceiling built-in in oak-effect laminate with open shelving tower, hanging rail, and bottom drawers.",
           "img": "images/projects/agbogba/agbogba-builtin-interior.jpg",
-          "alt": "Floor-to-ceiling built-in wardrobe interior, Agbogba, Accra 2022"
+          "alt": "Floor-to-ceiling built-in wardrobe interior, Agbogba, Accra 2022",
+          "photos": [
+            { "img": "images/projects/agbogba/agbogba-builtin-interior.jpg", "alt": "Floor-to-ceiling built-in wardrobe interior, Agbogba, Accra 2022", "cap": "As installed in Agbogba." },
+            { "img": "images/projects/agbogba/agbogba-builtin-visualisation.jpg", "alt": "Visualisation: the same Agbogba wardrobe shown in a sage green room with an oak floor", "cap": "Visualisation. The wardrobe is the real photograph; the room around it is drawn." }
+          ],
+          "more": [
+            "Floor-to-ceiling built-in in oak-effect laminate with an open shelving tower, hanging rail and bottom drawers.",
+            "The second picture is a visualisation: we took the real photo of this wardrobe and drew a different room around it, so you can picture the same build in your own space before we make it."
+          ]
         },
         {
           "cat": "builtin",

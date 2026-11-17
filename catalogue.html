@@ -4,102 +4,122 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Neewoody Custom Woodwork — Catalogue</title>
-<meta name="description" content="Selected works by Neewoody Custom Woodwork — bespoke wardrobes, kitchens, beds, dining, solid wood and commercial joinery, handcrafted in Accra, Ghana." />
+<meta name="description" content="Selected works by Neewoody Custom Woodwork — bespoke wardrobes, kitchens, beds, TV units, dining, solid wood and commercial joinery, handcrafted in Accra, Ghana." />
 <link rel="icon" href="images/favicon.ico" />
 <link rel="stylesheet" href="css/app.css?v=20261116d">
 <style>
-/* Catalogue, 2026-11-15: the site's new look (bone, espresso, walnut, brass; Cormorant Garamond + Manrope;
-   fonts and colour settings come from css/app.css). A4 pages, print-to-PDF. One label style, roman
-   headlines, no section numerals. Every page is a fixed A4 sheet: after any copy change, print to PDF
-   and look at each page, because text that runs long is cut off at the page edge. */
+/* Catalogue, Volume Two (2026-11-17). Same look as the site: bone, espresso, walnut, brass; Cormorant
+   Garamond + Manrope from css/app.css. Every page is a fixed A4 sheet built from five layouts:
+   opener (section title over a big photo), story (one photo, two smaller, text), grid (six cards),
+   mosaic (one project, many photos) and compare. Photos fill each page edge to edge; nothing floats in
+   empty space. After any copy change print to PDF and look at every page: text that runs long is cut
+   off at the page edge. Contents page numbers are typed by hand; update them if pages move. */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px}
-body{background:var(--stone);color:var(--espresso);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:24px 0}
-img{display:block;max-width:100%}
+body{background:var(--stone);color:var(--espresso);font-family:var(--sans);-webkit-font-smoothing:antialiased;padding:24px 0;counter-reset:pg}
+img{display:block;max-width:100%;width:100%;height:100%;object-fit:cover;background:var(--bone-2);min-height:0}
 
 .page{position:relative;width:210mm;height:297mm;margin:0 auto 24px;background:var(--bone);overflow:hidden;
-  box-shadow:0 8px 40px rgba(0,0,0,.28);page-break-after:always;break-after:page}
+  box-shadow:0 8px 40px rgba(0,0,0,.28);page-break-after:always;break-after:page;counter-increment:pg}
 .page:last-child{margin-bottom:0}
+.folio{position:absolute;right:12mm;bottom:7mm;z-index:3}
+.folio::after{content:counter(pg)}
 
 /* type */
-.label,.yr,.mt,.specs dt,.contact .l,.cover-meta,.sign{font-family:var(--sans);font-weight:500;font-size:7.5pt;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
+.label,.yr,.mt,.specs dt,.contact .l,.cover-meta,.sign,.folio,.toc .n{font-family:var(--sans);font-weight:500;font-size:7pt;letter-spacing:.14em;text-transform:uppercase;color:var(--stone)}
 .slash{display:inline-block;width:1px;height:.95em;background:currentColor;transform:skewX(-24deg);margin:0 .7em;vertical-align:-.12em;opacity:.6}
 h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.04;letter-spacing:-.015em;color:var(--espresso)}
-.lead{color:var(--stone);line-height:1.7}
-.logo{width:34mm;height:auto}
+p{font-size:9.5pt;line-height:1.62;color:var(--stone)}
+.logo{width:34mm;height:auto;background:none;object-fit:contain}
 
-/* dark pages share one treatment */
-.cover,.divider,.back{background:var(--espresso);color:var(--on-dark)}
-.cover h1,.divider h2,.back h2,.feature h3{color:var(--on-dark)}
-.cover .label,.divider .label,.back .label,.feature .label,.cover-meta,.back .sign,.back .contact .l{color:var(--on-dark-2)}
-.cover p,.divider p,.back p,.feature .cap p{color:var(--on-dark-2);line-height:1.7}
+/* dark pages */
+.dark{background:var(--espresso)}
+.dark h1,.dark h2,.dark h3{color:var(--on-dark)}
+.dark .label,.dark .yr,.dark .folio,.dark .sign,.dark .contact .l,.dark .cover-meta,.dark .mt{color:var(--on-dark-2)}
+.dark p{color:var(--on-dark-2)}
 
 /* cover */
-.cover{display:flex;flex-direction:column}
-.cover-art{height:62%;position:relative;overflow:hidden}
-.cover-art img{width:100%;height:100%;object-fit:cover}
-.cover-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,19,15,.05) 0%,rgba(23,19,15,.5) 100%)}
-.cover-body{flex:1;padding:12mm 18mm;display:flex;flex-direction:column;justify-content:center}
-.cover-body .label{margin-top:7mm}
+.cover{display:grid;grid-template-rows:63% 1fr}
+.cover-body{padding:11mm 18mm;display:flex;flex-direction:column;justify-content:center}
+.cover-body .label{margin-top:6mm}
 .cover-body h1{font-size:40pt;margin:3mm 0 4mm}
-.cover-body p{font-size:10.5pt;max-width:135mm}
+.cover-body p{font-size:10.5pt;max-width:140mm}
 .cover-meta{margin-top:5mm}
 
-/* about */
-.pad{padding:18mm}
-.about{display:flex;flex-direction:column;justify-content:center;height:100%}
-.about h2{font-size:34pt;margin:5mm 0 8mm;max-width:150mm}
-.about .lead{font-size:11pt;max-width:150mm;margin-bottom:5mm}
-.about .lead.fact{margin-top:6mm;padding-top:6mm;border-top:1px solid var(--hair);color:var(--espresso)}
+/* about + contents */
+.about{display:grid;grid-template-columns:1fr 70mm;height:100%}
+.about-text{padding:18mm 12mm 14mm 18mm;display:flex;flex-direction:column}
+.about-text h2{font-size:30pt;margin:4mm 0 6mm}
+.about-text p{font-size:10pt;margin-bottom:3.5mm}
+.about-text .fact{margin-top:2mm;padding-top:4mm;border-top:1px solid var(--hair);color:var(--espresso)}
+.quote{margin:5mm 0 0;padding:5mm 0 0;border-top:1px solid var(--hair)}
+.quote blockquote{font-family:var(--serif);font-size:15pt;line-height:1.3;color:var(--espresso)}
+.quote .label{margin-top:2.5mm}
+.steps{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:3mm 7mm;margin-top:6mm;padding-top:5mm;border-top:1px solid var(--hair)}
+.steps li p{font-size:8.6pt;line-height:1.5;margin:1mm 0 0}
+.steps b{font-family:var(--serif);font-weight:400;font-size:13pt;color:var(--espresso)}
+.toc{margin-top:auto;padding-top:5mm;border-top:1px solid var(--hair)}
+.toc .label{margin-bottom:3mm}
+.toc ol{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:1.6mm 8mm}
+.toc li{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--serif);font-size:13pt;color:var(--espresso);border-bottom:1px solid var(--hair);padding-bottom:1.2mm}
 
-/* section opener */
-.divider{display:flex;flex-direction:column;justify-content:flex-end;padding:18mm 18mm 30mm}
-.divider h2{font-size:52pt;margin-bottom:8mm}
-.divider p{font-size:11pt;max-width:130mm}
+/* section opener: title over a full photo */
+.opener{display:grid;grid-template-rows:auto 1fr}
+.opener .top{padding:15mm 18mm 9mm}
+.opener h2{font-size:42pt;margin:3mm 0 4mm}
+.opener p{font-size:10pt;max-width:150mm}
+.opener .ph{position:relative;min-height:0}
+.opener .ph .cap{position:absolute;left:0;right:0;bottom:0;padding:22mm 18mm 9mm;background:linear-gradient(180deg,rgba(23,19,15,0),rgba(23,19,15,.82));color:var(--on-dark)}
+.opener .ph .cap h3{font-size:20pt;color:var(--on-dark);margin-top:1.5mm}
+.opener .ph .cap .label{color:var(--on-dark-2)}
 
-/* full-page photo with caption */
-.feature{position:relative;color:var(--on-dark)}
-.feature>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.feature::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,19,15,0) 40%,rgba(23,19,15,.84) 100%)}
-.feature .cap{position:absolute;left:0;right:0;bottom:0;padding:16mm 18mm;z-index:2}
-.feature .cap h3{font-size:34pt;margin:3mm 0 4mm}
-.feature .cap p{font-size:10.5pt;max-width:140mm}
-
-/* photo over a description and details */
-.spread{display:flex;flex-direction:column;height:100%}
-.spread-img{height:62%;overflow:hidden;background:var(--bone-2)}
-.spread-img img{width:100%;height:100%;object-fit:cover}
-.spread-body{flex:1;padding:11mm 18mm;display:flex;flex-direction:column;justify-content:center}
-.spread-body .head,.duo .strip .head{display:flex;justify-content:space-between;align-items:baseline;gap:20px}
-.spread-body h3{font-size:28pt}
+/* story: main photo, two smaller, then text */
+.story{display:grid;grid-template-rows:148mm 78mm 1fr;gap:4mm;padding:12mm 12mm 0}
+.story .row{display:grid;grid-template-columns:1fr 1fr;gap:4mm;min-height:0}
+.story .body{padding:2mm 4mm 12mm;display:flex;flex-direction:column}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:6mm}
+.head h3{font-size:24pt}
 .yr{white-space:nowrap}
-.spread-body .desc{font-size:10pt;line-height:1.65;color:var(--stone);margin:4mm 0 0;max-width:150mm}
-.specs{display:grid;grid-template-columns:repeat(2,1fr);gap:7px 28px;margin-top:5mm;padding-top:5mm;border-top:1px solid var(--hair)}
-.specs div{display:flex;flex-direction:column;gap:2px}
-.specs dd{font-size:10pt;color:var(--espresso)}
+.story .body p{margin-top:2.5mm;max-width:172mm}
+.specs{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 6mm;margin-top:4mm;padding-top:3.5mm;border-top:1px solid var(--hair)}
+.specs div{display:flex;flex-direction:column;gap:1mm}
+.specs dd{font-size:8.5pt;line-height:1.35;color:var(--espresso)}
+.story.two{grid-template-rows:230mm 1fr}
 
-/* two photos */
-.duo{display:flex;flex-direction:column;height:100%}
-.duo .imgs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4mm;padding:14mm 14mm 0;min-height:0}
-.duo .imgs img{width:100%;height:100%;object-fit:cover;background:var(--bone-2);min-height:0}
-.duo .strip{padding:10mm 14mm 12mm}
-.duo .strip h3{font-size:26pt}
-.duo .strip p{font-size:10pt;line-height:1.6;color:var(--stone);margin-top:3mm;max-width:160mm}
+/* six to a page */
+.grid{display:grid;grid-template-rows:auto 1fr;padding:13mm 12mm 13mm;height:100%}
+.grid .pg-head{padding:0 0 6mm}
+.grid .pg-head h3{font-size:24pt;margin-top:1.5mm}
+.cards{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:6mm 5mm;min-height:0}
+.card{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+.card .txt{padding-top:2.2mm}
+.card .nm{font-family:var(--serif);font-size:14pt;line-height:1.1;color:var(--espresso)}
+.card .mt{margin-top:1mm}
+.card p{font-size:8.3pt;line-height:1.45;margin-top:1mm}
 
-/* four to a page */
-.grid-pg{padding:16mm 16mm 14mm;display:flex;flex-direction:column;height:100%}
-.grid-pg .pg-head{margin-bottom:9mm}
-.grid-pg .pg-head h3{font-size:26pt;margin-top:2mm}
-.thumbs{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:7mm}
-.card{display:flex;flex-direction:column}
-.card .ph{height:62mm;overflow:hidden;background:var(--bone-2)}
-.card .ph img{width:100%;height:100%;object-fit:cover}
-.card .nm{font-family:var(--serif);font-size:17pt;line-height:1.1;color:var(--espresso);margin-top:3mm}
-.card .mt{margin-top:1.5mm}
-.card .ds{font-size:9pt;line-height:1.5;color:var(--stone);margin-top:2mm}
+/* mosaic: one project, many photos */
+.mosaic{display:grid;grid-template-rows:auto 1fr;padding:13mm 12mm 13mm;height:100%}
+.mosaic .intro{display:grid;grid-template-columns:1fr 1fr;gap:8mm;padding-bottom:6mm}
+.mosaic .intro h3{font-size:26pt;margin-top:1.5mm}
+.tiles{display:grid;gap:4mm;min-height:0}
+.tiles figure{position:relative;min-height:0}
+.tiles figcaption{position:absolute;left:0;bottom:0;padding:5mm 4mm 2.5mm;width:100%;background:linear-gradient(180deg,rgba(23,19,15,0),rgba(23,19,15,.7));font-size:7pt;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--on-dark)}
+.t6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
+.t6 .big{grid-column:span 2;grid-row:span 2}
+.t5{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
+.t5 .big{grid-row:span 2}
+
+/* compare: real photo beside the visualisation */
+.compare{display:grid;grid-template-rows:auto 1fr auto;padding:13mm 12mm 13mm;height:100%;gap:6mm}
+.compare h3{font-size:26pt;margin-top:1.5mm}
+.compare .pair{display:grid;grid-template-columns:1fr 1fr;gap:4mm;min-height:0}
+.compare figure{display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+.compare figcaption{padding-top:2.5mm}
+.compare .note{display:grid;grid-template-columns:1fr 1fr;gap:8mm}
 
 /* back cover */
-.back{display:flex;flex-direction:column;justify-content:center;padding:20mm}
+.back{display:flex;flex-direction:column;padding:0 20mm 18mm}
+.back .strip{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:3mm;height:92mm;margin:0 -20mm 14mm}
 .back h2{font-size:40pt;margin:5mm 0 6mm}
 .back p{font-size:11pt;max-width:140mm;margin-bottom:11mm}
 .contact{display:grid;grid-template-columns:repeat(2,1fr);gap:6mm 12mm;max-width:150mm;padding-top:7mm;border-top:1px solid var(--hair-dark)}
@@ -114,367 +134,585 @@ h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.04;letter-spacin
   .page{margin:0;box-shadow:none;width:210mm;height:297mm}
 }
 @media screen and (max-width:760px){
-  .page{width:100%;height:auto;min-height:auto;aspect-ratio:210/297}
+  .page{width:100%;height:auto;aspect-ratio:210/297}
 }
 </style>
 </head>
 <body>
 
 <!-- ════════════ COVER ════════════ -->
-<section class="page cover">
-  <div class="cover-art">
-    <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Floor-to-ceiling fitted wardrobe by Neewoody">
-  </div>
+<section class="page cover dark">
+  <img src="images/projects/bortianor/bortianor-master-wardrobe.jpg" alt="Lit glass-front wardrobe by Neewoody, Bortianor">
   <div class="cover-body">
     <img class="logo" src="images/brand/logo-light.png" alt="Neewoody Custom Woodwork" width="1000" height="333">
     <div class="label">Selected Works<i class="slash"></i>Accra, Ghana</div>
     <h1>Neewoody<br>Custom Woodwork</h1>
-    <p>Bespoke furniture and architectural joinery, designed and built by hand for homes and institutions across Ghana. This catalogue is a selection of pieces we have made to measure.</p>
-    <div class="cover-meta">Catalogue<i class="slash"></i>Volume One</div>
+    <p>Furniture and joinery we have designed, built and fitted for homes and institutions across Ghana. Every piece in here was made to measure for one room.</p>
+    <div class="cover-meta">Catalogue<i class="slash"></i>Volume Two<i class="slash"></i>2026</div>
   </div>
 </section>
 
-<!-- ════════════ ABOUT ════════════ -->
+<!-- ════════════ ABOUT + CONTENTS ════════════ -->
 <section class="page">
-  <div class="pad about">
-    <div class="label">The Workshop</div>
-    <h2>Furniture made to measure, not made to fit.</h2>
-    <p class="lead">Neewoody Custom Woodwork is a bespoke furniture and carpentry workshop based on Amugi Avenue in Accra. Every commission begins with the room it is built for: its dimensions, its light, the way it will be used. It is then drawn, cut, finished and installed by our own crew.</p>
-    <p class="lead">We work in laminate and solid hardwood alike: fitted wardrobes and kitchens, dining sets and beds, live-edge tables, and full institutional fitouts. The pages that follow show real installations in clients' homes and premises, with no renders and no stock photography.</p>
-    <p class="lead fact">Clients rate us 4.8 out of 5 on Google, from 14 reviews. We have designed, built and installed by hand from East Legon to the Volta Region.</p>
+  <div class="about">
+    <div class="about-text">
+      <div class="label">The Workshop</div>
+      <h2>Made to measure, not made to fit.</h2>
+      <p>We are a furniture and carpentry workshop on Amugi Avenue in Accra, trading since 2015. Every job starts with the room: its size, its light and how it will be used. We draw it, cut it, finish it and fit it with our own crew.</p>
+      <p>We work in laminate and in solid Ghanaian hardwood: fitted wardrobes and kitchens, beds, TV walls, dining rooms, live-edge tables, and whole houses fitted out at once. The photos are of real work in clients' homes and premises. The one visualisation, on page 11, is marked as one.</p>
+      <p class="fact">4.8 out of 5 from 14 Google reviews. We have built and installed from East Legon to the Volta Region.</p>
+      <figure class="quote">
+        <blockquote>“For more than 5 years, everything Neewoody has produced for me is still looking and functioning like new, from my office to my home.”</blockquote>
+        <figcaption class="label">Ngminvielu Kuuire<i class="slash"></i>repeat client, Google review</figcaption>
+      </figure>
+      <ol class="steps">
+        <li><b>Measure</b><p>We come to the room and take every dimension ourselves.</p></li>
+        <li><b>Draw and price</b><p>A drawing, the finishes and one clear price, valid 14 days.</p></li>
+        <li><b>Build</b><p>Cut, assembled and finished in our Accra workshop.</p></li>
+        <li><b>Fit</b><p>Our own crew installs it and leaves the room clean.</p></li>
+      </ol>
+      <div class="toc">
+        <div class="label">Contents</div>
+        <ol>
+          <li>Whole homes <span class="n">3</span></li>
+          <li>TV walls and shelving <span class="n">20</span></li>
+          <li>Wardrobes <span class="n">6</span></li>
+          <li>Dining and living <span class="n">23</span></li>
+          <li>Kitchens <span class="n">12</span></li>
+          <li>Solid wood <span class="n">25</span></li>
+          <li>Beds <span class="n">16</span></li>
+          <li>Commercial <span class="n">29</span></li>
+        </ol>
+      </div>
+    </div>
+    <img src="images/projects/roman-ridge-live-edge/live-edge-table-staining.jpg" alt="Staining a Hyedua table top by hand in our yard">
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- ════════════ 01 · WARDROBES ════════════ -->
-<section class="page divider">
-  <h2>Fitted &amp; Freestanding<br>Wardrobes</h2>
-  <p>Built-in, alcove and freestanding wardrobes in laminate and melamine: floor-to-ceiling storage, sliding and hinged doors, integrated drawers, dressers and downlights, fitted to the exact wall.</p>
+<!-- ════════════ WHOLE HOMES ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">Whole homes</div>
+    <h2>One house, every room</h2>
+    <p>Some clients bring us the whole house. We plan the kitchen, wardrobes, TV walls and bathroom together, in one finish, and fit them room by room.</p>
+  </div>
+  <div class="ph">
+    <img src="images/projects/bortianor/bortianor-kitchen-wide.jpg" alt="Walnut-grain kitchen with a dark veined island, Bortianor">
+    <div class="cap"><div class="label">Bortianor, Accra<i class="slash"></i>2026</div><h3>The kitchen of a new house we fitted from front to back</h3></div>
+  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Oyarifa — feature -->
-<section class="page feature">
-  <img src="images/projects/oyarifa/oyarifa-master-closed-1.jpg" alt="Oyarifa master wardrobe">
-  <div class="cap">
-    <div class="label">Oyarifa<i class="slash"></i>2025</div>
-    <h3>Floor-to-Ceiling Built-ins</h3>
-    <p>Two greige oak-effect wardrobes for one property: a wall-to-wall master with four doors, overhead cabinets and a recessed downlight, and a narrow alcove guest unit with a six-shelf tower. Matte black hardware throughout.</p>
+<section class="page">
+  <div class="mosaic">
+    <div class="intro">
+      <div><div class="label">Bortianor<i class="slash"></i>September to October 2026</div><h3>A whole house of joinery</h3></div>
+      <p>Kitchen, pantry, two TV walls, a gentleman's bar, a glass-front wardrobe and the bathroom vanity, all in the same walnut-grain finish. Built in our workshop and fitted over two months, so every room of the house reads as one.</p>
+    </div>
+    <div class="tiles t6">
+      <figure class="big"><img src="images/projects/bortianor/bortianor-living-tv-wall.jpg" alt="Living-room TV wall with lit shelving, Bortianor"><figcaption>Living-room TV wall</figcaption></figure>
+      <figure><img src="images/projects/bortianor/bortianor-kitchen-island.jpg" alt="Kitchen island with drawers, Bortianor"><figcaption>Kitchen island</figcaption></figure>
+      <figure><img src="images/projects/bortianor/bortianor-living-bar.jpg" alt="Gentleman's bar, Bortianor"><figcaption>The bar</figcaption></figure>
+      <figure><img src="images/projects/bortianor/bortianor-pantry.jpg" alt="Pantry cabinets, Bortianor"><figcaption>Pantry</figcaption></figure>
+      <figure><img src="images/projects/bortianor/bortianor-master-tv-wall.jpg" alt="Master-bedroom TV wall, Bortianor"><figcaption>Master TV wall</figcaption></figure>
+      <figure><img src="images/projects/bortianor/bortianor-vanity.jpg" alt="Bathroom vanity, Bortianor"><figcaption>Bathroom vanity</figcaption></figure>
+    </div>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Oyarifa + Adenta interiors -->
-<section class="page duo">
-  <div class="imgs">
-    <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg" alt="Oyarifa guest wardrobe interior">
-    <img src="images/projects/adenta/adenta-interior-left.jpg" alt="Adenta wardrobe interior">
+<section class="page">
+  <div class="mosaic">
+    <div class="intro">
+      <div><div class="label">Dome, Accra<i class="slash"></i>2025</div><h3>Five pieces for one home</h3></div>
+      <p>A wave-carved Guarea chest, a kitchenette, a laundry room, bar stools and a fitted wardrobe, built to one brief. The chest is the piece people ask about: one wave carved across every drawer front, edge to edge.</p>
+    </div>
+    <div class="tiles t5">
+      <figure class="big"><img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg" alt="Wave-carved Guarea chest of drawers"><figcaption>Wave-carved Guarea chest</figcaption></figure>
+      <figure><img src="images/projects/nadia-dome/nadia-kitchenette-1.jpg" alt="Kitchenette in russet laminate"><figcaption>Kitchenette</figcaption></figure>
+      <figure><img src="images/projects/nadia-dome/nadia-laundry-1.jpg" alt="Laundry room in light beech laminate"><figcaption>Laundry room</figcaption></figure>
+      <figure><img src="images/projects/nadia-dome/nadia-bar-stools.jpg" alt="Solid wood bar stools with velvet seats"><figcaption>Bar stools</figcaption></figure>
+      <figure><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Distressed walnut-effect wardrobe"><figcaption>Wardrobe</figcaption></figure>
+    </div>
   </div>
-  <div class="strip">
-    <div class="head"><h3>Interiors, considered</h3><span class="yr">Oyarifa<i class="slash"></i>Adenta</span></div>
-    <p>Every wardrobe is planned from the inside out: hanging rails, adjustable shelving, drawer banks and cubbies arranged around how the room is actually used. At Adenta, a light ash alcove unit runs entirely handleless on push-to-open doors.</p>
-  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Zoe Cantonments — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/zoe-cantonments/zoe-front-closed.jpg" alt="Zoe Cantonments wardrobe"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Zoe, Cantonments</h3><span class="yr">2026</span></div>
-    <p class="desc">A freestanding wardrobe in dark walnut-effect laminate: two-panel sliding doors above an integrated four-drawer chest in a 2 + 2 configuration, finished with matte black bar handles.</p>
+<!-- ════════════ WARDROBES ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">Wardrobes</div>
+    <h2>Fitted to the wall</h2>
+    <p>Built-in, alcove and freestanding wardrobes in laminate: floor to ceiling, sliding or hinged, with drawers, dressers and lights planned in from the start.</p>
+  </div>
+  <div class="ph">
+    <img src="images/projects/agbogba/agbogba-dresser-wide.jpg" alt="Wall of wardrobes with open shelving and a dresser desk, Agbogba" style="object-position:50% 35%">
+    <div class="cap"><div class="label">Agbogba<i class="slash"></i>2022</div><h3>Shelving, hanging space and a dresser desk across one wall</h3></div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page story two">
+  <div class="row">
+    <img src="images/projects/zoe-cantonments/zoe-front-closed.jpg" alt="Sliding wardrobe with integrated drawer chest, Cantonments">
+    <img src="images/projects/zoe-cantonments/zoe-angled.jpg" alt="Wardrobe seen from the side" style="object-position:80% 50%">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Sliding wardrobe, Cantonments</h3><span class="yr">2026</span></div>
+    <p>A freestanding wardrobe in dark walnut-effect laminate: two sliding doors over a four-drawer chest built into the base, with matte black bar handles.</p>
     <dl class="specs">
       <div><dt>Finish</dt><dd>Dark walnut-effect laminate</dd></div>
+      <div><dt>Doors</dt><dd>Two-panel sliding</dd></div>
+      <div><dt>Base</dt><dd>Four-drawer chest</dd></div>
       <div><dt>Hardware</dt><dd>Matte black</dd></div>
-      <div><dt>Type</dt><dd>Freestanding, sliding doors</dd></div>
-      <div><dt>Detail</dt><dd>Integrated 4-drawer chest</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Dobro — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/dobro/dobro-wide-interior.jpg" alt="Dobro wardrobe interior"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Dobro, Nsawam Road</h3><span class="yr">2025</span></div>
-    <p class="desc">Four wardrobes across one new-build house: a wide master with six drawers, plus a kids' room and two guest bedrooms. Several units carry built-in drawer organisers with fitted compartments.</p>
+<section class="page story">
+  <img src="images/projects/dobro/dobro-wide-interior.jpg" alt="Wide wardrobe interior, Dobro">
+  <div class="row">
+    <img src="images/projects/dobro/dobro-wide-closed.jpg" alt="Wide wardrobe closed, Dobro">
+    <img src="images/projects/dobro/dobro-drawer-organizer.jpg" alt="Drawer with fitted compartments, Dobro">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Four wardrobes, Dobro</h3><span class="yr">Nsawam Road<i class="slash"></i>2025</span></div>
+    <p>Every bedroom of a new-build house: a wide master with six drawers, a kids' room and two guest rooms. Several drawers have fitted compartments for watches, ties and jewellery.</p>
     <dl class="specs">
       <div><dt>Finish</dt><dd>Cherry-effect laminate</dd></div>
+      <div><dt>Scope</dt><dd>Four wardrobes, one house</dd></div>
+      <div><dt>Detail</dt><dd>Compartmented drawers</dd></div>
       <div><dt>Hardware</dt><dd>Matte black</dd></div>
-      <div><dt>Scope</dt><dd>4 wardrobes, whole house</dd></div>
-      <div><dt>Detail</dt><dd>Compartmented drawer organisers</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Wardrobes grid: Agbogba, Dansoman, Seyram, Nadia -->
-<section class="page grid-pg">
-  <div class="pg-head">
-    <div class="label">Wardrobes</div>
-    <h3>More from the catalogue</h3>
+<section class="page story two">
+  <div class="row">
+    <img src="images/projects/oyarifa/oyarifa-guest-interior.jpg" alt="Guest wardrobe interior, Oyarifa">
+    <img src="images/projects/adenta/adenta-interior-left.jpg" alt="Handleless ash wardrobe interior, Adenta">
   </div>
-  <div class="thumbs">
-    <div class="card">
-      <div class="ph"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Agbogba wardrobe"></div>
-      <div class="nm">Agbogba</div>
-      <div class="mt">Oak-effect<i class="slash"></i>2022</div>
-      <div class="ds">Built-in plus freestanding unit with an integrated dresser recess and recessed spotlights.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Dansoman wardrobe"></div>
-      <div class="nm">Dansoman</div>
-      <div class="mt">Cherry-effect<i class="slash"></i>2024</div>
-      <div class="ds">Freestanding sliding-door wardrobe on aluminium track, with overhead cabinet and internal drawers.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Seyram open wardrobe"></div>
-      <div class="nm">Seyram, Nmai Dzorn</div>
-      <div class="mt">Open walk-in system</div>
-      <div class="ds">White melamine open dressing room: four units in facing pairs with an integrated full-length mirror.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Nadia wardrobe"></div>
-      <div class="nm">Nadia, Dome</div>
-      <div class="mt">Distressed walnut<i class="slash"></i>2025</div>
-      <div class="ds">Rustic distressed walnut-effect wardrobe, two hinged doors over three drawers. Part of a full-home commission.</div>
-    </div>
-  </div>
-</section>
-
-<!-- ════════════ 02 · KITCHENS ════════════ -->
-<section class="page divider">
-  <h2>Bespoke<br>Kitchens</h2>
-  <p>Fitted kitchens built around the way you cook: laminate cabinetry, stone and quartz worktops, islands with seating, integrated appliances and undermount sinks, from Spintex to the Eastern Region.</p>
-</section>
-
-<!-- Spintex — feature -->
-<section class="page feature">
-  <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg" alt="Spintex kitchen">
-  <div class="cap">
-    <div class="label">Spintex<i class="slash"></i>2024</div>
-    <h3>L-Shaped in Espresso &amp; Gold</h3>
-    <p>Dark espresso cabinetry under a Calacatta marble-effect worktop with gold veining, framed by black aluminium frosted-glass upper cabinets, an undermount sink and an integrated hob.</p>
-  </div>
-</section>
-
-<!-- Dansoman kitchen — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/dansoman-kitchen/dansoman-kitchen-island.jpg" alt="Dansoman kitchen island"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Dansoman Kitchen</h3><span class="yr">2024</span></div>
-    <p class="desc">A large family kitchen in cherry/teak-effect laminate under white engineered quartz, anchored by a freestanding island with an open-shelf end and a seating overhang. Integrated six-burner range and undermount sink.</p>
+  <div class="body">
+    <div class="head"><h3>Planned from the inside out</h3><span class="yr">Oyarifa<i class="slash"></i>Adenta</span></div>
+    <p>We lay out the inside before the doors: hanging rails, shelves, drawer banks and cubbies placed around what you own and how you dress. Left, the Oyarifa guest unit with its six-shelf tower. Right, a light ash alcove wardrobe in Adenta that opens on push-to-open doors, with no handles at all.</p>
     <dl class="specs">
-      <div><dt>Cabinetry</dt><dd>Cherry/teak-effect laminate</dd></div>
-      <div><dt>Worktop</dt><dd>White engineered quartz</dd></div>
-      <div><dt>Island</dt><dd>Open shelving, seating overhang</dd></div>
-      <div><dt>Appliances</dt><dd>6-burner range, undermount sink</dd></div>
+      <div><dt>Oyarifa</dt><dd>Greige oak, shelf tower</dd></div>
+      <div><dt>Adenta</dt><dd>Light ash, handleless</dd></div>
+      <div><dt>Inside</dt><dd>Rails, shelves, drawers</dd></div>
+      <div><dt>Lighting</dt><dd>Downlights on request</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Kitchens grid: Tantra, Danfa, Kokrobite, Kukurantumi -->
-<section class="page grid-pg">
-  <div class="pg-head">
+<section class="page">
+  <div class="grid">
+    <div class="pg-head"><div class="label">Wardrobes</div><h3>More wardrobes and dressing rooms</h3></div>
+    <div class="cards">
+      <div class="card"><img src="images/projects/agbogba/agbogba-dresser-lit.jpg" alt="Wardrobe with dresser recess, Agbogba"><div class="txt"><div class="nm">Agbogba</div><div class="mt">Oak-effect<i class="slash"></i>2022</div><p>Full-width wardrobe with a dresser recess and spotlights.</p></div></div>
+      <div class="card"><img src="images/projects/dansoman/dansoman-closed-1.jpg" alt="Sliding wardrobe, Dansoman"><div class="txt"><div class="nm">Dansoman</div><div class="mt">Cherry-effect<i class="slash"></i>2024</div><p>Sliding doors on an aluminium track, overhead cabinet.</p></div></div>
+      <div class="card"><img src="images/projects/seyram-nmai-dzorn/seyram-installed.jpg" alt="Open walk-in dressing room, Nmai Dzorn"><div class="txt"><div class="nm">Nmai Dzorn</div><div class="mt">Open walk-in</div><p>White dressing room: four units in facing pairs and a long mirror.</p></div></div>
+      <div class="card"><img src="images/projects/nadia-dome/nadia-wardrobe-front.jpg" alt="Distressed walnut-effect wardrobe, Dome"><div class="txt"><div class="nm">Dome</div><div class="mt">Distressed walnut<i class="slash"></i>2025</div><p>Two hinged doors over three drawers, part of a whole-home job.</p></div></div>
+      <div class="card"><img src="images/projects/achimota-guesthouse/achimota-wardrobe-vanity-wide.jpg" alt="Built-in wardrobe with vanity and glass cabinet, Achimota"><div class="txt"><div class="nm">Achimota</div><div class="mt">Guesthouse room</div><p>Built-in wardrobe with a floating vanity and a lit glass cabinet.</p></div></div>
+      <div class="card"><img src="images/projects/oyarifa/oyarifa-master-closed-2.jpg" alt="Wall-to-wall wardrobe, Oyarifa"><div class="txt"><div class="nm">Oyarifa</div><div class="mt">Greige oak<i class="slash"></i>2025</div><p>The master wardrobe from the side, overhead cabinets above.</p></div></div>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page">
+  <div class="compare">
+    <div><div class="label">Before you commit</div><h3>See it in your own room</h3></div>
+    <div class="pair">
+      <figure><img src="images/projects/agbogba/agbogba-builtin-interior.jpg" alt="Built-in wardrobe as installed in Agbogba"><figcaption class="label">The real wardrobe, Agbogba</figcaption></figure>
+      <figure><img src="images/projects/agbogba/agbogba-builtin-visualisation.jpg" alt="Visualisation: the same wardrobe in a sage green room"><figcaption class="label">Visualisation<i class="slash"></i>new room drawn around it</figcaption></figure>
+    </div>
+    <div class="note">
+      <p>Left is a built-in we made in Agbogba, photographed as installed: oak-effect laminate, an open shelf tower, a hanging rail and drawers at the base.</p>
+      <p>Right is a visualisation. The wardrobe is that same photograph; the walls, floor and light around it are drawn. We can do this with a piece we have built so you can picture it in your colours before we cut a board.</p>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<!-- ════════════ KITCHENS ════════════ -->
+<section class="page opener dark">
+  <div class="top">
     <div class="label">Kitchens</div>
-    <h3>Across the regions</h3>
+    <h2>Built around how you cook</h2>
+    <p>Laminate cabinetry, stone and quartz worktops, islands with seating, built-in appliances and undermount sinks, from Spintex to the Eastern Region.</p>
   </div>
-  <div class="thumbs">
-    <div class="card">
-      <div class="ph"><img src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg" alt="Tantra Hill kitchen"></div>
-      <div class="nm">Tantra Hill</div>
-      <div class="mt">Cream high-gloss</div>
-      <div class="ds">Warm beige speckled granite, a central island and an integrated fridge-freezer tower.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg" alt="Danfa kitchen"></div>
-      <div class="nm">Danfa</div>
-      <div class="mt">Mediterranean<i class="slash"></i>2025</div>
-      <div class="ds">Warm beech-effect cabinetry, sealed concrete worktops, a Belfast farmhouse sink and brass handles.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg" alt="Kokrobite kitchen"></div>
-      <div class="nm">Kokrobite</div>
-      <div class="mt">Wine-red gloss<i class="slash"></i>2021</div>
-      <div class="ds">Bold burgundy high-gloss cabinetry over black galaxy granite, with glazed upper cabinets.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg" alt="Kukurantumi kitchen"></div>
-      <div class="nm">Kukurantumi</div>
-      <div class="mt">Eastern Region</div>
-      <div class="ds">Charcoal concrete-effect laminate with blue-grey veined granite, delivered two hours from Accra.</div>
-    </div>
+  <div class="ph">
+    <img src="images/projects/spintex-kitchen/spintex-kitchen-hero.jpg" alt="L-shaped espresso kitchen, Spintex">
+    <div class="cap"><div class="label">Spintex<i class="slash"></i>2024</div><h3>Espresso cabinets under a gold-veined marble-effect worktop</h3></div>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- ════════════ 03 · BEDS ════════════ -->
-<section class="page divider">
-  <h2>Beds &amp;<br>Bedroom Pieces</h2>
-  <p>Platform beds, four-posters, bunks and matching nightstands, built in solid timber and laminate, with feature headboards and integrated bases.</p>
-</section>
-
-<!-- Dansoman bed — feature -->
-<section class="page feature">
-  <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg" alt="Dansoman bed">
-  <div class="cap">
-    <div class="label">Platform Bed</div>
-    <h3>Bed &amp; Matching Nightstand</h3>
-    <p>A low platform bed with an integrated base and a matching nightstand, built and finished as a single bedroom set.</p>
+<section class="page story">
+  <img src="images/projects/dansoman-kitchen/dansoman-kitchen-overview.jpg" alt="Family kitchen with island, Dansoman">
+  <div class="row">
+    <img src="images/projects/dansoman-kitchen/dansoman-kitchen-island.jpg" alt="Island with open shelves, Dansoman">
+    <img src="images/projects/dansoman-kitchen/dansoman-kitchen-layout.jpg" alt="Kitchen layout seen from the end, Dansoman">
   </div>
+  <div class="body">
+    <div class="head"><h3>Family kitchen, Dansoman</h3><span class="yr">2024</span></div>
+    <p>A big family kitchen in cherry-effect laminate under white engineered quartz. The freestanding island has open shelves at one end and room to sit at the other, with a six-burner range and an undermount sink along the walls.</p>
+    <dl class="specs">
+      <div><dt>Cabinets</dt><dd>Cherry-effect laminate</dd></div>
+      <div><dt>Worktop</dt><dd>White engineered quartz</dd></div>
+      <div><dt>Island</dt><dd>Open shelves, seating</dd></div>
+      <div><dt>Appliances</dt><dd>Six-burner range</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Beds grid: Ridge four-poster, Golf Hills bed, Montessori bunk, Platform iroko -->
-<section class="page grid-pg">
-  <div class="pg-head">
+<section class="page story">
+  <img src="images/projects/prampram-kitchen/prampram-kitchen-hero.jpg" alt="Open kitchen with waterfall peninsula, Prampram">
+  <div class="row">
+    <img src="images/projects/prampram-kitchen/prampram-kitchen-corner.jpg" alt="Kitchen corner with oven tower, Prampram">
+    <img src="images/projects/prampram-kitchen/prampram-kitchen-cabinets.jpg" alt="Tall cabinets with built-in microwave, Prampram">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Open kitchen, Prampram</h3><span class="yr">2026</span></div>
+    <p>For a developer finishing a new house for sale: walnut-grain laminate, grey marble-effect counters and a waterfall peninsula, with a matching floating TV unit in the living room. Clean and ready for a buyer.</p>
+    <dl class="specs">
+      <div><dt>Cabinets</dt><dd>Walnut-grain laminate</dd></div>
+      <div><dt>Counters</dt><dd>Grey marble-effect</dd></div>
+      <div><dt>Shape</dt><dd>L with waterfall peninsula</dd></div>
+      <div><dt>Also</dt><dd>Matching TV unit</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page">
+  <div class="grid">
+    <div class="pg-head"><div class="label">Kitchens</div><h3>Across Accra and beyond</h3></div>
+    <div class="cards">
+      <div class="card"><img src="images/projects/tantra-kitchen/tantra-kitchen-overview.jpg" alt="Cream gloss kitchen, Tantra Hill"><div class="txt"><div class="nm">Tantra Hill</div><div class="mt">Cream high-gloss</div><p>Speckled granite, a central island and a fridge tower.</p></div></div>
+      <div class="card"><img src="images/projects/danfa-kitchen/danfa-kitchen-layout.jpg" alt="Beech and concrete kitchen, Danfa"><div class="txt"><div class="nm">Danfa</div><div class="mt">Beech and concrete<i class="slash"></i>2025</div><p>Sealed concrete worktops, a Belfast sink and brass handles.</p></div></div>
+      <div class="card"><img src="images/projects/kokrobite-kitchen/kokrobite-kitchen-hero.jpg" alt="Burgundy gloss kitchen, Kokrobite"><div class="txt"><div class="nm">Kokrobite</div><div class="mt">Wine-red gloss<i class="slash"></i>2021</div><p>Burgundy gloss over black granite, glazed upper cabinets.</p></div></div>
+      <div class="card"><img src="images/projects/kukurantumi-kitchen/kukurantumi-kitchen-hero.jpg" alt="Charcoal kitchen, Kukurantumi"><div class="txt"><div class="nm">Kukurantumi</div><div class="mt">Eastern Region</div><p>Charcoal concrete-effect laminate, two hours from Accra.</p></div></div>
+      <div class="card"><img src="images/projects/labone-office-kitchen/labone-office-kitchen.jpg" alt="Office kitchen, Labone"><div class="txt"><div class="nm">Labone</div><div class="mt">Office kitchen</div><p>Black units and a white worktop for a company office.</p></div></div>
+      <div class="card"><img src="images/projects/nadia-dome/nadia-kitchenette-1.jpg" alt="Kitchenette, Dome"><div class="txt"><div class="nm">Dome</div><div class="mt">Kitchenette<i class="slash"></i>2025</div><p>Russet laminate, dark stone-effect top, black undermount sink.</p></div></div>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<!-- ════════════ BEDS ════════════ -->
+<section class="page opener dark">
+  <div class="top">
     <div class="label">Beds</div>
-    <h3>Frames &amp; headboards</h3>
+    <h2>Beds and bedroom pieces</h2>
+    <p>Platform beds, four-posters, bunks, nightstands and chests, in solid timber and laminate, with headboards and bases built to last.</p>
   </div>
-  <div class="thumbs">
-    <div class="card">
-      <div class="ph"><img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg" alt="Ridge four-poster bed"></div>
-      <div class="nm">Ridge Four-Poster</div>
-      <div class="mt">Solid timber</div>
-      <div class="ds">A clean-lined solid timber four-poster frame, built for a Ridge residence.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/golf-hills-bed/golf-hills-bed-feature.jpg" alt="Golf Hills bed"></div>
-      <div class="nm">Golf Hills Bed</div>
-      <div class="mt">Feature headboard</div>
-      <div class="ds">A platform bed with a full feature headboard, built for the Golf Hills estate.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg" alt="Montessori bunk bed"></div>
-      <div class="nm">Montessori Bunk</div>
-      <div class="mt">Children's room</div>
-      <div class="ds">A low Montessori-style bunk built to a child-safe height with an open frame.</div>
-    </div>
-    <div class="card">
-      <div class="ph"><img src="images/projects/platform-iroko/platform-iroko-headboard.jpg" alt="Iroko platform bed"></div>
-      <div class="nm">Iroko Platform</div>
-      <div class="mt">Solid iroko</div>
-      <div class="ds">A solid iroko platform bed with a slatted timber headboard.</div>
-    </div>
+  <div class="ph">
+    <img src="images/projects/dansoman-bed/dansoman-bed-overview.jpg" alt="Platform bed with matching nightstand">
+    <div class="cap"><div class="label">Bedroom set</div><h3>A low platform bed and its matching nightstand</h3></div>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- ════════════ 04 · DINING & LIVING ════════════ -->
-<section class="page divider">
-  <h2>Dining &amp;<br>Living</h2>
-  <p>Dining sets built to one brief: tables, seating, consoles and banquettes in matched timber, designed as complete rooms rather than single pieces.</p>
-</section>
-
-<!-- Judith — feature -->
-<section class="page feature">
-  <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Judith East Legon dining set">
-  <div class="cap">
-    <div class="label">Judith, East Legon<i class="slash"></i>2022</div>
-    <h3>A Hyedua Dining Room</h3>
-    <p>A full dining room to one unified brief: a large-format table, six upholstered chairs with linen fabric panels, and a console with full-extension drawers and waterfall-edge sides, all in Hyedua finished in rich espresso.</p>
+<section class="page story">
+  <img src="images/projects/dansoman-walnut-bed/walnut-bed-finished.jpg" alt="King-size walnut bed, finished">
+  <div class="row">
+    <img src="images/projects/dansoman-walnut-bed/walnut-bed-raw.jpg" alt="The bed frame in raw timber">
+    <img src="images/projects/dansoman-walnut-bed/walnut-bed-sanded.jpg" alt="The bed frame sanded, before finishing">
   </div>
+  <div class="body">
+    <div class="head"><h3>King-size walnut bed, Dansoman</h3><span class="yr">Solid walnut</span></div>
+    <p>A king-size frame with panelled head and foot boards and a slatted base. Above, finished; below, the same frame in rough boards and then sanded in our yard before the deep finish went on.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Walnut</dd></div>
+      <div><dt>Size</dt><dd>King</dd></div>
+      <div><dt>Ends</dt><dd>Panelled head and foot</dd></div>
+      <div><dt>Base</dt><dd>Slatted</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Golf Hills Estate — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Golf Hills dining zone"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Golf Hills Estate</h3><span class="yr">2021</span></div>
-    <p class="desc">A complete kitchen dining zone built and installed as one commission: a stained pine X-frame dining table and matching bench, a built-in L-shaped leatherette banquette with under-seat storage, and a timber-framed wall mirror above.</p>
+<section class="page story">
+  <img src="images/projects/dansoman-floating-bed/floating-bed-finished.jpg" alt="Dark floating platform bed with wide ledges">
+  <div class="row">
+    <img src="images/projects/dansoman-floating-bed/floating-bed-frame.jpg" alt="The bed's grid frame before the mattress deck">
+    <img src="images/projects/dansoman-floating-bed/floating-bed-wide.jpg" alt="The floating bed in the room">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Floating platform bed, Dansoman</h3><span class="yr">Upholstered headboard</span></div>
+    <p>The client wanted something strong, with sides wide enough to sit on. A grid frame carries the deck, the ledges run all the way round, and the base is set back so the bed seems to float.</p>
+    <dl class="specs">
+      <div><dt>Frame</dt><dd>Grid, built for weight</dd></div>
+      <div><dt>Sides</dt><dd>Wide ledges to sit on</dd></div>
+      <div><dt>Headboard</dt><dd>Upholstered panels</dd></div>
+      <div><dt>Base</dt><dd>Set back, floating</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page">
+  <div class="grid">
+    <div class="pg-head"><div class="label">Beds</div><h3>Frames, headboards and chests</h3></div>
+    <div class="cards">
+      <div class="card"><img src="images/projects/ridge-fourposter/ridge-fourposter-overview.jpg" alt="Solid wood four-poster bed, Ridge"><div class="txt"><div class="nm">Four-poster, Ridge</div><div class="mt">Solid timber</div><p>A clean-lined four-poster with a slatted headboard.</p></div></div>
+      <div class="card"><img src="images/projects/golf-hills-bed/golf-hills-bed-overview.jpg" alt="Storage bed with upper cabinet, Golf Hills"><div class="txt"><div class="nm">Golf Hills</div><div class="mt">Storage bed</div><p>Drawers under the bed and a cabinet above the headboard.</p></div></div>
+      <div class="card"><img src="images/projects/achimota-guesthouse/achimota-bed-nightstand.jpg" alt="Queen bed and nightstand, Achimota"><div class="txt"><div class="nm">Achimota</div><div class="mt">Guesthouse room</div><p>Queen bed with a slatted base and a matching nightstand.</p></div></div>
+      <div class="card"><img src="images/projects/montessori-bunk/montessori-bunk-overview.jpg" alt="Montessori bunk bed"><div class="txt"><div class="nm">Montessori bunk</div><div class="mt">Children's room</div><p>Low and open, built to a height a small child can manage.</p></div></div>
+      <div class="card"><img src="images/projects/platform-iroko/platform-iroko-headboard.jpg" alt="Iroko platform bed"><div class="txt"><div class="nm">Iroko platform</div><div class="mt">Solid iroko</div><p>A platform bed with a slatted timber headboard.</p></div></div>
+      <div class="card"><img src="images/projects/chest-of-drawers/chest-open.jpg" alt="Five-drawer chest"><div class="txt"><div class="nm">Chest of drawers</div><div class="mt">Five deep drawers</div><p>Warm woodgrain finish, full-extension runners.</p></div></div>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<!-- ════════════ TV WALLS AND SHELVING ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">TV walls and shelving</div>
+    <h2>Walls that work</h2>
+    <p>From a single floating console to a full feature wall with panelling, lit shelves and hidden cables, built to your room and your equipment.</p>
+  </div>
+  <div class="ph">
+    <img src="images/projects/achimota-guesthouse/achimota-tv-marble-wall-1.jpg" alt="Marble feature wall with floating TV bench and lit glass cabinet, Achimota">
+    <div class="cap"><div class="label">Achimota guesthouse</div><h3>A marble feature wall, floating bench and lit glass cabinet</h3></div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page story">
+  <img src="images/projects/amasaman-tv-console/amasaman-tv-console.jpg" alt="Long floating TV console, Amasaman">
+  <div class="row">
+    <img src="images/projects/amasaman-tv-console/amasaman-tv-side.jpg" alt="The console from the side">
+    <img src="images/projects/amasaman-tv-console/amasaman-tv-wide.jpg" alt="The console in the living room">
+  </div>
+  <div class="body">
+    <div class="head"><h3>A long floating console, Amasaman</h3><span class="yr">2026</span></div>
+    <p>One long, low console fixed to the wall, with dark fronts in a light oak frame. It holds the equipment and keeps the floor clear under it.</p>
+    <dl class="specs">
+      <div><dt>Type</dt><dd>Wall-hung console</dd></div>
+      <div><dt>Finish</dt><dd>Dark fronts, light oak frame</dd></div>
+      <div><dt>Storage</dt><dd>Doors and drawers</dd></div>
+      <div><dt>Floor</dt><dd>Left clear underneath</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page">
+  <div class="grid">
+    <div class="pg-head"><div class="label">TV walls and shelving</div><h3>Units, panelling and shelves</h3></div>
+    <div class="cards">
+      <div class="card"><img src="images/projects/bortianor/bortianor-living-wide.jpg" alt="Living room TV wall and bar, Bortianor"><div class="txt"><div class="nm">Bortianor</div><div class="mt">Living room<i class="slash"></i>2026</div><p>TV wall with lit shelving towers and a bar beside it.</p></div></div>
+      <div class="card"><img src="images/projects/prampram-kitchen/prampram-tv-unit-angle.jpg" alt="Floating TV unit, Prampram"><div class="txt"><div class="nm">Prampram</div><div class="mt">Floating unit<i class="slash"></i>2026</div><p>Push-open drawers and a wall shelf in a walnut tone.</p></div></div>
+      <div class="card"><img src="images/projects/tv-stands/tv-stand-1.jpg" alt="Feature panel TV stand in light oak"><div class="txt"><div class="nm">Feature panel</div><div class="mt">Light oak-effect</div><p>A full back panel for the screen over an open-shelf stand.</p></div></div>
+      <div class="card"><img src="images/projects/achimota-guesthouse/achimota-ac-paneling-1.jpg" alt="Slat wall panelling, Achimota"><div class="txt"><div class="nm">Achimota</div><div class="mt">Slat panelling</div><p>Vertical slat panelling up a bedroom wall, around the AC.</p></div></div>
+      <div class="card"><img src="images/projects/sage-centre/sage-gallery-8.jpg" alt="Teak bookcase, Sage Centre"><div class="txt"><div class="nm">Sage Centre</div><div class="mt">Solid teak</div><p>A teak bookcase that also divides the room.</p></div></div>
+      <div class="card"><img src="images/projects/shoe-racks/shoe-rack-1.jpg" alt="Shoe rack"><div class="txt"><div class="nm">Shoe storage</div><div class="mt">Open and closed</div><p>Racks and cabinets sized to the hallway and the pairs.</p></div></div>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<!-- ════════════ DINING AND LIVING ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">Dining and living</div>
+    <h2>Rooms, not single pieces</h2>
+    <p>Tables, chairs, consoles and banquettes in matched timber, designed together so the room reads as one.</p>
+  </div>
+  <div class="ph">
+    <img src="images/projects/judith-east-legon/judith-set-installed-2.jpg" alt="Hyedua dining table, chairs and console, East Legon">
+    <div class="cap"><div class="label">East Legon<i class="slash"></i>2022</div><h3>A whole dining room in Hyedua: table, six chairs and a console</h3></div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page story">
+  <img src="images/projects/golf-hills-estate/golf-hills-installed-1.jpg" alt="Dining corner with banquette, table and mirror, Golf Hills">
+  <div class="row">
+    <img src="images/projects/golf-hills-estate/golf-hills-installed-10.jpg" alt="X-frame table and bench">
+    <img src="images/projects/golf-hills-estate/golf-hills-installed-16.jpg" alt="L-shaped banquette and table">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Dining corner, Golf Hills</h3><span class="yr">2021</span></div>
+    <p>A kitchen dining corner built as one job: a stained pine X-frame table and bench, an L-shaped leatherette banquette with storage under the seats, and a timber-framed mirror above it.</p>
     <dl class="specs">
       <div><dt>Table</dt><dd>Stained pine, X-frame</dd></div>
-      <div><dt>Seating</dt><dd>Bench, L-shaped banquette</dd></div>
-      <div><dt>Storage</dt><dd>Under-seat banquette storage</dd></div>
-      <div><dt>Extra</dt><dd>Timber-framed wall mirror</dd></div>
+      <div><dt>Seating</dt><dd>Bench and banquette</dd></div>
+      <div><dt>Storage</dt><dd>Under the seats</dd></div>
+      <div><dt>Mirror</dt><dd>Timber frame</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- ════════════ 05 · SOLID WOOD ════════════ -->
-<section class="page divider">
-  <h2>Solid Wood<br>&amp; Statement Pieces</h2>
-  <p>Hardwood at its most expressive: live-edge tables, hand-carved fronts and sculptural seating in Afromosia, Guarea and other Ghanaian timbers.</p>
-</section>
-
-<!-- Nadia wave chest — feature -->
-<section class="page feature">
-  <img src="images/projects/nadia-dome/nadia-wave-chest-1.jpg" alt="Nadia wave-carved chest of drawers">
-  <div class="cap">
-    <div class="label">Nadia, Dome<i class="slash"></i>2025</div>
-    <h3>The Wave-Carved Chest</h3>
-    <p>A Guarea chest of drawers carved with a continuous wave pattern running unbroken across every drawer front, with integrated recessed pulls and a walnut-toned finish. One of the most distinctive pieces in the portfolio.</p>
+<!-- ════════════ SOLID WOOD ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">Solid wood</div>
+    <h2>Hardwood with character</h2>
+    <p>Live-edge tables, carved fronts and statement pieces in Hyedua, Afromosia, Guarea, Khaya and other Ghanaian timbers, finished in our yard.</p>
   </div>
+  <div class="ph">
+    <img src="images/projects/roman-ridge-live-edge/live-edge-table-hero.jpg" alt="Live-edge Hyedua table, Roman Ridge" style="object-position:25% 50%">
+    <div class="cap"><div class="label">Roman Ridge<i class="slash"></i>2026</div><h3>“A rugged table, wood with character”: a live-edge Hyedua slab</h3></div>
+  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Ridge Afromosia + Nadia stools — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/french-embassy/afromosia-table-installed-1.jpg" alt="Afromosia live-edge dining table"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Ridge Residence</h3><span class="yr">2021</span></div>
-    <p class="desc">An Afromosia live-edge dining table on solid timber U-frame legs, commissioned by French expatriates on posting in Ghana. The natural edge of the board is kept and finished as the defining feature of the piece.</p>
+<section class="page story">
+  <img src="images/projects/roman-ridge-live-edge/live-edge-table-room.jpg" alt="Live-edge Hyedua table in an open-plan room">
+  <div class="row">
+    <img src="images/projects/roman-ridge-live-edge/live-edge-table-yard.jpg" alt="The table in the workshop yard">
+    <img src="images/projects/roman-ridge-live-edge/live-edge-table-grain.jpg" alt="Close-up of the Hyedua grain and live edge">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Live-edge table, Roman Ridge</h3><span class="yr">Hyedua (Ovangkol)</span></div>
+    <p>We picked a Hyedua slab with a wild grain, kept the edge as the tree grew it and stood it on two solid slab legs. A darker stain was wiped into the grain in the yard, then sprayed coats sealed it before it was carried in.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Hyedua, Guibourtia ehie</dd></div>
+      <div><dt>Top</dt><dd>Live-edge slab</dd></div>
+      <div><dt>Legs</dt><dd>Solid slab</dd></div>
+      <div><dt>Finish</dt><dd>Wiped stain, sprayed seal</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page story">
+  <img src="images/projects/french-embassy/afromosia-table-installed-6.jpg" alt="Live-edge Afromosia dining table, Ridge">
+  <div class="row">
+    <img src="images/projects/french-embassy/afromosia-table-outdoor-2.jpg" alt="The Afromosia slab outdoors before finishing">
+    <img src="images/projects/french-embassy/afromosia-table-installed-5.jpg" alt="The Afromosia table set in the dining room">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Afromosia table, Ridge</h3><span class="yr">2021</span></div>
+    <p>A live-edge Afromosia dining table on solid U-frame legs, made for a French family on posting in Accra. The natural edge of the board is the feature, so we kept it and finished around it.</p>
     <dl class="specs">
       <div><dt>Timber</dt><dd>Afromosia</dd></div>
       <div><dt>Top</dt><dd>Live-edge slab</dd></div>
       <div><dt>Base</dt><dd>Solid U-frame legs</dd></div>
-      <div><dt>Client</dt><dd>Private residence, Ridge</dd></div>
+      <div><dt>Client</dt><dd>Private home, Ridge</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- ════════════ 06 · COMMERCIAL ════════════ -->
-<section class="page divider">
-  <h2>Commercial &amp;<br>Institutional</h2>
-  <p>Larger commissions for venues and institutions: full-property fitouts, branded installations and restaurant furniture, delivered as managed projects from brief to handover.</p>
-</section>
-
-<!-- Sage Centre — feature -->
-<section class="page feature">
-  <img src="images/projects/sage-centre/sage-hero.jpg" alt="Sage Centre teak fitout">
-  <div class="cap">
-    <div class="label">Sage Centre, Wli<i class="slash"></i>2022–2024</div>
-    <h3>A 26-Month Teak Fitout</h3>
-    <p>A full-property teak fitout for a US-based educational NGO at an educational retreat centre in Wli, in the Volta Region: furniture and joinery throughout the buildings and grounds, delivered over twenty-six months.</p>
+<section class="page story">
+  <img src="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-double-sink-hero.jpg" alt="Carved Khaya double vanity, Spintex">
+  <div class="row">
+    <img src="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-master-front.jpg" alt="Single vanity with carved door">
+    <img src="images/projects/spintex-newyork-vanities/spintex-newyork-vanity-guest-front.jpg" alt="Guest bathroom double vanity">
   </div>
+  <div class="body">
+    <div class="head"><h3>Carved vanities, Spintex</h3><span class="yr">Khaya<i class="slash"></i>2024</span></div>
+    <p>Wall-hung bathroom vanities in Khaya, African mahogany, for a house in a Spintex estate. Each has an open cubby beside a door carved in a scalloped pattern, under a vessel basin and black tap.</p>
+    <dl class="specs">
+      <div><dt>Timber</dt><dd>Khaya, African mahogany</dd></div>
+      <div><dt>Doors</dt><dd>Hand-carved</dd></div>
+      <div><dt>Mount</dt><dd>Wall-hung</dd></div>
+      <div><dt>Basins</dt><dd>Vessel, single and double</dd></div>
+    </dl>
+  </div>
+  <div class="folio"></div>
 </section>
 
-<!-- House of Walker — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/house-of-walker/how-hero.jpg" alt="House of Walker installation"></div>
-  <div class="spread-body">
+<!-- ════════════ COMMERCIAL ════════════ -->
+<section class="page opener dark">
+  <div class="top">
+    <div class="label">Commercial and institutional</div>
+    <h2>Larger commissions</h2>
+    <p>Whole-property fitouts, branded builds and restaurant furniture, run as managed projects from brief to handover.</p>
+  </div>
+  <div class="ph">
+    <img src="images/projects/sage-centre/sage-hero.jpg" alt="Teak furniture at the Sage Centre, Wli">
+    <div class="cap"><div class="label">Sage Centre, Wli<i class="slash"></i>2022 to 2024</div><h3>Twenty-six months of teak for a retreat centre in the Volta Region</h3></div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page">
+  <div class="mosaic">
+    <div class="intro">
+      <div><div class="label">Sage Centre, Wli<i class="slash"></i>Solid teak</div><h3>A whole retreat in teak</h3></div>
+      <p>Furniture and joinery for every building of an educational retreat centre run by a US-based NGO: lounges, a long dining room, bedrooms, the library and the terraces. We were the one contractor who stayed from the start to handover.</p>
+    </div>
+    <div class="tiles t6">
+      <figure class="big"><img src="images/projects/sage-centre/sage-gallery-1.jpg" alt="Teak lounge with blue sofas"><figcaption>Main lounge</figcaption></figure>
+      <figure><img src="images/projects/sage-centre/sage-gallery-5.jpg" alt="Teak dining table and benches"><figcaption>Dining room</figcaption></figure>
+      <figure><img src="images/projects/sage-centre/sage-story.jpg" alt="Teak bed and bunk"><figcaption>Bedrooms</figcaption></figure>
+      <figure><img src="images/projects/sage-centre/sage-gallery-6.jpg" alt="Outdoor teak lounge"><figcaption>Terrace</figcaption></figure>
+      <figure><img src="images/projects/sage-centre/sage-gallery-11.jpg" alt="Teak armchairs and sofa"><figcaption>Sitting room</figcaption></figure>
+      <figure><img src="images/projects/sage-centre/sage-grounds.jpg" alt="The grounds at Wli"><figcaption>The setting, Wli</figcaption></figure>
+    </div>
+  </div>
+  <div class="folio"></div>
+</section>
+
+<section class="page story">
+  <img src="images/projects/house-of-walker/how-hero.jpg" alt="House of Walker installation">
+  <div class="row">
+    <img src="images/projects/house-of-walker/how-gallery-1.jpg" alt="House of Walker, detail">
+    <img src="images/projects/house-of-walker/how-gallery-2.jpg" alt="House of Walker, detail">
+  </div>
+  <div class="body">
     <div class="head"><h3>House of Walker</h3><span class="yr">One Airport Square</span></div>
-    <p class="desc">A branded structural carpentry installation built for Johnnie Walker's 200-year celebration at One Airport Square, Accra, designed and fabricated to a brand brief and installed on site for the event.</p>
+    <p>A branded timber structure for Johnnie Walker's 200-year celebration at One Airport Square, Accra. Built to the brand's brief in our workshop and put up on site for the event.</p>
     <dl class="specs">
       <div><dt>Client</dt><dd>Johnnie Walker, 200 years</dd></div>
-      <div><dt>Venue</dt><dd>One Airport Square, Accra</dd></div>
-      <div><dt>Scope</dt><dd>Branded structural carpentry</dd></div>
-      <div><dt>Delivery</dt><dd>Fabricated &amp; installed on site</dd></div>
+      <div><dt>Venue</dt><dd>One Airport Square</dd></div>
+      <div><dt>Scope</dt><dd>Branded structure</dd></div>
+      <div><dt>Delivery</dt><dd>Built, then installed</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
-<!-- Jerksoul — spread -->
-<section class="page spread">
-  <div class="spread-img"><img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul restaurant furniture"></div>
-  <div class="spread-body">
-    <div class="head"><h3>Jerksoul Restaurant</h3><span class="yr">2022</span></div>
-    <p class="desc">Dining and bar furniture for a rooftop restaurant in Accra: custom pine dining tables with branded glass tops, upholstered cube stools paired to the sets and bar, and a large interior bar counter clad in reclaimed-style timber panels with a solid wood top.</p>
+<section class="page story two">
+  <div class="row">
+    <img src="images/projects/jerksoul/jerksoul-day-1.jpg" alt="Jerksoul rooftop restaurant furniture">
+    <img src="images/projects/jerksoul/jerksoul-day-2.jpg" alt="Jerksoul bar and seating">
+  </div>
+  <div class="body">
+    <div class="head"><h3>Jerksoul restaurant</h3><span class="yr">Rooftop, Accra<i class="slash"></i>2022</span></div>
+    <p>Dining and bar furniture for a rooftop restaurant: pine tables with branded glass tops, upholstered cube stools for the tables and the bar, and a long bar counter clad in reclaimed-style timber with a solid wood top.</p>
     <dl class="specs">
-      <div><dt>Tables</dt><dd>Pine, branded glass tops</dd></div>
+      <div><dt>Tables</dt><dd>Pine, branded glass</dd></div>
       <div><dt>Seating</dt><dd>Upholstered cube stools</dd></div>
-      <div><dt>Bar</dt><dd>Timber-clad counter, solid top</dd></div>
-      <div><dt>Setting</dt><dd>Rooftop restaurant, Accra</dd></div>
+      <div><dt>Bar</dt><dd>Timber-clad, solid top</dd></div>
+      <div><dt>Setting</dt><dd>Rooftop restaurant</dd></div>
     </dl>
   </div>
+  <div class="folio"></div>
 </section>
 
 <!-- ════════════ BACK COVER ════════════ -->
-<section class="page back">
-  <div class="label">Commission a Piece</div>
+<section class="page back dark">
+  <div class="strip">
+    <img src="images/projects/bortianor/bortianor-living-wide.jpg" alt="">
+    <img src="images/projects/nadia-dome/nadia-wave-chest-2.jpg" alt="">
+    <img src="images/projects/sage-centre/sage-gallery-8.jpg" alt="" style="object-position:50% 40%">
+  </div>
+  <div class="label">Commission a piece</div>
   <h2>Let's build something<br>for your space.</h2>
-  <p>Every piece in this catalogue began as a conversation about a room. If you have a space in mind, whether a wardrobe wall, a kitchen, a dining room, or something we haven't made before, we'd be glad to talk it through and measure up.</p>
+  <p>Everything in here started as a conversation about a room. If you have one in mind, a wardrobe wall, a kitchen, a whole house or something we haven't made yet, we'll come and measure up and talk it through.</p>
   <div class="contact">
+    <div class="row"><div class="l">WhatsApp and phone</div><div class="v">+233 24 463 3464</div></div>
     <div class="row"><div class="l">Email</div><div class="v">neewoodygh@gmail.com</div></div>
-    <div class="row"><div class="l">Telephone</div><div class="v">+233 24 463 3464</div></div>
-    <div class="row"><div class="l">Instagram</div><div class="v">@neewoodygh</div></div>
     <div class="row"><div class="l">Web</div><div class="v">neewoodygh.com</div></div>
-    <div class="row"><div class="l">Workshop</div><div class="v">Amugi Avenue, Accra, Ghana</div></div>
+    <div class="row"><div class="l">Instagram</div><div class="v">@neewoodygh</div></div>
+    <div class="row"><div class="l">Workshop</div><div class="v">Amugi Avenue, Accra</div></div>
     <div class="row"><div class="l">Hours</div><div class="v">Monday to Saturday, 8am to 6pm</div></div>
   </div>
   <img class="logo" src="images/brand/logo-light.png" alt="" width="1000" height="333">
-  <div class="sign">Handcrafted in Accra</div>
+  <div class="sign">Handcrafted in Accra since 2015</div>
 </section>
 
 </body>
