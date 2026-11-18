@@ -768,11 +768,11 @@ select {
     <div class="adv-grid">
       <div class="igrid" style="padding:0">
         <div class="ig"><label for="i-chset">Chest Set Back (mm)</label><input type="number" id="i-chset" value="80" inputmode="numeric" oninput="live()"><div class="hint">From the carcass front edge to the chest front</div></div>
-        <div class="ig"><label for="i-chgap">Gap Each Side (mm)</label><input type="number" id="i-chgap" value="18" inputmode="numeric" oninput="live()"><div class="hint">Chest side to carcass side = filler thickness</div></div>
+        <div class="ig"><label for="i-chgap">Gap Each Side (mm)</label><input type="number" id="i-chgap" value="60" inputmode="numeric" oninput="live()"><div class="hint">Chest side to carcass side; the filler strip is cut this wide</div></div>
       </div>
       <div class="igrid" style="padding:0">
-        <div class="ig"><label for="i-chstrip">Filler Strip Width (mm)</label><input type="number" id="i-chstrip" value="60" inputmode="numeric" oninput="live()"><div class="hint">Strip screwed to the outside front of the chest</div></div>
-        <div class="ig"><label for="i-chover">Face Strip Overlap (mm)</label><input type="number" id="i-chover" value="9" inputmode="numeric" oninput="live()"><div class="hint">How far the face strip covers the chest side's front edge</div></div>
+        <div class="ig"><label for="i-chover">Face Strip Overlap (mm)</label><input type="number" id="i-chover" value="9" inputmode="numeric" oninput="live()"><div class="hint">Onto the chest side's front edge, covering the joint. Face strip = gap + overlap (60 + 9 = 69). Keep it 60mm or wider for the edge bander, and the overlap less than the board, or the drawer box can't come out.</div></div>
+        <div class="ig"><label for="i-chfgap">Front Gap (mm)</label><input type="number" id="i-chfgap" value="3" inputmode="numeric" oninput="live()"><div class="hint">Between each drawer front and the face strips</div></div>
       </div>
     </div>
 
@@ -957,7 +957,7 @@ select {
 // ══════════════════════════════════════════════════════
 var S = {
   w:2400, h:2100, d:580,
-  thick:18, backType:'inset', backThick:3, groove:8, chSet:80, chGap:18, chStrip:60, chOver:9, clear:2,
+  thick:18, backType:'inset', backThick:3, groove:8, chSet:80, chGap:60, chOver:9, chFGap:3, clear:2,
   overlay:2, doorThick:18, dgap:2, hinge:2, topgap:2, botgap:2,
   sections:3,
   secs:[
@@ -992,7 +992,7 @@ function sync(){
   var _um = S.unit==='cm' ? 10 : 1;
   S.w=gi('i-w',2400)*_um;S.h=gi('i-h',2100)*_um;S.d=gi('i-d',580)*_um;
   S.thick=gi('i-thick',18);S.backType=gv('i-back')||'inset';S.backThick=gi('i-backthick',3);S.groove=gi('i-groove',8);
-  S.chSet=gi('i-chset',80);S.chGap=gi('i-chgap',18);S.chStrip=gi('i-chstrip',60);S.chOver=gi('i-chover',9);
+  S.chSet=gi('i-chset',80);S.chGap=gi('i-chgap',60);S.chOver=gi('i-chover',9);S.chFGap=gi('i-chfgap',3);
   S.clear=gi('i-clear',2);S.overlay=gi('i-overlay',2);S.doorThick=gi('i-doorthick',18);
   S.dgap=gi('i-dgap',2);S.hinge=S.clear;  // hinge gap = edge clearance (consolidated)
   S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
@@ -1503,14 +1503,14 @@ function calculate(){
         var chInW=chW-2*t, chOpenH=R(chH/ndc);
         var runner=[600,550,500,450,400,350,300,250].filter(function(L){return L<=chD-10;})[0]||R(chD-10);
         var fsW=R(S.chGap+S.chOver);                       // face strip covers the gap + part of the chest side
-        var cfW=Math.floor(chW-2*S.chOver-2*overlay+1e-9); // front covers the rest of the chest sides, less edge clearance
+        var cfW=Math.floor(unitOpenW-2*fsW-2*S.chFGap+1e-9); // opening − both face strips − front gaps
         var cfH=R(chOpenH-dgap), cbH=R((chH-2*t)/ndc-24), cbW=R(chInW-26);  // box height from the space inside the chest
         var cn='Drawer Chest ('+sn+')';
         parts.push({name:cn+' Side',qty:2,w:chH,d:chD,tag:'drawer',note:'H×D: '+chH+' × '+chD+' — chest set back '+S.chSet+'mm from the carcass front'});
         parts.push({name:cn+' Top/Bottom',qty:2,w:R(chInW),d:chD,tag:'drawer',note:'W×D: '+R(chInW)+' × '+chD+' — between the chest sides'});
-        parts.push({name:cn+' Filler Strip',qty:2,w:chH,d:R(S.chStrip),tag:'drawer',note:'H×W: '+chH+' × '+R(S.chStrip)+' — screwed to the outside front of each chest side, fills the '+S.chGap+'mm gap'});
+        parts.push({name:cn+' Filler Strip',qty:2,w:chH,d:R(S.chGap),tag:'drawer',note:'H×W: '+chH+' × '+R(S.chGap)+' — screwed to the outside front of each chest side, fills the gap to the carcass'});
         parts.push({name:cn+' Face Strip',qty:2,w:chH,d:fsW,tag:'drawer',note:'H×W: '+chH+' × '+fsW+' — glued to the filler front, overlaps the chest side by '+S.chOver+'mm'});
-        parts.push({name:'Drawer Front ('+sn+', inside)',qty:ndc,w:cfW,d:cfH,tag:'drawer',note:'W×H: '+cfW+' × '+cfH+' — overlays the chest, '+overlay+'mm clear of the face strips'});
+        parts.push({name:'Drawer Front ('+sn+', inside)',qty:ndc,w:cfW,d:cfH,tag:'drawer',note:'W×H: '+cfW+' × '+cfH+' — '+S.chFGap+'mm clear of the face strips'});
         parts.push({name:'Drawer Box Side ('+sn+')',qty:ndc*2,w:runner,d:cbH,tag:'drawer',note:'D×H: '+runner+' × '+cbH+' — '+runner+'mm runners'});
         parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndc*2,w:cbW,d:cbH,tag:'drawer',note:'W×H: '+cbW+' × '+cbH});
         parts.push({name:'Drawer Base ('+sn+')',qty:ndc,w:cbW,d:runner,tag:'drawer',note:'W×D: '+cbW+' × '+runner});
@@ -1806,7 +1806,7 @@ function generate(){
   if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> Butt join — two side panels face-to-face at each join. Screw through to connect.</div></div>';
   var hasChest=S.secs.some(function(sec){return sec.door.on&&sec.zones.some(function(z){return z.type==='drawers'&&z.drawers>0;});});
   var nn=S.modUnits>1?7:6;
-  if(hasChest){nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext"><strong>DRAWERS BEHIND DOORS:</strong> Build each drawer chest as its own box, set back '+S.chSet+'mm from the carcass front. Screw a filler strip ('+S.chStrip+'mm wide) to the outside front of each chest side to fill the '+S.chGap+'mm gap, then glue a face strip to each filler, overlapping the chest side by '+S.chOver+'mm. Drawer fronts cover the rest of the chest sides, '+S.overlay+'mm clear of the face strips.</div></div>';nn++;}
+  if(hasChest){nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext"><strong>DRAWERS BEHIND DOORS:</strong> Build each drawer chest as its own box, set back '+S.chSet+'mm from the carcass front. Screw a '+S.chGap+'mm filler strip to the outside front of each chest side to fill the gap to the carcass, then glue a '+R(S.chGap+S.chOver)+'mm face strip to each filler, overlapping the chest side by '+S.chOver+'mm to cover the joint. Drawer fronts sit between the face strips with a '+S.chFGap+'mm gap each side.'+((S.chGap+S.chOver)<60?' <strong>Check:</strong> face strip is under 60mm, too narrow for most edge banders.':'')+(S.chOver>=S.thick?' <strong>Check:</strong> the overlap is not less than the board thickness, so the face strips block the drawer boxes.':'')+'</div></div>';nn++;}
   if(S.spType!=='none')nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext"><strong>APPLIED SIDE PANELS:</strong> '+r.spDepth+'mm deep. Full height — covers carcass sides and subframe, extends past door face.</div></div>';
   nh+='</div>';
 
@@ -2023,7 +2023,7 @@ function restoreConfig(cfg){
 
   setV('i-w', dim(S.w)); setV('i-h', dim(S.h)); setV('i-d', dim(S.d));
   setV('i-thick', S.thick); setV('i-back', S.backType); setV('i-backthick', S.backThick); setV('i-groove', S.groove!=null?S.groove:8);
-  setV('i-chset', S.chSet!=null?S.chSet:80); setV('i-chgap', S.chGap!=null?S.chGap:18); setV('i-chstrip', S.chStrip!=null?S.chStrip:60); setV('i-chover', S.chOver!=null?S.chOver:9);
+  setV('i-chset', S.chSet!=null?S.chSet:80); setV('i-chgap', S.chGap!=null?S.chGap:60); setV('i-chover', S.chOver!=null?S.chOver:9); setV('i-chfgap', S.chFGap!=null?S.chFGap:3);
   setV('i-clear', S.clear); setV('i-overlay', S.overlay); setV('i-doorthick', S.doorThick);
   setV('i-dgap', S.dgap); setV('i-topgap', S.topgap); setV('i-botgap', S.botgap);
   setV('tk-h', S.tkH); setV('tk-style', S.tkStyle); setV('tk-setback', S.tkSetback);
