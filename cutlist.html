@@ -760,8 +760,10 @@ select {
         <select id="i-back" onchange="live()"><option value="inset">Inset (grooved in)</option><option value="nailon">Nail-on (flush back)</option></select>
       </div>
       <div class="ig"><label for="i-backthick">Back Thickness (mm)</label><input type="number" id="i-backthick" value="3" inputmode="numeric" oninput="live()"><div class="hint">Usually 3mm hardboard</div></div>
-      <div class="ig"><label for="i-groove">Groove Depth (mm)</label><input type="number" id="i-groove" value="8" inputmode="numeric" oninput="rememberGroove();live()"><div class="hint">Inset backs only. How deep you cut the groove (router or saw); the back is cut 1mm short each side so it drops in. Remembered on this device.</div></div>
+      <div class="ig"><label for="i-groove">Groove Depth (mm)</label><input type="number" id="i-groove" value="8" inputmode="numeric" oninput="live()"><div class="hint">Inset backs only. How deep you cut the groove (router or saw); the back is cut 1mm short each side so it drops in. </div></div>
     </div>
+
+    <div class="callout"><p><strong>YOUR CLEARANCES:</strong> The gaps, groove depth and drawer chest sizes on this tab start at our standard. Change any of them to suit how you work: this device remembers your values for every new cutlist, and each saved cutlist keeps its own. <button type="button" class="ui-link" onclick="resetClearances()" style="background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer;color:inherit">Reset to standard</button></p></div>
 
     <div class="sh"><div class="sh-txt">Drawers Behind Doors</div><div class="sh-line"></div></div>
     <div class="callout"><p><strong>DRAWER CHEST:</strong> When a section has a door, its drawers go in their own box (a chest) set back from the front so the hinges and the open door clear it. Filler strips on the outside of the chest fill the gap to the carcass, face strips on the fillers cover the gap and part of the chest sides, and the drawer fronts cover the rest of the chest sides less the edge clearance.</p></div>
@@ -2040,8 +2042,23 @@ function restoreConfig(cfg){
 }
 
 // Groove depth differs per workshop (router vs saw): remember this device's last value
-function rememberGroove(){ try{ localStorage.setItem('nwd-cutlist-groove', gv('i-groove')); }catch(e){} }
-(function(){ try{ var g=localStorage.getItem('nwd-cutlist-groove'); var el=document.getElementById('i-groove'); if(g&&el&&!isNaN(parseFloat(g))){ el.value=g; S.groove=parseFloat(g); } }catch(e){} })();
+// Member's own clearances: remembered on this device for every new cutlist (a saved cutlist keeps its own values)
+var PREF_IDS=['i-clear','i-overlay','i-dgap','i-topgap','i-botgap','i-groove','i-chset','i-chgap','i-chover','i-chfgap'];
+var PREF_KEY='nwd-cutlist-prefs';
+function savePrefs(){ try{ var o={}; PREF_IDS.forEach(function(id){ var v=gv(id); if(v!==''&&!isNaN(parseFloat(v))) o[id]=v; }); localStorage.setItem(PREF_KEY, JSON.stringify(o)); }catch(e){} }
+function resetClearances(){
+  PREF_IDS.forEach(function(id){ var el=document.getElementById(id); if(el) el.value=el.defaultValue; });
+  try{ localStorage.removeItem(PREF_KEY); localStorage.removeItem('nwd-cutlist-groove'); }catch(e){}
+  live();
+}
+document.addEventListener('input', function(ev){ if(ev.target&&PREF_IDS.indexOf(ev.target.id)>-1) savePrefs(); });
+(function(){ try{
+  var o=JSON.parse(localStorage.getItem(PREF_KEY)||'null');
+  if(!o){ var g=localStorage.getItem('nwd-cutlist-groove'); if(g) o={'i-groove':g}; }  // earlier groove-only memory
+  if(!o) return;
+  Object.keys(o).forEach(function(id){ var el=document.getElementById(id); if(el&&PREF_IDS.indexOf(id)>-1&&!isNaN(parseFloat(o[id]))) el.value=o[id]; });
+  sync(); live();
+}catch(e){} })();
 
 // Reveal the right bar: member bar with a live session, guest login bar without
 (function(){
