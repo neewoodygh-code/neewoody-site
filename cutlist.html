@@ -728,9 +728,11 @@ select {
       <div class="diag-tabs">
         <div class="dtab active" onclick="swDiag('front',this)">Front</div>
         <div class="dtab" onclick="swDiag('side',this)">Side</div>
+        <div class="dtab" onclick="swDiag('3d',this)">3D</div>
         <div class="dtab xray-btn" id="xray-btn" onclick="toggleXray(this)" title="Show internals through doors">X-Ray</div>
       </div>
       <svg id="wsvg" viewBox="0 0 340 280" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="w3d" hidden></div>
     </div>
 
     <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
@@ -953,6 +955,7 @@ select {
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
+<script src="js/cutlist-3d.js?v=20261118"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  STATE
@@ -965,7 +968,7 @@ var S = {
   secs:[
     {zones:[{type:'hanging',h:1200,shelves:0,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}},
     {zones:[{type:'shelves',h:900,shelves:4,drawers:0}],door:{on:true,count:1,type:'hinged',bottom:'full'}},
-    {zones:[{type:'drawers',h:400,shelves:0,drawers:4},{type:'shelves',h:500,shelves:2,drawers:0}],door:{on:true,count:2,type:'hinged',bottom:'full'}}
+    {zones:[{type:'shelves',h:500,shelves:2,drawers:0},{type:'drawers',h:400,shelves:0,drawers:4}],door:{on:true,count:2,type:'hinged',bottom:'full'}}
   ],
   tkH:100, tkStyle:'setback', tkSetback:60, tkThick:18, tkGap:3,
   tkMrMode:'auto', tkMrQty:3,
@@ -1200,12 +1203,20 @@ function setSP(type){
 // ══════════════════════════════════════════════════════
 function live(){sync();drawDiagram();}
 
+var _t3d=null;
 function drawDiagram(){
-  if(S.diagView==='side'){drawSide();}else{drawFront();}
+  var is3d=S.diagView==='3d', svg=document.getElementById('wsvg'), box3=document.getElementById('w3d'), xb=document.getElementById('xray-btn');
+  if(svg) svg.style.display=is3d?'none':'';
+  if(box3) box3.hidden=!is3d;
+  if(xb) xb.style.display=is3d?'none':'';
+  if(is3d){
+    clearTimeout(_t3d);
+    _t3d=setTimeout(function(){ if(window.Cutlist3D) Cutlist3D.show(box3,S,calculate()); },120);
+  } else if(S.diagView==='side'){drawSide();}else{drawFront();}
   var dd=document.getElementById('diag-dims');
   if(dd)dd.textContent=S.w+'W × '+S.h+'H × '+S.d+'D mm';
   var dl=document.getElementById('diag-lbl');
-  if(dl)dl.textContent=S.diagView==='side'?S.d+'mm depth (side)':'Front elevation';
+  if(dl)dl.textContent=S.diagView==='side'?S.d+'mm depth (side)':S.diagView==='3d'?'3D model, built from the cut list':'Front elevation';
 }
 
 function drawFront(){
@@ -1514,8 +1525,8 @@ function calculate(){
         parts.push({name:cn+' Face Strip',qty:2,w:chH,d:fsW,tag:'drawer',note:'H×W: '+chH+' × '+fsW+' — glued to the filler front, overlaps the chest side by '+S.chOver+'mm'});
         parts.push({name:'Drawer Front ('+sn+', inside)',qty:ndc,w:cfW,d:cfH,tag:'drawer',note:'W×H: '+cfW+' × '+cfH+' — '+S.chFGap+'mm clear of the face strips'});
         parts.push({name:'Drawer Box Side ('+sn+')',qty:ndc*2,w:runner,d:cbH,tag:'drawer',note:'D×H: '+runner+' × '+cbH+' — '+runner+'mm runners'});
-        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndc*2,w:cbW,d:cbH,tag:'drawer',note:'W×H: '+cbW+' × '+cbH});
-        parts.push({name:'Drawer Base ('+sn+')',qty:ndc,w:cbW,d:runner,tag:'drawer',note:'W×D: '+cbW+' × '+runner});
+        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndc*2,w:R(cbW-2*t),d:cbH,tag:'drawer',note:'W×H: '+R(cbW-2*t)+' × '+cbH+' — between the box sides'});
+        parts.push({name:'Drawer Base ('+sn+')',qty:ndc,w:cbW,d:runner,tag:'drawer',note:'W×D: '+cbW+' × '+runner+' — box outside width (chest inside − 26mm for runners)'});
       } else if(z.type==='drawers'&&z.drawers>0){
         var ndr=z.drawers;
         var drOpenH=R(z.h/ndr);
@@ -1532,10 +1543,10 @@ function calculate(){
           note:'W×H: '+dfW+' × '+dfH+' — full overlay, same width as a single door here'});
         parts.push({name:'Drawer Box Side ('+sn+')',qty:ndr*2,w:drBoxD,d:drBoxH,tag:'drawer',
           note:'D×H: '+drBoxD+' × '+drBoxH});
-        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndr*2,w:drBoxW,d:drBoxH,tag:'drawer',
-          note:'W×H: '+drBoxW+' × '+drBoxH});
+        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndr*2,w:R(drBoxW-2*t),d:drBoxH,tag:'drawer',
+          note:'W×H: '+R(drBoxW-2*t)+' × '+drBoxH+' — between the box sides'});
         parts.push({name:'Drawer Base ('+sn+')',qty:ndr,w:drBoxW,d:drBoxD,tag:'drawer',
-          note:'W×D: '+drBoxW+' × '+drBoxD});
+          note:'W×D: '+drBoxW+' × '+drBoxD+' — box outside width (opening − 26mm for runners)'});
       }
     });
 
@@ -1598,7 +1609,11 @@ function calculate(){
   var eb=0;
   parts.forEach(function(p){eb+=(p.w*2+p.d*2)*p.qty;});
 
+  // Geometry for the 3D view (positions only; every size comes from `parts`)
+  var geo={unitW:unitW,unitOpenW:unitOpenW,secsPerUnit:secsPerUnit,divsPerUnit:divsPerUnit,panelD:panelD,carcH:carcH,innerH:innerH,grooveIn:grooveIn,mrCount:mrCount,
+    spans:S.secs.map(function(sec,si){return [edgeOv(si,-1),edgeOv(si,1)];})};
   return{
+    geo:geo,
     parts:parts,cutList:cutList,sheets:sheets,sqm:sqm,
     eb:R(eb/1000),openW:R(unitOpenW),carcH:carcH,innerH:innerH,
     mrCount:mrCount,mrLen:mrLen,unitW:R(unitW),
@@ -1808,7 +1823,8 @@ function generate(){
   if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> Butt join — two side panels face-to-face at each join. Screw through to connect.</div></div>';
   var hasChest=S.secs.some(function(sec){return sec.door.on&&sec.zones.some(function(z){return z.type==='drawers'&&z.drawers>0;});});
   var nn=S.modUnits>1?7:6;
-  if(hasChest){nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext"><strong>DRAWERS BEHIND DOORS:</strong> Build each drawer chest as its own box, set back '+S.chSet+'mm from the carcass front. Screw a '+S.chGap+'mm filler strip to the outside front of each chest side to fill the gap to the carcass, then glue a '+R(S.chGap+S.chOver)+'mm face strip to each filler, overlapping the chest side by '+S.chOver+'mm to cover the joint. Drawer fronts sit between the face strips with a '+S.chFGap+'mm gap each side.'+((S.chGap+S.chOver)<60?' <strong>Check:</strong> face strip is under 60mm, too narrow for most edge banders.':'')+(S.chOver>=S.thick?' <strong>Check:</strong> the overlap is not less than the board thickness, so the face strips block the drawer boxes.':'')+'</div></div>';nn++;}
+  var chestHigh=S.secs.map(function(sec,si){var zs=sec.zones;return sec.door.on&&zs.some(function(z,zi){return z.type==='drawers'&&z.drawers>0&&zi<zs.length-1;})?'Sec '+(si+1):null;}).filter(Boolean);
+  if(hasChest){nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext">'+(chestHigh.length?'<strong>Check:</strong> the drawer chest in '+chestHigh.join(', ')+' is not the bottom zone, so it needs a fixed shelf under it (or move the drawers to the bottom on the Sections tab). ':'')+'<strong>DRAWERS BEHIND DOORS:</strong> Build each drawer chest as its own box, set back '+S.chSet+'mm from the carcass front. Screw a '+S.chGap+'mm filler strip to the outside front of each chest side to fill the gap to the carcass, then glue a '+R(S.chGap+S.chOver)+'mm face strip to each filler, overlapping the chest side by '+S.chOver+'mm to cover the joint. Drawer fronts sit between the face strips with a '+S.chFGap+'mm gap each side.'+((S.chGap+S.chOver)<60?' <strong>Check:</strong> face strip is under 60mm, too narrow for most edge banders.':'')+(S.chOver>=S.thick?' <strong>Check:</strong> the overlap is not less than the board thickness, so the face strips block the drawer boxes.':'')+'</div></div>';nn++;}
   if(S.spType!=='none')nh+='<div class="note-item"><div class="nbullet">'+nn+'.</div><div class="ntext"><strong>APPLIED SIDE PANELS:</strong> '+r.spDepth+'mm deep. Full height — covers carcass sides and subframe, extends past door face.</div></div>';
   nh+='</div>';
 
@@ -1837,7 +1853,13 @@ function generate(){
 
   ebLastParts=r.parts;
   var ebSheet=buildEbSheet(r.parts);
-  document.getElementById('rbody').innerHTML=aw+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
+  var v3='<div class="rcard r3d" id="r3d"><div class="rcard-hdr"><div class="rcard-title">3D View</div><div class="rcard-badge">built from this cut list</div></div><div style="padding:.6rem"><div class="r3d-img" style="aspect-ratio:7/5;display:grid;place-items:center;font-size:.8rem;color:#554d43">Drawing…</div></div></div>';
+  document.getElementById('rbody').innerHTML=aw+v3+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
+  if(window.Cutlist3D){
+    Cutlist3D.snapshot(S,r).then(function(url){
+      var el=document.querySelector('#r3d .r3d-img'); if(el) el.outerHTML='<img src="'+url+'" alt="3D view of the wardrobe built from this cut list" style="display:block;width:100%;height:auto;border-radius:6px">';
+    }).catch(function(){ var c=document.getElementById('r3d'); if(c) c.remove(); });
+  }
   document.getElementById('rpage').classList.add('show');
   document.getElementById('rpage').scrollTop=0;
 }
