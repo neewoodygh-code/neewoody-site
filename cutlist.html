@@ -550,6 +550,7 @@ select {
 .eb-part-name{font-size:.6rem;color:var(--clr-mid);text-align:center;line-height:1.25;max-width:112px}
 /* Zone warnings */
 .zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
+@media print{.no-print{display:none!important}}
 @media print{
   /* SVG strokes already print; this keeps any bg fills too */
   #rpage,#rpage *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -734,6 +735,7 @@ select {
       </div>
       <svg id="wsvg" viewBox="0 0 340 280" xmlns="http://www.w3.org/2000/svg"></svg>
       <div id="w3d" hidden></div>
+      <div id="w3d-ex" hidden><div class="c3d-ex" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem .8rem;border-top:1px solid rgba(0,0,0,.08)"><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D('html')">Client viewer (works offline)</button><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D('dae')">SketchUp file (.dae)</button><span style="font-size:.75rem;color:#554d43;flex:1 1 100%">Send the client viewer on WhatsApp: it opens on any phone or laptop, no internet or app needed. Open the SketchUp file with File, Import. Members only.</span></div></div>
     </div>
 
     <button class="gen-btn" onclick="generate()">Generate Cut List →</button>
@@ -959,7 +961,7 @@ select {
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
-<script src="js/cutlist-3d.js?v=20261119b"></script>
+<script src="js/cutlist-3d.js?v=20261119d"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  STATE
@@ -1212,6 +1214,7 @@ function drawDiagram(){
   var is3d=S.diagView==='3d', svg=document.getElementById('wsvg'), box3=document.getElementById('w3d'), xb=document.getElementById('xray-btn');
   if(svg) svg.style.display=is3d?'none':'';
   if(box3) box3.hidden=!is3d;
+  var ex3=document.getElementById('w3d-ex'); if(ex3) ex3.hidden=!is3d;
   if(xb) xb.style.display=is3d?'none':'';
   if(is3d){
     clearTimeout(_t3d);
@@ -1867,7 +1870,7 @@ function generate(){
   document.getElementById('rbody').innerHTML=aw+v3+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
   if(window.Cutlist3D){
     Cutlist3D.snapshot(S,r).then(function(url){
-      var el=document.querySelector('#r3d .r3d-img'); if(el) el.outerHTML='<img src="'+url+'" alt="3D view of the wardrobe built from this cut list" style="display:block;width:100%;height:auto;border-radius:6px">';
+      var el=document.querySelector('#r3d .r3d-img'); if(el) el.outerHTML='<img src="'+url+'" alt="3D view of the wardrobe built from this cut list" style="display:block;width:100%;height:auto;border-radius:6px"><div class="no-print"><div class="c3d-ex" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem .8rem;border-top:1px solid rgba(0,0,0,.08)"><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'html\')">Client viewer (works offline)</button><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'dae\')">SketchUp file (.dae)</button><span style="font-size:.75rem;color:#554d43;flex:1 1 100%">Send the client viewer on WhatsApp: it opens on any phone or laptop, no internet or app needed. Open the SketchUp file with File, Import. Members only.</span></div></div>';
     }).catch(function(){ var c=document.getElementById('r3d'); if(c) c.remove(); });
   }
   document.getElementById('rpage').classList.add('show');
@@ -1930,6 +1933,25 @@ document.addEventListener('click', function(e){
 //  persistence is the member benefit. Uses js/concierge.js.
 // ══════════════════════════════════════════════════════
 var LASTNAME_KEY = 'nwd-cutlist-lastname';
+
+// 3D exports (members): an offline viewer for the client, or a SketchUp (.dae) file
+function export3D(kind){
+  if(!memberLoggedIn()){
+    if(confirm('Sending a 3D file to a client, and opening it in SketchUp, are member tools.\n\nLog in or join Carpentry Concierge now?')) location.href='/concierge/login.html?next='+encodeURIComponent('/cutlist.html');
+    return;
+  }
+  if(!window.Cutlist3D) return;
+  sync();
+  var r=calculate(), boxes=Cutlist3D.model(S,r), size=S.w+' × '+S.h+' × '+S.d+' mm', base='wardrobe-'+S.w+'x'+S.h+'x'+S.d;
+  if(kind==='dae'){ Cutlist3D.download(base+'.dae', Cutlist3D.toDAE(boxes,'Wardrobe '+size), 'model/vnd.collada+xml'); return; }
+  var title=prompt('Name on the client file (e.g. "Master bedroom wardrobe")','Wardrobe design'); if(title===null) return;
+  var bp=(window.ToolSettings&&ToolSettings.loadBusiness)?ToolSettings.loadBusiness():Promise.resolve(null);
+  bp.then(function(b){
+    return Cutlist3D.offlineHTML(boxes,{title:title||'Wardrobe design',size:size,date:new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}),
+      business:b&&b.bizName||'',phone:b&&(b.phone||b.whatsapp)||''});
+  }).then(function(html){ Cutlist3D.download(base+'-3d.html', html, 'text/html'); })
+    .catch(function(e){ alert('Could not make the file. Check your connection and try again. ('+e.message+')'); });
+}
 
 function memberLoggedIn(){
   return !!(window.Concierge && Concierge.tokenAlive());
