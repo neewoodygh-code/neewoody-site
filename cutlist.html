@@ -807,7 +807,7 @@ select {
         </div>
       </div>
       <div class="igrid" style="padding:0" id="tk-sb-wrap">
-        <div class="ig"><label for="tk-setback">Setback Depth (mm)</label><input type="number" id="tk-setback" value="60" inputmode="numeric" oninput="live()"><div class="hint">From front face</div></div>
+        <div class="ig"><label for="tk-setback">Setback Depth (mm)</label><input type="number" id="tk-setback" value="60" inputmode="numeric" oninput="live()"><div class="hint">From the carcass front to the face of the toe kick. The whole frame gets shorter by this much.</div></div>
         <div class="ig"><label for="tk-thick">Frame Board Thick. (mm)</label><input type="number" id="tk-thick" value="18" inputmode="numeric" oninput="live()"></div>
       </div>
       <div class="ig"><label for="tk-gap">Face Panel Gap (mm)</label><input type="number" id="tk-gap" value="3" inputmode="numeric" oninput="live()"><div class="hint">Door to face panel clearance</div></div>
@@ -959,7 +959,7 @@ select {
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
-<script src="js/cutlist-3d.js?v=20261119"></script>
+<script src="js/cutlist-3d.js?v=20261119b"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  STATE
@@ -1442,7 +1442,10 @@ function calculate(){
   var backH = backType==='inset' ? R(innerH + grooveIn*2) : R(carcH);
 
   var mrCount=S.tkMrMode==='manual'?S.tkMrQty:autoMrCount(unitW);
-  var mrLen=R(d-2*tkThick);
+  // Gridwork: mid-rails sandwiched between the front and back rails; the face (toe kick) is glued on the front
+  // to hide the rail screws. A set-back toe kick makes the whole frame shallower.
+  var sfFront=(tkStyle==='setback'?tkSetback:0)+tkThick;  // carcass front to the frame's front rail
+  var mrLen=R(d-sfFront-2*tkThick);
 
   // ── CARCASS ──
   var joinP=modUnits>1?(modUnits-1)*2:0;  // two panels at every unit join
@@ -1487,9 +1490,9 @@ function calculate(){
   parts.push({name:'Subframe Back Rail',qty:modUnits,w:railL,d:tkH,tag:'frame',note:'W×H: '+railL+' × '+tkH+' — sandwiches mid-rails'});
   parts.push({name:'Subframe Mid-Rail',qty:modUnits*mrCount,w:mrLen,d:tkH,tag:'frame',note:'L×H: '+mrLen+' × '+tkH+' — '+mrCount+'/unit'});
   var fpH=R(tkH-tkGap);
-  parts.push({name:'Subframe Face Panel (Toe Kick)',qty:modUnits,w:railL,d:fpH,tag:'frame',note:'W×H: '+railL+' × '+fpH+' — '+tkGap+'mm gap to door'});
+  parts.push({name:'Subframe Face Panel (Toe Kick)',qty:modUnits,w:railL,d:fpH,tag:'frame',note:'W×H: '+railL+' × '+fpH+' — glued to the front rail (or screwed from inside the frame) to hide the rail screws; '+tkGap+'mm gap to door'});
   if(tkStyle==='setback'){
-    parts.push({name:'Subframe Face Mounting Rail',qty:modUnits,w:R(railL-2*tkThick),d:tkThick,tag:'frame',note:'W×D: '+R(railL-2*tkThick)+' × '+tkThick+' — '+tkSetback+'mm setback'});
+
   }
 
   // ── FRONT SPANS (full overlay) ──
@@ -1826,7 +1829,7 @@ function generate(){
   nh+='<div class="note-item"><div class="nbullet">2.</div><div class="ntext"><strong>SIDE PANELS:</strong> '+(S.sfMode==='separate'?r.carcH+'mm tall — box sides, standing on the plinth.':R(S.h)+'mm tall — full height to the floor, outside the subframe.')+' Bottom panel ('+r.topBotW+'mm wide) sits on the subframe, between the sides.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">3.</div><div class="ntext"><strong>DIVIDERS:</strong> '+r.divH+'mm — sit between top and bottom carcass panels only. Do not enter the subframe zone.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">4.</div><div class="ntext"><strong>BACK PANEL:</strong> '+(S.backType==='inset'?'Inset '+S.backThick+'mm — cut a groove '+S.backThick+'mm wide and '+S.groove+'mm deep into side panels and top/bottom panels before assembly. Back is cut 1mm short of the groove bottom each side.':'Nail-on '+S.backThick+'mm — screw to back face of assembled carcass.')+'</div></div>';
-  nh+='<div class="note-item"><div class="nbullet">5.</div><div class="ntext"><strong>FACE PANEL / TOE KICK:</strong> '+r.topBotW+'×'+R(S.tkH-S.tkGap)+'mm. '+S.tkGap+'mm gap prevents door binding on close. '+(S.tkStyle==='setback'?'Frame set back '+S.tkSetback+'mm — creates the toe kick recess.':'Flush with front.')+'</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">5.</div><div class="ntext"><strong>FACE PANEL / TOE KICK:</strong> '+r.railL+'×'+R(S.tkH-S.tkGap)+'mm. '+S.tkGap+'mm gap prevents door binding on close. Glue it to the front rail (or screw it from inside the frame) so it hides the rail screws. '+(S.tkStyle==='setback'?'Set back '+S.tkSetback+'mm: the whole frame is that much shallower, so the mid-rails are shorter.':'Flush with the carcass front.')+'</div></div>';
   if(S.modUnits>1)nh+='<div class="note-item"><div class="nbullet">6.</div><div class="ntext"><strong>MODULAR UNITS ('+S.modUnits+'×'+r.unitW+'mm):</strong> Butt join — two side panels face-to-face at each join. Screw through to connect.</div></div>';
   var hasChest=S.secs.some(function(sec){return sec.door.on&&sec.zones.some(function(z){return z.type==='drawers'&&z.drawers>0;});});
   var nn=S.modUnits>1?7:6;

@@ -31,7 +31,7 @@
         div = take('Internal Divider'), back = null;
     r.parts.forEach(function (p) { if (!back && p.name.indexOf('Back Panel') === 0) back = take(p.name); });
     var fr = take('Subframe Front Rail'), br = take('Subframe Back Rail'), mr = take('Subframe Mid-Rail'),
-        fp = take('Subframe Face Panel (Toe Kick)'), fm = take('Subframe Face Mounting Rail');
+        fp = take('Subframe Face Panel (Toe Kick)');
     var setb = S.tkStyle === 'setback' ? S.tkSetback : 0;
     for (var u = 0; u < U; u++) {
       var x0 = u * g.unitW;
@@ -47,14 +47,14 @@
       }
       // subframe: positions follow the cut list's sizes; see the construction notes for how it is fixed
       var rx = fr ? x0 + (g.unitW - fr.w) / 2 : x0;  // rails sit between the sides (built in) or span the unit (separate plinth)
-      if (fr) add(fr, rx, 0, setb, fr.w, fr.d, tk);
+      // face panel at the set back, front rail behind it, mid-rails sandwiched between the front and back rails
+      if (fr) add(fr, rx, 0, setb + tk, fr.w, fr.d, tk);
       if (br) add(br, rx, 0, d - tk, br.w, br.d, tk);
       if (mr && fr) for (var i = 0; i < g.mrCount; i++) {
         var mx = g.mrCount > 1 ? rx + i * (fr.w - tk) / (g.mrCount - 1) : rx + fr.w / 2;
-        add(mr, mx, 0, setb + tk, tk, mr.d, mr.w);
+        add(mr, mx, 0, setb + 2 * tk, tk, mr.d, mr.w);
       }
-      if (fp) add(fp, x0 + (g.unitW - fp.w) / 2, 0, setb - tk, fp.w, fp.d, tk);
-      if (fm) add(fm, x0 + (g.unitW - fm.w) / 2, tkH - tk, setb, fm.w, tk, fm.d);
+      if (fp) add(fp, x0 + (g.unitW - fp.w) / 2, 0, setb, fp.w, fp.d, tk);
     }
 
     // sections
@@ -136,10 +136,10 @@
     return { boxes: out, warnings: warn };
   }
 
-  // Parts that run into each other (more than 0.5 mm on every axis). The inset back sits in its groove
-  // and the subframe is only roughly placed, so those are left out.
+  // Parts that run into each other (more than 0.5 mm on every axis). The inset back sits in its groove,
+  // so it is left out; everything else, the subframe included, is checked.
   function clashes(boxes) {
-    var list = [], B = boxes.filter(function (b) { return b.tag !== 'hw' && b.tag !== 'frame' && b.name.indexOf('Back Panel') !== 0; });
+    var list = [], B = boxes.filter(function (b) { return b.tag !== 'hw' && b.name.indexOf('Back Panel') !== 0; });
     for (var i = 0; i < B.length; i++) for (var j = i + 1; j < B.length; j++) {
       var a = B[i], b = B[j];
       var ox = Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x), oy = Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y), oz = Math.min(a.z + a.d, b.z + b.d) - Math.max(a.z, b.z);
