@@ -35,8 +35,9 @@
     var setb = S.tkStyle === 'setback' ? S.tkSetback : 0;
     for (var u = 0; u < U; u++) {
       var x0 = u * g.unitW;
-      add(side, x0, 0, 0, t, side.w, side.d);
-      add(side, x0 + g.unitW - t, 0, 0, t, side.w, side.d);
+      var sy = h - side.w;  // 0 when the sides run to the floor, frame height when they stand on a separate plinth
+      add(side, x0, sy, 0, t, side.w, side.d);
+      add(side, x0 + g.unitW - t, sy, 0, t, side.w, side.d);
       add(top, x0 + t, h - t, 0, top.w, t, top.d);
       add(bot, x0 + t, tkH, 0, bot.w, t, bot.d);
       for (var k = 1; k <= g.divsPerUnit; k++) add(div, x0 + t + k * g.unitOpenW + (k - 1) * t, tkH + t, 0, t, div.w, div.d);
@@ -45,14 +46,15 @@
         else add(back, x0, tkH, d, back.w, back.d, S.backThick);
       }
       // subframe: positions follow the cut list's sizes; see the construction notes for how it is fixed
-      if (fr) add(fr, x0, 0, setb, fr.w, fr.d, tk);
-      if (br) add(br, x0, 0, d - tk, br.w, br.d, tk);
-      if (mr) for (var i = 0; i < g.mrCount; i++) {
-        var mx = g.mrCount > 1 ? x0 + t + i * (g.unitW - 2 * t - tk) / (g.mrCount - 1) : x0 + g.unitW / 2;
+      var rx = fr ? x0 + (g.unitW - fr.w) / 2 : x0;  // rails sit between the sides (built in) or span the unit (separate plinth)
+      if (fr) add(fr, rx, 0, setb, fr.w, fr.d, tk);
+      if (br) add(br, rx, 0, d - tk, br.w, br.d, tk);
+      if (mr && fr) for (var i = 0; i < g.mrCount; i++) {
+        var mx = g.mrCount > 1 ? rx + i * (fr.w - tk) / (g.mrCount - 1) : rx + fr.w / 2;
         add(mr, mx, 0, setb + tk, tk, mr.d, mr.w);
       }
-      if (fp) add(fp, x0 + t, 0, setb - tk, fp.w, fp.d, tk);
-      if (fm) add(fm, x0 + tk, tkH - tk, setb, fm.w, tk, fm.d);
+      if (fp) add(fp, x0 + (g.unitW - fp.w) / 2, 0, setb - tk, fp.w, fp.d, tk);
+      if (fm) add(fm, x0 + (g.unitW - fm.w) / 2, tkH - tk, setb, fm.w, tk, fm.d);
     }
 
     // sections
@@ -113,11 +115,11 @@
       }
     });
     function box(bx, by, bz, bs, bf, bb) {
-      // drawer box: base underneath, sides outside, front/back between the sides
-      var bw = bb.w, bh = bs.d, bl = bs.w, st = (bw - bf.w) / 2;
-      add(bb, bx, by, bz, bw, t, bb.d);
-      add(bs, bx, by + t, bz, st, bh, bl); add(bs, bx + bw - st, by + t, bz, st, bh, bl);
-      add(bf, bx + st, by + t, bz, bf.w, bh, t); add(bf, bx + st, by + t, bz + bl - t, bf.w, bh, t);
+      // drawer box (owner's way): base underneath, front and back full width, sides between them
+      var bw = bb.w, bl = bb.d, bh = bs.d, ft = (bl - bs.w) / 2;
+      add(bb, bx, by, bz, bw, t, bl);
+      add(bf, bx, by + t, bz, bf.w, bh, ft); add(bf, bx, by + t, bz + bl - ft, bf.w, bh, ft);
+      add(bs, bx, by + t, bz + ft, t, bh, bs.w); add(bs, bx + bw - t, by + t, bz + ft, t, bh, bs.w);
     }
     // applied end panels and pelmet
     var lp2 = take('Left Applied End Panel'), rp = take('Right Applied End Panel'), pel = take('Top Pelmet');

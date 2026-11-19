@@ -717,6 +717,7 @@ select {
     <div class="sh"><div class="sh-txt">Internal Clearance</div><div class="sh-line"></div></div>
     <div class="igrid">
       <div class="ig"><label for="i-clear">Shelf clearance (mm)</label><input type="number" id="i-clear" value="2" inputmode="numeric" oninput="live()"><div class="hint">Each side of shelf</div></div>
+      <div class="ig"><label for="i-rungap">Drawer runner gap (mm)</label><input type="number" id="i-rungap" value="27" inputmode="numeric" oninput="live()"><div class="hint">Total, both sides. Drawer box = opening − this. A little extra play stops the runners binding if the cut runs over.</div></div>
     </div>
 
     <div class="sh"><div class="sh-txt">Visual Diagram</div><div class="sh-line"></div></div>
@@ -797,6 +798,9 @@ select {
     <div class="callout"><p><strong>FRAME STRUCTURE:</strong> Front and back rails span the full unit width, sandwiching the mid-rails. Mid-rail count is auto-calculated from unit width.</p></div>
     <div class="adv-grid">
       <div class="igrid" style="padding:0">
+        <div class="ig"><label for="tk-mode">How It's Built</label>
+          <select id="tk-mode" onchange="live()"><option value="built">Built in: gridwork between the sides</option><option value="separate">Separate plinth under box units</option></select>
+          <div class="hint">Built in: the sides run to the floor and screw to the frame from the inside. Separate: for several units fitted in, the frame goes down first and the boxes stand on it.</div></div>
         <div class="ig"><label for="tk-h">Frame Height (mm)</label><input type="number" id="tk-h" value="100" inputmode="numeric" oninput="live()"><div class="hint">Toe kick height</div></div>
         <div class="ig"><label for="tk-style">Frame Style</label>
           <select id="tk-style" onchange="live()"><option value="setback">Setback (recessed)</option><option value="flush">Flush with front</option></select>
@@ -955,14 +959,14 @@ select {
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
-<script src="js/cutlist-3d.js?v=20261118"></script>
+<script src="js/cutlist-3d.js?v=20261119"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════
 var S = {
   w:2400, h:2100, d:580,
-  thick:18, backType:'inset', backThick:3, groove:8, chSet:80, chGap:60, chOver:9, chFGap:3, clear:2,
+  thick:18, backType:'inset', backThick:3, groove:8, chSet:80, chGap:60, chOver:9, chFGap:3, runGap:27, sfMode:'built', clear:2,
   overlay:2, doorThick:18, dgap:2, hinge:2, topgap:2, botgap:2,
   sections:3,
   secs:[
@@ -997,7 +1001,7 @@ function sync(){
   var _um = S.unit==='cm' ? 10 : 1;
   S.w=gi('i-w',2400)*_um;S.h=gi('i-h',2100)*_um;S.d=gi('i-d',580)*_um;
   S.thick=gi('i-thick',18);S.backType=gv('i-back')||'inset';S.backThick=gi('i-backthick',3);S.groove=gi('i-groove',8);
-  S.chSet=gi('i-chset',80);S.chGap=gi('i-chgap',60);S.chOver=gi('i-chover',9);S.chFGap=gi('i-chfgap',3);
+  S.chSet=gi('i-chset',80);S.chGap=gi('i-chgap',60);S.chOver=gi('i-chover',9);S.chFGap=gi('i-chfgap',3);S.runGap=gi('i-rungap',27);S.sfMode=gv('tk-mode')||'built';
   S.clear=gi('i-clear',2);S.overlay=gi('i-overlay',2);S.doorThick=gi('i-doorthick',18);
   S.dgap=gi('i-dgap',2);S.hinge=S.clear;  // hinge gap = edge clearance (consolidated)
   S.topgap=gi('i-topgap',2);S.botgap=gi('i-botgap',2);
@@ -1442,11 +1446,13 @@ function calculate(){
 
   // ── CARCASS ──
   var joinP=modUnits>1?(modUnits-1)*2:0;  // two panels at every unit join
+  var sep=S.sfMode==='separate';  // separate plinth under box units; otherwise the gridwork sits between the sides
+  var sideH=sep?R(carcH):R(h);
   parts.push({
     name:'Side Panel', qty:2+joinP,
-    w:R(h), d:R(d),
+    w:sideH, d:R(d),
     tag:'carcass',
-    note:'H×D: '+R(h)+' × '+R(d)+' — full height, covers subframe'+(modUnits>1?' (incl. '+joinP+' join panels)':'')
+    note:'H×D: '+sideH+' × '+R(d)+(sep?' — box side, stands on the plinth':' — full height to the floor, screwed to the subframe from inside')+(modUnits>1?' (incl. '+joinP+' join panels)':'')
   });
   parts.push({
     name:'Top Panel', qty:modUnits,
@@ -1476,13 +1482,14 @@ function calculate(){
   });
 
   // ── SUBFRAME ──
-  parts.push({name:'Subframe Front Rail',qty:modUnits,w:R(unitW),d:tkH,tag:'frame',note:'W×H: '+R(unitW)+' × '+tkH+' — full unit width'});
-  parts.push({name:'Subframe Back Rail',qty:modUnits,w:R(unitW),d:tkH,tag:'frame',note:'W×H: '+R(unitW)+' × '+tkH+' — sandwiches mid-rails'});
+  var railL=sep?R(unitW):topBotW;
+  parts.push({name:'Subframe Front Rail',qty:modUnits,w:railL,d:tkH,tag:'frame',note:'W×H: '+railL+' × '+tkH+(sep?' — full unit width':' — between the sides')});
+  parts.push({name:'Subframe Back Rail',qty:modUnits,w:railL,d:tkH,tag:'frame',note:'W×H: '+railL+' × '+tkH+' — sandwiches mid-rails'});
   parts.push({name:'Subframe Mid-Rail',qty:modUnits*mrCount,w:mrLen,d:tkH,tag:'frame',note:'L×H: '+mrLen+' × '+tkH+' — '+mrCount+'/unit'});
   var fpH=R(tkH-tkGap);
-  parts.push({name:'Subframe Face Panel (Toe Kick)',qty:modUnits,w:topBotW,d:fpH,tag:'frame',note:'W×H: '+topBotW+' × '+fpH+' — '+tkGap+'mm gap to door'});
+  parts.push({name:'Subframe Face Panel (Toe Kick)',qty:modUnits,w:railL,d:fpH,tag:'frame',note:'W×H: '+railL+' × '+fpH+' — '+tkGap+'mm gap to door'});
   if(tkStyle==='setback'){
-    parts.push({name:'Subframe Face Mounting Rail',qty:modUnits,w:R(unitW-2*tkThick),d:tkThick,tag:'frame',note:'W×D: '+R(unitW-2*tkThick)+' × '+tkThick+' — '+tkSetback+'mm setback'});
+    parts.push({name:'Subframe Face Mounting Rail',qty:modUnits,w:R(railL-2*tkThick),d:tkThick,tag:'frame',note:'W×D: '+R(railL-2*tkThick)+' × '+tkThick+' — '+tkSetback+'mm setback'});
   }
 
   // ── FRONT SPANS (full overlay) ──
@@ -1517,22 +1524,22 @@ function calculate(){
         var runner=[600,550,500,450,400,350,300,250].filter(function(L){return L<=chD-10;})[0]||R(chD-10);
         var fsW=R(S.chGap+S.chOver);                       // face strip covers the gap + part of the chest side
         var cfW=Math.floor(unitOpenW-2*fsW-2*S.chFGap+1e-9); // opening − both face strips − front gaps
-        var cfH=R(chOpenH-dgap), cbH=R((chH-2*t)/ndc-24), cbW=R(chInW-26);  // box height from the space inside the chest
+        var cfH=R(chOpenH-dgap), cbH=R((chH-2*t)/ndc-24), cbW=R(chInW-S.runGap);  // box height from the space inside the chest
         var cn='Drawer Chest ('+sn+')';
         parts.push({name:cn+' Side',qty:2,w:chH,d:chD,tag:'drawer',note:'H×D: '+chH+' × '+chD+' — chest set back '+S.chSet+'mm from the carcass front'});
         parts.push({name:cn+' Top/Bottom',qty:2,w:R(chInW),d:chD,tag:'drawer',note:'W×D: '+R(chInW)+' × '+chD+' — between the chest sides'});
         parts.push({name:cn+' Filler Strip',qty:2,w:chH,d:R(S.chGap),tag:'drawer',note:'H×W: '+chH+' × '+R(S.chGap)+' — screwed to the outside front of each chest side, fills the gap to the carcass'});
         parts.push({name:cn+' Face Strip',qty:2,w:chH,d:fsW,tag:'drawer',note:'H×W: '+chH+' × '+fsW+' — glued to the filler front, overlaps the chest side by '+S.chOver+'mm'});
         parts.push({name:'Drawer Front ('+sn+', inside)',qty:ndc,w:cfW,d:cfH,tag:'drawer',note:'W×H: '+cfW+' × '+cfH+' — '+S.chFGap+'mm clear of the face strips'});
-        parts.push({name:'Drawer Box Side ('+sn+')',qty:ndc*2,w:runner,d:cbH,tag:'drawer',note:'D×H: '+runner+' × '+cbH+' — '+runner+'mm runners'});
-        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndc*2,w:R(cbW-2*t),d:cbH,tag:'drawer',note:'W×H: '+R(cbW-2*t)+' × '+cbH+' — between the box sides'});
-        parts.push({name:'Drawer Base ('+sn+')',qty:ndc,w:cbW,d:runner,tag:'drawer',note:'W×D: '+cbW+' × '+runner+' — box outside width (chest inside − 26mm for runners)'});
+        parts.push({name:'Drawer Box Side ('+sn+')',qty:ndc*2,w:R(runner-2*t),d:cbH,tag:'drawer',note:'D×H: '+R(runner-2*t)+' × '+cbH+' — between the box front and back ('+runner+'mm runners)'});
+        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndc*2,w:cbW,d:cbH,tag:'drawer',note:'W×H: '+cbW+' × '+cbH+' — full box width'});
+        parts.push({name:'Drawer Base ('+sn+')',qty:ndc,w:cbW,d:runner,tag:'drawer',note:'W×D: '+cbW+' × '+runner+' — box outside size (chest inside − '+S.runGap+'mm for runners)'});
       } else if(z.type==='drawers'&&z.drawers>0){
         var ndr=z.drawers;
         var drOpenH=R(z.h/ndr);
         var drBoxH=R(drOpenH-24);  // 24mm for drawer slides + clearance
         var drBoxD=R(d-100);       // 100mm from front face
-        var drBoxW=R(unitOpenW-26); // 26mm for drawer runners each side
+        var drBoxW=R(unitOpenW-S.runGap); // runner gap, both sides together
 
         // Drawer false front: same width as section opening + overlay on each side, minus gap if multiple per section
         // (drawers stack vertically in one section, so each front spans full opening width)
@@ -1541,12 +1548,12 @@ function calculate(){
 
         parts.push({name:'Drawer False Front ('+sn+')',qty:ndr,w:dfW,d:dfH,tag:'drawer',
           note:'W×H: '+dfW+' × '+dfH+' — full overlay, same width as a single door here'});
-        parts.push({name:'Drawer Box Side ('+sn+')',qty:ndr*2,w:drBoxD,d:drBoxH,tag:'drawer',
-          note:'D×H: '+drBoxD+' × '+drBoxH});
-        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndr*2,w:R(drBoxW-2*t),d:drBoxH,tag:'drawer',
-          note:'W×H: '+R(drBoxW-2*t)+' × '+drBoxH+' — between the box sides'});
+        parts.push({name:'Drawer Box Side ('+sn+')',qty:ndr*2,w:R(drBoxD-2*t),d:drBoxH,tag:'drawer',
+          note:'D×H: '+R(drBoxD-2*t)+' × '+drBoxH+' — between the box front and back'});
+        parts.push({name:'Drawer Box Front/Back ('+sn+')',qty:ndr*2,w:drBoxW,d:drBoxH,tag:'drawer',
+          note:'W×H: '+drBoxW+' × '+drBoxH+' — full box width; the drawer face hides the screws'});
         parts.push({name:'Drawer Base ('+sn+')',qty:ndr,w:drBoxW,d:drBoxD,tag:'drawer',
-          note:'W×D: '+drBoxW+' × '+drBoxD+' — box outside width (opening − 26mm for runners)'});
+          note:'W×D: '+drBoxW+' × '+drBoxD+' — box outside size (opening − '+S.runGap+'mm for runners)'});
       }
     });
 
@@ -1613,7 +1620,7 @@ function calculate(){
   var geo={unitW:unitW,unitOpenW:unitOpenW,secsPerUnit:secsPerUnit,divsPerUnit:divsPerUnit,panelD:panelD,carcH:carcH,innerH:innerH,grooveIn:grooveIn,mrCount:mrCount,
     spans:S.secs.map(function(sec,si){return [edgeOv(si,-1),edgeOv(si,1)];})};
   return{
-    geo:geo,
+    geo:geo, railL:railL,
     parts:parts,cutList:cutList,sheets:sheets,sqm:sqm,
     eb:R(eb/1000),openW:R(unitOpenW),carcH:carcH,innerH:innerH,
     mrCount:mrCount,mrLen:mrLen,unitW:R(unitW),
@@ -1815,8 +1822,8 @@ function generate(){
 
   // Notes
   var nh='<div class="notes-card"><div class="notes-hdr">Construction Notes</div>';
-  nh+='<div class="note-item"><div class="nbullet">1.</div><div class="ntext"><strong>SUBFRAME:</strong> Front rail ('+r.unitW+'×'+S.tkH+'mm) and back rail (same). '+r.mrCount+' mid-rails at '+r.mrLen+'×'+S.tkH+'mm. Place 2 end mid-rails flush with sides; space '+Math.max(0,r.mrCount-2)+' intermediates evenly.</div></div>';
-  nh+='<div class="note-item"><div class="nbullet">2.</div><div class="ntext"><strong>SIDE PANELS:</strong> '+R(S.h)+'mm tall — full height, cover outside of subframe. Bottom panel ('+r.topBotW+'mm wide) screws onto top of subframe, between sides.</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">1.</div><div class="ntext"><strong>SUBFRAME:</strong> '+(S.sfMode==='separate'?'Separate plinth: build it first, level it, then stand the box units on it. ':'Gridwork between the sides: screw the sides to it from the inside before the bottom panel goes on. ')+'Front rail and back rail ('+r.railL+'×'+S.tkH+'mm). '+r.mrCount+' mid-rails at '+r.mrLen+'×'+S.tkH+'mm. Place 2 end mid-rails flush with sides; space '+Math.max(0,r.mrCount-2)+' intermediates evenly.</div></div>';
+  nh+='<div class="note-item"><div class="nbullet">2.</div><div class="ntext"><strong>SIDE PANELS:</strong> '+(S.sfMode==='separate'?r.carcH+'mm tall — box sides, standing on the plinth.':R(S.h)+'mm tall — full height to the floor, outside the subframe.')+' Bottom panel ('+r.topBotW+'mm wide) sits on the subframe, between the sides.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">3.</div><div class="ntext"><strong>DIVIDERS:</strong> '+r.divH+'mm — sit between top and bottom carcass panels only. Do not enter the subframe zone.</div></div>';
   nh+='<div class="note-item"><div class="nbullet">4.</div><div class="ntext"><strong>BACK PANEL:</strong> '+(S.backType==='inset'?'Inset '+S.backThick+'mm — cut a groove '+S.backThick+'mm wide and '+S.groove+'mm deep into side panels and top/bottom panels before assembly. Back is cut 1mm short of the groove bottom each side.':'Nail-on '+S.backThick+'mm — screw to back face of assembled carcass.')+'</div></div>';
   nh+='<div class="note-item"><div class="nbullet">5.</div><div class="ntext"><strong>FACE PANEL / TOE KICK:</strong> '+r.topBotW+'×'+R(S.tkH-S.tkGap)+'mm. '+S.tkGap+'mm gap prevents door binding on close. '+(S.tkStyle==='setback'?'Frame set back '+S.tkSetback+'mm — creates the toe kick recess.':'Flush with front.')+'</div></div>';
@@ -2047,7 +2054,7 @@ function restoreConfig(cfg){
 
   setV('i-w', dim(S.w)); setV('i-h', dim(S.h)); setV('i-d', dim(S.d));
   setV('i-thick', S.thick); setV('i-back', S.backType); setV('i-backthick', S.backThick); setV('i-groove', S.groove!=null?S.groove:8);
-  setV('i-chset', S.chSet!=null?S.chSet:80); setV('i-chgap', S.chGap!=null?S.chGap:60); setV('i-chover', S.chOver!=null?S.chOver:9); setV('i-chfgap', S.chFGap!=null?S.chFGap:3);
+  setV('i-chset', S.chSet!=null?S.chSet:80); setV('i-chgap', S.chGap!=null?S.chGap:60); setV('i-chover', S.chOver!=null?S.chOver:9); setV('i-chfgap', S.chFGap!=null?S.chFGap:3); setV('i-rungap', S.runGap!=null?S.runGap:27); setV('tk-mode', S.sfMode||'built');
   setV('i-clear', S.clear); setV('i-overlay', S.overlay); setV('i-doorthick', S.doorThick);
   setV('i-dgap', S.dgap); setV('i-topgap', S.topgap); setV('i-botgap', S.botgap);
   setV('tk-h', S.tkH); setV('tk-style', S.tkStyle); setV('tk-setback', S.tkSetback);
@@ -2065,7 +2072,7 @@ function restoreConfig(cfg){
 
 // Groove depth differs per workshop (router vs saw): remember this device's last value
 // Member's own clearances: remembered on this device for every new cutlist (a saved cutlist keeps its own values)
-var PREF_IDS=['i-clear','i-overlay','i-dgap','i-topgap','i-botgap','i-groove','i-chset','i-chgap','i-chover','i-chfgap'];
+var PREF_IDS=['i-rungap','i-clear','i-overlay','i-dgap','i-topgap','i-botgap','i-groove','i-chset','i-chgap','i-chover','i-chfgap'];
 var PREF_KEY='nwd-cutlist-prefs';
 function savePrefs(){ try{ var o={}; PREF_IDS.forEach(function(id){ var v=gv(id); if(v!==''&&!isNaN(parseFloat(v))) o[id]=v; }); localStorage.setItem(PREF_KEY, JSON.stringify(o)); }catch(e){} }
 function resetClearances(){
