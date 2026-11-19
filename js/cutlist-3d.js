@@ -228,7 +228,8 @@
         '<div class="c3d-ui" style="display:flex;flex-wrap:wrap;gap:.6rem 1.2rem;align-items:center;padding:.6rem .8rem;border-top:1px solid rgba(0,0,0,.08);font-size:.8rem">' +
         '<label style="display:flex;gap:.5rem;align-items:center">Pull apart <input type="range" class="c3d-x" min="0" max="1" step="0.01" value="0" style="width:120px"></label>' +
         '<label style="display:flex;gap:.5rem;align-items:center">Doors <select class="c3d-d"><option value="ghost">See-through</option><option value="show">Show</option><option value="hide">Hide</option></select></label>' +
-        '<span class="c3d-info" style="flex:1 1 100%;color:#554d43">Drag to turn, pinch or scroll to zoom. Tap a part to see its size.</span></div>';
+        '<span style="display:flex;gap:.35rem"><button type="button" class="c3d-zi" aria-label="Zoom in" style=\"font:inherit;font-size:.8rem;min-width:2.2rem;padding:.3rem .6rem;border:1px solid rgba(0,0,0,.25);border-radius:6px;background:#fff;cursor:pointer\">+</button><button type="button" class="c3d-zo" aria-label="Zoom out" style=\"font:inherit;font-size:.8rem;min-width:2.2rem;padding:.3rem .6rem;border:1px solid rgba(0,0,0,.25);border-radius:6px;background:#fff;cursor:pointer\">&minus;</button><button type="button" class="c3d-rs" style=\"font:inherit;font-size:.8rem;min-width:2.2rem;padding:.3rem .6rem;border:1px solid rgba(0,0,0,.25);border-radius:6px;background:#fff;cursor:pointer\">Reset view</button></span>' +
+        '<span class="c3d-info" style="flex:1 1 100%;color:#554d43">Drag (one finger) to turn. Pinch, Ctrl + scroll or the + and &minus; buttons to zoom. Tap a part to see its size.</span></div>';
       V = { host: host };
     }
     V.boxes = boxes;
@@ -243,6 +244,13 @@
         V.ctl = new Orbit(V.cam, V.renderer.domElement); V.ctl.enableDamping = true;
         host.querySelector('.c3d-x').oninput = function () { if (V.s) setExplode(V.s, +this.value); };
         host.querySelector('.c3d-d').onchange = function () { if (V.s) setDoors(V.s, this.value); };
+        // A plain scroll (mouse wheel, or a two-finger swipe on a laptop touchpad) scrolls the page instead of
+        // zooming the model; zoom = pinch, Ctrl + scroll (touchpad pinch sends this) or the buttons.
+        stage.addEventListener('wheel', function (e) { if (!e.ctrlKey) e.stopPropagation(); }, true);
+        function zoom(f) { if (!V.s) return; var t = V.ctl.target; V.cam.position.sub(t).multiplyScalar(f).add(t); V.ctl.update(); }
+        host.querySelector('.c3d-zi').onclick = function () { zoom(0.8); };
+        host.querySelector('.c3d-zo').onclick = function () { zoom(1.25); };
+        host.querySelector('.c3d-rs').onclick = function () { if (V.s) { place(V.cam, V.s, aspect()); V.ctl.target.copy(V.s.centre); V.ctl.update(); } };
         var ray = new THREE.Raycaster(), down = null;
         V.renderer.domElement.addEventListener('pointerdown', function (e) { down = [e.clientX, e.clientY]; });
         V.renderer.domElement.addEventListener('pointerup', function (e) {
