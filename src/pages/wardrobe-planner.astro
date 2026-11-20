@@ -47,24 +47,49 @@ import { WA } from '../data.js';
             <span class="est-group-label">Inside, left to right</span>
             <div id="wp-secs" class="wp-secs"></div>
           </div>
+          <div class="est-group">
+            <span class="est-group-label">Finish and handles</span>
+            <div class="est-grid-2">
+              <div class="est-field"><label for="wp-fin">Finish</label>
+                <select id="wp-fin"><option value="laminate">Laminate</option><option value="painted">Painted MDF</option><option value="veneer">Wood veneer</option><option value="gloss">High gloss</option></select></div>
+              <div class="est-field"><label for="wp-hd">Door handles</label>
+                <select id="wp-hd"><option value="30">30 cm</option><option value="60" selected>60 cm</option><option value="100">100 cm</option><option value="0">None (push to open)</option></select></div>
+              <div class="est-field"><label for="wp-loc">Where in Accra?</label>
+                <select id="wp-loc"><option value="central">Central Accra</option><option value="outer">Outer Accra, Tema, Kasoa</option><option value="outside">Outside Greater Accra</option></select></div>
+            </div>
+          </div>
         </div>
 
         <div class="wp-view">
           <div id="wp-msg" class="wp-msg" role="status" aria-live="polite"></div>
           <div id="wp-3d" class="wp-3d"></div>
           <p class="wp-sum" id="wp-sum"></p>
+          <div class="wp-price" aria-live="polite">
+            <div class="wp-p">
+              <span class="wp-pl">Build it yourself: materials</span>
+              <b id="wp-diy">GH₵ —</b>
+              <small id="wp-diy-note">Board, edge band and banding, screws and handles at Accra prices. Buy them yourself and build it, or have us assemble it.</small>
+              <details><summary>What's in it</summary><table class="wp-lines" id="wp-lines"></table><p class="wp-unp" id="wp-unp"></p></details>
+              <a class="ulink" href="/cutlist">Get the full cut list to buy and cut your boards</a>
+            </div>
+            <div class="wp-p">
+              <span class="wp-pl">We make and install it</span>
+              <b id="wp-pro">GH₵ —</b>
+              <small>Our usual range for a wardrobe like this, materials, labour and fitting included. We confirm after measuring.</small>
+            </div>
+          </div>
           <div class="wp-acts">
             <a class="pill ink" id="wp-wa" href={WA} target="_blank" rel="noopener">Send this design on WhatsApp <span aria-hidden="true">↗</span></a>
-            <a class="ulink" href="/wardrobe-estimator">Get a price range</a>
           </div>
-          <p class="wp-note">This is a guide drawing to help you decide. Before we quote, we visit, measure your room and finalise the design with you. Carpenters: the full cut list is in the <a class="ulink" href="/cutlist">cutlist calculator</a>.</p>
+          <p class="wp-note">This is a guide drawing to help you decide. Before we quote, we visit, measure your room and finalise the design with you. Prices are a guide and move with the market.</p>
         </div>
       </div>
     </section>
   </main>
   <Footer quoteLink />
 
-  <style>
+  <style is:global>
+    /* global: the price rows are added by the script, which Astro's scoped styles would not reach */
     .wp-body { padding: clamp(3rem, 6vw, 5rem) var(--gut); }
     .wp-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; max-width: 1320px; }
     .wp-view { position: sticky; top: 6rem; }
@@ -75,6 +100,18 @@ import { WA } from '../data.js';
     .wp-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin-top: 1.4rem; }
     .wp-note { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--hair); font-size: var(--t-small); color: var(--stone); }
     .wp-secs { display: grid; gap: 1rem; }
+    .wp-price { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; margin-top: 1.4rem; }
+    .wp-p { background: var(--espresso); color: var(--on-dark); border-radius: 6px; padding: 1.2rem 1.3rem; display: flex; flex-direction: column; gap: .45rem; }
+    .wp-pl { font-size: var(--t-small); color: var(--on-dark-2); }
+    .wp-p b { font-family: var(--serif); font-weight: 400; font-size: var(--t-h3); line-height: 1.1; color: var(--brass); }
+    .wp-p small { font-size: var(--t-small); color: var(--on-dark-2); }
+    .wp-p details summary { cursor: pointer; font-size: var(--t-small); }
+    .wp-p .ulink { font-size: var(--t-small); color: var(--on-dark); white-space: normal; }
+    .wp-lines { width: 100%; border-collapse: collapse; margin-top: .5rem; font-size: var(--t-small); color: var(--on-dark-2); }
+    .wp-lines td { padding: .25rem 0; border-bottom: 1px solid var(--hair-dark); vertical-align: top; }
+    .wp-lines td:last-child { text-align: right; white-space: nowrap; color: var(--on-dark); padding-left: .6rem; }
+    .wp-unp { font-size: var(--t-small); color: var(--on-dark-2); margin-top: .6rem; }
+    @media (max-width: 560px) { .wp-price { grid-template-columns: minmax(0, 1fr); } }
     .wp-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--hair); }
     .wp-sec:last-child { border-bottom: 0; }
     .wp-sec b { grid-column: 1 / -1; font-weight: 500; }
@@ -85,6 +122,7 @@ import { WA } from '../data.js';
   </style>
 
   <script is:inline src="/js/smart/engine.js?v=20261120"></script>
+  <script is:inline src="/js/smart/price.js?v=20261120"></script>
   <script is:inline src="/js/cutlist-3d.js?v=20261119e"></script>
   <script is:inline define:vars={{ WA }}>
   (function () {
@@ -119,6 +157,7 @@ import { WA } from '../data.js';
       if (t.dataset.k === 'lay') secs[i].lay = t.value; else secs[i].doors = +t.value;
       run();
     });
+    ['wp-fin', 'wp-hd', 'wp-loc'].forEach(function (id) { $(id).addEventListener('change', run); });
     ['wp-type', 'wp-n'].forEach(function (id) { $(id).addEventListener('change', function () { drawSecs(); run(); }); });
     ['wp-w', 'wp-h', 'wp-d'].forEach(function (id) { $(id).addEventListener('input', run); });
 
@@ -144,7 +183,26 @@ import { WA } from '../data.js';
       var doorTxt = type === 'open' ? 'open, no doors' : type === 'sliding' ? 'sliding doors' : 'hinged doors';
       var lines = secs.map(function (s, i) { return secName(i, n) + ': ' + LAYOUTS[s.lay][0].toLowerCase() + (type === 'hinged' ? ', ' + (s.doors === 2 ? 'two doors' : 'one door') : ''); });
       $('wp-sum').textContent = w + ' wide × ' + h + ' high × ' + d + ' mm deep, ' + n + ' section' + (n > 1 ? 's' : '') + ', ' + doorTxt + '.';
-      var msg = 'Hi Neewoody, I planned a wardrobe on your website and would like a price.\n\nSize: ' + w + ' wide x ' + h + ' high x ' + d + ' mm deep\nDoors: ' + doorTxt + '\n' + lines.join('\n') + '\n\nMy area: ';
+      // the price builds up from every part: materials to build it yourself, and our made-and-installed range
+      var fmt = function (v) { return 'GH₵ ' + Math.round(v).toLocaleString('en-GH'); };
+      var hd = +$('wp-hd').value, fin = $('wp-fin').value, loc = $('wp-loc').value;
+      var rails = r.boxes.filter(function (b) { return b.hardware; }).length;
+      var m = WardrobePrice.materials(r.parts.map(function (p) { return { name: p.name, tag: p.tag, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p) }; }),
+        { doorHandle: hd, drawerHandle: 30, rails: rails });
+      $('wp-diy').textContent = fmt(m.total);
+      $('wp-lines').innerHTML = m.lines.map(function (l) { return '<tr><td>' + l.item + (/handle/i.test(l.item) ? ' × ' + l.qty : '') + '<br><span style="opacity:.75">' + l.note + '</span></td><td>' + fmt(l.cost) + '</td></tr>'; }).join('');
+      $('wp-unp').textContent = m.unpriced.length ? 'Also needed, priced at the shop: ' + m.unpriced.map(function (u) { return u.item.toLowerCase() + ' (' + u.qty + ')'; }).join(', ') + '.' : '';
+      $('wp-diy-note').textContent = fin === 'laminate' ? 'Board, edge band and banding, screws and handles at Accra prices. Buy them yourself and build it, or have us assemble it.'
+        : 'Priced in laminate board. ' + $('wp-fin').options[$('wp-fin').selectedIndex].text + ' boards cost more. Buy them yourself and build it, or have us assemble it.';
+      var drawSecsN = secs.filter(function (s) { return /draw/.test(s.lay); }).length;
+      var nDoors = type === 'open' ? 2 : type === 'hinged' ? secs.reduce(function (t, s) { return t + s.doors; }, 0) : n;
+      var est = WardrobePrice.estimate({ widthMm: w, heightMm: h, depthMm: d, type: type, doors: Math.max(2, Math.min(6, nDoors)),
+        interior: drawSecsN === 0 ? 'basic' : drawSecsN < 3 ? 'standard' : 'premium', finish: fin, location: loc });
+      $('wp-pro').textContent = est ? fmt(est.low) + ' to ' + fmt(est.high).replace('GH₵ ', '') : 'Ask us on WhatsApp';
+      var msg = 'Hi Neewoody, I planned a wardrobe on your website and would like a price.\n\nSize: ' + w + ' wide x ' + h + ' high x ' + d + ' mm deep\nDoors: ' + doorTxt + '\n' + lines.join('\n') +
+        '\nFinish: ' + $('wp-fin').options[$('wp-fin').selectedIndex].text + (hd ? ', ' + hd + ' cm door handles' : ', no handles') +
+        '\nMaterials estimate: ' + fmt(m.total) + (est ? '\nMade and installed estimate: ' + fmt(est.low) + ' to ' + fmt(est.high) : '') +
+        '\n\nI would like: [a full quote / to buy the materials and have you assemble]\nMy area: ';
       $('wp-wa').href = WA + '?text=' + encodeURIComponent(msg);
     }
     drawSecs(); go();

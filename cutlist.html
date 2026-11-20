@@ -117,6 +117,8 @@ h4{font-size: 1.05rem;}
   position: absolute; inset: 0;
   background: linear-gradient(135deg, #2a3d6e, #1f2f58);
 }
+.carpenter-hero .hero-home { margin-top: .8rem; font-size: .9rem; color: rgba(255,255,255,.82); max-width: 60ch; }
+.carpenter-hero .hero-home a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 .carpenter-hero-accent {
   position: absolute; top: 0; right: 0;
   width: 40%; height: 100%;
@@ -338,6 +340,16 @@ select {
 /* ── RESULTS PAGE ── */
 #rpage { display: none; position: fixed; inset: 0; background: var(--clr-bg); z-index: 1000; overflow-y: auto; }
 #rpage.show { display: block; }
+/* live materials price (owner 2026-11-20: "the more you build the more price shows") */
+#price-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 900; background: #17130f; color: #efe9df; display: flex; flex-wrap: wrap; gap: .2rem 1.4rem; align-items: baseline; justify-content: center; padding: .7rem 1rem calc(.7rem + env(safe-area-inset-bottom)); font: 400 .9rem/1.4 var(--font-body, system-ui), sans-serif; box-shadow: 0 -4px 18px rgba(0,0,0,.18); }
+#price-bar b { color: #c49455; font-weight: 600; font-size: 1.05rem; }
+#price-bar span.pb-sub { color: rgba(239,233,223,.78); font-size: .8rem; }
+body.has-price-bar { padding-bottom: 4.2rem; }
+.price-tbl { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.price-tbl td { padding: .45rem .2rem; border-bottom: 1px solid var(--clr-border); vertical-align: top; }
+.price-tbl td.c { text-align: right; white-space: nowrap; font-weight: 600; }
+.price-tbl tr.tot td { font-size: 1rem; border-bottom: 0; }
+@media print { #price-bar { display: none !important; } }
 .rhdr { background: var(--clr-surface); border-bottom: 1px solid var(--clr-border); padding: .8rem 1rem; display: flex; align-items: center; gap: .75rem; position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow-sm); }
 .rbtn { background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border); color: var(--clr-dark); border-radius: var(--radius); padding: .45rem .9rem; font-family: var(--ff); font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s; }
 .rbtn:hover { background: var(--clr-border); }
@@ -641,6 +653,7 @@ select {
     </div>
     <h1>Wardrobe Cutlist Calculator</h1>
     <p>Enter your wardrobe dimensions and configuration. Get a full parts list, optimised cut list, and material summary — ready to take to the workshop.</p>
+    <p class="hero-home">Building it yourself, or buying the materials for us to assemble? The price of your materials adds up at the bottom of the screen as you build. Only want to see the design? <a href="/wardrobe-planner">Plan it in 3D</a>.</p>
   </div>
 </div>
 
@@ -926,6 +939,7 @@ select {
   <div class="rbody" id="rbody"></div>
   <div class="print-locked-note"><b>Follow @neewoodygh on Instagram or TikTok to print this cut list.</b><br>Open the cut list again at neewoodygh.com/cutlist, tap a follow button under the results, then print.</div>
 </div>
+<div id="price-bar" role="region" aria-label="Price so far"></div>
 
 <!-- ════ PAGE CTA ════ -->
 <section class="carpenter-cta">
@@ -969,6 +983,7 @@ select {
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
+<script src="js/smart/price.js?v=20261120"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -1249,6 +1264,7 @@ function live(){sync();drawDiagram();}
 
 var _t3d=null;
 function drawDiagram(){
+  updatePriceBar();
   var is3d=S.diagView==='3d', svg=document.getElementById('wsvg'), box3=document.getElementById('w3d'), xb=document.getElementById('xray-btn');
   if(svg) svg.style.display=is3d?'none':'';
   if(box3) box3.hidden=!is3d;
@@ -1688,6 +1704,7 @@ function rerenderEbSheet(){
     tmp.innerHTML=buildEbSheet(ebLastParts);
     host.replaceWith(tmp.firstChild);
   }
+  if(window.WardrobePrice) refreshPriceCard();   // banding changed: the edge band price follows
 }
 
 function ebKey(p){ return p.tag+'_'+p.w+'x'+p.d; }
@@ -1915,7 +1932,7 @@ function generate(){
   ebLastParts=r.parts;
   var ebSheet=buildEbSheet(r.parts);
   var v3='<div class="rcard r3d" id="r3d"><div class="rcard-hdr"><div class="rcard-title">3D View</div><div class="rcard-badge">built from this cut list</div></div><div style="padding:.6rem"><div class="r3d-img" style="aspect-ratio:7/5;display:grid;place-items:center;font-size:.8rem;color:#554d43">Drawing…</div></div></div>';
-  document.getElementById('rbody').innerHTML=aw+v3+ph+ch+zs+mh+nh+ebSheet+ctaCard+bf;
+  document.getElementById('rbody').innerHTML=aw+v3+ph+ch+zs+mh+(window.WardrobePrice?priceCard(r):'')+nh+ebSheet+ctaCard+bf;
   if(window.Cutlist3D){
     Cutlist3D.snapshot(S,r).then(function(url){
       var el=document.querySelector('#r3d .r3d-img'); if(el) el.outerHTML='<img src="'+url+'" alt="3D view of the wardrobe built from this cut list" style="display:block;width:100%;height:auto;border-radius:6px"><div class="no-print"><div class="c3d-ex" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem .8rem;border-top:1px solid rgba(0,0,0,.08)"><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'html\')">Client viewer (works offline)</button><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'dae\')">SketchUp file (.dae)</button><span style="font-size:.75rem;color:#554d43;flex:1 1 100%">Send the client viewer on WhatsApp: it opens on any phone or laptop, no internet or app needed. Open the SketchUp file with File, Import. Members only.</span></div></div>';
@@ -1925,6 +1942,50 @@ function generate(){
   document.getElementById('rpage').classList.add('show');
   document.getElementById('rpage').scrollTop=0;
 }
+
+// ── PRICE (js/smart/price.js; owner's prices 2026-11-20) ──
+// Materials to build it yourself, read off the cut list as you build it, plus our made-and-installed range.
+var priceDoorHandle=60;
+function priceInput(r){
+  return r.parts.map(function(p){
+    var k=ebKey(p), e=ebState[k]||ebDefault(p.tag,p.name,p);
+    return {name:p.name, tag:p.tag, L:Math.max(p.w,p.d), W:Math.min(p.w,p.d), qty:p.qty, eb:{t:e.t?1:0,r:e.r?1:0,b:e.b?1:0,l:e.l?1:0}};
+  });
+}
+function priceOf(r){
+  var rails=0, drawSecs=0, doors=0, sliding=false, anyDoor=false;
+  S.secs.forEach(function(sc){
+    sc.zones.forEach(function(z){ if(z.type==='hanging') rails++; });
+    if(sc.zones.some(function(z){ return z.type==='drawers'&&z.drawers>0; })) drawSecs++;
+    if(sc.door&&sc.door.on){ anyDoor=true; if(sc.door.type==='sliding') sliding=true; doors+=sc.door.type==='sliding'?1:(sc.door.count||1); }
+  });
+  var m=WardrobePrice.materials(priceInput(r), {doorHandle:priceDoorHandle, drawerHandle:30, rails:rails});
+  var est=WardrobePrice.estimate({widthMm:S.w, heightMm:S.h, depthMm:S.d, type:!anyDoor?'open':sliding?'sliding':'hinged', doors:Math.max(2,Math.min(6,doors||2)),
+    interior:drawSecs===0?'basic':drawSecs<3?'standard':'premium', finish:'laminate', location:'central'});
+  return {m:m, est:est};
+}
+function ghs(v){ return 'GH₵ '+Math.round(v).toLocaleString('en-GH'); }
+function updatePriceBar(){
+  var bar=document.getElementById('price-bar'); if(!bar||!window.WardrobePrice) return;
+  try{
+    var r=calculate(), p=priceOf(r);
+    bar.innerHTML='<span>Materials so far <b>'+ghs(p.m.total)+'</b></span><span class="pb-sub">'+p.m.boards+' boards, '+p.m.bandM+' m edge band, screws and handles'+(p.m.oversize?'. '+p.m.oversize+' part'+(p.m.oversize>1?'s are':' is')+' longer than a board: add a unit on the Frame &amp; Panels tab':'')+'</span>'+
+      (p.est?'<span class="pb-sub">Made and installed by us: '+ghs(p.est.low)+' to '+ghs(p.est.high).replace('GH₵ ','')+'</span>':'');
+    document.body.classList.add('has-price-bar');
+  }catch(e){ bar.innerHTML=''; }
+}
+function priceCard(r){
+  var p=priceOf(r), m=p.m;
+  var h='<div class="rcard" id="price-card"><div class="rcard-hdr"><div class="rcard-title">Materials Price</div><div class="rcard-badge">'+ghs(m.total)+'</div></div><div style="padding:.8rem 1rem">';
+  h+='<p style="font-size:.85rem;margin-bottom:.6rem">What it costs to buy the materials for this wardrobe at Accra prices: build it yourself, or buy them and have Neewoody assemble it. Edge banding follows your Edge Band Sheet.</p>';
+  h+='<label class="no-print" style="display:inline-flex;gap:.5rem;align-items:center;font-size:.85rem;margin-bottom:.6rem">Door handles <select onchange="priceDoorHandle=+this.value;refreshPriceCard()"><option value="30"'+(priceDoorHandle===30?' selected':'')+'>30 cm</option><option value="60"'+(priceDoorHandle===60?' selected':'')+'>60 cm</option><option value="100"'+(priceDoorHandle===100?' selected':'')+'>100 cm</option><option value="0"'+(!priceDoorHandle?' selected':'')+'>None</option></select></label>';
+  h+='<table class="price-tbl">'+m.lines.map(function(l){ return '<tr><td>'+l.item+(/handle/i.test(l.item)?' × '+l.qty:'')+'<br><span style="font-size:.75rem;color:var(--clr-muted)">'+l.note+'</span></td><td class="c">'+ghs(l.cost)+'</td></tr>'; }).join('')+
+    '<tr class="tot"><td><b>Materials total</b></td><td class="c">'+ghs(m.total)+'</td></tr></table>';
+  if(m.unpriced.length) h+='<p style="font-size:.8rem;color:var(--clr-muted);margin-top:.6rem">Also needed, priced at the shop: '+m.unpriced.map(function(u){ return u.item.toLowerCase()+' ('+u.qty+')'; }).join(', ')+'.</p>';
+  if(p.est) h+='<p style="font-size:.85rem;margin-top:.6rem">Made and installed by Neewoody in laminate: about <b>'+ghs(p.est.low)+' to '+ghs(p.est.high).replace('GH₵ ','')+'</b>. <a href="https://wa.me/233244633464?text='+encodeURIComponent('Hi Neewoody, I made a wardrobe cut list ('+S.w+' x '+S.h+' x '+S.d+' mm) on your website. Materials come to about '+ghs(m.total)+'. I would like: [a full quote / to buy the materials and have you assemble]')+'" style="color:var(--clr-accent-dk);text-decoration:underline">Ask us on WhatsApp</a></p>';
+  return h+'</div></div>';
+}
+function refreshPriceCard(){ var c=document.getElementById('price-card'); if(c){ c.outerHTML=priceCard(calculate()); } updatePriceBar(); }
 
 function closeR(){document.getElementById('rpage').classList.remove('show');}
 

@@ -119,6 +119,7 @@ import Footer from '../components/Footer.astro';
       </a>
     </div>
 
+    <p class="est-disclaimer" style="border-top:0;margin-top:2rem;padding-top:0">Want to see it and watch the price add up as you design? <a class="ulink" href="/wardrobe-planner">Plan your wardrobe in 3D</a>. Building it yourself? <a class="ulink" href="/cutlist">Get the full cut list</a>.</p>
     <div class="est-disclaimer">
       <strong>How estimates are calculated</strong><br />
       This tool uses size-band pricing based on Ghana carpentry realities: laminate panels at approximately
@@ -130,6 +131,7 @@ import Footer from '../components/Footer.astro';
     </section>
   </main>
   <Footer quoteLink />
+  <script is:inline src="/js/smart/price.js?v=20261120"></script>
   <script is:inline>
 
   /* ══════════════════════════════════════════════════════════════
@@ -139,48 +141,8 @@ import Footer from '../components/Footer.astro';
 
   (function () {
 
-    /* ── PRICING CONSTANTS ── edit these to adjust estimates ── */
-    const PANEL_COST_GHS = 500;
-    const EDGEBAND_PER_M = 7;
-
-    // Base prices calibrated to Neewoody's actual cost model at Basic Build tier (×1.45).
-    // Derived from: overhead (GH₵274/day) + crew labour (supervisor + hand + Nuer basic)
-    // + cabinetry materials + logistics, multiplied by 1.45.
-    // Updated 2026-05-31 — previously understated by ~40%.
-    const BASE = {
-      small:  12000,  // < 1500mm wide, ~5 job days
-      medium: 15500,  // 1500–2500mm wide, ~6 job days
-      large:  23000,  // 2500–3500mm wide, ~9 job days
-      xlarge: 34000   // > 3500mm wide, ~12 job days
-    };
-
-    const RANGE_SPREAD  = 0.12;
-    const BASE_HEIGHT_MM = 2400;
-    const BASE_DEPTH_MM  = 600;
-
-    const TYPE_MULT = { hinged:1.00, sliding:1.15, open:0.82 };
-    const DOOR_MULT = { 2:1.00, 3:1.00, 4:1.00, 5:1.05, 6:1.10 };
-    const INTERIOR_MULT = { basic:0.90, standard:1.00, premium:1.20 };
-    const FINISH_MULT   = { laminate:1.00, painted:1.10, veneer:1.20, gloss:1.25 };
-    const LOCATION_MULT = { central:1.00, outer:1.08, outside:null };
-
-    function estimate(inputs) {
-      const { widthMm, heightMm, depthMm, type, doors, interior, finish, location } = inputs;
-      if (location === 'outside') return null;
-      let base;
-      if (widthMm < 1500)      base = BASE.small;
-      else if (widthMm < 2500) base = BASE.medium;
-      else if (widthMm < 3500) base = BASE.large;
-      else                      base = BASE.xlarge;
-      base *= (heightMm / BASE_HEIGHT_MM);
-      base *= (depthMm  / BASE_DEPTH_MM);
-      const mult = TYPE_MULT[type] * (DOOR_MULT[doors]||1.00) * INTERIOR_MULT[interior] * FINISH_MULT[finish] * LOCATION_MULT[location];
-      const mid  = base * mult;
-      return {
-        low:  Math.round(mid * (1 - RANGE_SPREAD) / 500) * 500,
-        high: Math.round(mid * (1 + RANGE_SPREAD) / 500) * 500,
-      };
-    }
+    /* Pricing lives in /js/smart/price.js (WardrobePrice.estimate), shared with the wardrobe planner. */
+    const estimate = function (inputs) { return window.WardrobePrice.estimate(inputs); };
 
     function fmt(n) { return 'GH₵ ' + n.toLocaleString('en-GH'); }
     function lbl(el) { return el.options[el.selectedIndex].text; }

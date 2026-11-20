@@ -1063,7 +1063,7 @@ function maybeRecoverProjects(){
 }
 function findProj(arr,id){ for(var i=0;i<arr.length;i++) if(arr[i].id===id) return arr[i]; return null; }
 function findList(proj,id){ if(!proj) return null; for(var i=0;i<proj.lists.length;i++) if(proj.lists[i].id===id) return proj.lists[i]; return null; }
-function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1, boardPrice:500, rollPrice:200, applyPrice:500, rollLen:50 }; }
+function defaultU(){ return { code:'', thick:18, bl:2440, bw:1220, kerf:4, waste:12, grain:1, unit:'mm', proj:'', listName:'', projShow:false, brandSource:'', brandName:'', brandPhone:'', customLogo:'', brandTouched:false, entryMode:'list', qgSheets:1, boardPrice:500, rollPrice:200, applyPrice:500, rollLen:100 }; }
 // GHS edge cost per metre = (roll price + application per roll) / metres per roll.
 function edgePerM(u){ u=u||U; var rl=(u.rollLen>0?u.rollLen:100); return ((num(u.rollPrice,0))+(num(u.applyPrice,0)))/rl; }
 function fmtGHS(n){ return 'GHS ' + Math.round(n).toLocaleString('en-US'); }
