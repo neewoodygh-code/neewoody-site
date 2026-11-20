@@ -397,7 +397,7 @@ select {
   border-radius: var(--radius-lg); padding: 1rem 1.25rem;
   font-size: .82rem; color: var(--clr-mid); line-height: 1.6;
 }
-.alpha-warn strong { color: var(--rd); }
+.alpha-warn strong { color: #8e2f22; }
 
 /* Results: brand footer */
 .brand-footer {
@@ -409,14 +409,14 @@ select {
 .bf-info { flex: 1; }
 .bf-name { font-family: var(--font-display); font-size: 1rem; font-weight: 700; color: #fff; }
 .bf-details { font-size: .75rem; color: rgba(255,255,255,.55); margin-top: .25rem; line-height: 1.7; font-family: var(--mono); }
-.bf-details a { color: rgba(255,255,255,.7); }
+.bf-details a { color: rgba(255,255,255,.85); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Results: CTA */
 .result-cta {
   background: var(--clr-bg-alt); border: 1.5px solid var(--clr-border);
   border-radius: var(--radius-lg); padding: 1.5rem; text-align: center;
 }
-.result-cta h3 { font-size: 1rem; margin-bottom: .5rem; }
+.result-cta h3, .result-cta h2 { font-size: 1rem; margin-bottom: .5rem; }
 .result-cta p { font-size: .83rem; color: var(--clr-muted); margin-bottom: 1rem; }
 .social-btns { display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap; }
 .btn-ig {
@@ -599,7 +599,7 @@ select {
 <body>
 
 <!-- ════ ALPHA BANNER ════ -->
-<div class="alpha-banner">
+<div class="alpha-banner" role="region" aria-label="Alpha notice">
   ⚠ Alpha — Verify all figures before cutting. <a href="https://wa.me/233244633464?text=Hi Neewoody, I found an issue with the cutlist calculator.">Report an issue</a>
 </div>
 
@@ -1745,7 +1745,9 @@ function buildEbSheet(parts){
     var grain='<line x1="35" y1="15" x2="35" y2="65" stroke="#b3a892" stroke-width="1"/>'+
               '<line x1="65" y1="15" x2="65" y2="65" stroke="#b3a892" stroke-width="1"/>';
     // viewBox 0 0 116 100 · board edges: top10 bottom70 left18 right82.
-    var svg='<svg class="eb-svg" viewBox="0 0 116 100" xmlns="http://www.w3.org/2000/svg" role="img">'+
+    var ebL=(eb.l?1:0)+(eb.r?1:0), ebW=(eb.t?1:0)+(eb.b?1:0);
+    var ebDesc=(ebL===2&&ebW===2)?'all round':(!ebL&&!ebW)?'none':[ebL?ebL+' long':'',ebW?ebW+' short':''].filter(Boolean).join(', ');
+    var svg='<svg class="eb-svg" viewBox="0 0 116 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="'+nm.replace(/"/g,'')+': length '+len+', width '+wid+' mm. Edge band: '+ebDesc+'">'+
         '<rect x="18" y="10" width="64" height="60" fill="#f5f0e8" stroke="#9a9a9a" stroke-width="1.5"/>'+
         grain+ticks+
         '<text x="50" y="44" text-anchor="middle" font-family="ui-monospace,monospace" font-size="13" font-weight="700" fill="#8a6a1e">'+qty+'</text>'+
@@ -1775,7 +1777,7 @@ function generate(){
   var sorted=parts.slice().sort(function(a,b){return tagOrder.indexOf(a.tag)-tagOrder.indexOf(b.tag);});
 
   // Alpha warning
-  var aw='<div class="alpha-warn"><strong>⚠ Alpha Version:</strong> This calculator is in active development. Always verify all dimensions against your actual measurements before cutting. If you find an error, <a href="https://wa.me/233244633464?text=Hi Neewoody, I found a cutlist issue: " style="color:var(--rd);font-weight:600">let us know</a>.</div>';
+  var aw='<div class="alpha-warn"><strong>⚠ Alpha Version:</strong> This calculator is in active development. Always verify all dimensions against your actual measurements before cutting. If you find an error, <a href="https://wa.me/233244633464?text=Hi Neewoody, I found a cutlist issue: " style="color:#8e2f22;font-weight:600">let us know</a>.</div>';
 
   // Parts table
   var ph='<div class="rcard"><div class="rcard-hdr"><div class="rcard-title">Parts List</div><div class="rcard-badge">'+totalPcs+' pieces</div></div>';
@@ -1851,7 +1853,7 @@ function generate(){
   var tkSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.74a4.85 4.85 0 01-1.01-.05z"/></svg>';
   var prSVG='<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>';
   var ctaCard='<div class="result-cta">'+
-    '<h3>Found this useful?</h3>'+
+    '<h2 class="cta-h">Found this useful?</h2>'+
     '<p>Follow us to get updates when we add new features, fix bugs, and release new carpenter tools.</p>'+
     '<div class="social-btns">'+
       '<a href="https://www.instagram.com/neewoodygh" class="btn-ig" target="_blank" rel="noopener" onclick="unlockPrint()">'+igSVG+'@neewoodygh Instagram</a>'+

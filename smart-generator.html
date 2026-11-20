@@ -97,7 +97,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
   <nav aria-label="Site"><a href="/tools" data-cc-tools>Free tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
 </header>
 
-<div class="wip" role="note" aria-label="Under construction">
+<div class="wip" role="region" aria-label="Under construction">
   <div class="wip-in">
     <span class="wip-tag">Under construction</span>
     <div>
@@ -170,7 +170,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
       <div class="card" style="margin-top:1rem">
         <h2>Cut list</h2>
         <div class="sum" id="sum"></div>
-        <div style="overflow-x:auto"><table class="cl" id="cl"></table></div>
+        <div style="overflow-x:auto" tabindex="0" role="region" aria-label="Cut list table"><table class="cl" id="cl"></table></div>
         <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
         <div class="acts">
           <button type="button" class="ui-btn sm" id="toSheet">Send to the Cut Sheet</button>

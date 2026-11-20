@@ -19,6 +19,7 @@ export default {
     "img": "images/projects/bortianor/bortianor-master-wardrobe.jpg",
     "alt": "A black-framed glass-front wardrobe with lit shelves in a master bedroom, Bortianor",
     "caption": "Glass-front wardrobe, Bortianor",
+    "extra": [["/wardrobe-estimator", "Estimate the price"], ["/cutlist", "Design it in 3D"]],
     "facts": [
       [
         "Build time",
