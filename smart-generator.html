@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Smart Generator (experimental) | Carpentry Concierge</title>
+<meta name="description" content="Experimental: describe a wardrobe, see it in 3D and get its cut list. Under construction; check every size before cutting." />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="/images/favicon.ico" />
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZP77WR6BNH"></script>
+<script>
+if (location.hostname === 'neewoodygh.com') { window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-ZP77WR6BNH'); }
+</script>
+<link rel="stylesheet" href="css/app.css?v=20261117" />
+<style>
+/* Smart Generator page (experimental, 2026-11-19). Plain HTML on css/app.css; the engine is js/smart/engine.js,
+   the 3D view js/cutlist-3d.js. Rules: --t-* sizes only, one label style, no animations. */
+.wip { background: #f6e3b4; color: var(--espresso); border-bottom: 2px solid var(--brass); padding: 1rem clamp(1rem, 4vw, 2.5rem); font-size: var(--t-small); line-height: 1.55; }
+.wip-in { max-width: 1240px; margin: 0 auto; display: flex; gap: 1rem; align-items: flex-start; }
+.wip-tag { flex: none; background: var(--espresso); color: var(--bone); font-weight: 600; padding: .25rem .6rem; border-radius: 4px; white-space: nowrap; }
+.wip p + p { margin-top: .35rem; }
+.wip a { color: var(--walnut); }
+.sg { max-width: 1240px; margin: 0 auto; padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 3rem; }
+.sg h1 { font-size: var(--t-h3); font-weight: 600; line-height: 1.2; }
+.sg .lede { color: var(--stone); margin-top: .4rem; max-width: 60ch; }
+.sg-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 1.5rem; margin-top: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .sg-grid { grid-template-columns: minmax(0, 1fr); } }
+.card { background: #fff; border: 1px solid var(--hair); border-radius: 8px; padding: 1.1rem 1.1rem 1.2rem; }
+.card + .card { margin-top: 1rem; }
+.card h2 { font-size: var(--t-body); font-weight: 600; margin-bottom: .8rem; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; }
+.row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.f label { display: block; font-size: var(--t-small); color: var(--stone); font-weight: 500; margin-bottom: .2rem; }
+.f input, .f select, .z select, .z input { width: 100%; font: 400 var(--t-small) var(--sans); color: var(--espresso); background: #fff; border: 1px solid var(--hair); border-radius: 6px; padding: .5rem .55rem; }
+.f + .f, .row3 + .row2, .row2 + .row2, .row2 + .f, .f + .row2 { margin-top: .7rem; }
+.sec { border-top: 1px solid var(--hair); padding-top: .8rem; margin-top: .8rem; }
+.sec-head { display: flex; gap: .6rem; align-items: center; justify-content: space-between; margin-bottom: .5rem; }
+.sec-head b { font-weight: 600; font-size: var(--t-small); }
+.sec-head select { width: auto; max-width: 60%; font: 400 var(--t-small) var(--sans); border: 1px solid var(--hair); border-radius: 6px; padding: .4rem .5rem; background: #fff; }
+.z { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, .8fr) auto; gap: .4rem; align-items: center; margin-top: .35rem; }
+.z .rest { font-size: var(--t-small); color: var(--stone); padding: .5rem .2rem; }
+.zh { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, .8fr) auto; gap: .4rem; font-size: .8rem; color: var(--stone); }
+.zh span:last-child { width: 2rem; }
+.mini { font: 500 var(--t-small) var(--sans); background: none; border: 1px solid var(--hair); border-radius: 6px; padding: .35rem .6rem; cursor: pointer; color: var(--espresso); }
+.mini:hover { border-color: var(--walnut); color: var(--walnut); }
+.mini.x { width: 2rem; padding: .35rem 0; }
+details.cons summary { cursor: pointer; font-weight: 600; font-size: var(--t-body); }
+details.cons[open] summary { margin-bottom: .8rem; }
+.hint { font-size: .8rem; color: var(--stone); margin-top: .5rem; }
+.warns { border-left: 3px solid var(--err); background: #fbefec; padding: .7rem .9rem; border-radius: 0 6px 6px 0; font-size: var(--t-small); margin-bottom: 1rem; }
+.warns.ok { border-color: var(--ok); background: #eef5ee; }
+.warns ul { margin: .3rem 0 0 1.1rem; }
+#v3d { background: #fff; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; }
+table.cl { width: 100%; border-collapse: collapse; font-size: var(--t-small); }
+table.cl th { text-align: left; font-weight: 600; color: var(--stone); border-bottom: 1px solid var(--hair); padding: .45rem .4rem; }
+table.cl td { border-bottom: 1px solid rgba(23,19,15,.07); padding: .45rem .4rem; vertical-align: top; }
+table.cl td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.cl td.note { color: var(--stone); font-size: .8rem; }
+table.cl .note-m { display: none; font-size: .8rem; color: var(--stone); margin-top: .15rem; }
+@media (max-width: 600px) { table.cl td.note, table.cl th.note { display: none; } table.cl .note-m { display: block; } .wip-in { flex-direction: column; gap: .5rem; } }
+table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--walnut); }
+.sum { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; font-size: var(--t-small); color: var(--stone); margin-bottom: .8rem; }
+.sum b { color: var(--espresso); }
+.acts { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin-top: 1rem; }
+.ack { display: flex; gap: .55rem; align-items: flex-start; font-size: var(--t-small); background: var(--bone); border-radius: 6px; padding: .7rem .8rem; margin-top: 1rem; }
+.ack input { margin-top: .3rem; width: 1.05rem; height: 1.05rem; flex: none; accent-color: var(--navy); }
+.ui-btn.sm { font-size: var(--t-small); padding: .65rem 1rem; }
+.ui-btn.ghost { background: #fff; color: var(--espresso); border: 1px solid var(--hair); }
+.ui-btn.ghost:hover { background: var(--bone); }
+.print-only { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  .app-head, .app-foot, .wip, .sg-grid > .left, #v3d, .acts, .ack, .lede, .no-print { display: none !important; }
+  body.app { background: #fff; }
+  .sg { padding: 0; }
+  .sg-grid { display: block; margin: 0; }
+  .card { border: 0; padding: 0; }
+  .print-only { display: block; }
+  .pnote { border: 1.5px solid #000; padding: 6px 8px; font-size: 11px; margin: 6px 0 10px; }
+  table.cl { font-size: 11px; }
+  table.cl td.note { font-size: 10px; }
+  .warns { font-size: 11px; padding: 4px 8px; }
+  table.cl tr { break-inside: avoid; }
+}
+</style>
+</head>
+<body class="app">
+
+<header class="app-head navy">
+  <div class="lockup">
+    <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
+    <span class="lockup-rule" aria-hidden="true"></span>
+    <a class="lockup-cc" data-cc-home href="/concierge/" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Smart Generator</span>
+  </div>
+  <nav aria-label="Site"><a href="/tools" data-cc-tools>Free tools</a><a href="https://wa.me/233244633464">WhatsApp</a></nav>
+</header>
+
+<div class="wip" role="note" aria-label="Under construction">
+  <div class="wip-in">
+    <span class="wip-tag">Under construction</span>
+    <div>
+      <p><b>This tool is an experiment and is still being built.</b> Its sizes come from a new engine that has not been fully checked, and it may change or be taken down without notice.</p>
+      <p>Use it to try ideas, not as your only source of sizes. <b>Check every size against your own drawing and measurements before you cut.</b> Neewoody Custom Woodwork and Carpentry Concierge accept no responsibility for material cut, work done or money spent based on these figures.</p>
+      <p>Found something wrong? <a href="https://wa.me/233244633464?text=Hi%20Neewoody%2C%20I%20found%20a%20problem%20in%20the%20Smart%20Generator%3A%20">Tell us on WhatsApp</a>.</p>
+    </div>
+  </div>
+</div>
+
+<main class="sg">
+  <h1>Smart Generator <span style="font-weight:400;color:var(--stone)">(experimental)</span></h1>
+  <p class="lede">Describe a wardrobe. Every part is placed in 3D first and the cut list is read off the model, so the two always agree and parts that run into each other are flagged. Wardrobes only for now; kitchens come next.</p>
+
+  <div class="print-only">
+    <div class="pnote"><b>EXPERIMENTAL: check every size before cutting.</b> Made with the Carpentry Concierge Smart Generator, which is under construction. Neewoody Custom Woodwork and Carpentry Concierge accept no responsibility for material cut or work done from these figures.</div>
+    <div id="pSpec" style="font-size:12px;margin-bottom:8px"></div>
+  </div>
+
+  <div class="sg-grid">
+    <div class="left">
+      <div class="card">
+        <h2>Size</h2>
+        <div class="row3">
+          <div class="f"><label for="w">Width (mm)</label><input id="w" type="number" inputmode="numeric" value="2400"></div>
+          <div class="f"><label for="h">Height (mm)</label><input id="h" type="number" inputmode="numeric" value="2100"></div>
+          <div class="f"><label for="d">Depth (mm)</label><input id="d" type="number" inputmode="numeric" value="580"></div>
+        </div>
+        <div class="row2">
+          <div class="f"><label for="units">Carcasses</label><select id="units"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+          <div class="f"><label for="nsec">Sections</label><select id="nsec"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></div>
+        </div>
+        <p class="hint">Sections are shared out across the carcasses from left to right. Inside one carcass, sections are split by dividers.</p>
+      </div>
+
+      <div class="card">
+        <h2>Sections, left to right</h2>
+        <p class="hint" style="margin-top:0">Spaces are listed top to bottom. The top space takes whatever height is left.</p>
+        <div id="secs"></div>
+      </div>
+
+      <div class="card">
+        <details class="cons" id="consBox">
+          <summary>Construction (your own settings)</summary>
+          <div class="row3">
+            <div class="f"><label for="c-thick">Board (mm)</label><input id="c-thick" type="number" value="18"></div>
+            <div class="f"><label for="c-back">Back</label><select id="c-back"><option value="inset">Inset groove</option><option value="nailon">Nail-on</option></select></div>
+            <div class="f"><label for="c-bthick">Back (mm)</label><input id="c-bthick" type="number" value="3"></div>
+          </div>
+          <div class="row3" style="margin-top:.7rem">
+            <div class="f"><label for="c-groove">Groove depth</label><input id="c-groove" type="number" value="8"></div>
+            <div class="f"><label for="c-edge">Door edge gap</label><input id="c-edge" type="number" value="2"></div>
+            <div class="f"><label for="c-dgap">Gap between doors</label><input id="c-dgap" type="number" value="2"></div>
+          </div>
+          <div class="row3" style="margin-top:.7rem">
+            <div class="f"><label for="c-run">Runner gap</label><input id="c-run" type="number" value="27"></div>
+            <div class="f"><label for="c-tkh">Toe kick height</label><input id="c-tkh" type="number" value="100"></div>
+            <div class="f"><label for="c-tks">Toe kick set back</label><input id="c-tks" type="number" value="60"></div>
+          </div>
+          <div class="f" style="margin-top:.7rem"><label for="c-sub">Subframe</label><select id="c-sub"><option value="built">Built in: sides to the floor, gridwork between them</option><option value="separate">Separate plinth under box carcasses</option></select></div>
+          <p class="hint">Remembered on this device. Sizes in mm. Set back 0 = toe kick flush with the front.</p>
+          <button type="button" class="mini" id="c-reset" style="margin-top:.6rem">Reset to standard</button>
+        </details>
+      </div>
+    </div>
+
+    <div class="right">
+      <div id="warns"></div>
+      <div id="v3d" class="no-print"></div>
+      <div class="card" style="margin-top:1rem">
+        <h2>Cut list</h2>
+        <div class="sum" id="sum"></div>
+        <div style="overflow-x:auto"><table class="cl" id="cl"></table></div>
+        <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
+        <div class="acts">
+          <button type="button" class="ui-btn sm" id="toSheet">Send to the Cut Sheet</button>
+          <button type="button" class="ui-btn sm ghost" id="doPrint">Print the cut list</button>
+          <button type="button" class="ui-btn sm ghost" id="exHtml">Client 3D file</button>
+          <button type="button" class="ui-btn sm ghost" id="exDae">SketchUp file</button>
+        </div>
+        <p class="hint no-print">The Cut Sheet works out boards and lets you mark edge banding. Client 3D and SketchUp files are for members.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="app-foot">
+  <a href="/tools">Free tools</a>
+  <a href="/concierge/">Carpentry Concierge</a>
+  <a href="/contact">Contact</a>
+  <a href="/privacy">Privacy</a>
+  <span class="copy">&copy; <span id="footer-year"></span> Neewoody Custom Woodwork, Accra</span>
+</footer>
+
+<script src="js/concierge.js?v=20261113b"></script>
+<script>
+(function(){ var m = window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive();
+  document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/directory.html' : '/concierge/'; });
+  if (m) document.querySelectorAll('[data-cc-tools]').forEach(function(a){ a.href = '/concierge/directory.html#tools'; a.textContent = 'Member tools'; });
+})();
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+</script>
+<script src="js/smart/engine.js?v=20261119"></script>
+<script src="js/cutlist-3d.js?v=20261119e"></script>
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var PREFS = 'nwd-smart-prefs', ACK = 'nwd-smart-ack', HANDOFF = 'nwd-smart-handoff';
+  var SH = SmartEngine.SHOP;
+  var CONS = { 'c-thick': SH.thick, 'c-back': SH.backType, 'c-bthick': SH.backThick, 'c-groove': SH.groove, 'c-edge': SH.edgeClear,
+    'c-dgap': SH.doorGap, 'c-run': SH.runGap, 'c-tkh': SH.sub.h, 'c-tks': SH.sub.setback, 'c-sub': SH.sub.mode };
+  var DOORS = { none: { on: false, count: 1, type: 'hinged', bottom: 'full' }, h1: { on: true, count: 1, type: 'hinged', bottom: 'full' },
+    h2: { on: true, count: 2, type: 'hinged', bottom: 'full' }, sl: { on: true, count: 1, type: 'sliding', bottom: 'full' } };
+  var GROUPS = { carcass: 'Carcass', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', frame: 'Subframe', end: 'End panels', panel: 'End panels', pelmet: 'Pelmet' };
+
+  function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function put(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+  function num(id, def) { var v = parseFloat($(id).value); return isFinite(v) ? v : def; }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+  // sections: [{door:'h1', zones:[{type,h,n}]}] (zones top to bottom)
+  var secs = [
+    { door: 'h1', zones: [{ type: 'hanging', h: 1200, n: 0 }] },
+    { door: 'h1', zones: [{ type: 'shelves', h: 900, n: 4 }] },
+    { door: 'h2', zones: [{ type: 'shelves', h: 500, n: 2 }, { type: 'drawers', h: 400, n: 4 }] }
+  ];
+
+  function drawSecs() {
+    var html = '';
+    secs.forEach(function (s, si) {
+      html += '<div class="sec"><div class="sec-head"><b>Section ' + (si + 1) + '</b>' +
+        '<select data-s="' + si + '" data-k="door" aria-label="Section ' + (si + 1) + ' front">' +
+        [['none', 'No door'], ['h1', '1 hinged door'], ['h2', '2 hinged doors'], ['sl', 'Sliding door']].map(function (o) {
+          return '<option value="' + o[0] + '"' + (s.door === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+        '</select></div><div class="zh"><span>Space</span><span>Height (mm)</span><span>How many</span><span></span></div>';
+      s.zones.forEach(function (z, zi) {
+        var top = zi === 0, lbl = 'Section ' + (si + 1) + ', space ' + (zi + 1);
+        html += '<div class="z"><select data-s="' + si + '" data-z="' + zi + '" data-k="type" aria-label="' + lbl + ' type">' +
+          [['shelves', 'Shelves'], ['hanging', 'Hanging'], ['drawers', 'Drawers']].map(function (o) {
+            return '<option value="' + o[0] + '"' + (z.type === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+          (top ? '<span class="rest">the rest</span>' : '<input type="number" inputmode="numeric" data-s="' + si + '" data-z="' + zi + '" data-k="h" value="' + z.h + '" aria-label="' + lbl + ' height">') +
+          (z.type === 'hanging' ? '<span class="rest">rail</span>' : '<input type="number" inputmode="numeric" min="0" data-s="' + si + '" data-z="' + zi + '" data-k="n" value="' + z.n + '" aria-label="' + lbl + (z.type === 'drawers' ? ' drawers' : ' shelves') + '">') +
+          (s.zones.length > 1 ? '<button type="button" class="mini x" data-del="' + si + ':' + zi + '" aria-label="Remove ' + lbl + '">&times;</button>' : '<span></span>') + '</div>';
+      });
+      if (s.zones.length < 4) html += '<button type="button" class="mini" data-add="' + si + '" style="margin-top:.5rem">Add a space below</button>';
+      html += '</div>';
+    });
+    $('secs').innerHTML = html;
+  }
+  $('secs').addEventListener('change', onSec);
+  $('secs').addEventListener('input', function (e) { if (e.target.tagName === 'INPUT') onSec(e); });
+  function onSec(e) {
+    var t = e.target, si = +t.dataset.s, k = t.dataset.k; if (isNaN(si) || !k) return;
+    if (k === 'door') secs[si].door = t.value;
+    else {
+      var z = secs[si].zones[+t.dataset.z];
+      if (k === 'type') { z.type = t.value; if (z.type === 'drawers' && !z.n) z.n = 3; if (z.type === 'shelves' && !z.n) z.n = 2; drawSecs(); }
+      else z[k] = Math.max(0, parseFloat(t.value) || 0);
+    }
+    run();
+  }
+  $('secs').addEventListener('click', function (e) {
+    var t = e.target;
+    if (t.dataset.add) { secs[+t.dataset.add].zones.push({ type: 'drawers', h: 400, n: 3 }); drawSecs(); run(); }
+    else if (t.dataset.del) { var p = t.dataset.del.split(':'); secs[+p[0]].zones.splice(+p[1], 1); drawSecs(); run(); }
+  });
+  $('nsec').addEventListener('change', function () {
+    var n = +this.value;
+    while (secs.length < n) secs.push({ door: 'h1', zones: [{ type: 'shelves', h: 900, n: 3 }] });
+    secs.length = n; drawSecs(); run();
+  });
+  ['w', 'h', 'd', 'units'].forEach(function (id) { $(id).addEventListener('input', run); $(id).addEventListener('change', run); });
+
+  // construction settings, remembered on this device
+  function loadCons() {
+    var p = {}; try { p = JSON.parse(get(PREFS) || '{}') || {}; } catch (e) {}
+    Object.keys(CONS).forEach(function (id) { $(id).value = p[id] != null ? p[id] : CONS[id]; });
+  }
+  function saveCons() { var p = {}; Object.keys(CONS).forEach(function (id) { p[id] = $(id).value; }); put(PREFS, JSON.stringify(p)); }
+  Object.keys(CONS).forEach(function (id) { $(id).addEventListener('change', function () { saveCons(); run(); }); $(id).addEventListener('input', run); });
+  $('c-reset').onclick = function () { Object.keys(CONS).forEach(function (id) { $(id).value = CONS[id]; }); saveCons(); run(); };
+
+  function spec() {
+    var tks = num('c-tks', SH.sub.setback);
+    return {
+      w: num('w', 2400), h: num('h', 2100), d: num('d', 580), units: +$('units').value,
+      sections: secs.map(function (s) {
+        return { door: Object.assign({}, DOORS[s.door]), zones: s.zones.map(function (z) {
+          return { type: z.type, h: z.h, shelves: z.type === 'shelves' ? z.n : 0, drawers: z.type === 'drawers' ? z.n : 0 }; }) };
+      }),
+      shop: { thick: num('c-thick', SH.thick), backType: $('c-back').value, backThick: num('c-bthick', SH.backThick), groove: num('c-groove', SH.groove),
+        edgeClear: num('c-edge', SH.edgeClear), doorGap: num('c-dgap', SH.doorGap), runGap: num('c-run', SH.runGap),
+        sub: { mode: $('c-sub').value, h: num('c-tkh', SH.sub.h), style: tks > 0 ? 'setback' : 'flush', setback: tks } }
+    };
+  }
+  function check(sp) {
+    var bad = [];
+    if (!(sp.w >= 300 && sp.w <= 8000)) bad.push('Width should be between 300 and 8000 mm.');
+    if (!(sp.h >= 300 && sp.h <= 3200)) bad.push('Height should be between 300 and 3200 mm.');
+    if (!(sp.d >= 250 && sp.d <= 1000)) bad.push('Depth should be between 250 and 1000 mm.');
+    if (sp.units > sp.sections.length) bad.push('There are more carcasses than sections. Use fewer carcasses or more sections.');
+    var opening = (sp.w / sp.units) / Math.ceil(sp.sections.length / sp.units);
+    if (opening < 200) bad.push('Sections come out under 200 mm wide. Use fewer sections or a wider wardrobe.');
+    return bad;
+  }
+
+  var last = null, timer = null;
+  function run() { clearTimeout(timer); timer = setTimeout(go, 150); }
+  function go() {
+    var sp = spec(), bad = check(sp);
+    if (bad.length) { last = null; $('warns').innerHTML = '<div class="warns"><b>Fix these first:</b><ul>' + bad.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>'; $('cl').innerHTML = ''; $('sum').innerHTML = ''; return; }
+    var r;
+    try { r = SmartEngine.build(sp); } catch (e) { last = null; $('warns').innerHTML = '<div class="warns"><b>The engine could not build this.</b> Try other sizes, and please tell us what you entered.</div>'; if (window.console) console.error(e); return; }
+    last = { spec: sp, r: r };
+    var w = r.warnings.map(esc).concat(r.clashes.map(function (c) { return 'Parts run into each other: ' + esc(c); }));
+    $('warns').innerHTML = w.length ? '<div class="warns"><b>Check these:</b><ul><li>' + w.join('</li><li>') + '</li></ul></div>'
+      : '<div class="warns ok">No clashes found: every part fits without running into another. Still check the sizes yourself.</div>';
+    drawList(r.parts);
+    $('pSpec').textContent = 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm, ' + sp.units + ' carcass' + (sp.units > 1 ? 'es' : '') + ', ' + sp.sections.length + ' sections. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
+    if (window.Cutlist3D) Cutlist3D.mount($('v3d'), SmartEngine.forViewer(r.boxes), { height: 'clamp(300px,52vw,460px)' });
+  }
+  function drawList(parts) {
+    var by = {}, order = [], qty = 0, area = 0;
+    parts.forEach(function (p) { if (!by[p.tag]) { by[p.tag] = []; order.push(p.tag); } by[p.tag].push(p); qty += p.qty; if (!/back/i.test(p.name)) area += p.a * p.b * p.qty / 1e6; });
+    var h = '<thead><tr><th>Part</th><th style="text-align:right">Length</th><th style="text-align:right">Width</th><th style="text-align:right">Qty</th><th class="note">Note</th></tr></thead><tbody>';
+    order.forEach(function (tag) {
+      h += '<tr class="grp"><td colspan="5">' + esc(GROUPS[tag] || tag) + '</td></tr>';
+      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + p.a + '</td><td class="n">' + p.b + '</td><td class="n">' + p.qty + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
+    });
+    $('cl').innerHTML = h + '</tbody>';
+    $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span>Sizes in mm</span>';
+  }
+
+  // the acknowledgement: needed before anything leaves the page; remembered on this device
+  $('ack').checked = get(ACK) === '1';
+  $('ack').onchange = function () { put(ACK, this.checked ? '1' : '0'); };
+  function acked() {
+    if ($('ack').checked) return true;
+    $('ack').parentNode.scrollIntoView({ block: 'center' }); $('ack').focus();
+    alert('Please tick the box first: this tool is experimental and every size must be checked before cutting.');
+    return false;
+  }
+
+  $('toSheet').onclick = function () {
+    if (!last || !acked()) return;
+    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: p.a, W: p.b, qty: p.qty }; });
+    var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)', parts: rows, thick: sp.shop.thick }));
+    if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
+    location.href = '/cut-sheet.html#from-smart';
+  };
+  $('doPrint').onclick = function () { if (last && acked()) window.print(); };
+  function member() { return !!(window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive()); }
+  function exp(kind) {
+    if (!last || !acked()) return;
+    if (!member()) { if (confirm('Client 3D files and SketchUp files are member tools.\n\nLog in or join Carpentry Concierge now?')) location.href = '/concierge/login.html?next=' + encodeURIComponent('/smart-generator.html'); return; }
+    var sp = last.spec, boxes = SmartEngine.forViewer(last.r.boxes), size = sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm', base = 'wardrobe-' + sp.w + 'x' + sp.h + 'x' + sp.d;
+    if (kind === 'dae') { Cutlist3D.download(base + '.dae', Cutlist3D.toDAE(boxes, 'Wardrobe ' + size), 'model/vnd.collada+xml'); return; }
+    var title = prompt('Name on the client file (e.g. "Master bedroom wardrobe")', 'Wardrobe design'); if (title === null) return;
+    var bp = (window.ToolSettings && ToolSettings.loadBusiness) ? ToolSettings.loadBusiness() : Promise.resolve(null);
+    bp.then(function (b) {
+      return Cutlist3D.offlineHTML(boxes, { title: title || 'Wardrobe design', size: size, date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+        business: b && b.bizName || '', phone: b && (b.phone || b.whatsapp) || '' });
+    }).then(function (html) { Cutlist3D.download(base + '-3d.html', html, 'text/html'); })
+      .catch(function (e) { alert('Could not make the file. Check your connection and try again. (' + e.message + ')'); });
+  }
+  $('exHtml').onclick = function () { exp('html'); };
+  $('exDae').onclick = function () { exp('dae'); };
+
+  loadCons(); drawSecs(); go();
+})();
+</script>
+<script src="js/tool-settings.js?v=20261117"></script>
+</body>
+</html>

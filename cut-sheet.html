@@ -1889,7 +1889,22 @@ function clearAll(){
   var bar = document.getElementById(loggedIn ? 'member-bar' : 'guest-bar');
   if(bar) bar.style.display='flex';
   fetchSession();   // async: adopt the member's own logo & number if signed in
+  takeSmartHandoff();
 })();
+// Parts passed on from the Smart Generator (experimental, smart-generator.html). Read once, then removed.
+// Never overwrites the open list silently: a list with parts is saved (or the user is asked) by newList() first.
+function takeSmartHandoff(){
+  var h=null; try{ h=JSON.parse(localStorage.getItem('nwd-smart-handoff')||'null'); localStorage.removeItem('nwd-smart-handoff'); }catch(e){}
+  if(!h||!Array.isArray(h.parts)||!h.parts.length||Date.now()-(h.at||0)>30*60*1000) return;
+  if(hasContent() && !confirm('Start a new cut list with the '+h.parts.length+' parts from the Smart Generator?\n\nYour current list stays in its project.')) return;
+  if(hasContent()) newList();
+  parts=[]; ebState={}; seq=1; curListId=null;
+  h.parts.forEach(function(p){ var id=uid(); parts.push({id:id,name:String(p.name||''),L:+p.L||0,W:+p.W||0,qty:Math.max(1,+p.qty||1),code:''}); ebState[id]={t:0,r:0,b:0,l:0,gflip:false}; });
+  U.listName=String(h.name||'Smart Generator'); U.entryMode='list';
+  if(+h.thick>0) U.thick=+h.thick;
+  fillSettings(); renderParts(); renderAll(); save(); renderListChips();
+  projStatus('Added '+h.parts.length+' parts from the Smart Generator (experimental). Check every size, then mark the edge banding.');
+}
 function memberLogout(){ if(window.Concierge) Concierge.clearToken(); location.reload(); }
 </script>
 <script>
