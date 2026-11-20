@@ -229,8 +229,14 @@
   // Same rules as cutlist.html ebDefault (part names match it): {t,r,b,l}, 1 = band that edge. The box is drawn
   // the machine-shop way, length (the longer size, along the grain) on the right, so l/r are the long edges
   // and t/b the short ones.
-  function edges(p) {
+  // shop (optional) = the spec's shop settings; the toe kick depends on them (owner 2026-11-20): flush with the doors
+  // = banded all round; set back = only its bottom long edge, so dragging on the floor doesn't chip the laminate.
+  function edges(p, shop) {
     var n = p.name.toLowerCase(), E = function (t, r, b, l) { return { t: t, r: r, b: b, l: l }; };
+    if (n.indexOf('toe kick') !== -1) {
+      var sub = merge(SHOP, shop || {}).sub;
+      return (sub.style === 'flush' || !(sub.setback > 0)) ? E(1, 1, 1, 1) : E(0, 1, 0, 0);
+    }
     if (p.tag === 'door' || n.indexOf('false front') !== -1 || /drawer front|face strip/.test(n)) return E(1, 1, 1, 1);
     if (n.indexOf('filler strip') !== -1) return E(0, 0, 0, 0);                // hidden behind the face strip
     if (/chest .*top\/bottom/.test(n)) return E(0, 1, 0, 0);                    // front edge (the long one)

@@ -551,6 +551,13 @@ select {
 /* Zone warnings */
 .zone-warn{font-family:var(--mono);font-size:.63rem;color:#8a5800;background:rgba(200,140,0,.1);border:1px solid rgba(200,140,0,.3);border-radius:3px;padding:3px 8px;margin-top:4px}
 @media print{.no-print{display:none!important}}
+/* print lock: until unlocked, printing shows a notice instead of the cut list */
+.result-cta.flash{outline:3px solid var(--clr-accent);outline-offset:4px}
+.print-locked-note{display:none}
+@media print{
+  body:not(.print-ok) #rpage .rbody{display:none!important}
+  body:not(.print-ok) #rpage .print-locked-note{display:block!important;padding:40px 20px;font:16px/1.5 system-ui,sans-serif;text-align:center}
+}
 @media print{
   /* SVG strokes already print; this keeps any bg fills too */
   #rpage,#rpage *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
@@ -914,9 +921,10 @@ select {
     <button class="rbtn" onclick="closeR()">← Edit</button>
     <div class="rhdr-title">Parts &amp; Cut List</div>
     <button class="rbtn" onclick="saveCutlist()" title="Save this cut list to your Concierge account">💾 Save</button>
-    <button class="rbtn" onclick="window.print()">⎙ Print / Save PDF</button>
+    <button class="rbtn" onclick="printCutlist()">⎙ Print / Save PDF</button>
   </div>
   <div class="rbody" id="rbody"></div>
+  <div class="print-locked-note"><b>Follow @neewoodygh on Instagram or TikTok to print this cut list.</b><br>Open the cut list again at neewoodygh.com/cutlist, tap a follow button under the results, then print.</div>
 </div>
 
 <!-- ════ PAGE CTA ════ -->
@@ -1061,9 +1069,39 @@ function swDiag(name,el){
   drawDiagram();
 }
 
+// Print lock (owner 2026-11-20: "make sure they can't print without following"). No website can check who
+// follows an Instagram or TikTok account, so this is the strongest honest version: the follow link has to be
+// opened and the visitor has to come back (or 10 s pass) before print unlocks, and until then Ctrl+P and the
+// top Print button print a "follow to print" notice instead of the cut list. Remembered per device; members
+// are always unlocked.
+function printOK(){
+  var m=false; try{ m=!!(window.Concierge&&Concierge.tokenAlive()); }catch(e){}
+  var d=false; try{ d=localStorage.getItem('nwd-cutlist-print')==='1'; }catch(e){}
+  return m||d;
+}
+function applyPrintLock(){
+  var ok=printOK();
+  document.body.classList.toggle('print-ok', ok);
+  var el=document.getElementById('print-reveal'); if(el) el.classList.toggle('unlocked', ok);
+  var g=document.querySelector('.print-gate-hint'); if(g) g.style.display=ok?'none':'';
+}
+var printPending=0;
 function unlockPrint(){
-  var el=document.getElementById('print-reveal');
-  if(el) el.classList.add('unlocked');
+  if(printOK()) return;
+  printPending=Date.now();
+  var g=document.querySelector('.print-gate-hint'); if(g) g.innerHTML='Follow us, then come back here: <span>print unlocks</span> when you return.';
+  setTimeout(function(){ if(printPending) finishUnlock(); }, 10000);
+}
+function finishUnlock(){
+  printPending=0; try{ localStorage.setItem('nwd-cutlist-print','1'); }catch(e){}
+  applyPrintLock();
+}
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState==='visible' && printPending && Date.now()-printPending>2500) finishUnlock();
+});
+function printCutlist(){
+  if(printOK()){ window.print(); return; }
+  var c=document.querySelector('.result-cta'); if(c){ c.scrollIntoView({behavior:'smooth',block:'center'}); c.classList.add('flash'); setTimeout(function(){ c.classList.remove('flash'); },1600); }
 }
 
 function setUnit(u, btn){
@@ -1658,6 +1696,8 @@ function ebDefault(tag, name, p){
   // Edge banding comes on as standard (owner 2026-11-20); members tap off what a job doesn't need.
   // Same rules as js/smart/engine.js edges(); keep the two in step.
   var n = name.toLowerCase();
+  // Toe kick (owner 2026-11-20): flush with the doors = all round; set back = only the bottom edge (stops floor chipping).
+  if(n.indexOf('toe kick')!==-1) return (S.tkStyle==='flush'||!(S.tkSetback>0)) ? {t:true,r:true,b:true,l:true} : {t:false,r:true,b:false,l:false};
   if(tag==='door') return {t:true,r:true,b:true,l:true};
   if(n.indexOf('false front')!==-1||/drawer front|face strip/.test(n)) return {t:true,r:true,b:true,l:true};
   if(n.indexOf('filler strip')!==-1) return {t:false,r:false,b:false,l:false};
@@ -1682,7 +1722,8 @@ function initEbState(parts){
     var k=ebKey(p);
     if(!seen[k]){
       seen[k]=true;
-      if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name,p);
+      var tkMode=(S.tkStyle==='flush'||!(S.tkSetback>0))?'flush':'setback';
+      if(!ebState[k]||(/toe kick/i.test(p.name)&&ebState[k]._tk!==tkMode)){ ebState[k]=ebDefault(p.tag,p.name,p); if(/toe kick/i.test(p.name)) ebState[k]._tk=tkMode; }
       // Per-edge state is 0=none · 1=band (1 tick) · 2=double+band (3 ticks).
       // Normalise legacy booleans → 0/1 and drop the old per-part dbl flag.
       ['t','r','b','l'].forEach(function(s){ ebState[k][s] = ebState[k][s]===2 ? 2 : (ebState[k][s] ? 1 : 0); });
@@ -1880,6 +1921,7 @@ function generate(){
       var el=document.querySelector('#r3d .r3d-img'); if(el) el.outerHTML='<img src="'+url+'" alt="3D view of the wardrobe built from this cut list" style="display:block;width:100%;height:auto;border-radius:6px"><div class="no-print"><div class="c3d-ex" style="display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;padding:.6rem .8rem;border-top:1px solid rgba(0,0,0,.08)"><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'html\')">Client viewer (works offline)</button><button type="button" style="font:inherit;font-size:.8rem;font-weight:600;padding:.5rem .8rem;border:1px solid #6b4a33;border-radius:6px;background:#fff;color:#17130f;cursor:pointer" onclick="export3D(\'dae\')">SketchUp file (.dae)</button><span style="font-size:.75rem;color:#554d43;flex:1 1 100%">Send the client viewer on WhatsApp: it opens on any phone or laptop, no internet or app needed. Open the SketchUp file with File, Import. Members only.</span></div></div>';
     }).catch(function(){ var c=document.getElementById('r3d'); if(c) c.remove(); });
   }
+  applyPrintLock();
   document.getElementById('rpage').classList.add('show');
   document.getElementById('rpage').scrollTop=0;
 }

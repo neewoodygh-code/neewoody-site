@@ -328,7 +328,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     return [L ? L + ' long' : '', W ? W + ' short' : ''].filter(Boolean).join(', ');
   }
   function ebMetres(parts) {
-    return parts.reduce(function (m, p) { var e = SmartEngine.edges(p), lo = Math.max(p.a, p.b), sh = Math.min(p.a, p.b);
+    return parts.reduce(function (m, p) { var e = SmartEngine.edges(p, (last && last.spec || spec()).shop), lo = Math.max(p.a, p.b), sh = Math.min(p.a, p.b);
       return m + ((e.l + e.r) * lo + (e.t + e.b) * sh) * p.qty / 1000; }, 0);
   }
   function drawList(parts) {
@@ -337,7 +337,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     var h = '<thead><tr><th>Part</th><th style="text-align:right">Length</th><th style="text-align:right">Width</th><th style="text-align:right">Qty</th><th>Edge band</th><th class="note">Note</th></tr></thead><tbody>';
     order.forEach(function (tag) {
       h += '<tr class="grp"><td colspan="6">' + esc(GROUPS[tag] || tag) + '</td></tr>';
-      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + Math.max(p.a, p.b) + '</td><td class="n">' + Math.min(p.a, p.b) + '</td><td class="n">' + p.qty + '</td><td class="eb">' + ebText(SmartEngine.edges(p)) + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
+      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + Math.max(p.a, p.b) + '</td><td class="n">' + Math.min(p.a, p.b) + '</td><td class="n">' + p.qty + '</td><td class="eb">' + ebText(SmartEngine.edges(p, (last && last.spec || spec()).shop)) + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
     });
     $('cl').innerHTML = h + '</tbody>';
     $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span><b>' + Math.ceil(ebMetres(parts)) + '</b> m of edge band</span><span>Sizes in mm; length runs with the grain</span>';
@@ -355,7 +355,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
 
   $('toSheet').onclick = function () {
     if (!last || !acked()) return;
-    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p) }; });
+    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, (last && last.spec || spec()).shop) }; });
     var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)', parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
     location.href = '/cut-sheet.html#from-smart';

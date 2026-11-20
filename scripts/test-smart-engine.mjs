@@ -66,7 +66,7 @@ for (const [label, c] of CASES) {
     const ebOf = (o) => ['t', 'r', 'b', 'l'].map(k => o[k] ? 1 : 0).join('');
     const EB = {};
     r.parts.forEach(x => { EB[key(x.name, x.w, x.d)] = ebOf(ebDefault(x.tag, x.name, x)); });
-    e.parts.forEach(x => { const k = key(x.name, x.a, x.b); if (EB[k] !== undefined && EB[k] !== ebOf(SmartEngine.edges(x))) diff.push(k + '  edge band: cutlist ' + EB[k] + ', engine ' + ebOf(SmartEngine.edges(x))); });
+    e.parts.forEach(x => { const k = key(x.name, x.a, x.b); if (EB[k] !== undefined && EB[k] !== ebOf(SmartEngine.edges(x, spec.shop))) diff.push(k + '  edge band: cutlist ' + EB[k] + ', engine ' + ebOf(SmartEngine.edges(x, spec.shop))); });
     return { parts: Object.values(A).reduce((a, b) => a + b, 0), diff, clashes: e.clashes, warnings: e.warnings };
   }, c);
   const ok = !res.diff.length && !res.clashes.length;

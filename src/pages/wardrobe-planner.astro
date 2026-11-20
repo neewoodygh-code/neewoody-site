@@ -1,0 +1,153 @@
+---
+// Wardrobe planner for homeowners (public, free; owner 2026-11-20: "homeowners should have their version").
+// The homeowner side of the carpenters' cutlist: choose the size and what goes behind each door, see it in 3D,
+// send it to Neewoody on WhatsApp. No cut list, no construction settings. Built on the Smart Generator engine
+// (js/smart/engine.js) and the shared 3D viewer (js/cutlist-3d.js), both plain scripts loaded as-is.
+import Base from '../layouts/Base.astro';
+import '../styles/forms.css';
+import '../styles/doors.css';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import { WA } from '../data.js';
+---
+<Base title="Wardrobe Planner: Design Your Wardrobe in 3D | Neewoody Accra"
+  description="Plan a custom wardrobe in 3D for free. Choose the size, the doors and what goes inside each section, turn it round, then send the design to Neewoody in Accra for a price."
+  ogTitle="Plan your wardrobe in 3D — Neewoody Custom Woodwork"
+  ogDescription="Free wardrobe planner: choose the size and layout, see it in 3D and send it to us for a price."
+  ogImg="images/projects/bortianor/bortianor-master-wardrobe.jpg"
+  path="/wardrobe-planner">
+  <Nav />
+  <main id="main">
+    <header class="page-head" data-nav="dark">
+      <h1 class="display">Plan your wardrobe in 3D</h1>
+      <p>Choose the size, the doors and what goes behind each one. Turn it round, look inside, then send it to us for a price. Free, with no sign-up.</p>
+    </header>
+    <section class="wp-body" data-nav="light">
+      <div class="wp-grid">
+        <div class="wp-form">
+          <div class="est-group">
+            <span class="est-group-label">Size</span>
+            <div class="est-grid">
+              <div class="est-field"><label for="wp-w">Width (mm)</label><input type="number" id="wp-w" inputmode="numeric" value="2400" min="600" max="6000" /><small>The wall it fills</small></div>
+              <div class="est-field"><label for="wp-h">Height (mm)</label><input type="number" id="wp-h" inputmode="numeric" value="2400" min="1200" max="3200" /><small>Floor to top</small></div>
+              <div class="est-field"><label for="wp-d">Depth (mm)</label><input type="number" id="wp-d" inputmode="numeric" value="600" min="350" max="900" /><small>Usually 600</small></div>
+            </div>
+          </div>
+          <div class="est-group">
+            <span class="est-group-label">Doors</span>
+            <div class="est-grid-2">
+              <div class="est-field"><label for="wp-type">Door type</label>
+                <select id="wp-type"><option value="hinged">Hinged doors</option><option value="sliding">Sliding doors</option><option value="open">Open, no doors</option></select></div>
+              <div class="est-field"><label for="wp-n">Sections across</label>
+                <select id="wp-n"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select>
+                <small>Equal-width bays, side by side</small></div>
+            </div>
+          </div>
+          <div class="est-group">
+            <span class="est-group-label">Inside, left to right</span>
+            <div id="wp-secs" class="wp-secs"></div>
+          </div>
+        </div>
+
+        <div class="wp-view">
+          <div id="wp-msg" class="wp-msg" role="status" aria-live="polite"></div>
+          <div id="wp-3d" class="wp-3d"></div>
+          <p class="wp-sum" id="wp-sum"></p>
+          <div class="wp-acts">
+            <a class="pill ink" id="wp-wa" href={WA} target="_blank" rel="noopener">Send this design on WhatsApp <span aria-hidden="true">↗</span></a>
+            <a class="ulink" href="/wardrobe-estimator">Get a price range</a>
+          </div>
+          <p class="wp-note">This is a guide drawing to help you decide. Before we quote, we visit, measure your room and finalise the design with you. Carpenters: the full cut list is in the <a class="ulink" href="/cutlist">cutlist calculator</a>.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer quoteLink />
+
+  <style>
+    .wp-body { padding: clamp(3rem, 6vw, 5rem) var(--gut); }
+    .wp-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 5vw, 4rem); align-items: start; max-width: 1320px; }
+    .wp-view { position: sticky; top: 6rem; }
+    .wp-3d { background: #fff; border: 1px solid var(--hair); border-radius: 6px; overflow: hidden; }
+    .wp-msg:empty { display: none; }
+    .wp-msg { background: #fbefec; border-left: 3px solid #9b3426; padding: .8rem 1rem; margin-bottom: 1rem; font-size: var(--t-small); }
+    .wp-sum { margin-top: 1.2rem; color: var(--stone); font-size: var(--t-small); }
+    .wp-acts { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin-top: 1.4rem; }
+    .wp-note { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--hair); font-size: var(--t-small); color: var(--stone); }
+    .wp-secs { display: grid; gap: 1rem; }
+    .wp-sec { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--hair); }
+    .wp-sec:last-child { border-bottom: 0; }
+    .wp-sec b { grid-column: 1 / -1; font-weight: 500; }
+    @media (max-width: 900px) {
+      .wp-grid { grid-template-columns: minmax(0, 1fr); }
+      .wp-view { position: static; order: -1; }
+    }
+  </style>
+
+  <script is:inline src="/js/smart/engine.js?v=20261120"></script>
+  <script is:inline src="/js/cutlist-3d.js?v=20261119e"></script>
+  <script is:inline define:vars={{ WA }}>
+  (function () {
+    var $ = function (id) { return document.getElementById(id); };
+    // what goes inside a section: zones top to bottom (the top zone takes the height that is left)
+    var LAYOUTS = {
+      long: ['Long hanging (dresses, coats)', function () { return [{ type: 'hanging' }]; }],
+      hangshelf: ['Hanging, shelves below', function () { return [{ type: 'hanging' }, { type: 'shelves', h: 700, shelves: 2 }]; }],
+      double: ['Double hanging (shirts)', function (ih) { return [{ type: 'hanging' }, { type: 'hanging', h: Math.round(ih / 2) }]; }],
+      shelves: ['Shelves', function (ih) { return [{ type: 'shelves', shelves: Math.max(3, Math.round(ih / 350)) }]; }],
+      shelfdraw: ['Shelves, drawers below', function () { return [{ type: 'shelves', shelves: 3 }, { type: 'drawers', h: 600, drawers: 3 }]; }],
+      hangdraw: ['Hanging, drawers below', function () { return [{ type: 'hanging' }, { type: 'drawers', h: 500, drawers: 3 }]; }]
+    };
+    var START = ['long', 'shelves', 'shelfdraw', 'hangshelf', 'double', 'hangdraw'];
+    var secs = [];
+    function secName(i, n) { return n === 1 ? 'The wardrobe' : 'Section ' + (i + 1) + (i === 0 ? ' (left)' : i === n - 1 ? ' (right)' : ''); }
+    function drawSecs() {
+      var n = +$('wp-n').value, hinged = $('wp-type').value === 'hinged';
+      while (secs.length < n) secs.push({ lay: START[secs.length % START.length], doors: 1 });
+      secs.length = n;
+      $('wp-secs').innerHTML = secs.map(function (s, i) {
+        var id = 'wp-l' + i, did = 'wp-dc' + i;
+        return '<div class="wp-sec"><b>' + secName(i, n) + '</b>' +
+          '<div class="est-field"><label for="' + id + '">Inside</label><select id="' + id + '" data-i="' + i + '" data-k="lay">' +
+          Object.keys(LAYOUTS).map(function (k) { return '<option value="' + k + '"' + (s.lay === k ? ' selected' : '') + '>' + LAYOUTS[k][0] + '</option>'; }).join('') + '</select></div>' +
+          (hinged ? '<div class="est-field"><label for="' + did + '">Doors on it</label><select id="' + did + '" data-i="' + i + '" data-k="doors"><option value="1"' + (s.doors === 1 ? ' selected' : '') + '>One door</option><option value="2"' + (s.doors === 2 ? ' selected' : '') + '>Two doors</option></select></div>' : '') +
+          '</div>';
+      }).join('');
+    }
+    $('wp-secs').addEventListener('change', function (e) {
+      var t = e.target, i = +t.dataset.i; if (isNaN(i)) return;
+      if (t.dataset.k === 'lay') secs[i].lay = t.value; else secs[i].doors = +t.value;
+      run();
+    });
+    ['wp-type', 'wp-n'].forEach(function (id) { $(id).addEventListener('change', function () { drawSecs(); run(); }); });
+    ['wp-w', 'wp-h', 'wp-d'].forEach(function (id) { $(id).addEventListener('input', run); });
+
+    function num(id) { return parseFloat($(id).value); }
+    var timer;
+    function run() { clearTimeout(timer); timer = setTimeout(go, 200); }
+    function go() {
+      var w = num('wp-w'), h = num('wp-h'), d = num('wp-d'), n = secs.length, type = $('wp-type').value, bad = [];
+      if (!(w >= 600 && w <= 6000)) bad.push('Width should be between 600 and 6000 mm.');
+      if (!(h >= 1200 && h <= 3200)) bad.push('Height should be between 1200 and 3200 mm.');
+      if (!(d >= 350 && d <= 900)) bad.push('Depth should be between 350 and 900 mm.');
+      if (!bad.length && w / n < 300) bad.push('Each section would be under 300 mm wide. Choose fewer sections or a wider wardrobe.');
+      $('wp-msg').textContent = bad.join(' ');
+      if (bad.length) return;
+      var units = n <= 3 ? 1 : n % 3 === 0 ? n / 3 : n % 2 === 0 ? n / 2 : 1, ih = h - 100 - 36;
+      var spec = { w: w, h: h, d: d, units: units, sections: secs.map(function (s) {
+        return { zones: LAYOUTS[s.lay][1](ih).map(function (z) { return { type: z.type, h: z.h || 0, shelves: z.shelves || 0, drawers: z.drawers || 0 }; }),
+          door: { on: type !== 'open', count: type === 'hinged' ? s.doors : 1, type: type === 'sliding' ? 'sliding' : 'hinged', bottom: 'full' } };
+      }) };
+      var r;
+      try { r = SmartEngine.build(spec); } catch (e) { $('wp-msg').textContent = 'That combination could not be drawn. Try other sizes.'; return; }
+      if (window.Cutlist3D) Cutlist3D.mount($('wp-3d'), SmartEngine.forViewer(r.boxes), { client: true, height: 'clamp(320px, 60vw, 520px)' });
+      var doorTxt = type === 'open' ? 'open, no doors' : type === 'sliding' ? 'sliding doors' : 'hinged doors';
+      var lines = secs.map(function (s, i) { return secName(i, n) + ': ' + LAYOUTS[s.lay][0].toLowerCase() + (type === 'hinged' ? ', ' + (s.doors === 2 ? 'two doors' : 'one door') : ''); });
+      $('wp-sum').textContent = w + ' wide × ' + h + ' high × ' + d + ' mm deep, ' + n + ' section' + (n > 1 ? 's' : '') + ', ' + doorTxt + '.';
+      var msg = 'Hi Neewoody, I planned a wardrobe on your website and would like a price.\n\nSize: ' + w + ' wide x ' + h + ' high x ' + d + ' mm deep\nDoors: ' + doorTxt + '\n' + lines.join('\n') + '\n\nMy area: ';
+      $('wp-wa').href = WA + '?text=' + encodeURIComponent(msg);
+    }
+    drawSecs(); go();
+  })();
+  </script>
+</Base>
