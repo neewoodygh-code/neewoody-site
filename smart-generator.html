@@ -55,6 +55,7 @@ table.cl { width: 100%; border-collapse: collapse; font-size: var(--t-small); }
 table.cl th { text-align: left; font-weight: 600; color: var(--stone); border-bottom: 1px solid var(--hair); padding: .45rem .4rem; }
 table.cl td { border-bottom: 1px solid rgba(23,19,15,.07); padding: .45rem .4rem; vertical-align: top; }
 table.cl td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.cl td.eb { white-space: nowrap; font-size: .8rem; }
 table.cl td.note { color: var(--stone); font-size: .8rem; }
 table.cl .note-m { display: none; font-size: .8rem; color: var(--stone); margin-top: .15rem; }
 @media (max-width: 600px) { table.cl td.note, table.cl th.note { display: none; } table.cl .note-m { display: block; } .wip-in { flex-direction: column; gap: .5rem; } }
@@ -177,7 +178,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
           <button type="button" class="ui-btn sm ghost" id="exHtml">Client 3D file</button>
           <button type="button" class="ui-btn sm ghost" id="exDae">SketchUp file</button>
         </div>
-        <p class="hint no-print">The Cut Sheet works out boards and lets you mark edge banding. Client 3D and SketchUp files are for members.</p>
+        <p class="hint no-print">Edge banding comes on as standard (doors and fronts all round, the front edge of carcass parts and shelves). In the Cut Sheet, tap an edge to take off what this job doesn't need. The Cut Sheet also works out the boards. Client 3D and SketchUp files are for members.</p>
       </div>
     </div>
   </div>
@@ -199,7 +200,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261119"></script>
+<script src="js/smart/engine.js?v=20261120"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 (function () {
@@ -319,16 +320,27 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     $('pSpec').textContent = 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm, ' + sp.units + ' carcass' + (sp.units > 1 ? 'es' : '') + ', ' + sp.sections.length + ' sections. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
     if (window.Cutlist3D) Cutlist3D.mount($('v3d'), SmartEngine.forViewer(r.boxes), { height: 'clamp(300px,52vw,460px)' });
   }
+  // edge banding comes on as standard; L = long edges, W = short edges (length = the longer size, along the grain)
+  function ebText(e) {
+    var L = e.l + e.r, W = e.t + e.b;
+    if (L === 2 && W === 2) return 'all round';
+    if (!L && !W) return 'none';
+    return [L ? L + ' long' : '', W ? W + ' short' : ''].filter(Boolean).join(', ');
+  }
+  function ebMetres(parts) {
+    return parts.reduce(function (m, p) { var e = SmartEngine.edges(p), lo = Math.max(p.a, p.b), sh = Math.min(p.a, p.b);
+      return m + ((e.l + e.r) * lo + (e.t + e.b) * sh) * p.qty / 1000; }, 0);
+  }
   function drawList(parts) {
     var by = {}, order = [], qty = 0, area = 0;
     parts.forEach(function (p) { if (!by[p.tag]) { by[p.tag] = []; order.push(p.tag); } by[p.tag].push(p); qty += p.qty; if (!/back/i.test(p.name)) area += p.a * p.b * p.qty / 1e6; });
-    var h = '<thead><tr><th>Part</th><th style="text-align:right">Length</th><th style="text-align:right">Width</th><th style="text-align:right">Qty</th><th class="note">Note</th></tr></thead><tbody>';
+    var h = '<thead><tr><th>Part</th><th style="text-align:right">Length</th><th style="text-align:right">Width</th><th style="text-align:right">Qty</th><th>Edge band</th><th class="note">Note</th></tr></thead><tbody>';
     order.forEach(function (tag) {
-      h += '<tr class="grp"><td colspan="5">' + esc(GROUPS[tag] || tag) + '</td></tr>';
-      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + p.a + '</td><td class="n">' + p.b + '</td><td class="n">' + p.qty + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
+      h += '<tr class="grp"><td colspan="6">' + esc(GROUPS[tag] || tag) + '</td></tr>';
+      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + Math.max(p.a, p.b) + '</td><td class="n">' + Math.min(p.a, p.b) + '</td><td class="n">' + p.qty + '</td><td class="eb">' + ebText(SmartEngine.edges(p)) + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
     });
     $('cl').innerHTML = h + '</tbody>';
-    $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span>Sizes in mm</span>';
+    $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span><b>' + Math.ceil(ebMetres(parts)) + '</b> m of edge band</span><span>Sizes in mm; length runs with the grain</span>';
   }
 
   // the acknowledgement: needed before anything leaves the page; remembered on this device
@@ -343,7 +355,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
 
   $('toSheet').onclick = function () {
     if (!last || !acked()) return;
-    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: p.a, W: p.b, qty: p.qty }; });
+    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p) }; });
     var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)', parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
     location.href = '/cut-sheet.html#from-smart';

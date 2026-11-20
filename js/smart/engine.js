@@ -225,11 +225,30 @@
     });
   }
 
+  // Edge banding as standard, so members take off what a job does not need instead of adding it.
+  // Same rules as cutlist.html ebDefault (part names match it): {t,r,b,l}, 1 = band that edge. The box is drawn
+  // the machine-shop way, length (the longer size, along the grain) on the right, so l/r are the long edges
+  // and t/b the short ones.
+  function edges(p) {
+    var n = p.name.toLowerCase(), E = function (t, r, b, l) { return { t: t, r: r, b: b, l: l }; };
+    if (p.tag === 'door' || n.indexOf('false front') !== -1 || /drawer front|face strip/.test(n)) return E(1, 1, 1, 1);
+    if (n.indexOf('filler strip') !== -1) return E(0, 0, 0, 0);                // hidden behind the face strip
+    if (/chest .*top\/bottom/.test(n)) return E(0, 1, 0, 0);                    // front edge (the long one)
+    if (/chest .*side/.test(n)) return p.a >= p.b ? E(0, 1, 0, 0) : E(1, 0, 0, 0); // front edge = the chest height
+    if (n.indexOf('drawer box front') !== -1 || n.indexOf('drawer box back') !== -1 || n.indexOf('front/back') !== -1) return E(1, 1, 0, 1);
+    if (n.indexOf('drawer box side') !== -1) return E(1, 0, 0, 0);
+    if (n.indexOf('drawer base') !== -1 || n.indexOf('back panel') !== -1 || p.tag === 'frame') return E(0, 0, 0, 0);
+    if (n.indexOf('side panel') !== -1 || p.tag === 'panel') return E(1, 0, 1, 1);
+    if (n.indexOf('top panel') !== -1 || n.indexOf('bottom panel') !== -1 || n.indexOf('divider') !== -1) return E(0, 1, 0, 0);
+    if (p.tag === 'shelf' || n.indexOf('pelmet') !== -1) return E(0, 1, 0, 0);
+    return E(0, 0, 0, 0);
+  }
+
   function build(spec) {
     var m = wardrobe(spec);   // wardrobe units first; kitchen units follow once their rules are settled
     return { boxes: m.boxes, parts: cutList(m.boxes), clashes: clashes(m.boxes), warnings: m.warnings };
   }
 
-  var api = { SHOP: SHOP, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer };
+  var api = { SHOP: SHOP, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SmartEngine = api;
 })(typeof window !== 'undefined' ? window : this);

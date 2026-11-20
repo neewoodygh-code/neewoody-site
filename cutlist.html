@@ -1654,10 +1654,15 @@ function rerenderEbSheet(){
 
 function ebKey(p){ return p.tag+'_'+p.w+'x'+p.d; }
 
-function ebDefault(tag, name){
+function ebDefault(tag, name, p){
+  // Edge banding comes on as standard (owner 2026-11-20); members tap off what a job doesn't need.
+  // Same rules as js/smart/engine.js edges(); keep the two in step.
   var n = name.toLowerCase();
   if(tag==='door') return {t:true,r:true,b:true,l:true};
-  if(n.indexOf('false front')!==-1) return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('false front')!==-1||/drawer front|face strip/.test(n)) return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('filler strip')!==-1) return {t:false,r:false,b:false,l:false};
+  if(/chest .*top\/bottom/.test(n)) return {t:false,r:true,b:false,l:false};
+  if(/chest .*side/.test(n)) return (p&&p.w>=p.d) ? {t:false,r:true,b:false,l:false} : {t:true,r:false,b:false,l:false};
   if(n.indexOf('drawer box front')!==-1||n.indexOf('drawer box back')!==-1||n.indexOf('front/back')!==-1)
     return {t:true,r:true,b:false,l:true};
   if(n.indexOf('drawer box side')!==-1) return {t:true,r:false,b:false,l:false};
@@ -1677,7 +1682,7 @@ function initEbState(parts){
     var k=ebKey(p);
     if(!seen[k]){
       seen[k]=true;
-      if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name);
+      if(!ebState[k])ebState[k]=ebDefault(p.tag,p.name,p);
       // Per-edge state is 0=none · 1=band (1 tick) · 2=double+band (3 ticks).
       // Normalise legacy booleans → 0/1 and drop the old per-part dbl flag.
       ['t','r','b','l'].forEach(function(s){ ebState[k][s] = ebState[k][s]===2 ? 2 : (ebState[k][s] ? 1 : 0); });
