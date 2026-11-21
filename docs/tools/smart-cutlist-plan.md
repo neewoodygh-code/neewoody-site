@@ -82,6 +82,25 @@ The guiding principle, from the owner: **load should put screws in shear (pushed
 | J13 | Drawers behind a door | **Separate drawer chest** set back 80 mm; 60 mm filler strips on the outside front of the chest sides fill the gap to the carcass; 69 mm face strips (gap + 9 mm overlap; ≥ 60 mm for the edge bander, overlap < board so drawer boxes clear) glued to the fillers cover the joint; drawer fronts sit between the face strips with 3 mm gaps (owner's method, Bortianor wardrobe) | The set back clears hinges and the open door; the chest is built square on the bench; the strips hide the gap | Chest parts, fillers, face strips, inside fronts, drawer boxes sized to the chest | **Decided 2026-11-17** (already built in `cutlist.html`); defaults owner-corrected 2026-11-18 |
 | J12 | Applied end panels | Separate finished panel on exposed ends, proud of the door face by door thickness + clearance | Matches the wardrobe tool | Adds end panel parts | Confirm for kitchens. |
 
+### 4a-k. Kitchen rules: owner's answers 2026-11-21 (first test job: the Prampram kitchen)
+
+These settle the kitchen [OWNER] questions above where they differ from the draft.
+
+- **Base units stand on legs, not a plinth frame.** Adjustable cabinet legs, sold in sets of 4, 10 cm or 15 cm high; the owner usually uses **10 cm**. Sides do not run to the floor.
+- **Rails (80 mm), not a full top.** Base units get **4 rails**: two flat at the top (front and back), and two upright at the back (top and bottom). The upright rails keep the carcass square and are what the carcass is screwed through to the wall. Wall units get **2 rails at the back, top and bottom** (the wall fixing). Rail length = unit width − 2 × board.
+- **Depths:** standard is 580 base / 280 wall carcass, but the client's own depths win when given (Prampram: 60/40/30/28 cm including the door).
+- **Toe kick set back 80 mm.**
+- **Back panels are screwed on from the back, not grooved.** That adds 4 mm at the back, which is why applied side/end panels get **+5 mm on their width (depth)**. **Exception: the sink unit has no back** (left open for the pipes).
+- **Doors with a J-profile are shortened by the profile's height.**
+- **Drawers follow the wardrobe drawer rules (side-mount runners).** An undermount toggle comes later.
+- **Adjustable shelves in wall units are set back 20 mm** (the 50 mm wardrobe set-back is too much in a 280 carcass).
+- **L-shaped corner units:** the L top and bottom are **one piece, routed out of a square cut at the larger of the two leg sizes**. The cut list gives the square; the routing is a note.
+- **Worktop riser:** a 2 cm riser (offcuts of the quartz or laminate strips) sits between the carcass and the 2 cm slab, so the doubled 4 cm front edge finishes flush with the top of the carcass instead of dropping over the doors. So the **carcass top = worktop height − 4 cm**, and on 10 cm legs the **base side height = worktop height − 4 − 10** (a 90 worktop gives 760 mm sides).
+- **Legs per unit:** 4 up to 80 cm wide, 6 over 80 cm, and an L corner unit may take 8.
+- **Toe kick:** the leg height (10 cm), set back 80 mm, **one long board per run**. Bought in 3 m lengths, silver or black, GH₵150 each (for the price list).
+- **J-profile height:** a member setting, default **35 mm** (the common size for 18 mm doors, for example a 35 × 19 mm J-profile listed for 18 mm board). The member measures their own stock; the door is shortened by this height.
+- **Later, each probably with its own logic:** the tall appliance unit (oven/microwave openings, lift-up flap), the folding-door pantry, the island (back-to-back units, sliding doors, the 10 cm band) and the laundry (unit under a floating steel frame).
+
 ### 4b. Checks (warnings only; nothing is resized)
 
 | # | Check | Draft limit | Suggested fix shown |
@@ -139,6 +158,29 @@ Later: keep each member's edits to AI-suggested specs (with their consent) and u
    - Kept for parity, worth the owner's eye later: shelf depth = depth − 50 ignores the back panel; end panel depth adds the *shelf* clearance; sliding leaves are 55% of the opening. Next: the experimental page (spec editor + 3D + cut list) or kitchen units once the owner answers the kitchen questions.
    - **Experimental page DONE 2026-11-20 (owner: "go with A … put an under construction label so people can try it out but we don't bear liability"):** `smart-generator.html` (plain HTML on `css/app.css`, noindex, not in the sitemap). Open to everyone so people can try it; client 3D file and SketchUp file are members only (same as the cutlist). Spec editor: size, carcasses (1–4), sections (1–8), per section a front (no door / 1 or 2 hinged / sliding) and up to 4 spaces listed top to bottom (shelves, hanging, drawers; the top space takes the rest). Construction settings (board, back type/thickness, groove, edge gap, door gap, runner gap, toe kick height/set back, subframe mode) remembered per device in `nwd-smart-prefs`, Reset to standard. Output: warnings + clashes (or a green "no clashes"), the shared 3D viewer, the cut list grouped by carcass/subframe/doors/shelves/drawers/end panels with piece count and board m² (backs excluded); on phones notes move under the part name. **Liability:** a yellow "Under construction" banner (experiment, not fully checked, may change or be removed, check every size before cutting, Neewoody and Carpentry Concierge accept no responsibility for material cut, work done or money spent; WhatsApp link to report problems); a tick box "I will check every size myself before cutting" is required before Send to the Cut Sheet, Print or the exports (remembered per device, `nwd-smart-ack`); the printout carries the same notice in a box. A disclaimer limits exposure but is not legal advice. **Send to the Cut Sheet:** writes `nwd-smart-handoff` `{from, at, name, parts:[{name,L,W,qty}], thick}`; `cut-sheet.html` `takeSmartHandoff()` reads it once on load (ignored after 30 min), asks before replacing a list that has parts (the current list stays in its project; `newList()` offers to save an unsaved one), names the list "Wardrobe WxHxD (Smart Generator, check sizes)". Edge banding comes on as standard (2026-11-20): `SmartEngine.edges(part)` (same rules as the cutlist's `ebDefault`, enforced by the parity test) shows per part on the page ("all round", "1 long, 2 short"…) with the total metres, and travels in the handoff as `eb {t,r,b,l}` so the Cut Sheet opens with the edges marked; length = the longer size (grain), so the long edges are l/r. Members tap off what a job does not need. Listed on `/tools` and in the member Tools tab as Experimental; What's new #44. Tested in Playwright: default and changed specs build with no clashes, bad sizes show "Fix these first", the tick box blocks sending, handoff lands 29 parts with thickness 18 and is removed after use, no horizontal scroll at 375 px.
 3. **Kitchen units:** base, wall, tall, drawers, plinth, hanging rail. Test against a real past Neewoody kitchen's cut list.
+   **Started 2026-11-21 (owner: "yes, start building"), first test job the Prampram kitchen:**
+   - `kitchen(spec)` in `js/smart/engine.js`, reached through `build()` when `spec.type === 'kitchen'`. Wardrobe output is unchanged (old and new engine compared: identical).
+   - **Spec:** worktop height, room width, and runs. A run is a wall (back, left or right), a start position, a stand-off from the wall, a carcass depth, base or wall, and for wall runs a bottom height, a height and a ceiling filler.
+   - **Units:**
+     - `base` (drawers listed top to bottom, or doors)
+     - `sink` (no back; warns about the sink cut-out against the rail gap)
+     - `wall` (shelves; `fixed` = how many of the lowest shelves are fixed)
+     - `panel` (18 mm side panel between units, floor to carcass top, +5 mm deep)
+     - `filler`
+     - `cornerL` (back leg, return, return depth, side; the L bottom/top/shelves are one routed blank each; bi-fold pair; carousel optional)
+   - **Base units:** legs, 4 rails, J-profile-shortened fronts. A `hob` warning fires when the cut-out is deeper than the gap between the top rails.
+   - **Hardware tallies:** legs, J-profiles, hinges by door height, bi-fold sets, runners by length, toe-kick 3 m boards per run, carousel.
+   - **Ceiling filler strips** are listed as parts (≤ 2400 pieces).
+   - **Test:** `node scripts/test-kitchen-prampram.mjs` (plain Node, no browser): main U run, right run and both wall-cabinet runs. 304 pieces, **no clashes**, 24 boards by the Cut Sheet's packing (backs excluded).
+   - **It found two real problems in the job:** the hob cut-out (490) was deeper than the 420 between D's top rails, and the sink cut-out (420) had 0 mm to spare between E's rails. **Owner's fixes (2026-11-21), now built:**
+     - **Under a hob,** the front rail is stood upright, the flat back rail is left out, and the upright back rail comes up to the top. That gives 544 mm for the hob, and the top drawer box stays under the front rail.
+     - **Under a sink,** the flat rails are 60 wide (`sinkRail`), giving 460 mm, so 40 mm spare.
+   - **Not yet:** tall unit A, pantry K, the island, the laundry (owner: their own logic), the page's kitchen editor, and the hand-off to the Cut Sheet for kitchens.
+   - **Confirmed by the owner (2026-11-21):**
+     - **L blanks** are a square at the larger leg size (B: 979 × 979). The machine shop cuts the square and the workshop cuts the L out, since shops don't cut complicated shapes.
+     - **Base carcass depth** = client's depth − 20.
+     - Amina's wall depths (30 / 28) are her carcass depths without doors.
+   - The wardrobe parity test (`test-smart-engine.mjs`) needs Playwright, which isn't installed on the owner's Windows machine. The wardrobe output was checked instead by comparing the old and new engine on 3 wardrobes: identical.
 4. **Checks** (section 4b) + **Construction tab** in the shared Settings panel.
 5. **Spec editor + front-view drawing** (new member tool page), sending parts straight into the Cut Sheet (one cut list per material).
 6. **AI: words → spec.** Then **sketch photo → spec.**

@@ -251,11 +251,208 @@
     return E(0, 0, 0, 0);
   }
 
+  /* ---------------- KITCHENS (step 3, started 2026-11-21; owner's rules in plan section 4a-k) ----------------
+   * Base units stand on adjustable legs (10 cm standard; 4 legs up to 800 wide, 6 over, 8 under an L corner).
+   * A 2 cm riser under the 2 cm slab puts the doubled 4 cm edge flush with the carcass top, so
+   * carcass top = worktop - 40 and base sides = worktop - 40 - legs.
+   * Base units: sides, bottom between them, NO top panel: 4 rails of 80 mm (2 flat at the top front and back,
+   * 2 upright at the back, top and bottom: they square the box and are what it is screwed to the wall through).
+   * Wall units: sides, top and bottom between them, 2 upright back rails (top and bottom), shelves set back 20.
+   * Backs are screwed on from the back (applied side panels get +5 mm to cover them); the sink unit has no back.
+   * J-profile handles: every door and drawer front is shortened by the profile height (base: profile on top;
+   * wall: on the bottom). L corner units: top/bottom/shelves are one piece routed out of a blank.
+   * Toe kick: bought in 3 m lengths (one long board per run), set back 80; it is hardware, not on the cut list.
+   * Spec: { type:'kitchen', worktop:900, room:{w}, runs:[{name, wall:'back'|'left'|'right', at, depth, kind:'base'|'wall',
+   *   bottom, height, units:[...]}], shop }. Unit types: 'base' (drawers:[h top to bottom] or doors:n), 'sink',
+   *   'panel' (18 mm side panel between units), 'filler', 'cornerL' (back leg w, return r, returnDepth), 'wall'.
+   * The tall appliance unit, folding-door pantry, island and laundry are NOT here yet (owner: their own logic). */
+  var KSHOP = { sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3 };
+
+  function kitchen(spec) {
+    var s = merge(merge(SHOP, { backType: 'nailon' }), spec.shop || {}), K = merge(KSHOP, spec.kshop || {});
+    var t = s.thick, bt = K.backThick, J = K.jH, gap = s.doorGap, ec = s.edgeClear, DT = s.doorThick;
+    var W = (spec.room && spec.room.w) || 4000, WT = spec.worktop || 900;
+    var carcTop = WT - K.edgeDrop, baseSideH = carcTop - K.legH;
+    var boxes = [], warn = [], hw = {};
+    function tally(k, n) { hw[k] = (hw[k] || 0) + n; }
+
+    spec.runs.forEach(function (run) {
+      var wall = run.wall || 'back', base = (run.kind || 'base') === 'base';
+      var dC = run.depth, Dr = dC + bt;                       // carcass depth (client's own), + back
+      var yBot = base ? K.legH : run.bottom, H = base ? baseSideH : run.height, yTop = yBot + H;
+      // map a box from run-local (x along the run, y up, z = carcass front 0 .. wall Dr) to the room
+      // (X along the back wall from the left wall, Y up, Z = out from the back wall; walls at X = 0, X = W, Z = 0)
+      function put(name, tag, kind, x, y, z, bw, bh, bd, cut, note, extra) {
+        var ext = { x: bw, y: bh, z: bd }, o = { name: name, tag: tag, kind: kind || tag, y: y, h: bh,
+          cut: cut ? [R(ext[cut[0]]), R(ext[cut[1]])] : null, note: note || '', run: run.name };
+        var a = run.at || 0, off = run.off || 0;    // off = stand-off from the wall (the slack hidden behind the L corners)
+        if (wall === 'back') { o.x = a + x; o.w = bw; o.z = off + Dr - z - bd; o.d = bd; }
+        else if (wall === 'left') { o.x = off + Dr - z - bd; o.w = bd; o.z = a + x; o.d = bw; }
+        else { o.x = W - off - Dr + z; o.w = bd; o.z = a + x; o.d = bw; }
+        if (extra) for (var k in extra) o[k] = extra[k];
+        boxes.push(o); return o;
+      }
+      function hwBox(name, x, y, z, bw, bh, bd) { put(name, 'hw', 'hw', x, y, z, bw, bh, bd, null, '', { hardware: true }); }
+      function legs(x0, bw, n) { tally('Cabinet legs ' + K.legH / 10 + ' cm (sets of 4)', n); }
+
+      var x = 0, frontLen = 0;
+      run.units.forEach(function (u, ui) {
+        var w = u.w, un = u.name || ('Unit ' + (ui + 1)), lbl = ' (' + un + ')';
+        if (u.type === 'panel') {          // 18 mm side panel between units: floor to carcass top, covers the back (+5)
+          var pd = dC + DT + K.panelExtra;
+          put('Side Panel between units' + lbl, 'panel', '', x, 0, -DT, t, base ? carcTop : H, pd, ['y', 'z'], 'floor to the carcass top; ' + K.panelExtra + ' mm deeper to cover the back');
+          if (!base) boxes[boxes.length - 1].y = yBot;
+          x += t; frontLen += t; return;
+        }
+        if (u.type === 'filler') {         // a strip in the line of the fronts (e.g. over a base side panel)
+          put('Filler Strip' + lbl, 'panel', '', x, yBot, -DT, w, H, DT, ['y', 'x'], 'in line with the doors');
+          x += w; frontLen += w; return;
+        }
+        if (u.type === 'gap') { x += w; return; }
+        if (u.type === 'cornerL') { cornerL(u, un); x += w; frontLen += w - dC; return; }
+
+        // ---- straight carcass (base / sink / wall) ----
+        var inW = w - 2 * t;
+        put('Side Panel' + lbl, 'carcass', '', x, yBot, 0, t, H, dC, ['y', 'z']);
+        put('Side Panel' + lbl, 'carcass', '', x + w - t, yBot, 0, t, H, dC, ['y', 'z']);
+        put('Bottom Panel' + lbl, 'carcass', '', x + t, yBot, 0, inW, t, dC, ['x', 'z'], 'between the sides');
+        if (base && u.hob) {
+          // under a hob (owner 2026-11-21): the front rail turns upright, the flat back rail is left out and the upright
+          // back rail comes up to the top, so the hob body has the whole depth between them
+          put('Top Rail, upright front (hob)' + lbl, 'frame', '', x + t, yTop - K.rail, 0, inW, K.rail, t, ['x', 'y'], 'stood on edge under the hob');
+          put('Back Rail, upright top (hob)' + lbl, 'frame', '', x + t, yTop - K.rail, dC - t, inW, K.rail, t, ['x', 'y'], 'raised to the top; no flat back rail under the hob');
+          put('Back Rail, upright bottom' + lbl, 'frame', '', x + t, yBot + t, dC - t, inW, K.rail, t, ['x', 'y']);
+          tally('Cabinet legs ' + K.legH / 10 + ' cm', w > 800 ? 6 : 4);
+        } else if (base) {
+          var rw = u.type === 'sink' ? K.sinkRail : K.rail;     // narrower flat rails under a sink (owner: 60)
+          put('Top Rail, flat front' + lbl, 'frame', '', x + t, yTop - t, 0, inW, t, rw, ['x', 'z']);
+          put('Top Rail, flat back' + lbl, 'frame', '', x + t, yTop - t, dC - rw, inW, t, rw, ['x', 'z']);
+          put('Back Rail, upright top' + lbl, 'frame', '', x + t, yTop - t - K.rail, dC - t, inW, K.rail, t, ['x', 'y'], 'squares the box; screw through it to the wall');
+          put('Back Rail, upright bottom' + lbl, 'frame', '', x + t, yBot + t, dC - t, inW, K.rail, t, ['x', 'y']);
+          tally('Cabinet legs ' + K.legH / 10 + ' cm', w > 800 ? 6 : 4);
+        } else {
+          put('Top Panel' + lbl, 'carcass', '', x + t, yTop - t, 0, inW, t, dC, ['x', 'z'], 'between the sides');
+          put('Back Rail, upright top' + lbl, 'frame', '', x + t, yTop - t - K.rail, dC - t, inW, K.rail, t, ['x', 'y'], 'hang the unit through this');
+          put('Back Rail, upright bottom' + lbl, 'frame', '', x + t, yBot + t, dC - t, inW, K.rail, t, ['x', 'y']);
+        }
+        if (u.type !== 'sink') put('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x, yBot, dC, w, H, bt, ['x', 'y']);
+        else warn.push(un + ': sink unit, no back panel (open for the pipes)');
+
+        // shelves (adjustable, on pins)
+        var nSh = u.shelves || 0, set = base ? K.baseShelfSet : K.wallShelfSet;
+        for (var i = 1; i <= nSh; i++) {       // u.fixed = how many of the lowest shelves are fixed (through the sides)
+          var sy = yBot + t + i * (H - 2 * t) / (nSh + 1) - t / 2;
+          if (i <= (u.fixed || 0)) put('Shelf, fixed' + lbl, 'shelf', '', x + t, sy, 0, inW, t, dC, ['x', 'z'], 'fixed through the sides (confirmat or dowel)');
+          else put('Shelf, adjustable' + lbl, 'shelf', '', x + t + s.shelfClear, sy, set, inW - 2 * s.shelfClear, t, R(dC - set), ['x', 'z'], s.shelfClear + ' mm clearance each side, set back ' + set);
+        }
+        if (u.shelves && inW > 800) warn.push(un + ': shelf spans ' + R(inW) + ' mm, over 800 (check C1)');
+
+        // fronts: full overlay, J-profile shortens every front
+        var fW = w - 2 * ec, fY = yBot + s.botGap, fH = H - s.botGap - s.topGap;
+        if (u.drawers) {
+          var sum = u.drawers.reduce(function (a, b) { return a + b; }, 0), yy = yTop - s.topGap;
+          var runner = RUNNERS.filter(function (L) { return L <= dC - t - 10; })[0] || R(dC - t - 10);
+          u.drawers.forEach(function (dh, di) {      // listed top to bottom
+            var slot = fH * dh / sum, sTop = yy, sBot = yy - slot;
+            var frH = R(slot - gap - J), frY = sBot + gap / 2;
+            put('Drawer Front' + lbl, 'drawer', 'front', x + ec, base ? frY : frY + J, -DT, floor(fW), frH, DT, ['x', 'y'], 'shortened by the ' + J + ' mm J-profile');
+            tally('J-profile handle (cut to front width)', 1);
+            var bw = R(inW - s.runGap), bh = Math.max(60, R(slot - 70)), by = Math.max(sBot + 15, yBot + t + 5);
+            var bx = x + t + (inW - bw) / 2, cap = (di === 0 && base) ? yTop - (u.hob ? K.rail : t) - 5 : sTop - 5;   // under a hob the top box clears the upright front rail
+            bh = Math.min(bh, R(cap - by - t));
+            put('Drawer Base' + lbl, 'drawer', '', bx, by, 0, bw, t, runner, ['x', 'z'], 'box outside size');
+            put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, 0, bw, bh, t, ['x', 'y'], 'full box width');
+            put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, runner - t, bw, bh, t, ['x', 'y']);
+            put('Drawer Box Side' + lbl, 'drawer', '', bx, by + t, t, t, bh, runner - 2 * t, ['z', 'y'], 'between the box front and back');
+            put('Drawer Box Side' + lbl, 'drawer', '', bx + bw - t, by + t, t, t, bh, runner - 2 * t, ['z', 'y']);
+            tally('Drawer runners ' + runner + ' mm (side mount, pair)', 1);
+            yy = sBot;
+          });
+        } else {
+          var nd = u.doors || (w > 600 ? 2 : 1), dW = floor((fW - gap * (nd - 1)) / nd), dH = R(fH - J);
+          for (var q = 0; q < nd; q++) {
+            put('Door' + lbl, 'door', 'door', x + ec + q * (dW + gap), base ? fY : fY + J, -DT, dW, dH, DT, ['x', 'y'], 'shortened by the ' + J + ' mm J-profile (' + (base ? 'top' : 'bottom') + ')');
+            tally('J-profile handle (cut to front width)', 1);
+            tally('Hinges (pair, soft close)', dH > 900 ? 2 : 1);
+          }
+        }
+        if (u.hob && base) {
+          var railGap = dC - 2 * t;
+          if (u.hob.d > railGap) warn.push(un + ': hob cut-out ' + u.hob.d + ' mm deep but only ' + railGap + ' mm between the upright rails.');
+        }
+        if (u.sinkCut && base) {
+          var g2 = dC - 2 * K.sinkRail;
+          warn.push(un + ': sink cut-out ' + u.sinkCut.w + ' x ' + u.sinkCut.d + ' between top rails ' + g2 + ' mm apart' + (u.sinkCut.d > g2 ? ': TOO DEEP, move the rails' : (g2 - u.sinkCut.d < 20 ? ': only ' + (g2 - u.sinkCut.d) + ' mm to spare' : '')));
+        }
+        if (u.note) warn.push(un + ': ' + u.note);
+        x += w; frontLen += w;
+      });
+
+      // L corner: back leg (u.w along the run) and return (u.r along the side wall, u.returnDepth deep)
+      function cornerL(u, un) {
+        var lbl = ' (' + un + ')', Lb = u.w, Lr = u.r, dR = u.returnDepth || dC, side = u.side || 'left';
+        var M = function (xx, ww) { return side === 'left' ? xx : x + Lb - (xx - x) - ww; };   // mirror inside the unit
+        var x0 = x, zR0 = Dr - Lr;                               // return runs from z = Dr - Lr (into the room) to the wall
+        var Hh = H, y0 = yBot, y1 = yTop;
+        var putM = function (n, tg, k, xx, y, z, ww, hh, dd, cut, note, ex) { return put(n, tg, k, M(xx, ww), y, z, ww, hh, dd, cut, note, ex); };
+        // ends
+        putM('Side Panel, end' + lbl, 'carcass', '', x0 + Lb - t, y0, 0, t, Hh, dC, ['y', 'z']);
+        putM('Side Panel, return end' + lbl, 'carcass', '', x0 + bt, y0, zR0 + bt, dR, Hh, t, ['y', 'x']);
+        // L pieces: one blank each, routed; the return part is drawn but not cut separately
+        var bs = R(Math.max(Lb, Lr) - t - bt), blank = [bs, bs];   // machine shops cut squares; the L is cut out in the workshop (owner)
+        function Lpiece(nm, y, note) {
+          var o = putM(nm + lbl, 'carcass', '', x0 + bt, y, 0, Lb - t - bt, t, dC, ['x', 'z'], note);
+          o.cut = blank;
+          putM(nm + ' (return part)' + lbl, 'carcass', 'Lpart', x0 + bt, y, zR0 + bt + t, dR, t, -zR0 - bt - t, null, '');
+        }
+        Lpiece('L Bottom, routed', y0, 'shop cuts a ' + bs + ' square; cut the L out of it in the workshop: legs ' + R(Lb - t - bt) + ' x ' + R(Lr - t - bt) + ', inner corner out (back leg ' + R(dC) + ' deep, return ' + R(dR) + ' deep); band the two inner front edges by hand');
+        if (base) {
+          putM('Top Rail, flat front' + lbl, 'frame', '', x0 + bt + dR, y1 - t, 0, Lb - t - bt - dR, t, K.rail, ['x', 'z']);
+          putM('Top Rail, flat front (return)' + lbl, 'frame', '', x0 + bt + dR - K.rail, y1 - t, zR0 + bt + t, K.rail, t, -zR0 - bt - t, ['z', 'x']);
+          putM('Top Rail, flat back' + lbl, 'frame', '', x0 + bt + K.rail, y1 - t, dC - K.rail, Lb - t - bt - K.rail, t, K.rail, ['x', 'z']);
+          putM('Top Rail, flat back (return)' + lbl, 'frame', '', x0 + bt, y1 - t, zR0 + bt + t, K.rail, t, dC - zR0 - bt - t, ['z', 'x']);
+          tally('Cabinet legs ' + K.legH / 10 + ' cm', 8);
+          if (u.carousel) { hwBox('Corner carousel' + lbl, x0 + bt + 40, y0 + 60, 40, Math.min(520, dR - 60), H - 140, Math.min(520, dR - 60)); tally('Corner carousel (' + un + ')', 1); }
+        } else {
+          Lpiece('L Top, routed', y1 - t, 'same blank as the bottom');
+        }
+        for (var i = 1; i <= (u.shelves || 0); i++) Lpiece('L Shelf, routed', y0 + t + i * (Hh - 2 * t) / ((u.shelves || 0) + 1) - t / 2, 'routed L, fixed (one piece)');
+        putM('Back Rail, upright top' + lbl, 'frame', '', x0 + bt, y1 - t - K.rail - (base ? t : 0), dC - t, Lb - t - bt, K.rail, t, ['x', 'y'], 'screw through to the wall');
+        putM('Back Rail, upright bottom' + lbl, 'frame', '', x0 + bt, y0 + t, dC - t, Lb - t - bt, K.rail, t, ['x', 'y']);
+        putM('Back Rail, upright top (return)' + lbl, 'frame', '', x0 + bt, y1 - t - K.rail - (base ? t : 0), zR0 + bt + t, t, K.rail, dC - t - zR0 - bt - t, ['z', 'y']);
+        putM('Back Rail, upright bottom (return)' + lbl, 'frame', '', x0 + bt, y0 + t, zR0 + bt + t, t, K.rail, dC - t - zR0 - bt - t, ['z', 'y']);
+        putM('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, dC, Lb, Hh, bt, ['x', 'y']);
+        putM('Back Panel, return (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, zR0, bt, Hh, dC - zR0, ['z', 'y']);
+        // bi-fold pair across the inside corner
+        var fY = y0 + s.botGap + (base ? 0 : J), fH = R(Hh - s.botGap - s.topGap - J);
+        var aW = R(-zR0 - bt - ec), bW = R(Lb - bt - dR - DT - gap - ec);
+        putM('Bi-fold Door, return leaf' + lbl, 'door', 'door', x0 + bt + dR, fY, zR0 + bt + ec, DT, fH, aW, ['z', 'y'], 'bi-fold, hinged to the next leaf');
+        putM('Bi-fold Door, front leaf' + lbl, 'door', 'door', x0 + bt + dR + DT + gap, fY, -DT, bW, fH, DT, ['x', 'y'], 'bi-fold; hinge side as agreed');
+        tally('J-profile handle (cut to front width)', 2); tally('Bi-fold hinges (set)', 1);
+      }
+
+      if (base) tally('Toe kick 3 m (' + run.name + ')', Math.ceil(frontLen / K.toeLen));
+    });
+
+    // ceiling filler strips (scribed on site) over every wall run: parts only, not placed in 3D
+    var extra = [];
+    spec.runs.forEach(function (run) {
+      if ((run.kind || 'base') === 'base' || !run.ceilingFiller) return;
+      var L = run.units.reduce(function (a, u) { return a + (u.type === 'gap' ? 0 : u.w); }, 0), left = L;
+      while (left > 0) { var piece = R(Math.min(2400, left)); extra.push({ name: 'Ceiling Filler Strip (' + run.name + ')', tag: 'panel', a: piece, b: run.ceilingFiller, qty: 1, note: 'scribe to the ceiling on site; joins over a unit side' }); left -= piece; }
+    });
+    return { boxes: boxes, warnings: warn, hardware: hw, extra: extra };
+  }
+
   function build(spec) {
-    var m = wardrobe(spec);   // wardrobe units first; kitchen units follow once their rules are settled
+    if (spec && spec.type === 'kitchen') {
+      var k = kitchen(spec);
+      return { boxes: k.boxes, parts: cutList(k.boxes).concat(k.extra), clashes: clashes(k.boxes), warnings: k.warnings, hardware: k.hardware };
+    }
+    var m = wardrobe(spec);   // wardrobes
     return { boxes: m.boxes, parts: cutList(m.boxes), clashes: clashes(m.boxes), warnings: m.warnings };
   }
 
-  var api = { SHOP: SHOP, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
+  var api = { SHOP: SHOP, KSHOP: KSHOP, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SmartEngine = api;
 })(typeof window !== 'undefined' ? window : this);
