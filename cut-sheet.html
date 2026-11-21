@@ -350,6 +350,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .print-cta{display:flex;gap:.7rem;flex-wrap:wrap;padding:1rem;border-top:1px solid var(--clr-border);background:#faf7f0}
 .btn-print{display:inline-flex;align-items:center;gap:.5rem;background:var(--navy);color:#fff;border:none;border-radius:7px;padding:.65rem 1.3rem;font-family:var(--font-body);font-size:.86rem;font-weight:700;letter-spacing:.03em;cursor:pointer}
 .btn-print:hover{opacity:.9}
+.btn-price{background:transparent;color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--navy)}
 
 /* help */
 .help{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;margin-bottom:1.1rem;overflow:hidden}
@@ -668,6 +669,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>
         Print / Save PDF
       </button>
+      <button class="btn-print btn-price" onclick="priceJob()" title="Opens a new quote in Job Pricing with these boards and edge band (Carpentry Concierge members)">Price this job</button>
       <span style="font-family:var(--mono);font-size:.66rem;color:var(--clr-muted);align-self:center">Each page carries your logo &amp; number · each colour on its own page</span>
     </div>
   </div>
@@ -738,6 +740,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 })();
 </script>
 <script src="js/tool-settings.js?v=20261117"></script>
+<script src="js/pricing-handoff.js?v=20261121"></script>
 <script>
 // ══════════════════════════════════════════════════════
 //  CUT SHEET GENERATOR — standalone, vanilla JS
@@ -1738,6 +1741,30 @@ function renderSummary(gs){
       (priceOn?'<span class="rb-sep"></span><span class="rb-stat rb-cost"><span class="rb-num">'+fmtGHS(grandCost).replace('GHS ','₵')+'</span><span class="rb-lbl">est. cost</span></span>':'')+
       (grandOver?'<span class="rb-warn">⚠ '+grandOver+' oversize</span>':'');
   }
+}
+// "Price this job" (members only, 2026-11-21): boards per colour + edge band rolls go to Job Pricing
+// as a new quote (js/pricing-handoff.js). Quantities only; labour and days stay with the carpenter.
+function priceJob(){
+  var gs=groups();
+  if(!gs.length){ alert('Add parts with a length and width first.'); return; }
+  var allowRot = U.grain==='0'||U.grain===0, BL=U.bl, BW=U.bw, kerf=U.kerf, rl=(U.rollLen>0?U.rollLen:100);
+  var lines=[], bandMM=0;
+  gs.forEach(function(g){
+    var items=[];
+    g.parts.forEach(function(p){
+      var eb=ebState[p.id]||{}, gflip=!!eb.gflip, vlen=gflip?p.W:p.L, hlen=gflip?p.L:p.W;
+      bandMM += ((eb.t?hlen:0)+(eb.b?hlen:0)+(eb.l?vlen:0)+(eb.r?vlen:0))*p.qty;
+      for(var i=0;i<p.qty;i++) items.push({len:vlen,wid:hlen});
+    });
+    var n=packBoards(items,BL,BW,kerf,allowRot).count;
+    lines.push({group:'Boards', name:(/^board$/i.test(g.code)?'Board':'Board '+g.code)+', '+BL+' × '+BW+(U.thick?' × '+U.thick+' mm':''), qty:n, price:num(U.boardPrice,0)});
+  });
+  var rolls=Math.ceil(bandMM/1000/rl);
+  if(rolls){
+    lines.push({group:'Edge band', name:'Edge band, '+rl+' m roll', qty:rolls, price:num(U.rollPrice,0)});
+    lines.push({group:'Edge banding application', name:'Edge banding application, per roll', qty:rolls, price:num(U.applyPrice,0)});
+  }
+  PricingHandoff.send({ from:'Cut Sheet', item:printLabel()||'', note:'Cut Sheet: '+gs.length+' colour'+(gs.length!==1?'s':'')+', '+(bandMM/1000).toFixed(1)+' m edge band. Hardware is not on a cut sheet: add it under Fixtures.', lines:lines });
 }
 // Print running header, rendered as a repeating <thead> cell (see renderSheet).
 function buildPrintHead(gs){

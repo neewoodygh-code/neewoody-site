@@ -983,7 +983,8 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 <script src="js/tool-settings.js?v=20261117"></script>
 <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
-<script src="js/smart/price.js?v=20261121"></script>
+<script src="js/smart/price.js?v=20261121b"></script>
+<script src="js/pricing-handoff.js?v=20261121"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 // ══════════════════════════════════════════════════════
@@ -1978,8 +1979,14 @@ function priceCard(r){
   h+='<label class="no-print" style="display:inline-flex;gap:.5rem;align-items:center;font-size:.85rem;margin-bottom:.6rem">Door handles <select onchange="priceDoorHandle=+this.value;refreshPriceCard()"><option value="30"'+(priceDoorHandle===30?' selected':'')+'>30 cm</option><option value="60"'+(priceDoorHandle===60?' selected':'')+'>60 cm</option><option value="100"'+(priceDoorHandle===100?' selected':'')+'>100 cm</option><option value="0"'+(!priceDoorHandle?' selected':'')+'>None</option></select></label>';
   h+='<table class="price-tbl">'+m.lines.map(function(l){ return '<tr><td>'+l.item+(/handle/i.test(l.item)?' × '+l.qty:'')+'<br><span style="font-size:.75rem;color:var(--clr-muted)">'+l.note+'</span></td><td class="c">'+ghs(l.cost)+'</td></tr>'; }).join('')+
     '<tr class="tot"><td><b>Materials total</b></td><td class="c">'+ghs(m.total)+'</td></tr></table>';
+  // members only (owner 2026-11-21): send these materials to Job Pricing as a new quote; homeowners never see it
+  if(window.PricingHandoff && PricingHandoff.member()) h+='<p class="no-print" style="margin-top:.7rem"><button type="button" onclick="priceJob()" style="font:inherit;font-size:.85rem;font-weight:600;padding:.5rem 1rem;border-radius:6px;border:1.5px solid currentColor;background:transparent;color:var(--clr-accent-dk);cursor:pointer">Price this job in Job Pricing</button></p>';
   h+='<p style="font-size:.85rem;margin-top:.6rem">Need someone to put it together? <a href="https://wa.me/233244633464?text='+encodeURIComponent('Hi Neewoody, I made a wardrobe cut list ('+S.w+' x '+S.h+' x '+S.d+' mm) on your website. Materials come to about '+ghs(m.total)+'. Can you connect me with someone to assemble it?')+'" style="color:var(--clr-accent-dk);text-decoration:underline">Ask us on WhatsApp</a> and we will connect you with a carpenter. The assembly fee is agreed between you.</p>';
   return h+'</div></div>';
+}
+function priceJob(){
+  var m=priceOf(calculate()).m;
+  PricingHandoff.send({ from:'Cutlist', item:'Wardrobe '+S.w+' × '+S.h+' × '+S.d, note:'Cutlist wardrobe '+S.w+' × '+S.h+' × '+S.d+' mm. Screws are an estimate; edge banding follows the Edge Band Sheet.', lines:PricingHandoff.fromMaterials(m) });
 }
 function refreshPriceCard(){ var c=document.getElementById('price-card'); if(c){ c.outerHTML=priceCard(calculate()); } updatePriceBar(); }
 

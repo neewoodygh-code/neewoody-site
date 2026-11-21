@@ -243,11 +243,12 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
         <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
         <div class="acts">
           <button type="button" class="ui-btn sm" id="toSheet">Send to the Cut Sheet</button>
+          <button type="button" class="ui-btn sm ghost" id="toPrice">Price this job</button>
           <button type="button" class="ui-btn sm ghost" id="doPrint">Print the cut list</button>
           <button type="button" class="ui-btn sm ghost" id="exHtml">Client 3D file</button>
           <button type="button" class="ui-btn sm ghost" id="exDae">SketchUp file</button>
         </div>
-        <p class="hint no-print">Edge banding comes on as standard (doors and fronts all round, the front edge of carcass parts and shelves). In the Cut Sheet, tap an edge to take off what this job doesn't need. The Cut Sheet also works out the boards. Client 3D and SketchUp files are for members.</p>
+        <p class="hint no-print">Edge banding comes on as standard (doors and fronts all round, the front edge of carcass parts and shelves). In the Cut Sheet, tap an edge to take off what this job doesn't need. The Cut Sheet also works out the boards. Price this job, the client 3D file and the SketchUp file are for members. Price this job opens a new quote in Job Pricing with the materials counted here.</p>
       </div>
     </div>
   </div>
@@ -270,6 +271,8 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
 <script src="js/smart/engine.js?v=20261121c"></script>
+<script src="js/smart/price.js?v=20261121b"></script>
+<script src="js/pricing-handoff.js?v=20261121"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 (function () {
@@ -440,6 +443,31 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: nm, parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
     location.href = '/cut-sheet.html#from-smart';
+  };
+  // "Price this job" (members only, 2026-11-21): the materials go to Job Pricing as a new quote (js/pricing-handoff.js)
+  $('toPrice').onclick = function () {
+    if (!last || !acked()) return;
+    if (!PricingHandoff.member()) { PricingHandoff.send({}); return; }
+    var sp = last.spec, r = last.r, K = last.kit;
+    var rows = r.parts.map(function (p) { return { name: p.name, tag: p.tag, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop) }; });
+    var lines, note;
+    if (K) {
+      // boards, backs and edge band from the parts; the screw estimate is for wardrobes, so kitchens take the engine's own hardware list
+      lines = PricingHandoff.fromMaterials(WardrobePrice.materials(rows)).filter(function (l) { return l.group !== 'Fixtures'; });
+      var hw = {};
+      Object.keys(r.hardware || {}).forEach(function (k) {
+        var nm = /^(Toe kick|Corner carousel)/.test(k) ? k.replace(/ \([^)]*\)$/, '') : k;
+        hw[nm] = (hw[nm] || 0) + r.hardware[k];
+      });
+      Object.keys(hw).forEach(function (k) { lines.push({ group: /^Toe kick/.test(k) ? 'Boards' : 'Fixtures', name: k, qty: hw[k], price: 0 }); });
+      note = 'Smart Generator kitchen, worktop ' + sp.worktop + ' mm. Screws, worktop, sink and appliances are not counted: add them.';
+    } else {
+      var slide = r.parts.some(function (p) { return p.tag === 'door' && /sliding/i.test(p.name); }) ? sp.w : 0;
+      var rails = (r.boxes || []).filter(function (b) { return b.hardware && b.name === 'Hanging rail'; }).map(function (b) { return Math.round(b.w); });
+      lines = PricingHandoff.fromMaterials(WardrobePrice.materials(rows, { doorHandle: 60, drawerHandle: 30, railRuns: rails, slidingWidth: slide }));
+      note = 'Smart Generator wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm. Handles counted as 60 cm on doors and 30 cm on drawers; screws are an estimate.';
+    }
+    PricingHandoff.send({ from: 'Smart Generator', item: K ? 'Kitchen, worktop ' + sp.worktop : 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d, note: note, lines: lines });
   };
   $('doPrint').onclick = function () { if (last && acked()) window.print(); };
   function member() { return !!(window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive()); }

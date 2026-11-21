@@ -1295,10 +1295,45 @@ function newQuote(refNum, prefix) {
   };
 }
 
+// ── From the generators ("Price this job", owner 2026-11-21, members only) ──
+// The Cut Sheet, Smart Generator and cutlist leave their materials in localStorage
+// (js/pricing-handoff.js); the next load opens them as a new quote on the Materials tab.
+// Only quantities come across. Prices: the member's own last price for the same item,
+// else (owner's account only) the owner's price from the generator, else blank.
+const HANDOFF_KEY = 'nwd-pricing-handoff';
+const HANDOFF_MAT = { 'Boards':'m01', 'Back panels':'m02', 'Edge band':'m03', 'Edge banding application':'m04', 'Fixtures':'m10' };
+function takeHandoff() {
+  let h = null;
+  try { h = JSON.parse(localStorage.getItem(HANDOFF_KEY)); localStorage.removeItem(HANDOFF_KEY); } catch (e) {}
+  if (!h || !Array.isArray(h.lines) || !h.lines.length || Date.now() - (h.at||0) > 30*60*1000) return null;
+  return h;
+}
+function lastPrice(quotes, name) {
+  const key = (name||'').trim().toLowerCase();
+  const newest = [...quotes].sort((a,b)=>(b.updatedAt||b.createdAt||'').localeCompare(a.updatedAt||a.createdAt||''));
+  for (const q of newest) for (const m of [...(q.materials||[]), ...(q.optionals||[])])
+    for (const si of (m.subItems||[])) if ((si.name||'').trim().toLowerCase()===key && si.unitPrice>0) return si.unitPrice;
+  return 0;
+}
+function applyHandoff(q, h, quotes, isOwner) {
+  const groups = {};
+  h.lines.forEach(l => { const id = HANDOFF_MAT[l.group] || 'm10'; (groups[id] = groups[id] || []).push(l); });
+  const when = new Date(h.at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  return { ...q,
+    item: h.item || q.item,
+    materials: q.materials.map(m => {
+      const ls = groups[m.id]; if (!ls) return m;
+      return { ...m, on:true, expanded:true, subItems: ls.map(l => ({ id:uid(), name:String(l.name||m.name).slice(0,120), qty:+l.qty||0,
+        unitPrice: lastPrice(quotes, l.name) || (isOwner ? (+l.price||0) : 0) })) };
+    }),
+    notes: [`Materials from the ${h.from||'generator'}, ${when}. Quantities only: check them and the prices, then add labour, days and logistics.`, h.note].filter(Boolean).join(' '),
+  };
+}
+
 // ── Quote Editor ──────────────────────────────────────────────────────
-function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, session, onSave, onBack }) {
+function QuoteEditor({ quote:initial, clients, ensureClient, overheadCfg, session, onSave, onBack, startTab }) {
   const [q, setQ]       = useState(initial);
-  const [tab, setTab]   = useState('setup');
+  const [tab, setTab]   = useState(startTab || 'setup');
   const [saving, setSaving] = useState(false);
   const upd  = u => setQ(prev=>({...prev,...u}));
   const calc = useMemo(()=>calcQuote(q,overheadCfg),[q,overheadCfg]);
@@ -2158,6 +2193,7 @@ function App() {
   const [overheadCfg, setOverheadCfg] = useState(null);
   const [memberInfo,  setMemberInfo]  = useState(null);
   const [activeId,    setActiveId]    = useState(null);
+  const [editorTab,   setEditorTab]   = useState('setup');
 
   function logout() {
     try { localStorage.removeItem(CONCIERGE_TOKEN_KEY); } catch (e) {}
@@ -2211,7 +2247,7 @@ function App() {
 
       setClients(loadedClients);
       setQuotes(loadedQuotes);
-      return { ok: true, hasConfig: !!cfgRes.config };
+      return { ok: true, hasConfig: !!cfgRes.config, quotes: loadedQuotes, member: m };
     } catch (e) { return { ok: false }; }
   }
 
@@ -2252,6 +2288,8 @@ function App() {
     if (!getToken()) { location.replace(LOGIN_URL); return; }
     loadData().then(res => {
       if (!res.ok) return; // carpFetch already redirected on 401
+      const h = takeHandoff();
+      if (h) { history.replaceState(null, '', location.pathname); fromHandoff(h, res.quotes, res.member); return; }
       // Always land on the Dashboard — even first time in. It now explains
       // what's left to set up (via a welcome checklist) instead of forcing a
       // settings form on someone before they understand why they're there.
@@ -2291,6 +2329,16 @@ function App() {
     if (client && client.name) { q.client = client.name; q.clientId = client.id || null; }
     setQuotes(prev => [...prev, q]);
     setActiveId(q.id);
+    setScreen('editor');
+  };
+  // a job sent from a generator: new quote, Materials tab open (see takeHandoff)
+  const fromHandoff = (h, list, m) => {
+    const prefix = ((m.business_name || m.name || 'My Workshop').replace(/[^a-zA-Z]/g,'').slice(0,3).toUpperCase() || 'JOB');
+    const used = list.map(q => parseInt((q.refId||'').split('-').pop()) || 0);
+    const q = applyHandoff(newQuote(used.length ? Math.max(0, ...used) + 1 : 1, prefix), h, list, m.role === 'admin');
+    setQuotes(prev => [...prev, q]);
+    setActiveId(q.id);
+    setEditorTab('materials');
     setScreen('editor');
   };
   const openQuote  = id  => { setActiveId(id); setScreen('editor'); };
@@ -2440,8 +2488,9 @@ function App() {
         ensureClient={ensureClient}
         overheadCfg={overheadCfg}
         session={session}
+        startTab={editorTab}
         onSave={async updated => { await saveQuote(updated); }}
-        onBack={()=>setScreen('dashboard')}/>
+        onBack={()=>{ setEditorTab('setup'); setScreen('dashboard'); }}/>
     );
   }
 
