@@ -259,22 +259,24 @@
    * 2 upright at the back, top and bottom: they square the box and are what it is screwed to the wall through).
    * Wall units: sides, top and bottom between them, 2 upright back rails (top and bottom), shelves set back 20.
    * Backs are screwed on from the back (applied side panels get +5 mm to cover them); the sink unit has no back.
-   * J-profile handles: every door and drawer front is shortened by the profile height (base: profile on top;
+   * Handles (owner 2026-11-21: a choice per kitchen): K.handle 'jprofile' = every door and drawer front is shortened by
+   * the profile height (base: profile on top;
    * wall: on the bottom). L corner units: top/bottom/shelves are one piece routed out of a blank.
    * Toe kick: bought in 3 m lengths (one long board per run), set back 80; it is hardware, not on the cut list.
    * Spec: { type:'kitchen', worktop:900, room:{w}, runs:[{name, wall:'back'|'left'|'right', at, depth, kind:'base'|'wall',
    *   bottom, height, units:[...]}], shop }. Unit types: 'base' (drawers:[h top to bottom] or doors:n), 'sink',
    *   'panel' (18 mm side panel between units), 'filler', 'cornerL' (back leg w, return r, returnDepth), 'wall'.
    * The tall appliance unit, folding-door pantry, island and laundry are NOT here yet (owner: their own logic). */
-  var KSHOP = { sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3 };
+  var KSHOP = { handle: 'jprofile', sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3 };
 
   function kitchen(spec) {
     var s = merge(merge(SHOP, { backType: 'nailon' }), spec.shop || {}), K = merge(KSHOP, spec.kshop || {});
-    var t = s.thick, bt = K.backThick, J = K.jH, gap = s.doorGap, ec = s.edgeClear, DT = s.doorThick;
+    var JP = K.handle !== 'bar', t = s.thick, bt = K.backThick, J = JP ? K.jH : 0, gap = s.doorGap, ec = s.edgeClear, DT = s.doorThick;
     var W = (spec.room && spec.room.w) || 4000, WT = spec.worktop || 900;
     var carcTop = WT - K.edgeDrop, baseSideH = carcTop - K.legH;
     var boxes = [], warn = [], hw = {};
     function tally(k, n) { hw[k] = (hw[k] || 0) + n; }
+    function handle(n) { tally(JP ? 'J-profile handle (cut to front width)' : 'Handles or knobs (one per front)', n); }
 
     spec.runs.forEach(function (run) {
       var wall = run.wall || 'back', base = (run.kind || 'base') === 'base';
@@ -355,8 +357,8 @@
           u.drawers.forEach(function (dh, di) {      // listed top to bottom
             var slot = fH * dh / sum, sTop = yy, sBot = yy - slot;
             var frH = R(slot - gap - J), frY = sBot + gap / 2;
-            put('Drawer Front' + lbl, 'drawer', 'front', x + ec, base ? frY : frY + J, -DT, floor(fW), frH, DT, ['x', 'y'], 'shortened by the ' + J + ' mm J-profile');
-            tally('J-profile handle (cut to front width)', 1);
+            put('Drawer Front' + lbl, 'drawer', 'front', x + ec, base ? frY : frY + J, -DT, floor(fW), frH, DT, ['x', 'y'], JP ? 'shortened by the ' + J + ' mm J-profile' : '');
+            handle(1);
             var bw = R(inW - s.runGap), bh = Math.max(60, R(slot - 70)), by = Math.max(sBot + 15, yBot + t + 5);
             var bx = x + t + (inW - bw) / 2, cap = (di === 0 && base) ? yTop - (u.hob ? K.rail : t) - 5 : sTop - 5;   // under a hob the top box clears the upright front rail
             bh = Math.min(bh, R(cap - by - t));
@@ -371,8 +373,8 @@
         } else {
           var nd = u.doors || (w > 600 ? 2 : 1), dW = floor((fW - gap * (nd - 1)) / nd), dH = R(fH - J);
           for (var q = 0; q < nd; q++) {
-            put('Door' + lbl, 'door', 'door', x + ec + q * (dW + gap), base ? fY : fY + J, -DT, dW, dH, DT, ['x', 'y'], 'shortened by the ' + J + ' mm J-profile (' + (base ? 'top' : 'bottom') + ')');
-            tally('J-profile handle (cut to front width)', 1);
+            put('Door' + lbl, 'door', 'door', x + ec + q * (dW + gap), base ? fY : fY + J, -DT, dW, dH, DT, ['x', 'y'], JP ? 'shortened by the ' + J + ' mm J-profile (' + (base ? 'top' : 'bottom') + ')' : '');
+            handle(1);
             tally('Hinges (pair, soft close)', dH > 900 ? 2 : 1);
           }
         }
@@ -428,7 +430,7 @@
         var aW = R(-zR0 - bt - ec), bW = R(Lb - bt - dR - DT - gap - ec);
         putM('Bi-fold Door, return leaf' + lbl, 'door', 'door', x0 + bt + dR, fY, zR0 + bt + ec, DT, fH, aW, ['z', 'y'], 'bi-fold, hinged to the next leaf');
         putM('Bi-fold Door, front leaf' + lbl, 'door', 'door', x0 + bt + dR + DT + gap, fY, -DT, bW, fH, DT, ['x', 'y'], 'bi-fold; hinge side as agreed');
-        tally('J-profile handle (cut to front width)', 2); tally('Bi-fold hinges (set)', 1);
+        handle(2); tally('Bi-fold hinges (set)', 1);
       }
 
       if (base) tally('Toe kick 3 m (' + run.name + ')', Math.ceil(frontLen / K.toeLen));

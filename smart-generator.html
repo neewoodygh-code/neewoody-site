@@ -152,6 +152,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
             <div class="f"><label for="k-wt">Worktop height (mm)</label><input id="k-wt" type="number" inputmode="numeric"></div>
             <div class="f"><label for="k-room">Back wall length (mm)</label><input id="k-room" type="number" inputmode="numeric"></div>
           </div>
+          <div class="f" style="margin-top:.7rem"><label for="k-handle">Handles</label><select id="k-handle"><option value="bar">Bar handles or knobs: full-height fronts</option><option value="jprofile">J-profile: every front shortened for the profile</option></select></div>
           <p class="hint">Base units stand on legs. The worktop's doubled 4 cm edge sits flush with the carcass top, so base sides are the worktop height less 40 less the legs.</p>
           <div class="acts" style="margin-top:.6rem"><button type="button" class="mini" data-load="straight">Start a straight kitchen</button><button type="button" class="mini" data-load="u">Load a U-shaped example</button></div>
         </div>
@@ -179,7 +180,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
               <div class="f"><label for="k-dgap">Gap between fronts</label><input id="k-dgap" type="number"></div>
               <div class="f"><label for="k-run">Runner gap</label><input id="k-run" type="number"></div>
             </div>
-            <p class="hint">Remembered on this device. Every door and drawer front is shortened by the J-profile. Backs are screwed on; the sink unit has none.</p>
+            <p class="hint">Remembered on this device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none.</p>
             <button type="button" class="mini" id="k-reset" style="margin-top:.6rem">Reset to standard</button>
           </details>
         </div>
@@ -268,7 +269,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261121b"></script>
+<script src="js/smart/engine.js?v=20261121c"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 (function () {
@@ -470,7 +471,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   var RUN_TYPES = { base: ['base', 'sink', 'cornerL', 'panel', 'filler', 'gap'], wall: ['wall', 'cornerL', 'panel', 'filler', 'gap'] };
   // examples, written the engine's way; fromEngine() turns them into editor state
   var EX = {
-    straight: { worktop: 900, room: { w: 3000 }, runs: [
+    straight: { worktop: 900, handle: 'bar', room: { w: 3000 }, runs: [
       { name: 'Back wall, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
         { type: 'base', name: 'A', w: 600, drawers: [140, 320, 320] },
         { type: 'base', name: 'B', w: 600, drawers: [380, 380], hob: { d: 490 } },
@@ -482,7 +483,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         { type: 'wall', name: 'C upper', w: 800, doors: 2, shelves: 2 },
         { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 2 } ] } ] },
     // the engine's first real test job (scripts/test-kitchen-prampram.mjs), without the tall unit, pantry and island
-    u: { worktop: 900, room: { w: 4010 }, runs: [
+    u: { worktop: 900, handle: 'jprofile', room: { w: 4010 }, runs: [
       { name: 'Back wall, base', wall: 'back', at: 12, depth: 580, kind: 'base', units: [
         { type: 'cornerL', name: 'B', w: 800, r: 1000, returnDepth: 580, side: 'left', carousel: true, note: 'carousel behind bi-fold doors; check its size against the 800 leg' },
         { type: 'panel', name: 'B|C' },
@@ -518,7 +519,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       r: u.r || 900, returnDepth: u.returnDepth || 0, side: u.side || 'left', carousel: !!u.carousel, note: u.note || '' };
   }
   function fromEngine(sp) {
-    return { worktop: sp.worktop, roomW: sp.room.w, runs: sp.runs.map(function (r) {
+    return { worktop: sp.worktop, handle: sp.handle || 'bar', roomW: sp.room.w, runs: sp.runs.map(function (r) {
       return { name: r.name, wall: r.wall || 'back', kind: r.kind || 'base', at: r.at || 0, off: r.off || 0, depth: r.depth,
         bottom: r.bottom || 1500, height: r.height || 720, ceilingFiller: r.ceilingFiller || 0, units: r.units.map(uiUnit) };
     }) };
@@ -535,7 +536,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   function kSpec() {
     return { type: 'kitchen', worktop: KS.worktop, room: { w: KS.roomW },
       shop: { thick: knum('k-thick'), edgeClear: knum('k-edge'), doorGap: knum('k-dgap'), runGap: knum('k-run') },
-      kshop: { backThick: knum('k-bthick'), legH: knum('k-leg'), jH: knum('k-jh'), rail: knum('k-rail'), sinkRail: knum('k-srail') },
+      kshop: { handle: KS.handle || 'bar', backThick: knum('k-bthick'), legH: knum('k-leg'), jH: knum('k-jh'), rail: knum('k-rail'), sinkRail: knum('k-srail') },
       runs: KS.runs.map(function (r, ri) {
         var o = { name: r.name || ('Run ' + (ri + 1)), wall: r.wall, kind: r.kind, at: r.at, off: r.off, depth: r.depth, units: r.units.map(function (u, ui) {
           var e = { type: u.type, name: u.name || ('R' + (ri + 1) + '-' + (ui + 1)), w: u.type === 'panel' ? 0 : u.w };
@@ -681,7 +682,8 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       KS = fromEngine(EX[b.dataset.load]); kSave(); kTop(); drawRuns(); run();
     };
   });
-  function kTop() { $('k-wt').value = KS.worktop; $('k-room').value = KS.roomW; }
+  function kTop() { $('k-wt').value = KS.worktop; $('k-room').value = KS.roomW; $('k-handle').value = KS.handle || 'bar'; }
+  $('k-handle').addEventListener('change', function () { KS.handle = this.value; kSave(); run(); });
   [['k-wt', 'worktop'], ['k-room', 'roomW']].forEach(function (a) { $(a[0]).addEventListener('input', function () { KS[a[1]] = parseFloat(this.value) || 0; kSave(); run(); }); });
   function kSaveCons() { var p = {}; Object.keys(KCONS).forEach(function (id) { p[id] = $(id).value; }); put(KPREFS, JSON.stringify(p)); }
   function kInit() {
