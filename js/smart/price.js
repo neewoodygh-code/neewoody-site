@@ -4,7 +4,8 @@
  *
  * WardrobePrice.materials(parts, opt) with parts = [{name, tag, L, W, qty, eb:{t,r,b,l}}] (L = the longer size,
  * along the grain; eb = edge banding, l/r the long edges) and opt = {doorHandle: 0|30|60|100, drawerHandle: 0|30|60|100}.
- * Returns {lines:[{item, qty, cost, note}], total, unpriced:[{item, qty}], boards, bandM}.
+ * opt also takes railRuns (hanging rail lengths, mm) and slidingWidth (mm of sliding doors).
+ * Returns {lines:[{item, qty, cost, note}], total, unpriced:[], boards, bandM}.
  * Screw counts are an estimate from the joints (see SCREWS) with 10% spare, rounded up to whole boxes.
  * Plain script; sets window.WardrobePrice. */
 (function (root) {
@@ -13,7 +14,12 @@
     board: 500, boardL: 2440, boardW: 1220, kerf: 4,   // 18 mm laminate board 2440 x 1220
     bandRoll: 200, bandApply: 500, rollM: 100,          // edge band: roll of 100 m, application per roll
     screwBox: 60, screwsPerBox: 100,                    // 2" assembly screws and 1¼" external-panel screws, same price
-    handle: { 30: 30, 60: 50, 100: 75 }                 // handle length in cm: price
+    handle: { 30: 30, 60: 50, 100: 75 },                // handle length in cm: price
+    hingePair: 15,                                      // a pair of hinges
+    runner: { 12: 35, 14: 45, 16: 55 },                 // a pair of runners: 12", 14", 16" to 22"
+    rail: 120, railM: 3000,                             // hanging rail, 3 m length, comes with 2 pairs of brackets
+    back: 200,                                          // thin back panel board 2440 x 1220
+    track: 750, trackM: 3048                            // sliding door track set, 10 ft
   };
 
   // Guillotine shelf packing, first-fit decreasing, grain fixed (length along the board): the same method as
@@ -67,18 +73,17 @@
 
   function materials(parts, opt) {
     opt = opt || {};
-    var lines = [], unpriced = [], boardItems = [], bandMM = 0, s2 = 0, s1 = 0, doors = 0, fronts = 0, backs = 0, drawers = 0, rails = 0;
+    var lines = [], unpriced = [], boardItems = [], backItems = [], sides = [], bandMM = 0, s2 = 0, s1 = 0, doors = 0, fronts = 0;
     parts.forEach(function (p) {
       var q = p.qty || 1, L = Math.max(p.L, p.W), W = Math.min(p.L, p.W), e = p.eb || {};
-      if (is(p, /back panel/)) { backs += q; return; }                       // thin back board: not the 18 mm laminate
+      if (is(p, /back panel/)) { for (var j = 0; j < q; j++) backItems.push({ L: L, W: W }); return; }  // thin back board, its own sheets
       for (var i = 0; i < q; i++) boardItems.push({ L: L, W: W });
       bandMM += (((e.l ? 1 : 0) + (e.r ? 1 : 0)) * L + ((e.t ? 1 : 0) + (e.b ? 1 : 0)) * W) * q;
       var sc = screwsFor(p); s2 += sc[0] * q; s1 += sc[1] * q;
       if (p.tag === 'door') doors += q;
       if (is(p, /drawer front|false front/)) fronts += q;
-      if (is(p, /drawer base/)) drawers += q;
+      if (is(p, /drawer box side/)) for (var k = 0; k < q; k++) sides.push(L);
     });
-    (opt.rails || 0) && (rails = opt.rails);
     var pk = packCount(boardItems);
     lines.push({ item: pk.count + ' laminate board' + (pk.count === 1 ? '' : 's') + ', 2440 × 1220', qty: pk.count, cost: pk.count * P.board, note: 'GH₵' + P.board + ' a board' + (pk.oversize ? '; ' + pk.oversize + ' part' + (pk.oversize > 1 ? 's are' : ' is') + ' longer than a board and must be joined (or split the wardrobe into more carcasses)' : '') });
     var bandM = Math.ceil(bandMM / 1000), rolls = Math.ceil(bandM / P.rollM);
@@ -92,14 +97,25 @@
     var dh = P.handle[opt.doorHandle], fh = P.handle[opt.drawerHandle == null ? 30 : opt.drawerHandle];
     if (doors && dh) lines.push({ item: 'Door handles, ' + opt.doorHandle + ' cm', qty: doors, cost: doors * dh, note: 'GH₵' + dh + ' each' });
     if (fronts && fh) lines.push({ item: 'Drawer handles, ' + (opt.drawerHandle == null ? 30 : opt.drawerHandle) + ' cm', qty: fronts, cost: fronts * fh, note: 'GH₵' + fh + ' each' });
-    // counted but not priced yet (owner to give prices)
+    // hardware (owner's prices 2026-11-20)
     var hinged = parts.filter(function (p) { return p.tag === 'door' && !is(p, /sliding/); });
-    var hinges = hinged.reduce(function (n, p) { return n + (p.qty || 1) * (Math.max(p.L, p.W) > 1500 ? 4 : Math.max(p.L, p.W) > 900 ? 3 : 2); }, 0);
-    if (hinges) unpriced.push({ item: 'Hinges', qty: hinges });
-    if (drawers) unpriced.push({ item: 'Drawer runners (pairs)', qty: drawers });
-    if (rails) unpriced.push({ item: 'Hanging rails with brackets', qty: rails });
-    if (parts.some(function (p) { return p.tag === 'door' && is(p, /sliding/); })) unpriced.push({ item: 'Sliding door track set', qty: 1 });
-    if (backs) unpriced.push({ item: 'Back panel board (thin)', qty: backs });
+    var hinges = hinged.reduce(function (n, p) { var h = Math.max(p.L, p.W); return n + (p.qty || 1) * (h > 1500 ? 4 : h > 900 ? 3 : 2); }, 0);
+    if (hinges) { var hp = Math.ceil(hinges / 2); lines.push({ item: 'Hinges', qty: hp, cost: hp * P.hingePair, note: hinges + ' hinges (2 to 4 a door by height), GH₵' + P.hingePair + ' a pair' }); }
+    // runners: one pair per drawer, length from the drawer box side (the longest stocked size that fits)
+    var rn = {};
+    for (var si = 0; si < sides.length; si += 2) {   // two sides make one drawer, one pair of runners
+      var inch = Math.floor(sides[si] / 25.4), size = inch >= 16 ? 16 : inch >= 14 ? 14 : 12; rn[size] = (rn[size] || 0) + 1; }
+    Object.keys(rn).forEach(function (sz) {
+      var label = sz === '16' ? '16" to 22"' : sz + '"';
+      lines.push({ item: 'Drawer runners, ' + label, qty: rn[sz], cost: rn[sz] * P.runner[sz], note: rn[sz] + ' pair' + (rn[sz] > 1 ? 's' : '') + ', GH₵' + P.runner[sz] + ' a pair' });
+    });
+    // hanging rails: each rail cut from 3 m lengths; each length brings 2 pairs of brackets (one pair per rail)
+    var runs = (opt.railRuns || []).filter(function (x) { return x > 0; }).sort(function (a, b) { return b - a; }), bins = [];
+    runs.forEach(function (len) { for (var b = 0; b < bins.length; b++) if (bins[b] + len <= P.railM) { bins[b] += len; return; } bins.push(len); });
+    var railLen = Math.max(bins.length, Math.ceil(runs.length / 2));
+    if (railLen) lines.push({ item: 'Hanging rail, 3 m with brackets', qty: railLen, cost: railLen * P.rail, note: runs.length + ' rail' + (runs.length > 1 ? 's' : '') + ' cut from ' + railLen + ' length' + (railLen > 1 ? 's' : '') + ', GH₵' + P.rail + ' each' });
+    if (backItems.length) { var bk = packCount(backItems).count; lines.push({ item: 'Back panel board, 2440 × 1220', qty: bk, cost: bk * P.back, note: bk + ' sheet' + (bk > 1 ? 's' : '') + ', GH₵' + P.back + ' a sheet' }); }
+    if (opt.slidingWidth > 0) { var ts = Math.ceil(opt.slidingWidth / P.trackM); lines.push({ item: 'Sliding door track, 10 ft set', qty: ts, cost: ts * P.track, note: ts + ' set' + (ts > 1 ? 's' : '') + ' for ' + Math.round(opt.slidingWidth) + ' mm, GH₵' + P.track + ' a set' }); }
     var total = lines.reduce(function (t, l) { return t + l.cost; }, 0);
     return { lines: lines, total: total, unpriced: unpriced, boards: pk.count, oversize: pk.oversize, bandM: bandM };
   }

@@ -237,7 +237,8 @@
       var sub = merge(SHOP, shop || {}).sub;
       return (sub.style === 'flush' || !(sub.setback > 0)) ? E(1, 1, 1, 1) : E(0, 1, 0, 0);
     }
-    if (p.tag === 'door' || n.indexOf('false front') !== -1 || /drawer front|face strip/.test(n)) return E(1, 1, 1, 1);
+    if (p.tag === 'door' || n.indexOf('false front') !== -1 || /drawer front/.test(n)) return E(1, 1, 1, 1);
+    if (n.indexOf('face strip') !== -1) return E(0, 1, 0, 0);   // inner long edge only: back on the carcass, bottom on the carcass, top under the shelf (owner 2026-11-20)
     if (n.indexOf('filler strip') !== -1) return E(0, 0, 0, 0);                // hidden behind the face strip
     if (/chest .*top\/bottom/.test(n)) return E(0, 1, 0, 0);                    // front edge (the long one)
     if (/chest .*side/.test(n)) return p.a >= p.b ? E(0, 1, 0, 0) : E(1, 0, 0, 0); // front edge = the chest height

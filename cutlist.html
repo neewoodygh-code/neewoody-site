@@ -653,7 +653,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
     </div>
     <h1>Wardrobe Cutlist Calculator</h1>
     <p>Enter your wardrobe dimensions and configuration. Get a full parts list, optimised cut list, and material summary — ready to take to the workshop.</p>
-    <p class="hero-home">Building it yourself, or buying the materials for us to assemble? The price of your materials adds up at the bottom of the screen as you build. Only want to see the design? <a href="/wardrobe-planner">Plan it in 3D</a>.</p>
+    <p class="hero-home">Building it yourself, or buying the materials and having it assembled? The price of your materials adds up at the bottom of the screen as you build. Only want to see the design? <a href="/wardrobe-planner">Plan it in 3D</a>.</p>
   </div>
 </div>
 
@@ -1716,7 +1716,8 @@ function ebDefault(tag, name, p){
   // Toe kick (owner 2026-11-20): flush with the doors = all round; set back = only the bottom edge (stops floor chipping).
   if(n.indexOf('toe kick')!==-1) return (S.tkStyle==='flush'||!(S.tkSetback>0)) ? {t:true,r:true,b:true,l:true} : {t:false,r:true,b:false,l:false};
   if(tag==='door') return {t:true,r:true,b:true,l:true};
-  if(n.indexOf('false front')!==-1||/drawer front|face strip/.test(n)) return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('false front')!==-1||/drawer front/.test(n)) return {t:true,r:true,b:true,l:true};
+  if(n.indexOf('face strip')!==-1) return {t:false,r:true,b:false,l:false};   // inner long edge only (owner 2026-11-20)
   if(n.indexOf('filler strip')!==-1) return {t:false,r:false,b:false,l:false};
   if(/chest .*top\/bottom/.test(n)) return {t:false,r:true,b:false,l:false};
   if(/chest .*side/.test(n)) return (p&&p.w>=p.d) ? {t:false,r:true,b:false,l:false} : {t:true,r:false,b:false,l:false};
@@ -1953,36 +1954,31 @@ function priceInput(r){
   });
 }
 function priceOf(r){
-  var rails=0, drawSecs=0, doors=0, sliding=false, anyDoor=false;
+  // clients get the materials only (owner 2026-11-21: no labour or assembly price; assembly is agreed with whoever does it)
+  var runs=[], slide=0, ow=r.openW||0;
   S.secs.forEach(function(sc){
-    sc.zones.forEach(function(z){ if(z.type==='hanging') rails++; });
-    if(sc.zones.some(function(z){ return z.type==='drawers'&&z.drawers>0; })) drawSecs++;
-    if(sc.door&&sc.door.on){ anyDoor=true; if(sc.door.type==='sliding') sliding=true; doors+=sc.door.type==='sliding'?1:(sc.door.count||1); }
+    sc.zones.forEach(function(z){ if(z.type==='hanging') runs.push(Math.max(0,Math.round(ow-10))); });
+    if(sc.door&&sc.door.on&&sc.door.type==='sliding') slide+=ow+S.thick;
   });
-  var m=WardrobePrice.materials(priceInput(r), {doorHandle:priceDoorHandle, drawerHandle:30, rails:rails});
-  var est=WardrobePrice.estimate({widthMm:S.w, heightMm:S.h, depthMm:S.d, type:!anyDoor?'open':sliding?'sliding':'hinged', doors:Math.max(2,Math.min(6,doors||2)),
-    interior:drawSecs===0?'basic':drawSecs<3?'standard':'premium', finish:'laminate', location:'central'});
-  return {m:m, est:est};
+  return {m:WardrobePrice.materials(priceInput(r), {doorHandle:priceDoorHandle, drawerHandle:30, railRuns:runs, slidingWidth:slide})};
 }
 function ghs(v){ return 'GH₵ '+Math.round(v).toLocaleString('en-GH'); }
 function updatePriceBar(){
   var bar=document.getElementById('price-bar'); if(!bar||!window.WardrobePrice) return;
   try{
     var r=calculate(), p=priceOf(r);
-    bar.innerHTML='<span>Materials so far <b>'+ghs(p.m.total)+'</b></span><span class="pb-sub">'+p.m.boards+' boards, '+p.m.bandM+' m edge band, screws and handles'+(p.m.oversize?'. '+p.m.oversize+' part'+(p.m.oversize>1?'s are':' is')+' longer than a board: add a unit on the Frame &amp; Panels tab':'')+'</span>'+
-      (p.est?'<span class="pb-sub">Made and installed by us: '+ghs(p.est.low)+' to '+ghs(p.est.high).replace('GH₵ ','')+'</span>':'');
+    bar.innerHTML='<span>Materials so far <b>'+ghs(p.m.total)+'</b></span><span class="pb-sub">'+p.m.boards+' boards, '+p.m.bandM+' m edge band, hardware and handles'+(p.m.oversize?'. '+p.m.oversize+' part'+(p.m.oversize>1?'s are':' is')+' longer than a board: add a unit on the Frame &amp; Panels tab':'')+'</span>';
     document.body.classList.add('has-price-bar');
   }catch(e){ bar.innerHTML=''; }
 }
 function priceCard(r){
   var p=priceOf(r), m=p.m;
   var h='<div class="rcard" id="price-card"><div class="rcard-hdr"><div class="rcard-title">Materials Price</div><div class="rcard-badge">'+ghs(m.total)+'</div></div><div style="padding:.8rem 1rem">';
-  h+='<p style="font-size:.85rem;margin-bottom:.6rem">What it costs to buy the materials for this wardrobe at Accra prices: build it yourself, or buy them and have Neewoody assemble it. Edge banding follows your Edge Band Sheet.</p>';
+  h+='<p style="font-size:.85rem;margin-bottom:.6rem">What it costs to buy the materials for this wardrobe at Accra prices, hardware included. Edge banding follows your Edge Band Sheet. Prices are a guide and move with the market.</p>';
   h+='<label class="no-print" style="display:inline-flex;gap:.5rem;align-items:center;font-size:.85rem;margin-bottom:.6rem">Door handles <select onchange="priceDoorHandle=+this.value;refreshPriceCard()"><option value="30"'+(priceDoorHandle===30?' selected':'')+'>30 cm</option><option value="60"'+(priceDoorHandle===60?' selected':'')+'>60 cm</option><option value="100"'+(priceDoorHandle===100?' selected':'')+'>100 cm</option><option value="0"'+(!priceDoorHandle?' selected':'')+'>None</option></select></label>';
   h+='<table class="price-tbl">'+m.lines.map(function(l){ return '<tr><td>'+l.item+(/handle/i.test(l.item)?' × '+l.qty:'')+'<br><span style="font-size:.75rem;color:var(--clr-muted)">'+l.note+'</span></td><td class="c">'+ghs(l.cost)+'</td></tr>'; }).join('')+
     '<tr class="tot"><td><b>Materials total</b></td><td class="c">'+ghs(m.total)+'</td></tr></table>';
-  if(m.unpriced.length) h+='<p style="font-size:.8rem;color:var(--clr-muted);margin-top:.6rem">Also needed, priced at the shop: '+m.unpriced.map(function(u){ return u.item.toLowerCase()+' ('+u.qty+')'; }).join(', ')+'.</p>';
-  if(p.est) h+='<p style="font-size:.85rem;margin-top:.6rem">Made and installed by Neewoody in laminate: about <b>'+ghs(p.est.low)+' to '+ghs(p.est.high).replace('GH₵ ','')+'</b>. <a href="https://wa.me/233244633464?text='+encodeURIComponent('Hi Neewoody, I made a wardrobe cut list ('+S.w+' x '+S.h+' x '+S.d+' mm) on your website. Materials come to about '+ghs(m.total)+'. I would like: [a full quote / to buy the materials and have you assemble]')+'" style="color:var(--clr-accent-dk);text-decoration:underline">Ask us on WhatsApp</a></p>';
+  h+='<p style="font-size:.85rem;margin-top:.6rem">Need someone to put it together? <a href="https://wa.me/233244633464?text='+encodeURIComponent('Hi Neewoody, I made a wardrobe cut list ('+S.w+' x '+S.h+' x '+S.d+' mm) on your website. Materials come to about '+ghs(m.total)+'. Can you connect me with someone to assemble it?')+'" style="color:var(--clr-accent-dk);text-decoration:underline">Ask us on WhatsApp</a> and we will connect you with a carpenter. The assembly fee is agreed between you.</p>';
   return h+'</div></div>';
 }
 function refreshPriceCard(){ var c=document.getElementById('price-card'); if(c){ c.outerHTML=priceCard(calculate()); } updatePriceBar(); }
