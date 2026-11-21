@@ -1,14 +1,17 @@
 // Parity test: the Smart Generator engine (js/smart/engine.js) against the wardrobe cutlist
 // (cutlist.html calculate()) on a range of wardrobes. Every part name, size and count must match,
 // and the engine's placed parts must not clash. Run: node scripts/test-smart-engine.mjs
-// (starts a local web server on port 8766; needs Playwright, which this repo's environment has).
+// (starts a local web server on port 8766; needs Playwright + its Chromium. On the owner's PC it is
+// installed in the main checkout's node_modules (npm install --no-save playwright; npx playwright install chromium),
+// which worktrees under .claude/worktrees find by walking up.)
 import { createRequire } from 'node:module';
 const { chromium } = createRequire(import.meta.url)('playwright');  // CommonJS lookup finds a globally installed Playwright
 import { spawn } from 'node:child_process';
 
 const PORT = 8766;
-const server = spawn('python3', ['-m', 'http.server', String(PORT)], { stdio: 'ignore' });
-await new Promise(r => setTimeout(r, 800));
+// Windows has "python", Mac/Linux "python3".
+const server = spawn(process.platform === 'win32' ? 'python' : 'python3', ['-m', 'http.server', String(PORT)], { stdio: 'ignore' });
+await new Promise(r => setTimeout(r, 1500));
 
 const CASES = [
   ['default wardrobe', {}],
