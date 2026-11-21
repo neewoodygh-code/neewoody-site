@@ -1,0 +1,60 @@
+---
+// The free tools as cards (owner 2026-11-21: "make the free tools their own cards, more noticeable").
+// Used on the Concierge landing (full set) and under the login form (compact). Whole card is the link.
+// tone: 'light' (bone page) or 'dark' (navy page); compact: fewer tools and smaller text.
+const { tone = 'light', compact = false, heading = 'Free tools, no account needed', lede = '' } = Astro.props;
+const ALL = [
+  { href: '/cutlist', title: 'Wardrobe cut list', text: 'Every board, edge and screw for a wardrobe, with the materials price adding up as you build.', icon: 'cut' },
+  { href: '/cut-sheet', title: 'Cut sheet', text: 'Type in any parts. Get the machine-shop sheet, edge banding and how many boards to buy.', icon: 'sheet' },
+  { href: '/wardrobe-planner', title: 'Wardrobe planner', text: 'Design a wardrobe in 3D and see what the materials cost. Made for clients.', icon: 'cube' },
+  { href: '/wardrobe-estimator', title: 'Price estimator', text: 'A price range for a wardrobe made and fitted by Neewoody.', icon: 'tag' },
+  { href: '/smart-generator', title: 'Smart Generator', text: 'Experimental. Describe a wardrobe and get it in 3D with its cut list.', icon: 'spark' },
+];
+const tools = compact ? ALL.slice(0, 3) : ALL;
+const ICON = {
+  cut: 'M4 3h16v18H4z M12 3v18 M4 9h8 M12 14h8',
+  sheet: 'M3 3h18v18H3z M3 10h18 M10 10v11 M15 3v7',
+  cube: 'M12 2.5 20.5 7v10L12 21.5 3.5 17V7z M3.5 7 12 11.5 20.5 7 M12 11.5v10',
+  tag: 'M3 12V4h8l10 10-8 8z M7.5 8.5h.01',
+  spark: 'M12 3v4 M12 17v4 M3 12h4 M17 12h4 M6 6l2.5 2.5 M15.5 15.5 18 18 M6 18l2.5-2.5 M15.5 8.5 18 6',
+};
+---
+<section class={'tcards ' + tone + (compact ? ' compact' : '')} data-nav={compact ? undefined : 'light'} aria-labelledby={compact ? 'tc-h-c' : 'tc-h'}>
+  <h2 id={compact ? 'tc-h-c' : 'tc-h'}>{heading}</h2>
+  {lede && <p class="tc-lede">{lede}</p>}
+  <ul>
+    {tools.map((t) => (
+      <li>
+        <a href={t.href}>
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={ICON[t.icon]} /></svg>
+          <span class="tc-t">{t.title} <span aria-hidden="true">→</span></span>
+          <span class="tc-x">{t.text}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+  {compact && <p class="tc-more"><a href="/tools">See all free tools</a></p>}
+</section>
+
+<style>
+  .tcards { padding: clamp(3.5rem, 7vw, 6rem) var(--gut); }
+  .tcards.light { background: var(--bone); }
+  .tcards h2 { font-size: var(--t-h2); max-width: 18ch; }
+  .tc-lede { color: var(--stone); max-width: 52ch; margin-top: 1rem; }
+  .tcards ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 1rem; margin-top: clamp(1.8rem, 4vw, 2.8rem); }
+  .tcards a { display: flex; flex-direction: column; gap: .5rem; height: 100%; padding: 1.4rem 1.3rem; border-radius: 6px; text-decoration: none; background: #fff; color: var(--espresso); border: 1px solid var(--hair); transition: border-color .3s, background-color .3s; }
+  .tcards a:hover { border-color: var(--walnut); background: #fbf8f3; }
+  .tcards svg { color: var(--walnut); margin-bottom: .3rem; }
+  .tc-t { font-weight: 600; font-size: var(--t-body); }
+  .tc-x { font-size: var(--t-small); color: var(--stone); }
+  /* on the navy login page: smaller, sits under the form */
+  .tcards.dark { padding: 0; margin-top: 2.5rem; }
+  .tcards.compact h2 { font-size: var(--t-body); font-family: var(--sans); font-weight: 600; color: var(--on-dark); max-width: none; }
+  .tcards.compact ul { grid-template-columns: minmax(0, 1fr); gap: .6rem; margin-top: .9rem; }
+  .tcards.compact a { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: .8rem; padding: .9rem 1rem; }
+  .tcards.compact svg { margin: 0; width: 24px; height: 24px; }
+  .tcards.compact .tc-x { flex-basis: 100%; }
+  .tc-more { margin-top: .9rem; font-size: var(--t-small); }
+  .tc-more a:hover { background: none; }
+  .tc-more a { display: inline; padding: 0; border: 0; background: none; color: var(--brass); text-decoration: underline; text-underline-offset: 3px; }
+</style>

@@ -355,6 +355,21 @@ const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
   if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1px solid ${S.border}`,opacity:disabled?.4:1,...st}}>{ch}</button>;
   return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?S.bgAlt:(color||S.dark),color:disabled?S.muted:'#fff',opacity:disabled?.6:1}}>{ch}</button>;
 };
+// A big, obvious button for opening a sheet (owner 2026-11-21: the outline buttons blended in): icon, title, one line.
+const SHEET_ICONS={
+  client:<path d="M6 2.5h9l4 4v15H6z M15 2.5v4h4 M9 11h7 M9 14.5h7 M9 18h4"/>,
+  market:<path d="M3.5 5h2l2.2 10.5h10.6L20.5 8H7 M9.5 19.5a1 1 0 1 0 0 .01 M17 19.5a1 1 0 1 0 0 .01"/>,
+  cost:<path d="M5 3.5h14v17H5z M8.5 8h7 M8.5 11.5h7 M8.5 15h4 M15.5 15h0"/>
+};
+const SheetTile=({icon,title,text,onClick})=>(
+  <button onClick={onClick} style={{display:'flex',gap:12,alignItems:'flex-start',width:'100%',textAlign:'left',background:'#fff',border:`2px solid ${S.dark}`,borderRadius:6,padding:'12px 14px',cursor:'pointer',color:S.dark,fontFamily:FB}}>
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{flex:'none',marginTop:2,color:S.accent}}>{SHEET_ICONS[icon]}</svg>
+    <span style={{flex:1,minWidth:0}}>
+      <span style={{display:'block',fontWeight:700,fontSize:'.95rem'}}>{title} <span aria-hidden="true">→</span></span>
+      <span style={{display:'block',fontSize:'.74rem',color:S.mid,lineHeight:1.45,marginTop:2}}>{text}</span>
+    </span>
+  </button>
+);
 const Card=({ch,style:st={}})=><div style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:4,padding:'14px 16px',...st}}>{ch}</div>;
 const TextInp=React.memo(({value,onChange,onBlur,placeholder,style:st={},type='text',...rest})=>(
   <input type={type} defaultValue={value} onChange={onChange} onBlur={onBlur} placeholder={placeholder||''}
@@ -2005,14 +2020,14 @@ function SummaryTab({ q, calc, cfg, session, brand, onStatusChange, onSave }) {
       <Card ch={<div>
         <Lbl ch="Customer copy"/>
         <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>A client-facing breakdown — materials plus workmanship (labour, expenses, service charge). Your overhead, tier multiplier and margin stay hidden. Print it or save as PDF.</div>
-        <Btn ch="Open client copy →" onClick={()=>setShowClient(true)} full outline color={S.dark}/>
+        <SheetTile icon="client" title="Open client copy" text="The price breakdown to print or send to your client." onClick={()=>setShowClient(true)}/>
       </div>}/>
       <Card ch={<div>
         <Lbl ch="Workshop print-outs"/>
         <div style={{fontSize:'.78rem',color:S.mid,fontFamily:FB,marginBottom:10,lineHeight:1.5}}>For your own team, never the client. The <strong>market list</strong> tells whoever goes shopping what to buy, how many and the budget, with space to write what was paid. The <strong>cost sheet</strong> lays out every cost of the job for a partner or investor.</div>
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
-          <Btn ch="Market list →" onClick={()=>setSheet('market')} full outline color={S.dark}/>
-          <Btn ch="Cost sheet →" onClick={()=>setSheet('cost')} full outline color={S.dark}/>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:10}}>
+          <SheetTile icon="market" title="Market list" text="What to buy, how many and the budget, for whoever goes shopping." onClick={()=>setSheet('market')}/>
+          <SheetTile icon="cost" title="Cost sheet" text="Every cost of the job, for a partner or investor." onClick={()=>setSheet('cost')}/>
         </div>
       </div>}/>
       <Card ch={<div>

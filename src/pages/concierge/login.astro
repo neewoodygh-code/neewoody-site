@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/forms.css';
 import '../../styles/doors.css';
 import Nav from '../../components/Nav.astro';
+import ToolCards from '../../components/ToolCards.astro';
 import Footer from '../../components/Footer.astro';
 ---
 <Base title="Member Login · Carpentry Concierge" description="Log in to Carpentry Concierge with your phone number and PIN." path="/concierge/login" noindex concierge>
@@ -33,6 +34,7 @@ import Footer from '../../components/Footer.astro';
         Not a member yet? <a href="register.html">Register here</a><br />
         Forgotten your PIN? Message us on <a href="https://wa.me/233244633464" target="_blank" rel="noopener">WhatsApp</a>.
       </p>
+      <ToolCards tone="dark" compact heading="Free tools, no account needed" />
     </div>
   </main>
   <Footer bare />

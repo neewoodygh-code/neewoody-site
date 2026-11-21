@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/forms.css';
 import '../../styles/doors.css';
 import Nav from '../../components/Nav.astro';
+import ToolCards from '../../components/ToolCards.astro';
 import Footer from '../../components/Footer.astro';
 ---
 <Base title="Carpentry Concierge — hire a vetted carpenter, or join the network | Ghana"
@@ -33,6 +34,8 @@ import Footer from '../../components/Footer.astro';
       </div>
     </section>
 
+    <ToolCards lede="Use them now, free. Members save their work and get the member tools: job pricing, invoices and more." />
+
     <section class="cc-about" data-nav="light">
       <h2>What is Carpentry Concierge?</h2>
       <p>A members’ network for Ghanaian carpenters, vendors and couriers, built by Neewoody. Clients get a trusted artisan without the guesswork. Artisans get visibility, work, sourcing and safety tools in one place.</p>
@@ -42,7 +45,6 @@ import Footer from '../../components/Footer.astro';
         <div><dt>Tools and safety</dt><dd>Job pricing, cut lists, and a lone-worker safety check-in.</dd></div>
       </dl>
       <p class="cc-links">
-        <a class="ulink" href="/tools">Free tools</a>
         <a class="ulink" href="/concierge/login">Member login</a>
         <a class="ulink" href="/hire">Post a job</a>
       </p>
