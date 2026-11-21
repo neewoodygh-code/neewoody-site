@@ -268,7 +268,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261121"></script>
+<script src="js/smart/engine.js?v=20261121b"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
 <script>
 (function () {
@@ -460,7 +460,9 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   $('exDae').onclick = function () { exp('dae'); };
 
   /* ---------------- KITCHEN editor (2026-11-21): runs of units, built by SmartEngine kitchen() ---------------- */
-  var KPREFS = 'nwd-smart-kprefs', KSTATE = 'nwd-smart-kitchen', MODE = 'nwd-smart-mode', K0 = SmartEngine.KSHOP;
+  // a browser holding an older engine file (no kitchens) must not break the wardrobe side: hide the switch instead
+  var KOK = !!SmartEngine.KSHOP;
+  var KPREFS = 'nwd-smart-kprefs', KSTATE = 'nwd-smart-kitchen', MODE = 'nwd-smart-mode', K0 = SmartEngine.KSHOP || {};
   var KCONS = { 'k-thick': SH.thick, 'k-bthick': K0.backThick, 'k-leg': K0.legH, 'k-jh': K0.jH, 'k-rail': K0.rail, 'k-srail': K0.sinkRail,
     'k-edge': SH.edgeClear, 'k-dgap': SH.doorGap, 'k-run': SH.runGap };
   var KGROUPS = { carcass: 'Carcass', frame: 'Rails', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', panel: 'Side panels and fillers' };
@@ -702,8 +704,9 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   }
   document.querySelectorAll('.mode button').forEach(function (b) { b.onclick = function () { setMode(b.dataset.mode); }; });
 
-  loadCons(); drawSecs(); kInit();
-  setMode(location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE)));
+  loadCons(); drawSecs();
+  if (KOK) { kInit(); setMode(location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE))); }
+  else { document.querySelector('.mode').hidden = true; go(); }
 })();
 </script>
 <script src="js/tool-settings.js?v=20261117"></script>
