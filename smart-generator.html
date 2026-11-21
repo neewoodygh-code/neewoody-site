@@ -68,6 +68,28 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 .ui-btn.sm { font-size: var(--t-small); padding: .65rem 1rem; }
 .ui-btn.ghost { background: #fff; color: var(--espresso); border: 1px solid var(--hair); }
 .ui-btn.ghost:hover { background: var(--bone); }
+.mode { display: inline-flex; margin-top: 1.1rem; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; background: #fff; }
+.mode button { font: 500 var(--t-small) var(--sans); padding: .55rem 1.2rem; border: 0; background: none; color: var(--espresso); cursor: pointer; }
+.mode button + button { border-left: 1px solid var(--hair); }
+.mode button[aria-pressed="true"] { background: var(--navy); color: var(--on-dark, #fff); }
+.run { border-top: 1px solid var(--hair); padding-top: .9rem; margin-top: .9rem; }
+.run-head { display: flex; gap: .5rem; align-items: center; margin-bottom: .6rem; }
+.run-head input { flex: 1; font: 600 var(--t-small) var(--sans); color: var(--espresso); border: 1px solid var(--hair); border-radius: 6px; padding: .45rem .55rem; }
+.ku { background: var(--bone); border-radius: 6px; padding: .55rem; margin-top: .5rem; }
+.ku-bar { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.ku-bar b { font-size: var(--t-small); font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ku-btns { display: flex; gap: .2rem; flex: none; }
+.ku-btns .mini { width: 1.9rem; padding: .25rem 0; background: #fff; }
+.ku-det { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .4rem; margin-top: .45rem; align-items: end; }
+.ku-det .f + .f { margin-top: 0; }
+.ku-det .f label, .ku-det .lbl { display: block; font-size: .78rem; color: var(--stone); font-weight: 500; margin-bottom: .2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ku-det .f input, .ku-det .f select { padding: .4rem .4rem; }
+.ku-det .wide { grid-column: span 2; }
+.ku-det .full { grid-column: 1 / -1; }
+.ku .fixed { display: block; font-size: var(--t-small); color: var(--stone); padding: .4rem 0; }
+#hw h3 { font-size: var(--t-small); font-weight: 600; margin: 1.1rem 0 .4rem; }
+#hw ul { font-size: var(--t-small); margin-left: 1.1rem; }
+#hw li + li { margin-top: .15rem; }
 .print-only { display: none; }
 @media print {
   @page { size: A4; margin: 12mm; }
@@ -110,7 +132,11 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 
 <main class="sg">
   <h1>Smart Generator <span style="font-weight:400;color:var(--stone)">(experimental)</span></h1>
-  <p class="lede">Describe a wardrobe. Every part is placed in 3D first and the cut list is read off the model, so the two always agree and parts that run into each other are flagged. Wardrobes only for now; kitchens come next.</p>
+  <p class="lede">Describe a wardrobe or a kitchen. Every part is placed in 3D first and the cut list is read off the model, so the two always agree and parts that run into each other are flagged.</p>
+  <div class="mode no-print" role="group" aria-label="What are you making?">
+    <button type="button" data-mode="wardrobe" aria-pressed="true">Wardrobe</button>
+    <button type="button" data-mode="kitchen" aria-pressed="false">Kitchen</button>
+  </div>
 
   <div class="print-only">
     <div class="pnote"><b>EXPERIMENTAL: check every size before cutting.</b> Made with the Carpentry Concierge Smart Generator, which is under construction. Neewoody Custom Woodwork and Carpentry Concierge accept no responsibility for material cut or work done from these figures.</div>
@@ -119,6 +145,46 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 
   <div class="sg-grid">
     <div class="left">
+      <div id="kitEd" hidden>
+        <div class="card">
+          <h2>Kitchen</h2>
+          <div class="row2">
+            <div class="f"><label for="k-wt">Worktop height (mm)</label><input id="k-wt" type="number" inputmode="numeric"></div>
+            <div class="f"><label for="k-room">Back wall length (mm)</label><input id="k-room" type="number" inputmode="numeric"></div>
+          </div>
+          <p class="hint">Base units stand on legs. The worktop's doubled 4 cm edge sits flush with the carcass top, so base sides are the worktop height less 40 less the legs.</p>
+          <div class="acts" style="margin-top:.6rem"><button type="button" class="mini" data-load="straight">Start a straight kitchen</button><button type="button" class="mini" data-load="u">Load a U-shaped example</button></div>
+        </div>
+        <div class="card">
+          <h2>Runs</h2>
+          <p class="hint" style="margin-top:0">A run is one line of units along a wall, base or wall cabinets. Units go left to right as you face the wall. On a side wall, "starts at" is measured from the back wall. Drawer heights are shared out to fit the unit. A hob cut-out depth of 0 means no hob; a return depth of 0 means the same depth as the run. A gap leaves space for an appliance.</p>
+          <div id="kRuns"></div>
+          <button type="button" class="mini" id="kAddRun" style="margin-top:.8rem">Add a run</button>
+        </div>
+        <div class="card">
+          <details class="cons">
+            <summary>Construction (your own settings)</summary>
+            <div class="row3">
+              <div class="f"><label for="k-thick">Board (mm)</label><input id="k-thick" type="number"></div>
+              <div class="f"><label for="k-bthick">Back (mm)</label><input id="k-bthick" type="number"></div>
+              <div class="f"><label for="k-leg">Legs (mm)</label><input id="k-leg" type="number"></div>
+            </div>
+            <div class="row3" style="margin-top:.7rem">
+              <div class="f"><label for="k-jh">J-profile (mm)</label><input id="k-jh" type="number"></div>
+              <div class="f"><label for="k-rail">Rails (mm)</label><input id="k-rail" type="number"></div>
+              <div class="f"><label for="k-srail">Sink rails (mm)</label><input id="k-srail" type="number"></div>
+            </div>
+            <div class="row3" style="margin-top:.7rem">
+              <div class="f"><label for="k-edge">Door edge gap</label><input id="k-edge" type="number"></div>
+              <div class="f"><label for="k-dgap">Gap between fronts</label><input id="k-dgap" type="number"></div>
+              <div class="f"><label for="k-run">Runner gap</label><input id="k-run" type="number"></div>
+            </div>
+            <p class="hint">Remembered on this device. Every door and drawer front is shortened by the J-profile. Backs are screwed on; the sink unit has none.</p>
+            <button type="button" class="mini" id="k-reset" style="margin-top:.6rem">Reset to standard</button>
+          </details>
+        </div>
+      </div>
+      <div id="wardEd">
       <div class="card">
         <h2>Size</h2>
         <div class="row3">
@@ -162,6 +228,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
           <button type="button" class="mini" id="c-reset" style="margin-top:.6rem">Reset to standard</button>
         </details>
       </div>
+      </div>
     </div>
 
     <div class="right">
@@ -171,6 +238,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
         <h2>Cut list</h2>
         <div class="sum" id="sum"></div>
         <div style="overflow-x:auto" tabindex="0" role="region" aria-label="Cut list table"><table class="cl" id="cl"></table></div>
+        <div id="hw"></div>
         <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
         <div class="acts">
           <button type="button" class="ui-btn sm" id="toSheet">Send to the Cut Sheet</button>
@@ -305,20 +373,31 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     return bad;
   }
 
-  var last = null, timer = null;
+  var last = null, timer = null, mode = 'wardrobe';
   function run() { clearTimeout(timer); timer = setTimeout(go, 150); }
   function go() {
-    var sp = spec(), bad = check(sp);
+    var kit = mode === 'kitchen', sp = kit ? kSpec() : spec(), bad = kit ? kCheck(sp) : check(sp);
+    $('hw').innerHTML = '';
     if (bad.length) { last = null; $('warns').innerHTML = '<div class="warns"><b>Fix these first:</b><ul>' + bad.map(function (b) { return '<li>' + esc(b) + '</li>'; }).join('') + '</ul></div>'; $('cl').innerHTML = ''; $('sum').innerHTML = ''; return; }
     var r;
     try { r = SmartEngine.build(sp); } catch (e) { last = null; $('warns').innerHTML = '<div class="warns"><b>The engine could not build this.</b> Try other sizes, and please tell us what you entered.</div>'; if (window.console) console.error(e); return; }
-    last = { spec: sp, r: r };
-    var w = r.warnings.map(esc).concat(r.clashes.map(function (c) { return 'Parts run into each other: ' + esc(c); }));
-    $('warns').innerHTML = w.length ? '<div class="warns"><b>Check these:</b><ul><li>' + w.join('</li><li>') + '</li></ul></div>'
+    last = { spec: sp, r: r, kit: kit };
+    var w = (kit ? kNotes(sp) : []).concat(r.warnings).map(esc).concat(r.clashes.map(function (c) { return 'Parts run into each other: ' + esc(c); }));
+    $('warns').innerHTML = w.length ? '<div class="warns' + (r.clashes.length ? '' : ' ok') + '"><b>' + (r.clashes.length ? 'Check these:' : 'No clashes found. Notes to check:') + '</b><ul><li>' + w.join('</li><li>') + '</li></ul></div>'
       : '<div class="warns ok">No clashes found: every part fits without running into another. Still check the sizes yourself.</div>';
-    drawList(r.parts);
-    $('pSpec').textContent = 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm, ' + sp.units + ' carcass' + (sp.units > 1 ? 'es' : '') + ', ' + sp.sections.length + ' sections. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
-    if (window.Cutlist3D) Cutlist3D.mount($('v3d'), SmartEngine.forViewer(r.boxes), { height: 'clamp(300px,52vw,460px)' });
+    drawList(r.parts, sp.shop, kit);
+    if (kit) {
+      var hk = Object.keys(r.hardware || {});
+      $('hw').innerHTML = hk.length ? '<h3>Hardware and bought items (not on the cut list)</h3><ul>' + hk.map(function (k) { return '<li>' + r.hardware[k] + ' × ' + esc(k) + '</li>'; }).join('') + '</ul>' : '';
+      var nU = sp.runs.reduce(function (a, rn) { return a + rn.units.filter(function (u) { return /base|sink|wall|cornerL/.test(u.type); }).length; }, 0);
+      $('pSpec').textContent = 'Kitchen: ' + sp.runs.length + ' run' + (sp.runs.length > 1 ? 's' : '') + ', ' + nU + ' units, worktop ' + sp.worktop + ' mm. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
+    } else $('pSpec').textContent = 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm, ' + sp.units + ' carcass' + (sp.units > 1 ? 'es' : '') + ', ' + sp.sections.length + ' sections. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
+    if (window.Cutlist3D) Cutlist3D.mount($('v3d'), viewBoxes(), { height: 'clamp(300px,52vw,460px)' });
+  }
+  // kitchen boxes have Z = out from the back wall; the viewer's z runs the other way
+  function viewBoxes() {
+    var vb = SmartEngine.forViewer(last.r.boxes);
+    return last.kit ? vb.map(function (b) { return Object.assign({}, b, { z: -b.z - b.d }); }) : vb;
   }
   // edge banding comes on as standard; L = long edges, W = short edges (length = the longer size, along the grain)
   function ebText(e) {
@@ -327,20 +406,20 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     if (!L && !W) return 'none';
     return [L ? L + ' long' : '', W ? W + ' short' : ''].filter(Boolean).join(', ');
   }
-  function ebMetres(parts) {
-    return parts.reduce(function (m, p) { var e = SmartEngine.edges(p, (last && last.spec || spec()).shop), lo = Math.max(p.a, p.b), sh = Math.min(p.a, p.b);
+  function ebMetres(parts, shop) {
+    return parts.reduce(function (m, p) { var e = SmartEngine.edges(p, shop), lo = Math.max(p.a, p.b), sh = Math.min(p.a, p.b);
       return m + ((e.l + e.r) * lo + (e.t + e.b) * sh) * p.qty / 1000; }, 0);
   }
-  function drawList(parts) {
-    var by = {}, order = [], qty = 0, area = 0;
+  function drawList(parts, shop, kit) {
+    var by = {}, order = [], qty = 0, area = 0, G = kit ? KGROUPS : GROUPS;
     parts.forEach(function (p) { if (!by[p.tag]) { by[p.tag] = []; order.push(p.tag); } by[p.tag].push(p); qty += p.qty; if (!/back/i.test(p.name)) area += p.a * p.b * p.qty / 1e6; });
     var h = '<thead><tr><th>Part</th><th style="text-align:right">Length</th><th style="text-align:right">Width</th><th style="text-align:right">Qty</th><th>Edge band</th><th class="note">Note</th></tr></thead><tbody>';
     order.forEach(function (tag) {
-      h += '<tr class="grp"><td colspan="6">' + esc(GROUPS[tag] || tag) + '</td></tr>';
-      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + Math.max(p.a, p.b) + '</td><td class="n">' + Math.min(p.a, p.b) + '</td><td class="n">' + p.qty + '</td><td class="eb">' + ebText(SmartEngine.edges(p, (last && last.spec || spec()).shop)) + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
+      h += '<tr class="grp"><td colspan="6">' + esc(G[tag] || tag) + '</td></tr>';
+      by[tag].forEach(function (p) { h += '<tr><td>' + esc(p.name) + (p.note ? '<div class="note-m">' + esc(p.note) + '</div>' : '') + '</td><td class="n">' + Math.max(p.a, p.b) + '</td><td class="n">' + Math.min(p.a, p.b) + '</td><td class="n">' + p.qty + '</td><td class="eb">' + ebText(SmartEngine.edges(p, shop)) + '</td><td class="note">' + esc(p.note || '') + '</td></tr>'; });
     });
     $('cl').innerHTML = h + '</tbody>';
-    $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span><b>' + Math.ceil(ebMetres(parts)) + '</b> m of edge band</span><span>Sizes in mm; length runs with the grain</span>';
+    $('sum').innerHTML = '<span><b>' + qty + '</b> pieces</span><span><b>' + area.toFixed(2) + '</b> m² of board (backs not counted)</span><span><b>' + Math.ceil(ebMetres(parts, shop)) + '</b> m of edge band</span><span>Sizes in mm; length runs with the grain</span>';
   }
 
   // the acknowledgement: needed before anything leaves the page; remembered on this device
@@ -355,8 +434,9 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
 
   $('toSheet').onclick = function () {
     if (!last || !acked()) return;
-    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, (last && last.spec || spec()).shop) }; });
-    var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)', parts: rows, thick: sp.shop.thick }));
+    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop) }; });
+    var nm = last.kit ? 'Kitchen, worktop ' + sp.worktop + ' (Smart Generator, check sizes)' : 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)';
+    var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: nm, parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
     location.href = '/cut-sheet.html#from-smart';
   };
@@ -365,12 +445,13 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   function exp(kind) {
     if (!last || !acked()) return;
     if (!member()) { if (confirm('Client 3D files and SketchUp files are member tools.\n\nLog in or join Carpentry Concierge now?')) location.href = '/concierge/login.html?next=' + encodeURIComponent('/smart-generator.html'); return; }
-    var sp = last.spec, boxes = SmartEngine.forViewer(last.r.boxes), size = sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm', base = 'wardrobe-' + sp.w + 'x' + sp.h + 'x' + sp.d;
-    if (kind === 'dae') { Cutlist3D.download(base + '.dae', Cutlist3D.toDAE(boxes, 'Wardrobe ' + size), 'model/vnd.collada+xml'); return; }
-    var title = prompt('Name on the client file (e.g. "Master bedroom wardrobe")', 'Wardrobe design'); if (title === null) return;
+    var sp = last.spec, boxes = viewBoxes(), K = last.kit, Wd = K ? 'Kitchen' : 'Wardrobe';
+    var size = K ? 'worktop ' + sp.worktop + ' mm' : sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm', base = K ? 'kitchen-' + sp.room.w : 'wardrobe-' + sp.w + 'x' + sp.h + 'x' + sp.d;
+    if (kind === 'dae') { Cutlist3D.download(base + '.dae', Cutlist3D.toDAE(boxes, Wd + ' ' + size), 'model/vnd.collada+xml'); return; }
+    var title = prompt('Name on the client file (e.g. "' + (K ? 'Main kitchen' : 'Master bedroom wardrobe') + '")', Wd + ' design'); if (title === null) return;
     var bp = (window.ToolSettings && ToolSettings.loadBusiness) ? ToolSettings.loadBusiness() : Promise.resolve(null);
     bp.then(function (b) {
-      return Cutlist3D.offlineHTML(boxes, { title: title || 'Wardrobe design', size: size, date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+      return Cutlist3D.offlineHTML(boxes, { title: title || Wd + ' design', size: size, date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
         business: b && b.bizName || '', phone: b && (b.phone || b.whatsapp) || '' });
     }).then(function (html) { Cutlist3D.download(base + '-3d.html', html, 'text/html'); })
       .catch(function (e) { alert('Could not make the file. Check your connection and try again. (' + e.message + ')'); });
@@ -378,7 +459,251 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   $('exHtml').onclick = function () { exp('html'); };
   $('exDae').onclick = function () { exp('dae'); };
 
-  loadCons(); drawSecs(); go();
+  /* ---------------- KITCHEN editor (2026-11-21): runs of units, built by SmartEngine kitchen() ---------------- */
+  var KPREFS = 'nwd-smart-kprefs', KSTATE = 'nwd-smart-kitchen', MODE = 'nwd-smart-mode', K0 = SmartEngine.KSHOP;
+  var KCONS = { 'k-thick': SH.thick, 'k-bthick': K0.backThick, 'k-leg': K0.legH, 'k-jh': K0.jH, 'k-rail': K0.rail, 'k-srail': K0.sinkRail,
+    'k-edge': SH.edgeClear, 'k-dgap': SH.doorGap, 'k-run': SH.runGap };
+  var KGROUPS = { carcass: 'Carcass', frame: 'Rails', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', panel: 'Side panels and fillers' };
+  var UTYPES = { base: 'Base unit', sink: 'Sink unit', wall: 'Wall unit', cornerL: 'L corner', panel: 'Side panel', filler: 'Filler', gap: 'Gap' };
+  var RUN_TYPES = { base: ['base', 'sink', 'cornerL', 'panel', 'filler', 'gap'], wall: ['wall', 'cornerL', 'panel', 'filler', 'gap'] };
+  // examples, written the engine's way; fromEngine() turns them into editor state
+  var EX = {
+    straight: { worktop: 900, room: { w: 3000 }, runs: [
+      { name: 'Back wall, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
+        { type: 'base', name: 'A', w: 600, drawers: [140, 320, 320] },
+        { type: 'base', name: 'B', w: 600, drawers: [380, 380], hob: { d: 490 } },
+        { type: 'sink', name: 'C', w: 800, doors: 2, sinkCut: { w: 720, d: 420 } },
+        { type: 'base', name: 'D', w: 600, doors: 1, shelves: 1 } ] },
+      { name: 'Back wall, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'wall', name: 'A upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'B upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'C upper', w: 800, doors: 2, shelves: 2 },
+        { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 2 } ] } ] },
+    // the engine's first real test job (scripts/test-kitchen-prampram.mjs), without the tall unit, pantry and island
+    u: { worktop: 900, room: { w: 4010 }, runs: [
+      { name: 'Back wall, base', wall: 'back', at: 12, depth: 580, kind: 'base', units: [
+        { type: 'cornerL', name: 'B', w: 800, r: 1000, returnDepth: 580, side: 'left', carousel: true, note: 'carousel behind bi-fold doors; check its size against the 800 leg' },
+        { type: 'panel', name: 'B|C' },
+        { type: 'base', name: 'C', w: 600, drawers: [140, 320, 320] },
+        { type: 'base', name: 'D', w: 600, drawers: [380, 380], hob: { d: 490 } },
+        { type: 'sink', name: 'E', w: 1150, doors: 2, sinkCut: { w: 720, d: 420 } },
+        { type: 'panel', name: 'E|F' },
+        { type: 'cornerL', name: 'F', w: 800, r: 800, returnDepth: 380, side: 'right', shelves: 1 } ] },
+      { name: 'Right wall, base', wall: 'right', at: 800, off: 12, depth: 380, kind: 'base', units: [
+        { type: 'base', name: 'G', w: 400, drawers: [220, 220, 320] },
+        { type: 'base', name: 'H', w: 600, drawers: [380, 380] },
+        { type: 'base', name: 'I', w: 600, drawers: [220, 220, 320] },
+        { type: 'base', name: 'J', w: 600, drawers: [140, 320, 320] } ] },
+      { name: 'Back wall, wall cabinets', wall: 'back', at: 12, depth: 300, kind: 'wall', bottom: 1500, height: 1200, ceilingFiller: 100, units: [
+        { type: 'cornerL', name: 'B upper', w: 800, r: 1000, returnDepth: 300, side: 'left', shelves: 3 },
+        { type: 'filler', name: 'over B|C', w: 18 },
+        { type: 'wall', name: 'C upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 3, fixed: 1, note: 'hood cabinet: adjust on site for the hood' },
+        { type: 'wall', name: 'E upper 1', w: 575, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'wall', name: 'E upper 2', w: 575, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'filler', name: 'over E|F', w: 18 },
+        { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 3, fixed: 1 } ] },
+      { name: 'Right wall, wall cabinets', wall: 'right', at: 800, off: 12, depth: 280, kind: 'wall', bottom: 1335, height: 1365, ceilingFiller: 100, units: [
+        { type: 'wall', name: 'G upper', w: 400, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'wall', name: 'H upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'wall', name: 'I upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'wall', name: 'J upper', w: 600, doors: 1, shelves: 3, fixed: 1 } ] } ] }
+  };
+  function uiUnit(u) {
+    return { type: u.type, name: u.name || '', w: u.w || 0, front: u.drawers ? 'drawers' : 'doors', drawers: (u.drawers || [140, 320, 320]).join(', '),
+      doors: u.doors || 1, shelves: u.shelves || 0, fixed: u.fixed || 0, hobD: u.hob ? u.hob.d : 0,
+      sinkW: u.sinkCut ? u.sinkCut.w : 720, sinkD: u.sinkCut ? u.sinkCut.d : 420,
+      r: u.r || 900, returnDepth: u.returnDepth || 0, side: u.side || 'left', carousel: !!u.carousel, note: u.note || '' };
+  }
+  function fromEngine(sp) {
+    return { worktop: sp.worktop, roomW: sp.room.w, runs: sp.runs.map(function (r) {
+      return { name: r.name, wall: r.wall || 'back', kind: r.kind || 'base', at: r.at || 0, off: r.off || 0, depth: r.depth,
+        bottom: r.bottom || 1500, height: r.height || 720, ceilingFiller: r.ceilingFiller || 0, units: r.units.map(uiUnit) };
+    }) };
+  }
+  function newUnit(type) {
+    return uiUnit(Object.assign({ type: type }, { base: { w: 600, drawers: [140, 320, 320] }, sink: { w: 900, doors: 2, sinkCut: { w: 720, d: 420 } },
+      wall: { w: 600, doors: 1, shelves: 2 }, cornerL: { w: 900, r: 900, side: 'left', shelves: 1 }, panel: {}, filler: { w: 50 }, gap: { w: 600 } }[type]));
+  }
+  function parseList(s) { return String(s).split(/[^0-9.]+/).map(parseFloat).filter(function (v) { return v > 0; }); }
+  function knum(id) { var v = parseFloat($(id).value); return isFinite(v) ? v : KCONS[id]; }
+
+  var KS = null;
+  function kSave() { put(KSTATE, JSON.stringify(KS)); }
+  function kSpec() {
+    return { type: 'kitchen', worktop: KS.worktop, room: { w: KS.roomW },
+      shop: { thick: knum('k-thick'), edgeClear: knum('k-edge'), doorGap: knum('k-dgap'), runGap: knum('k-run') },
+      kshop: { backThick: knum('k-bthick'), legH: knum('k-leg'), jH: knum('k-jh'), rail: knum('k-rail'), sinkRail: knum('k-srail') },
+      runs: KS.runs.map(function (r, ri) {
+        var o = { name: r.name || ('Run ' + (ri + 1)), wall: r.wall, kind: r.kind, at: r.at, off: r.off, depth: r.depth, units: r.units.map(function (u, ui) {
+          var e = { type: u.type, name: u.name || ('R' + (ri + 1) + '-' + (ui + 1)), w: u.type === 'panel' ? 0 : u.w };
+          if (u.note) e.note = u.note;
+          if (u.type === 'base') {
+            if (u.front === 'drawers') e.drawers = parseList(u.drawers); else { e.doors = u.doors; e.shelves = u.shelves; }
+            if (u.hobD > 0) e.hob = { d: u.hobD };
+          } else if (u.type === 'sink') { e.doors = u.doors; if (u.sinkW > 0 && u.sinkD > 0) e.sinkCut = { w: u.sinkW, d: u.sinkD }; }
+          else if (u.type === 'wall') { e.doors = u.doors; e.shelves = u.shelves; e.fixed = Math.min(u.fixed, u.shelves); }
+          else if (u.type === 'cornerL') {
+            e.r = u.r; e.returnDepth = u.returnDepth || r.depth; e.side = u.side;
+            if (r.kind === 'base' && u.carousel) e.carousel = true; else e.shelves = u.shelves;
+          }
+          return e;
+        }) };
+        if (r.kind === 'wall') { o.bottom = r.bottom; o.height = r.height; o.ceilingFiller = r.ceilingFiller; }
+        return o;
+      }) };
+  }
+  function kCheck(sp) {
+    var bad = [];
+    if (!(sp.worktop >= 700 && sp.worktop <= 1100)) bad.push('Worktop height should be between 700 and 1100 mm.');
+    if (!(sp.room.w >= 1000 && sp.room.w <= 12000)) bad.push('Back wall length should be between 1000 and 12000 mm.');
+    if (!sp.runs.length) bad.push('Add a run.');
+    sp.runs.forEach(function (r) {
+      var L = r.name + ': ';
+      if (!r.units.length) bad.push(L + 'add a unit.');
+      if (!(r.depth >= 250 && r.depth <= 800)) bad.push(L + 'depth should be between 250 and 800 mm.');
+      if (r.kind === 'wall' && !(r.bottom >= 900 && r.bottom <= 2600)) bad.push(L + 'the bottom of the wall cabinets should be 900 to 2600 mm off the floor.');
+      if (r.kind === 'wall' && !(r.height >= 200 && r.height <= 1600)) bad.push(L + 'height should be between 200 and 1600 mm.');
+      r.units.forEach(function (u) {
+        var n = L + u.name + ': ', min = u.type === 'filler' ? 5 : (/base|sink|wall/.test(u.type) ? 250 : 100);
+        if (u.type !== 'panel' && !(u.w >= min && u.w <= 2000)) bad.push(n + 'width should be ' + min + ' to 2000 mm.');
+        if (u.drawers && !u.drawers.length) bad.push(n + 'give at least one drawer height.');
+        if (u.drawers && u.drawers.length > 6) bad.push(n + 'six drawers at most.');
+        if (u.hob && u.hob.d >= r.depth) bad.push(n + 'the hob cut-out is deeper than the unit.');
+        if (u.sinkCut && u.sinkCut.w > u.w - 40) bad.push(n + 'the sink cut-out is wider than the unit.');
+        if (u.type === 'cornerL') {
+          if (u.r < r.depth + 200) bad.push(n + 'the return (along the side wall) must be at least 200 mm longer than this run is deep.');
+          if (u.w < u.returnDepth + 200) bad.push(n + 'the back leg must be at least 200 mm longer than the return is deep.');
+        }
+      });
+    });
+    return bad;
+  }
+  function kNotes(sp) {      // how each run adds up against the back wall
+    var t = sp.shop.thick;
+    return sp.runs.map(function (r) {
+      var len = Math.round(r.units.reduce(function (a, u) { return a + (u.type === 'panel' ? t : u.w); }, 0)), at = r.at || 0;
+      if (r.wall !== 'back') return r.name + ': units add up to ' + len + ' mm, starting ' + at + ' mm from the back wall.';
+      var left = sp.room.w - at - len;
+      return r.name + ': units add up to ' + len + ' mm' + (left < 0 ? ', ' + (-left) + ' mm PAST the end of the ' + sp.room.w + ' mm wall' : ', ' + left + ' mm of wall left') + '.';
+    });
+  }
+
+  function opt(list, cur) { return list.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? ' selected' : '') + '>' + o[1] + '</option>'; }).join(''); }
+  function da(ri, ui, k) { return 'id="k' + ri + '-' + (ui == null ? 'r' : ui) + '-' + k + '" data-r="' + ri + '"' + (ui == null ? '' : ' data-u="' + ui + '"') + ' data-k="' + k + '"'; }
+  function lab(ri, ui, k, label) { return '<label for="k' + ri + '-' + (ui == null ? 'r' : ui) + '-' + k + '">' + label + '</label>'; }
+  function nf(ri, ui, k, label, val, cls) { return '<div class="f' + (cls ? ' ' + cls : '') + '">' + lab(ri, ui, k, label) + '<input type="number" inputmode="numeric" ' + da(ri, ui, k) + ' value="' + esc(val) + '"></div>'; }
+  function tf(ri, ui, k, label, val, cls) { return '<div class="f' + (cls ? ' ' + cls : '') + '">' + lab(ri, ui, k, label) + '<input type="text" ' + da(ri, ui, k) + ' value="' + esc(val) + '"></div>'; }
+  function sf(ri, ui, k, label, list, cur, cls) { return '<div class="f' + (cls ? ' ' + cls : '') + '">' + lab(ri, ui, k, label) + '<select ' + da(ri, ui, k) + '>' + opt(list, cur) + '</select></div>'; }
+
+  function unitHtml(r, ri, u, ui) {
+    var L = esc(r.name) + ', unit ' + (ui + 1) + (u.name ? ' ' + esc(u.name) : ''), base = r.kind === 'base';
+    var h = '<div class="ku" role="group" aria-label="' + L + '"><div class="ku-bar"><b>' + (ui + 1) + '. ' + esc(u.name || UTYPES[u.type]) + '</b>' +
+      '<span class="ku-btns"><button type="button" class="mini" data-mv="' + ri + ':' + ui + ':-1" aria-label="Move ' + L + ' left">&larr;</button>' +
+      '<button type="button" class="mini" data-mv="' + ri + ':' + ui + ':1" aria-label="Move ' + L + ' right">&rarr;</button>' +
+      '<button type="button" class="mini" data-delu="' + ri + ':' + ui + '" aria-label="Remove ' + L + '">&times;</button></span></div>' +
+      '<div class="ku-det">' + sf(ri, ui, 'type', 'Type', RUN_TYPES[r.kind].map(function (t) { return [t, UTYPES[t]]; }), u.type) + tf(ri, ui, 'name', 'Name', u.name) +
+      (u.type === 'panel' ? '<div class="f"><span class="lbl">Width</span><span class="fixed">the board</span></div>' : nf(ri, ui, 'w', u.type === 'cornerL' ? 'Back leg' : 'Width', u.w)) + '</div>';
+    var d = '';
+    if (u.type === 'base') {
+      d += sf(ri, ui, 'front', 'Front', [['drawers', 'Drawers'], ['doors', 'Doors']], u.front);
+      d += u.front === 'drawers' ? tf(ri, ui, 'drawers', 'Drawer heights, top down', u.drawers, 'wide')
+        : sf(ri, ui, 'doors', 'Doors', [[1, '1'], [2, '2']], u.doors) + nf(ri, ui, 'shelves', 'Shelves', u.shelves);
+      d += nf(ri, ui, 'hobD', 'Hob depth', u.hobD);
+    } else if (u.type === 'sink') {
+      d += sf(ri, ui, 'doors', 'Doors', [[1, '1'], [2, '2']], u.doors) + nf(ri, ui, 'sinkW', 'Cut-out width', u.sinkW) + nf(ri, ui, 'sinkD', 'Cut-out depth', u.sinkD);
+    } else if (u.type === 'wall') {
+      d += sf(ri, ui, 'doors', 'Doors', [[1, '1'], [2, '2']], u.doors) + nf(ri, ui, 'shelves', 'Shelves', u.shelves) + nf(ri, ui, 'fixed', 'Fixed (lowest)', u.fixed);
+    } else if (u.type === 'cornerL') {
+      d += sf(ri, ui, 'side', 'Corner', [['left', 'Left'], ['right', 'Right']], u.side) + nf(ri, ui, 'r', 'Return', u.r) + nf(ri, ui, 'returnDepth', 'Return depth', u.returnDepth);
+      if (base) d += sf(ri, ui, 'carousel', 'Inside', [[0, 'Shelves'], [1, 'Carousel']], u.carousel ? 1 : 0);
+      if (!base || !u.carousel) d += nf(ri, ui, 'shelves', 'Shelves', u.shelves);
+    }
+    if (/base|sink|wall|cornerL/.test(u.type)) d += tf(ri, ui, 'note', 'Note (shown in the checks)', u.note, 'full');
+    return h + (d ? '<div class="ku-det">' + d + '</div>' : '') + '</div>';
+  }
+  function drawRuns() {
+    var h = '';
+    KS.runs.forEach(function (r, ri) {
+      var wallRun = r.kind === 'wall';
+      h += '<div class="run"><div class="run-head"><input type="text" ' + da(ri, null, 'name') + ' value="' + esc(r.name) + '" aria-label="Run ' + (ri + 1) + ' name">' +
+        (KS.runs.length > 1 ? '<button type="button" class="mini x" data-delrun="' + ri + '" aria-label="Remove ' + esc(r.name) + '">&times;</button>' : '') + '</div>';
+      h += '<div class="row3">' + sf(ri, null, 'kind', 'Cabinets', [['base', 'Base'], ['wall', 'Wall']], r.kind) + sf(ri, null, 'wall', 'Wall', [['back', 'Back'], ['left', 'Left'], ['right', 'Right']], r.wall) + nf(ri, null, 'depth', 'Depth', r.depth) + '</div>';
+      h += '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'at', 'Starts at', r.at) + nf(ri, null, 'off', 'Off the wall', r.off) + (wallRun ? nf(ri, null, 'bottom', 'Bottom at', r.bottom) : '<span></span>') + '</div>';
+      if (wallRun) h += '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'height', 'Height', r.height) + nf(ri, null, 'ceilingFiller', 'Ceiling filler', r.ceilingFiller) + '</div>';
+      r.units.forEach(function (u, ui) { h += unitHtml(r, ri, u, ui); });
+      h += '<button type="button" class="mini" data-addu="' + ri + '" style="margin-top:.6rem">Add a unit</button></div>';
+    });
+    $('kRuns').innerHTML = h;
+  }
+  function kEdit(e) {
+    var t = e.target, k = t.dataset.k; if (!k || t.dataset.r == null) return;
+    var r = KS.runs[+t.dataset.r], ui = t.dataset.u, u = ui != null ? r.units[+ui] : null, o = u || r;
+    var v = t.type === 'number' ? (parseFloat(t.value) || 0) : t.value;
+    if (k === 'type') {
+      if (e.type !== 'change') return;
+      var nu = newUnit(v); nu.name = u.name; if (u.type !== 'panel' && /base|sink|wall|cornerL/.test(v) && /base|sink|wall|cornerL/.test(u.type)) nu.w = u.w;
+      r.units[+ui] = nu; kSave(); drawRuns(); run(); return;
+    }
+    if (k === 'doors') v = +v;
+    if (k === 'carousel') v = v === '1';
+    if (k === 'kind' && v !== r.kind) {        // selects fire input before change, so do this on whichever comes first
+      r.units = r.units.map(function (x) { return RUN_TYPES[v].indexOf(x.type) !== -1 ? x : Object.assign(newUnit(v), { name: x.name, w: x.w }); });
+      if (v === 'wall' && r.depth > 400) r.depth = 300;
+      if (v === 'base' && r.depth < 450) r.depth = 560;
+    }
+    o[k] = v; kSave();
+    if (k === 'name' && u) t.closest('.ku').querySelector('.ku-bar b').textContent = (+ui + 1) + '. ' + (v || UTYPES[u.type]);
+    if (e.type === 'change' && /^(kind|front|carousel)$/.test(k)) drawRuns();
+    run();
+  }
+  $('kRuns').addEventListener('input', kEdit);
+  $('kRuns').addEventListener('change', kEdit);
+  $('kRuns').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; var d = b.dataset;
+    if (d.addu != null) { var rr = KS.runs[+d.addu]; rr.units.push(newUnit(rr.kind === 'wall' ? 'wall' : 'base')); }
+    else if (d.delu) { var p = d.delu.split(':'); KS.runs[+p[0]].units.splice(+p[1], 1); }
+    else if (d.mv) { var q = d.mv.split(':'), us = KS.runs[+q[0]].units, i = +q[1], j = i + +q[2]; if (j < 0 || j >= us.length) return; var tmp = us[i]; us[i] = us[j]; us[j] = tmp; }
+    else if (d.delrun != null) { if (!confirm('Remove "' + KS.runs[+d.delrun].name + '" and all its units?')) return; KS.runs.splice(+d.delrun, 1); }
+    else return;
+    kSave(); drawRuns(); run();
+    if (d.mv) { var f = document.querySelector('[data-mv="' + q[0] + ':' + j + ':' + q[2] + '"]'); if (f) f.focus(); }
+  });
+  $('kAddRun').onclick = function () {
+    KS.runs.push({ name: 'Run ' + (KS.runs.length + 1), wall: 'back', kind: 'wall', at: 0, off: 0, depth: 300, bottom: 1500, height: 720, ceilingFiller: 0, units: [newUnit('wall')] });
+    kSave(); drawRuns(); run();
+  };
+  document.querySelectorAll('[data-load]').forEach(function (b) {
+    b.onclick = function () {
+      if (!confirm('Replace the kitchen you have here with this one?')) return;
+      KS = fromEngine(EX[b.dataset.load]); kSave(); kTop(); drawRuns(); run();
+    };
+  });
+  function kTop() { $('k-wt').value = KS.worktop; $('k-room').value = KS.roomW; }
+  [['k-wt', 'worktop'], ['k-room', 'roomW']].forEach(function (a) { $(a[0]).addEventListener('input', function () { KS[a[1]] = parseFloat(this.value) || 0; kSave(); run(); }); });
+  function kSaveCons() { var p = {}; Object.keys(KCONS).forEach(function (id) { p[id] = $(id).value; }); put(KPREFS, JSON.stringify(p)); }
+  function kInit() {
+    var p = {}; try { p = JSON.parse(get(KPREFS) || '{}') || {}; } catch (e) {}
+    Object.keys(KCONS).forEach(function (id) {
+      $(id).value = p[id] != null ? p[id] : KCONS[id];
+      $(id).addEventListener('input', run); $(id).addEventListener('change', function () { kSaveCons(); run(); });
+    });
+    $('k-reset').onclick = function () { Object.keys(KCONS).forEach(function (id) { $(id).value = KCONS[id]; }); kSaveCons(); run(); };
+    try { KS = JSON.parse(get(KSTATE) || 'null'); } catch (e) { KS = null; }
+    if (!KS || !KS.runs) KS = fromEngine(EX.straight);
+    kTop(); drawRuns();
+  }
+  function setMode(m) {
+    mode = m === 'kitchen' ? 'kitchen' : 'wardrobe'; put(MODE, mode);
+    document.querySelectorAll('.mode button').forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.mode === mode ? 'true' : 'false'); });
+    $('kitEd').hidden = mode !== 'kitchen'; $('wardEd').hidden = mode === 'kitchen';
+    if (history.replaceState) history.replaceState(null, '', location.pathname + location.search + (mode === 'kitchen' ? '#kitchen' : ''));
+    go();
+  }
+  document.querySelectorAll('.mode button').forEach(function (b) { b.onclick = function () { setMode(b.dataset.mode); }; });
+
+  loadCons(); drawSecs(); kInit();
+  setMode(location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE)));
 })();
 </script>
 <script src="js/tool-settings.js?v=20261117"></script>

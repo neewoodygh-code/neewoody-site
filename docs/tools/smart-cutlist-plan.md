@@ -175,12 +175,18 @@ Later: keep each member's edits to AI-suggested specs (with their consent) and u
    - **It found two real problems in the job:** the hob cut-out (490) was deeper than the 420 between D's top rails, and the sink cut-out (420) had 0 mm to spare between E's rails. **Owner's fixes (2026-11-21), now built:**
      - **Under a hob,** the front rail is stood upright, the flat back rail is left out, and the upright back rail comes up to the top. That gives 544 mm for the hob, and the top drawer box stays under the front rail.
      - **Under a sink,** the flat rails are 60 wide (`sinkRail`), giving 460 mm, so 40 mm spare.
-   - **Not yet:** tall unit A, pantry K, the island, the laundry (owner: their own logic), the page's kitchen editor, and the hand-off to the Cut Sheet for kitchens.
+   - **Not yet:** tall unit A, pantry K, the island, the laundry (owner: their own logic).
+   - **Kitchen editor on the page DONE 2026-11-21 (owner: "build the kitchen editor on the Smart Generator page"):** `smart-generator.html` has a Wardrobe / Kitchen switch (remembered per device in `nwd-smart-mode`; `#kitchen` in the URL opens it). Kitchen side:
+     - worktop height and back wall length; "Start a straight kitchen" and "Load a U-shaped example" (the Prampram job without names: gives exactly the test's 218 rows / 304 pieces, no clashes).
+     - **Runs** (name, base or wall, which wall, depth, starts at, off the wall; wall runs add bottom height, height, ceiling filler) and **units** in each run (type, name, width, move left/right, remove). Per type: base = drawers (heights top down, shared out to fit) or doors + shelves, and a hob cut-out depth; sink = doors + cut-out size; wall = doors, shelves, fixed; L corner = side, return, return depth, carousel or shelves; note shown in the checks.
+     - Kitchen construction settings (board, back, legs, J-profile, rails, sink rails, door edge gap, gap between fronts, runner gap), remembered in `nwd-smart-kprefs`; the kitchen itself is kept in `nwd-smart-kitchen`.
+     - Checks before building (sizes in range, sink/hob cut-outs fit, L corner legs longer than the depths) and, after, how each run adds up against the back wall.
+     - Output shares the wardrobe's: 3D (kitchen z flipped for the viewer), cut list grouped Carcass / Rails / Shelves / Doors / Drawers / Side panels and fillers, a **Hardware and bought items** list, print, Send to the Cut Sheet (name "Kitchen, worktop 900 (Smart Generator, check sizes)"; the Cut Sheet counts the 3 mm backs too, so the U example shows 29 boards there against the test's 24 without backs), client 3D and SketchUp files for members.
+   - **Playwright installed 2026-11-21** (owner's go-ahead) in the main checkout's `node_modules` (`--no-save`) + its Chromium; the wardrobe parity test passes 9/9 on Windows (it now starts `python` on Windows, `python3` elsewhere).
    - **Confirmed by the owner (2026-11-21):**
      - **L blanks** are a square at the larger leg size (B: 979 × 979). The machine shop cuts the square and the workshop cuts the L out, since shops don't cut complicated shapes.
      - **Base carcass depth** = client's depth − 20.
      - Amina's wall depths (30 / 28) are her carcass depths without doors.
-   - The wardrobe parity test (`test-smart-engine.mjs`) needs Playwright, which isn't installed on the owner's Windows machine. The wardrobe output was checked instead by comparing the old and new engine on 3 wardrobes: identical.
 4. **Checks** (section 4b) + **Construction tab** in the shared Settings panel.
 5. **Spec editor + front-view drawing** (new member tool page), sending parts straight into the Cut Sheet (one cut list per material).
 6. **AI: words → spec.** Then **sketch photo → spec.**
