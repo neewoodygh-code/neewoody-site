@@ -352,7 +352,7 @@ const Btn=({ch,onClick,color,outline,full,disabled,size='md',style:st={}})=>{
   const p=size==='lg'?'14px 22px':size==='sm'?'5px 11px':'8px 16px';
   const fs=size==='lg'?'1rem':size==='sm'?'.72rem':'.82rem';
   const base={border:'none',borderRadius:4,padding:p,fontFamily:FB,fontWeight:500,fontSize:fs,letterSpacing:'.06em',cursor:disabled?'not-allowed':'pointer',width:full?'100%':'auto',transition:'all .15s',...st};
-  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1px solid ${S.border}`,opacity:disabled?.4:1}}>{ch}</button>;
+  if(outline) return <button onClick={onClick} disabled={disabled} style={{...base,background:'transparent',color:color||S.mid,border:`1px solid ${S.border}`,opacity:disabled?.4:1,...st}}>{ch}</button>;
   return <button onClick={onClick} disabled={disabled} style={{...base,background:disabled?S.bgAlt:(color||S.dark),color:disabled?S.muted:'#fff',opacity:disabled?.6:1}}>{ch}</button>;
 };
 const Card=({ch,style:st={}})=><div style={{background:S.bgAlt,border:`1px solid ${S.border}`,borderRadius:4,padding:'14px 16px',...st}}>{ch}</div>;
@@ -1614,7 +1614,22 @@ function LogisticsTab({ q, upd }) {
 // Expenses (overhead + logistics, encapsulated — no tool-wear line items a
 // layman would balk at) and a Service charge (the margin). Tier multiplier,
 // gross-margin %, net-profit projection and day-rate never appear here.
+// Full-screen sheets (client copy, market list, cost sheet): Escape or a click on the dark backdrop closes them,
+// focus moves to Close on open and returns to where it was (owner 2026-11-21: no way out of the materials sheet).
+function useSheetClose(onClose) {
+  const closeRef = React.useRef(null);
+  useEffect(() => {
+    const back = document.activeElement;
+    const onKey = e => { if (e.key === 'Escape') { e.preventDefault(); onClose(); } };
+    document.addEventListener('keydown', onKey);
+    const t = setTimeout(() => { const bs = closeRef.current ? closeRef.current.querySelectorAll('button') : []; if (bs.length) bs[bs.length - 1].focus(); }, 0);
+    return () => { document.removeEventListener('keydown', onKey); clearTimeout(t); if (back && back.focus) back.focus(); };
+  }, []);
+  return { closeRef, onBackdrop: e => { if (e.target === e.currentTarget) onClose(); } };
+}
+const SHEET_BAR = {position:'sticky',top:0,zIndex:1,background:'rgba(28,26,23,.92)',padding:'10px 12px',borderRadius:6};
 function ClientCopy({ q, calc, session, brand, onClose }) {
+  const { closeRef, onBackdrop } = useSheetClose(onClose);
   const bName = (brand && brand.name) || session?.workshopName || 'My Workshop';
   const bContact = [brand && brand.phone, brand && brand.location].filter(Boolean).join('  ·  ');
   const bLogo = brand && brand.logoUrl;
@@ -1633,15 +1648,15 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
   // flex/overflow scroll ancestors — otherwise @media print clipped it / emitted
   // blank pages. With it as a direct body child, print can hide everything else.
   return ReactDOM.createPortal(
-    <div className="cc-overlay" style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
-      <div className="no-print" style={{maxWidth:480,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
+    <div className="cc-overlay" role="dialog" aria-modal="true" aria-label="Sheet" onClick={onBackdrop} style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
+      <div className="no-print" style={{...SHEET_BAR,maxWidth:480,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
         <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',color:'#fff',fontFamily:FB,fontSize:'.8rem'}}>
           <input type="checkbox" checked={itemize} onChange={e=>setItemize(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>
           Itemise materials
         </label>
-        <div style={{display:'flex',gap:8}}>
+        <div ref={closeRef} style={{display:'flex',gap:8}}>
           <Btn ch="Print / Save PDF" onClick={()=>window.print()} color={S.accent} size="sm"/>
-          <Btn ch="Close" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.5)'}}/>
+          <Btn ch="Close ✕" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.7)'}}/>
         </div>
       </div>
       <div id="client-copy" style={{maxWidth:480,margin:'0 auto',background:'#fff',padding:'24px 26px'}}>
@@ -1714,6 +1729,7 @@ function ClientCopy({ q, calc, session, brand, onClose }) {
 //  • Cost sheet: the full cost build-up (materials, crew, logistics,
 //    overhead) to share with a partner. Price and margin only when ticked.
 function InternalSheet({ kind, q, calc, cfg, session, brand, onClose }) {
+  const { closeRef, onBackdrop } = useSheetClose(onClose);
   const market   = kind === 'market';
   const bName    = (brand && brand.name) || session?.workshopName || 'My Workshop';
   const bContact = [brand && brand.phone, brand && brand.location].filter(Boolean).join('  ·  ');
@@ -1769,17 +1785,17 @@ function InternalSheet({ kind, q, calc, cfg, session, brand, onClose }) {
   const transport = +log.primary || 0;
 
   return ReactDOM.createPortal(
-    <div className="cc-overlay" style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
-      <div className="no-print" style={{maxWidth:720,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
+    <div className="cc-overlay" role="dialog" aria-modal="true" aria-label="Sheet" onClick={onBackdrop} style={{position:'fixed',inset:0,background:'rgba(28,26,23,.55)',zIndex:200,overflowY:'auto',padding:16}}>
+      <div className="no-print" style={{...SHEET_BAR,maxWidth:720,margin:'0 auto 10px',display:'flex',gap:8,alignItems:'center',justifyContent:'space-between',flexWrap:'wrap'}}>
         <label style={{display:'flex',alignItems:'center',gap:6,cursor:'pointer',color:'#fff',fontFamily:FB,fontSize:'.8rem'}}>
           {market
             ? <input type="checkbox" checked={showPrices} onChange={e=>setShowPrices(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>
             : <input type="checkbox" checked={showMargin} onChange={e=>setShowMargin(e.target.checked)} style={{accentColor:S.accent,width:15,height:15}}/>}
           {market ? 'Show budget prices' : 'Include price and margin'}
         </label>
-        <div style={{display:'flex',gap:8}}>
+        <div ref={closeRef} style={{display:'flex',gap:8}}>
           <Btn ch="Print / Save PDF" onClick={()=>window.print()} color={S.accent} size="sm"/>
-          <Btn ch="Close" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.5)'}}/>
+          <Btn ch="Close ✕" onClick={onClose} outline size="sm" style={{color:'#fff',borderColor:'rgba(255,255,255,.7)'}}/>
         </div>
       </div>
       <div id="internal-sheet" style={{maxWidth:720,margin:'0 auto',background:'#fff',color:ink,padding:'26px 28px'}}>
