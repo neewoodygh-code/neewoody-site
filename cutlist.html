@@ -2233,6 +2233,29 @@ function dismissFirstRun(){ var el=document.getElementById('firstRun'); if(el) e
   if(!frDone){ var el=document.getElementById('firstRun'); if(el) el.style.display='flex'; }
 })();
 
+// A design sent over from the homeowner wardrobe planner (/wardrobe-planner, 2026-11-21): read once, then removed.
+// The planner lets the top space "take the rest"; the cutlist needs every height, so the top one is worked out here.
+function takePlannerHandoff(){
+  var h=null; try{ h=JSON.parse(localStorage.getItem('nwd-planner-handoff')||'null'); localStorage.removeItem('nwd-planner-handoff'); }catch(e){}
+  if(!h||!h.design||!Array.isArray(h.design.secs)||!h.design.secs.length||Date.now()-(h.at||0)>30*60*1000) return;
+  var d=h.design, inner=d.h-S.tkH-2*S.thick;
+  var secs=d.secs.map(function(sc){
+    var zs=sc.zones.map(function(z){ return {type:z.type, h:Math.round(z.h||0), shelves:z.shelves||0, drawers:z.drawers||0}; });
+    var below=zs.slice(1).reduce(function(t,z){ return t+z.h; },0);
+    zs[0].h=Math.max(100, Math.round(inner-below));
+    return {zones:zs, door:{on:!!sc.door.on, count:sc.door.count||1, type:sc.door.type||'hinged', bottom:sc.door.bottom||'full'}};
+  });
+  restoreConfig({S:{w:d.w, h:d.h, d:d.d, modUnits:d.units||1, secs:secs}});
+  if(d.doorHandle!=null) priceDoorHandle=+d.doorHandle;
+  var note=document.createElement('div');
+  note.setAttribute('role','status');
+  note.style.cssText='background:#17130f;color:#efe9df;padding:.8rem 1rem;border-radius:8px;margin:0 0 1rem;font-size:.9rem;line-height:1.5';
+  note.innerHTML='<b>Your design from the wardrobe planner is loaded.</b> Every board, edge and screw is below, with the materials price at the bottom of the screen. Check the sizes against your room before you buy or cut. <a href="/wardrobe-planner" style="color:#c49455">Back to the planner</a>';
+  var wrap=document.querySelector('.calc-wrap'); if(wrap) wrap.insertBefore(note, wrap.firstChild);
+  setTimeout(function(){ generate(); }, 50);
+}
+takePlannerHandoff();
+
 </script>
 <script>
 /* The printed sheet keeps its original fonts, which the screen no longer uses.

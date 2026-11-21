@@ -68,7 +68,7 @@ import { WA } from '../data.js';
               <b id="wp-diy">GH₵ —</b>
               <small id="wp-diy-note"></small>
               <details><summary>What's in it</summary><table class="wp-lines" id="wp-lines"></table><p class="wp-unp" id="wp-unp"></p></details>
-              <a class="ulink" href="/cutlist">Get the full cut list to buy and cut your boards</a>
+              <a class="ulink" id="wp-cl" href="/cutlist">Get the full cut list for this design</a>
             </div>
           </div>
           <div class="wp-acts">
@@ -155,7 +155,16 @@ import { WA } from '../data.js';
     ['wp-w', 'wp-h', 'wp-d'].forEach(function (id) { $(id).addEventListener('input', run); });
 
     function num(id) { return parseFloat($(id).value); }
-    var timer;
+    var timer, lastSpec = null;
+    // hand this design to the full cutlist (it reads nwd-planner-handoff once on load and opens the cut list)
+    $('wp-cl').addEventListener('click', function () {
+      if (!lastSpec) return;
+      try {
+        localStorage.setItem('nwd-planner-handoff', JSON.stringify({ at: Date.now(), design: {
+          w: lastSpec.w, h: lastSpec.h, d: lastSpec.d, units: lastSpec.units, doorHandle: +$('wp-hd').value,
+          secs: lastSpec.sections.map(function (sc) { return { zones: sc.zones, door: sc.door }; }) } }));
+      } catch (e) {}
+    });
     function run() { clearTimeout(timer); timer = setTimeout(go, 200); }
     function go() {
       var w = num('wp-w'), h = num('wp-h'), d = num('wp-d'), n = secs.length, type = $('wp-type').value, bad = [];
@@ -164,9 +173,9 @@ import { WA } from '../data.js';
       if (!(d >= 350 && d <= 900)) bad.push('Depth should be between 350 and 900 mm.');
       if (!bad.length && w / n < 300) bad.push('Each section would be under 300 mm wide. Choose fewer sections or a wider wardrobe.');
       $('wp-msg').textContent = bad.join(' ');
-      if (bad.length) return;
+      if (bad.length) { lastSpec = null; return; }
       var units = n <= 3 ? 1 : n % 3 === 0 ? n / 3 : n % 2 === 0 ? n / 2 : 1, ih = h - 100 - 36;
-      var spec = { w: w, h: h, d: d, units: units, sections: secs.map(function (s) {
+      var spec = lastSpec = { w: w, h: h, d: d, units: units, sections: secs.map(function (s) {
         return { zones: LAYOUTS[s.lay][1](ih).map(function (z) { return { type: z.type, h: z.h || 0, shelves: z.shelves || 0, drawers: z.drawers || 0 }; }),
           door: { on: type !== 'open', count: type === 'hinged' ? s.doors : 1, type: type === 'sliding' ? 'sliding' : 'hinged', bottom: 'full' } };
       }) };
