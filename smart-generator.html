@@ -21,6 +21,9 @@ if (location.hostname === 'neewoodygh.com') { window.dataLayer = window.dataLaye
 .wip p + p { margin-top: .35rem; }
 .wip a { color: var(--walnut); }
 .sg { max-width: 1240px; margin: 0 auto; padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 3rem; }
+.sg-crumb { display: flex; flex-wrap: wrap; gap: .45rem; font-size: var(--t-small); color: var(--stone); margin-bottom: .8rem; }
+.sg-crumb a { color: var(--stone); text-decoration: underline; text-underline-offset: 2px; }
+.sg-crumb a:hover { color: var(--ink, #17130f); }
 .sg h1 { font-size: var(--t-h3); font-weight: 600; line-height: 1.2; }
 .sg .lede { color: var(--stone); margin-top: .4rem; max-width: 60ch; }
 .sg-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 1.5rem; margin-top: 1.5rem; align-items: start; }
@@ -131,6 +134,11 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 </div>
 
 <main class="sg">
+  <nav class="sg-crumb no-print" aria-label="Breadcrumb">
+    <a href="/concierge/" data-cc-home>Carpentry Concierge</a><span aria-hidden="true">›</span>
+    <a href="/tools" data-cc-tools>Tools</a><span aria-hidden="true">›</span>
+    <span aria-current="page">Smart Generator</span>
+  </nav>
   <h1>Smart Generator <span style="font-weight:400;color:var(--stone)">(experimental)</span></h1>
   <p class="lede">Describe a wardrobe or a kitchen. Every part is placed in 3D first and the cut list is read off the model, so the two always agree and parts that run into each other are flagged.</p>
   <div class="mode no-print" role="group" aria-label="What are you making?">
@@ -279,7 +287,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 </main>
 
 <footer class="app-foot">
-  <a href="/tools">Free tools</a>
+  <a href="/tools" data-cc-tools>Free tools</a>
   <a href="/concierge/">Carpentry Concierge</a>
   <a href="/contact">Contact</a>
   <a href="/privacy">Privacy</a>
