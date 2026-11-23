@@ -1960,7 +1960,7 @@ function takeSmartHandoff(){
   if(hasContent() && !confirm('Start a new cut list with the '+h.parts.length+' parts from the Smart Generator?\n\nYour current list stays in its project.')) return;
   if(hasContent()) newList();
   parts=[]; ebState={}; seq=1; curListId=null;
-  h.parts.forEach(function(p){ var id=uid(); parts.push({id:id,name:String(p.name||''),L:+p.L||0,W:+p.W||0,qty:Math.max(1,+p.qty||1),code:''}); var e=p.eb||{}, v=function(x){ return x===2?2:(x?1:0); }; ebState[id]={t:v(e.t),r:v(e.r),b:v(e.b),l:v(e.l),gflip:false}; });
+  h.parts.forEach(function(p){ var id=uid(); parts.push({id:id,name:String(p.name||''),L:+p.L||0,W:+p.W||0,qty:Math.max(1,+p.qty||1),code:String(p.code||'').slice(0,40)}); var e=p.eb||{}, v=function(x){ return x===2?2:(x?1:0); }; ebState[id]={t:v(e.t),r:v(e.r),b:v(e.b),l:v(e.l),gflip:false}; });
   U.listName=String(h.name||'Smart Generator'); U.entryMode='list';
   if(+h.thick>0) U.thick=+h.thick;
   fillSettings(); renderParts(); renderAll(); save(); renderListChips();

@@ -518,9 +518,28 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     return false;
   }
 
+  // Group identical pieces for the cutting shop (owner 2026-11-23: "a lot of parts, check if similar parts are grouped").
+  // Same length, width (grain) and edge banding = one row with the quantities added; the name keeps the part types
+  // ("Back Rail / Top Rail"), without the unit names. The cut list on this page stays per unit for assembly.
+  // Thin back panels get their own board code, so the Cut Sheet packs them on their own sheets and prints them on their
+  // own page (before, they were packed into the 18 mm boards and inflated the count).
+  function groupForShop(rows, backCode) {
+    var map = {}, out = [];
+    rows.forEach(function (p) {
+      var e = p.eb || {}, code = /back panel/i.test(p.name) ? backCode : '';
+      var k = code + ':' + p.L + 'x' + p.W + ':' + [e.t, e.r, e.b, e.l].map(function (x) { return x || 0; }).join('');
+      var kind = String(p.name).replace(/\s*\([^()]*\)/g, '').split(',')[0].trim();
+      if (!map[k]) { map[k] = { name: '', kinds: [], L: p.L, W: p.W, qty: 0, eb: p.eb, code: code }; out.push(map[k]); }
+      map[k].qty += p.qty;
+      if (map[k].kinds.indexOf(kind) < 0) map[k].kinds.push(kind);
+    });
+    out.forEach(function (g) { g.name = g.kinds.slice(0, 2).join(' / ') + (g.kinds.length > 2 ? ' +' + (g.kinds.length - 2) : ''); delete g.kinds; });
+    return out;
+  }
   $('toSheet').onclick = function () {
     if (!last || !acked()) return;
-    var sp = last.spec, rows = last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop) }; });
+    var sp = last.spec, bt = (last.kit && sp.kshop && sp.kshop.backThick) || (sp.shop && sp.shop.backThick) || 3;
+    var rows = groupForShop(last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop) }; }), bt + ' mm back panel');
     var nm = last.kit ? 'Kitchen, worktop ' + sp.worktop + ' (Smart Generator, check sizes)' : 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)';
     var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: nm, parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
