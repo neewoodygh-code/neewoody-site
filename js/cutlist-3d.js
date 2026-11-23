@@ -1,3 +1,5 @@
+/* © 2015–2026 Neewoody Custom Woodwork, Accra. All rights reserved. Not licensed for copying, rebranding or resale;
+ * see https://neewoodygh.com/terms */
 /* Cutlist 3D view (built 2026-11-18).
  * Every part is placed from the cut list itself: sizes come from calculate().parts, this file only
  * decides WHERE each part sits. buildModel() also checks that every part on the list appears in the

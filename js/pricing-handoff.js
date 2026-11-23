@@ -1,3 +1,5 @@
+/* © 2015–2026 Neewoody Custom Woodwork, Accra. All rights reserved. Not licensed for copying, rebranding or resale;
+ * see https://neewoodygh.com/terms */
 /* "Price this job": hands a generator's materials to Job Pricing (carpenter-pricing.html) as a new quote.
  * Members only (owner 2026-11-21). Used by the Cut Sheet, the Smart Generator and the cutlist.
  *

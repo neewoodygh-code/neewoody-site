@@ -1,3 +1,5 @@
+/* © 2015–2026 Neewoody Custom Woodwork, Accra. All rights reserved. Not licensed for copying, rebranding or resale;
+ * see https://neewoodygh.com/terms */
 /* Materials price for a wardrobe's parts (owner's prices, 2026-11-20). Used by the homeowner planner
  * (src/pages/wardrobe-planner.astro), the cutlist (cutlist.html) and anything else that has a parts list.
  * "The more you build the more price shows": every part, edge, screw and handle is counted from the parts.

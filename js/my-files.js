@@ -1,3 +1,5 @@
+/* © 2015–2026 Neewoody Custom Woodwork, Accra. All rights reserved. Not licensed for copying, rebranding or resale;
+ * see https://neewoodygh.com/terms */
 /* My files (2026-11-23, owner: "member storage ... reached from your profile ... a folder structure of all your saves").
  * Shared by the Smart Generator and the profile page. Talks to concierge-api /api/files (migration 0036) and the
  * shared /api/clients registry. Folders are client > job. Members only; reads also work for lapsed members, saving

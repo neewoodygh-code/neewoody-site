@@ -1,3 +1,5 @@
+/* © 2015–2026 Neewoody Custom Woodwork, Accra. All rights reserved. Not licensed for copying, rebranding or resale;
+ * see https://neewoodygh.com/terms */
 /* Smart Generator engine (step 2 of docs/tools/smart-cutlist-plan.md, started 2026-11-19).
  *
  * POSITIONS FIRST: every part is placed as a box in 3D (mm; x = left to right, y = floor up,

@@ -43,6 +43,19 @@ export default {
       text: 'The chairs, the table and a console were built to one brief, in the same timber and the same espresso finish, so the whole room reads as one set.',
       link: ['/projects/judith-east-legon', 'Read the case study'] },
     { kind: 'gallery', id: 'work', title: 'More seating we have built', items: [
+      { badge: 'Lounge', place: 'A pair of lounge chairs', caption: 'Solid wood frames with deep tan cushions on the seat and back.',
+        img: P + 'lounge-chairs/lounge-chair-3.jpg', alt: 'A pair of solid wood lounge chairs with tan upholstered seat and back cushions',
+        more: [
+          'Two lounge chairs with solid wood frames: a reclined back frame, square arms and a slatted seat frame that the cushions sit on.',
+          'The seat and back cushions are tan with piped edges, and lift off the frame. The last photo shows the frames finished and stained, before the cushions went on.',
+        ],
+        photos: [
+          ph('lounge-chairs/lounge-chair-3.jpg', 'A pair of solid wood lounge chairs with tan upholstered cushions, front view'),
+          ph('lounge-chairs/lounge-chair-1.jpg', 'Lounge chair seen from the front corner'),
+          ph('lounge-chairs/lounge-chair-2.jpg', 'Lounge chair seen from the other front corner'),
+          ph('lounge-chairs/lounge-chair-4.jpg', 'Lounge chair from the side, showing the reclined back'),
+          ph('lounge-chairs/lounge-chair-frames.jpg', 'The two stained wooden frames before upholstery, outside the workshop'),
+        ] },
       { badge: 'Restaurant', place: 'Cube stools, Jerksoul rooftop', caption: 'Upholstered cube stools for more than 15 dining sets and the bar counter.',
         img: P + 'jerksoul/jerksoul-day-1.jpg', alt: 'Upholstered cube stools and pine dining tables on the Jerksoul rooftop, Accra', href: '/projects/jerksoul' },
       { badge: 'Built in', place: 'Banquette and bench, Golf Hills Estate', caption: 'An L-shaped leatherette banquette with storage under the seats, and a matching X-frame bench.',
