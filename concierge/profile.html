@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex,nofollow" />
+<title>My profile · Carpentry Concierge</title>
+<link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
+<link rel="stylesheet" href="../css/app.css?v=20261117">
+<style>
+/* My profile (2026-11-23, owner: "separate directory and member profiles"). The form and its script were moved
+   from directory.html unchanged; it saves through the same PUT /api/me. My files will live on this page too. */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  /* 2026-11-15 re-skin: Concierge navy with the site's new neutrals; one font (Manrope, from css/app.css).
+     --gold is brass (fills, and text on navy); --gold-ink is walnut, for small gold text on light backgrounds. */
+  --navy:#1f2f58; --gold:#c49455; --gold-ink:#6b4a33; --cream:#efe9df; --cream-dark:#e4dccf;
+  --ink:#17130f; --muted:#554d43;
+  --display:'Manrope',system-ui,sans-serif; --body:'Manrope',system-ui,sans-serif; --ui:'Manrope',system-ui,sans-serif;
+}
+html{font-size:16px}
+body{ background:var(--cream); color:var(--ink); font-family:var(--body); -webkit-font-smoothing:antialiased; }
+img{display:block;max-width:100%}
+button,input,select{font-family:inherit}
+a{color:inherit;text-decoration:none}
+/* header */
+header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
+  display:flex; align-items:center; justify-content:space-between; gap:1rem; position:sticky; top:0; z-index:50; }
+.top .brand{ line-height:1.15; }
+.top .brand .eyebrow{ font-family:var(--ui); font-size:.55rem; letter-spacing:.24em; text-transform:uppercase; color:var(--gold); }
+.top .brand .name{ font-family:var(--display); font-size:1.2rem; font-weight:500; }
+.top-actions{ display:flex; align-items:center; gap:.5rem; }
+.tbtn{ font-family:var(--ui); font-size:.66rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--cream); background:transparent; border:1px solid rgba(240,232,208,.35);
+  border-radius:3px; padding:.5rem .8rem; cursor:pointer; transition:background .2s,border-color .2s; }
+.tbtn:hover{ background:rgba(240,232,208,.1); border-color:var(--gold); }
+.pwrap{ max-width:640px; margin:0 auto; padding:1.25rem 1rem 3rem; }
+.crumb{ display:flex; flex-wrap:wrap; gap:.45rem; font-size:.85rem; color:var(--muted); margin-bottom:1rem; }
+.crumb a{ text-decoration:underline; text-underline-offset:2px; }
+.pcard{ background:var(--cream); border:1px solid rgba(31,47,88,.12); border-radius:6px; background:#f7f3ec; }
+.pcard .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(31,47,88,.1); }
+.pcard .mhead h1{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
+.state{ padding:2rem 1.5rem; color:var(--muted); }
+.buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
+  background:transparent; color:var(--navy); border:1px dashed rgba(31,47,88,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
+.buy-additem:hover{ border-color:var(--gold); }
+.buy-item-row{ display:flex; gap:.5rem; margin-bottom:.5rem; align-items:center; }
+.buy-item-row .bi-name{ flex:2; min-width:0; }
+.buy-item-row .bi-qty{ flex:1; min-width:0; }
+.buy-item-row .bi-del{ flex:0 0 auto; background:transparent; border:none; color:var(--muted); font-size:1.3rem; line-height:1; cursor:pointer; padding:.2rem .4rem; }
+.buy-item-row .bi-del:hover{ color:#a52a2a; }
+.buy-pin{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; margin-top:.4rem; }
+.buy-pin-btn{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.06em;
+  background:transparent; color:var(--navy); border:1px solid rgba(31,47,88,.3); border-radius:3px; padding:.5rem .8rem; cursor:pointer; }
+.buy-pin-btn:hover{ border-color:var(--gold); }
+.buy-pin-clear{ font-family:var(--ui); font-size:.66rem; background:none; border:none; color:var(--muted); text-decoration:underline; cursor:pointer; }
+.buy-pin-msg{ font-size:.76rem; color:var(--muted); }
+.buy-pin-msg.ok{ color:var(--navy); } .buy-pin-msg.error{ color:#a52a2a; }
+.pcard textarea{ width:100%; font-size:1rem; font-family:var(--body); padding:.7rem .8rem; border:1px solid rgba(31,47,88,.2); border-radius:3px; background:#fff; min-height:90px; resize:vertical; }
+.pcard .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(31,47,88,.1); }
+.pcard .mhead h2{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
+.pcard form{ padding:1.25rem 1.5rem 1.75rem; }
+.pcard label{ display:block; font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--muted); margin:1rem 0 .4rem; }
+.pcard input, .pcard select{ width:100%; font-size:1rem; padding:.7rem .8rem; border:1px solid rgba(31,47,88,.2); border-radius:3px; background:#fff; }
+.photo-row{ display:flex; align-items:center; gap:1rem; }
+.pprev{ width:72px; height:72px; border-radius:50%; background:var(--cream-dark); overflow:hidden;
+  position:relative; flex-shrink:0; border:1px solid rgba(31,47,88,.12); }
+.pprev img{ width:100%; height:100%; object-fit:cover; }
+.pprev.logo{ width:110px; height:72px; border-radius:6px; background:#fff; }
+.pprev.logo img{ object-fit:contain; padding:4px; }
+.pprev.logo .initials{ font-size:.6rem; font-family:var(--ui); letter-spacing:.1em; text-transform:uppercase; text-align:center; padding:0 6px; }
+.pprev .initials{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--display); font-size:1.5rem; color:rgba(31,47,88,.3); }
+.photo-btns{ display:flex; flex-direction:column; gap:.4rem; }
+.pbtn{ font-family:var(--ui); font-size:.66rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase;
+  background:transparent; color:var(--navy); border:1px solid rgba(31,47,88,.3); border-radius:3px;
+  padding:.45rem .8rem; cursor:pointer; }
+.pbtn:hover{ border-color:var(--gold); }
+.pbtn:disabled{ opacity:.5; cursor:default; }
+.pmsg{ font-size:.8rem; color:var(--muted); margin-top:.4rem; min-height:1em; }
+.pmsg.error{ color:#a52a2a; } .pmsg.ok{ color:#2e6b2e; }
+.spec-grid{ display:grid; grid-template-columns:1fr; gap:.55rem; margin-top:.4rem; }
+.spec-grid label.cb{ display:flex; align-items:flex-start; gap:.55rem; text-transform:none; letter-spacing:0;
+  font-family:var(--body); font-size:.9rem; color:var(--ink); margin:0; cursor:pointer; }
+.spec-grid label.cb input{ width:auto; margin-top:.2rem; }
+.spec-grid label.cb small{ display:block; color:var(--muted); font-size:.72rem; line-height:1.4; }
+.save{ width:100%; margin-top:1.5rem; font-family:var(--ui); font-weight:500; font-size:.78rem;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--cream); background:var(--navy);
+  border:none; border-radius:3px; padding:.9rem; cursor:pointer; }
+.save:disabled{ opacity:.6; }
+.pcard .mmsg{ text-align:center; font-size:.85rem; margin-top:.9rem; min-height:1.1em; }
+.pcard .mmsg.error{ color:#a52a2a; }
+.pcard .mmsg.ok{ color:#2e6b2e; }
+.sf-note{ font-size:.82rem; color:var(--muted); line-height:1.6; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="lockup">
+    <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
+    <span class="lockup-rule" aria-hidden="true"></span>
+    <a class="lockup-cc" href="/concierge/directory.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">My profile</span>
+  </div>
+  <div class="top-actions">
+    <a class="tbtn" href="directory.html">Members area</a>
+    <button class="tbtn" id="logoutBtn">Log out</button>
+  </div>
+</header>
+<main class="pwrap">
+  <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">My profile</span></nav>
+  <section class="pcard" aria-labelledby="profileTitle">
+    <div class="mhead"><h1 id="profileTitle">My profile</h1></div>
+    <div class="state" id="state">Loading your profile…</div>
+    <form id="profileForm" hidden>
+      <label>Photo <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— logo or a picture of you</span></label>
+      <div class="photo-row">
+        <div class="pprev" id="pprev"></div>
+        <div class="photo-btns">
+          <button class="pbtn" id="photoBtn" type="button">Upload photo</button>
+          <button class="pbtn" id="photoRemoveBtn" type="button" style="display:none">Remove photo</button>
+        </div>
+      </div>
+      <div class="pmsg" id="pmsg"></div>
+      <input type="file" id="photoFile" accept="image/*" hidden>
+      <label style="margin-top:1rem">Business logo <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown on your quote printouts. A PNG with a transparent background works best.</span></label>
+      <div class="photo-row">
+        <div class="pprev logo" id="lprev"></div>
+        <div class="photo-btns">
+          <button class="pbtn" id="logoBtn" type="button">Upload logo</button>
+          <button class="pbtn" id="logoRemoveBtn" type="button" style="display:none">Remove logo</button>
+        </div>
+      </div>
+      <div class="pmsg" id="lmsg"></div>
+      <input type="file" id="logoFile" accept="image/png,image/jpeg,image/*" hidden>
+      <label for="p_name">Name</label>
+      <input id="p_name" required />
+      <label for="p_member_type">What are you?</label>
+      <select id="p_member_type"></select>
+      <label for="p_type">Account type</label>
+      <select id="p_type">
+        <option value="">Individual carpenter / apprentice</option>
+        <option value="1">Business — I hire and take on work</option>
+      </select>
+      <label for="p_biz">Business name</label>
+      <input id="p_biz" placeholder="Optional" />
+      <label for="p_avail">Availability <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— shows as a badge on your card</span></label>
+      <select id="p_avail"><option value="">— not shown —</option></select>
+      <label for="p_biz_phone">Business / call number <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown to others instead of your login number</span></label>
+      <input id="p_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
+      <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.5rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
+        <input type="checkbox" id="p_hide_phone" style="width:auto;margin-top:.2rem" />
+        <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">Hide my personal number — other members reach me on my business number only <span style="color:var(--muted)">(requires a business number above)</span></span>
+      </label>
+      <label for="p_area">Area</label>
+      <select id="p_area"></select>
+      <label>Location pin <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shows a map on your profile &amp; lets people see how far you are</span></label>
+      <div class="buy-pin"><button type="button" class="buy-pin-btn" id="p_locBtn">📍 Use my current location</button><span class="buy-pin-msg" id="p_locMsg"></span><button type="button" class="buy-pin-clear" id="p_locClear" style="display:none">Clear</button></div>
+      <label>Links <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— your website &amp; socials; shown on your profile so people can see your work</span></label>
+      <input id="soc_website" type="url" inputmode="url" placeholder="Website — https://…" style="margin-bottom:.4rem" />
+      <input id="soc_instagram" type="url" inputmode="url" placeholder="Instagram link" style="margin-bottom:.4rem" />
+      <input id="soc_tiktok" type="url" inputmode="url" placeholder="TikTok link" style="margin-bottom:.4rem" />
+      <input id="soc_facebook" type="url" inputmode="url" placeholder="Facebook link" style="margin-bottom:.4rem" />
+      <input id="soc_youtube" type="url" inputmode="url" placeholder="YouTube link" style="margin-bottom:.4rem" />
+      <input id="soc_linkedin" type="url" inputmode="url" placeholder="LinkedIn link" />
+      <label>Emergency contact <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— private; used only for the Safety check-in if you go overdue</span></label>
+      <input id="p_emerg_name" maxlength="80" placeholder="Contact name" style="margin-bottom:.4rem" />
+      <input id="p_emerg_phone" type="tel" inputmode="numeric" placeholder="Contact phone (0XX…)" />
+      <div id="carpFields">
+        <label for="p_lvl">Skill level</label>
+        <select id="p_lvl"><option value="">— not set —</option></select>
+        <label for="p_yrs">Years of experience</label>
+        <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
+      </div>
+      <div id="vendorFields">
+        <label for="p_vendor_scale">Shop size</label>
+        <select id="p_vendor_scale"><option value="">— not set —</option></select>
+        <label>What you sell <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— products you supply</span></label>
+        <div class="spec-grid" id="catGrid"></div>
+        <label>What you do <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— services you offer; up to 5, also Sourcing filters</span></label>
+        <div class="spec-grid" id="svcGrid"></div>
+        <label for="p_services_other">Other services <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; anything not listed above</span></label>
+        <input id="p_services_other" type="text" maxlength="160" placeholder="e.g. CNC cutting, veneering" />
+        <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
+        <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
+      </div>
+      <div id="tradesWrap">
+        <label>Trades</label>
+        <div class="spec-grid" id="specGrid"></div>
+      </div>
+      <!-- Services you offer (global catalog; incl. deliveries_errands = courier pings) -->
+      <div id="sideHustleWrap">
+        <label>Services you offer <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— extra skills shown on the Services page; "Deliveries &amp; errands" also gets you buy-for-me pings</span></label>
+        <div class="spec-grid" id="p_services_grid"></div>
+        <div style="display:flex;gap:.5rem;margin-top:.5rem">
+          <input id="p_suggest" type="text" maxlength="40" placeholder="Suggest a service…" style="flex:1" />
+          <button type="button" class="pbtn" id="p_suggest_btn">Suggest</button>
+        </div>
+        <div class="sf-note" id="p_suggest_msg" style="margin-top:.3rem"></div>
+      </div>
+      <!-- Coverage zones (couriers, or anyone who ticked deliveries) -->
+      <div id="coverageWrap" hidden>
+        <label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— where you'll pick up / deliver; you get buy-for-me pings here</span></label>
+        <div id="coverZones"></div>
+        <button type="button" class="buy-additem" id="coverAddBtn">+ Add a zone</button>
+        <p class="sf-note" style="margin-top:.35rem">Leave empty to use just your home area above.</p>
+      </div>
+      <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
+      <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
+      <div id="p_curpin_wrap" hidden>
+        <label for="p_curpin" style="margin-top:.9rem">Current PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— needed to change it</span></label>
+        <input id="p_curpin" type="password" inputmode="numeric" maxlength="5" autocomplete="current-password" />
+      </div>
+      <button class="save" id="saveBtn" type="submit">Save changes</button>
+      <div class="mmsg" id="mmsg"></div>
+    </form>
+  </section>
+</main>
+<script src="../js/concierge.js?v=20261113b"></script>
+<script>
+(function () {
+  'use strict';
+  var C = window.Concierge, me = null;
+  var SOCIAL_KEYS = ['website', 'instagram', 'tiktok', 'facebook', 'youtube', 'linkedin'];
+  function initials(name) {
+    return String(name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase();
+  }
+  document.getElementById('logoutBtn').addEventListener('click', function () { C.clearToken(); location.replace('login.html'); });
+
+  // ── edit-profile modal ──
+  var specGrid = document.getElementById('specGrid');
+  var mmsg = document.getElementById('mmsg');
+  C.SPECIALTY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    var ex = C.SPECIALTY_EXAMPLES[k];
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.specialtyLabel(k)) +
+      (ex ? '<small>' + C.escapeHtml(ex) + '</small>' : '') + '</span>';
+    specGrid.appendChild(l);
+  });
+  var catGrid = document.getElementById('catGrid');
+  C.VENDOR_CATEGORY_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
+    catGrid.appendChild(l);
+  });
+  var svcGrid = document.getElementById('svcGrid');
+  C.VENDOR_SERVICE_ORDER.forEach(function (k) {
+    var l = document.createElement('label'); l.className = 'cb';
+    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorServiceLabel(k)) + '</span>';
+    svcGrid.appendChild(l);
+  });
+  // Cap services selection at VENDOR_SERVICES_MAX.
+  svcGrid.addEventListener('change', function (e) {
+    if (svcGrid.querySelectorAll('input:checked').length > C.VENDOR_SERVICES_MAX && e.target.checked) {
+      e.target.checked = false;
+      mmsg.className = 'mmsg error'; mmsg.textContent = 'You can pick up to ' + C.VENDOR_SERVICES_MAX + ' services.';
+    }
+  });
+
+  // photo upload / remove
+  var pprev = document.getElementById('pprev');
+  var pmsg = document.getElementById('pmsg');
+  var photoFile = document.getElementById('photoFile');
+  var photoBtn = document.getElementById('photoBtn');
+  var photoRemoveBtn = document.getElementById('photoRemoveBtn');
+
+  function renderPreview() {
+    if (me && me.photo_url) {
+      pprev.innerHTML = '<img src="' + C.escapeHtml(me.photo_url) + '" alt="" onerror="this.remove()">';
+      photoRemoveBtn.style.display = '';
+    } else {
+      pprev.innerHTML = '<div class="initials">' + C.escapeHtml(initials(me && me.name)) + '</div>';
+      photoRemoveBtn.style.display = 'none';
+    }
+  }
+  photoBtn.addEventListener('click', function () { photoFile.click(); });
+  photoFile.addEventListener('change', async function () {
+    var f = photoFile.files && photoFile.files[0];
+    photoFile.value = '';
+    if (!f) return;
+    photoBtn.disabled = photoRemoveBtn.disabled = true;
+    pmsg.className = 'pmsg'; pmsg.textContent = 'Compressing…';
+    try {
+      var blob = await C.compressImage(f);
+      pmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
+      var r = await C.uploadPhoto('/me/photo', blob);
+      me = r.member;
+      renderPreview();
+      pmsg.className = 'pmsg ok'; pmsg.textContent = 'Photo updated.';
+    } catch (err) {
+      pmsg.className = 'pmsg error';
+      pmsg.textContent = err.message || C.errorMessage(0, { error: err.message }) || 'Could not upload that photo.';
+    } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
+  });
+  photoRemoveBtn.addEventListener('click', async function () {
+    photoBtn.disabled = photoRemoveBtn.disabled = true;
+    pmsg.className = 'pmsg'; pmsg.textContent = 'Removing…';
+    try {
+      var r = await C.api('/me/photo', { method: 'DELETE' });
+      me = r.member;
+      renderPreview();
+      pmsg.className = 'pmsg ok'; pmsg.textContent = 'Photo removed.';
+    } catch (err) {
+      pmsg.className = 'pmsg error'; pmsg.textContent = err.message || 'Could not remove the photo.';
+    } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
+  });
+
+  // ── business logo (dedicated; PNG, shown on quote printouts) ──
+  var lprev = document.getElementById('lprev');
+  var logoFile = document.getElementById('logoFile');
+  var logoBtn = document.getElementById('logoBtn');
+  var logoRemoveBtn = document.getElementById('logoRemoveBtn');
+  var lmsg = document.getElementById('lmsg');
+  function renderLogoPreview() {
+    if (me && me.logo_url) {
+      lprev.innerHTML = '<img src="' + C.escapeHtml(me.logo_url) + '" alt="" onerror="this.remove()">';
+      logoRemoveBtn.style.display = '';
+    } else {
+      lprev.innerHTML = '<div class="initials">No logo</div>';
+      logoRemoveBtn.style.display = 'none';
+    }
+  }
+  logoBtn.addEventListener('click', function () { logoFile.click(); });
+  logoFile.addEventListener('change', async function () {
+    var f = logoFile.files && logoFile.files[0];
+    logoFile.value = '';
+    if (!f) return;
+    logoBtn.disabled = logoRemoveBtn.disabled = true;
+    lmsg.className = 'pmsg'; lmsg.textContent = 'Processing…';
+    try {
+      var blob = await C.compressLogo(f);
+      lmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
+      var r = await C.uploadPhoto('/me/logo', blob, 'image/png');
+      me = r.member;
+      renderLogoPreview();
+      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo updated.';
+    } catch (err) {
+      lmsg.className = 'pmsg error';
+      lmsg.textContent = (err.message === 'logo_too_large') ? 'That image is too large — try a simpler logo.' : (err.message || 'Could not upload that logo.');
+    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
+  });
+  logoRemoveBtn.addEventListener('click', async function () {
+    logoBtn.disabled = logoRemoveBtn.disabled = true;
+    lmsg.className = 'pmsg'; lmsg.textContent = 'Removing…';
+    try {
+      var r = await C.api('/me/logo', { method: 'DELETE' });
+      me = r.member;
+      renderLogoPreview();
+      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo removed.';
+    } catch (err) {
+      lmsg.className = 'pmsg error'; lmsg.textContent = err.message || 'Could not remove the logo.';
+    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
+  });
+
+  // skill level + availability options (once)
+  var pLvl = document.getElementById('p_lvl');
+  C.SKILL_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); pLvl.appendChild(o);
+  });
+  var pAvail = document.getElementById('p_avail');
+  C.AVAILABILITY_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); pAvail.appendChild(o);
+  });
+  // member type + show skill fields only for carpenters
+  var pMemberType = document.getElementById('p_member_type');
+  C.MEMBER_TYPE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); pMemberType.appendChild(o);
+  });
+  var pVendorScale = document.getElementById('p_vendor_scale');
+  C.VENDOR_SCALE_ORDER.forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); pVendorScale.appendChild(o);
+  });
+  var carpFields = document.getElementById('carpFields');
+  var vendorFields = document.getElementById('vendorFields');
+  // offered-services (dynamic catalog) picker
+  var serviceCatalog = [];
+  var servicesGrid = document.getElementById('p_services_grid');
+  function serviceLabelFor(slug) {
+    for (var i = 0; i < serviceCatalog.length; i++) if (serviceCatalog[i].slug === slug) return serviceCatalog[i].label;
+    return slug;
+  }
+  function buildServicesGrid(selected) {
+    var set = {}; (selected || []).forEach(function (s) { set[s] = true; });
+    servicesGrid.innerHTML = serviceCatalog.map(function (s) {
+      return '<label class="cb"><input type="checkbox" value="' + C.escapeHtml(s.slug) + '"' + (set[s.slug] ? ' checked' : '') + '> <span>' + C.escapeHtml(s.label) + '</span></label>';
+    }).join('') || '<span class="sf-note">No services listed yet.</span>';
+  }
+  servicesGrid.addEventListener('change', function () { syncTypeFields(); });
+  document.getElementById('p_suggest_btn').addEventListener('click', async function () {
+    var inp = document.getElementById('p_suggest'), msg = document.getElementById('p_suggest_msg');
+    var label = inp.value.trim();
+    if (!label) { msg.textContent = 'Type a service to suggest.'; return; }
+    this.disabled = true; msg.textContent = 'Sending…';
+    try {
+      var r = await C.api('/services/suggest', { method: 'POST', body: { label: label } });
+      if (r.status === 'approved') { msg.textContent = '"' + label + '" already exists — tick it above.'; }
+      else { msg.textContent = 'Sent for review — it\'ll appear once an admin approves it.'; }
+      inp.value = '';
+    } catch (err) { msg.textContent = err.message || 'Could not send the suggestion.'; }
+    finally { this.disabled = false; }
+  });
+  // coverage-zone repeater (couriers / delivery runners)
+  var coverZonesWrap = document.getElementById('coverZones');
+  function addCoverZone(val) {
+    if (coverZonesWrap.children.length >= C.COVERAGE_MAX_ZONES) return;
+    var row = document.createElement('div'); row.className = 'buy-item-row';
+    var sel = document.createElement('select'); sel.className = 'bi-name';
+    C.fillZoneSelect(sel, val || '', '— choose a zone —');
+    var del = document.createElement('button'); del.type = 'button'; del.className = 'bi-del'; del.setAttribute('aria-label', 'Remove zone'); del.textContent = '×';
+    del.addEventListener('click', function () { row.remove(); });
+    row.appendChild(sel); row.appendChild(del); coverZonesWrap.appendChild(row);
+  }
+  document.getElementById('coverAddBtn').addEventListener('click', function () { addCoverZone(); });
+  function deliverySelected() { return !!servicesGrid.querySelector('input[value="deliveries_errands"]:checked'); }
+  function syncTypeFields() {
+    var t = pMemberType.value;
+    var isCarp = t === 'carpenter', isVendor = t === 'vendor', isCourier = t === 'courier';
+    carpFields.style.display = isCarp ? '' : 'none';
+    document.getElementById('tradesWrap').style.display = isCarp ? '' : 'none';
+    vendorFields.style.display = isVendor ? '' : 'none';
+    // Coverage zones: couriers always; others when they offer deliveries & errands.
+    document.getElementById('coverageWrap').hidden = !(isCourier || deliverySelected());
+  }
+  pMemberType.addEventListener('change', syncTypeFields);
+
+  function fill() {
+    if (!me) return;
+    document.getElementById('p_name').value = me.name || '';
+    document.getElementById('p_biz').value = me.business_name || '';
+    document.getElementById('p_type').value = me.is_business ? '1' : '';
+    pAvail.value = me.availability || '';
+    C.fillZoneSelect(document.getElementById('p_area'), me.area || '', '— select your area —');
+    pLvl.value = me.skill_level || '';
+    document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
+    pMemberType.value = me.member_type || 'carpenter';
+    document.getElementById('p_stock').value = me.stock || '';
+    document.getElementById('p_services_other').value = me.services_other || '';
+    pVendorScale.value = me.vendor_scale || '';
+    buildServicesGrid(me.side_hustles || []);
+    document.getElementById('p_suggest').value = ''; document.getElementById('p_suggest_msg').textContent = '';
+    (function () { var soc = me.socials || {}; SOCIAL_KEYS.forEach(function (k) { document.getElementById('soc_' + k).value = soc[k] || ''; }); })();
+    document.getElementById('p_emerg_name').value = me.emergency_name || '';
+    document.getElementById('p_emerg_phone').value = me.emergency_phone || '';
+    setProfileLoc((me.location_lat != null && me.location_lng != null) ? { lat: me.location_lat, lng: me.location_lng } : null);
+    coverZonesWrap.innerHTML = '';
+    (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
+    syncTypeFields();
+    renderPreview();
+    renderLogoPreview();
+    pmsg.textContent = ''; pmsg.className = 'pmsg';
+    lmsg.textContent = ''; lmsg.className = 'pmsg';
+    var set = new Set(me.specialties || []);
+    specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
+    document.getElementById('p_biz_phone').value = me.business_phone || '';
+    document.getElementById('p_hide_phone').checked = !!me.hide_phone;
+    var catSet = new Set(me.vendor_categories || []);
+    catGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = catSet.has(cb.value); });
+    var svcSet = new Set(me.vendor_services || []);
+    svcGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = svcSet.has(cb.value); });
+    document.getElementById('p_pin').value = '';
+    document.getElementById('p_curpin').value = ''; document.getElementById('p_curpin_wrap').hidden = true;
+    mmsg.textContent = ''; mmsg.className = 'mmsg';
+  }
+
+  document.getElementById('p_pin').addEventListener('input', function (e) {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
+    document.getElementById('p_curpin_wrap').hidden = !e.target.value; // ask for the current PIN only when changing it
+  });
+  document.getElementById('p_curpin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
+
+  // Optional profile location pin (all members). Same columns as the vendor
+  // shop location; here surfaced generally so anyone can pin where they're based.
+  var profileLoc = null;
+  function setProfileLoc(p) {
+    profileLoc = p;
+    var msg = document.getElementById('p_locMsg'), clr = document.getElementById('p_locClear');
+    if (p) { msg.textContent = '📍 Pin set (' + p.lat.toFixed(4) + ', ' + p.lng.toFixed(4) + ')'; msg.className = 'buy-pin-msg ok'; clr.style.display = ''; }
+    else { msg.textContent = ''; msg.className = 'buy-pin-msg'; clr.style.display = 'none'; }
+  }
+  document.getElementById('p_locBtn').addEventListener('click', function () {
+    var btn = this, msg = document.getElementById('p_locMsg');
+    if (!navigator.geolocation) { msg.textContent = 'Location not available on this device.'; msg.className = 'buy-pin-msg error'; return; }
+    btn.disabled = true; msg.textContent = 'Getting location…'; msg.className = 'buy-pin-msg';
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      btn.disabled = false; setProfileLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+    }, function () {
+      btn.disabled = false; msg.textContent = 'Could not get location — check permissions.'; msg.className = 'buy-pin-msg error';
+    }, { enableHighAccuracy: true, timeout: 10000 });
+  });
+  document.getElementById('p_locClear').addEventListener('click', function () { setProfileLoc(null); });
+
+  document.getElementById('profileForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var saveBtn = document.getElementById('saveBtn');
+    var mtype = pMemberType.value;
+    var isVendorEdit = mtype === 'vendor';
+    var isCarpEdit = mtype === 'carpenter';
+    var isCourierEdit = mtype === 'courier';
+    var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    if (isCarpEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
+    var sideHustles = [].slice.call(servicesGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
+    var socials = {}; SOCIAL_KEYS.forEach(function (k) { var v = document.getElementById('soc_' + k).value.trim(); if (v) socials[k] = v; });
+    var deliveryOn = isCourierEdit || sideHustles.indexOf('deliveries_errands') >= 0;
+    var coverZones = deliveryOn ? [].slice.call(coverZonesWrap.querySelectorAll('select')).map(function (s) { return s.value; }).filter(Boolean) : [];
+    coverZones = coverZones.filter(function (z, i) { return coverZones.indexOf(z) === i; });
+    var hidePhone = document.getElementById('p_hide_phone').checked;
+    var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
+    if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
+    var newPin = document.getElementById('p_pin').value;
+    if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
+    var curPin = document.getElementById('p_curpin').value;
+    if (newPin && !/^\d{5}$/.test(curPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Enter your current 5-digit PIN to change it.'; document.getElementById('p_curpin').focus(); return; }
+    saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
+    try {
+      var body = {
+        name: document.getElementById('p_name').value.trim(),
+        business_name: document.getElementById('p_biz').value.trim(),
+        is_business: document.getElementById('p_type').value === '1',
+        member_type: pMemberType.value,
+        stock: isVendorEdit ? document.getElementById('p_stock').value.trim() : '',
+        vendor_scale: isVendorEdit ? pVendorScale.value : '',
+        vendor_categories: isVendorEdit ? cats : [],
+        vendor_services: isVendorEdit ? svcs : [],
+        services_other: isVendorEdit ? document.getElementById('p_services_other').value.trim() : '',
+        coverage_zones: coverZones,
+        side_hustles: sideHustles,
+        socials: socials,
+        emergency_name: document.getElementById('p_emerg_name').value.trim(),
+        emergency_phone: document.getElementById('p_emerg_phone').value.trim(),
+        business_phone: bizPhoneVal,
+        hide_phone: hidePhone,
+        availability: pAvail.value,
+        area: document.getElementById('p_area').value,
+        location_lat: profileLoc ? profileLoc.lat : '',
+        location_lng: profileLoc ? profileLoc.lng : '',
+        skill_level: isCarpEdit ? pLvl.value : '',
+        years_experience: isCarpEdit && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
+        specialties: isCarpEdit ? specs : []
+      };
+      if (newPin) { body.pin = newPin; body.current_pin = curPin; }
+      var r = await C.api('/me', { method: 'PUT', body: body });
+      me = r.member;
+      if (r.token) C.setToken(r.token); // a new PIN signs out other devices; keep this one signed in
+      document.getElementById('p_pin').value = '';
+      document.getElementById('p_curpin').value = '';
+      document.getElementById('p_curpin_wrap').hidden = true;
+      mmsg.className = 'mmsg ok'; mmsg.textContent = newPin ? 'Saved. Your new PIN is set, and any other phone signed in to your account has been signed out.' : 'Saved.';
+
+    } catch (err) {
+      mmsg.className = 'mmsg error'; mmsg.textContent = err.message || 'Could not save.';
+    } finally { saveBtn.disabled = false; }
+  });
+
+  // load the member, then fill the form (the directory's paywall handles unpaid sign-ups)
+  (async function init() {
+    var st = document.getElementById('state');
+    try { me = (await C.api('/me')).member; }
+    catch (err) {
+      if (err.status === 401) { location.replace('login.html?next=' + encodeURIComponent('/concierge/profile.html' + location.hash)); return; }
+      st.textContent = 'Could not load your profile. Check your connection and refresh.'; return;
+    }
+    if (me.status !== 'approved') { location.replace('directory.html'); return; }
+    try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
+    fill();
+    st.hidden = true; document.getElementById('profileForm').hidden = false;
+    var target = location.hash === '#emergency' ? document.getElementById('p_emerg_name') : null;
+    if (target) { target.scrollIntoView({ block: 'center' }); target.focus(); }
+  })();
+})();
+</script>
+</body>
+</html>

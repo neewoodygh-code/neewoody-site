@@ -610,7 +610,7 @@ a.tool-card:hover .go{ color:var(--navy); }
         <div class="notif-list" id="notifList"><div class="notif-empty">No notifications yet.</div></div>
       </div>
     </div>
-    <button class="tbtn" id="editBtn">My profile</button>
+    <a class="tbtn" id="editBtn" href="profile.html">My profile</a>
     <a class="tbtn" id="adminLink" href="admin.html" style="display:none">Admin</a>
     <button class="tbtn" id="logoutBtn">Log out</button>
   </div>
@@ -908,115 +908,6 @@ a.tool-card:hover .go{ color:var(--navy); }
 
 <!-- trade popover -->
 <div class="spop" id="spop" role="tooltip"></div>
-
-<!-- Edit own profile -->
-<div class="overlay" id="overlay">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="mhead"><h2>My profile</h2><button class="x" id="closeModal" aria-label="Close">×</button></div>
-    <form id="profileForm">
-      <label>Photo <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— logo or a picture of you</span></label>
-      <div class="photo-row">
-        <div class="pprev" id="pprev"></div>
-        <div class="photo-btns">
-          <button class="pbtn" id="photoBtn" type="button">Upload photo</button>
-          <button class="pbtn" id="photoRemoveBtn" type="button" style="display:none">Remove photo</button>
-        </div>
-      </div>
-      <div class="pmsg" id="pmsg"></div>
-      <input type="file" id="photoFile" accept="image/*" hidden>
-      <label style="margin-top:1rem">Business logo <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown on your quote printouts. A PNG with a transparent background works best.</span></label>
-      <div class="photo-row">
-        <div class="pprev logo" id="lprev"></div>
-        <div class="photo-btns">
-          <button class="pbtn" id="logoBtn" type="button">Upload logo</button>
-          <button class="pbtn" id="logoRemoveBtn" type="button" style="display:none">Remove logo</button>
-        </div>
-      </div>
-      <div class="pmsg" id="lmsg"></div>
-      <input type="file" id="logoFile" accept="image/png,image/jpeg,image/*" hidden>
-      <label for="p_name">Name</label>
-      <input id="p_name" required />
-      <label for="p_member_type">What are you?</label>
-      <select id="p_member_type"></select>
-      <label for="p_type">Account type</label>
-      <select id="p_type">
-        <option value="">Individual carpenter / apprentice</option>
-        <option value="1">Business — I hire and take on work</option>
-      </select>
-      <label for="p_biz">Business name</label>
-      <input id="p_biz" placeholder="Optional" />
-      <label for="p_avail">Availability <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— shows as a badge on your card</span></label>
-      <select id="p_avail"><option value="">— not shown —</option></select>
-      <label for="p_biz_phone">Business / call number <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shown to others instead of your login number</span></label>
-      <input id="p_biz_phone" type="tel" inputmode="numeric" placeholder="0XX XXX XXXX" />
-      <label style="display:flex;align-items:flex-start;gap:.5rem;margin:.5rem 0 .2rem;text-transform:none;letter-spacing:0;font-weight:400;cursor:pointer">
-        <input type="checkbox" id="p_hide_phone" style="width:auto;margin-top:.2rem" />
-        <span style="font-family:var(--body);font-size:.85rem;color:var(--ink)">Hide my personal number — other members reach me on my business number only <span style="color:var(--muted)">(requires a business number above)</span></span>
-      </label>
-      <label for="p_area">Area</label>
-      <select id="p_area"></select>
-      <label>Location pin <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; shows a map on your profile &amp; lets people see how far you are</span></label>
-      <div class="buy-pin"><button type="button" class="buy-pin-btn" id="p_locBtn">📍 Use my current location</button><span class="buy-pin-msg" id="p_locMsg"></span><button type="button" class="buy-pin-clear" id="p_locClear" style="display:none">Clear</button></div>
-      <label>Links <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— your website &amp; socials; shown on your profile so people can see your work</span></label>
-      <input id="soc_website" type="url" inputmode="url" placeholder="Website — https://…" style="margin-bottom:.4rem" />
-      <input id="soc_instagram" type="url" inputmode="url" placeholder="Instagram link" style="margin-bottom:.4rem" />
-      <input id="soc_tiktok" type="url" inputmode="url" placeholder="TikTok link" style="margin-bottom:.4rem" />
-      <input id="soc_facebook" type="url" inputmode="url" placeholder="Facebook link" style="margin-bottom:.4rem" />
-      <input id="soc_youtube" type="url" inputmode="url" placeholder="YouTube link" style="margin-bottom:.4rem" />
-      <input id="soc_linkedin" type="url" inputmode="url" placeholder="LinkedIn link" />
-      <label>Emergency contact <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— private; used only for the Safety check-in if you go overdue</span></label>
-      <input id="p_emerg_name" maxlength="80" placeholder="Contact name" style="margin-bottom:.4rem" />
-      <input id="p_emerg_phone" type="tel" inputmode="numeric" placeholder="Contact phone (0XX…)" />
-      <div id="carpFields">
-        <label for="p_lvl">Skill level</label>
-        <select id="p_lvl"><option value="">— not set —</option></select>
-        <label for="p_yrs">Years of experience</label>
-        <input id="p_yrs" type="number" inputmode="numeric" min="0" max="70" step="1" placeholder="e.g. 8" />
-      </div>
-      <div id="vendorFields">
-        <label for="p_vendor_scale">Shop size</label>
-        <select id="p_vendor_scale"><option value="">— not set —</option></select>
-        <label>What you sell <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— products you supply</span></label>
-        <div class="spec-grid" id="catGrid"></div>
-        <label>What you do <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— services you offer; up to 5, also Sourcing filters</span></label>
-        <div class="spec-grid" id="svcGrid"></div>
-        <label for="p_services_other">Other services <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional; anything not listed above</span></label>
-        <input id="p_services_other" type="text" maxlength="160" placeholder="e.g. CNC cutting, veneering" />
-        <label for="p_stock">About your shop <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— a short blurb; add items in the Storefront tab</span></label>
-        <textarea id="p_stock" rows="3" placeholder="Brands you carry, delivery, opening hours…"></textarea>
-      </div>
-      <div id="tradesWrap">
-        <label>Trades</label>
-        <div class="spec-grid" id="specGrid"></div>
-      </div>
-      <!-- Services you offer (global catalog; incl. deliveries_errands = courier pings) -->
-      <div id="sideHustleWrap">
-        <label>Services you offer <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— extra skills shown on the Services page; "Deliveries &amp; errands" also gets you buy-for-me pings</span></label>
-        <div class="spec-grid" id="p_services_grid"></div>
-        <div style="display:flex;gap:.5rem;margin-top:.5rem">
-          <input id="p_suggest" type="text" maxlength="40" placeholder="Suggest a service…" style="flex:1" />
-          <button type="button" class="pbtn" id="p_suggest_btn">Suggest</button>
-        </div>
-        <div class="sf-note" id="p_suggest_msg" style="margin-top:.3rem"></div>
-      </div>
-      <!-- Coverage zones (couriers, or anyone who ticked deliveries) -->
-      <div id="coverageWrap" hidden>
-        <label>Coverage zones <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— where you'll pick up / deliver; you get buy-for-me pings here</span></label>
-        <div id="coverZones"></div>
-        <button type="button" class="buy-additem" id="coverAddBtn">+ Add a zone</button>
-        <p class="sf-note" style="margin-top:.35rem">Leave empty to use just your home area above.</p>
-      </div>
-      <label for="p_pin" style="margin-top:1.25rem">New PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— optional, 5 digits</span></label>
-      <input id="p_pin" type="password" inputmode="numeric" maxlength="5" placeholder="Leave blank to keep current PIN" autocomplete="new-password" />
-      <div id="p_curpin_wrap" hidden>
-        <label for="p_curpin" style="margin-top:.9rem">Current PIN <span style="text-transform:none;letter-spacing:0;font-family:var(--body);font-size:.8rem;color:var(--muted)">— needed to change it</span></label>
-        <input id="p_curpin" type="password" inputmode="numeric" maxlength="5" autocomplete="current-password" />
-      </div>
-      <button class="save" id="saveBtn" type="submit">Save changes</button>
-      <div class="mmsg" id="mmsg"></div>
-    </form>
-  </div>
-</div>
 
 <!-- Member detail (opened by tapping a card) -->
 <div class="overlay" id="memOverlay">
@@ -1482,347 +1373,19 @@ a.tool-card:hover .go{ color:var(--navy); }
       '<button type="button" id="nudgeGo">Complete my profile</button>' +
       '<button type="button" class="x" id="nudgeX">Later</button>';
     el.style.display = 'flex';
-    document.getElementById('nudgeGo').addEventListener('click', openModal);
+    document.getElementById('nudgeGo').addEventListener('click', function () { location.href = 'profile.html'; });
     document.getElementById('nudgeX').addEventListener('click', function () {
       try { sessionStorage.setItem('nwd-nudge-dismissed', '1'); } catch (e) {}
       el.style.display = 'none';
     });
   }
 
-  // ── edit-profile modal ──
-  var overlay = document.getElementById('overlay');
-  var specGrid = document.getElementById('specGrid');
-  var mmsg = document.getElementById('mmsg');
-  C.SPECIALTY_ORDER.forEach(function (k) {
-    var l = document.createElement('label'); l.className = 'cb';
-    var ex = C.SPECIALTY_EXAMPLES[k];
-    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.specialtyLabel(k)) +
-      (ex ? '<small>' + C.escapeHtml(ex) + '</small>' : '') + '</span>';
-    specGrid.appendChild(l);
-  });
-  var catGrid = document.getElementById('catGrid');
-  C.VENDOR_CATEGORY_ORDER.forEach(function (k) {
-    var l = document.createElement('label'); l.className = 'cb';
-    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorCategoryLabel(k)) + '</span>';
-    catGrid.appendChild(l);
-  });
-  var svcGrid = document.getElementById('svcGrid');
-  C.VENDOR_SERVICE_ORDER.forEach(function (k) {
-    var l = document.createElement('label'); l.className = 'cb';
-    l.innerHTML = '<input type="checkbox" value="' + k + '"> <span>' + C.escapeHtml(C.vendorServiceLabel(k)) + '</span>';
-    svcGrid.appendChild(l);
-  });
-  // Cap services selection at VENDOR_SERVICES_MAX.
-  svcGrid.addEventListener('change', function (e) {
-    if (svcGrid.querySelectorAll('input:checked').length > C.VENDOR_SERVICES_MAX && e.target.checked) {
-      e.target.checked = false;
-      mmsg.className = 'mmsg error'; mmsg.textContent = 'You can pick up to ' + C.VENDOR_SERVICES_MAX + ' services.';
-    }
-  });
-
-  // photo upload / remove
-  var pprev = document.getElementById('pprev');
-  var pmsg = document.getElementById('pmsg');
-  var photoFile = document.getElementById('photoFile');
-  var photoBtn = document.getElementById('photoBtn');
-  var photoRemoveBtn = document.getElementById('photoRemoveBtn');
-
-  function renderPreview() {
-    if (me && me.photo_url) {
-      pprev.innerHTML = '<img src="' + C.escapeHtml(me.photo_url) + '" alt="" onerror="this.remove()">';
-      photoRemoveBtn.style.display = '';
-    } else {
-      pprev.innerHTML = '<div class="initials">' + C.escapeHtml(initials(me && me.name)) + '</div>';
-      photoRemoveBtn.style.display = 'none';
-    }
-  }
-  photoBtn.addEventListener('click', function () { photoFile.click(); });
-  photoFile.addEventListener('change', async function () {
-    var f = photoFile.files && photoFile.files[0];
-    photoFile.value = '';
-    if (!f) return;
-    photoBtn.disabled = photoRemoveBtn.disabled = true;
-    pmsg.className = 'pmsg'; pmsg.textContent = 'Compressing…';
-    try {
-      var blob = await C.compressImage(f);
-      pmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
-      var r = await C.uploadPhoto('/me/photo', blob);
-      me = r.member;
-      renderPreview();
-      pmsg.className = 'pmsg ok'; pmsg.textContent = 'Photo updated.';
-      await load();
-    } catch (err) {
-      pmsg.className = 'pmsg error';
-      pmsg.textContent = err.message || C.errorMessage(0, { error: err.message }) || 'Could not upload that photo.';
-    } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
-  });
-  photoRemoveBtn.addEventListener('click', async function () {
-    photoBtn.disabled = photoRemoveBtn.disabled = true;
-    pmsg.className = 'pmsg'; pmsg.textContent = 'Removing…';
-    try {
-      var r = await C.api('/me/photo', { method: 'DELETE' });
-      me = r.member;
-      renderPreview();
-      pmsg.className = 'pmsg ok'; pmsg.textContent = 'Photo removed.';
-      await load();
-    } catch (err) {
-      pmsg.className = 'pmsg error'; pmsg.textContent = err.message || 'Could not remove the photo.';
-    } finally { photoBtn.disabled = photoRemoveBtn.disabled = false; }
-  });
-
-  // ── business logo (dedicated; PNG, shown on quote printouts) ──
-  var lprev = document.getElementById('lprev');
-  var logoFile = document.getElementById('logoFile');
-  var logoBtn = document.getElementById('logoBtn');
-  var logoRemoveBtn = document.getElementById('logoRemoveBtn');
-  var lmsg = document.getElementById('lmsg');
-  function renderLogoPreview() {
-    if (me && me.logo_url) {
-      lprev.innerHTML = '<img src="' + C.escapeHtml(me.logo_url) + '" alt="" onerror="this.remove()">';
-      logoRemoveBtn.style.display = '';
-    } else {
-      lprev.innerHTML = '<div class="initials">No logo</div>';
-      logoRemoveBtn.style.display = 'none';
-    }
-  }
-  logoBtn.addEventListener('click', function () { logoFile.click(); });
-  logoFile.addEventListener('change', async function () {
-    var f = logoFile.files && logoFile.files[0];
-    logoFile.value = '';
-    if (!f) return;
-    logoBtn.disabled = logoRemoveBtn.disabled = true;
-    lmsg.className = 'pmsg'; lmsg.textContent = 'Processing…';
-    try {
-      var blob = await C.compressLogo(f);
-      lmsg.textContent = 'Uploading (' + Math.round(blob.size / 1024) + 'KB)…';
-      var r = await C.uploadPhoto('/me/logo', blob, 'image/png');
-      me = r.member;
-      renderLogoPreview();
-      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo updated.';
-    } catch (err) {
-      lmsg.className = 'pmsg error';
-      lmsg.textContent = (err.message === 'logo_too_large') ? 'That image is too large — try a simpler logo.' : (err.message || 'Could not upload that logo.');
-    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
-  });
-  logoRemoveBtn.addEventListener('click', async function () {
-    logoBtn.disabled = logoRemoveBtn.disabled = true;
-    lmsg.className = 'pmsg'; lmsg.textContent = 'Removing…';
-    try {
-      var r = await C.api('/me/logo', { method: 'DELETE' });
-      me = r.member;
-      renderLogoPreview();
-      lmsg.className = 'pmsg ok'; lmsg.textContent = 'Logo removed.';
-    } catch (err) {
-      lmsg.className = 'pmsg error'; lmsg.textContent = err.message || 'Could not remove the logo.';
-    } finally { logoBtn.disabled = logoRemoveBtn.disabled = false; }
-  });
-
-  // skill level + availability options (once)
-  var pLvl = document.getElementById('p_lvl');
-  C.SKILL_ORDER.forEach(function (k) {
-    var o = document.createElement('option'); o.value = k; o.textContent = C.skillLabel(k); pLvl.appendChild(o);
-  });
-  var pAvail = document.getElementById('p_avail');
-  C.AVAILABILITY_ORDER.forEach(function (k) {
-    var o = document.createElement('option'); o.value = k; o.textContent = C.availabilityLabel(k); pAvail.appendChild(o);
-  });
-  // member type + show skill fields only for carpenters
-  var pMemberType = document.getElementById('p_member_type');
-  C.MEMBER_TYPE_ORDER.forEach(function (k) {
-    var o = document.createElement('option'); o.value = k; o.textContent = C.memberTypeLabel(k); pMemberType.appendChild(o);
-  });
-  var pVendorScale = document.getElementById('p_vendor_scale');
-  C.VENDOR_SCALE_ORDER.forEach(function (k) {
-    var o = document.createElement('option'); o.value = k; o.textContent = C.vendorScaleLabel(k); pVendorScale.appendChild(o);
-  });
-  var carpFields = document.getElementById('carpFields');
-  var vendorFields = document.getElementById('vendorFields');
-  // offered-services (dynamic catalog) picker
+  // the services catalog (also used by My profile, now concierge/profile.html)
   var serviceCatalog = [];
-  var servicesGrid = document.getElementById('p_services_grid');
   function serviceLabelFor(slug) {
     for (var i = 0; i < serviceCatalog.length; i++) if (serviceCatalog[i].slug === slug) return serviceCatalog[i].label;
     return slug;
   }
-  function buildServicesGrid(selected) {
-    var set = {}; (selected || []).forEach(function (s) { set[s] = true; });
-    servicesGrid.innerHTML = serviceCatalog.map(function (s) {
-      return '<label class="cb"><input type="checkbox" value="' + C.escapeHtml(s.slug) + '"' + (set[s.slug] ? ' checked' : '') + '> <span>' + C.escapeHtml(s.label) + '</span></label>';
-    }).join('') || '<span class="sf-note">No services listed yet.</span>';
-  }
-  servicesGrid.addEventListener('change', function () { syncTypeFields(); });
-  document.getElementById('p_suggest_btn').addEventListener('click', async function () {
-    var inp = document.getElementById('p_suggest'), msg = document.getElementById('p_suggest_msg');
-    var label = inp.value.trim();
-    if (!label) { msg.textContent = 'Type a service to suggest.'; return; }
-    this.disabled = true; msg.textContent = 'Sending…';
-    try {
-      var r = await C.api('/services/suggest', { method: 'POST', body: { label: label } });
-      if (r.status === 'approved') { msg.textContent = '"' + label + '" already exists — tick it above.'; }
-      else { msg.textContent = 'Sent for review — it\'ll appear once an admin approves it.'; }
-      inp.value = '';
-    } catch (err) { msg.textContent = err.message || 'Could not send the suggestion.'; }
-    finally { this.disabled = false; }
-  });
-  // coverage-zone repeater (couriers / delivery runners)
-  var coverZonesWrap = document.getElementById('coverZones');
-  function addCoverZone(val) {
-    if (coverZonesWrap.children.length >= C.COVERAGE_MAX_ZONES) return;
-    var row = document.createElement('div'); row.className = 'buy-item-row';
-    var sel = document.createElement('select'); sel.className = 'bi-name';
-    C.fillZoneSelect(sel, val || '', '— choose a zone —');
-    var del = document.createElement('button'); del.type = 'button'; del.className = 'bi-del'; del.setAttribute('aria-label', 'Remove zone'); del.textContent = '×';
-    del.addEventListener('click', function () { row.remove(); });
-    row.appendChild(sel); row.appendChild(del); coverZonesWrap.appendChild(row);
-  }
-  document.getElementById('coverAddBtn').addEventListener('click', function () { addCoverZone(); });
-  function deliverySelected() { return !!servicesGrid.querySelector('input[value="deliveries_errands"]:checked'); }
-  function syncTypeFields() {
-    var t = pMemberType.value;
-    var isCarp = t === 'carpenter', isVendor = t === 'vendor', isCourier = t === 'courier';
-    carpFields.style.display = isCarp ? '' : 'none';
-    document.getElementById('tradesWrap').style.display = isCarp ? '' : 'none';
-    vendorFields.style.display = isVendor ? '' : 'none';
-    // Coverage zones: couriers always; others when they offer deliveries & errands.
-    document.getElementById('coverageWrap').hidden = !(isCourier || deliverySelected());
-  }
-  pMemberType.addEventListener('change', syncTypeFields);
-
-  function openModal() {
-    if (!me) return;
-    document.getElementById('p_name').value = me.name || '';
-    document.getElementById('p_biz').value = me.business_name || '';
-    document.getElementById('p_type').value = me.is_business ? '1' : '';
-    pAvail.value = me.availability || '';
-    C.fillZoneSelect(document.getElementById('p_area'), me.area || '', '— select your area —');
-    pLvl.value = me.skill_level || '';
-    document.getElementById('p_yrs').value = me.years_experience != null ? me.years_experience : '';
-    pMemberType.value = me.member_type || 'carpenter';
-    document.getElementById('p_stock').value = me.stock || '';
-    document.getElementById('p_services_other').value = me.services_other || '';
-    pVendorScale.value = me.vendor_scale || '';
-    buildServicesGrid(me.side_hustles || []);
-    document.getElementById('p_suggest').value = ''; document.getElementById('p_suggest_msg').textContent = '';
-    (function () { var soc = me.socials || {}; SOCIAL_KEYS.forEach(function (k) { document.getElementById('soc_' + k).value = soc[k] || ''; }); })();
-    document.getElementById('p_emerg_name').value = me.emergency_name || '';
-    document.getElementById('p_emerg_phone').value = me.emergency_phone || '';
-    setProfileLoc((me.location_lat != null && me.location_lng != null) ? { lat: me.location_lat, lng: me.location_lng } : null);
-    coverZonesWrap.innerHTML = '';
-    (me.coverage_zones || []).forEach(function (z) { addCoverZone(z); });
-    syncTypeFields();
-    renderPreview();
-    renderLogoPreview();
-    pmsg.textContent = ''; pmsg.className = 'pmsg';
-    lmsg.textContent = ''; lmsg.className = 'pmsg';
-    var set = new Set(me.specialties || []);
-    specGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = set.has(cb.value); });
-    document.getElementById('p_biz_phone').value = me.business_phone || '';
-    document.getElementById('p_hide_phone').checked = !!me.hide_phone;
-    var catSet = new Set(me.vendor_categories || []);
-    catGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = catSet.has(cb.value); });
-    var svcSet = new Set(me.vendor_services || []);
-    svcGrid.querySelectorAll('input').forEach(function (cb) { cb.checked = svcSet.has(cb.value); });
-    document.getElementById('p_pin').value = '';
-    document.getElementById('p_curpin').value = ''; document.getElementById('p_curpin_wrap').hidden = true;
-    mmsg.textContent = ''; mmsg.className = 'mmsg';
-    overlay.classList.add('open');
-  }
-  function closeModal() { overlay.classList.remove('open'); }
-  document.getElementById('editBtn').addEventListener('click', openModal);
-  document.getElementById('closeModal').addEventListener('click', closeModal);
-  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
-
-  document.getElementById('p_pin').addEventListener('input', function (e) {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5);
-    document.getElementById('p_curpin_wrap').hidden = !e.target.value; // ask for the current PIN only when changing it
-  });
-  document.getElementById('p_curpin').addEventListener('input', function (e) { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 5); });
-
-  // Optional profile location pin (all members). Same columns as the vendor
-  // shop location; here surfaced generally so anyone can pin where they're based.
-  var profileLoc = null;
-  function setProfileLoc(p) {
-    profileLoc = p;
-    var msg = document.getElementById('p_locMsg'), clr = document.getElementById('p_locClear');
-    if (p) { msg.textContent = '📍 Pin set (' + p.lat.toFixed(4) + ', ' + p.lng.toFixed(4) + ')'; msg.className = 'buy-pin-msg ok'; clr.style.display = ''; }
-    else { msg.textContent = ''; msg.className = 'buy-pin-msg'; clr.style.display = 'none'; }
-  }
-  document.getElementById('p_locBtn').addEventListener('click', function () {
-    var btn = this, msg = document.getElementById('p_locMsg');
-    if (!navigator.geolocation) { msg.textContent = 'Location not available on this device.'; msg.className = 'buy-pin-msg error'; return; }
-    btn.disabled = true; msg.textContent = 'Getting location…'; msg.className = 'buy-pin-msg';
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      btn.disabled = false; setProfileLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-    }, function () {
-      btn.disabled = false; msg.textContent = 'Could not get location — check permissions.'; msg.className = 'buy-pin-msg error';
-    }, { enableHighAccuracy: true, timeout: 10000 });
-  });
-  document.getElementById('p_locClear').addEventListener('click', function () { setProfileLoc(null); });
-
-  document.getElementById('profileForm').addEventListener('submit', async function (e) {
-    e.preventDefault();
-    var saveBtn = document.getElementById('saveBtn');
-    var mtype = pMemberType.value;
-    var isVendorEdit = mtype === 'vendor';
-    var isCarpEdit = mtype === 'carpenter';
-    var isCourierEdit = mtype === 'courier';
-    var specs = [].slice.call(specGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    var cats = [].slice.call(catGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    var svcs = [].slice.call(svcGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    if (isCarpEdit && !specs.length) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Choose at least one trade.'; return; }
-    var sideHustles = [].slice.call(servicesGrid.querySelectorAll('input:checked')).map(function (c) { return c.value; });
-    var socials = {}; SOCIAL_KEYS.forEach(function (k) { var v = document.getElementById('soc_' + k).value.trim(); if (v) socials[k] = v; });
-    var deliveryOn = isCourierEdit || sideHustles.indexOf('deliveries_errands') >= 0;
-    var coverZones = deliveryOn ? [].slice.call(coverZonesWrap.querySelectorAll('select')).map(function (s) { return s.value; }).filter(Boolean) : [];
-    coverZones = coverZones.filter(function (z, i) { return coverZones.indexOf(z) === i; });
-    var hidePhone = document.getElementById('p_hide_phone').checked;
-    var bizPhoneVal = document.getElementById('p_biz_phone').value.trim();
-    if (hidePhone && !bizPhoneVal) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Add a business / call number before hiding your personal number.'; return; }
-    var newPin = document.getElementById('p_pin').value;
-    if (newPin && !/^\d{5}$/.test(newPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'New PIN must be exactly 5 digits.'; return; }
-    var curPin = document.getElementById('p_curpin').value;
-    if (newPin && !/^\d{5}$/.test(curPin)) { mmsg.className = 'mmsg error'; mmsg.textContent = 'Enter your current 5-digit PIN to change it.'; document.getElementById('p_curpin').focus(); return; }
-    saveBtn.disabled = true; mmsg.className = 'mmsg'; mmsg.textContent = 'Saving…';
-    try {
-      var body = {
-        name: document.getElementById('p_name').value.trim(),
-        business_name: document.getElementById('p_biz').value.trim(),
-        is_business: document.getElementById('p_type').value === '1',
-        member_type: pMemberType.value,
-        stock: isVendorEdit ? document.getElementById('p_stock').value.trim() : '',
-        vendor_scale: isVendorEdit ? pVendorScale.value : '',
-        vendor_categories: isVendorEdit ? cats : [],
-        vendor_services: isVendorEdit ? svcs : [],
-        services_other: isVendorEdit ? document.getElementById('p_services_other').value.trim() : '',
-        coverage_zones: coverZones,
-        side_hustles: sideHustles,
-        socials: socials,
-        emergency_name: document.getElementById('p_emerg_name').value.trim(),
-        emergency_phone: document.getElementById('p_emerg_phone').value.trim(),
-        business_phone: bizPhoneVal,
-        hide_phone: hidePhone,
-        availability: pAvail.value,
-        area: document.getElementById('p_area').value,
-        location_lat: profileLoc ? profileLoc.lat : '',
-        location_lng: profileLoc ? profileLoc.lng : '',
-        skill_level: isCarpEdit ? pLvl.value : '',
-        years_experience: isCarpEdit && document.getElementById('p_yrs').value.trim() !== '' ? Number(document.getElementById('p_yrs').value) : null,
-        specialties: isCarpEdit ? specs : []
-      };
-      if (newPin) { body.pin = newPin; body.current_pin = curPin; }
-      var r = await C.api('/me', { method: 'PUT', body: body });
-      me = r.member;
-      if (r.token) C.setToken(r.token); // a new PIN signs out other devices; keep this one signed in
-      document.getElementById('p_pin').value = '';
-      document.getElementById('p_curpin').value = '';
-      document.getElementById('p_curpin_wrap').hidden = true;
-      mmsg.className = 'mmsg ok'; mmsg.textContent = newPin ? 'Saved. Your new PIN is set, and any other phone signed in to your account has been signed out.' : 'Saved.';
-      await load(); // refresh directory (own card may have changed)
-      setTimeout(closeModal, newPin ? 1400 : 700);
-    } catch (err) {
-      mmsg.className = 'mmsg error'; mmsg.textContent = err.message || 'Could not save.';
-    } finally { saveBtn.disabled = false; }
-  });
 
   // ── Sourcing: browse vendors & service providers (reuses the compact card) ──
   var srcAreaFilter = document.getElementById('srcAreaFilter');
@@ -2108,7 +1671,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     host.addEventListener('click', function (e) {
       var b = e.target.closest('.tipact'); if (!b) return;
       var go = b.getAttribute('data-go'), act = b.getAttribute('data-act');
-      if (act === 'profile') { var eb = document.getElementById('editBtn'); if (eb) eb.click(); return; }
+      if (act === 'profile') { location.href = 'profile.html'; return; }
       if (go) { showTab(go); window.scrollTo(0, 0); }
     });
   }
@@ -2809,7 +2372,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     if (!(me && me.emergency_phone)) {
       warn.className = 'mbar info'; warn.style.display = 'flex';
       warn.innerHTML = '<p>Add an <b>emergency contact</b> in My profile — that’s who the team helps reach if you’re ever overdue.</p><button type="button" id="emergGo">Add now</button>';
-      document.getElementById('emergGo').addEventListener('click', openModal);
+      document.getElementById('emergGo').addEventListener('click', function () { location.href = 'profile.html#emergency'; });
     } else { warn.style.display = 'none'; }
     try {
       var r = await C.api('/callouts');
@@ -2913,6 +2476,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     { id: 44, date: '2026-11-20', title: 'Try the Smart Generator (experimental)', body: 'A new tool, still under construction: describe a wardrobe (size, sections, and what goes in each: shelves, hanging or drawers) and it builds every part in 3D first, then reads the cut list off the model, so the two always agree and parts that run into each other are flagged. Your own construction settings (board, groove depth, gaps, runner gap, subframe) are remembered. Send the list straight to the Cut Sheet for boards and edge banding. It is an experiment: check every size yourself before cutting, and tell us on WhatsApp when something looks wrong. Kitchens come next. Find it in Tools.' },
     { id: 45, date: '2026-11-20', title: 'Edge banding now comes on as standard', body: 'In the wardrobe cutlist and the Smart Generator every part now arrives with its usual edge banding already marked: doors, drawer fronts and drawer-chest face strips all round, the front edge of carcass parts, shelves and the chest top, and the visible edges of side and end panels. Backs, drawer bases, subframe rails and the hidden filler strips stay plain. Tap an edge to take off what a job does not need (tap again for double then band). Lists from the Smart Generator carry the banding into the Cut Sheet too. Lists you saved before keep the banding you set.' },
     { id: 46, date: '2026-11-21', title: 'Kitchens in the Smart Generator (experimental)', body: 'The Smart Generator now does kitchens as well as wardrobes: switch to Kitchen at the top. Lay out runs of base and wall cabinets along the back and side walls, then add units: drawer or door base units, a sink unit, a hob over drawers, wall units with fixed and adjustable shelves, L corners, side panels, fillers and gaps for appliances. Base units stand on legs under rails; choose bar handles (full-height fronts) or J-profile (every front shortened for the profile), and your own settings (legs, J-profile, rails, gaps) are remembered. You get the 3D, the cut list, a list of the hardware to buy (legs, hinges, runners, J-profiles, toe kicks) and Send to the Cut Sheet. Load the U-shaped example to see a full kitchen. Still under construction: check every size before cutting, and tell us on WhatsApp what is wrong.' },
+    { id: 52, date: '2026-11-23', title: 'My profile has its own page', body: 'My profile now opens as its own page instead of a pop-up over the directory. Everything is where it was: photo, logo, details, links, emergency contact, trades and PIN, and it saves the same way. Next, the same page will hold My files: everything you have saved in the tools, in folders by client and job.' },
     { id: 51, date: '2026-11-23', title: 'Smart Generator: side-mount or undermount drawers', body: 'Choose your drawer runners in the kitchen construction settings. Side mount keeps the box you know (the opening less the runner gap, base underneath). Undermount (concealed) runners follow the Blum rule: the inside of the box is the opening less 42, 18 mm sides (use runners made for 18 mm sides), the bottom raised 13 between the sides, the back sitting on the bottom, and the box 10 shorter than the runner, with the runner length picked from the cabinet depth. Every number is a setting, because each runner make differs: check your runner sheet.' },
     { id: 50, date: '2026-11-23', title: 'Smart Generator: blind corners and kitchen starters', body: 'The Kitchen tab is now Kitchen / Laundry. Start a straight, L-shaped or U-shaped kitchen, or a laundry, built from standard unit widths. Corners are blind corners as standard: 1000 or 1200 wide, the blind part sized from the run that meets it (its depth, its door and an 80 mm corner filler) and closed with a blind panel, with the door on the open part. The run that meets the corner starts with the 80 mm filler. Base blind corners can take a magic corner or LeMans pull-out. The routed L corner is still there as a special option.' },
     { id: 49, date: '2026-11-23', title: 'Smart Generator: door types, sliding tracks, drawer boxes, shelf positions', body: 'Every door now has a type. Base units with doors: hinged on cup hinges, lift-up (on hinges with a gas or mechanical stay, or a hingeless fitting), bi-fold lift, drop-down with or without a soft-down stay (TV units), or sliding. Wall units: hinged, the two lift-ups or a bi-fold lift; lift-ups give one door per shelf space, so the shelves behind them become the door joints. Tall units choose per box, and can also take sliding doors or a folding pair for a special request. With sliding doors the carcass is set back for the tracks so the side panels stay flush with the doors (island sliding units too). Drawer boxes are cut lower than their fronts (50 mm by default, in your construction settings). J-profiles go on whichever edge you can reach. Shelves: the count is what gets cut and the installer places them on site, but you can give exact heights for the 3D and drawings. Wide shelves (over 800) get a centre divider. An island with an overhang now sits on one top panel the size of the quartz less its 80 mm doubled edge.' },
