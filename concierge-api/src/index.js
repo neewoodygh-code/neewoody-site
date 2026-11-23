@@ -389,6 +389,14 @@ async function route(request, env, ctx) {
   if (mClient && method === 'PUT')    return withPaid(request, env, (m) => updateClient(request, env, m, Number(mClient[1])));
   if (mClient && method === 'DELETE') return withPaid(request, env, (m) => deleteClient(env, m, Number(mClient[1])));
 
+  // ---- member: My files (2026-11-23; folders = client > job; reads open to lapsed members, saves need a paid membership) ----
+  if (path === '/api/files' && method === 'GET')  return withAuth(request, env, (m) => listFiles(env, m));
+  if (path === '/api/files' && method === 'POST') return withPaid(request, env, (m) => createFile(request, env, m));
+  const mFile = path.match(/^\/api\/files\/(\d+)$/);
+  if (mFile && method === 'GET')    return withAuth(request, env, (m) => getFile(env, m, Number(mFile[1])));
+  if (mFile && method === 'PUT')    return withPaid(request, env, (m) => updateFile(request, env, m, Number(mFile[1])));
+  if (mFile && method === 'DELETE') return withAuth(request, env, (m) => deleteFile(env, m, Number(mFile[1])));
+
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
   if (path === '/api/cutlists' && method === 'POST') return withPaid(request, env, (m) => saveCutlist(request, env, m));
@@ -916,6 +924,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM payments WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM payment_intents WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM member_files WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM buy_requests WHERE poster_phone = ?').bind(phone),
@@ -975,6 +984,7 @@ async function purgePending(env, onlyPhone) {
     q(`DELETE FROM payments WHERE member_phone IN ${sub}`),
     q(`DELETE FROM payment_intents WHERE member_phone IN ${sub}`),
     q(`DELETE FROM saved_cutlists WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM member_files WHERE member_phone IN ${sub}`),
     q(`DELETE FROM login_attempts WHERE phone IN ${sub}`),
     q(`DELETE FROM jobs WHERE poster_phone IN ${sub}`),
     q(`DELETE FROM buy_requests WHERE poster_phone IN ${sub}`),
@@ -2410,6 +2420,99 @@ async function deleteClient(env, member, id) {
   if (!existing) return json({ error: 'not_found' }, 404);
   if (existing.member_phone !== member.phone) return json({ error: 'forbidden' }, 403);
   await env.DB.prepare('DELETE FROM clients WHERE id = ?').bind(id).run();
+  return json({ deleted: true });
+}
+
+// ── My files (migration 0036) ──────────────────────────────────────────
+// One row per saved file. Folders are the member's own client (soft link to clients.id) then a free-text job.
+// Never deletes or rewrites anything but the member's own rows; older tools keep their own tables.
+const FILE_TOOLS = ['smart'];
+const FILE_MAX_PER_MEMBER = 300;
+const FILE_MAX_BYTES = 256 * 1024;
+const FILE_NAME_MAX = 80;
+const FILE_JOB_MAX = 80;
+const FILE_COLS = 'id, client_id, job, tool, name, size, created_at, updated_at';
+
+async function ownClientId(env, member, v) {
+  if (v == null || v === '' || v === 0) return null;
+  const id = Number(v);
+  if (!Number.isInteger(id) || id <= 0) return undefined;
+  const c = await env.DB.prepare('SELECT id FROM clients WHERE id = ? AND member_phone = ?').bind(id, member.phone).first();
+  return c ? id : undefined;
+}
+function fileData(v) {
+  if (!v || typeof v !== 'object') return { error: 'data_required' };
+  let str; try { str = JSON.stringify(v); } catch { return { error: 'data_required' }; }
+  if (str.length > FILE_MAX_BYTES) return { error: 'file_too_large', limit: FILE_MAX_BYTES };
+  return { str };
+}
+
+async function listFiles(env, member) {
+  const { results } = await env.DB.prepare(
+    `SELECT ${FILE_COLS} FROM member_files WHERE member_phone = ? ORDER BY updated_at DESC`
+  ).bind(member.phone).all();
+  return json({ files: results || [], limit: FILE_MAX_PER_MEMBER });
+}
+
+async function getFile(env, member, id) {
+  const row = await env.DB.prepare(`SELECT ${FILE_COLS}, data FROM member_files WHERE id = ? AND member_phone = ?`).bind(id, member.phone).first();
+  if (!row) return json({ error: 'not_found' }, 404);
+  let data = null; try { data = JSON.parse(row.data); } catch {}
+  return json({ file: { ...row, data } });
+}
+
+async function createFile(request, env, member) {
+  const body = await readJson(request);
+  const tool = String(body.tool || '');
+  if (!FILE_TOOLS.includes(tool)) return json({ error: 'invalid_tool' }, 400);
+  const name = String(body.name || '').trim().slice(0, FILE_NAME_MAX);
+  if (!name) return json({ error: 'name_required' }, 400);
+  const job = String(body.job || '').trim().slice(0, FILE_JOB_MAX);
+  const clientId = await ownClientId(env, member, body.client_id);
+  if (clientId === undefined) return json({ error: 'invalid_client' }, 400);
+  const d = fileData(body.data);
+  if (d.error) return json(d, 400);
+  const c = await env.DB.prepare('SELECT COUNT(*) AS c FROM member_files WHERE member_phone = ?').bind(member.phone).first();
+  if (c && c.c >= FILE_MAX_PER_MEMBER) return json({ error: 'too_many_files', limit: FILE_MAX_PER_MEMBER }, 400);
+  const r = await env.DB.prepare(
+    'INSERT INTO member_files (member_phone, client_id, job, tool, name, data, size) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  ).bind(member.phone, clientId, job, tool, name, d.str, d.str.length).run();
+  const row = await env.DB.prepare(`SELECT ${FILE_COLS} FROM member_files WHERE id = ?`).bind(r.meta.last_row_id).first();
+  return json({ file: row }, 201);
+}
+
+// Update any of name, client_id, job, data; fields left out stay as they are.
+async function updateFile(request, env, member, id) {
+  const cur = await env.DB.prepare('SELECT id FROM member_files WHERE id = ? AND member_phone = ?').bind(id, member.phone).first();
+  if (!cur) return json({ error: 'not_found' }, 404);
+  const body = await readJson(request);
+  const sets = [], vals = [];
+  if (body.name !== undefined) {
+    const name = String(body.name || '').trim().slice(0, FILE_NAME_MAX);
+    if (!name) return json({ error: 'name_required' }, 400);
+    sets.push('name = ?'); vals.push(name);
+  }
+  if (body.job !== undefined) { sets.push('job = ?'); vals.push(String(body.job || '').trim().slice(0, FILE_JOB_MAX)); }
+  if (body.client_id !== undefined) {
+    const clientId = await ownClientId(env, member, body.client_id);
+    if (clientId === undefined) return json({ error: 'invalid_client' }, 400);
+    sets.push('client_id = ?'); vals.push(clientId);
+  }
+  if (body.data !== undefined) {
+    const d = fileData(body.data);
+    if (d.error) return json(d, 400);
+    sets.push('data = ?', 'size = ?'); vals.push(d.str, d.str.length);
+  }
+  if (!sets.length) return json({ error: 'nothing_to_change' }, 400);
+  await env.DB.prepare(`UPDATE member_files SET ${sets.join(', ')}, updated_at = datetime('now') WHERE id = ? AND member_phone = ?`)
+    .bind(...vals, id, member.phone).run();
+  const row = await env.DB.prepare(`SELECT ${FILE_COLS} FROM member_files WHERE id = ?`).bind(id).first();
+  return json({ file: row });
+}
+
+async function deleteFile(env, member, id) {
+  const r = await env.DB.prepare('DELETE FROM member_files WHERE id = ? AND member_phone = ?').bind(id, member.phone).run();
+  if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
 }
 

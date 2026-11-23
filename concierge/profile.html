@@ -41,6 +41,36 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .pcard .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(31,47,88,.1); }
 .pcard .mhead h1{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
 .state{ padding:2rem 1.5rem; color:var(--muted); }
+.jump{ margin:-.4rem 0 1rem; font-size:.9rem; } .jump a{ text-decoration:underline; text-underline-offset:2px; }
+.pcard.files{ margin-top:1.5rem; }
+.fbody{ padding:1rem 1.5rem 1.5rem; }
+.fnote{ font-size:.85rem; color:var(--muted); line-height:1.55; margin-bottom:1rem; }
+.fsum{ font-size:.85rem; color:var(--muted); margin-bottom:.8rem; }
+.ffold{ border:1px solid rgba(31,47,88,.15); border-radius:6px; margin-bottom:.7rem; background:#fff; }
+.ffold > summary{ cursor:pointer; padding:.75rem 1rem; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:1rem; }
+.ffold > summary::-webkit-details-marker{ display:none; }
+.ffold > summary::before{ content:'▸'; color:var(--muted); margin-right:.5rem; } .ffold[open] > summary::before{ content:'▾'; }
+.ffold > summary span{ margin-right:auto; } .ffold > summary small{ font-weight:400; color:var(--muted); }
+.fjob{ font-size:.8rem; font-weight:600; color:var(--muted); padding:.5rem 1rem .2rem; }
+.frow{ display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .8rem; padding:.6rem 1rem; border-top:1px solid #eee6da; }
+.frow .ftool{ font-size:.7rem; font-weight:600; letter-spacing:.04em; color:#fff; background:var(--navy); border-radius:3px; padding:.15rem .45rem; }
+.frow .ftool.old{ background:#8a7f70; }
+.frow .fname{ font-weight:500; flex:1 1 12rem; min-width:0; overflow-wrap:anywhere; }
+.frow .fdate{ font-size:.78rem; color:var(--muted); }
+.frow .facts{ display:flex; flex-wrap:wrap; gap:.35rem; flex-basis:100%; }
+.frow .facts a, .frow .facts button{ font:inherit; font-size:.8rem; font-weight:600; color:var(--navy); background:none; border:1px solid rgba(31,47,88,.3); border-radius:4px; padding:.3rem .6rem; cursor:pointer; text-decoration:none; }
+.frow .facts button.del{ color:#8a2a1a; border-color:rgba(138,42,26,.35); }
+.fwarn{ font-size:.82rem; color:#8a2a1a; margin:.3rem 0; }
+@media(min-width:560px){ .frow .facts{ flex-basis:auto; } }
+/* phones: the same header rules as the directory (lockup and buttons on their own rows) */
+@media (max-width: 600px){
+  header.top{ position:static; flex-wrap:wrap; row-gap:.65rem; padding:.75rem 1rem; }
+  .top-actions{ margin-left:auto; }
+}
+@media (max-width: 520px){
+  .top{ gap:.5rem; } .top-actions{ gap:.3rem; }
+  .tbtn{ letter-spacing:.03em; padding-left:.5rem; padding-right:.5rem; white-space:nowrap; }
+}
 .buy-additem{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.08em; text-transform:uppercase;
   background:transparent; color:var(--navy); border:1px dashed rgba(31,47,88,.35); border-radius:4px; padding:.5rem .8rem; cursor:pointer; margin-top:.5rem; }
 .buy-additem:hover{ border-color:var(--gold); }
@@ -110,6 +140,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 </header>
 <main class="pwrap">
   <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">My profile</span></nav>
+  <p class="jump"><a href="#files">Go to My files</a></p>
   <section class="pcard" aria-labelledby="profileTitle">
     <div class="mhead"><h1 id="profileTitle">My profile</h1></div>
     <div class="state" id="state">Loading your profile…</div>
@@ -216,8 +247,18 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
       <div class="mmsg" id="mmsg"></div>
     </form>
   </section>
+
+  <section class="pcard files" id="files" aria-labelledby="filesTitle">
+    <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
+    <div class="fbody">
+      <p class="fnote">Everything you have saved in the tools, in folders by client. Smart Generator designs can be opened, moved to another folder, renamed, downloaded and deleted here. Files from the other tools open in their own tool, where you manage them as before.</p>
+      <div id="fList" role="region" aria-live="polite">Loading your files…</div>
+      <input type="file" id="fUpIn" accept=".json,application/json" hidden>
+    </div>
+  </section>
 </main>
 <script src="../js/concierge.js?v=20261113b"></script>
+<script src="../js/my-files.js?v=20261123"></script>
 <script>
 (function () {
   'use strict';
@@ -554,6 +595,98 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     } finally { saveBtn.disabled = false; }
   });
 
+  // ── My files (2026-11-23): every tool's saves, in folders by client. Smart Generator files live in /api/files and are
+  // managed here; the older tools (cutlist, Cut Sheet, Job Pricing, invoices) keep their own storage and are only listed.
+  var TOOL = { smart: 'Smart Generator', cutlist: 'Cutlist', cutsheet: 'Cut Sheet', quote: 'Job Pricing', invoice: 'Invoice' };
+  var OPEN = { cutlist: '/cutlist.html', cutsheet: '/cut-sheet.html', quote: '/carpenter-pricing.html', invoice: '/invoice-generator.html' };
+  var OPENIN = { cutlist: 'the Cutlist', cutsheet: 'the Cut Sheet', quote: 'Job Pricing', invoice: 'Invoices' };
+  var fState = { files: [], clients: [] };
+  function fdate(v) {
+    if (!v) return '';
+    var d = typeof v === 'number' ? new Date(v) : new Date(String(v).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(String(v)) || String(v).indexOf('T') > 0 ? '' : 'Z'));
+    return isNaN(d) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+  async function loadFiles() {
+    var host = document.getElementById('fList');
+    var calls = [MyFiles.list(), MyFiles.clients(), C.api('/cutlists'), C.api('/cutsheets'), C.api('/pricing/quotes'), C.api('/invoices')];
+    var res = await Promise.all(calls.map(function (p) { return p.then(function (v) { return { ok: true, v: v }; }, function (e) { return { ok: false, e: e }; }); }));
+    var warn = [];
+    var names = ['My files', 'your clients', 'cutlists', 'Cut Sheet projects', 'Job Pricing quotes', 'invoices'];
+    res.forEach(function (r, i) { if (!r.ok) warn.push('Could not load ' + names[i] + ' just now.'); });
+    var V = function (i) { return res[i].ok ? res[i].v : null; };
+    var files = V(0) || [], clients = V(1) || [];
+    fState = { files: files, clients: clients };
+    var byId = {}, byName = {};
+    clients.forEach(function (c) { byId[c.id] = c; byName[String(c.name).trim().toLowerCase()] = c; });
+    var rows = [];
+    function folderOf(id, text) {
+      if (id && byId[id]) return byId[id].name;
+      var t = String(text || '').trim(); if (t && byName[t.toLowerCase()]) return byName[t.toLowerCase()].name;
+      return t || '';
+    }
+    files.forEach(function (f) { rows.push({ tool: f.tool, folder: folderOf(f.client_id), job: f.job || '', name: f.name, date: f.updated_at, file: f }); });
+    ((V(2) || {}).cutlists || []).forEach(function (c) { rows.push({ tool: 'cutlist', folder: '', job: '', name: c.name, date: c.updated_at }); });
+    (((V(3) || {}).data || {}).list || []).forEach(function (pj) {
+      var n = (pj.lists || []).length;
+      rows.push({ tool: 'cutsheet', folder: folderOf(pj.clientId, pj.name), job: '', name: (pj.name || 'Project') + ': ' + n + ' cut list' + (n === 1 ? '' : 's'), date: pj.updatedAt });
+    });
+    ((V(4) || {}).quotes || []).forEach(function (q) { rows.push({ tool: 'quote', folder: folderOf(q.clientId, q.client), job: '', name: (q.refId ? q.refId + ' ' : '') + (q.item || 'Quote'), date: q.updatedAt || q.createdAt }); });
+    (((V(5) || {}).data || {}).list || []).forEach(function (e) {
+      var kind = e.docType === 'quote' ? 'Quote' : e.docType === 'receipt' ? 'Receipt' : 'Invoice';
+      rows.push({ tool: 'invoice', folder: folderOf(null, e.client), job: '', name: kind + ' ' + (e.number || '') + (e.project ? ', ' + e.project : ''), date: e.savedAt });
+    });
+    var groups = {};
+    rows.forEach(function (r) { (groups[r.folder] = groups[r.folder] || []).push(r); });
+    var keys = Object.keys(groups).sort(function (a, b) { return (a === '') - (b === '') || a.localeCompare(b); });
+    var E = MyFiles.esc;
+    var h = warn.map(function (w) { return '<p class="fwarn">' + E(w) + '</p>'; }).join('');
+    h += '<p class="fsum">' + rows.length + ' saved item' + (rows.length === 1 ? '' : 's') + ' in ' + keys.length + ' folder' + (keys.length === 1 ? '' : 's') +
+      '. Smart Generator files: ' + files.length + ' of 300.</p>';
+    if (!rows.length) h += '<p>Nothing saved yet. Save a design from the <a href="/smart-generator.html" style="text-decoration:underline">Smart Generator</a>, or upload a file.</p>';
+    keys.forEach(function (k, ki) {
+      var list = groups[k].slice().sort(function (a, b) { return (a.job || '').localeCompare(b.job || '') || String(b.date || '').localeCompare(String(a.date || '')); });
+      h += '<details class="ffold"' + (ki < 3 ? ' open' : '') + '><summary><span>' + E(k || 'No client') + '</span><small>' + list.length + '</small></summary>';
+      var lastJob = null;
+      list.forEach(function (r) {
+        if (r.job !== lastJob) { if (r.job) h += '<div class="fjob">' + E(r.job) + '</div>'; lastJob = r.job; }
+        h += '<div class="frow"><span class="ftool' + (r.file ? '' : ' old') + '">' + E(TOOL[r.tool] || r.tool) + '</span><span class="fname">' + E(r.name) + '</span>' +
+          '<span class="fdate">' + E(fdate(r.date)) + '</span><span class="facts">' +
+          (r.file ? '<a href="/smart-generator.html#file=' + r.file.id + '">Open</a><button type="button" data-f="move" data-id="' + r.file.id + '">Move or rename</button>' +
+            '<button type="button" data-f="down" data-id="' + r.file.id + '">Download</button><button type="button" class="del" data-f="del" data-id="' + r.file.id + '">Delete</button>'
+            : '<a href="' + OPEN[r.tool] + '">Open in ' + E(OPENIN[r.tool]) + '</a>') + '</span></div>';
+      });
+      h += '</details>';
+    });
+    host.innerHTML = h;
+  }
+  document.getElementById('fList').addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-f]'); if (!b) return;
+    var f = fState.files.filter(function (x) { return x.id === +b.dataset.id; })[0]; if (!f) return;
+    try {
+      if (b.dataset.f === 'down') { var full = await MyFiles.get(f.id); MyFiles.download(f.name, f.tool, full.data); return; }
+      if (b.dataset.f === 'del') {
+        if (!confirm('Delete "' + f.name + '"?\n\nThis cannot be undone. Download it first if you may want it again.')) return;
+        await MyFiles.remove(f.id); await loadFiles(); return;
+      }
+      var r = await MyFiles.folderDialog({ title: 'Move or rename', name: f.name, clientId: f.client_id, job: f.job, clients: fState.clients, files: fState.files, primary: 'Save' });
+      if (!r) return;
+      await MyFiles.update(f.id, { name: r.name, client_id: r.client_id, job: r.job });
+      await loadFiles();
+    } catch (err) { alert(MyFiles.err(err)); }
+  });
+  document.getElementById('fUp').addEventListener('click', function () { document.getElementById('fUpIn').click(); });
+  document.getElementById('fUpIn').addEventListener('change', async function () {
+    var file = this.files[0]; this.value = '';
+    try {
+      var o = await MyFiles.readUpload(file);
+      if (o.tool !== 'smart') throw new Error('Only Smart Generator files can be uploaded here for now.');
+      var r = await MyFiles.folderDialog({ title: 'Save the uploaded file', name: o.name, clients: fState.clients, files: fState.files, primary: 'Save to My files' });
+      if (!r) return;
+      await MyFiles.create({ tool: o.tool, name: r.name, client_id: r.client_id, job: r.job, data: o.data });
+      await loadFiles();
+    } catch (err) { alert(err.data ? MyFiles.err(err) : (err.message || 'Could not upload that file.')); }
+  });
+
   // load the member, then fill the form (the directory's paywall handles unpaid sign-ups)
   (async function init() {
     var st = document.getElementById('state');
@@ -566,6 +699,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     try { serviceCatalog = (await C.api('/services')).services || []; } catch (e) {}
     fill();
     st.hidden = true; document.getElementById('profileForm').hidden = false;
+    loadFiles();
+    if (location.hash === '#files') document.getElementById('files').scrollIntoView();
     var target = location.hash === '#emergency' ? document.getElementById('p_emerg_name') : null;
     if (target) { target.scrollIntoView({ block: 'center' }); target.focus(); }
   })();

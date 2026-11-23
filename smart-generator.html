@@ -21,6 +21,8 @@ if (location.hostname === 'neewoodygh.com') { window.dataLayer = window.dataLaye
 .wip p + p { margin-top: .35rem; }
 .wip a { color: var(--walnut); }
 .sg { max-width: 1240px; margin: 0 auto; padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 3rem; }
+.filebar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .8rem 0 0; }
+.filebar .fcur { font-size: var(--t-small); color: var(--stone); flex-basis: 100%; }
 .sg-crumb { display: flex; flex-wrap: wrap; gap: .45rem; font-size: var(--t-small); color: var(--stone); margin-bottom: .8rem; }
 .sg-crumb a { color: var(--stone); text-decoration: underline; text-underline-offset: 2px; }
 .sg-crumb a:hover { color: var(--ink, #17130f); }
@@ -144,6 +146,14 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
   <div class="mode no-print" role="group" aria-label="What are you making?">
     <button type="button" data-mode="wardrobe" aria-pressed="true">Wardrobe</button>
     <button type="button" data-mode="kitchen" aria-pressed="false">Kitchen / Laundry</button>
+  </div>
+  <div class="filebar no-print" role="group" aria-label="My files">
+    <button type="button" class="ui-btn sm ghost" id="fSave">Save to My files</button>
+    <button type="button" class="ui-btn sm ghost" id="fOpen">Open from My files</button>
+    <button type="button" class="ui-btn sm ghost" id="fDown">Download file</button>
+    <button type="button" class="ui-btn sm ghost" id="fUp">Upload file</button>
+    <input type="file" id="fUpIn" accept=".json,application/json" hidden>
+    <span class="fcur" id="fCur" role="status"></span>
   </div>
 
   <div class="print-only">
@@ -295,6 +305,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 </footer>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/my-files.js?v=20261123"></script>
 <script>
 (function(){ var m = window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive();
   document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/directory.html' : '/concierge/'; });
@@ -518,6 +529,79 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       .catch(function (e) { alert('Could not make the file. Check your connection and try again. (' + e.message + ')'); });
   }
   $('exHtml').onclick = function () { exp('html'); };
+
+  /* ---------------- My files (2026-11-23): save the design to the member's account, in folders by client and job ----------------
+   * A file holds the design only (the wardrobe's size and sections, or the whole kitchen editor); construction settings stay
+   * each member's own. Download / Upload move a design between devices and accounts as a .nwd.json file. */
+  var curFile = null, fileClients = [];
+  function design() {
+    return mode === 'kitchen' ? { mode: 'kitchen', design: JSON.parse(JSON.stringify(KS)) }
+      : { mode: 'wardrobe', design: { w: num('w', 2400), h: num('h', 2100), d: num('d', 580), units: +$('units').value, secs: JSON.parse(JSON.stringify(secs)) } };
+  }
+  function applyDesign(dd) {
+    if (!dd || !dd.design) throw new Error('This file has no design in it.');
+    if (dd.mode === 'kitchen') {
+      if (!KOK) throw new Error('Refresh the page to get the kitchen part of the generator, then open the file again.');
+      KS = dd.design; kSave(); kTop(); drawRuns(); setMode('kitchen');
+    } else {
+      var w = dd.design; $('w').value = w.w; $('h').value = w.h; $('d').value = w.d; $('units').value = String(w.units);
+      secs = w.secs; $('nsec').value = String(secs.length); drawSecs(); setMode('wardrobe');
+    }
+    run();
+  }
+  function defaultName() { return mode === 'kitchen' ? 'Kitchen, ' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Wardrobe ' + num('w', 2400) + ' x ' + num('h', 2100); }
+  function showCur(note) {
+    var c = curFile && fileClients.filter(function (x) { return x.id === curFile.client_id; })[0];
+    $('fCur').textContent = note || (curFile ? 'Open: ' + curFile.name + ' (' + (c ? c.name : 'No client') + (curFile.job ? ' › ' + curFile.job : '') + ')' : '');
+  }
+  function needMember(what) {
+    if (window.MyFiles && MyFiles.member()) return true;
+    if (confirm(what + ' is for Carpentry Concierge members.\n\nLog in or join now?')) location.href = '/concierge/login.html?next=' + encodeURIComponent('/smart-generator.html');
+    return false;
+  }
+  function openFile(id) {
+    if (!needMember('Opening My files')) return;
+    MyFiles.get(id).then(function (f) {
+      applyDesign(f.data); curFile = f;
+      return MyFiles.clients().then(function (cl) { fileClients = cl; showCur(); });
+    }).catch(function (e) { alert('Could not open that file. ' + MyFiles.err(e)); });
+  }
+  $('fSave').onclick = function () {
+    if (!needMember('Saving to My files')) return;
+    var files;
+    Promise.all([MyFiles.clients(), MyFiles.list()]).then(function (r) {
+      fileClients = r[0]; files = r[1].filter(function (f) { return f.tool === 'smart'; });
+      return MyFiles.folderDialog({ title: curFile ? 'Save this design' : 'Save to My files', name: curFile ? curFile.name : defaultName(),
+        clientId: curFile && curFile.client_id, job: curFile && curFile.job, clients: fileClients, files: files,
+        primary: curFile ? 'Save over the open file' : 'Save', secondary: curFile ? 'Save as a new file' : null });
+    }).then(function (r) {
+      if (!r) return;
+      if (r.newClient) fileClients.push(r.newClient);
+      var body = { name: r.name, client_id: r.client_id, job: r.job, data: design() };
+      return (curFile && r.action === 'primary' ? MyFiles.update(curFile.id, body) : MyFiles.create(Object.assign({ tool: 'smart' }, body)))
+        .then(function (f) { curFile = f; showCur(); });
+    }).catch(function (e) { alert(MyFiles.err(e)); });
+  };
+  $('fOpen').onclick = function () {
+    if (!needMember('Opening My files')) return;
+    Promise.all([MyFiles.clients(), MyFiles.list()]).then(function (r) {
+      fileClients = r[0];
+      return MyFiles.pickDialog('Open a design', r[1].filter(function (f) { return f.tool === 'smart'; }), fileClients);
+    }).then(function (f) { if (f) openFile(f.id); }).catch(function (e) { alert(MyFiles.err(e)); });
+  };
+  $('fDown').onclick = function () {
+    if (!needMember('Downloading a design file')) return;
+    MyFiles.download(curFile ? curFile.name : defaultName(), 'smart', design());
+  };
+  $('fUp').onclick = function () { if (needMember('Uploading a design file')) $('fUpIn').click(); };
+  $('fUpIn').onchange = function () {
+    var f = this.files[0]; this.value = '';
+    MyFiles.readUpload(f).then(function (o) {
+      if (o.tool !== 'smart') throw new Error('That file is from another tool, not the Smart Generator.');
+      applyDesign(o.data); curFile = null;
+      showCur('Opened "' + o.name + '" from a file. Use Save to My files to keep it in your account.');
+    }).catch(function (e) { alert(e.message || 'Could not open that file.'); });
+  };
   $('exDae').onclick = function () { exp('dae'); };
 
   /* ---------------- KITCHEN editor (2026-11-21): runs of units, built by SmartEngine kitchen() ---------------- */
@@ -943,7 +1027,9 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     kInit();
     var own = { '#prampram': 'prampram', '#prampram-laundry': 'prampramLaundry' }[location.hash];   // the owner's job, not linked
     if (own) { KS = fromEngine(EX[own]); kSave(); kTop(); drawRuns(); }
+    var fileHash = location.hash.match(/^#file=(\d+)$/);   // opened from My files on the profile page
     setMode(own || location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE)));
+    if (fileHash) openFile(+fileHash[1]);
   }
   else { document.querySelector('.mode').hidden = true; go(); }
 })();

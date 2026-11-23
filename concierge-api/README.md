@@ -115,6 +115,11 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | POST | `/api/admin/payments` | admin | record MoMo payment (upsert on member+period) |
 | GET | `/api/admin/payments?period=YYYY-MM` | admin | who paid this month |
 | DELETE | `/api/admin/payments` | admin | reverse a payment (body `{member_phone, period}`; idempotent) |
+| GET | `/api/files` | member | My files list, no data (migration 0036; 2026-11-23) |
+| POST | `/api/files` | paid member | save a file `{tool:'smart', name, client_id?, job?, data}` (≤256 KB, ≤300 per member, client must be the member's own) |
+| GET | `/api/files/:id` | member | one file with its data (own only) |
+| PUT | `/api/files/:id` | paid member | change any of name, client_id, job, data |
+| DELETE | `/api/files/:id` | member | delete own file |
 
 ## Files
 
