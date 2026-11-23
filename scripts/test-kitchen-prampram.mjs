@@ -49,7 +49,38 @@ export const SPEC = {
   ],
 };
 
-const r = E.build(SPEC);
+// The units given their own logic on 2026-11-23 (owner): tall unit A (oven + microwave, two stacked boxes, 270),
+// pantry K (drawers, cubbies, shelves behind one full-height fold), the island (legs, 10 cm band, B1/B2 back to back
+// with bottom-rolling sliding doors). Run with --full. Heights inside A and K are first guesses to confirm.
+export const FULL = { ...SPEC, tallTop: 2700, runs: [
+  ...SPEC.runs.map(r => r.name !== 'Right wall, base' ? r : { ...r, units: [...r.units,
+    { type: 'tall', name: 'K', w: 800, fold: true, zones: [
+      { k: 'drawer', h: 300, n: 1 }, { k: 'drawer', h: 300, n: 2 }, { k: 'drawer', h: 200, n: 3 },
+      { k: 'cubby', h: 300, rows: 2, cols: 3 }, { k: 'split' }, { k: 'shelves', h: 0, n: 4 }] },
+    { type: 'panel', name: 'K end', h: 2700, extraD: 12 }] }),
+  { name: 'Left wall, tall', wall: 'left', at: 1012, off: OFF, depth: 580, kind: 'base', units: [
+    { type: 'tall', name: 'A', w: 600, zones: [
+      { k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 450 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
+    { type: 'panel', name: 'A end', h: 2700 }] },
+  { name: 'Island', kind: 'island', x: 1700, z: 1630, axis: 'z', depth: 800, top: 1100, units: [
+    { type: 'base', name: 'Island A', w: 600, drawers: [150, 200, 250, 300] },
+    { type: 'slide', name: 'B1', name2: 'B2', w: 1100, shelves: 1 }] },
+] };
+
+// The laundry (owner's brief 2026-11-18): 127 wide, 180 long. Width side: floating quartz on a welded frame over
+// the washer, wall cabinets 2 x 575 with 60 fillers. Length side: an 80 cabinet, 350 deep, doors stopping under the
+// lip (874). Run with --laundry.
+export const LAUNDRY = { type: 'kitchen', worktop: 950, room: { w: 1270 }, runs: [
+  { name: 'Laundry, worktop frame', wall: 'back', at: 0, depth: 350, kind: 'base', carcTop: 874, units: [{ type: 'gap', w: 1270 }],
+    items: ['Welded 1.5" angle frame, Hammerite black (laundry worktop)', 'Moisture-resistant board 18 mm under the slab (cut to the frame)'] },
+  { name: 'Laundry, length side', wall: 'left', at: 1000, depth: 350, kind: 'base', carcTop: 874, units: [
+    { type: 'base', name: 'Laundry cabinet', w: 800, doors: 2, frontTop: 874 }] },
+  { name: 'Laundry, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 1200, ceilingFiller: 100, units: [
+    { type: 'filler', name: 'left filler', w: 60 }, { type: 'wall', name: 'L1', w: 575, doors: 1, shelves: 3, fixed: 1 },
+    { type: 'wall', name: 'L2', w: 575, doors: 1, shelves: 3, fixed: 1 }, { type: 'filler', name: 'right filler', w: 60 }] },
+] };
+
+const r = E.build(process.argv.includes('--full') ? FULL : process.argv.includes('--laundry') ? LAUNDRY : SPEC);
 const rows = r.parts.map(p => ({ name: p.name, tag: p.tag, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: E.edges(p) }));
 if (process.argv.includes('--json')) { console.log(JSON.stringify({ spec: SPEC, parts: rows, hardware: r.hardware, warnings: r.warnings, clashes: r.clashes }, null, 1)); process.exit(0); }
 

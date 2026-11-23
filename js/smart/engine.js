@@ -266,8 +266,23 @@
    * Spec: { type:'kitchen', worktop:900, room:{w}, runs:[{name, wall:'back'|'left'|'right', at, depth, kind:'base'|'wall',
    *   bottom, height, units:[...]}], shop }. Unit types: 'base' (drawers:[h top to bottom] or doors:n), 'sink',
    *   'panel' (18 mm side panel between units), 'filler', 'cornerL' (back leg w, return r, returnDepth), 'wall'.
-   * The tall appliance unit, folding-door pantry, island and laundry are NOT here yet (owner: their own logic). */
-  var KSHOP = { handle: 'jprofile', sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3 };
+   * Tall units, the island and the laundry (owner's answers 2026-11-23):
+   *  - Board size is a setting (K.board: '4x8' 2440 x 1220 standard; '4x9' and '6x9' usually only come in chipboard).
+   *    A tall box stays within the board: on 10 cm legs that is 2300 for 4x8 (240 overall). Taller units (Amina's
+   *    A and K go to 270) are TWO STACKED BOXES; the lower one holds the appliances.
+   *  - 'tall' unit: zones listed bottom to top, {k:'drawer'|'oven'|'micro'|'cubby'|'shelves', h (0 = the rest),
+   *    n (drawers side by side, or shelves), rows, cols, open}; {k:'split'} starts the upper box. Fixed shelves
+   *    between zones. Cubbies and shelves sit behind doors; u.fold = one 2-leaf folding door over all of them,
+   *    full height (owner: one fold, full height).
+   *  - island run: {kind:'island', x, z, axis:'z'|'x', depth, top (underside of the quartz, 1100), units}; units
+   *    stand on legs with a toe kick all round (owner), carcass = top - 10 cm gloss band - legs; 'slide' units
+   *    are back to back pairs (u.name and u.name2) with bottom-rolling sliding doors (owner).
+   *  - laundry: a base run with carcTop (top of the carcass under the board) and units with frontTop (doors stop
+   *    under the worktop lip); run.items = bought items (welded frame, moisture-resistant board). */
+  var KSHOP = { handle: 'jprofile', sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3,
+    board: '4x8', tallTop: 2700, bandH: 100, slideTrack: 15, slideOverlap: 30, ovenW: 560, ovenH: 600 };
+  var BOARDS = { '4x8': [2440, 1220], '4x9': [2745, 1220], '6x9': [2745, 1830] };
+  function boardOf(K) { return BOARDS[K.board] || BOARDS['4x8']; }
 
   function kitchen(spec) {
     var s = merge(merge(SHOP, { backType: 'nailon' }), spec.shop || {}), K = merge(KSHOP, spec.kshop || {});
@@ -277,11 +292,33 @@
     var boxes = [], warn = [], hw = {};
     function tally(k, n) { hw[k] = (hw[k] || 0) + n; }
     function handle(n) { tally(JP ? 'J-profile handle (cut to front width)' : 'Handles or knobs (one per front)', n); }
+    var BD = boardOf(K), tallMax = BD[0] - 140;   // 2440 board: 2300 box on 10 cm legs (owner: 240 overall max)
 
+    // islands become one sub-run per unit (back-to-back pairs give two), each facing its own side
+    var runs = [], islands = [];
     spec.runs.forEach(function (run) {
+      if (run.kind !== 'island') { runs.push(run); return; }
+      var D = run.depth || 800, a = 0, iTop = (run.top || 1100) - K.bandH, outA = DT, outB = DT;
+      run.units.forEach(function (u, ui) {
+        var nm = u.name || ('Island ' + (ui + 1)), c = { wall: 'island', kind: 'base', isl: true, carcTop: iTop, ix: run.x || 0, iz: run.z || 0, axis: run.axis || 'z', D: D, at: a, name: (run.name || 'Island') + ', ' + nm };
+        if (u.type === 'slide') {
+          var half = (D - 2 * bt) / 2;
+          runs.push(merge(c, { face: 'a', depth: half, units: [merge(u, { name: nm })] }));
+          runs.push(merge(c, { face: 'b', depth: half, units: [merge(u, { name: u.name2 || nm + ' (other side)' })] }));
+          outA = outB = Math.max(outA, 2 * DT + 2);
+        } else {
+          runs.push(merge(c, { face: u.face || 'a', depth: D - bt, units: [merge(u, { name: nm, cover: true })] }));
+        }
+        a += u.w || 600;
+      });
+      islands.push({ run: run, L: a, D: D, iTop: iTop, outA: outA, outB: outB });
+    });
+
+    runs.forEach(function (run) {
       var wall = run.wall || 'back', base = (run.kind || 'base') === 'base';
       var dC = run.depth, Dr = dC + bt;                       // carcass depth (client's own), + back
-      var yBot = base ? K.legH : run.bottom, H = base ? baseSideH : run.height, yTop = yBot + H;
+      var rTop = run.carcTop || carcTop;                       // laundry and island set their own carcass top
+      var yBot = base ? K.legH : run.bottom, H = base ? rTop - K.legH : run.height, yTop = yBot + H;
       // map a box from run-local (x along the run, y up, z = carcass front 0 .. wall Dr) to the room
       // (X along the back wall from the left wall, Y up, Z = out from the back wall; walls at X = 0, X = W, Z = 0)
       function put(name, tag, kind, x, y, z, bw, bh, bd, cut, note, extra) {
@@ -290,6 +327,11 @@
         var a = run.at || 0, off = run.off || 0;    // off = stand-off from the wall (the slack hidden behind the L corners)
         if (wall === 'back') { o.x = a + x; o.w = bw; o.z = off + Dr - z - bd; o.d = bd; }
         else if (wall === 'left') { o.x = off + Dr - z - bd; o.w = bd; o.z = a + x; o.d = bw; }
+        else if (wall === 'island') {   // z = 0 is this unit's front; face b units look the other way
+          var lz = run.face === 'b' ? run.D - z - bd : z, lx = a + x;
+          if (run.axis === 'x') { o.x = run.ix + lx; o.w = bw; o.z = run.iz + run.D - lz - bd; o.d = bd; }
+          else { o.x = run.ix + lz; o.w = bd; o.z = run.iz + lx; o.d = bw; }
+        }
         else { o.x = W - off - Dr + z; o.w = bd; o.z = a + x; o.d = bw; }
         if (extra) for (var k in extra) o[k] = extra[k];
         boxes.push(o); return o;
@@ -297,12 +339,17 @@
       function hwBox(name, x, y, z, bw, bh, bd) { put(name, 'hw', 'hw', x, y, z, bw, bh, bd, null, '', { hardware: true }); }
       function legs(x0, bw, n) { tally('Cabinet legs ' + K.legH / 10 + ' cm (sets of 4)', n); }
 
-      var x = 0, frontLen = 0;
+      var x = 0, frontLen = 0, tallJoint = 0;   // tallJoint: where the last tall unit's boxes meet (its end panel joins there)
       run.units.forEach(function (u, ui) {
         var w = u.w, un = u.name || ('Unit ' + (ui + 1)), lbl = ' (' + un + ')';
         if (u.type === 'panel') {          // 18 mm side panel between units: floor to carcass top, covers the back (+5)
-          var pd = dC + DT + K.panelExtra;
-          put('Side Panel between units' + lbl, 'panel', '', x, 0, -DT, t, base ? carcTop : H, pd, ['y', 'z'], 'floor to the carcass top; ' + K.panelExtra + ' mm deeper to cover the back');
+          var pd = dC + DT + K.panelExtra + (u.extraD || 0), ph = u.h || (base ? rTop : H);   // u.h: beside a tall unit; u.extraD: scribe allowance
+          var pnote = K.panelExtra + ' mm deeper to cover the back' + (u.extraD ? ', +' + u.extraD + ' to scribe on site' : '');
+          if (u.h && ph > boardOf(K)[0]) {   // longer than the board: two pieces, joined where the tall unit's boxes meet
+            var jy = tallJoint || R(ph / 2);
+            put('End Panel, tall, lower piece' + lbl, 'panel', '', x, 0, -DT, t, jy, pd, ['y', 'z'], 'floor to ' + R(jy) + ', joined at the box joint; ' + pnote);
+            put('End Panel, tall, upper piece' + lbl, 'panel', '', x, jy, -DT, t, ph - jy, pd, ['y', 'z'], R(jy) + ' to ' + ph + '; ' + pnote);
+          } else put((u.h ? 'End Panel, tall' : 'Side Panel between units') + lbl, 'panel', '', x, 0, -DT, t, ph, pd, ['y', 'z'], (u.h ? 'floor to ' + ph : 'floor to the carcass top') + '; ' + pnote);
           if (!base) boxes[boxes.length - 1].y = yBot;
           x += t; frontLen += t; return;
         }
@@ -312,6 +359,7 @@
         }
         if (u.type === 'gap') { x += w; return; }
         if (u.type === 'cornerL') { cornerL(u, un); x += w; frontLen += w - dC; return; }
+        if (u.type === 'tall') { tall(u, un); x += w; frontLen += w; return; }
 
         // ---- straight carcass (base / sink / wall) ----
         var inW = w - 2 * t;
@@ -350,8 +398,15 @@
         if (u.shelves && inW > 800) warn.push(un + ': shelf spans ' + R(inW) + ' mm, over 800 (check C1)');
 
         // fronts: full overlay, J-profile shortens every front
-        var fW = w - 2 * ec, fY = yBot + s.botGap, fH = H - s.botGap - s.topGap;
-        if (u.drawers) {
+        var fW = w - 2 * ec, fY = yBot + s.botGap, fH = (u.frontTop ? u.frontTop - yBot : H) - s.botGap - s.topGap;   // laundry: doors stop under the lip
+        if (u.type === 'slide') {
+          // bottom-rolling track (owner 2026-11-23): two overlapping leaves in two planes, standing on the track
+          var sw = floor((fW + K.slideOverlap) / 2), sh = R(fH - K.slideTrack);
+          put('Sliding Door' + lbl, 'door', 'door', x + ec, fY + K.slideTrack, -DT, sw, sh, DT, ['x', 'y'], 'back track; leaves overlap ' + K.slideOverlap);
+          put('Sliding Door' + lbl, 'door', 'door', x + ec + fW - sw, fY + K.slideTrack, -2 * DT - 2, sw, sh, DT, ['x', 'y'], 'front track');
+          tally('Sliding door track, bottom rolling, cabinet (set for 2 doors)', 1);
+          tally('Flush pull for sliding doors', 2);
+        } else if (u.drawers) {
           var sum = u.drawers.reduce(function (a, b) { return a + b; }, 0), yy = yTop - s.topGap;
           var runner = RUNNERS.filter(function (L) { return L <= dC - t - 10; })[0] || R(dC - t - 10);
           u.drawers.forEach(function (dh, di) {      // listed top to bottom
@@ -377,6 +432,9 @@
             handle(1);
             tally('Hinges (pair, soft close)', dH > 900 ? 2 : 1);
           }
+        }
+        if (u.cover) {   // island: the back of a one-sided unit shows, so it gets a cover panel
+          put('Island Back Cover' + lbl, 'panel', '', x, yBot, dC + bt, w, H, t, ['y', 'x'], 'covers the back of the unit on the other side of the island');
         }
         if (u.hob && base) {
           var railGap = dC - 2 * t;
@@ -433,7 +491,144 @@
         handle(2); tally('Bi-fold hinges (set)', 1);
       }
 
-      if (base) tally('Toe kick 3 m (' + run.name + ')', Math.ceil(frontLen / K.toeLen));
+      // TALL unit (owner 2026-11-23): zones bottom to top, in one box or two stacked boxes, on legs
+      function tall(u, un) {
+        var w = u.w, lbl = ' (' + un + ')', x0 = x, inW = w - 2 * t, top = u.top || spec.tallTop || K.tallTop, HT = top - K.legH;
+        var zs = (u.zones || [{ k: 'shelves', h: 0, n: 4 }]).map(function (z) { return merge(z, {}); });
+        // boxes: split at {k:'split'}, or by the board length when the whole unit is too tall for one box
+        var groups = [[]];
+        zs.forEach(function (z) { if (z.k === 'split') groups.push([]); else groups[groups.length - 1].push(z); });
+        groups = groups.filter(function (g) { return g.length; });
+        if (groups.length === 1 && HT > tallMax) {
+          var g0 = groups[0], lo0 = [], used = 2 * t;
+          for (var i = 0; i < g0.length - 1; i++) { var need = (g0[i].h || 0) + (lo0.length ? t : 0); if (!g0[i].h || used + need > tallMax) break; lo0.push(g0[i]); used += need; }
+          if (lo0.length && lo0.length < g0.length) groups = [lo0, g0.slice(lo0.length)];
+        }
+        var bh = groups.map(function (g, gi) {
+          if (gi === groups.length - 1) return 0;
+          return 2 * t + (g.length - 1) * t + g.reduce(function (a2, z) { return a2 + (z.h || 0); }, 0);
+        });
+        bh[bh.length - 1] = HT - bh.reduce(function (a2, b2) { return a2 + b2; }, 0);
+        if (groups.length > 1) warn.push(un + ': ' + top + ' tall, made as ' + groups.length + ' stacked boxes (' + bh.map(R).join(' + ') + ') on ' + K.legH + ' legs');
+        bh.forEach(function (h, gi) { if (h > tallMax) warn.push(un + ': box ' + (gi + 1) + ' is ' + R(h) + ' tall; a ' + K.board + ' board (' + BD[0] + ') only allows about ' + tallMax + ' on legs. Split it or use a longer board.'); });
+
+        var y = K.legH, fronts = [], doorZones = [];
+        groups.forEach(function (g, gi) {
+          var Hb = bh[gi], yb = y, ye = y + Hb, box = groups.length > 1 ? (gi === 0 ? ', lower box' : ', upper box') : '';
+          var hasOven = g.some(function (z) { return z.k === 'oven'; });
+          put('Side Panel' + box + lbl, 'carcass', '', x0, yb, 0, t, Hb, dC, ['y', 'z']);
+          put('Side Panel' + box + lbl, 'carcass', '', x0 + w - t, yb, 0, t, Hb, dC, ['y', 'z']);
+          put('Bottom Panel' + box + lbl, 'carcass', '', x0 + t, yb, 0, inW, t, dC, ['x', 'z'], 'between the sides');
+          put('Top Panel' + box + lbl, 'carcass', '', x0 + t, ye - t, 0, inW, t, dC, ['x', 'z'], 'between the sides' + (gi < groups.length - 1 ? '; the upper box sits on it, screw the two boxes together' : ''));
+          put('Back Rail, upright top' + box + lbl, 'frame', '', x0 + t, ye - t - K.rail, dC - t, inW, K.rail, t, ['x', 'y'], 'screw through it to the wall');
+          put('Back Rail, upright bottom' + box + lbl, 'frame', '', x0 + t, yb + t, dC - t, inW, K.rail, t, ['x', 'y']);
+          put('Back Panel (screwed on, ' + bt + 'mm)' + box + lbl, 'carcass', 'back', x0, yb, dC, w, Hb, bt, ['x', 'y'], hasOven ? 'cut a vent opening behind the oven' : '');
+          // zone heights: a 'rest' zone (h 0) takes what is left, otherwise the box's last zone does
+          var inner = Hb - 2 * t - (g.length - 1) * t, fixedSum = g.reduce(function (a2, z) { return a2 + (z.h || 0); }, 0);
+          var rest = g.filter(function (z) { return !z.h; }), spare = inner - fixedSum;
+          if (rest.length) rest.forEach(function (z) { z.h = spare / rest.length; });
+          else if (Math.abs(spare) > 1) g[g.length - 1].h += spare;
+          var yy = yb + t;
+          g.forEach(function (z, zi) {
+            var zb = yy, zt = yy + z.h;
+            // the front band of this zone: box edges get the outer gaps, shelves are shared half and half
+            var lo = zi === 0 ? (gi === 0 ? yb + s.botGap : yb + gap / 2) : zb - t / 2 + gap / 2;
+            var hi = zi === g.length - 1 ? (gi === groups.length - 1 ? ye - s.topGap : ye - gap / 2) : zt + t / 2 - gap / 2;
+            if (z.k === 'drawer') {
+              var n = z.n || 1, sw = (inW - (n - 1) * t) / n, runner = RUNNERS.filter(function (L) { return L <= dC - t - 10; })[0] || R(dC - t - 10);
+              for (var q = 1; q < n; q++) put('Divider, drawer row' + lbl, 'carcass', '', x0 + t + q * sw + (q - 1) * t, zb, 0, t, z.h, dC - t, ['y', 'z'], 'fixed between the shelves; stops at the back rails');
+              for (q = 0; q < n; q++) {
+                var bw = R(sw - s.runGap), bx = x0 + t + q * (sw + t) + (sw - bw) / 2, bhh = Math.max(60, R(z.h - 40)), by = zb + 5;
+                put('Drawer Base' + lbl, 'drawer', '', bx, by, 0, bw, t, runner, ['x', 'z'], 'box outside size');
+                put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, 0, bw, bhh - t, t, ['x', 'y'], 'full box width');
+                put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, runner - t, bw, bhh - t, t, ['x', 'y']);
+                put('Drawer Box Side' + lbl, 'drawer', '', bx, by + t, t, t, bhh - t, runner - 2 * t, ['z', 'y'], 'between the box front and back');
+                put('Drawer Box Side' + lbl, 'drawer', '', bx + bw - t, by + t, t, t, bhh - t, runner - 2 * t, ['z', 'y']);
+                tally('Drawer runners ' + runner + ' mm (side mount, pair)', 1);
+              }
+              fronts.push({ k: 'drawer', lo: lo, hi: hi, n: n });
+            } else if (z.k === 'oven') {
+              if (inW < K.ovenW) warn.push(un + ': oven niche only ' + R(inW) + ' wide inside; a 60 built-in oven needs ' + K.ovenW + '.');
+              if (z.h < K.ovenH - 0.5) warn.push(un + ': oven niche only ' + R(z.h) + ' high; it needs ' + K.ovenH + '.');
+              warn.push(un + ': vent the back behind the oven (cut the back panel); the unit is only ' + dC + ' deep.');
+            } else if (z.k === 'micro') {
+              fronts.push({ k: 'flap', lo: lo, hi: hi });
+              tally('Lift-up flap stay (pair)', 1);
+            } else if (z.k === 'cubby') {
+              var rows = z.rows || 2, cols = z.cols || 3, cw = (inW - (cols - 1) * t) / cols;
+              for (var c2 = 1; c2 < cols; c2++) put('Divider, cubbies' + lbl, 'carcass', '', x0 + t + c2 * cw + (c2 - 1) * t, zb, 0, t, z.h, dC - t, ['y', 'z'], 'fixed; stops at the back rails');
+              for (c2 = 0; c2 < cols; c2++) for (var r2 = 1; r2 < rows; r2++)
+                put('Shelf, cubby' + lbl, 'shelf', '', x0 + t + c2 * (cw + t), zb + r2 * (z.h - (rows - 1) * t) / rows + (r2 - 1) * t, 0, cw, t, dC - t, ['x', 'z'], 'fixed between the dividers');
+              if (!z.open) doorZones.push({ lo: lo, hi: hi, box: gi });
+            } else {   // shelves, adjustable
+              var nS = z.n == null ? 2 : z.n, set = K.baseShelfSet;
+              for (var i2 = 1; i2 <= nS; i2++) put('Shelf, adjustable' + lbl, 'shelf', '', x0 + t + s.shelfClear, zb + i2 * z.h / (nS + 1) - t / 2, set, inW - 2 * s.shelfClear, t, R(dC - set), ['x', 'z'], s.shelfClear + ' mm clearance each side, set back ' + set);
+              if (!z.open) doorZones.push({ lo: lo, hi: hi, box: gi });
+            }
+            yy = zt;
+            if (zi < g.length - 1) { put('Shelf, fixed' + lbl, 'shelf', '', x0 + t, yy, 0, inW, t, dC, ['x', 'z'], 'fixed through the sides (confirmat or dowel)'); yy += t; }
+          });
+          y = ye;
+          if (gi === 0 && groups.length > 1) tallJoint = ye;
+        });
+        // doors over neighbouring shelf/cubby zones: one fold over all of them, else hinged doors per group in each box
+        var dg = [];
+        doorZones.forEach(function (d) {
+          var last = dg[dg.length - 1];
+          if (last && (u.fold || last.box === d.box) && d.lo - last.hi < t + 2 * gap + 1) last.hi = d.hi; else dg.push({ lo: d.lo, hi: d.hi, box: d.box });
+        });
+        var fW = w - 2 * ec;
+        function front(nm, k, xx, ww, lo, hi, jEdge, note) {
+          var h = R(hi - lo - J), yF = JP && jEdge === 'bottom' ? lo + J : lo;
+          put(nm + lbl, k === 'door' ? 'door' : 'drawer', k === 'door' ? 'door' : 'front', xx, yF, -DT, ww, h, DT, ['x', 'y'], (JP ? 'shortened by the ' + J + ' mm J-profile (' + jEdge + ')' : '') + (note ? (JP ? '; ' : '') + note : ''));
+          if (JP && jEdge === 'top' && yF + h > 1800) warn.push(un + ': the J-profile on the ' + nm.toLowerCase() + ' is at ' + R(yF + h + J) + ' mm; check it can be reached, or pull from the bottom edge.');
+          handle(1);
+          return h;
+        }
+        fronts.forEach(function (f) {
+          if (f.k === 'drawer') { var fw2 = floor((fW - (f.n - 1) * gap) / f.n); for (var q = 0; q < f.n; q++) front('Drawer Front', 'front', x0 + ec + q * (fw2 + gap), fw2, f.lo, f.hi, 'top'); }
+          else { front('Lift-up Flap', 'door', x0 + ec, fW, f.lo, f.hi, 'bottom', 'hinged at the top'); tally('Hinges (pair, soft close)', 1); }
+        });
+        dg.forEach(function (d) {
+          if (u.fold) {
+            var lw = floor((fW - gap) / 2);
+            front('Folding Door Leaf', 'door', x0 + ec, lw, d.lo, d.hi, u.pull || 'top', 'folds in two');
+            front('Folding Door Leaf', 'door', x0 + ec + lw + gap, lw, d.lo, d.hi, u.pull || 'top', 'folds in two');
+            tally('Folding door system (180 degree, 2 leaves)', 1);
+            if (d.hi - d.lo > 2000) warn.push(un + ': folding leaves ' + R(d.hi - d.lo) + ' tall: check the fitting takes that height and weight.');
+          } else {
+            var nd = u.doors || (w > 600 ? 2 : 1), dw = floor((fW - gap * (nd - 1)) / nd);
+            for (var q = 0; q < nd; q++) {
+              var dh = front('Door', 'door', x0 + ec + q * (dw + gap), dw, d.lo, d.hi, u.pull || 'top');
+              tally('Hinges (pair, soft close)', dh > 2000 ? 3 : dh > 900 ? 2 : 1);
+            }
+          }
+        });
+        tally('Cabinet legs ' + K.legH / 10 + ' cm', w > 800 ? 6 : 4);
+        if (u.note) warn.push(un + ': ' + u.note);
+      }
+
+      if (base && !run.isl && frontLen > 0) tally('Toe kick 3 m (' + run.name + ')', Math.ceil(frontLen / K.toeLen));
+      (run.items || []).forEach(function (it) { tally(it, 1); });
+    });
+
+    // island ends and the gloss band under the quartz (owner: 10 cm band; legs and a toe kick all round)
+    islands.forEach(function (I) {
+      var run = I.run, nm = ' (' + (run.name || 'Island') + ')', L = I.L, D = I.D, A0 = -I.outA, B1 = D + I.outB;
+      function iput(name, tag, lx, y, lz, bw, bh, bd, cut, note) {   // island-local: lx along, lz across from side a's fronts
+        var ext = { x: bw, y: bh, z: bd }, o = { name: name, tag: tag, kind: tag, y: y, h: bh, cut: [R(ext[cut[0]]), R(ext[cut[1]])], note: note || '', run: run.name };
+        if ((run.axis || 'z') === 'x') { o.x = (run.x || 0) + lx; o.w = bw; o.z = (run.z || 0) + D - lz - bd; o.d = bd; }
+        else { o.x = (run.x || 0) + lz; o.w = bd; o.z = (run.z || 0) + lx; o.d = bw; }
+        boxes.push(o);
+      }
+      iput('Island End Panel' + nm, 'panel', -t, 0, A0, t, I.iTop, B1 - A0, ['y', 'z'], 'floor to the band');
+      iput('Island End Panel' + nm, 'panel', L, 0, A0, t, I.iTop, B1 - A0, ['y', 'z'], 'floor to the band');
+      iput('Island Band, long side' + nm, 'panel', -t, I.iTop, A0, L + 2 * t, K.bandH, t, ['x', 'y'], 'gloss band under the quartz, flush with the fronts');
+      iput('Island Band, long side' + nm, 'panel', -t, I.iTop, B1 - t, L + 2 * t, K.bandH, t, ['x', 'y'], 'gloss band under the quartz');
+      iput('Island Band, end' + nm, 'panel', -t, I.iTop, A0 + t, t, K.bandH, B1 - A0 - 2 * t, ['z', 'y'], 'between the long bands');
+      iput('Island Band, end' + nm, 'panel', L, I.iTop, A0 + t, t, K.bandH, B1 - A0 - 2 * t, ['z', 'y'], 'between the long bands');
+      tally('Toe kick 3 m (' + (run.name || 'Island') + ', all round)', Math.ceil((2 * L + 2 * D) / K.toeLen));
+      warn.push((run.name || 'Island') + ': quartz underside at ' + (run.top || 1100) + '; check how the slab is carried over the ' + K.bandH + ' mm band (a top board or cross rails at the band top).');
     });
 
     // ceiling filler strips (scribed on site) over every wall run: parts only, not placed in 3D
@@ -443,18 +638,23 @@
       var L = run.units.reduce(function (a, u) { return a + (u.type === 'gap' ? 0 : u.w); }, 0), left = L;
       while (left > 0) { var piece = R(Math.min(2400, left)); extra.push({ name: 'Ceiling Filler Strip (' + run.name + ')', tag: 'panel', a: piece, b: run.ceilingFiller, qty: 1, note: 'scribe to the ceiling on site; joins over a unit side' }); left -= piece; }
     });
+    // every cut part must fit the chosen board
+    cutList(boxes).concat(extra).forEach(function (p) {
+      var L = Math.max(p.a, p.b), Wd = Math.min(p.a, p.b);
+      if (L > BD[0] || Wd > BD[1]) warn.push(p.name + ' is ' + L + ' x ' + Wd + ', bigger than a ' + K.board + ' board (' + BD[0] + ' x ' + BD[1] + ').');
+    });
     return { boxes: boxes, warnings: warn, hardware: hw, extra: extra };
   }
 
   function build(spec) {
     if (spec && spec.type === 'kitchen') {
       var k = kitchen(spec);
-      return { boxes: k.boxes, parts: cutList(k.boxes).concat(k.extra), clashes: clashes(k.boxes), warnings: k.warnings, hardware: k.hardware };
+      return { boxes: k.boxes, parts: cutList(k.boxes).concat(k.extra), clashes: clashes(k.boxes), warnings: k.warnings.filter(function (v, i, l) { return l.indexOf(v) === i; }), hardware: k.hardware };
     }
     var m = wardrobe(spec);   // wardrobes
     return { boxes: m.boxes, parts: cutList(m.boxes), clashes: clashes(m.boxes), warnings: m.warnings };
   }
 
-  var api = { SHOP: SHOP, KSHOP: KSHOP, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
+  var api = { SHOP: SHOP, KSHOP: KSHOP, BOARDS: BOARDS, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SmartEngine = api;
 })(typeof window !== 'undefined' ? window : this);

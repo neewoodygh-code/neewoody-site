@@ -24,8 +24,8 @@
 
   // Guillotine shelf packing, first-fit decreasing, grain fixed (length along the board): the same method as
   // the Cut Sheet's packBoards(), so the board count here matches what the Cut Sheet says.
-  function packCount(items) {
-    var BL = P.boardL, BW = P.boardW, k = P.kerf, boards = [], over = 0;
+  function packCount(items, bl, bw) {
+    var BL = bl || P.boardL, BW = bw || P.boardW, k = P.kerf, boards = [], over = 0;
     // a part longer (or wider) than a board has to be made from joined pieces: count those pieces so the price
     // still grows with the wardrobe, and report how many parts need joining
     var list = [];
@@ -84,8 +84,9 @@
       if (is(p, /drawer front|false front/)) fronts += q;
       if (is(p, /drawer box side/)) for (var k = 0; k < q; k++) sides.push(L);
     });
-    var pk = packCount(boardItems);
-    lines.push({ group: 'Boards', name: 'Laminate board 2440 × 1220', unit: P.board, item: pk.count + ' laminate board' + (pk.count === 1 ? '' : 's') + ', 2440 × 1220', qty: pk.count, cost: pk.count * P.board, note: 'GH₵' + P.board + ' a board' + (pk.oversize ? '; ' + pk.oversize + ' part' + (pk.oversize > 1 ? 's are' : ' is') + ' longer than a board and must be joined (or split the wardrobe into more carcasses)' : '') });
+    var BL = opt.board ? opt.board[0] : P.boardL, BW = opt.board ? opt.board[1] : P.boardW;   // opt.board: [length, width] (kitchen board-size setting)
+    var pk = packCount(boardItems, BL, BW);
+    lines.push({ group: 'Boards', name: 'Laminate board ' + BL + ' × ' + BW, unit: P.board, item: pk.count + ' laminate board' + (pk.count === 1 ? '' : 's') + ', ' + BL + ' × ' + BW, qty: pk.count, cost: pk.count * P.board, note: 'GH₵' + P.board + ' a board' + (pk.oversize ? '; ' + pk.oversize + ' part' + (pk.oversize > 1 ? 's are' : ' is') + ' longer than a board and must be joined (or split the wardrobe into more carcasses)' : '') });
     var bandM = Math.ceil(bandMM / 1000), rolls = Math.ceil(bandM / P.rollM);
     if (rolls) {
       lines.push({ group: 'Edge band', name: 'Edge band, 100 m roll', unit: P.bandRoll, item: 'Edge band (' + bandM + ' m)', qty: rolls, cost: rolls * P.bandRoll, note: rolls + ' roll' + (rolls > 1 ? 's' : '') + ' of ' + P.rollM + ' m' });
