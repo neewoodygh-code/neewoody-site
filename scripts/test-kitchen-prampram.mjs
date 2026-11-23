@@ -51,7 +51,9 @@ export const SPEC = {
 
 // The units given their own logic on 2026-11-23 (owner): tall unit A (oven + microwave, two stacked boxes, 270),
 // pantry K (drawers, cubbies, shelves behind one full-height fold), the island (legs, 10 cm band, B1/B2 back to back
-// with bottom-rolling sliding doors). Run with --full. Heights inside A and K are first guesses to confirm.
+// with Accra sliding doors). Run with --full. A's insides follow the appliances (owner 2026-11-23): oven 595 high in a
+// 600 niche; the freestanding microwave (275 high, 374 deep) in a 400 space; the island where Amina drew it: top 1200 x 2000
+// from x 1500 and z 1600, base 800 deep centred under it, 300 overhang at the window end.
 export const FULL = { ...SPEC, tallTop: 2700, runs: [
   ...SPEC.runs.map(r => r.name !== 'Right wall, base' ? r : { ...r, units: [...r.units,
     { type: 'tall', name: 'K', w: 800, fold: true, zones: [
@@ -60,9 +62,9 @@ export const FULL = { ...SPEC, tallTop: 2700, runs: [
     { type: 'panel', name: 'K end', h: 2700, extraD: 12 }] }),
   { name: 'Left wall, tall', wall: 'left', at: 1012, off: OFF, depth: 580, kind: 'base', units: [
     { type: 'tall', name: 'A', w: 600, zones: [
-      { k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 450 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
+      { k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 400 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
     { type: 'panel', name: 'A end', h: 2700 }] },
-  { name: 'Island', kind: 'island', x: 1700, z: 1630, axis: 'z', depth: 800, top: 1100, units: [
+  { name: 'Island', kind: 'island', x: 1700, z: 1600, axis: 'z', depth: 800, top: 1100, topW: 1200, ohStart: 0, ohEnd: 300, units: [
     { type: 'base', name: 'Island A', w: 600, drawers: [150, 200, 250, 300] },
     { type: 'slide', name: 'B1', name2: 'B2', w: 1100, shelves: 1 }] },
 ] };
