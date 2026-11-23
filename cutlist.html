@@ -977,7 +977,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 /* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
    members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
 (function(){ var m = window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive();
-  document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/directory.html' : '/concierge/'; });
+  document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/profile.html' : '/concierge/'; });
   if (m) document.querySelectorAll('[data-cc-tools]').forEach(function(a){ a.href = '/concierge/directory.html#tools'; a.textContent = 'Member tools'; });
 })();
 </script>

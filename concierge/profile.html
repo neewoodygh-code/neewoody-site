@@ -34,7 +34,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   color:var(--cream); background:transparent; border:1px solid rgba(240,232,208,.35);
   border-radius:3px; padding:.5rem .8rem; cursor:pointer; transition:background .2s,border-color .2s; }
 .tbtn:hover{ background:rgba(240,232,208,.1); border-color:var(--gold); }
-.pwrap{ max-width:640px; margin:0 auto; padding:1.25rem 1rem 3rem; }
+.pwrap{ max-width:1100px; margin:0 auto; padding:1.25rem 1rem 3rem; }
 .crumb{ display:flex; flex-wrap:wrap; gap:.45rem; font-size:.85rem; color:var(--muted); margin-bottom:1rem; }
 .crumb a{ text-decoration:underline; text-underline-offset:2px; }
 .pcard{ background:var(--cream); border:1px solid rgba(31,47,88,.12); border-radius:6px; background:#f7f3ec; }
@@ -43,7 +43,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .state{ padding:2rem 1.5rem; color:var(--muted); }
 /* "Go to" links into the members area (2026-11-23, owner: "the links on the left disappeared" after the landing moved
    here). Same list and icons as the directory's left rail: a column on the left on wide screens, a swipeable row on phones. */
-.gonav{ display:flex; gap:.4rem; overflow-x:auto; max-width:640px; margin:0 auto; padding:.9rem 1rem 0; scrollbar-width:none; }
+.gonav{ display:flex; gap:.4rem; overflow-x:auto; max-width:1100px; margin:0 auto; padding:.9rem 1rem 0; scrollbar-width:none; }
 .gonav::-webkit-scrollbar{ display:none; }
 .gonav .rail-h{ display:none; }
 .rnav{ display:flex; align-items:center; gap:.5rem; flex:none; background:#fff; border:1px solid rgba(31,47,88,.12); border-radius:20px;
@@ -58,8 +58,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .rnav.active{ border-color:var(--navy); }
 .rnav.active .ic{ background:var(--gold); color:var(--navy); }
 @media(min-width:1200px){
-  .pshell{ display:grid; grid-template-columns:238px minmax(0,640px) 238px; justify-content:center; gap:1.6rem; padding:1.25rem 1.6rem 0; }
-  .pshell .pwrap{ margin:0; padding:0 0 3rem; }
+  .pshell{ display:grid; grid-template-columns:238px minmax(0,1fr) 302px; gap:1.6rem; max-width:1580px; margin:0 auto; padding:1.75rem 1.6rem 0; align-items:start; }
+  .pshell .pwrap{ max-width:none; margin:0; padding:0 0 3rem; }
+  #railTips{ display:block; position:sticky; top:96px; }
   .gonav{ display:block; position:sticky; top:96px; align-self:start; max-width:none; margin:0; padding:0; overflow:visible; }
   .gonav .rail-h{ display:block; font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:0 0 .55rem .25rem; }
   .rnav{ width:100%; gap:.7rem; background:transparent; border:none; border-radius:9px; padding:.55rem .6rem; margin-bottom:.15rem; }
@@ -71,6 +72,30 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   .rnav.active{ background:#fff; box-shadow:0 3px 12px rgba(31,47,88,.09); }
   .rnav.active .lb b{ color:var(--navy); }
 }
+/* profile-completion nudge */
+.pnudge{ background:var(--navy); color:var(--cream); border-radius:5px; padding:1rem 1.2rem; margin-bottom:1.25rem;
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+.pnudge p{ flex:1; min-width:200px; font-size:.9rem; line-height:1.55; color:rgba(240,232,208,.85); }
+.pnudge p b{ color:var(--gold); font-weight:600; }
+.pnudge button{ font-family:var(--ui); font-size:.68rem; font-weight:500; letter-spacing:.12em; text-transform:uppercase;
+  background:var(--gold); color:var(--navy); border:none; border-radius:3px; padding:.6rem 1rem; cursor:pointer; white-space:nowrap; }
+.pnudge .x{ background:transparent; color:rgba(240,232,208,.55); border:1px solid rgba(240,232,208,.3); }
+/* right help panel */
+.rail-right{ background:#fff; border:1px solid rgba(31,47,88,.1); border-radius:11px; padding:1.15rem 1.05rem; }
+.rail-lead{ font-family:var(--body); font-size:.85rem; color:var(--muted); line-height:1.5; margin:0 0 .85rem; }
+.tipact{ display:flex; align-items:center; gap:.6rem; width:100%; text-align:left; background:var(--cream);
+  border:1px solid var(--cream-dark); border-radius:9px; padding:.55rem .65rem; margin-bottom:.45rem;
+  cursor:pointer; font-family:var(--ui); font-size:.79rem; font-weight:500; color:var(--navy);
+  transition:border-color .15s,background .15s; }
+.tipact:hover{ border-color:var(--gold); background:#fffdf7; }
+.tipact svg{ width:17px; height:17px; flex:none; color:var(--gold); stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+.benefits-list{ list-style:none; margin:.2rem 0 0; padding:0; }
+.benefits-list li{ font-family:var(--body); font-size:.82rem; color:var(--ink); padding:.26rem 0 .26rem 1.15rem; position:relative; line-height:1.4; }
+.benefits-list li::before{ content:'✓'; position:absolute; left:0; top:.26rem; color:var(--gold); font-weight:700; }
+.rail-tip{ margin-top:1rem; background:var(--cream); border-left:3px solid var(--gold); border-radius:0 7px 7px 0;
+  padding:.6rem .7rem; font-family:var(--body); font-size:.78rem; color:var(--ink); line-height:1.5; }
+.rail-tip b{ color:var(--navy); }
+@media(max-width:1199px){ #railTips{ display:none; } }
 /* Home greeting: same styles as the members area dashboard in directory.html (copied 2026-11-23) */
 .dash-home{ background:var(--navy); color:var(--cream); border-radius:14px; padding:1.05rem 1.2rem .95rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(31,47,88,.18); }
 .dash-greet{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }
@@ -206,7 +231,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <div class="lockup">
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
     <span class="lockup-rule" aria-hidden="true"></span>
-    <a class="lockup-cc" href="/concierge/directory.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <a class="lockup-cc" href="/concierge/profile.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
     <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Home</span>
   </div>
   <div class="top-actions">
@@ -330,6 +355,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   </section>
 
   <div id="home" role="tabpanel" aria-labelledby="tab-home">
+  <div id="profileNudge" class="pnudge" style="display:none"></div>
   <div id="dashHome" class="dash-home" hidden></div>
   <section class="pcard files" id="files" aria-labelledby="filesTitle">
     <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
@@ -346,9 +372,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   </section>
   </div>
 </main>
+<aside class="rail-right" id="railTips" aria-label="Getting started"></aside>
 </div>
 <script src="../js/concierge.js?v=20261113b"></script>
 <script src="../js/my-files.js?v=20261123b"></script>
+<script src="../js/whats-new.js?v=20261123"></script>
 <script>
 (function () {
   'use strict';
@@ -870,6 +898,28 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
       e.preventDefault(); showTab('home'); history.replaceState(null, '', location.pathname + location.search); window.scrollTo(0, 0);
     });
   })();
+  function buildRailTips() {
+    var host = document.getElementById('railTips'); if (!host) return;
+    var svg = function (p) { return '<svg viewBox="0 0 24 24" aria-hidden="true">' + p + '</svg>'; };
+    host.innerHTML =
+      '<div class="rail-h">New here?</div>' +
+      '<p class="rail-lead">Tell us what you want to do — tap and we\'ll take you there.</p>' +
+      '<a class="tipact" href="directory.html#directory">' + svg(RAIL_IC.directory) + 'Find &amp; hire a carpenter</a>' +
+      '<a class="tipact" href="directory.html#jobs">' + svg(RAIL_IC.jobs) + 'Post a job or find work</a>' +
+      '<a class="tipact" href="directory.html#services">' + svg(RAIL_IC.services) + 'Get materials bought &amp; delivered</a>' +
+      '<a class="tipact" href="directory.html#tools">' + svg(RAIL_IC.tools) + 'Price a job or make a cut list</a>' +
+      '<a class="tipact" href="#profile">' + svg(RAIL_IC.directory) + 'Complete my profile — get found</a>' +
+      '<div class="rail-h" style="margin-top:1.2rem">Your membership</div>' +
+      '<ul class="benefits-list">' +
+        '<li>Be found &amp; hire other members</li>' +
+        '<li>Jobs board — post work, get hired</li>' +
+        '<li>Buy-for-me &amp; delivery runners</li>' +
+        '<li>Free member tools — cut lists &amp; pricing</li>' +
+        '<li>Safety check-in for solo visits</li>' +
+      '</ul>' +
+      '<div class="rail-tip"><b>Tip:</b> Add a photo or logo and your trades — members are far more likely to contact a complete profile.</div>';
+  }
+  buildRailTips();
   // Tabs (2026-11-23). Owner: "Concierge landing page = the profile page: the greeting, your files underneath, and the
   // next tab where you edit your profile". Home = greeting + My files; Edit profile = the form. #profile / #emergency
   // open Edit profile; anything else (incl. #files) opens Home.
@@ -908,6 +958,31 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     if (s < 86400) return Math.floor(s / 3600) + 'h ago';
     if (s < 604800) return Math.floor(s / 86400) + 'd ago';
     return Math.floor(s / 604800) + 'w ago';
+  }
+  function renderNudge() {
+    var el = document.getElementById('profileNudge');
+    if (!el || !me) { if (el) el.style.display = 'none'; return; }
+    try { if (sessionStorage.getItem('nwd-nudge-dismissed')) { el.style.display = 'none'; return; } } catch (e) {}
+    var mt = me.member_type || 'carpenter';
+    var missing = [];
+    if (!me.photo_url) missing.push('add a photo');
+    if (mt === 'carpenter' && !me.skill_level) missing.push('set your skill level');
+    if (!me.availability) missing.push('set your availability');
+    if (mt === 'carpenter' && !(me.specialties || []).length) missing.push('pick your trades');
+    if (mt === 'vendor' && !(me.vendor_categories || []).length && !(me.vendor_services || []).length) missing.push('list what you sell or do');
+    if (mt === 'courier' && !(me.coverage_zones || []).length) missing.push('set your coverage zones');
+    if (!missing.length) { el.style.display = 'none'; return; }
+    el.innerHTML =
+      '<p>Your profile is <b>' + missing.length + ' step' + (missing.length > 1 ? 's' : '') + '</b> from complete — a fuller profile gets contacted far more. Still to do: ' +
+      C.escapeHtml(missing.join(', ')) + '.</p>' +
+      '<button type="button" id="nudgeGo">Complete my profile</button>' +
+      '<button type="button" class="x" id="nudgeX">Later</button>';
+    el.style.display = 'flex';
+    document.getElementById('nudgeGo').addEventListener('click', function () { showTab('profile', true); history.replaceState(null, '', '#profile'); window.scrollTo(0, 0); });
+    document.getElementById('nudgeX').addEventListener('click', function () {
+      try { sessionStorage.setItem('nwd-nudge-dismissed', '1'); } catch (e) {}
+      el.style.display = 'none';
+    });
   }
   async function loadDash() {
     var host = document.getElementById('dashHome'), E = C.escapeHtml;
@@ -1031,6 +1106,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     st.hidden = true; document.getElementById('profileForm').hidden = false;
     loadFiles();
     loadDash();
+    renderNudge();
+    if (window.ConciergeWhatsNew) ConciergeWhatsNew.show(me);
     if (me.member_type === 'vendor') document.querySelectorAll('#goNav [data-vendor]').forEach(function (a) { a.hidden = false; });
     if (location.hash === '#files') document.getElementById('files').scrollIntoView();
     var target = location.hash === '#emergency' ? document.getElementById('p_emerg_name') : null;

@@ -240,11 +240,6 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .alerts-note{ font-size:.72rem; color:var(--muted); max-width:230px; text-align:right; min-height:1em; }
 
 /* what's-new modal */
-.wn-entry{ padding:.9rem 0; border-bottom:1px solid rgba(31,47,88,.1); }
-.wn-entry:last-child{ border-bottom:none; }
-.wn-date{ font-family:var(--ui); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase; color:var(--gold); }
-.wn-entry h3{ font-family:var(--display); font-weight:500; font-size:1.05rem; margin:.2rem 0 .3rem; }
-.wn-entry p{ font-size:.88rem; line-height:1.6; color:var(--muted); }
 .modal textarea{ width:100%; font-size:1rem; font-family:var(--body); padding:.7rem .8rem; border:1px solid rgba(31,47,88,.2); border-radius:3px; background:#fff; min-height:90px; resize:vertical; }
 
 /* breadcrumb */
@@ -530,31 +525,6 @@ a.tool-card:hover .go{ color:var(--navy); }
   .filters .count{ margin-left:0; width:100%; }
 }
 /* ── personal dashboard "near you" widget ── */
-.dash-home{ background:var(--navy); color:var(--cream); border-radius:14px; padding:1.05rem 1.2rem .95rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(31,47,88,.18); }
-.dash-greet{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }
-.dash-greet h2{ font-family:var(--display); font-weight:500; font-size:1.28rem; color:var(--cream); line-height:1.1; }
-.dash-greet .sub{ font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.04em; color:var(--gold); }
-.dash-list{ margin-top:.75rem; display:flex; flex-direction:column; gap:.35rem; }
-.dash-item{ display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; background:rgba(240,232,208,.06); border:1px solid rgba(240,232,208,.1); border-radius:9px; padding:.55rem .7rem; cursor:pointer; transition:background .15s; }
-.dash-item:hover{ background:rgba(240,232,208,.13); }
-.dash-ic{ width:30px; height:30px; border-radius:7px; background:rgba(200,146,42,.18); display:flex; align-items:center; justify-content:center; flex:none; }
-.dash-ic svg{ width:16px; height:16px; }
-.dash-txt{ flex:1; min-width:0; }
-.dash-txt .t{ display:block; font-family:var(--body); font-size:.9rem; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.dash-txt .m{ display:block; font-family:var(--ui); font-size:.7rem; color:rgba(240,232,208,.6); margin-top:1px; }
-.dash-new{ flex:none; font-family:var(--ui); font-size:.56rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#241500; background:var(--gold); border-radius:20px; padding:2px 7px; }
-.dash-empty{ font-family:var(--body); font-size:.86rem; color:rgba(240,232,208,.72); margin-top:.55rem; line-height:1.5; }
-.dash-stats{ display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.75rem; }
-.dash-stat{ display:inline-flex; align-items:center; gap:.4rem; background:rgba(240,232,208,.08); border:1px solid rgba(240,232,208,.14); border-radius:20px; padding:.34rem .7rem .34rem .6rem; cursor:pointer; font-family:var(--ui); font-size:.75rem; color:rgba(240,232,208,.85); transition:background .15s; }
-.dash-stat:hover{ background:rgba(240,232,208,.15); }
-.dash-stat b{ color:var(--gold); font-weight:600; }
-.dash-stat svg{ width:14px; height:14px; flex:none; }
-.dash-actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
-.dash-act{ display:inline-flex; align-items:center; gap:.35rem; font-family:var(--ui); font-size:.78rem; font-weight:600; letter-spacing:.02em; border-radius:8px; padding:.5rem .9rem; cursor:pointer; border:1px solid transparent; transition:filter .15s; }
-.dash-act.primary{ background:var(--gold); color:#241500; }
-.dash-act.ghost{ background:transparent; color:var(--cream); border-color:rgba(240,232,208,.35); }
-.dash-act:hover{ filter:brightness(1.07); }
-.dash-lbl{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,232,208,.5); margin:1rem 0 .35rem; }
 /* ── service-category cards (Services tab) — compact grid, 2–3 per row ── */
 #offGrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(215px,1fr)); gap:.75rem; align-items:stretch; }
 .svc-card{ background:#fff; border:1px solid var(--cream-dark); border-radius:12px; padding:.7rem .8rem .8rem; }
@@ -600,7 +570,7 @@ a.tool-card:hover .go{ color:var(--navy); }
   <div class="lockup">
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
     <span class="lockup-rule" aria-hidden="true"></span>
-    <a class="lockup-cc" href="/concierge/directory.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
+    <a class="lockup-cc" href="/concierge/profile.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
     <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Members area</span>
   </div>
   <div class="top-actions">
@@ -713,8 +683,6 @@ a.tool-card:hover .go{ color:var(--navy); }
 
   <!-- TAB: Directory -->
   <div id="tab-directory" class="tabpanel">
-  <div id="dashHome" class="dash-home" style="display:none"></div>
-  <div id="profileNudge" class="pnudge" style="display:none"></div>
   <div class="lead">
     <h1>Find a fellow carpenter</h1>
     <p>Members hire members. Select your area or trade, then message on WhatsApp. Tap any trade tag to see what it covers.</p>
@@ -919,16 +887,6 @@ a.tool-card:hover .go{ color:var(--navy); }
   </div>
 </div>
 
-<!-- What's new since your last visit -->
-<div class="overlay" id="wnOverlay">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="mhead"><h2>What's new</h2><button class="x" id="closeWn" aria-label="Close">×</button></div>
-    <div style="padding:.5rem 1.5rem 1.5rem">
-      <div id="wnList"></div>
-      <button class="save" id="wnGotIt" type="button" style="margin-top:1rem">Got it</button>
-    </div>
-  </div>
-</div>
 
 <!-- Post a job -->
 <div class="overlay" id="jobOverlay">
@@ -1356,31 +1314,7 @@ a.tool-card:hover .go{ color:var(--navy); }
 
   // ── profile-completion nudge ──
   // A complete profile gets far more contacts; nudge members to fill the gaps.
-  function renderNudge() {
-    var el = document.getElementById('profileNudge');
-    if (!el || !me) { if (el) el.style.display = 'none'; return; }
-    try { if (sessionStorage.getItem('nwd-nudge-dismissed')) { el.style.display = 'none'; return; } } catch (e) {}
-    var mt = me.member_type || 'carpenter';
-    var missing = [];
-    if (!me.photo_url) missing.push('add a photo');
-    if (mt === 'carpenter' && !me.skill_level) missing.push('set your skill level');
-    if (!me.availability) missing.push('set your availability');
-    if (mt === 'carpenter' && !(me.specialties || []).length) missing.push('pick your trades');
-    if (mt === 'vendor' && !(me.vendor_categories || []).length && !(me.vendor_services || []).length) missing.push('list what you sell or do');
-    if (mt === 'courier' && !(me.coverage_zones || []).length) missing.push('set your coverage zones');
-    if (!missing.length) { el.style.display = 'none'; return; }
-    el.innerHTML =
-      '<p>Your profile is <b>' + missing.length + ' step' + (missing.length > 1 ? 's' : '') + '</b> from complete — a fuller profile gets contacted far more. Still to do: ' +
-      C.escapeHtml(missing.join(', ')) + '.</p>' +
-      '<button type="button" id="nudgeGo">Complete my profile</button>' +
-      '<button type="button" class="x" id="nudgeX">Later</button>';
-    el.style.display = 'flex';
-    document.getElementById('nudgeGo').addEventListener('click', function () { location.href = 'profile.html'; });
-    document.getElementById('nudgeX').addEventListener('click', function () {
-      try { sessionStorage.setItem('nwd-nudge-dismissed', '1'); } catch (e) {}
-      el.style.display = 'none';
-    });
-  }
+  function renderNudge() {}  // the profile nudge moved to Home (concierge/profile.html) 2026-11-23
 
   // the services catalog (also used by My profile, now concierge/profile.html)
   var serviceCatalog = [];
@@ -2434,93 +2368,7 @@ a.tool-card:hover .go{ color:var(--navy); }
   }
   alertsBtns.forEach(function (b) { b.addEventListener('click', toggleAlerts); });
 
-  // ── what's new since your last visit ──
-  // Append an entry (next id, today's date) whenever a member-facing feature
-  // ships. Members see entries newer than BOTH their join date and the last
-  // entry they dismissed on this device.
-  var CHANGELOG = [
-    { id: 1, date: '2026-07-15', title: 'Trades got more specific', body: 'Open My profile and re-pick your trades — Furniture is now Cabinet construction, Interior work and Solid wood furniture. Pick your area from the new zone list too.' },
-    { id: 2, date: '2026-07-15', title: 'Add your photo', body: 'Upload a photo or business logo from My profile — no links needed. A face on your card makes people far more likely to contact you.' },
-    { id: 3, date: '2026-07-15', title: 'Show your skill level', body: 'Set your level (Apprentice / Carpenter / Master Carpenter) and years of experience in My profile — it shows as a badge on your card.' },
-    { id: 4, date: '2026-07-16', title: 'The Jobs board is live', body: 'Post a job in any zone, or get hired for day work near you — open the Jobs tab. Rates are discussed on WhatsApp.' },
-    { id: 5, date: '2026-07-16', title: 'Business & availability badges', body: 'In My profile: set your account type (Business or Individual) and your availability — Open to work, Hiring, Seeking apprenticeship or Taking apprentices. Both show on your card and are searchable.' },
-    { id: 6, date: '2026-07-16', title: 'Job alerts for your area', body: 'In the Jobs tab, tap "Get job alerts" — you\'ll be notified the moment someone posts a job in your zone.' },
-    { id: 7, date: '2026-07-16', title: 'Clients can now hire you directly', body: 'Homeowners and businesses can post jobs from the public site. Approved requests appear on your Jobs board marked "Client · direct hire" — contact them on WhatsApp, no membership on their side needed.' },
-    { id: 8, date: '2026-07-16', title: 'Your own Job Pricing Tool', body: 'In "Your member tools" open the Job Pricing Tool. Set your own overhead, crew rates and margins the first time you open it, then build quotes that reflect YOUR real costs. Everything saves privately to your account.' },
-    { id: 9, date: '2026-07-18', title: 'A sleeker directory', body: 'Member cards are smaller and quicker to scan — tap any card to see the full profile: all trades, availability, experience and business details.' },
-    { id: 10, date: '2026-07-19', title: 'Vendors & interior designers welcome', body: 'The directory now covers more than carpenters. In My profile set "What are you?" — Carpenter or Vendor / Service Provider. Anyone can add Interior design as a specialty — it gets its own badge. A small badge on every card shows the identity at a glance; filter by type to find who you need.' },
-    { id: 11, date: '2026-07-19', title: 'Vendors: your Storefront is live', body: 'If you\'re a Vendor / Service Provider, open the new My Storefront tab: add items you sell with a photo, description and price, write a short shop blurb, and pin your shop location. Everything shows under the Sourcing tab, where every member can browse vendors (by company name) and message you about a specific item on WhatsApp.' },
-    { id: 12, date: '2026-07-19', title: 'Sourcing by category + a business line', body: 'Sourcing now filters by what a vendor sells — Materials, Tools & machinery, Tooling & consumables, Finishes, Lighting and more — not just area. And anyone can add a Business / call number in My profile: it\'s shown instead of your personal number, with WhatsApp and Call buttons.' },
-    { id: 13, date: '2026-07-19', title: 'Hide your personal number', body: 'Tired of members reaching you on your login number? In My profile, add a Business / call number and tick "Hide my personal number" — other members will only ever see and contact you on the business number. Your personal number still logs you in; it just stays private.' },
-    { id: 14, date: '2026-07-19', title: 'Vendors: list your services', body: 'Vendors now have two lists in My profile: "What you sell" (products) and "What you do" (services — Interior design, Installation, Delivery, Repairs, Consultation and more, up to 5, plus a free-text "Other"). Services show on your profile and are their own Sourcing filter, so members can find you by the service they need.' },
-    { id: 15, date: '2026-07-19', title: 'New: Services · Buy for me', body: 'There\'s a new Services tab. Tap "Request a buy" to list materials you need — a member nearby can buy them and deliver to you. Agree the budget, their fee and how you pay on WhatsApp. Members in that area get an alert, just like jobs.' },
-    { id: 16, date: '2026-07-19', title: 'Notifications bell', body: 'A 🔔 bell now sits top-right. It collects your alerts — new buy requests in your zone, orders on your storefront, and when a vendor accepts your order — even if you never turned on push notifications.' },
-    { id: 17, date: '2026-07-19', title: 'Couriers & delivery runs', body: 'New member type: Courier / Delivery. Couriers set coverage zones and get pinged for buy-for-me requests there. Not a courier? In My profile tick "I also do deliveries & errands" and set your zones to get the same pings.' },
-    { id: 18, date: '2026-07-19', title: 'Vendors: take orders', body: 'Vendors get an Orders tab. Members can now Order an item straight from your storefront (not just ask about it) — you get a notification, accept the ones you want, and sort payment & delivery on WhatsApp. The buyer is alerted when you accept.' },
-    { id: 19, date: '2026-07-19', title: 'List the services you offer', body: 'In My profile → "Services you offer", tick any side skills — 3D modelling, product design, teaching, deliveries and more. They show on the new Services tab, where members find each other by service. Not listed? Use "Suggest a service" and we\'ll add it.' },
-    { id: 20, date: '2026-07-19', title: 'Add your website & socials', body: 'In My profile → "Links", add your website, Instagram, TikTok, Facebook, YouTube or LinkedIn. They show on your profile so people can see your work — no need to upload photos here.' },
-    { id: 21, date: '2026-07-19', title: 'Pay your membership online', body: 'When your monthly membership is due you\'ll see a "Pay now" bar at the top — pay securely by Mobile Money or card. Founders and admins are never charged. (Rolling out once online payment is switched on.)' },
-    { id: 22, date: '2026-07-20', title: 'The Verified mark', body: 'Members Neewoody personally vouches for now carry a gold ✓ "Verified by Carpentry Concierge Ghana" mark on their card and profile. It\'s the trust signal clients and members look for.' },
-    { id: 23, date: '2026-07-20', title: 'Keep your membership active', body: 'If your monthly membership lapses, the directory, jobs and services lock until you renew — but your saved cut lists, quotes and profile are always safe. Renew in one tap from the member area to reopen everything.' },
-    { id: 24, date: '2026-07-20', title: 'New: Support tab', body: 'There\'s a new Support tab with answers to common questions and a suggestion box — tell us what to build next. Lots of you asked for a way to suggest features; here it is. We read every one.' },
-    { id: 25, date: '2026-07-20', title: 'New: Academy tab', body: 'An Academy tab is on the way — short woodworking skill videos, built for how we work here, and great for apprentices. Filter by level. Want a topic covered? Ask in the Support tab.' },
-    { id: 26, date: '2026-07-20', title: 'New: Safety check-in', body: 'Going to see a client alone? Open the Safety tab and start a call-out before you go — check in when you arrive and tap "I\'m safe" when done. If you go overdue, the Concierge team is alerted with your details and location. First, add an emergency contact in My profile.' },
-    { id: 27, date: '2026-07-20', title: 'Add a location photo to a call-out', body: 'After you check in on a call-out, you can snap a photo of where you are and attach it. Only you and the Concierge team can see it — it stays private evidence, never public.' },
-    { id: 28, date: '2026-07-20', title: 'Buy-for-me: drop a delivery pin', body: 'When you post a "Buy for me" request you can now drop a GPS pin on your delivery spot. Runners see a map link and — with "Show distances" on — how far each request is, nearest first. Great for couriers picking the closest jobs.' },
-    { id: 29, date: '2026-07-20', title: 'Pin where you’re based', body: 'Any member can now add a location pin in My profile (not just vendors). It shows a small map on your profile so people can see where you’re based and how to reach you. Totally optional — your area still works as before.' },
-    { id: 30, date: '2026-07-21', title: 'Your dashboard, personalised', body: 'When you open the member area you now get a “near you” panel up top — the latest jobs and buy-for-me requests in your area, newest first, with a New tag for anything since your last visit. So even if browser alerts don’t reach you, you never miss what’s happening around you. Tap any item to jump to it.' },
-    { id: 31, date: '2026-08-23', title: 'Step-by-step guides on the tools', body: 'The Cutlist generator and the Job Pricing tool now have a “How to use this tool” guide right on the page — a sidebar on a computer, or a “How to use” button on your phone. New to a tool? Read the quick steps and tips first, then get to work.' },
-    { id: 32, date: '2026-08-24', title: 'Easier to get around', body: 'On a computer the member area now has a side menu with clear icons on the left — Directory, Jobs, Tools and the rest, each with a line on what it’s for — plus a “New here?” panel on the right that takes you straight to what you want to do. On a phone the tabs across the top work as before.' },
-    { id: 33, date: '2026-08-24', title: 'New tool: Cut Sheet Generator', body: 'In “Your member tools” open the Cut Sheet Generator. Type in your parts — or switch to Quick grid and enter measurements straight in, no names needed — and get a printable sheet of boxes with edge-band marks plus how many boards you need. It prints with YOUR logo and number to hand to the cutting shop.' },
-    { id: 34, date: '2026-10-11', title: 'Make your invoices look like yours', body: 'In the Invoice & Quote Generator open “Document style” to pick your fonts, colour, header layout and logo size, add your own tagline under your name, and hide your business name if your logo already shows it. Quotes can now also offer options the client picks between (e.g. laminate, plywood or drywall) and show the price as a range.' },
-    { id: 35, date: '2026-11-11', title: 'Academy: take a cabinet apart', body: 'The first Academy lesson is live. Open the Academy tab and pull apart a Euro-style base cabinet: 18 mm sides, the 37 mm line with fixing points every 32 mm, screwed-in shelf, hinges, legs, kicker and finishing panel. Tap any part to see how it goes together.' },
-    { id: 36, date: '2026-11-13', title: 'Your account is safer', body: 'Changing your PIN now asks for your current PIN first, and it signs out any other phone that was logged in to your account. After too many wrong PINs in one day, logins for that number pause until the next day and the owner is told, so nobody can keep guessing.' },
-    { id: 37, date: '2026-11-15', title: 'A fresh look', body: 'The member area has new colours and a cleaner, easier-to-read font, to match the rest of the site. Nothing has moved: every tab and button is where it was.' },
-    { id: 38, date: '2026-11-16', title: 'Print a market list or a cost sheet', body: 'In Job Pricing, open a quote and go to Summary. Market list prints what to buy, how many and the budget, with space for whoever shops to write what was paid. Cost sheet prints every cost of the job for a partner, with the price and margin only if you tick it.' },
-    { id: 39, date: '2026-11-17', title: 'Settings in every tool, and price your way', body: 'Every tool now has a Settings button at the top right. Tap it in the middle of a quote, invoice or cut sheet to change your rates or business details without leaving the page. Your business name, phone, address, payment details and terms are kept in one place and used by Job Pricing, Invoices and the Cut Sheet. You can also choose how you set your price: a multiplier (×1.65), a markup on cost (65%) or a profit margin (40%). Your saved quotes keep the same prices.' },
-    { id: 40, date: '2026-11-17', title: 'Wardrobe cutlist: door widths fixed, set your groove depth', body: 'Hinged doors on a wardrobe with dividers were coming out too wide: on the standard 3-section wardrobe the doors added up to 24 mm more than the carcass. Now each door covers half the divider it shares with the next door, so they meet with an even gap, and drawer fronts match the door width. Inset backs: set your own groove depth (router or saw cut, however deep you go) on the Doors tab, and the back panel is cut to fit it. The "Shared divider" unit join is gone: one panel shared by two units is just one carcass with a divider, so use Sections for that. Check any saved wardrobe cutlist before you cut from it again.' },
-    { id: 41, date: '2026-11-17', title: 'Wardrobe cutlist: drawers behind doors get their own chest', body: 'When a section has a door, its drawers now go in a separate drawer chest set back from the front (80 mm by default), so the hinges and the open door clear them. The cut list adds the chest sides, top and bottom, a filler strip on each side to fill the gap to the carcass (60 mm), a face strip glued to each filler that covers the joint (69 mm, wide enough for the edge bander), and drawer fronts between the face strips with a 3 mm gap. Set your own set back, gap, overlap and front gap on the Doors tab. Your own clearances (door gaps, groove depth, drawer chest sizes) are now remembered on your device for every new cutlist; Reset to standard puts them back.' },
-    { id: 42, date: '2026-11-18', title: 'Wardrobe cutlist in 3D', body: 'The wardrobe cutlist now has a 3D tab. Every part on your cut list is placed in the model at its real size, so you can turn it round, pull it apart to see how it goes together, make the doors see-through, and tap any part to see its size. The finished cut list and the printout now start with a 3D picture of the wardrobe. Drawer boxes are now built the standard way: front and back the full box width, sides between them (the drawer face hides the screws), with a 27 mm runner gap you can change. The subframe has a new choice: built in (the gridwork sits between the sides, which run to the floor) or a separate plinth for several units fitted in. With a set-back toe kick the whole frame is now shallower, so the mid-rails come out the right length, and the extra "face mounting rail" is gone: the toe-kick face is glued on to hide the screws.' },
-    { id: 43, date: '2026-11-19', title: 'Send your client the 3D wardrobe, or open it in SketchUp', body: 'On the 3D tab (and under the 3D picture on your finished cut list) there are two new buttons. Client viewer makes one small file you can send on WhatsApp: your client opens it on any phone or laptop, with no internet and no app, and can turn the wardrobe round, pull it apart and open the doors. It carries your business name and phone from Settings. SketchUp file makes a .dae you open in SketchUp with File, Import: every part is a named component, sorted into groups, in millimetres, ready for you to add handles, the room and a render.' },
-    { id: 44, date: '2026-11-20', title: 'Try the Smart Generator (experimental)', body: 'A new tool, still under construction: describe a wardrobe (size, sections, and what goes in each: shelves, hanging or drawers) and it builds every part in 3D first, then reads the cut list off the model, so the two always agree and parts that run into each other are flagged. Your own construction settings (board, groove depth, gaps, runner gap, subframe) are remembered. Send the list straight to the Cut Sheet for boards and edge banding. It is an experiment: check every size yourself before cutting, and tell us on WhatsApp when something looks wrong. Kitchens come next. Find it in Tools.' },
-    { id: 45, date: '2026-11-20', title: 'Edge banding now comes on as standard', body: 'In the wardrobe cutlist and the Smart Generator every part now arrives with its usual edge banding already marked: doors, drawer fronts and drawer-chest face strips all round, the front edge of carcass parts, shelves and the chest top, and the visible edges of side and end panels. Backs, drawer bases, subframe rails and the hidden filler strips stay plain. Tap an edge to take off what a job does not need (tap again for double then band). Lists from the Smart Generator carry the banding into the Cut Sheet too. Lists you saved before keep the banding you set.' },
-    { id: 46, date: '2026-11-21', title: 'Kitchens in the Smart Generator (experimental)', body: 'The Smart Generator now does kitchens as well as wardrobes: switch to Kitchen at the top. Lay out runs of base and wall cabinets along the back and side walls, then add units: drawer or door base units, a sink unit, a hob over drawers, wall units with fixed and adjustable shelves, L corners, side panels, fillers and gaps for appliances. Base units stand on legs under rails; choose bar handles (full-height fronts) or J-profile (every front shortened for the profile), and your own settings (legs, J-profile, rails, gaps) are remembered. You get the 3D, the cut list, a list of the hardware to buy (legs, hinges, runners, J-profiles, toe kicks) and Send to the Cut Sheet. Load the U-shaped example to see a full kitchen. Still under construction: check every size before cutting, and tell us on WhatsApp what is wrong.' },
-    { id: 58, date: '2026-11-23', title: 'Home', body: 'Your landing page is now called Home. It is the first link in the Go to list on the left (on a phone, the first in the row under the header), and the Home button at the top of the members area takes you back to it from anywhere.' },
-    { id: 57, date: '2026-11-23', title: 'Logging in now opens your Home', body: 'When you log in you now land on your own page. The Home tab has your greeting, your jobs and buys, your unread alerts, Post a job, Request a buy and what is new near you, with My files underneath. The Edit profile tab is where you change your details. The members area is one tap away with the Members area button.' },
-    { id: 56, date: '2026-11-23', title: 'My profile: two tabs', body: 'Your profile page now has two tabs, Profile and My files, so you see one at a time instead of scrolling past your profile to reach your files. The My files link in the Tools tab opens straight on the files.' },
-    { id: 55, date: '2026-11-23', title: 'My files: move any save into a folder', body: 'Saves from the Cutlist, the Cut Sheet, Job Pricing and Invoices can now be moved into any client and job folder in My files: open More on the save and choose Move to a folder. This only changes where My files shows it; nothing inside the tool changes, and the tool still opens it as before. Put back takes it to the client the tool has it under.' },
-    { id: 54, date: '2026-11-23', title: 'My files: folders you can open', body: 'My files is now a proper folder view instead of one long list. It opens on your five latest saves and a folder for each client. Tap a client to see a folder for each job and any loose files; tap a job to see its files. Search finds a file in any folder, you can show one tool at a time, and sort by newest or by name. Open, move, rename, download and delete are under More on each Smart Generator design.' },
-    { id: 53, date: '2026-11-23', title: 'My files', body: 'Your profile page now has My files: everything you have saved in the tools, in folders by client, with each job inside its client. In the Smart Generator you can now Save to My files (pick the client and the job), Open from My files, and Download or Upload a design file to move it to another phone or account. On the profile page you can open, move, rename, download and delete your Smart Generator designs, and upload a design file. Cutlists, Cut Sheet projects, quotes and invoices are listed under their client and open in their own tool, saved exactly as before.' },
-    { id: 52, date: '2026-11-23', title: 'My profile has its own page', body: 'My profile now opens as its own page instead of a pop-up over the directory. Everything is where it was: photo, logo, details, links, emergency contact, trades and PIN, and it saves the same way. Next, the same page will hold My files: everything you have saved in the tools, in folders by client and job.' },
-    { id: 51, date: '2026-11-23', title: 'Smart Generator: side-mount or undermount drawers', body: 'Choose your drawer runners in the kitchen construction settings. Side mount keeps the box you know (the opening less the runner gap, base underneath). Undermount (concealed) runners follow the Blum rule: the inside of the box is the opening less 42, 18 mm sides (use runners made for 18 mm sides), the bottom raised 13 between the sides, the back sitting on the bottom, and the box 10 shorter than the runner, with the runner length picked from the cabinet depth. Every number is a setting, because each runner make differs: check your runner sheet.' },
-    { id: 50, date: '2026-11-23', title: 'Smart Generator: blind corners and kitchen starters', body: 'The Kitchen tab is now Kitchen / Laundry. Start a straight, L-shaped or U-shaped kitchen, or a laundry, built from standard unit widths. Corners are blind corners as standard: 1000 or 1200 wide, the blind part sized from the run that meets it (its depth, its door and an 80 mm corner filler) and closed with a blind panel, with the door on the open part. The run that meets the corner starts with the 80 mm filler. Base blind corners can take a magic corner or LeMans pull-out. The routed L corner is still there as a special option.' },
-    { id: 49, date: '2026-11-23', title: 'Smart Generator: door types, sliding tracks, drawer boxes, shelf positions', body: 'Every door now has a type. Base units with doors: hinged on cup hinges, lift-up (on hinges with a gas or mechanical stay, or a hingeless fitting), bi-fold lift, drop-down with or without a soft-down stay (TV units), or sliding. Wall units: hinged, the two lift-ups or a bi-fold lift; lift-ups give one door per shelf space, so the shelves behind them become the door joints. Tall units choose per box, and can also take sliding doors or a folding pair for a special request. With sliding doors the carcass is set back for the tracks so the side panels stay flush with the doors (island sliding units too). Drawer boxes are cut lower than their fronts (50 mm by default, in your construction settings). J-profiles go on whichever edge you can reach. Shelves: the count is what gets cut and the installer places them on site, but you can give exact heights for the 3D and drawings. Wide shelves (over 800) get a centre divider. An island with an overhang now sits on one top panel the size of the quartz less its 80 mm doubled edge.' },
-    { id: 48, date: '2026-11-23', title: 'Smart Generator: tall units, islands, laundries and board size', body: 'Kitchens in the Smart Generator can now have tall units (an oven and microwave unit, a pantry with drawers, cubbies and shelves), an island with sliding doors on both sides, and a laundry run with a floating worktop. Choose your board size (4 × 8 is standard; 4 × 9 and 6 × 9 rarely come in laminate). A tall unit stays one box while it fits the board, about 2300 on 10 cm legs for a 4 × 8; taller ones are made as two stacked boxes, and end panels longer than the board come in two pieces. Load the U-shape with tall units and an island, or the laundry, to see them. Still under construction: check every size before cutting.' },
-    { id: 47, date: '2026-11-21', title: 'Price this job: from the generators to Job Pricing', body: 'The Cut Sheet, the Smart Generator and the cutlist now have a Price this job button. It opens a new quote in Job Pricing with the materials already counted: boards, back boards, edge band rolls and application, and the hardware (hinges, runners, handles, rails, legs, screws). Only quantities come across; you add labour, days and logistics as usual. Prices you type are remembered, so the next job sent over picks up your last price for the same item. Check every quantity before you quote.' }
-  ];
-  var WN_KEY = 'nwd-changelog-seen';
-
-  function maybeShowWhatsNew() {
-    if (!me) return;
-    var seen = 0;
-    try { seen = Number(localStorage.getItem(WN_KEY)) || 0; } catch (e) {}
-    var joined = String(me.joined_at || '').slice(0, 10);
-    var fresh = CHANGELOG.filter(function (e) { return e.id > seen && e.date > joined; });
-    var latest = CHANGELOG[CHANGELOG.length - 1].id;
-    var markSeen = function () { try { localStorage.setItem(WN_KEY, String(latest)); } catch (e) {} };
-    if (!fresh.length) { markSeen(); return; }
-    var list = document.getElementById('wnList');
-    list.innerHTML = fresh.map(function (e) {
-      return '<div class="wn-entry"><span class="wn-date">' + C.escapeHtml(e.date) + '</span>' +
-        '<h3>' + C.escapeHtml(e.title) + '</h3><p>' + C.escapeHtml(e.body) + '</p></div>';
-    }).join('');
-    var wn = document.getElementById('wnOverlay');
-    var close = function () { wn.classList.remove('open'); markSeen(); };
-    document.getElementById('wnGotIt').onclick = close;
-    document.getElementById('closeWn').onclick = close;
-    wn.addEventListener('click', function (e) { if (e.target === wn) close(); });
-    wn.classList.add('open');
-  }
+  // What's new moved to js/whats-new.js on 2026-11-23 (it pops up on Home, concierge/profile.html, now the landing page).
 
   async function load() {
     try {
@@ -2704,107 +2552,7 @@ a.tool-card:hover .go{ color:var(--navy); }
   document.getElementById('notifReadAll').addEventListener('click', function () { markNotifs(); });
   document.addEventListener('visibilitychange', function () { if (!document.hidden) fetchNotifs(); });
 
-  // Personal "near you" widget — open jobs + buy-for-me requests in the
-  // member's zone(s), newest first. The in-app fallback when push doesn't fire.
-  function dashSeenKey() { return 'nwd-dash-seen-' + (me && me.phone || ''); }
-  function timeAgo(ts) {
-    if (!ts) return '';
-    var d = new Date(String(ts).replace(' ', 'T') + (String(ts).indexOf('Z') < 0 ? 'Z' : ''));
-    var s = Math.floor((Date.now() - d.getTime()) / 1000);
-    if (isNaN(s)) return '';
-    if (s < 60) return 'just now';
-    if (s < 3600) return Math.floor(s / 60) + 'm ago';
-    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
-    if (s < 604800) return Math.floor(s / 86400) + 'd ago';
-    return Math.floor(s / 604800) + 'w ago';
-  }
-  async function loadDashHome() {
-    var host = document.getElementById('dashHome');
-    if (!host || !me) return;
-    var zones = {}; [me.area].concat(me.coverage_zones || []).forEach(function (z) { if (z) zones[z] = 1; });
-    var res;
-    try {
-      res = await Promise.all([
-        C.api('/jobs').catch(function () { return {}; }),
-        C.api('/buy-requests').catch(function () { return {}; }),
-      ]);
-    } catch (e) { return; }
-    var jobs = (res[0] && res[0].jobs) || [], buys = (res[1] && res[1].requests) || [];
-    var items = [];
-    jobs.forEach(function (j) {
-      if (j.mine || (j.status && j.status !== 'open') || !zones[j.zone]) return;
-      var trade = (C.SPECIALTY_LABELS && C.SPECIALTY_LABELS[j.trade]) || j.trade || 'Carpentry';
-      items.push({ kind: 'job', zone: j.zone, created_at: j.created_at,
-        title: trade + ' work needed' + (j.workers > 1 ? (' · ' + j.workers + ' hands') : '') });
-    });
-    buys.forEach(function (b) {
-      if (b.mine || (b.status && b.status !== 'open') || !zones[b.zone]) return;
-      var first = (b.items && b.items[0] && b.items[0].name) ? b.items[0].name : 'Materials';
-      var more = (b.items || []).length - 1;
-      items.push({ kind: 'buy', zone: b.zone, created_at: b.created_at,
-        title: 'Buy-for-me: ' + first + (more > 0 ? (' +' + more + ' more') : '') });
-    });
-    items.sort(function (a, b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); });
-    var top = items.slice(0, 6);
-
-    var seen = ''; try { seen = localStorage.getItem(dashSeenKey()) || ''; } catch (e) {}
-    var newCount = top.filter(function (it) { return String(it.created_at || '') > seen; }).length;
-    var first = C.escapeHtml((me.name || 'there').split(/\s+/)[0]);
-    var hr = new Date().getHours();
-    var greet = hr < 12 ? 'Good morning' : (hr < 17 ? 'Good afternoon' : 'Good evening');
-    var jobSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
-    var buySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>';
-
-    var myJobs = jobs.filter(function (j) { return j.mine && (!j.status || j.status === 'open'); }).length;
-    var myBuys = buys.filter(function (b) { return b.mine && (!b.status || b.status === 'open'); }).length;
-    var unread = (typeof notifItems !== 'undefined' && notifItems) ? notifItems.filter(function (n) { return !n.read; }).length : 0;
-    var bellSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
-
-    var html = '<div class="dash-greet"><h2>' + greet + ', ' + first + '</h2>' +
-      (me.area ? '<span class="sub">' + C.escapeHtml(me.area) + '</span>' : '') + '</div>';
-    html += '<div class="dash-stats">' +
-      '<button class="dash-stat" data-go="jobs">' + jobSvg + '<span><b>' + myJobs + '</b> your jobs</span></button>' +
-      '<button class="dash-stat" data-go="services">' + buySvg + '<span><b>' + myBuys + '</b> your buys</span></button>' +
-      '<button class="dash-stat" data-go="notif">' + bellSvg + '<span><b>' + unread + '</b> unread</span></button>' +
-    '</div>';
-    html += '<div class="dash-actions">' +
-      '<button class="dash-act primary" data-act="job">+ Post a job</button>' +
-      '<button class="dash-act ghost" data-act="buy">+ Request a buy</button>' +
-    '</div>';
-    html += '<div class="dash-lbl">Near you' + (newCount ? ' · ' + newCount + ' new' : '') + '</div>';
-    if (!top.length) {
-      html += '<div class="dash-empty">Nothing new near ' + (me.area ? C.escapeHtml(me.area) : 'you') + ' yet — new jobs and buy-for-me requests in your area will land here, even if browser alerts are off.</div>';
-    } else {
-      html += '<div class="dash-list">' + top.map(function (it) {
-        var isNew = String(it.created_at || '') > seen;
-        var tab = it.kind === 'job' ? 'jobs' : 'services';
-        return '<button class="dash-item" data-tab="' + tab + '">' +
-          '<span class="dash-ic">' + (it.kind === 'job' ? jobSvg : buySvg) + '</span>' +
-          '<span class="dash-txt"><span class="t">' + C.escapeHtml(it.title) + '</span>' +
-          '<span class="m">' + C.escapeHtml(it.zone || '') + ' · ' + timeAgo(it.created_at) + '</span></span>' +
-          (isNew ? '<span class="dash-new">New</span>' : '') + '</button>';
-      }).join('') + '</div>';
-    }
-    host.innerHTML = html;
-    host.style.display = '';
-    host.querySelectorAll('.dash-item').forEach(function (btn) {
-      btn.addEventListener('click', function () { showTab(btn.getAttribute('data-tab')); window.scrollTo(0, 0); });
-    });
-    host.querySelectorAll('.dash-stat').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var go = btn.getAttribute('data-go');
-        if (go === 'notif') { if (typeof notifPanel !== 'undefined' && notifPanel) notifPanel.hidden = false; }
-        else { showTab(go); window.scrollTo(0, 0); }
-      });
-    });
-    host.querySelectorAll('.dash-act').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var t = document.getElementById(btn.getAttribute('data-act') === 'job' ? 'postJobBtn' : 'postBuyBtn');
-        if (t) t.click();
-      });
-    });
-    if (top.length) { try { localStorage.setItem(dashSeenKey(), String(top[0].created_at || '')); } catch (e) {} }
-  }
+  // The greeting / "near you" widget moved to Home (concierge/profile.html) on 2026-11-23.
 
   async function init() {
     try {
@@ -2839,10 +2587,8 @@ a.tool-card:hover .go{ color:var(--navy); }
 
     if (me.member_type === 'vendor') loadOrders(); // Orders badge (paid vendors only)
     await load();
-    loadDashHome();  // personal "near you" widget on the landing
     renderNudge();
     renderMembershipBar();
-    maybeShowWhatsNew();
     if (h) showTab(h);
     // links from the Home greeting on the profile page (2026-11-23): open the post form or the alerts panel
     var go = location.hash.slice(1);
