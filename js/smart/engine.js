@@ -237,7 +237,7 @@
       var sub = merge(SHOP, shop || {}).sub;
       return (sub.style === 'flush' || !(sub.setback > 0)) ? E(1, 1, 1, 1) : E(0, 1, 0, 0);
     }
-    if (p.tag === 'door' || n.indexOf('false front') !== -1 || /drawer front/.test(n)) return E(1, 1, 1, 1);
+    if (p.tag === 'door' || n.indexOf('false front') !== -1 || n.indexOf('blind panel') !== -1 || /drawer front/.test(n)) return E(1, 1, 1, 1);
     if (n.indexOf('face strip') !== -1) return E(0, 1, 0, 0);   // inner long edge only: back on the carcass, bottom on the carcass, top under the shelf (owner 2026-11-20)
     if (n.indexOf('filler strip') !== -1) return E(0, 0, 0, 0);                // hidden behind the face strip
     if (n.indexOf('island top panel') !== -1) return E(0, 0, 0, 0);            // under the quartz, never seen
@@ -284,7 +284,8 @@
     board: '4x8', tallTop: 2700, bandH: 100, slideTrack: 15, slideOverlap: 30, ovenW: 560, ovenH: 600,
     // owner 2026-11-23: drawer boxes sit lower than their fronts; Accra sliding tracks (flat bottom, bigger top) need the
     // carcass set back by the track depth; pulls go at hand height; island top panel = the quartz less its doubled edge
-    drawerDrop: 50, drawerMin: 80, slideD: 50, slideBot: 10, slideTop: 30, reach: 1800, edgeW: 80 };
+    drawerDrop: 50, drawerMin: 80, slideD: 50, slideBot: 10, slideTop: 30, reach: 1800, edgeW: 80,
+    cornerFill: 80 };   // blind corners (owner 2026-11-23): the run that meets a blind unit starts with an 80 mm filler
   var BOARDS = { '4x8': [2440, 1220], '4x9': [2745, 1220], '6x9': [2745, 1830] };
   function boardOf(K) { return BOARDS[K.board] || BOARDS['4x8']; }
 
@@ -468,7 +469,7 @@
         // shelves (adjustable, on pins)
         // the count is what gets cut; u.shelfAt (mm above the inside bottom) places them exactly for the 3D and drawings.
         // Over 800 inside, the shelves get a centre divider (owner 2026-11-23, rule C1).
-        var nSh = u.shelves || 0, set = base ? K.baseShelfSet : K.wallShelfSet, halves = nSh && inW > 800 ? 2 : 1, hw2 = (inW - (halves - 1) * t) / halves;
+        var nSh = u.shelves || 0, set = base ? K.baseShelfSet : K.wallShelfSet, halves = nSh && inW > 800 && u.type !== 'blind' ? 2 : 1, hw2 = (inW - (halves - 1) * t) / halves;
         var shelfLines = [];
         if (halves > 1) put('Divider, centre' + lbl, 'carcass', '', x + t + hw2, yBot + t, zf, t, H - 2 * t, dd - t, ['y', 'z'], 'fixed between bottom and top; carries the shelves');
         for (var i = 1; i <= nSh; i++) {       // u.fixed = how many of the lowest shelves are fixed (through the sides)
@@ -481,11 +482,22 @@
             else put('Shelf, adjustable' + lbl, 'shelf', '', sx + s.shelfClear, sy, zf + set, hw2 - 2 * s.shelfClear, t, R(dd - set), ['x', 'z'], s.shelfClear + ' mm clearance each side, set back ' + set + (sat != null ? '' : '; placed on site'));
           }
         }
-        if (nSh && hw2 > 800) warn.push(un + ': shelf spans ' + R(hw2) + ' mm, over 800 (check C1)');
+        if (nSh && hw2 > 800 && u.type !== 'blind') warn.push(un + ': shelf spans ' + R(hw2) + ' mm, over 800 (check C1)');
 
         // fronts: full overlay, J-profile shortens every front
         var fW = w - 2 * ec, fY = yBot + s.botGap, fH = (u.frontTop ? u.frontTop - yBot : H) - s.botGap - s.topGap;   // laundry: doors stop under the lip
-        if (u.type === 'slide') {
+        if (u.type === 'blind') {
+          // BLIND CORNER, the standard corner (owner 2026-11-23; base units 1000 or 1200, wall units the same rule): the
+          // blind part sits behind the run that meets it = that run's depth + its back + its door + the 80 mm corner
+          // filler. An 18 mm blind panel is fixed on the front over it; the door(s) cover the open part.
+          // u.side = the blind end (where the corner is); u.otherD = the other run's depth (default: this run's).
+          var blind = (u.otherD || dC) + bt + DT + K.cornerFill, left = (u.side || 'left') === 'left';
+          var bpW = R(blind - ec - gap / 2), opW = R(w - blind - ec - gap / 2), opX = left ? x + blind + gap / 2 : x + ec, bH = R(fH - J);
+          if (opW < 250) warn.push(un + ': only ' + opW + ' left for the door beside the ' + R(blind) + ' blind part; use the 1200 width.');
+          put('Blind Panel' + lbl, 'panel', '', left ? x + ec : x + w - blind + gap / 2, base ? fY : fY + J, -DT, bpW, bH, DT, ['x', 'y'], 'fixed on the carcass front over the blind part (' + R(blind) + ' = the other run ' + R(blind - K.cornerFill - DT) + ' + its door ' + DT + ' + ' + K.cornerFill + ' filler)');
+          doorSet(u.doorType || 'hinged', un, lbl, opX, opW, fY, fY + fH, shelfLines, { n: u.doors || (opW > 600 ? 2 : 1), edge: base ? 'top' : 'bottom' });
+          if (base && u.fitting) tally((u.fitting === 'lemans' ? 'LeMans corner pull-out' : 'Magic corner pull-out') + ' (' + un + ')', 1);
+        } else if (u.type === 'slide') {
           slidePair(lbl, x + ec, fW, fY, fH, zf);
         } else if (u.drawers) {
           var sum = u.drawers.reduce(function (a, b) { return a + b; }, 0), yy = yTop - s.topGap;

@@ -135,7 +135,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
   <p class="lede">Describe a wardrobe or a kitchen. Every part is placed in 3D first and the cut list is read off the model, so the two always agree and parts that run into each other are flagged.</p>
   <div class="mode no-print" role="group" aria-label="What are you making?">
     <button type="button" data-mode="wardrobe" aria-pressed="true">Wardrobe</button>
-    <button type="button" data-mode="kitchen" aria-pressed="false">Kitchen</button>
+    <button type="button" data-mode="kitchen" aria-pressed="false">Kitchen / Laundry</button>
   </div>
 
   <div class="print-only">
@@ -147,7 +147,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
     <div class="left">
       <div id="kitEd" hidden>
         <div class="card">
-          <h2>Kitchen</h2>
+          <h2>Kitchen / Laundry</h2>
           <div class="row2">
             <div class="f"><label for="k-wt">Worktop height (mm)</label><input id="k-wt" type="number" inputmode="numeric"></div>
             <div class="f"><label for="k-room">Back wall length (mm)</label><input id="k-room" type="number" inputmode="numeric"></div>
@@ -158,11 +158,11 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
             <div class="f"><label for="k-tall">Tall units up to (mm)</label><input id="k-tall" type="number" inputmode="numeric"></div>
           </div>
           <p class="hint">Base units stand on legs. The worktop's doubled 4 cm edge sits flush with the carcass top, so base sides are the worktop height less 40 less the legs. A tall unit stays one box while it fits the board (2300 on legs for a 4 × 8); taller ones are made as two stacked boxes. 4 × 9 and 6 × 9 boards rarely come in laminate, usually chipboard only.</p>
-          <div class="acts" style="margin-top:.6rem"><button type="button" class="mini" data-load="straight">Start a straight kitchen</button><button type="button" class="mini" data-load="u">Load a U-shaped example</button><button type="button" class="mini" data-load="full">U-shape with tall units and an island</button><button type="button" class="mini" data-load="laundry">Load a laundry</button></div>
+          <div class="acts" style="margin-top:.6rem"><button type="button" class="mini" data-load="straight">Start a straight kitchen</button><button type="button" class="mini" data-load="L">Start an L-shaped kitchen</button><button type="button" class="mini" data-load="U">Start a U-shaped kitchen</button><button type="button" class="mini" data-load="laundry">Start a laundry</button></div>
         </div>
         <div class="card">
           <h2>Runs</h2>
-          <p class="hint" style="margin-top:0">A run is one line of units along a wall, base or wall cabinets. Units go left to right as you face the wall. On a side wall, "starts at" is measured from the back wall. Drawer heights are shared out to fit the unit. A hob cut-out depth of 0 means no hob; a return depth of 0 means the same depth as the run. A gap leaves space for an appliance. A tall unit's insides are listed bottom to top, separated by commas, with | where the upper box starts: drawer 300 (or drawer 300 x2 side by side), oven 600, micro 450, cubby 300 2x3, shelves 4 (takes the height that is left). Door types: hinged on cup hinges is the usual; lift-ups (on hinges with a gas or mechanical stay, or a hingeless fitting) give one door per shelf space, so the shelves behind them become the door joints; a bi-fold lift folds two panels up; drop-downs (TV units) open down on bottom hinges, with a soft-down stay or without; sliding doors set the carcass back for the Accra tracks. Add "at" to place shelves exactly (shelves 4 at 300 600 900 1200, mm above the bottom of the space); otherwise only the count matters and the installer sets them on site. Shelf heights on other units work the same way. An island is placed by the corner of its cabinets nearest the left and back walls; its sliding-door units are two units back to back; the quartz sits on one panel the size of the top less its 80 mm doubled edge.</p>
+          <p class="hint" style="margin-top:0">A run is one line of units along a wall, base or wall cabinets. Units go left to right as you face the wall. On a side wall, "starts at" is measured from the back wall. Drawer heights are shared out to fit the unit. A hob cut-out depth of 0 means no hob; a return depth of 0 means the same depth as the run. A gap leaves space for an appliance. A tall unit's insides are listed bottom to top, separated by commas, with | where the upper box starts: drawer 300 (or drawer 300 x2 side by side), oven 600, micro 450, cubby 300 2x3, shelves 4 (takes the height that is left). Corners: a blind corner is the standard (1000 or 1200 wide; the blind part is the other run's depth plus its door plus an 80 mm filler, closed with a blind panel), and the run that meets it starts with an 80 mm corner filler. The L corner is a special option. Door types: hinged on cup hinges is the usual; lift-ups (on hinges with a gas or mechanical stay, or a hingeless fitting) give one door per shelf space, so the shelves behind them become the door joints; a bi-fold lift folds two panels up; drop-downs (TV units) open down on bottom hinges, with a soft-down stay or without; sliding doors set the carcass back for the Accra tracks. Add "at" to place shelves exactly (shelves 4 at 300 600 900 1200, mm above the bottom of the space); otherwise only the count matters and the installer sets them on site. Shelf heights on other units work the same way. An island is placed by the corner of its cabinets nearest the left and back walls; its sliding-door units are two units back to back; the quartz sits on one panel the size of the top less its 80 mm doubled edge.</p>
           <div id="kRuns"></div>
           <button type="button" class="mini" id="kAddRun" style="margin-top:.8rem">Add a run</button>
         </div>
@@ -284,7 +284,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261123c"></script>
+<script src="js/smart/engine.js?v=20261123d"></script>
 <script src="js/smart/price.js?v=20261123"></script>
 <script src="js/pricing-handoff.js?v=20261121"></script>
 <script src="js/cutlist-3d.js?v=20261119e"></script>
@@ -510,8 +510,8 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     'k-edge': SH.edgeClear, 'k-dgap': SH.doorGap, 'k-run': SH.runGap,
     'k-ddrop': K0.drawerDrop, 'k-dmin': K0.drawerMin, 'k-reach': K0.reach, 'k-sld': K0.slideD, 'k-slb': K0.slideBot, 'k-slt': K0.slideTop };
   var KGROUPS = { carcass: 'Carcass', frame: 'Rails', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', panel: 'Side panels and fillers' };
-  var UTYPES = { base: 'Base unit', sink: 'Sink unit', wall: 'Wall unit', cornerL: 'L corner', tall: 'Tall unit', slide: 'Sliding doors, back to back', panel: 'Side panel', filler: 'Filler', gap: 'Gap' };
-  var RUN_TYPES = { base: ['base', 'sink', 'cornerL', 'tall', 'panel', 'filler', 'gap'], wall: ['wall', 'cornerL', 'panel', 'filler', 'gap'], island: ['base', 'slide', 'gap'] };
+  var UTYPES = { base: 'Base unit', sink: 'Sink unit', wall: 'Wall unit', blind: 'Blind corner', cornerL: 'L corner (special)', tall: 'Tall unit', slide: 'Sliding doors, back to back', panel: 'Side panel', filler: 'Filler', gap: 'Gap' };
+  var RUN_TYPES = { base: ['base', 'sink', 'blind', 'tall', 'cornerL', 'panel', 'filler', 'gap'], wall: ['wall', 'blind', 'cornerL', 'panel', 'filler', 'gap'], island: ['base', 'slide', 'gap'] };
   // a tall unit's insides as text, bottom to top: "drawer 300, oven 600, micro 450 | shelves 2"
   // door types (engine doorSet): which ones each kind of unit offers
   var DOOR_LABEL = { hinged: 'Hinged (cup hinges)', liftHinge: 'Lift-up, hinges and a stay', liftFree: 'Lift-up, no hinges', liftFold: 'Bi-fold lift (two panels)',
@@ -552,19 +552,83 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   }
   // examples, written the engine's way; fromEngine() turns them into editor state
   var EX = {
+    // standard starters (owner 2026-11-23): modular widths, blind corners; the run that meets a blind corner starts
+    // with the 80 mm corner filler, and starts after the blind run's carcass, back and doors (560 + 3 + 18 = 581)
     straight: { worktop: 900, handle: 'bar', room: { w: 3000 }, runs: [
       { name: 'Back wall, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
         { type: 'base', name: 'A', w: 600, drawers: [140, 320, 320] },
         { type: 'base', name: 'B', w: 600, drawers: [380, 380], hob: { d: 490 } },
         { type: 'sink', name: 'C', w: 800, doors: 2, sinkCut: { w: 720, d: 420 } },
-        { type: 'base', name: 'D', w: 600, doors: 1, shelves: 1 } ] },
+        { type: 'base', name: 'D', w: 600, doors: 1, shelves: 1 },
+        { type: 'base', name: 'E', w: 400, doors: 1, shelves: 1 } ] },
       { name: 'Back wall, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
         { type: 'wall', name: 'A upper', w: 600, doors: 1, shelves: 2 },
         { type: 'wall', name: 'B upper', w: 600, doors: 1, shelves: 2 },
         { type: 'wall', name: 'C upper', w: 800, doors: 2, shelves: 2 },
-        { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 2 } ] } ] },
+        { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'E upper', w: 400, doors: 1, shelves: 2 } ] } ] },
+    L: { worktop: 900, handle: 'bar', room: { w: 3000 }, runs: [
+      { name: 'Back wall, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
+        { type: 'blind', name: 'A', w: 1000, side: 'left', doors: 1, shelves: 1 },
+        { type: 'base', name: 'B', w: 600, drawers: [380, 380], hob: { d: 490 } },
+        { type: 'sink', name: 'C', w: 800, doors: 2, sinkCut: { w: 720, d: 420 } },
+        { type: 'base', name: 'D', w: 600, drawers: [140, 320, 320] } ] },
+      { name: 'Left wall, base', wall: 'left', at: 581, depth: 560, kind: 'base', units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'base', name: 'E', w: 600, doors: 1, shelves: 1 },
+        { type: 'base', name: 'F', w: 600, drawers: [140, 320, 320] },
+        { type: 'base', name: 'G', w: 500, doors: 1, shelves: 1 } ] },
+      { name: 'Back wall, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'blind', name: 'A upper', w: 1000, side: 'left', doors: 1, shelves: 2 },
+        { type: 'wall', name: 'B upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'C upper', w: 800, doors: 2, shelves: 2 },
+        { type: 'wall', name: 'D upper', w: 600, doors: 1, shelves: 2 } ] },
+      { name: 'Left wall, wall cabinets', wall: 'left', at: 321, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'wall', name: 'E upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'G upper', w: 500, doors: 1, shelves: 2 } ] } ] },
+    U: { worktop: 900, handle: 'bar', room: { w: 3600 }, runs: [
+      { name: 'Back wall, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
+        { type: 'blind', name: 'A', w: 1000, side: 'left', doors: 1, shelves: 1 },
+        { type: 'base', name: 'B', w: 600, drawers: [380, 380], hob: { d: 490 } },
+        { type: 'sink', name: 'C', w: 800, doors: 2, sinkCut: { w: 720, d: 420 } },
+        { type: 'blind', name: 'D', w: 1200, side: 'right', doors: 1, shelves: 1 } ] },
+      { name: 'Left wall, base', wall: 'left', at: 581, depth: 560, kind: 'base', units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'base', name: 'E', w: 600, doors: 1, shelves: 1 },
+        { type: 'base', name: 'F', w: 600, drawers: [140, 320, 320] } ] },
+      { name: 'Right wall, base', wall: 'right', at: 581, depth: 560, kind: 'base', units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'base', name: 'G', w: 600, drawers: [140, 320, 320] },
+        { type: 'base', name: 'H', w: 600, doors: 1, shelves: 1 } ] },
+      { name: 'Back wall, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'blind', name: 'A upper', w: 1000, side: 'left', doors: 1, shelves: 2 },
+        { type: 'wall', name: 'B upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'C upper', w: 800, doors: 2, shelves: 2 },
+        { type: 'blind', name: 'D upper', w: 1200, side: 'right', doors: 1, shelves: 2 } ] },
+      { name: 'Left wall, wall cabinets', wall: 'left', at: 321, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'wall', name: 'E upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 2 } ] },
+      { name: 'Right wall, wall cabinets', wall: 'right', at: 321, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'filler', name: 'corner filler', w: 80 },
+        { type: 'wall', name: 'G upper', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'H upper', w: 600, doors: 1, shelves: 2 } ] } ] },
+    // a plain laundry: sink unit, washer and dryer spaces under the worktop, a cupboard, wall units over
+    laundry: { worktop: 900, handle: 'bar', room: { w: 2400 }, runs: [
+      { name: 'Laundry, base', wall: 'back', at: 0, depth: 560, kind: 'base', units: [
+        { type: 'sink', name: 'Sink unit', w: 600, doors: 1, sinkCut: { w: 500, d: 400 } },
+        { type: 'gap', name: 'washer', w: 600 },
+        { type: 'gap', name: 'dryer', w: 600 },
+        { type: 'base', name: 'Cupboard', w: 600, doors: 1, shelves: 1 } ] },
+      { name: 'Laundry, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 720, units: [
+        { type: 'wall', name: 'W1', w: 600, doors: 1, shelves: 2 }, { type: 'wall', name: 'W2', w: 600, doors: 1, shelves: 2 },
+        { type: 'wall', name: 'W3', w: 600, doors: 1, shelves: 2 }, { type: 'wall', name: 'W4', w: 600, doors: 1, shelves: 2 } ] } ] },
+    // Not linked on the page (non-standard, one client's job): the Prampram kitchen and laundry, opened by the owner
+    // with #prampram / #prampram-laundry. They are also the engine tests (scripts/test-kitchen-prampram.mjs).
     // the engine's first real test job (scripts/test-kitchen-prampram.mjs), without the tall unit, pantry and island
-    u: { worktop: 900, handle: 'jprofile', room: { w: 4010 }, runs: [
+    prampramU: { worktop: 900, handle: 'jprofile', room: { w: 4010 }, runs: [
       { name: 'Back wall, base', wall: 'back', at: 12, depth: 580, kind: 'base', units: [
         { type: 'cornerL', name: 'B', w: 800, r: 1000, returnDepth: 580, side: 'left', carousel: true, note: 'carousel behind bi-fold doors; check its size against the 800 leg' },
         { type: 'panel', name: 'B|C' },
@@ -592,7 +656,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         { type: 'wall', name: 'H upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
         { type: 'wall', name: 'I upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
         { type: 'wall', name: 'J upper', w: 600, doors: 1, shelves: 3, fixed: 1 } ] } ] },
-    laundry: { worktop: 950, handle: 'jprofile', room: { w: 1270 }, runs: [
+    prampramLaundry: { worktop: 950, handle: 'jprofile', room: { w: 1270 }, runs: [
       { name: 'Worktop frame (washer under)', wall: 'back', at: 0, depth: 350, kind: 'base', carcTop: 874, units: [{ type: 'gap', name: 'washer and frame', w: 1270 }],
         items: ['Welded 1.5" angle frame, Hammerite black', 'Moisture-resistant board 18 mm under the slab'] },
       { name: 'Length side', wall: 'left', at: 1000, depth: 350, kind: 'base', carcTop: 874, units: [{ type: 'base', name: 'Cabinet', w: 800, doors: 2, frontTop: 874 }] },
@@ -601,7 +665,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         { type: 'wall', name: 'L2', w: 575, doors: 1, shelves: 3, fixed: 1 }, { type: 'filler', name: 'right filler', w: 60 }] } ] }
   };
   // the U example plus the tall units, the pantry and the island (scripts/test-kitchen-prampram.mjs --full)
-  EX.full = JSON.parse(JSON.stringify(EX.u)); EX.full.tallTop = 2700;
+  EX.prampram = JSON.parse(JSON.stringify(EX.prampramU)); EX.prampram.tallTop = 2700; EX.full = EX.prampram;
   EX.full.runs[1].units.push({ type: 'tall', name: 'K', w: 800, fold: true, zones: [{ k: 'drawer', h: 300, n: 1 }, { k: 'drawer', h: 300, n: 2 }, { k: 'drawer', h: 200, n: 3 },
     { k: 'cubby', h: 300, rows: 2, cols: 3 }, { k: 'split' }, { k: 'shelves', h: 0, n: 4 }] }, { type: 'panel', name: 'K end', h: 2700, extraD: 12 });
   EX.full.runs.splice(2, 0, { name: 'Left wall, tall', wall: 'left', at: 1012, off: 12, depth: 580, kind: 'base', units: [
@@ -613,7 +677,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     return { type: u.type, name: u.name || '', w: u.w || 0, front: u.drawers ? 'drawers' : 'doors', drawers: (u.drawers || [140, 320, 320]).join(', '),
       doors: u.doors || 1, shelves: u.shelves || 0, fixed: u.fixed || 0, hobD: u.hob ? u.hob.d : 0,
       sinkW: u.sinkCut ? u.sinkCut.w : 720, sinkD: u.sinkCut ? u.sinkCut.d : 420,
-      r: u.r || 900, returnDepth: u.returnDepth || 0, side: u.side || 'left', carousel: !!u.carousel, note: u.note || '',
+      r: u.r || 900, returnDepth: u.returnDepth || 0, side: u.side || 'left', otherD: u.otherD || 0, fitting: u.fitting || '', carousel: !!u.carousel, note: u.note || '',
       zones: zonesText(u.zones || [{ k: 'drawer', h: 300 }, { k: 'shelves', h: 0, n: 4 }]), d1: u.fold ? 'fold' : ((u.boxDoors || [])[0] || u.doorType || 'hinged'), d2: u.fold ? 'fold' : ((u.boxDoors || [])[1] || u.doorType || 'hinged'),
       doorType: u.doorType || 'hinged', lift: u.lift || 'liftHinge', pull: u.pull || 'auto', name2: u.name2 || '', shelfAt: (u.shelfAt || []).join(', '),
       h: u.h || 0, extraD: u.extraD || 0, face: u.face || 'a', frontTop: u.frontTop || 0 };
@@ -628,6 +692,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   function newUnit(type) {
     return uiUnit(Object.assign({ type: type }, { base: { w: 600, drawers: [140, 320, 320] }, sink: { w: 900, doors: 2, sinkCut: { w: 720, d: 420 } },
       wall: { w: 600, doors: 1, shelves: 2 }, cornerL: { w: 900, r: 900, side: 'left', shelves: 1 }, panel: {}, filler: { w: 50 }, gap: { w: 600 },
+      blind: { w: 1000, side: 'left', doors: 1, shelves: 1 },
       tall: { w: 600, zones: [{ k: 'drawer', h: 300 }, { k: 'shelves', h: 0, n: 4 }] }, slide: { w: 1000, shelves: 1 } }[type]));
   }
   function parseList(s) { return String(s).split(/[^0-9.]+/).map(parseFloat).filter(function (v) { return v > 0; }); }
@@ -659,6 +724,11 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
             if (u.hobD > 0) e.hob = { d: u.hobD };
           } else if (u.type === 'sink') { e.doors = u.doors; if (u.sinkW > 0 && u.sinkD > 0) e.sinkCut = { w: u.sinkW, d: u.sinkD }; }
           else if (u.type === 'wall') { e.doors = u.doors; e.shelves = u.shelves; e.fixed = Math.min(u.fixed, u.shelves); if (u.doorType !== 'hinged') e.doorType = u.doorType; }
+          else if (u.type === 'blind') {
+            e.side = u.side; e.doors = u.doors; e.shelves = u.shelves; if (u.otherD > 0) e.otherD = u.otherD;
+            if (u.doorType !== 'hinged') e.doorType = u.doorType; if (r.kind === 'base' && u.fitting) e.fitting = u.fitting;
+            if (u.shelfAt) { var sb = parseList(u.shelfAt); if (sb.length) e.shelfAt = sb; }
+          }
           else if (u.type === 'cornerL') {
             e.r = u.r; e.returnDepth = u.returnDepth || r.depth; e.side = u.side;
             if (r.kind === 'base' && u.carousel) e.carousel = true; else e.shelves = u.shelves;
@@ -727,7 +797,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       '<button type="button" class="mini" data-mv="' + ri + ':' + ui + ':1" aria-label="Move ' + L + ' right">&rarr;</button>' +
       '<button type="button" class="mini" data-delu="' + ri + ':' + ui + '" aria-label="Remove ' + L + '">&times;</button></span></div>' +
       '<div class="ku-det">' + sf(ri, ui, 'type', 'Type', RUN_TYPES[r.kind].map(function (t) { return [t, UTYPES[t]]; }), u.type) + tf(ri, ui, 'name', 'Name', u.name) +
-      (u.type === 'panel' ? '<div class="f"><span class="lbl">Width</span><span class="fixed">the board</span></div>' : nf(ri, ui, 'w', u.type === 'cornerL' ? 'Back leg' : 'Width', u.w)) + '</div>';
+      (u.type === 'panel' ? '<div class="f"><span class="lbl">Width</span><span class="fixed">the board</span></div>' : u.type === 'blind' ? sf(ri, ui, 'w', 'Width', [[1000, '1000'], [1200, '1200']], u.w) : nf(ri, ui, 'w', u.type === 'cornerL' ? 'Back leg' : 'Width', u.w)) + '</div>';
     var d = '';
     if (u.type === 'base') {
       d += sf(ri, ui, 'front', 'Front', [['drawers', 'Drawers'], ['doors', 'Doors']], u.front);
@@ -750,6 +820,10 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       d += tf(ri, ui, 'name2', 'Name of the back unit', u.name2) + nf(ri, ui, 'shelves', 'Shelves', u.shelves) + tf(ri, ui, 'shelfAt', 'Shelf heights (optional)', u.shelfAt);
     } else if (u.type === 'panel') {
       d += nf(ri, ui, 'h', 'Height (0 = carcass)', u.h) + nf(ri, ui, 'extraD', 'Extra depth to scribe', u.extraD);
+    } else if (u.type === 'blind') {
+      d += sf(ri, ui, 'side', 'Blind end', [['left', 'Left (corner on the left)'], ['right', 'Right (corner on the right)']], u.side) + nf(ri, ui, 'otherD', 'Depth of the run it meets (0 = same)', u.otherD);
+      d += sf(ri, ui, 'doorType', 'Door type', base ? BASE_DOORS : WALL_DOORS, u.doorType) + sf(ri, ui, 'doors', 'Doors', [[1, '1'], [2, '2']], u.doors) + nf(ri, ui, 'shelves', 'Shelves', u.shelves);
+      if (base) d += sf(ri, ui, 'fitting', 'Corner fitting', [['', 'Shelves only'], ['magic', 'Magic corner pull-out'], ['lemans', 'LeMans pull-out']], u.fitting);
     } else if (u.type === 'cornerL') {
       d += sf(ri, ui, 'side', 'Corner', [['left', 'Left'], ['right', 'Right']], u.side) + nf(ri, ui, 'r', 'Return', u.r) + nf(ri, ui, 'returnDepth', 'Return depth', u.returnDepth);
       if (base) d += sf(ri, ui, 'carousel', 'Inside', [[0, 'Shelves'], [1, 'Carousel']], u.carousel ? 1 : 0);
@@ -785,7 +859,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       var nu = newUnit(v); nu.name = u.name; if (u.type !== 'panel' && /base|sink|wall|cornerL|tall|slide/.test(v) && /base|sink|wall|cornerL|tall|slide/.test(u.type)) nu.w = u.w;
       r.units[+ui] = nu; kSave(); drawRuns(); run(); return;
     }
-    if (k === 'doors') v = +v;
+    if (k === 'doors' || (k === 'w' && t.tagName === 'SELECT')) v = +v;
     if (k === 'carousel') v = v === '1';
     if (k === 'kind' && v !== r.kind) {        // selects fire input before change, so do this on whichever comes first
       r.units = r.units.map(function (x) { return RUN_TYPES[v].indexOf(x.type) !== -1 ? x : Object.assign(newUnit(v === 'island' ? 'base' : v), { name: x.name, w: x.w }); });
@@ -847,7 +921,12 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   document.querySelectorAll('.mode button').forEach(function (b) { b.onclick = function () { setMode(b.dataset.mode); }; });
 
   loadCons(); drawSecs();
-  if (KOK) { kInit(); setMode(location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE))); }
+  if (KOK) {
+    kInit();
+    var own = { '#prampram': 'prampram', '#prampram-laundry': 'prampramLaundry' }[location.hash];   // the owner's job, not linked
+    if (own) { KS = fromEngine(EX[own]); kSave(); kTop(); drawRuns(); }
+    setMode(own || location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE)));
+  }
   else { document.querySelector('.mode').hidden = true; go(); }
 })();
 </script>
