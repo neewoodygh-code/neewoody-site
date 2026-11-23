@@ -79,9 +79,27 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .breadcrumb-sep{margin:0 .4rem;opacity:.5}
 
 /* ── LAYOUT ── */
-.cs-wrap{max-width:1180px;margin:0 auto;padding:1.8rem 1.25rem 4rem}
+.cs-wrap{max-width:1580px;margin:0 auto;padding:1.8rem 1.25rem 4rem}
 .cs-cols{display:grid;grid-template-columns:1fr;gap:1.6rem}
 @media(min-width:1000px){.cs-cols{grid-template-columns:minmax(0,440px) minmax(0,1fr);align-items:start}}
+/* console: a third column that stays in view on wide screens; below that it sits at the end and the bottom bar stays on screen */
+.console{background:#fff;border:1.5px solid var(--clr-border);border-radius:12px;padding:1rem 1.1rem;grid-column:1/-1;scroll-margin-top:1rem}
+.console h2{font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--navy)}
+.console h3{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--clr-muted);margin:1rem 0 .5rem}
+.console .con-acts{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.console .con-hint{font-size:.74rem;color:var(--clr-muted);margin-top:.5rem;line-height:1.45}
+.conbar{display:none}
+@media(max-width:1199px){
+  .conbar{display:flex;gap:.5rem;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:.6rem 1.25rem calc(.6rem + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--clr-border);box-shadow:0 -6px 20px rgba(23,19,15,.08)}
+  .conbar .btn-print{flex:1 1 0;justify-content:center}
+  body{padding-bottom:4.6rem}
+}
+@media(min-width:1200px){
+  .cs-cols{grid-template-columns:minmax(0,420px) minmax(0,1fr) minmax(0,280px)}
+  .console{grid-column:auto;position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow-y:auto}
+  .console .con-acts,.console .proj-actions{flex-direction:column;align-items:stretch}
+  .console .btn-print,.console .mini-btn{width:100%;justify-content:center;text-align:center}
+}
 
 /* ── CARDS / FORM ── */
 .card{background:var(--clr-surface,#fff);border:1.5px solid var(--clr-border);border-radius:12px;padding:1.1rem 1.15rem;margin-bottom:1.1rem}
@@ -378,7 +396,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   #sheetCol>*:not(#sheetWrap){display:none!important}
   #sheetOut{border:none!important;border-radius:0!important}
   .sheet-topbar,.sheet-legend{border-color:#999}
-  .print-cta,.sheet-hint{display:none!important}
+  .print-cta,.sheet-hint,.console,.conbar{display:none!important}
+  body{padding-bottom:0!important}
   /* thead repeats on EVERY printed page with reserved space → boxes can never
      slip behind the header (the fix for the fixed-header overlap). */
   .cut-thead{display:table-header-group}
@@ -430,7 +449,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   /* readable small text (Lighthouse contrast, 2026-11-16) */
   #guest-bar span, #guest-bar b { opacity: 1 !important; color: #554d43 !important; }
   /* phones: let the single column shrink to the screen (it was 24px too wide, so the page scrolled sideways) */
-  .cs-cols { grid-template-columns: minmax(0, 1fr); }
+  @media (max-width: 999px) { .cs-cols { grid-template-columns: minmax(0, 1fr); } }
   .cs-cols > * { min-width: 0; }
   .breadcrumb, .breadcrumb span { color: rgba(239, 233, 223, .78); }
   .carpenter-cta .section-label { color: #c49455; }
@@ -545,13 +564,6 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div class="hint" style="margin-bottom:.55rem">One project (a home/client) can hold several cut lists — a wardrobe, a kitchen, a TV unit…</div>
       <div id="listChips" class="list-chips"></div>
       <label class="chk"><input type="checkbox" id="s-projshow" onchange="onSetting()"> Show project &amp; list name on the printed sheet</label>
-      <div class="proj-actions">
-        <button class="mini-btn primary" onclick="saveCurrentList()">&#128190; Save cut list</button>
-        <button class="mini-btn" onclick="newList()">+ New list</button>
-        <button class="mini-btn" onclick="newProject()">+ New project</button>
-        <button class="mini-btn" onclick="openLibrary()">&#128193; My projects (<span id="projCount">0</span>)</button>
-      </div>
-      <div id="projStatus" class="proj-status"></div>
     </div>
 
     <!-- BOARD & SHEET SETUP (collapsible) -->
@@ -650,11 +662,6 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       </div>
     </div>
 
-    <!-- BOARD SUMMARY -->
-    <div class="card">
-      <div class="card-t"><span class="dot"></span>Boards needed</div>
-      <div class="bsum" id="bsum"></div>
-    </div>
 
   </div>
 
@@ -664,18 +671,44 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     <div id="sheetWrap">
       <div id="sheetOut"></div>
     </div>
-    <div class="print-cta">
+  </div>
+
+  <!-- ════ CONSOLE (2026-11-23, owner: "do the same console on the cut sheet" as the Smart Generator) ════ -->
+  <aside class="console" id="csConsole" aria-labelledby="conTitle">
+    <h2 id="conTitle">Use this sheet</h2>
+    <div class="con-acts">
       <button class="btn-print" onclick="window.print()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>
         Print / Save PDF
       </button>
       <button class="btn-print btn-price" onclick="priceJob()" title="Opens a new quote in Job Pricing with these boards and edge band (Carpentry Concierge members)">Price this job</button>
-      <span style="font-family:var(--mono);font-size:.66rem;color:var(--clr-muted);align-self:center">Each page carries your logo &amp; number · each colour on its own page</span>
     </div>
-  </div>
+    <p class="con-hint">Each page carries your logo and number, and each colour prints on its own page.</p>
+    <h3>Boards needed</h3>
+    <div class="bsum" id="bsum"></div>
+    <h3>Project</h3>
+    <div class="proj-actions">
+        <button class="mini-btn primary" onclick="saveCurrentList()">&#128190; Save cut list</button>
+        <button class="mini-btn" onclick="newList()">+ New list</button>
+        <button class="mini-btn" onclick="newProject()">+ New project</button>
+        <button class="mini-btn" onclick="openLibrary()">&#128193; My projects (<span id="projCount">0</span>)</button>
+      </div>
+      <div id="projStatus" class="proj-status"></div>
+  </aside>
 
 </div>
 </div>
+
+<div class="conbar" role="group" aria-label="Use this sheet">
+  <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
+  <button type="button" class="btn-print btn-price" id="cbMore">More options</button>
+</div>
+<script>
+  document.getElementById('cbMore').addEventListener('click', function () {
+    var c = document.getElementById('csConsole'); c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var t = document.getElementById('conTitle'); t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: true });
+  });
+</script>
 
 <footer class="app-foot">
   <a href="/tools">Free tools</a>
