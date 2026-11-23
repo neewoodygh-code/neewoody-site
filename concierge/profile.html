@@ -41,8 +41,12 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .pcard .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(31,47,88,.1); }
 .pcard .mhead h1{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
 .state{ padding:2rem 1.5rem; color:var(--muted); }
-.jump{ margin:-.4rem 0 1rem; font-size:.9rem; } .jump a{ text-decoration:underline; text-underline-offset:2px; }
-.pcard.files{ margin-top:1.5rem; }
+.ptabs{ display:flex; gap:.25rem; border-bottom:1px solid rgba(31,47,88,.15); margin-bottom:1rem; }
+.ptabs [role=tab]{ font:inherit; font-size:.95rem; font-weight:600; color:var(--muted); background:none; border:none;
+  border-bottom:2px solid transparent; margin-bottom:-1px; padding:.6rem .9rem; cursor:pointer; }
+.ptabs [role=tab]:hover{ color:var(--navy); }
+.ptabs [role=tab][aria-selected=true]{ color:var(--navy); border-bottom-color:var(--navy); }
+.ptabs [role=tab]:focus-visible{ outline:2px solid var(--navy); outline-offset:-2px; }
 .fbody{ padding:1rem 1.5rem 1.5rem; }
 .fnote{ font-size:.85rem; color:var(--muted); line-height:1.55; margin-bottom:1rem; }
 .fsum{ font-size:.85rem; color:var(--muted); margin-bottom:.8rem; }
@@ -155,8 +159,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 </header>
 <main class="pwrap">
   <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">My profile</span></nav>
-  <p class="jump"><a href="#files">Go to My files</a></p>
-  <section class="pcard" aria-labelledby="profileTitle">
+  <div class="ptabs" role="tablist" aria-label="My profile and files">
+    <button type="button" role="tab" id="tab-profile" aria-controls="profile" aria-selected="true">Profile</button>
+    <button type="button" role="tab" id="tab-files" aria-controls="files" aria-selected="false" tabindex="-1">My files</button>
+  </div>
+  <section class="pcard" id="profile" role="tabpanel" aria-labelledby="tab-profile">
     <div class="mhead"><h1 id="profileTitle">My profile</h1></div>
     <div class="state" id="state">Loading your profile…</div>
     <form id="profileForm" hidden>
@@ -263,7 +270,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     </form>
   </section>
 
-  <section class="pcard files" id="files" aria-labelledby="filesTitle">
+  <section class="pcard files" id="files" role="tabpanel" aria-labelledby="tab-files" hidden>
     <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
     <div class="fbody">
       <p class="fnote">Everything you have saved in the tools, in a folder for each client and a folder for each job inside it. Smart Generator designs can be opened, moved, renamed, downloaded and deleted here. Saves from the other tools can be moved to any folder here too; they open in their own tool, and moving them here changes nothing inside that tool.</p>
@@ -760,6 +767,30 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     var c = document.querySelector('#fList .fcrumb strong'); if (c) { c.tabIndex = -1; c.focus({ preventScroll: true }); }
     document.getElementById('files').scrollIntoView({ block: 'start' });
   }
+  // Tabs (2026-11-23, owner: "profile on one tab and files on the other"). #files opens My files; anything else Profile.
+  var TABS = ['profile', 'files'];
+  function showTab(name, focus) {
+    TABS.forEach(function (t) {
+      var b = document.getElementById('tab-' + t), on = t === name;
+      b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1;
+      document.getElementById(t).hidden = !on;
+    });
+    if (focus) document.getElementById('tab-' + name).focus();
+  }
+  TABS.forEach(function (t, i) {
+    var b = document.getElementById('tab-' + t);
+    b.addEventListener('click', function () {
+      showTab(t); history.replaceState(null, '', t === 'files' ? '#files' : location.pathname + location.search);
+    });
+    b.addEventListener('keydown', function (e) {
+      var k = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!k) return;
+      e.preventDefault(); var n = TABS[(i + k + TABS.length) % TABS.length];
+      showTab(n, true); history.replaceState(null, '', n === 'files' ? '#files' : location.pathname + location.search);
+    });
+  });
+  function tabFromHash() { showTab(location.hash === '#files' ? 'files' : 'profile'); }
+  window.addEventListener('hashchange', tabFromHash);
+  tabFromHash();
   document.getElementById('fQ').addEventListener('input', renderFiles);
   document.getElementById('fTool').addEventListener('change', renderFiles);
   document.getElementById('fSort').addEventListener('change', renderFiles);
@@ -832,7 +863,6 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     fill();
     st.hidden = true; document.getElementById('profileForm').hidden = false;
     loadFiles();
-    if (location.hash === '#files') document.getElementById('files').scrollIntoView();
     var target = location.hash === '#emergency' ? document.getElementById('p_emerg_name') : null;
     if (target) { target.scrollIntoView({ block: 'center' }); target.focus(); }
   })();
