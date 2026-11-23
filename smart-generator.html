@@ -352,7 +352,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261123g"></script>
+<script src="js/smart/engine.js?v=20261123h"></script>
 <script src="js/smart/price.js?v=20261123b"></script>
 <script src="js/pricing-handoff.js?v=20261123"></script>
 <script src="js/cutlist-3d.js?v=20261123"></script>
@@ -474,7 +474,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     drawList(r.parts, sp.shop, kit);
     if (kit) {
       var hk = Object.keys(r.hardware || {});
-      $('hw').innerHTML = hk.length ? '<h3>Hardware and bought items (not on the cut list)</h3><ul>' + hk.map(function (k) { return '<li>' + r.hardware[k] + ' × ' + esc(k) + '</li>'; }).join('') + '</ul>' : '';
+      $('hw').innerHTML = hk.length ? '<h3>Hardware and bought items (not on the cut list)</h3><ul>' + hk.map(function (k) { return '<li>' + esc(buyAs(k, r.hardware[k], r).label) + '</li>'; }).join('') + '</ul>' : '';
       var nU = sp.runs.reduce(function (a, rn) { return a + rn.units.filter(function (u) { return /base|sink|wall|cornerL/.test(u.type); }).length; }, 0);
       $('pSpec').textContent = 'Kitchen: ' + sp.runs.length + ' run' + (sp.runs.length > 1 ? 's' : '') + ', ' + nU + ' units, worktop ' + sp.worktop + ' mm. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
     } else $('pSpec').textContent = 'Wardrobe ' + sp.w + ' × ' + sp.h + ' × ' + sp.d + ' mm, ' + sp.units + ' carcass' + (sp.units > 1 ? 'es' : '') + ', ' + sp.sections.length + ' sections. Printed ' + new Date().toLocaleDateString('en-GB') + '.';
@@ -526,6 +526,22 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
     location.href = '/cut-sheet.html#from-smart';
   };
+  // Shop units (owner 2026-11-23): cabinet legs come in packs of 4; J-profiles in 3 m lengths, so the fronts' pieces are
+  // packed into 3000 mm bars, longest first, with a 5 mm saw cut between pieces.
+  var BAR = 3000, KERF = 5;
+  function profileBars(pieces) {
+    var bars = [];
+    (pieces || []).slice().sort(function (a, b) { return b - a; }).forEach(function (p) {
+      for (var i = 0; i < bars.length; i++) if (bars[i] >= p + KERF) { bars[i] -= p + KERF; return; }
+      bars.push(BAR - p);
+    });
+    return bars.length;
+  }
+  function buyAs(k, n, r) {   // -> {name, qty, label} in the unit the shop sells
+    if (/^Cabinet legs/.test(k)) { var nm = k.replace(/ \(sets of 4\)$/, ''); return { name: nm + ', pack of 4', qty: Math.ceil(n / 4), label: n + ' × ' + nm + ' (' + Math.ceil(n / 4) + ' pack' + (Math.ceil(n / 4) > 1 ? 's' : '') + ' of 4)' }; }
+    if (/^J-profile handle/.test(k) && r && r.jPieces && r.jPieces.length) { var b = profileBars(r.jPieces); return { name: 'J-profile handle, 3 m length', qty: b, label: n + ' × J-profile handle, cut to front width (' + b + ' length' + (b > 1 ? 's' : '') + ' of 3 m)' }; }
+    return { name: k, qty: n, label: n + ' × ' + k };
+  }
   // "Price this job" (members only, 2026-11-21): the materials go to Job Pricing as a new quote (js/pricing-handoff.js)
   $('toPrice').onclick = function () {
     if (!last || !acked()) return;
@@ -541,7 +557,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         var nm = /^(Toe kick|Corner carousel)/.test(k) ? k.replace(/ \([^)]*\)$/, '') : k;
         hw[nm] = (hw[nm] || 0) + r.hardware[k];
       });
-      Object.keys(hw).forEach(function (k) { lines.push({ group: /^Toe kick/.test(k) ? 'Boards' : 'Fixtures', name: k, qty: hw[k], price: 0 }); });
+      Object.keys(hw).forEach(function (k) { var b = buyAs(k, hw[k], r); lines.push({ group: /^Toe kick/.test(k) ? 'Boards' : 'Fixtures', name: b.name, qty: b.qty, price: 0 }); });
       note = 'Smart Generator kitchen, worktop ' + sp.worktop + ' mm. Screws, worktop, sink and appliances are not counted: add them.';
     } else {
       var slide = r.parts.some(function (p) { return p.tag === 'door' && /sliding/i.test(p.name); }) ? sp.w : 0;

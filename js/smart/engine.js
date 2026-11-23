@@ -306,7 +306,9 @@
     var carcTop = WT - K.edgeDrop, baseSideH = carcTop - K.legH;
     var boxes = [], warn = [], hw = {};
     function tally(k, n) { hw[k] = (hw[k] || 0) + n; }
-    function handle(n) { tally(JP ? 'J-profile handle (cut to front width)' : 'Handles or knobs (one per front)', n); }
+    // J-profile pieces are kept by front width so the handover can count 3 m lengths (owner 2026-11-23: profiles are sold in 3 m lengths)
+    var jPieces = [];
+    function handle(n, mm) { tally(JP ? 'J-profile handle (cut to front width)' : 'Handles or knobs (one per front)', n); if (JP && mm) for (var i = 0; i < n; i++) jPieces.push(Math.round(mm)); }
     var BD = boardOf(K), tallMax = BD[0] - 140;   // 2440 board: 2300 box on 10 cm legs (owner: 240 overall max)
 
     // islands become one sub-run per unit (back-to-back pairs give two), each facing its own side
@@ -392,7 +394,7 @@
       function doorFront(nm, lbl, xx, ww, lo, hi, jEdge, note, z0) {
         var h = R(hi - lo - J), yF = JP && jEdge === 'bottom' ? lo + J : lo;
         put(nm + lbl, 'door', 'door', xx, yF, z0 == null ? -DT : z0, ww, h, DT, ['x', 'y'], (JP ? 'shortened by the ' + J + ' mm J-profile (' + jEdge + ')' : '') + (note ? (JP ? '; ' : '') + note : ''));
-        handle(1);
+        handle(1, ww);
         return h;
       }
       // DOOR TYPES (owner 2026-11-23; size ranges from Blum AVENTOS, Grass Kinvaro and Sugatsune data):
@@ -533,7 +535,7 @@
             var slot = fH * dh / sum, sTop = yy, sBot = yy - slot;
             var frH = R(slot - gap - J), frY = sBot + gap / 2;
             put('Drawer Front' + lbl, 'drawer', 'front', x + ec, base ? frY : frY + J, -DT, floor(fW), frH, DT, ['x', 'y'], JP ? 'shortened by the ' + J + ' mm J-profile' : '');
-            handle(1);
+            handle(1, floor(fW));
             var by = Math.max(sBot + 15, yBot + t + 5), cap = (di === 0 && base) ? yTop - (u.hob ? K.rail : t) - 5 : sTop - 5;   // under a hob the top box clears the upright front rail
             drawerBoxParts(lbl, x + t, inW, by, 0, drawerBox(frH, cap - by), dC - t);
             yy = sBot;
@@ -544,7 +546,7 @@
           var nd = u.doors || (w > 600 ? 2 : 1), dW = floor((fW - gap * (nd - 1)) / nd), dH = R(fH - J);
           for (var q = 0; q < nd; q++) {
             put('Door' + lbl, 'door', 'door', x + ec + q * (dW + gap), base ? fY : fY + J, -DT, dW, dH, DT, ['x', 'y'], JP ? 'shortened by the ' + J + ' mm J-profile (' + (base ? 'top' : 'bottom') + ')' : '');
-            handle(1);
+            handle(1, dW);
             tally('Hinges (pair, soft close)', dH > 900 ? 2 : 1);
           }
         }
@@ -603,7 +605,7 @@
         var aW = R(-zR0 - bt - ec), bW = R(Lb - bt - dR - DT - gap - ec);
         putM('Bi-fold Door, return leaf' + lbl, 'door', 'door', x0 + bt + dR, fY, zR0 + bt + ec, DT, fH, aW, ['z', 'y'], 'bi-fold, hinged to the next leaf');
         putM('Bi-fold Door, front leaf' + lbl, 'door', 'door', x0 + bt + dR + DT + gap, fY, -DT, bW, fH, DT, ['x', 'y'], 'bi-fold; hinge side as agreed');
-        handle(2); tally('Bi-fold hinges (set)', 1);
+        handle(1, aW); handle(1, bW); tally('Bi-fold hinges (set)', 1);
       }
 
       // TALL unit (owner 2026-11-23): zones bottom to top, in one box or two stacked boxes, on legs.
@@ -713,7 +715,7 @@
         function front(nm, k, xx, ww, lo, hi, jEdge, note, z0) {
           var h = R(hi - lo - J), yF = JP && jEdge === 'bottom' ? lo + J : lo;
           put(nm + lbl, k === 'door' ? 'door' : 'drawer', k === 'door' ? 'door' : 'front', xx, yF, z0 == null ? -DT : z0, ww, h, DT, ['x', 'y'], (JP ? 'shortened by the ' + J + ' mm J-profile (' + jEdge + ')' : '') + (note ? (JP ? '; ' : '') + note : ''));
-          handle(1);
+          handle(1, ww);
           return h;
         }
         function lift(kind, h) {
@@ -782,13 +784,13 @@
       var L = Math.max(p.a, p.b), Wd = Math.min(p.a, p.b);
       if (L > BD[0] || Wd > BD[1]) warn.push(p.name + ' is ' + L + ' x ' + Wd + ', bigger than a ' + K.board + ' board (' + BD[0] + ' x ' + BD[1] + ').');
     });
-    return { boxes: boxes, warnings: warn, hardware: hw, extra: extra };
+    return { boxes: boxes, warnings: warn, hardware: hw, extra: extra, jPieces: jPieces };
   }
 
   function build(spec) {
     if (spec && spec.type === 'kitchen') {
       var k = kitchen(spec);
-      return { boxes: k.boxes, parts: cutList(k.boxes).concat(k.extra), clashes: clashes(k.boxes), warnings: k.warnings.filter(function (v, i, l) { return l.indexOf(v) === i; }), hardware: k.hardware };
+      return { boxes: k.boxes, parts: cutList(k.boxes).concat(k.extra), clashes: clashes(k.boxes), warnings: k.warnings.filter(function (v, i, l) { return l.indexOf(v) === i; }), hardware: k.hardware, jPieces: k.jPieces };
     }
     var m = wardrobe(spec);   // wardrobes
     return { boxes: m.boxes, parts: cutList(m.boxes), clashes: clashes(m.boxes), warnings: m.warnings };
