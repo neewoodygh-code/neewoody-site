@@ -46,22 +46,37 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .fbody{ padding:1rem 1.5rem 1.5rem; }
 .fnote{ font-size:.85rem; color:var(--muted); line-height:1.55; margin-bottom:1rem; }
 .fsum{ font-size:.85rem; color:var(--muted); margin-bottom:.8rem; }
-.ffold{ border:1px solid rgba(31,47,88,.15); border-radius:6px; margin-bottom:.7rem; background:#fff; }
-.ffold > summary{ cursor:pointer; padding:.75rem 1rem; font-weight:600; list-style:none; display:flex; justify-content:space-between; gap:1rem; }
-.ffold > summary::-webkit-details-marker{ display:none; }
-.ffold > summary::before{ content:'▸'; color:var(--muted); margin-right:.5rem; } .ffold[open] > summary::before{ content:'▾'; }
-.ffold > summary span{ margin-right:auto; } .ffold > summary small{ font-weight:400; color:var(--muted); }
-.fjob{ font-size:.8rem; font-weight:600; color:var(--muted); padding:.5rem 1rem .2rem; }
-.frow{ display:flex; flex-wrap:wrap; align-items:center; gap:.4rem .8rem; padding:.6rem 1rem; border-top:1px solid #eee6da; }
-.frow .ftool{ font-size:.7rem; font-weight:600; letter-spacing:.04em; color:#fff; background:var(--navy); border-radius:3px; padding:.15rem .45rem; }
+.ftools{ display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:.8rem; }
+.ftools input, .ftools select{ font:inherit; font-size:.9rem; padding:.5rem .6rem; border:1px solid #c9c0b3; border-radius:5px; background:#fff; color:#17130f; }
+.ftools input{ flex:1 1 14rem; min-width:0; } .ftools select{ flex:1 1 8rem; }
+.fcrumb{ display:flex; flex-wrap:wrap; align-items:center; gap:.3rem; font-size:.9rem; margin:.2rem 0 .8rem; }
+.fcrumb button{ font:inherit; background:none; border:none; padding:.2rem 0; color:var(--navy); text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
+.fcrumb strong{ font-weight:600; } .fcrumb .sep{ color:var(--muted); }
+.fhead{ font-size:.78rem; font-weight:600; color:var(--muted); margin:1rem 0 .45rem; }
+.fgrid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,10.5rem),1fr)); gap:.55rem; }
+.ftile{ font:inherit; text-align:left; display:flex; flex-direction:column; gap:.15rem; padding:.75rem .85rem .7rem; background:#fff; border:1px solid rgba(31,47,88,.15); border-radius:6px; cursor:pointer; color:inherit; min-width:0; }
+.ftile:hover, .ftile:focus-visible{ border-color:var(--navy); }
+.ftile .ficon{ width:26px; height:20px; margin-bottom:.35rem; color:var(--navy); }
+.ftile .ftn{ font-weight:600; overflow-wrap:anywhere; } .ftile small{ font-size:.76rem; color:var(--muted); }
+.ftile.none .ficon{ color:#8a7f70; }
+.flist{ background:#fff; border:1px solid rgba(31,47,88,.15); border-radius:6px; }
+.frow{ display:flex; flex-wrap:wrap; align-items:center; gap:.3rem .7rem; padding:.6rem .85rem; border-top:1px solid #eee6da; }
+.frow:first-child{ border-top:none; }
+.frow .ftool{ font-size:.68rem; font-weight:600; letter-spacing:.04em; color:#fff; background:var(--navy); border-radius:3px; padding:.15rem .45rem; white-space:nowrap; }
 .frow .ftool.old{ background:#8a7f70; }
-.frow .fname{ font-weight:500; flex:1 1 12rem; min-width:0; overflow-wrap:anywhere; }
-.frow .fdate{ font-size:.78rem; color:var(--muted); }
-.frow .facts{ display:flex; flex-wrap:wrap; gap:.35rem; flex-basis:100%; }
-.frow .facts a, .frow .facts button{ font:inherit; font-size:.8rem; font-weight:600; color:var(--navy); background:none; border:1px solid rgba(31,47,88,.3); border-radius:4px; padding:.3rem .6rem; cursor:pointer; text-decoration:none; }
-.frow .facts button.del{ color:#8a2a1a; border-color:rgba(138,42,26,.35); }
+.frow .fmain{ flex:1 1 10rem; min-width:0; display:flex; flex-direction:column; }
+.frow .fname{ font-weight:500; overflow-wrap:anywhere; color:inherit; text-decoration:none; }
+.frow a.fname:hover{ text-decoration:underline; }
+.frow .fpath{ font-size:.74rem; color:var(--muted); }
+.frow .fdate{ font-size:.76rem; color:var(--muted); white-space:nowrap; }
+.fmore{ position:relative; margin-left:auto; }
+.fmore > summary{ list-style:none; cursor:pointer; font-size:.8rem; font-weight:600; color:var(--navy); border:1px solid rgba(31,47,88,.3); border-radius:4px; padding:.25rem .55rem; }
+.fmore > summary::-webkit-details-marker{ display:none; }
+.fmore > div{ position:absolute; right:0; top:calc(100% + 4px); z-index:5; background:#fff; border:1px solid rgba(31,47,88,.2); border-radius:6px; box-shadow:0 8px 24px rgba(0,0,0,.14); padding:.3rem; display:flex; flex-direction:column; min-width:10rem; }
+.fmore button{ font:inherit; font-size:.85rem; text-align:left; background:none; border:none; padding:.5rem .6rem; border-radius:4px; cursor:pointer; color:#17130f; }
+.fmore button:hover, .fmore button:focus-visible{ background:#efe9df; } .fmore button.del{ color:#8a2a1a; }
+.fempty{ color:var(--muted); font-size:.9rem; padding:.4rem 0; }
 .fwarn{ font-size:.82rem; color:#8a2a1a; margin:.3rem 0; }
-@media(min-width:560px){ .frow .facts{ flex-basis:auto; } }
 /* phones: the same header rules as the directory (lockup and buttons on their own rows) */
 @media (max-width: 600px){
   header.top{ position:static; flex-wrap:wrap; row-gap:.65rem; padding:.75rem 1rem; }
@@ -251,7 +266,12 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <section class="pcard files" id="files" aria-labelledby="filesTitle">
     <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
     <div class="fbody">
-      <p class="fnote">Everything you have saved in the tools, in folders by client. Smart Generator designs can be opened, moved to another folder, renamed, downloaded and deleted here. Files from the other tools open in their own tool, where you manage them as before.</p>
+      <p class="fnote">Everything you have saved in the tools, in a folder for each client and a folder for each job inside it. Smart Generator designs can be opened, moved, renamed, downloaded and deleted here. Files from the other tools open in their own tool, where you manage them as before.</p>
+      <div class="ftools">
+        <input type="search" id="fQ" placeholder="Search all files" aria-label="Search all files">
+        <select id="fTool" aria-label="Show files from"><option value="">All tools</option></select>
+        <select id="fSort" aria-label="Sort"><option value="recent">Newest first</option><option value="name">A to Z</option></select>
+      </div>
       <div id="fList" role="region" aria-live="polite">Loading your files…</div>
       <input type="file" id="fUpIn" accept=".json,application/json" hidden>
     </div>
@@ -635,30 +655,119 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
       var kind = e.docType === 'quote' ? 'Quote' : e.docType === 'receipt' ? 'Receipt' : 'Invoice';
       rows.push({ tool: 'invoice', folder: folderOf(null, e.client), job: '', name: kind + ' ' + (e.number || '') + (e.project ? ', ' + e.project : ''), date: e.savedAt });
     });
-    var groups = {};
-    rows.forEach(function (r) { (groups[r.folder] = groups[r.folder] || []).push(r); });
-    var keys = Object.keys(groups).sort(function (a, b) { return (a === '') - (b === '') || a.localeCompare(b); });
-    var E = MyFiles.esc;
-    var h = warn.map(function (w) { return '<p class="fwarn">' + E(w) + '</p>'; }).join('');
-    h += '<p class="fsum">' + rows.length + ' saved item' + (rows.length === 1 ? '' : 's') + ' in ' + keys.length + ' folder' + (keys.length === 1 ? '' : 's') +
-      '. Smart Generator files: ' + files.length + ' of 300.</p>';
-    if (!rows.length) h += '<p>Nothing saved yet. Save a design from the <a href="/smart-generator.html" style="text-decoration:underline">Smart Generator</a>, or upload a file.</p>';
-    keys.forEach(function (k, ki) {
-      var list = groups[k].slice().sort(function (a, b) { return (a.job || '').localeCompare(b.job || '') || String(b.date || '').localeCompare(String(a.date || '')); });
-      h += '<details class="ffold"' + (ki < 3 ? ' open' : '') + '><summary><span>' + E(k || 'No client') + '</span><small>' + list.length + '</small></summary>';
-      var lastJob = null;
-      list.forEach(function (r) {
-        if (r.job !== lastJob) { if (r.job) h += '<div class="fjob">' + E(r.job) + '</div>'; lastJob = r.job; }
-        h += '<div class="frow"><span class="ftool' + (r.file ? '' : ' old') + '">' + E(TOOL[r.tool] || r.tool) + '</span><span class="fname">' + E(r.name) + '</span>' +
-          '<span class="fdate">' + E(fdate(r.date)) + '</span><span class="facts">' +
-          (r.file ? '<a href="/smart-generator.html#file=' + r.file.id + '">Open</a><button type="button" data-f="move" data-id="' + r.file.id + '">Move or rename</button>' +
-            '<button type="button" data-f="down" data-id="' + r.file.id + '">Download</button><button type="button" class="del" data-f="del" data-id="' + r.file.id + '">Delete</button>'
-            : '<a href="' + OPEN[r.tool] + '">Open in ' + E(OPENIN[r.tool]) + '</a>') + '</span></div>';
+    rows.forEach(function (r) { r.t = toMs(r.date); });
+    fState.rows = rows; fState.warn = warn;
+    var sel = document.getElementById('fTool'), keep = sel.value, cnt = {};
+    rows.forEach(function (r) { cnt[r.tool] = (cnt[r.tool] || 0) + 1; });
+    sel.innerHTML = '<option value="">All tools (' + rows.length + ')</option>' + Object.keys(TOOL).filter(function (t) { return cnt[t]; })
+      .map(function (t) { return '<option value="' + t + '">' + TOOL[t] + ' (' + cnt[t] + ')</option>'; }).join('');
+    sel.value = cnt[keep] ? keep : '';
+    if (fView.folder != null && !rows.some(function (r) { return r.folder === fView.folder; })) fView = { folder: null, job: null };
+    renderFiles();
+  }
+  function toMs(v) {
+    if (!v) return 0; if (typeof v === 'number') return v;
+    var d = new Date(String(v).replace(' ', 'T') + (/[zZ]|[+-]\d\d:?\d\d$/.test(String(v)) || String(v).indexOf('T') > 0 ? '' : 'Z'));
+    return isNaN(d) ? 0 : +d;
+  }
+  // The browser (2026-11-23, owner: "more sophisticated instead of a long scrolling list"): All files shows the five
+  // latest saves and a tile per client; a client shows a tile per job plus its loose files; search looks everywhere.
+  var fView = { folder: null, job: null };
+  var FOLDER = '<svg class="ficon" viewBox="0 0 26 20" aria-hidden="true"><path d="M1 3a2 2 0 0 1 2-2h6l2 2.5h12a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>';
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+  function renderFiles() {
+    var E = MyFiles.esc, host = document.getElementById('fList');
+    var q = document.getElementById('fQ').value.trim().toLowerCase(), tool = document.getElementById('fTool').value;
+    var byName = document.getElementById('fSort').value === 'name';
+    var all = (fState.rows || []).filter(function (r) { return !tool || r.tool === tool; });
+    function order(list) { return list.slice().sort(byName ? function (a, b) { return a.name.localeCompare(b.name); } : function (a, b) { return b.t - a.t; }); }
+    function row(r, withPath) {
+      var f = r.file, path = [r.folder || 'No client', r.job].filter(Boolean).join(' › ');
+      return '<div class="frow"><span class="ftool' + (f ? '' : ' old') + '">' + E(TOOL[r.tool] || r.tool) + '</span>' +
+        '<span class="fmain"><a class="fname" href="' + (f ? '/smart-generator.html#file=' + f.id : OPEN[r.tool]) + '">' + E(r.name) + '</a>' +
+        (withPath ? '<span class="fpath">' + E(path) + (f ? '' : ', opens in ' + E(OPENIN[r.tool])) + '</span>' : (f ? '' : '<span class="fpath">Opens in ' + E(OPENIN[r.tool]) + '</span>')) + '</span>' +
+        '<span class="fdate">' + E(fdate(r.date)) + '</span>' +
+        (f ? '<details class="fmore"><summary aria-label="More for ' + E(r.name) + '">More</summary><div>' +
+          '<button type="button" data-f="move" data-id="' + f.id + '">Move or rename</button><button type="button" data-f="down" data-id="' + f.id + '">Download</button>' +
+          '<button type="button" class="del" data-f="del" data-id="' + f.id + '">Delete</button></div></details>' : '') + '</div>';
+    }
+    function list(rs, withPath) { return rs.length ? '<div class="flist">' + order(rs).map(function (r) { return row(r, withPath); }).join('') + '</div>' : ''; }
+    function group(rs, key) { var g = {}; rs.forEach(function (r) { var k = r[key]; g[k] = g[k] || { n: 0, t: 0 }; g[k].n++; g[k].t = Math.max(g[k].t, r.t); }); return g; }
+    function tiles(groups, attr) {
+      var keys = Object.keys(groups).sort(function (a, b) {
+        return (a === '') - (b === '') || (byName ? a.localeCompare(b) : groups[b].t - groups[a].t);
       });
-      h += '</details>';
-    });
+      return '<div class="fgrid">' + keys.map(function (k) {
+        var g = groups[k];
+        return '<button type="button" class="ftile' + (k ? '' : ' none') + '" data-' + attr + '="' + E(k) + '">' + FOLDER +
+          '<span class="ftn">' + E(k || 'No client') + '</span><small>' + plural(g.n, 'file') + '</small>' +
+          (g.t ? '<small>Last saved ' + E(fdate(g.t)) + '</small>' : '') + '</button>';
+      }).join('') + '</div>';
+    }
+    var h = (fState.warn || []).map(function (w) { return '<p class="fwarn">' + E(w) + '</p>'; }).join('');
+    if (!(fState.rows || []).length) {
+      host.innerHTML = h + '<p class="fempty">Nothing saved yet. Save a design from the <a href="/smart-generator.html" style="text-decoration:underline">Smart Generator</a>, or upload a file.</p>';
+      return;
+    }
+    if (q) {
+      var hits = all.filter(function (r) { return (r.name + ' ' + r.folder + ' ' + r.job + ' ' + (TOOL[r.tool] || '')).toLowerCase().indexOf(q) >= 0; });
+      host.innerHTML = h + '<p class="fcrumb"><strong>' + plural(hits.length, 'result') + ' for “' + E(q) + '”</strong></p>' +
+        (list(hits, true) || '<p class="fempty">No files match.</p>');
+      return;
+    }
+    var none = '<p class="fempty">No files here' + (tool ? ' from this tool' : '') + '.</p>';
+    h += '<nav class="fcrumb" aria-label="Folder">';
+    if (fView.folder == null) h += '<strong>All files</strong>';
+    else {
+      h += '<button type="button" data-go="root">All files</button><span class="sep">›</span>';
+      h += fView.job == null ? '<strong>' + E(fView.folder || 'No client') + '</strong>'
+        : '<button type="button" data-go="folder">' + E(fView.folder || 'No client') + '</button><span class="sep">›</span><strong>' + E(fView.job) + '</strong>';
+    }
+    h += '</nav>';
+    if (fView.folder == null) {
+      if (!all.length) h += none;
+      else {
+        var recent = all.slice().sort(function (a, b) { return b.t - a.t; }).slice(0, 5);
+        h += '<p class="fhead">Recent</p><div class="flist">' + recent.map(function (r) { return row(r, true); }).join('') + '</div>';
+        h += '<p class="fhead">Clients</p>' + tiles(group(all, 'folder'), 'folder');
+      }
+      h += '<p class="fsum" style="margin-top:1rem">' + plural(all.length, 'saved item') + '. Smart Generator files: ' + (fState.files || []).length + ' of 300.</p>';
+    } else {
+      var inF = all.filter(function (r) { return r.folder === fView.folder; });
+      if (fView.job == null) {
+        var jobs = inF.filter(function (r) { return r.job; }), loose = inF.filter(function (r) { return !r.job; });
+        if (jobs.length) h += '<p class="fhead">Jobs</p>' + tiles(group(jobs, 'job'), 'job');
+        if (loose.length) h += (jobs.length ? '<p class="fhead">Other files</p>' : '') + list(loose);
+        if (!inF.length) h += none;
+      } else {
+        h += list(inF.filter(function (r) { return r.job === fView.job; })) || none;
+      }
+    }
     host.innerHTML = h;
   }
+  function goFiles(folder, job) {
+    fView = { folder: folder, job: job }; renderFiles();
+    var c = document.querySelector('#fList .fcrumb strong'); if (c) { c.tabIndex = -1; c.focus({ preventScroll: true }); }
+    document.getElementById('files').scrollIntoView({ block: 'start' });
+  }
+  document.getElementById('fQ').addEventListener('input', renderFiles);
+  document.getElementById('fTool').addEventListener('change', renderFiles);
+  document.getElementById('fSort').addEventListener('change', renderFiles);
+  document.getElementById('fList').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-folder],[data-job],[data-go]'); if (!t) return;
+    if (t.dataset.go === 'root') goFiles(null, null);
+    else if (t.dataset.go === 'folder') goFiles(fView.folder, null);
+    else if (t.hasAttribute('data-folder')) goFiles(t.dataset.folder, null);
+    else goFiles(fView.folder, t.dataset.job);
+  });
+  // one "More" menu open at a time; an outside click or Esc closes it
+  document.addEventListener('click', function (e) {
+    document.querySelectorAll('.fmore[open]').forEach(function (d) { if (!d.contains(e.target)) d.open = false; });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.fmore[open]').forEach(function (d) { d.open = false; d.querySelector('summary').focus(); });
+  });
   document.getElementById('fList').addEventListener('click', async function (e) {
     var b = e.target.closest('button[data-f]'); if (!b) return;
     var f = fState.files.filter(function (x) { return x.id === +b.dataset.id; })[0]; if (!f) return;
