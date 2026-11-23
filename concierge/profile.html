@@ -266,7 +266,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   <section class="pcard files" id="files" aria-labelledby="filesTitle">
     <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
     <div class="fbody">
-      <p class="fnote">Everything you have saved in the tools, in a folder for each client and a folder for each job inside it. Smart Generator designs can be opened, moved, renamed, downloaded and deleted here. Files from the other tools open in their own tool, where you manage them as before.</p>
+      <p class="fnote">Everything you have saved in the tools, in a folder for each client and a folder for each job inside it. Smart Generator designs can be opened, moved, renamed, downloaded and deleted here. Saves from the other tools can be moved to any folder here too; they open in their own tool, and moving them here changes nothing inside that tool.</p>
       <div class="ftools">
         <input type="search" id="fQ" placeholder="Search all files" aria-label="Search all files">
         <select id="fTool" aria-label="Show files from"><option value="">All tools</option></select>
@@ -628,10 +628,10 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   }
   async function loadFiles() {
     var host = document.getElementById('fList');
-    var calls = [MyFiles.list(), MyFiles.clients(), C.api('/cutlists'), C.api('/cutsheets'), C.api('/pricing/quotes'), C.api('/invoices')];
+    var calls = [MyFiles.list(), MyFiles.clients(), C.api('/cutlists'), C.api('/cutsheets'), C.api('/pricing/quotes'), C.api('/invoices'), C.api('/places')];
     var res = await Promise.all(calls.map(function (p) { return p.then(function (v) { return { ok: true, v: v }; }, function (e) { return { ok: false, e: e }; }); }));
     var warn = [];
-    var names = ['My files', 'your clients', 'cutlists', 'Cut Sheet projects', 'Job Pricing quotes', 'invoices'];
+    var names = ['My files', 'your clients', 'cutlists', 'Cut Sheet projects', 'Job Pricing quotes', 'invoices', 'your folders'];
     res.forEach(function (r, i) { if (!r.ok) warn.push('Could not load ' + names[i] + ' just now.'); });
     var V = function (i) { return res[i].ok ? res[i].v : null; };
     var files = V(0) || [], clients = V(1) || [];
@@ -644,16 +644,24 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
       var t = String(text || '').trim(); if (t && byName[t.toLowerCase()]) return byName[t.toLowerCase()].name;
       return t || '';
     }
+    // step 3: a folder chosen in My files for an older tool's save wins over the tool's own client (the tool is never written)
+    var places = {}; ((V(6) || {}).places || []).forEach(function (p) { places[p.tool + ':' + p.ref] = p; });
+    function old(tool, ref, folder, name, date) {
+      ref = ref == null ? '' : String(ref);
+      var p = ref && places[tool + ':' + ref], r = { tool: tool, ref: ref, own: folder, folder: folder, job: '', name: name, date: date };
+      if (p) { r.place = p; r.folder = folderOf(p.client_id); r.job = p.job || ''; }
+      rows.push(r);
+    }
     files.forEach(function (f) { rows.push({ tool: f.tool, folder: folderOf(f.client_id), job: f.job || '', name: f.name, date: f.updated_at, file: f }); });
-    ((V(2) || {}).cutlists || []).forEach(function (c) { rows.push({ tool: 'cutlist', folder: '', job: '', name: c.name, date: c.updated_at }); });
+    ((V(2) || {}).cutlists || []).forEach(function (c) { old('cutlist', c.id, '', c.name, c.updated_at); });
     (((V(3) || {}).data || {}).list || []).forEach(function (pj) {
       var n = (pj.lists || []).length;
-      rows.push({ tool: 'cutsheet', folder: folderOf(pj.clientId, pj.name), job: '', name: (pj.name || 'Project') + ': ' + n + ' cut list' + (n === 1 ? '' : 's'), date: pj.updatedAt });
+      old('cutsheet', pj.id, folderOf(pj.clientId, pj.name), (pj.name || 'Project') + ': ' + n + ' cut list' + (n === 1 ? '' : 's'), pj.updatedAt);
     });
-    ((V(4) || {}).quotes || []).forEach(function (q) { rows.push({ tool: 'quote', folder: folderOf(q.clientId, q.client), job: '', name: (q.refId ? q.refId + ' ' : '') + (q.item || 'Quote'), date: q.updatedAt || q.createdAt }); });
+    ((V(4) || {}).quotes || []).forEach(function (q) { old('quote', q.id || q.refId, folderOf(q.clientId, q.client), (q.refId ? q.refId + ' ' : '') + (q.item || 'Quote'), q.updatedAt || q.createdAt); });
     (((V(5) || {}).data || {}).list || []).forEach(function (e) {
       var kind = e.docType === 'quote' ? 'Quote' : e.docType === 'receipt' ? 'Receipt' : 'Invoice';
-      rows.push({ tool: 'invoice', folder: folderOf(null, e.client), job: '', name: kind + ' ' + (e.number || '') + (e.project ? ', ' + e.project : ''), date: e.savedAt });
+      old('invoice', e.savedId || e.number, folderOf(null, e.client), kind + ' ' + (e.number || '') + (e.project ? ', ' + e.project : ''), e.savedAt);
     });
     rows.forEach(function (r) { r.t = toMs(r.date); });
     fState.rows = rows; fState.warn = warn;
@@ -689,7 +697,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
         '<span class="fdate">' + E(fdate(r.date)) + '</span>' +
         (f ? '<details class="fmore"><summary aria-label="More for ' + E(r.name) + '">More</summary><div>' +
           '<button type="button" data-f="move" data-id="' + f.id + '">Move or rename</button><button type="button" data-f="down" data-id="' + f.id + '">Download</button>' +
-          '<button type="button" class="del" data-f="del" data-id="' + f.id + '">Delete</button></div></details>' : '') + '</div>';
+          '<button type="button" class="del" data-f="del" data-id="' + f.id + '">Delete</button></div></details>'
+          : r.ref ? '<details class="fmore"><summary aria-label="More for ' + E(r.name) + '">More</summary><div>' +
+          '<button type="button" data-p="' + fState.rows.indexOf(r) + '">Move to a folder</button></div></details>' : '') + '</div>';
     }
     function list(rs, withPath) { return rs.length ? '<div class="flist">' + order(rs).map(function (r) { return row(r, withPath); }).join('') + '</div>' : ''; }
     function group(rs, key) { var g = {}; rs.forEach(function (r) { var k = r[key]; g[k] = g[k] || { n: 0, t: 0 }; g[k].n++; g[k].t = Math.max(g[k].t, r.t); }); return g; }
@@ -767,6 +777,19 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Escape') return;
     document.querySelectorAll('.fmore[open]').forEach(function (d) { d.open = false; d.querySelector('summary').focus(); });
+  });
+  // step 3: move an older tool's save; only My files' own record changes
+  document.getElementById('fList').addEventListener('click', async function (e) {
+    var b = e.target.closest('button[data-p]'); if (!b) return;
+    var r = fState.rows[+b.dataset.p]; if (!r || !r.ref) return;
+    var cid = r.place ? r.place.client_id : ((fState.clients.filter(function (c) { return c.name === r.own; })[0] || {}).id || null);
+    var d = await MyFiles.folderDialog({ title: 'Move "' + r.name + '"', askName: false, clientId: cid, job: r.job, clients: fState.clients,
+      files: fState.rows, primary: 'Move', secondary: r.place ? 'Put back where ' + OPENIN[r.tool] + ' has it' : '' });
+    if (!d) return;
+    try {
+      await C.api('/places', { method: 'PUT', body: { tool: r.tool, ref: r.ref, client_id: d.client_id, job: d.job, reset: d.action === 'secondary' } });
+      await loadFiles();
+    } catch (err) { alert(MyFiles.err(err)); }
   });
   document.getElementById('fList').addEventListener('click', async function (e) {
     var b = e.target.closest('button[data-f]'); if (!b) return;

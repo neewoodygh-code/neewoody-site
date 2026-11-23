@@ -396,6 +396,9 @@ async function route(request, env, ctx) {
   if (mFile && method === 'GET')    return withAuth(request, env, (m) => getFile(env, m, Number(mFile[1])));
   if (mFile && method === 'PUT')    return withPaid(request, env, (m) => updateFile(request, env, m, Number(mFile[1])));
   if (mFile && method === 'DELETE') return withAuth(request, env, (m) => deleteFile(env, m, Number(mFile[1])));
+  // My files step 3: folder of an older tool's save, kept by My files only (the tool's own data is never written)
+  if (path === '/api/places' && method === 'GET') return withAuth(request, env, (m) => listPlaces(env, m));
+  if (path === '/api/places' && method === 'PUT') return withPaid(request, env, (m) => setPlace(request, env, m));
 
   // ---- member: saved cutlists (free to use, login to persist) ----
   if (path === '/api/cutlists' && method === 'GET')  return withAuth(request, env, (m) => listCutlists(env, m));
@@ -925,6 +928,7 @@ async function adminDeleteMember(request, env, admin, rawPhone) {
     env.DB.prepare('DELETE FROM payment_intents WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM saved_cutlists WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM member_files WHERE member_phone = ?').bind(phone),
+    env.DB.prepare('DELETE FROM file_places WHERE member_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM login_attempts WHERE phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM jobs WHERE poster_phone = ?').bind(phone),
     env.DB.prepare('DELETE FROM buy_requests WHERE poster_phone = ?').bind(phone),
@@ -985,6 +989,7 @@ async function purgePending(env, onlyPhone) {
     q(`DELETE FROM payment_intents WHERE member_phone IN ${sub}`),
     q(`DELETE FROM saved_cutlists WHERE member_phone IN ${sub}`),
     q(`DELETE FROM member_files WHERE member_phone IN ${sub}`),
+    q(`DELETE FROM file_places WHERE member_phone IN ${sub}`),
     q(`DELETE FROM login_attempts WHERE phone IN ${sub}`),
     q(`DELETE FROM jobs WHERE poster_phone IN ${sub}`),
     q(`DELETE FROM buy_requests WHERE poster_phone IN ${sub}`),
@@ -2514,6 +2519,46 @@ async function deleteFile(env, member, id) {
   const r = await env.DB.prepare('DELETE FROM member_files WHERE id = ? AND member_phone = ?').bind(id, member.phone).run();
   if (!r.meta || r.meta.changes === 0) return json({ error: 'not_found' }, 404);
   return json({ deleted: true });
+}
+
+// ── My files step 3: folders for the older tools' saves (2026-11-23) ──
+// Owner chose "My files keeps its own folders": a row only says where My files shows a cutlist, Cut Sheet project,
+// Job Pricing quote or invoice. The tools' own data is never read or written here, so a move can't be undone by a
+// tool syncing an older copy, and nothing in a tool can be lost. Client null + job '' = back to the tool's own client.
+const PLACE_TOOLS = ['cutlist', 'cutsheet', 'quote', 'invoice'];
+const PLACE_REF_MAX = 120;
+const PLACES_MAX_PER_MEMBER = 2000;
+
+async function listPlaces(env, member) {
+  const { results } = await env.DB.prepare(
+    'SELECT tool, ref, client_id, job, updated_at FROM file_places WHERE member_phone = ?'
+  ).bind(member.phone).all();
+  return json({ places: results || [] });
+}
+
+async function setPlace(request, env, member) {
+  const body = await readJson(request);
+  const tool = String(body.tool || '');
+  if (!PLACE_TOOLS.includes(tool)) return json({ error: 'invalid_tool' }, 400);
+  const ref = String(body.ref == null ? '' : body.ref).trim();
+  if (!ref || ref.length > PLACE_REF_MAX) return json({ error: 'invalid_ref' }, 400);
+  const job = String(body.job || '').trim().slice(0, FILE_JOB_MAX);
+  const clientId = await ownClientId(env, member, body.client_id);
+  if (clientId === undefined) return json({ error: 'invalid_client' }, 400);
+  if (body.reset) {
+    await env.DB.prepare('DELETE FROM file_places WHERE member_phone = ? AND tool = ? AND ref = ?').bind(member.phone, tool, ref).run();
+    return json({ ok: true, reset: true });
+  }
+  const has = await env.DB.prepare('SELECT 1 AS x FROM file_places WHERE member_phone = ? AND tool = ? AND ref = ?').bind(member.phone, tool, ref).first();
+  if (!has) {
+    const c = await env.DB.prepare('SELECT COUNT(*) AS c FROM file_places WHERE member_phone = ?').bind(member.phone).first();
+    if (c && c.c >= PLACES_MAX_PER_MEMBER) return json({ error: 'too_many_places', limit: PLACES_MAX_PER_MEMBER }, 400);
+  }
+  await env.DB.prepare(
+    `INSERT INTO file_places (member_phone, tool, ref, client_id, job) VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(member_phone, tool, ref) DO UPDATE SET client_id = excluded.client_id, job = excluded.job, updated_at = datetime('now')`
+  ).bind(member.phone, tool, ref, clientId, job).run();
+  return json({ ok: true, place: { tool, ref, client_id: clientId, job } });
 }
 
 // ── saved cutlists ─────────────────────────────────────────────────────

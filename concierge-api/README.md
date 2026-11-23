@@ -120,6 +120,8 @@ CORS already allows `localhost`/`127.0.0.1` on any port.
 | GET | `/api/files/:id` | member | one file with its data (own only) |
 | PUT | `/api/files/:id` | paid member | change any of name, client_id, job, data |
 | DELETE | `/api/files/:id` | member | delete own file |
+| GET | `/api/places` | member | My files folders for the older tools' saves (migration 0037; 2026-11-23) |
+| PUT | `/api/places` | paid member | `{tool: cutlist\|cutsheet\|quote\|invoice, ref, client_id?, job?, reset?}`: put a save in a folder (`reset` = back to the tool's own client); the tool's own data is never written |
 
 ## Files
 
