@@ -41,6 +41,33 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .pcard .mhead{ display:flex; align-items:center; justify-content:space-between; padding:1.25rem 1.5rem; border-bottom:1px solid rgba(31,47,88,.1); }
 .pcard .mhead h1{ font-family:var(--display); font-weight:500; font-size:1.3rem; }
 .state{ padding:2rem 1.5rem; color:var(--muted); }
+/* Home greeting: same styles as the members area dashboard in directory.html (copied 2026-11-23) */
+.dash-home{ background:var(--navy); color:var(--cream); border-radius:14px; padding:1.05rem 1.2rem .95rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(31,47,88,.18); }
+.dash-greet{ display:flex; align-items:baseline; justify-content:space-between; gap:.6rem; flex-wrap:wrap; }
+.dash-greet h2{ font-family:var(--display); font-weight:500; font-size:1.28rem; color:var(--cream); line-height:1.1; }
+.dash-greet .sub{ font-family:var(--ui); font-size:.72rem; font-weight:500; letter-spacing:.04em; color:var(--gold); }
+.dash-list{ margin-top:.75rem; display:flex; flex-direction:column; gap:.35rem; }
+.dash-item{ font:inherit; color:inherit; display:flex; align-items:center; gap:.7rem; width:100%; text-align:left; background:rgba(240,232,208,.06); border:1px solid rgba(240,232,208,.1); border-radius:9px; padding:.55rem .7rem; cursor:pointer; transition:background .15s; }
+.dash-item:hover{ background:rgba(240,232,208,.13); }
+.dash-ic{ width:30px; height:30px; border-radius:7px; background:rgba(200,146,42,.18); display:flex; align-items:center; justify-content:center; flex:none; }
+.dash-ic svg{ width:16px; height:16px; }
+.dash-txt{ flex:1; min-width:0; }
+.dash-txt .t{ display:block; font-family:var(--body); font-size:.9rem; color:var(--cream); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dash-txt .m{ display:block; font-family:var(--ui); font-size:.7rem; color:rgba(240,232,208,.6); margin-top:1px; }
+.dash-new{ flex:none; font-family:var(--ui); font-size:.56rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#241500; background:var(--gold); border-radius:20px; padding:2px 7px; }
+.dash-empty{ font-family:var(--body); font-size:.86rem; color:rgba(240,232,208,.72); margin-top:.55rem; line-height:1.5; }
+.dash-stats{ display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.75rem; }
+.dash-stat{ text-decoration:none; display:inline-flex; align-items:center; gap:.4rem; background:rgba(240,232,208,.08); border:1px solid rgba(240,232,208,.14); border-radius:20px; padding:.34rem .7rem .34rem .6rem; cursor:pointer; font-family:var(--ui); font-size:.75rem; color:rgba(240,232,208,.85); transition:background .15s; }
+.dash-stat:hover{ background:rgba(240,232,208,.15); }
+.dash-stat b{ color:var(--gold); font-weight:600; }
+.dash-stat svg{ width:14px; height:14px; flex:none; }
+.dash-actions{ display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.7rem; }
+.dash-act{ text-decoration:none; display:inline-flex; align-items:center; gap:.35rem; font-family:var(--ui); font-size:.78rem; font-weight:600; letter-spacing:.02em; border-radius:8px; padding:.5rem .9rem; cursor:pointer; border:1px solid transparent; transition:filter .15s; }
+.dash-act.primary{ background:var(--gold); color:#241500; }
+.dash-act.ghost{ background:transparent; color:var(--cream); border-color:rgba(240,232,208,.35); }
+.dash-act:hover{ filter:brightness(1.07); }
+.dash-lbl{ font-family:var(--ui); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:rgba(240,232,208,.5); margin:1rem 0 .35rem; }
+.pcard.files{ margin-top:0; }
 .ptabs{ display:flex; gap:.25rem; border-bottom:1px solid rgba(31,47,88,.15); margin-bottom:1rem; }
 .ptabs [role=tab]{ font:inherit; font-size:.95rem; font-weight:600; color:var(--muted); background:none; border:none;
   border-bottom:2px solid transparent; margin-bottom:-1px; padding:.6rem .9rem; cursor:pointer; }
@@ -159,11 +186,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 </header>
 <main class="pwrap">
   <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">My profile</span></nav>
-  <div class="ptabs" role="tablist" aria-label="My profile and files">
-    <button type="button" role="tab" id="tab-profile" aria-controls="profile" aria-selected="true">Profile</button>
-    <button type="button" role="tab" id="tab-files" aria-controls="files" aria-selected="false" tabindex="-1">My files</button>
+  <div class="ptabs" role="tablist" aria-label="Home and profile">
+    <button type="button" role="tab" id="tab-home" aria-controls="home" aria-selected="true">Home</button>
+    <button type="button" role="tab" id="tab-profile" aria-controls="profile" aria-selected="false" tabindex="-1">Edit profile</button>
   </div>
-  <section class="pcard" id="profile" role="tabpanel" aria-labelledby="tab-profile">
+  <section class="pcard" id="profile" role="tabpanel" aria-labelledby="tab-profile" hidden>
     <div class="mhead"><h1 id="profileTitle">My profile</h1></div>
     <div class="state" id="state">Loading your profile…</div>
     <form id="profileForm" hidden>
@@ -270,7 +297,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     </form>
   </section>
 
-  <section class="pcard files" id="files" role="tabpanel" aria-labelledby="tab-files" hidden>
+  <div id="home" role="tabpanel" aria-labelledby="tab-home">
+  <div id="dashHome" class="dash-home" hidden></div>
+  <section class="pcard files" id="files" aria-labelledby="filesTitle">
     <div class="mhead"><h1 id="filesTitle">My files</h1><button type="button" class="pbtn" id="fUp">Upload a file</button></div>
     <div class="fbody">
       <p class="fnote">Everything you have saved in the tools, in a folder for each client and a folder for each job inside it. Smart Generator designs can be opened, moved, renamed, downloaded and deleted here. Saves from the other tools can be moved to any folder here too; they open in their own tool, and moving them here changes nothing inside that tool.</p>
@@ -283,6 +312,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
       <input type="file" id="fUpIn" accept=".json,application/json" hidden>
     </div>
   </section>
+  </div>
 </main>
 <script src="../js/concierge.js?v=20261113b"></script>
 <script src="../js/my-files.js?v=20261123b"></script>
@@ -767,8 +797,11 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     var c = document.querySelector('#fList .fcrumb strong'); if (c) { c.tabIndex = -1; c.focus({ preventScroll: true }); }
     document.getElementById('files').scrollIntoView({ block: 'start' });
   }
-  // Tabs (2026-11-23, owner: "profile on one tab and files on the other"). #files opens My files; anything else Profile.
-  var TABS = ['profile', 'files'];
+  // Tabs (2026-11-23). Owner: "Concierge landing page = the profile page: the greeting, your files underneath, and the
+  // next tab where you edit your profile". Home = greeting + My files; Edit profile = the form. #profile / #emergency
+  // open Edit profile; anything else (incl. #files) opens Home.
+  var TABS = ['home', 'profile'];
+  function tabHash(t) { return t === 'profile' ? '#profile' : location.pathname + location.search; }
   function showTab(name, focus) {
     TABS.forEach(function (t) {
       var b = document.getElementById('tab-' + t), on = t === name;
@@ -779,18 +812,79 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   }
   TABS.forEach(function (t, i) {
     var b = document.getElementById('tab-' + t);
-    b.addEventListener('click', function () {
-      showTab(t); history.replaceState(null, '', t === 'files' ? '#files' : location.pathname + location.search);
-    });
+    b.addEventListener('click', function () { showTab(t); history.replaceState(null, '', tabHash(t)); });
     b.addEventListener('keydown', function (e) {
       var k = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!k) return;
       e.preventDefault(); var n = TABS[(i + k + TABS.length) % TABS.length];
-      showTab(n, true); history.replaceState(null, '', n === 'files' ? '#files' : location.pathname + location.search);
+      showTab(n, true); history.replaceState(null, '', tabHash(n));
     });
   });
-  function tabFromHash() { showTab(location.hash === '#files' ? 'files' : 'profile'); }
+  function tabFromHash() { showTab(location.hash === '#profile' || location.hash === '#emergency' ? 'profile' : 'home'); }
   window.addEventListener('hashchange', tabFromHash);
   tabFromHash();
+
+  // The greeting (same as the members area dashboard, same data): your open jobs and buys, unread alerts, the post
+  // buttons, and up to six open jobs / buy-for-me requests in your area. Everything links into the members area.
+  function timeAgo(ts) {
+    if (!ts) return '';
+    var d = new Date(String(ts).replace(' ', 'T') + (String(ts).indexOf('Z') < 0 ? 'Z' : ''));
+    var s = Math.floor((Date.now() - d.getTime()) / 1000);
+    if (isNaN(s)) return '';
+    if (s < 60) return 'just now';
+    if (s < 3600) return Math.floor(s / 60) + 'm ago';
+    if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+    if (s < 604800) return Math.floor(s / 86400) + 'd ago';
+    return Math.floor(s / 604800) + 'w ago';
+  }
+  async function loadDash() {
+    var host = document.getElementById('dashHome'), E = C.escapeHtml;
+    var zones = {}; [me.area].concat(me.coverage_zones || []).forEach(function (z) { if (z) zones[z] = 1; });
+    var res = await Promise.all([C.api('/jobs'), C.api('/buy-requests'), C.api('/notifications')].map(function (p) { return p.catch(function () { return {}; }); }));
+    var jobs = (res[0] && res[0].jobs) || [], buys = (res[1] && res[1].requests) || [], notes = (res[2] && res[2].notifications) || [];
+    var items = [];
+    jobs.forEach(function (j) {
+      if (j.mine || (j.status && j.status !== 'open') || !zones[j.zone]) return;
+      var trade = (C.SPECIALTY_LABELS && C.SPECIALTY_LABELS[j.trade]) || j.trade || 'Carpentry';
+      items.push({ kind: 'job', zone: j.zone, created_at: j.created_at, title: trade + ' work needed' + (j.workers > 1 ? (' · ' + j.workers + ' hands') : '') });
+    });
+    buys.forEach(function (b) {
+      if (b.mine || (b.status && b.status !== 'open') || !zones[b.zone]) return;
+      var first = (b.items && b.items[0] && b.items[0].name) ? b.items[0].name : 'Materials', more = (b.items || []).length - 1;
+      items.push({ kind: 'buy', zone: b.zone, created_at: b.created_at, title: 'Buy-for-me: ' + first + (more > 0 ? (' +' + more + ' more') : '') });
+    });
+    items.sort(function (a, b) { return String(b.created_at || '').localeCompare(String(a.created_at || '')); });
+    var top = items.slice(0, 6);
+    var seenKey = 'nwd-dash-seen-' + (me.phone || ''), seen = ''; try { seen = localStorage.getItem(seenKey) || ''; } catch (e) {}
+    var newCount = top.filter(function (it) { return String(it.created_at || '') > seen; }).length;
+    var first = E((me.name || 'there').split(/\s+/)[0]), hr = new Date().getHours();
+    var greet = hr < 12 ? 'Good morning' : (hr < 17 ? 'Good afternoon' : 'Good evening');
+    var jobSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+    var buySvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>';
+    var bellSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="#c8922a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>';
+    var myJobs = jobs.filter(function (j) { return j.mine && (!j.status || j.status === 'open'); }).length;
+    var myBuys = buys.filter(function (b) { return b.mine && (!b.status || b.status === 'open'); }).length;
+    var unread = notes.filter(function (n) { return !n.read; }).length;
+    var h = '<div class="dash-greet"><h2>' + greet + ', ' + first + '</h2>' + (me.area ? '<span class="sub">' + E(me.area) + '</span>' : '') + '</div>';
+    h += '<div class="dash-stats">' +
+      '<a class="dash-stat" href="directory.html#jobs">' + jobSvg + '<span><b>' + myJobs + '</b> your jobs</span></a>' +
+      '<a class="dash-stat" href="directory.html#services">' + buySvg + '<span><b>' + myBuys + '</b> your buys</span></a>' +
+      '<a class="dash-stat" href="directory.html#alerts">' + bellSvg + '<span><b>' + unread + '</b> unread</span></a></div>';
+    h += '<div class="dash-actions"><a class="dash-act primary" href="directory.html#post-job">+ Post a job</a>' +
+      '<a class="dash-act ghost" href="directory.html#post-buy">+ Request a buy</a></div>';
+    h += '<div class="dash-lbl">Near you' + (newCount ? ' · ' + newCount + ' new' : '') + '</div>';
+    if (!top.length) {
+      h += '<div class="dash-empty">Nothing new near ' + (me.area ? E(me.area) : 'you') + ' yet. New jobs and buy-for-me requests in your area will show here, even if browser alerts are off.</div>';
+    } else {
+      h += '<div class="dash-list">' + top.map(function (it) {
+        return '<a class="dash-item" href="directory.html#' + (it.kind === 'job' ? 'jobs' : 'services') + '">' +
+          '<span class="dash-ic">' + (it.kind === 'job' ? jobSvg : buySvg) + '</span>' +
+          '<span class="dash-txt"><span class="t">' + E(it.title) + '</span><span class="m">' + E(it.zone || '') + ' · ' + timeAgo(it.created_at) + '</span></span>' +
+          (String(it.created_at || '') > seen ? '<span class="dash-new">New</span>' : '') + '</a>';
+      }).join('') + '</div>';
+    }
+    host.innerHTML = h; host.hidden = false;
+    if (top.length) { try { localStorage.setItem(seenKey, String(top[0].created_at || '')); } catch (e) {} }
+  }
   document.getElementById('fQ').addEventListener('input', renderFiles);
   document.getElementById('fTool').addEventListener('change', renderFiles);
   document.getElementById('fSort').addEventListener('change', renderFiles);
@@ -863,6 +957,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     fill();
     st.hidden = true; document.getElementById('profileForm').hidden = false;
     loadFiles();
+    loadDash();
+    if (location.hash === '#files') document.getElementById('files').scrollIntoView();
     var target = location.hash === '#emergency' ? document.getElementById('p_emerg_name') : null;
     if (target) { target.scrollIntoView({ block: 'center' }); target.focus(); }
   })();

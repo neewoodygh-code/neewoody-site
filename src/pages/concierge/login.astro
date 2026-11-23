@@ -53,7 +53,7 @@ import Footer from '../../components/Footer.astro';
   // Optional ?next= return path (same-site relative paths only — no open redirect)
   function dest() {
     var next = new URLSearchParams(location.search).get('next') || '';
-    return /^\/(?!\/)/.test(next) ? next : 'directory.html';
+    return /^\/(?!\/)/.test(next) ? next : 'profile.html'; // members land on their Home (greeting + My files), 2026-11-23
   }
 
   // Already logged in? Go straight to the destination.

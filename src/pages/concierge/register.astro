@@ -167,7 +167,7 @@ import Footer from '../../components/Footer.astro';
     if (m0) { m0.className = 'msg error'; m0.innerHTML = 'The page did not load fully, so you cannot log in yet. Check your internet (try switching between Wi-Fi and mobile data), then <a href="#" onclick="location.reload();return false" style="color:inherit;text-decoration:underline">tap here to reload</a>.'; }
     return;
   }
-  if (C.tokenAlive()) { location.replace('directory.html'); return; }
+  if (C.tokenAlive()) { location.replace('profile.html'); return; }
 
   var form = document.getElementById('regForm');
   var btn = document.getElementById('regBtn');
