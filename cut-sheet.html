@@ -225,6 +225,16 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .mini-btn:hover{border-color:var(--clr-accent);color:var(--navy)}
 .mini-btn.primary{background:var(--navy);color:#f3ecdd;border-color:var(--navy)}
 .mini-btn.primary:hover{opacity:.9;color:#f3ecdd}
+.merge-dlg{margin:auto;width:min(560px,calc(100vw - 32px));max-height:85vh;border:1px solid var(--clr-border);border-radius:10px;padding:1.1rem 1.2rem;background:#fff;color:var(--clr-dark);font-family:var(--font-body)}
+.merge-dlg::backdrop{background:rgba(23,19,15,.45)}
+.merge-dlg h2{font-size:1.05rem;margin:0 0 .5rem}
+.merge-dlg p{font-size:.85rem;margin:.2rem 0 .7rem;color:var(--clr-muted)}
+.merge-list{list-style:none;margin:0;padding:0;max-height:52vh;overflow:auto;border-top:1px solid var(--clr-border)}
+.merge-list li{padding:.55rem 0;border-bottom:1px solid var(--clr-border);font-size:.84rem}
+.merge-list .sz{font-weight:700}
+.merge-list .from{display:block;color:var(--clr-muted);font-size:.78rem;margin-top:.15rem}
+.merge-act{display:flex;justify-content:flex-end;gap:.5rem;margin-top:.9rem}
+.merge-undo{margin-top:.6rem;font-size:.82rem;display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
 
 /* project card */
 .chk{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--clr-muted);cursor:pointer;margin-bottom:.6rem}
@@ -542,7 +552,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div class="help-body">
         <ol>
           <li><b>Set your board</b> — the colour code (e.g. <i>18mm Oak Melamine</i>), thickness and board size. This is what the shop cuts from.</li>
-          <li><b>Add your parts</b> — name, length, width, quantity. <b>Length is the grain direction</b> (shows on the right of each box); width shows on the bottom.</li>
+          <li><b>Add your parts</b> — name, width, length, quantity. <b>Length is the grain direction</b> (shows on the right of each box); width shows on the bottom.</li>
           <li><b>Mark edge banding</b> on the sheet — tap an edge once to band it (1 tick), twice to double the board then band (3 ticks), again to clear. Tap the middle of a box to flip the grain.</li>
           <li><b>Different colours?</b> Put a different code in a row's <i>Board</i> column — each colour prints on its own page.</li>
           <li><b>Print / Save PDF</b> — every page carries your logo and number. Hand it to the cutting shop.</li>
@@ -643,8 +653,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
         <thead>
           <tr>
             <th>Part name</th>
-            <th class="num col-w">Length</th>
             <th class="num col-w">Width</th>
+            <th class="num col-w">Length</th>
             <th class="num col-q">Qty</th>
             <th class="col-w">Board</th>
             <th class="num" style="width:48px">Bands</th>
@@ -659,7 +669,17 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
       <div class="mini-actions">
         <button class="mini-btn" onclick="loadExample()">Load example</button>
         <button class="mini-btn" onclick="clearAll()">Clear all</button>
+        <button class="mini-btn" onclick="openMerge()" title="Join rows with the same size, edge banding and board into one row">Merge same sizes</button>
       </div>
+      <dialog id="mergeDlg" class="merge-dlg" aria-labelledby="mergeT">
+        <h2 id="mergeT">Merge same sizes</h2>
+        <div id="mergeBody"></div>
+        <div class="merge-act">
+          <button class="mini-btn" onclick="document.getElementById('mergeDlg').close()">Cancel</button>
+          <button class="mini-btn primary" id="mergeGo" onclick="doMerge()">Merge</button>
+        </div>
+      </dialog>
+      <div id="mergeUndo" class="merge-undo" role="status" hidden></div>
     </div>
 
 
@@ -736,7 +756,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     </div>
   </div>
   <div class="qg-scroll">
-    <div class="qg-lead">Type sizes straight into the boxes — <b>length</b> on the right, <b>width</b> at the bottom, <b>quantity</b> in the middle. <b>Tap a box edge to set edge banding</b> (tap again = double, again = off) — no need to leave this page. Board colour and the rest are set on the <b>Named list</b> tab.</div>
+    <div class="qg-lead">Type sizes straight into the boxes — <b>width</b> at the bottom, <b>length</b> on the right, <b>quantity</b> in the middle (Tab goes in that order). <b>Tap a box edge to set edge banding</b> (tap again = double, again = off) — no need to leave this page. Board colour and the rest are set on the <b>Named list</b> tab.</div>
     <div id="qgBody"></div>
     <button class="qg-addsheet" onclick="addSheet()">+ Add another sheet</button>
   </div>
@@ -1446,8 +1466,8 @@ function addRow(name,L,W,qty,code){
   parts.push({id:id, name:name||'', L:L||0, W:W||0, qty:qty||1, code:code||''});
   ebState[id]={t:0,r:0,b:0,l:0,gflip:false};
   renderParts(); renderAll(); save();
-  // focus the new row — name in list mode, length in grid mode
-  var f = U.entryMode==='grid' ? 'L' : 'name';
+  // focus the new row — name in list mode, width in grid mode
+  var f = U.entryMode==='grid' ? 'W' : 'name';
   var el=document.querySelector('input[data-id="'+id+'"][data-f="'+f+'"]');
   if(el) el.focus();
 }
@@ -1456,8 +1476,72 @@ function delRow(id){
   delete ebState[id];
   renderParts(); renderAll(); save();
 }
+// ── MERGE SAME SIZES (2026-11-23, owner) ──
+// Only on request: rows with the same width, length, grain direction, edge banding and board
+// become one row with the quantities added. The dialog lists every merge first; Undo restores.
+var mergeSnap=null;
+function mergeGroups(){
+  var map={}, out=[];
+  parts.forEach(function(p){
+    if(!(p.L>0&&p.W>0)) return;
+    var e=ebState[p.id]||{};
+    var k=effCode(p)+'|'+p.W+'x'+p.L+'|'+[e.t,e.r,e.b,e.l].map(function(x){return x||0;}).join('')+(e.gflip?'f':'');
+    if(!map[k]){ map[k]=[]; out.push(map[k]); }
+    map[k].push(p);
+  });
+  return out.filter(function(g){ return g.length>1; });
+}
+function bandWords(e){
+  var n=['t','r','b','l'].filter(function(s){return e[s];}).length, d=['t','r','b','l'].some(function(s){return e[s]===2;});
+  return n ? (n===4?'banded all round':n+' edge'+(n>1?'s':'')+' banded')+(d?', doubled':'') : 'no banding';
+}
+function mergedName(g){
+  var names=[]; g.forEach(function(p){ var n=(p.name||'').trim(); if(n&&names.indexOf(n)<0) names.push(n); });
+  return names.slice(0,2).join(' / ')+(names.length>2?' +'+(names.length-2):'');
+}
+function openMerge(){
+  var gs=mergeGroups(), body=document.getElementById('mergeBody'), go=document.getElementById('mergeGo'), u=U.unit;
+  if(!gs.length){
+    body.innerHTML='<p>No rows to merge: every part already has its own size, banding or board.</p>';
+    go.hidden=true;
+  } else {
+    var rows=gs.reduce(function(s,g){return s+g.length;},0);
+    body.innerHTML='<p>'+rows+' rows will become '+gs.length+'. Only rows with the same width, length, grain, edge banding and board are joined. Check the list, then merge. You can undo it.</p><ul class="merge-list">'+
+      gs.map(function(g){
+        var p=g[0], q=g.reduce(function(s,x){return s+x.qty;},0), nm=mergedName(g);
+        return '<li><span class="sz">'+fromMM(p.W)+' × '+fromMM(p.L)+' '+u+'</span> · '+q+' pcs · '+esc(bandWords(ebState[p.id]||{}))+' · '+esc(effCode(p))+
+          (nm?'<br>New name: '+esc(nm):'')+
+          '<span class="from">From '+g.length+' rows: '+g.map(function(x){ return esc((x.name||'').trim()||'(no name)')+' × '+x.qty; }).join(', ')+'</span></li>';
+      }).join('')+'</ul>';
+    go.hidden=false;
+  }
+  document.getElementById('mergeDlg').showModal();
+}
+function doMerge(){
+  var gs=mergeGroups(); document.getElementById('mergeDlg').close(); if(!gs.length) return;
+  mergeSnap={ parts:JSON.parse(JSON.stringify(parts)), eb:JSON.parse(JSON.stringify(ebState)) };
+  var drop={}, before=parts.length;
+  gs.forEach(function(g){
+    var keep=g[0];
+    keep.qty=g.reduce(function(s,x){return s+x.qty;},0);
+    keep.name=mergedName(g);
+    g.slice(1).forEach(function(x){ drop[x.id]=1; delete ebState[x.id]; });
+  });
+  parts=parts.filter(function(p){ return !drop[p.id]; });
+  renderParts(); renderAll(); save();
+  var n=document.getElementById('mergeUndo');
+  n.innerHTML='Merged '+before+' rows into '+parts.length+'. <button class="mini-btn" onclick="undoMerge()">Undo</button>';
+  n.hidden=false;
+}
+function undoMerge(){
+  if(!mergeSnap) return;
+  parts=mergeSnap.parts; ebState=mergeSnap.eb; mergeSnap=null;
+  document.getElementById('mergeUndo').hidden=true;
+  renderParts(); renderAll(); save();
+}
 function onCell(id,f,val){
   var p=parts.filter(function(x){return x.id===id;})[0]; if(!p) return;
+  if(mergeSnap){ mergeSnap=null; document.getElementById('mergeUndo').hidden=true; }   // editing after a merge ends its undo
   if(f==='name'||f==='code') p[f]=val;
   else if(f==='qty') p.qty=Math.max(1,Math.round(num(val,1)));
   else p[f]=toMM(num(val,0));      // L or W: convert to mm
@@ -1503,7 +1587,7 @@ function openQuickGrid(){
   renderQuickGrid();
   document.getElementById('qgPage').style.display='';
   document.body.style.overflow='hidden';
-  var f=document.querySelector('#qgBody input[data-f="L"]'); if(f) f.focus();
+  var f=document.querySelector('#qgBody input[data-f="W"]'); if(f) f.focus();
 }
 function closeQuickGrid(){
   document.getElementById('qgPage').style.display='none';
@@ -1521,12 +1605,13 @@ function qgBox(p,i){
     '<span class="qg2-n">#'+(i+1)+'</span>'+
     '<button class="qg2-del" title="Clear box" onclick="clearBox(\''+p.id+'\')">&times;</button>'+
     '<div class="qg2-frame">'+
+      // Typing order: width, length, quantity (the grid places each box; the order here is the Tab order)
+      '<input class="qg2-wid" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="wid" title="Width — bottom" oninput="onCell(\''+p.id+'\',\'W\',this.value)">'+
+      '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
       '<div class="qg2-box">'+
         ebOverlay(p.id)+
         '<input class="qg2-qty" type="number" inputmode="numeric" min="1" data-id="'+p.id+'" data-f="qty" value="'+qv+'" placeholder="×" title="Quantity" oninput="onCell(\''+p.id+'\',\'qty\',this.value)">'+
       '</div>'+
-      '<input class="qg2-len" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="L" value="'+Ld+'" placeholder="len" title="Length — grain, right side" oninput="onCell(\''+p.id+'\',\'L\',this.value)">'+
-      '<input class="qg2-wid" type="number" inputmode="decimal" data-id="'+p.id+'" data-f="W" value="'+Wd+'" placeholder="wid" title="Width — bottom" oninput="onCell(\''+p.id+'\',\'W\',this.value)">'+
     '</div></div>';
 }
 function renderQuickGrid(){
@@ -1569,8 +1654,8 @@ function renderRows(){
     var Ld=p.L?fromMM(p.L):''; var Wd=p.W?fromMM(p.W):'';
     tr.innerHTML=
       '<td><input class="nm" data-id="'+p.id+'" data-f="name" value="'+esc(p.name)+'" placeholder="Part name" oninput="onCell(\''+p.id+'\',\'name\',this.value)"></td>'+
-      '<td class="num"><input class="dim" type="number" inputmode="decimal" aria-label="Length, part '+(i+1)+'" data-id="'+p.id+'" data-f="L" value="'+Ld+'" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></td>'+
       '<td class="num"><input class="dim" type="number" inputmode="decimal" aria-label="Width, part '+(i+1)+'" data-id="'+p.id+'" data-f="W" value="'+Wd+'" oninput="onCell(\''+p.id+'\',\'W\',this.value)"></td>'+
+      '<td class="num"><input class="dim" type="number" inputmode="decimal" aria-label="Length, part '+(i+1)+'" data-id="'+p.id+'" data-f="L" value="'+Ld+'" oninput="onCell(\''+p.id+'\',\'L\',this.value)"></td>'+
       '<td class="num"><input class="qty" type="number" inputmode="numeric" aria-label="Quantity, part '+(i+1)+'" data-id="'+p.id+'" data-f="qty" value="'+p.qty+'" oninput="onCell(\''+p.id+'\',\'qty\',this.value)"></td>'+
       '<td><input class="code" data-id="'+p.id+'" data-f="code" value="'+esc(p.code)+'" placeholder="—" oninput="onCell(\''+p.id+'\',\'code\',this.value)"></td>'+
       '<td class="num"><span class="eb-minibox" title="Tap an edge to band it">'+ebOverlay(p.id)+'</span></td>'+
