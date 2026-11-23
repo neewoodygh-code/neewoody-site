@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="robots" content="noindex,nofollow" />
-<title>My profile · Carpentry Concierge</title>
+<title>Home · Carpentry Concierge</title>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
 <link rel="stylesheet" href="../css/app.css?v=20261117">
 <style>
@@ -55,6 +55,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 .rnav .lb b{ font-size:.8rem; font-weight:600; line-height:1.2; white-space:nowrap; }
 .rnav .lb i{ display:none; }
 .rnav:hover .ic, .rnav:focus-visible .ic{ background:var(--navy); color:var(--cream); }
+.rnav.active{ border-color:var(--navy); }
+.rnav.active .ic{ background:var(--gold); color:var(--navy); }
 @media(min-width:1200px){
   .pshell{ display:grid; grid-template-columns:238px minmax(0,640px) 238px; justify-content:center; gap:1.6rem; padding:1.25rem 1.6rem 0; }
   .pshell .pwrap{ margin:0; padding:0 0 3rem; }
@@ -66,6 +68,8 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   .rnav .lb b{ font-size:.84rem; }
   .rnav .lb i{ display:block; font-size:.68rem; font-style:normal; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .rnav:hover, .rnav:focus-visible{ background:#fff; }
+  .rnav.active{ background:#fff; box-shadow:0 3px 12px rgba(31,47,88,.09); }
+  .rnav.active .lb b{ color:var(--navy); }
 }
 /* Home greeting: same styles as the members area dashboard in directory.html (copied 2026-11-23) */
 .dash-home{ background:var(--navy); color:var(--cream); border-radius:14px; padding:1.05rem 1.2rem .95rem; margin-bottom:1.4rem; box-shadow:0 10px 30px rgba(31,47,88,.18); }
@@ -203,7 +207,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
     <span class="lockup-rule" aria-hidden="true"></span>
     <a class="lockup-cc" href="/concierge/directory.html" aria-label="Carpentry Concierge"><img src="/images/concierge/cc-mark.svg" alt="" width="40" height="40"><span>Carpentry<br>Concierge</span></a>
-    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">My profile</span>
+    <span class="lockup-rule lockup-sec-rule" aria-hidden="true"></span><span class="lockup-sec">Home</span>
   </div>
   <div class="top-actions">
     <a class="tbtn" href="directory.html">Members area</a>
@@ -213,7 +217,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 <div class="pshell">
 <nav class="gonav" id="goNav" aria-label="Members area sections"></nav>
 <main class="pwrap">
-  <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">My profile</span></nav>
+  <nav class="crumb" aria-label="Breadcrumb"><a href="directory.html">Carpentry Concierge</a><span aria-hidden="true">›</span><span aria-current="page">Home</span></nav>
   <div class="ptabs" role="tablist" aria-label="Home and profile">
     <button type="button" role="tab" id="tab-home" aria-controls="home" aria-selected="true">Home</button>
     <button type="button" role="tab" id="tab-profile" aria-controls="profile" aria-selected="false" tabindex="-1">Edit profile</button>
@@ -828,6 +832,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   }
   // "Go to" links into the members area (same list and icons as the directory's left rail)
   var RAIL_IC = {
+    home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
     directory: '<circle cx="9" cy="7" r="3.2"/><path d="M2.5 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h4a4.5 4.5 0 0 1 4.5 4.5V20"/><path d="M17 4.2a3.2 3.2 0 0 1 0 6"/><path d="M20.5 20v-1.5a4.3 4.3 0 0 0-2.8-4"/>',
     jobs: '<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7"/><path d="M2.5 12h19"/>',
     services: '<path d="M17 2.5 21 6l-4 3.5"/><path d="M3 8V7a2 2 0 0 1 2-2h16"/><path d="M7 21.5 3 18l4-3.5"/><path d="M21 16v1a2 2 0 0 1-2 2H3"/>',
@@ -840,6 +845,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     support: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.6 1c0 2-3 2.6-3 2.6"/><path d="M12 17h.01"/>'
   };
   var RAIL_ITEMS = [
+    { tab: 'home', label: 'Home', sub: 'Your jobs, alerts and files', href: 'profile.html' },
     { tab: 'directory', label: 'Directory', sub: 'Find & hire members' },
     { tab: 'jobs', label: 'Jobs', sub: 'Post work · get hired' },
     { tab: 'services', label: 'Services', sub: 'Buy-for-me · who offers what' },
@@ -854,11 +860,15 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   (function () {
     var h = '<div class="rail-h">Go to</div>';
     RAIL_ITEMS.forEach(function (it) {
-      h += '<a class="rnav" href="directory.html#' + it.tab + '"' + (it.vendor ? ' data-vendor hidden' : '') + '>' +
+      h += '<a class="rnav' + (it.href ? ' active" aria-current="page' : '') + '" href="' + (it.href ? it.href : 'directory.html#' + it.tab) + '"' + (it.vendor ? ' data-vendor hidden' : '') + '>' +
         '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (RAIL_IC[it.tab] || '') + '</svg></span>' +
         '<span class="lb"><b>' + it.label + '</b><i>' + it.sub + '</i></span></a>';
     });
     document.getElementById('goNav').innerHTML = h;
+    // Home is this page: open the Home tab instead of reloading
+    document.querySelector('#goNav .rnav.active').addEventListener('click', function (e) {
+      e.preventDefault(); showTab('home'); history.replaceState(null, '', location.pathname + location.search); window.scrollTo(0, 0);
+    });
   })();
   // Tabs (2026-11-23). Owner: "Concierge landing page = the profile page: the greeting, your files underneath, and the
   // next tab where you edit your profile". Home = greeting + My files; Edit profile = the form. #profile / #emergency

@@ -280,6 +280,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   border:none; border-radius:9px; padding:.55rem .6rem; cursor:pointer; margin-bottom:.15rem;
   transition:background .15s,box-shadow .15s; }
 .rnav[hidden]{ display:none; }
+a.rnav{ text-decoration:none; color:inherit; }
 .rnav .ic{ width:34px; height:34px; flex:none; display:flex; align-items:center; justify-content:center;
   border-radius:8px; background:var(--cream-dark); color:var(--navy); transition:background .15s,color .15s; }
 .rnav .ic svg{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
@@ -610,7 +611,7 @@ a.tool-card:hover .go{ color:var(--navy); }
         <div class="notif-list" id="notifList"><div class="notif-empty">No notifications yet.</div></div>
       </div>
     </div>
-    <a class="tbtn" id="editBtn" href="profile.html">My profile</a>
+    <a class="tbtn" id="editBtn" href="profile.html">Home</a>
     <a class="tbtn" id="adminLink" href="admin.html" style="display:none">Admin</a>
     <button class="tbtn" id="logoutBtn">Log out</button>
   </div>
@@ -1610,6 +1611,7 @@ a.tool-card:hover .go{ color:var(--navy); }
   // ── Left nav rail + right help rail (wide screens; the horizontal tabbar is
   //    the mobile fallback). Icon cues make the nav more "leading" for newcomers. ──
   var RAIL_IC = {
+    home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h5v-6h4v6h5V10"/>',
     directory: '<circle cx="9" cy="7" r="3.2"/><path d="M2.5 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h4a4.5 4.5 0 0 1 4.5 4.5V20"/><path d="M17 4.2a3.2 3.2 0 0 1 0 6"/><path d="M20.5 20v-1.5a4.3 4.3 0 0 0-2.8-4"/>',
     jobs: '<rect x="2.5" y="7" width="19" height="13" rx="2"/><path d="M8 7V5.5A1.5 1.5 0 0 1 9.5 4h5A1.5 1.5 0 0 1 16 5.5V7"/><path d="M2.5 12h19"/>',
     services: '<path d="M17 2.5 21 6l-4 3.5"/><path d="M3 8V7a2 2 0 0 1 2-2h16"/><path d="M7 21.5 3 18l4-3.5"/><path d="M21 16v1a2 2 0 0 1-2 2H3"/>',
@@ -1622,6 +1624,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     support: '<circle cx="12" cy="12" r="9"/><path d="M9.2 9.2a3 3 0 0 1 5.6 1c0 2-3 2.6-3 2.6"/><path d="M12 17h.01"/>'
   };
   var RAIL_ITEMS = [
+    { tab: 'home', label: 'Home', sub: 'Your jobs, alerts and files', href: 'profile.html' },
     { tab: 'directory', label: 'Directory', sub: 'Find & hire members' },
     { tab: 'jobs', label: 'Jobs', sub: 'Post work · get hired' },
     { tab: 'services', label: 'Services', sub: 'Buy-for-me · who offers what' },
@@ -1638,6 +1641,11 @@ a.tool-card:hover .go{ color:var(--navy); }
     var html = '<div class="rail-h">Go to</div>';
     RAIL_ITEMS.forEach(function (it) {
       var idAttr = it.tab === 'storefront' ? ' id="railStorefront"' : it.tab === 'orders' ? ' id="railOrders"' : '';
+      if (it.href) {  // Home (2026-11-23): the member landing page, a link out of the members area
+        html += '<a class="rnav" href="' + it.href + '"><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (RAIL_IC[it.tab] || '') + '</svg></span>' +
+          '<span class="lb"><b>' + it.label + '</b><i>' + it.sub + '</i></span></a>';
+        return;
+      }
       html += '<button class="rnav' + (it.tab === 'directory' ? ' active" aria-current="page' : '') + '" data-tab="' + it.tab + '"' + idAttr + (it.vendor ? ' hidden' : '') + '>' +
         '<span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true">' + (RAIL_IC[it.tab] || '') + '</svg></span>' +
         '<span class="lb"><b>' + it.label + '</b><i>' + it.sub + '</i></span>' +
@@ -1646,7 +1654,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     });
     host.innerHTML = html;
     host.addEventListener('click', function (e) {
-      var b = e.target.closest('.rnav'); if (b) { showTab(b.getAttribute('data-tab')); window.scrollTo(0, 0); }
+      var b = e.target.closest('.rnav[data-tab]'); if (b) { showTab(b.getAttribute('data-tab')); window.scrollTo(0, 0); }
     });
   }
   function buildRailTips() {
@@ -2477,6 +2485,7 @@ a.tool-card:hover .go{ color:var(--navy); }
     { id: 44, date: '2026-11-20', title: 'Try the Smart Generator (experimental)', body: 'A new tool, still under construction: describe a wardrobe (size, sections, and what goes in each: shelves, hanging or drawers) and it builds every part in 3D first, then reads the cut list off the model, so the two always agree and parts that run into each other are flagged. Your own construction settings (board, groove depth, gaps, runner gap, subframe) are remembered. Send the list straight to the Cut Sheet for boards and edge banding. It is an experiment: check every size yourself before cutting, and tell us on WhatsApp when something looks wrong. Kitchens come next. Find it in Tools.' },
     { id: 45, date: '2026-11-20', title: 'Edge banding now comes on as standard', body: 'In the wardrobe cutlist and the Smart Generator every part now arrives with its usual edge banding already marked: doors, drawer fronts and drawer-chest face strips all round, the front edge of carcass parts, shelves and the chest top, and the visible edges of side and end panels. Backs, drawer bases, subframe rails and the hidden filler strips stay plain. Tap an edge to take off what a job does not need (tap again for double then band). Lists from the Smart Generator carry the banding into the Cut Sheet too. Lists you saved before keep the banding you set.' },
     { id: 46, date: '2026-11-21', title: 'Kitchens in the Smart Generator (experimental)', body: 'The Smart Generator now does kitchens as well as wardrobes: switch to Kitchen at the top. Lay out runs of base and wall cabinets along the back and side walls, then add units: drawer or door base units, a sink unit, a hob over drawers, wall units with fixed and adjustable shelves, L corners, side panels, fillers and gaps for appliances. Base units stand on legs under rails; choose bar handles (full-height fronts) or J-profile (every front shortened for the profile), and your own settings (legs, J-profile, rails, gaps) are remembered. You get the 3D, the cut list, a list of the hardware to buy (legs, hinges, runners, J-profiles, toe kicks) and Send to the Cut Sheet. Load the U-shaped example to see a full kitchen. Still under construction: check every size before cutting, and tell us on WhatsApp what is wrong.' },
+    { id: 58, date: '2026-11-23', title: 'Home', body: 'Your landing page is now called Home. It is the first link in the Go to list on the left (on a phone, the first in the row under the header), and the Home button at the top of the members area takes you back to it from anywhere.' },
     { id: 57, date: '2026-11-23', title: 'Logging in now opens your Home', body: 'When you log in you now land on your own page. The Home tab has your greeting, your jobs and buys, your unread alerts, Post a job, Request a buy and what is new near you, with My files underneath. The Edit profile tab is where you change your details. The members area is one tap away with the Members area button.' },
     { id: 56, date: '2026-11-23', title: 'My profile: two tabs', body: 'Your profile page now has two tabs, Profile and My files, so you see one at a time instead of scrolling past your profile to reach your files. The My files link in the Tools tab opens straight on the files.' },
     { id: 55, date: '2026-11-23', title: 'My files: move any save into a folder', body: 'Saves from the Cutlist, the Cut Sheet, Job Pricing and Invoices can now be moved into any client and job folder in My files: open More on the save and choose Move to a folder. This only changes where My files shows it; nothing inside the tool changes, and the tool still opens it as before. Put back takes it to the client the tool has it under.' },
