@@ -285,7 +285,15 @@
     // owner 2026-11-23: drawer boxes sit lower than their fronts; Accra sliding tracks (flat bottom, bigger top) need the
     // carcass set back by the track depth; pulls go at hand height; island top panel = the quartz less its doubled edge
     drawerDrop: 50, drawerMin: 80, slideD: 50, slideBot: 10, slideTop: 30, reach: 1800, edgeW: 80,
-    cornerFill: 80 };   // blind corners (owner 2026-11-23): the run that meets a blind unit starts with an 80 mm filler
+    cornerFill: 80,
+    // drawer runners (owner 2026-11-23: "drawer box logic will switch according to drawer type"): 'side' = side mount
+    // (the owner's box: front/back full width, sides between, base under; box = opening - runner gap) or 'under' =
+    // undermount, Blum TANDEM/MOVENTO rules (Knape & Vogt the same; Temax sells 16 and 18 mm side versions): inside
+    // width = opening - 42, sides 16 mm max, bottom raised 13 from the bottom edge of the sides, back sits on the
+    // bottom, box length = nominal runner length - 10, about 14 mm under the box and 7 over it
+    runner: 'side', umSide: 18,   // owner: 18 mm sides only, Ghana has no 16 mm laminate board
+    umDeduct: 42, umRecess: 13, umShort: 10, umBelow: 14, umAbove: 7 };
+  var UNDER = [600, 550, 500, 450, 400, 350, 300, 270, 250];   // undermount nominal lengths   // blind corners (owner 2026-11-23): the run that meets a blind unit starts with an 80 mm filler
   var BOARDS = { '4x8': [2440, 1220], '4x9': [2745, 1220], '6x9': [2745, 1830] };
   function boardOf(K) { return BOARDS[K.board] || BOARDS['4x8']; }
 
@@ -344,7 +352,24 @@
       function legs(x0, bw, n) { tally('Cabinet legs ' + K.legH / 10 + ' cm (sets of 4)', n); }
       // drawer box height (base + sides): lower than the front by K.drawerDrop, never under K.drawerMin, never over the space
       function drawerBox(frontH, room) { return Math.min(Math.max(K.drawerMin, R(frontH - K.drawerDrop)), R(room)); }
-      function drawerBoxParts(lbl, bx, by, z0, bw, boxH, runner) {
+      // one drawer box in an opening ow wide starting at ox; inner = usable depth behind the front edge
+      function drawerBoxParts(lbl, ox, ow, by, z0, boxH, inner) {
+        if (K.runner === 'under') {
+          var NL = UNDER.filter(function (L) { return L <= inner - 3; })[0];
+          if (!NL) { warn.push('Drawers' + lbl + ': no undermount runner fits ' + R(inner) + ' mm of depth.'); NL = UNDER[UNDER.length - 1]; }
+          var st = K.umSide, inW2 = R(ow - K.umDeduct), W2 = inW2 + 2 * st, L2 = NL - K.umShort, bx2 = ox + (ow - W2) / 2;
+          var by2 = by + (K.umBelow - 5), H2 = R(boxH - (K.umBelow - 5) - (K.umAbove - 5)), bt2 = t, rec = K.umRecess;
+          var nt = st !== t ? ' (' + st + ' mm board)' : '';
+          put('Drawer Box Front/Back' + nt + lbl, 'drawer', '', bx2, by2, z0, W2, H2, st, ['x', 'y'], 'full box width; inside width ' + inW2 + ' = opening ' + R(ow) + ' - ' + K.umDeduct + '; drill the front for the locking devices');
+          put('Drawer Box Back, on the bottom' + nt + lbl, 'drawer', '', bx2, by2 + rec + bt2, z0 + L2 - st, W2, H2 - rec - bt2, st, ['x', 'y'], 'sits on the drawer bottom; notch and drill for the runner hooks as the runner sheet shows');
+          put('Drawer Box Side' + nt + lbl, 'drawer', '', bx2, by2, z0 + st, st, H2, L2 - 2 * st, ['z', 'y'], 'between the front and back');
+          put('Drawer Box Side' + nt + lbl, 'drawer', '', bx2 + W2 - st, by2, z0 + st, st, H2, L2 - 2 * st, ['z', 'y']);
+          put('Drawer Bottom, raised' + lbl, 'drawer', '', bx2 + st, by2 + rec, z0 + st, inW2, bt2, L2 - st, ['x', 'z'], 'between the sides, ' + rec + ' up from their bottom edge; the runner runs underneath');
+          tally('Undermount runners ' + NL + ' mm (pair, with locking devices)', 1);
+          if (st > 16) warn.push('Undermount drawers: ' + st + ' mm sides need runners made for ' + st + ' mm sides (Blum takes 16 mm at most; Temax makes 18 mm versions).');
+          return;
+        }
+        var runner = RUNNERS.filter(function (L) { return L <= inner - 10; })[0] || R(inner - 10), bw = R(ow - s.runGap), bx = ox + (ow - bw) / 2;
         put('Drawer Base' + lbl, 'drawer', '', bx, by, z0, bw, t, runner, ['x', 'z'], 'box outside size');
         put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, z0, bw, boxH - t, t, ['x', 'y'], 'full box width; box ' + boxH + ' high overall');
         put('Drawer Box Front/Back' + lbl, 'drawer', '', bx, by + t, z0 + runner - t, bw, boxH - t, t, ['x', 'y']);
@@ -507,9 +532,8 @@
             var frH = R(slot - gap - J), frY = sBot + gap / 2;
             put('Drawer Front' + lbl, 'drawer', 'front', x + ec, base ? frY : frY + J, -DT, floor(fW), frH, DT, ['x', 'y'], JP ? 'shortened by the ' + J + ' mm J-profile' : '');
             handle(1);
-            var bw = R(inW - s.runGap), by = Math.max(sBot + 15, yBot + t + 5);
-            var bx = x + t + (inW - bw) / 2, cap = (di === 0 && base) ? yTop - (u.hob ? K.rail : t) - 5 : sTop - 5;   // under a hob the top box clears the upright front rail
-            drawerBoxParts(lbl, bx, by, 0, bw, drawerBox(frH, cap - by), runner);
+            var by = Math.max(sBot + 15, yBot + t + 5), cap = (di === 0 && base) ? yTop - (u.hob ? K.rail : t) - 5 : sTop - 5;   // under a hob the top box clears the upright front rail
+            drawerBoxParts(lbl, x + t, inW, by, 0, drawerBox(frH, cap - by), dC - t);
             yy = sBot;
           });
         } else if (u.type !== 'sink' && u.doorType && u.doorType !== 'hinged') {
@@ -633,10 +657,7 @@
               var n = z.n || 1, sw = (inW - (n - 1) * t) / n, runner = RUNNERS.filter(function (L) { return L <= dd - t - 10; })[0] || R(dd - t - 10);
               var frontH = hi - lo - J, boxH = drawerBox(frontH, z.h - 10);
               for (var q = 1; q < n; q++) put('Divider, drawer row' + lbl, 'carcass', '', x0 + t + q * sw + (q - 1) * t, zb, zf, t, z.h, dd - t, ['y', 'z'], 'fixed between the shelves; stops at the back rails');
-              for (q = 0; q < n; q++) {
-                var bw = R(sw - s.runGap), bx = x0 + t + q * (sw + t) + (sw - bw) / 2, by = zb + 5;
-                drawerBoxParts(lbl, bx, by, zf, bw, boxH, runner);
-              }
+              for (q = 0; q < n; q++) drawerBoxParts(lbl, x0 + t + q * (sw + t), sw, zb + 5, zf, boxH, dd - t);
               fronts.push({ k: 'drawer', lo: lo, hi: hi, n: n });
             } else if (z.k === 'oven') {
               if (inW < K.ovenW) warn.push(un + ': oven niche only ' + R(inW) + ' wide inside; a 60 built-in oven needs ' + K.ovenW + '.');
