@@ -20,7 +20,7 @@ if (location.hostname === 'neewoodygh.com') { window.dataLayer = window.dataLaye
 .wip-tag { flex: none; background: var(--espresso); color: var(--bone); font-weight: 600; padding: .25rem .6rem; border-radius: 4px; white-space: nowrap; }
 .wip p + p { margin-top: .35rem; }
 .wip a { color: var(--walnut); }
-.sg { max-width: 1240px; margin: 0 auto; padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 3rem; }
+.sg { max-width: 1580px; margin: 0 auto; padding: 1.75rem clamp(1rem, 4vw, 2.5rem) 3rem; }
 .filebar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: .8rem 0 0; }
 .filebar .fcur { font-size: var(--t-small); color: var(--stone); flex-basis: 100%; }
 .sg-crumb { display: flex; flex-wrap: wrap; gap: .45rem; font-size: var(--t-small); color: var(--stone); margin-bottom: .8rem; }
@@ -30,6 +30,28 @@ if (location.hostname === 'neewoodygh.com') { window.dataLayer = window.dataLaye
 .sg .lede { color: var(--stone); margin-top: .4rem; max-width: 60ch; }
 .sg-grid { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 1.5rem; margin-top: 1.5rem; align-items: start; }
 @media (max-width: 900px) { .sg-grid { grid-template-columns: minmax(0, 1fr); } }
+/* Console (2026-11-23, owner: "move Send to the Cut Sheet, Price this job and all other options at the bottom to a console on the right;
+   a new user wouldn't know they were there"). Wide screens: a third column that stays in view. Smaller screens: a strip above the work. */
+.console { background: #fff; border: 1px solid var(--hair); border-radius: 10px; padding: 1rem 1.1rem; grid-column: 1 / -1; scroll-margin-top: 1rem; }
+/* below 1200 px the console sits at the end, and this bar stays at the bottom of the screen */
+.conbar { display: none; }
+@media (max-width: 1199px) {
+  .conbar { display: flex; gap: .5rem; position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: .6rem clamp(1rem, 4vw, 2.5rem) calc(.6rem + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--hair); box-shadow: 0 -6px 20px rgba(23,19,15,.08); }
+  .conbar .ui-btn { flex: 1 1 0; text-align: center; }
+  body { padding-bottom: 4.6rem; }
+}
+.console h2 { font-size: var(--t-body); font-weight: 600; }
+.console h3 { font-size: var(--t-small); font-weight: 600; color: var(--stone); margin: 1rem 0 0; }
+.console .ack { margin-top: .7rem; font-size: .78rem; line-height: 1.45; padding: .6rem .7rem; }
+.console .con-acts { margin-top: .8rem; }
+.console .filebar { margin-top: .5rem; }
+.console .hint { margin-top: .9rem; }
+@media (min-width: 1200px) {
+  .sg-grid { grid-template-columns: minmax(0, 360px) minmax(0, 1fr) minmax(0, 300px); }
+  .console { grid-column: auto; position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
+  .console .con-acts, .console .filebar { flex-direction: column; align-items: stretch; }
+  .console .ui-btn { width: 100%; text-align: center; }
+}
 .card { background: #fff; border: 1px solid var(--hair); border-radius: 8px; padding: 1.1rem 1.1rem 1.2rem; }
 .card + .card { margin-top: 1rem; }
 .card h2 { font-size: var(--t-body); font-weight: 600; margin-bottom: .8rem; }
@@ -146,14 +168,6 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
   <div class="mode no-print" role="group" aria-label="What are you making?">
     <button type="button" data-mode="wardrobe" aria-pressed="true">Wardrobe</button>
     <button type="button" data-mode="kitchen" aria-pressed="false">Kitchen / Laundry</button>
-  </div>
-  <div class="filebar no-print" role="group" aria-label="My files">
-    <button type="button" class="ui-btn sm ghost" id="fSave">Save to My files</button>
-    <button type="button" class="ui-btn sm ghost" id="fOpen">Open from My files</button>
-    <button type="button" class="ui-btn sm ghost" id="fDown">Download file</button>
-    <button type="button" class="ui-btn sm ghost" id="fUp">Upload file</button>
-    <input type="file" id="fUpIn" accept=".json,application/json" hidden>
-    <span class="fcur" id="fCur" role="status"></span>
   </div>
 
   <div class="print-only">
@@ -282,18 +296,42 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
         <div class="sum" id="sum"></div>
         <div style="overflow-x:auto" tabindex="0" role="region" aria-label="Cut list table"><table class="cl" id="cl"></table></div>
         <div id="hw"></div>
-        <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
-        <div class="acts">
+      </div>
+    </div>
+    <aside class="console no-print" aria-labelledby="conTitle">
+      <h2 id="conTitle">Use this design</h2>
+      <label class="ack"><input type="checkbox" id="ack"><span>I understand this tool is experimental and <b>I will check every size myself before cutting</b>. Neewoody and Carpentry Concierge are not responsible for what is cut from these figures.</span></label>
+      <div class="acts con-acts">
           <button type="button" class="ui-btn sm" id="toSheet">Send to the Cut Sheet</button>
           <button type="button" class="ui-btn sm ghost" id="toPrice">Price this job</button>
           <button type="button" class="ui-btn sm ghost" id="doPrint">Print the cut list</button>
           <button type="button" class="ui-btn sm ghost" id="exHtml">Client 3D file</button>
           <button type="button" class="ui-btn sm ghost" id="exDae">SketchUp file</button>
-        </div>
-        <p class="hint no-print">Edge banding comes on as standard (doors and fronts all round, the front edge of carcass parts and shelves). In the Cut Sheet, tap an edge to take off what this job doesn't need. The Cut Sheet also works out the boards. Price this job, the client 3D file and the SketchUp file are for members. Price this job opens a new quote in Job Pricing with the materials counted here.</p>
       </div>
-    </div>
+      <h3>My files</h3>
+      <div class="filebar" role="group" aria-label="My files">
+    <button type="button" class="ui-btn sm ghost" id="fSave">Save to My files</button>
+    <button type="button" class="ui-btn sm ghost" id="fOpen">Open from My files</button>
+    <button type="button" class="ui-btn sm ghost" id="fDown">Download file</button>
+    <button type="button" class="ui-btn sm ghost" id="fUp">Upload file</button>
+    <input type="file" id="fUpIn" accept=".json,application/json" hidden>
+    <span class="fcur" id="fCur" role="status"></span>
+      </div>
+        <p class="hint">Edge banding comes on as standard (doors and fronts all round, the front edge of carcass parts and shelves). In the Cut Sheet, tap an edge to take off what this job doesn't need. The Cut Sheet also works out the boards. Price this job, the client 3D file and the SketchUp file are for members. Price this job opens a new quote in Job Pricing with the materials counted here.</p>
+    </aside>
   </div>
+  <div class="conbar no-print" role="group" aria-label="Use this design">
+    <button type="button" class="ui-btn sm" id="cbSend">Send to the Cut Sheet</button>
+    <button type="button" class="ui-btn sm ghost" id="cbMore">More options</button>
+  </div>
+  <script>
+    // the bottom bar (phones and tablets) works the same as the console buttons
+    document.getElementById('cbSend').addEventListener('click', function () { document.getElementById('toSheet').click(); });
+    document.getElementById('cbMore').addEventListener('click', function () {
+      var c = document.querySelector('.console'); c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById('conTitle').setAttribute('tabindex', '-1'); document.getElementById('conTitle').focus({ preventScroll: true });
+    });
+  </script>
 </main>
 
 <footer class="app-foot">
