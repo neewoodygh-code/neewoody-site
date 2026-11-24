@@ -774,12 +774,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     </div>
   </div>
   <div class="qg-scroll">
-    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it. Tick cut lists to <b>print several at once</b>, or use a project's <b>Print all</b>. Projects are saved on this device — use <b>Back up</b> to keep a copy you can <b>Restore</b> on any device.</div>
+    <div class="qg-lead">Each project is a home or client. Open a project to see its cut lists — a wardrobe, a kitchen, a TV unit — and tap one to work on it. Tick cut lists to <b>print several at once</b> or <b>merge them into a new list</b>, or use a project's <b>Print all</b>. Projects are saved on this device — use <b>Back up</b> to keep a copy you can <b>Restore</b> on any device.</div>
     <div id="projLib"></div>
   </div>
   <div id="libPrintBar" style="display:none">
     <span class="lpb-n"><b id="libPrintN">0</b> cut list(s) selected</span>
     <button class="lpb-clear" onclick="clearPrintSel()">Clear</button>
+    <button class="lpb-clear" onclick="mergeSelected()">Merge into a new list</button>
     <button class="lpb-print" onclick="printSelected()">&#9113; Print selected</button>
   </div>
 </div>
@@ -1405,6 +1406,34 @@ function updatePrintBar(){
 function printProject(pid){
   var arr=projStore(), proj=findProj(arr,pid); if(!proj||!proj.lists.length) return;
   printLists(proj.lists.map(function(l){ return {projId:pid, listId:l.id}; }));
+}
+// Merge the ticked cut lists into one new list (owner 2026-11-24): every row with its own edge banding and board,
+// in the project of the first ticked list. The originals are kept; Merge same sizes then joins matching rows.
+function mergeSelected(){
+  var refs=Object.keys(printSel).map(function(k){ return k.split('|'); });
+  if(refs.length<2){ alert('Tick at least two cut lists to merge.'); return; }
+  var arr=projStore(), lists=[];
+  refs.forEach(function(r){ var p=findProj(arr,r[0]), l=findList(p,r[1]); if(l) lists.push({ p:p, l:l }); });
+  if(lists.length<2) return;
+  var name=(prompt('Name the merged cut list:', lists.map(function(x){ return x.l.name; }).join(' + '))||'').trim(); if(!name) return;
+  var out=[], eb={}, n=1;
+  lists.forEach(function(x){
+    var d=x.l.data||{}, def=(d.U&&d.U.code)||'';
+    (d.parts||[]).forEach(function(q){
+      if(isEmptyPart(q)) return;
+      var id='p'+(n++), e=(d.ebState||{})[q.id]||{};
+      out.push({ id:id, name:String(q.name||''), L:+q.L||0, W:+q.W||0, qty:Math.max(1,+q.qty||1), code:String(q.code||def||'') });   // a row keeps its own list's board
+      eb[id]={ t:e.t||0, r:e.r||0, b:e.b||0, l:e.l||0, gflip:!!e.gflip };
+    });
+  });
+  if(!out.length){ alert('Those cut lists have no parts to merge.'); return; }
+  var dest=lists[0].p, u=JSON.parse(JSON.stringify((lists[0].l.data||{}).U||{})), now=Date.now();
+  u.proj=dest.name; u.listName=name; u.entryMode='list';
+  var nl={ id:'l'+now, name:name, savedAt:now, data:{ U:u, parts:out, ebState:eb, seq:n } };
+  dest.lists.unshift(nl); dest.updatedAt=now;
+  if(!projSave(arr)){ alert('Could not save: storage is full. Delete an old project first.'); return; }
+  printSel={}; updatePrintBar(); closeLibrary(); loadList(dest.id, nl.id);
+  if(window.ToolBar) ToolBar.toast('Merged '+lists.length+' cut lists into "'+name+'": '+out.length+' rows. Press Merge same sizes to join rows that match.');
 }
 function printSelected(){
   var refs=Object.keys(printSel).map(function(k){ var a=k.split('|'); return {projId:a[0], listId:a[1]}; });
