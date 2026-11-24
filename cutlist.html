@@ -615,7 +615,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 }
 </style>
 </head>
-<body>
+<body data-tool="cutlist">
 
 <!-- ════ ALPHA BANNER ════ -->
 <div class="alpha-banner" role="region" aria-label="Alpha notice">
@@ -670,6 +670,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
     <button onclick="memberLogout()" style="font-family:inherit;font-size:.75rem;background:transparent;color:rgba(240,232,208,.75);border:1px solid rgba(240,232,208,.35);border-radius:5px;padding:.35rem .7rem;cursor:pointer">Log out</button>
   </div>
 
+  <input type="file" id="clUpIn" accept=".json,application/json" hidden onchange="clUpload(this)">
   <!-- ════ GUEST BAR (no session — login entry point + pitch) ════ -->
   <div id="guest-bar" style="display:none;align-items:center;gap:.6rem;flex-wrap:wrap;background:#f0e8d0;border:1px solid rgba(31,47,88,.15);color:#5c564a;border-radius:8px;padding:.55rem .9rem;margin-bottom:.9rem;font-size:.83rem">
     <span>💾 Concierge members save &amp; reload their cut lists</span>
@@ -961,7 +962,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 </section>
 
 <footer class="app-foot">
-  <a href="/tools">Free tools</a>
+  <a href="/tools" data-cc-tools>Free tools</a>
   <a href="/concierge/">Carpentry Concierge</a>
   <a href="/contact">Contact</a>
   <a href="/privacy">Privacy</a>
@@ -973,6 +974,8 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 </main>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/my-files.js?v=20261123b"></script>
+<script src="js/tool-bar.js?v=20261124"></script>
 <script>
 /* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
    members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
@@ -2111,7 +2114,52 @@ function saveCutlist(){
     });
 }
 
+// My Cutlists now opens the shared Files panel (js/tool-bar.js, 2026-11-24): search, open, rename, duplicate,
+// download, delete with Undo, and Save from the inputs as well as the results page. Same /api/cutlists storage.
+function cutlistByName(name){ return Concierge.api('/cutlists').then(function(r){ return (r.cutlists || []).filter(function(c){ return c.name === name; })[0]; }); }
+function cutlistGet(id){ return Concierge.api('/cutlists/' + id).then(function(r){ return r.cutlist; }); }
+function cutlistPut(name, config){ return Concierge.api('/cutlists', { method:'POST', body:{ name:name, config:config } }); }
+function cutlistFreeName(base){
+  return Concierge.api('/cutlists').then(function(r){
+    var have = {}; (r.cutlists || []).forEach(function(c){ have[c.name] = 1; });
+    var n = base + ' (copy)', i = 2; while(have[n]) n = base + ' (copy ' + (i++) + ')'; return n;
+  });
+}
+if(window.ToolBar) ToolBar.files({
+  title:'My cut lists', noun:'cut list', member:true,
+  current:function(){ try { return localStorage.getItem(LASTNAME_KEY) || ''; } catch(e){ return ''; } },
+  list:function(){ return Concierge.api('/cutlists').then(function(r){ return (r.cutlists || []).map(function(c){ return { id:c.id, name:c.name, updated:c.updated_at }; }); }); },
+  open:function(it){ loadCutlist(it.id); },
+  save:function(){ saveCutlist(); },
+  upload:function(){ document.getElementById('clUpIn').click(); },
+  rename:function(it, name){
+    return cutlistByName(name).then(function(clash){
+      if(clash && !confirm('There is already a cut list called "' + name + '". Replace it?')) return false;
+      return cutlistGet(it.id).then(function(c){ return cutlistPut(name, c.config); })
+        .then(function(){ return Concierge.api('/cutlists/' + it.id, { method:'DELETE' }); })
+        .then(function(){ try { if(localStorage.getItem(LASTNAME_KEY) === it.name) localStorage.setItem(LASTNAME_KEY, name); } catch(e){} });
+    });
+  },
+  duplicate:function(it){ return Promise.all([cutlistGet(it.id), cutlistFreeName(it.name)]).then(function(r){ return cutlistPut(r[1], r[0].config); }); },
+  download:function(it){ return cutlistGet(it.id).then(function(c){ MyFiles.download(c.name, 'cutlist', c.config); }); },
+  remove:function(it){
+    return cutlistGet(it.id).then(function(c){
+      return Concierge.api('/cutlists/' + it.id, { method:'DELETE' }).then(function(){ return function(){ return cutlistPut(c.name, c.config); }; });
+    });
+  }
+});
+function clUpload(input){
+  var f = input.files[0]; input.value = '';
+  MyFiles.readUpload(f).then(function(o){
+    if(o.tool !== 'cutlist' || !o.data || !o.data.S) throw new Error('That file is from another tool, not the Cutlist.');
+    restoreConfig(o.data); closeR(); window.scrollTo(0, 0);
+    try { localStorage.setItem(LASTNAME_KEY, o.name || ''); } catch(e){}
+    ToolBar.toast('Opened "' + o.name + '". Use Save to keep it in your account.');
+  }).catch(function(e){ alert(e.message || 'Could not open that file.'); });
+}
+
 function openCutlists(){
+  if(window.ToolBar){ ToolBar.openFiles(); return; }
   if(!memberLoggedIn()){ promptJoin(); return; }
   var ov = document.getElementById('mycl-overlay');
   var body = document.getElementById('mycl-body');

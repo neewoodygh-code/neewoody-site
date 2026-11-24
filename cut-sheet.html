@@ -467,7 +467,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 }
 </style>
 </head>
-<body>
+<body data-tool="cutsheet">
 
 <header class="app-head navy">
   <div class="lockup">
@@ -491,7 +491,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   <div class="container">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="/concierge/" data-cc-home>Carpentry Concierge</a><span class="breadcrumb-sep" aria-hidden="true">›</span>
-      <a href="tools.html">Tools</a><span class="breadcrumb-sep" aria-hidden="true">›</span>
+      <a href="/tools" data-cc-tools>Tools</a><span class="breadcrumb-sep" aria-hidden="true">›</span>
       <span aria-current="page">Cut Sheet</span>
     </nav>
     <img src="images/logo.png" alt="Neewoody Custom Woodwork" style="height:46px;width:auto;object-fit:contain;margin-bottom:.9rem;display:block;filter:invert(1) brightness(1.4)" onerror="this.style.display='none'">
@@ -731,7 +731,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </script>
 
 <footer class="app-foot">
-  <a href="/tools">Free tools</a>
+  <a href="/tools" data-cc-tools>Free tools</a>
   <a href="/concierge/">Carpentry Concierge</a>
   <a href="/contact">Contact</a>
   <a href="/privacy">Privacy</a>
@@ -785,6 +785,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/tool-bar.js?v=20261124"></script>
 <script>
 /* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
    members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
@@ -1304,6 +1305,7 @@ function renderRecent(){
   bar.innerHTML=html; bar.style.display='flex';
 }
 // Full-screen projects library.
+if(window.ToolBar) ToolBar.files({ screen: function(){ openLibrary(); } });   // Files = My projects (2026-11-24)
 function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
 function closeLibrary(){ document.getElementById('projPage').style.display='none'; document.body.style.overflow=''; }
 

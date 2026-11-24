@@ -270,7 +270,7 @@
 </style>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
 </head>
-<body>
+<body data-tool="invoices">
 <header class="app-head navy">
   <div class="lockup">
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
@@ -297,8 +297,8 @@
     <a href="/concierge/directory.html#tools">← Tools</a>
     <span class="sep">·</span>
     <a href="/concierge/directory.html">Member area</a>
-    <span class="sep">·</span>
-    <a href="/concierge/admin.html">Admin</a>
+    <span class="sep" id="igAdminSep" hidden>·</span>
+    <a href="/concierge/admin.html" id="igAdmin" hidden>Admin</a>
     <span class="pill">Carpentry Concierge</span>
   </div>
 
@@ -500,6 +500,7 @@
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
+<script src="js/tool-bar.js?v=20261124"></script>
 <script src="js/tool-settings.js?v=20261124"></script>
 <script>
 /* ============================================================
@@ -1066,6 +1067,7 @@ function saveInvoice(){
   setList(list);
   toast('Saved · '+ (snap.number||'invoice'));
 }
+if(window.ToolBar) ToolBar.files({ screen: function(){ openLib(); } });   // Files = My invoices (2026-11-24)
 function openLib(){ renderLib(); document.getElementById('libOverlay').classList.add('on'); }
 function closeLib(){ document.getElementById('libOverlay').classList.remove('on'); }
 function renderLib(){
@@ -1349,6 +1351,7 @@ async function boot(){
   catch(err){ if(err&&err.status===401){ location.replace(LOGIN); return; } showGate('Could not load your account','Check your connection and try again.',true); return; }
   if(!me){ showGate('Could not load your account','Check your connection and try again.',true); return; }
   MEMBER_LOGO_URL = me.logo_url || me.photo_url || '';
+  if (me.role === 'admin') { document.getElementById('igAdmin').hidden = false; document.getElementById('igAdminSep').hidden = false; }
 
   // First time ever on this account (no saved settings anywhere yet): seed a
   // real starting letterhead. Admin keeps the actual Neewoody template

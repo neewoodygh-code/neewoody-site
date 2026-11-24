@@ -134,7 +134,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 }
 </style>
 </head>
-<body class="app">
+<body class="app" data-tool="smart">
 
 <header class="app-head navy">
   <div class="lockup">
@@ -311,7 +311,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
       <h3>My files</h3>
       <div class="filebar" role="group" aria-label="My files">
     <button type="button" class="ui-btn sm ghost" id="fSave">Save to My files</button>
-    <button type="button" class="ui-btn sm ghost" id="fOpen">Open from My files</button>
+    <button type="button" class="ui-btn sm ghost" id="fOpen">Files: open, rename, delete…</button>
     <button type="button" class="ui-btn sm ghost" id="fDown">Download file</button>
     <button type="button" class="ui-btn sm ghost" id="fUp">Upload file</button>
     <input type="file" id="fUpIn" accept=".json,application/json" hidden>
@@ -322,11 +322,13 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
   </div>
   <div class="conbar no-print" role="group" aria-label="Use this design">
     <button type="button" class="ui-btn sm" id="cbSend">Send to the Cut Sheet</button>
+    <button type="button" class="ui-btn sm ghost" id="cbFiles">Files</button>
     <button type="button" class="ui-btn sm ghost" id="cbMore">More options</button>
   </div>
   <script>
     // the bottom bar (phones and tablets) works the same as the console buttons
     document.getElementById('cbSend').addEventListener('click', function () { document.getElementById('toSheet').click(); });
+    document.getElementById('cbFiles').addEventListener('click', function () { if (window.ToolBar) ToolBar.openFiles(); });
     document.getElementById('cbMore').addEventListener('click', function () {
       var c = document.querySelector('.console'); c.scrollIntoView({ behavior: 'smooth', block: 'start' });
       document.getElementById('conTitle').setAttribute('tabindex', '-1'); document.getElementById('conTitle').focus({ preventScroll: true });
@@ -345,6 +347,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 
 <script src="js/concierge.js?v=20261113b"></script>
 <script src="js/my-files.js?v=20261123b"></script>
+<script src="js/tool-bar.js?v=20261124"></script>
 <script>
 (function(){ var m = window.Concierge && Concierge.tokenAlive && Concierge.tokenAlive();
   document.querySelectorAll('[data-cc-home]').forEach(function(a){ a.href = m ? '/concierge/profile.html' : '/concierge/'; });
@@ -659,13 +662,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         .then(function (f) { curFile = f; showCur(); });
     }).catch(function (e) { alert(MyFiles.err(e)); });
   };
-  $('fOpen').onclick = function () {
-    if (!needMember('Opening My files')) return;
-    Promise.all([MyFiles.clients(), MyFiles.list()]).then(function (r) {
-      fileClients = r[0];
-      return MyFiles.pickDialog('Open a design', r[1].filter(function (f) { return f.tool === 'smart'; }), fileClients);
-    }).then(function (f) { if (f) openFile(f.id); }).catch(function (e) { alert(MyFiles.err(e)); });
-  };
+  $('fOpen').onclick = function () { if (window.ToolBar) ToolBar.openFiles(); };
   $('fDown').onclick = function () {
     if (!needMember('Downloading a design file')) return;
     MyFiles.download(curFile ? curFile.name : defaultName(), 'smart', design());
@@ -680,6 +677,40 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     }).catch(function (e) { alert(e.message || 'Could not open that file.'); });
   };
   $('exDae').onclick = function () { exp('dae'); };
+
+  // The shared Files panel (js/tool-bar.js, 2026-11-24): open, rename, duplicate, move, download and delete (with Undo)
+  // without leaving the tool. Same /api/files storage as before.
+  function afterEdit(it) { return function (f) { if (curFile && curFile.id === it.id) { curFile = f; showCur(); } }; }
+  if (window.ToolBar) ToolBar.files({
+    title: 'Smart Generator designs', noun: 'design', member: true,
+    current: function () { return curFile ? curFile.name : ''; },
+    list: function () {
+      return Promise.all([MyFiles.clients(), MyFiles.list()]).then(function (r) {
+        fileClients = r[0]; var nm = {}; r[0].forEach(function (c) { nm[c.id] = c.name; });
+        return r[1].filter(function (f) { return f.tool === 'smart'; }).map(function (f) {
+          return { id: f.id, name: f.name, where: (nm[f.client_id] || '') + (f.job ? ' › ' + f.job : ''), updated: f.updated_at, f: f };
+        });
+      });
+    },
+    open: function (it) { openFile(it.id); },
+    save: function () { $('fSave').click(); },
+    upload: function () { $('fUp').click(); },
+    rename: function (it, name) { return MyFiles.update(it.id, { name: name }).then(afterEdit(it)); },
+    move: function (it) {
+      return MyFiles.folderDialog({ title: 'Move "' + it.name + '"', askName: false, clientId: it.f.client_id, job: it.f.job, clients: fileClients, files: [], primary: 'Move' })
+        .then(function (r) { if (!r) return false; return MyFiles.update(it.id, { client_id: r.client_id, job: r.job }).then(afterEdit(it)); });
+    },
+    duplicate: function (it) { return MyFiles.get(it.id).then(function (f) { return MyFiles.create({ tool: 'smart', name: f.name + ' (copy)', client_id: f.client_id, job: f.job, data: f.data }); }); },
+    download: function (it) { return MyFiles.get(it.id).then(function (f) { MyFiles.download(f.name, 'smart', f.data); }); },
+    remove: function (it) {
+      return MyFiles.get(it.id).then(function (f) {
+        return MyFiles.remove(it.id).then(function () {
+          if (curFile && curFile.id === it.id) { curFile = null; showCur(''); }
+          return function () { return MyFiles.create({ tool: 'smart', name: f.name, client_id: f.client_id, job: f.job, data: f.data }); };
+        });
+      });
+    }
+  });
 
   /* ---------------- KITCHEN editor (2026-11-21): runs of units, built by SmartEngine kitchen() ---------------- */
   // a browser holding an older engine file (no kitchens) must not break the wardrobe side: hide the switch instead

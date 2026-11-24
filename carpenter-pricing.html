@@ -78,7 +78,7 @@
   </style>
 <link rel="icon" href="/images/concierge/cc-mark.svg" type="image/svg+xml"><link rel="icon" href="/images/concierge/cc-icon-64.png" type="image/png"><link rel="apple-touch-icon" href="/images/concierge/cc-icon-180.png">
 </head>
-<body>
+<body data-tool="pricing">
 <header class="app-head navy">
   <div class="lockup">
     <a class="lockup-nw" href="/" aria-label="Neewoody Custom Woodwork, home"><img src="/images/brand/logo-light.png" alt="" width="1000" height="333"></a>
@@ -90,6 +90,7 @@
 </header>
 <div id="root"></div>
 <script src="js/tool-settings.js?v=20261124"></script>
+<script src="js/tool-bar.js?v=20261124"></script>
 <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
@@ -2318,6 +2319,8 @@ function App() {
     if (window.ToolSettings) window.ToolSettings.local('Overhead costs, tools and letterhead options →', () => setScreen('settings'));
     return () => window.removeEventListener('nw-settings', onShared);
   }, []);
+  // the tool bar's Files button opens the quotes dashboard (2026-11-24)
+  useEffect(() => { if (window.ToolBar) ToolBar.files({ screen: () => { setScreen(s => (s === 'loading' || s === 'login') ? s : 'dashboard'); window.scrollTo(0, 0); } }); }, []);
   useEffect(() => { if (screen === 'dashboard' && location.hash === '#settings-overhead') { history.replaceState(null, '', location.pathname); setScreen('settings'); } }, [screen]);
 
   // `client` is optional — {id, name} to start the quote already linked to a
