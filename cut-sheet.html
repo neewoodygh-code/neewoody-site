@@ -785,7 +785,8 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
-<script src="js/tool-bar.js?v=20261124"></script>
+<script src="js/tool-bar.js?v=20261124b"></script>
+<script src="js/my-files.js?v=20261123b"></script>
 <script>
 /* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
    members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
@@ -1035,6 +1036,7 @@ async function cloudSync(){
   var libOpen=document.getElementById('projPage'); if(libOpen && libOpen.style.display!=='none') renderLibrary();
   if(merged.length) projStatus('☁ Synced with your account — '+merged.length+' project'+(merged.length!==1?'s':''));
   migrateProjectsToClients();
+  csDeepLink();
 }
 
 // ── CLIENTS (shared registry — also used by the Job Pricing tool) ──
@@ -1305,7 +1307,71 @@ function renderRecent(){
   bar.innerHTML=html; bar.style.display='flex';
 }
 // Full-screen projects library.
-if(window.ToolBar) ToolBar.files({ screen: function(){ openLibrary(); } });   // Files = My projects (2026-11-24)
+// The shared Files panel (js/tool-bar.js, 2026-11-24): every cut list in every project, without leaving the sheet.
+// Same storage as My projects (this device + account sync); My projects stays for printing several lists at once.
+function csItems(){ var out=[]; projStore().forEach(function(p){ (p.lists||[]).forEach(function(l){ out.push({ id:p.id+'|'+l.id, pid:p.id, lid:l.id, name:l.name, where:p.name, updated:new Date(l.savedAt||p.updatedAt||0).toISOString() }); }); }); return out; }
+function csFreeName(proj, base){ var have={}; proj.lists.forEach(function(l){ have[l.name.toLowerCase()]=1; }); var n=base+' (copy)', i=2; while(have[n.toLowerCase()]) n=base+' (copy '+(i++)+')'; return n; }
+function csProjectNamed(arr, name){ var d=null; arr.forEach(function(x){ if(!d && x.name.toLowerCase()===name.toLowerCase()) d=x; }); if(!d){ var now=Date.now(); d={ id:'j'+now, name:name, updatedAt:now, lists:[] }; arr.unshift(d); } return d; }
+if(window.ToolBar) ToolBar.files({
+  title:'Cut lists', noun:'cut list',
+  current:function(){ return curListId ? printLabel() : ''; },
+  more:[['All projects', function(){ openLibrary(); }], ['New cut list', function(){ newList(); }]],
+  list:function(){ return csItems(); },
+  open:function(it){ loadList(it.pid, it.lid); window.scrollTo(0,0); },
+  save:function(){ saveCurrentList(); },
+  upload:function(){ ToolBar.pickFile(function(f){ MyFiles.readUpload(f).then(csImport).catch(function(e){ alert(e.message || 'Could not open that file.'); }); }); },
+  rename:function(it, name){
+    var arr=projStore(), p=findProj(arr,it.pid), l=findList(p,it.lid); if(!l) return false;
+    l.name=name; l.savedAt=Date.now(); p.updatedAt=Date.now();
+    if(it.lid===curListId){ U.listName=name; document.getElementById('s-listname').value=name; save(); renderAll(); }
+    projSave(arr); renderListChips();
+  },
+  duplicate:function(it){
+    var arr=projStore(), p=findProj(arr,it.pid), l=findList(p,it.lid); if(!l) return false; var now=Date.now();
+    p.lists.unshift({ id:'l'+now, name:csFreeName(p,l.name), savedAt:now, data:JSON.parse(JSON.stringify(l.data||{})) }); p.updatedAt=now;
+    projSave(arr); renderListChips(); renderProjectCount();
+  },
+  move:function(it){
+    var to=(prompt('Move "'+it.name+'" to which project? Type the project\'s name (a new name makes a new project).', it.where)||'').trim();
+    if(!to || to.toLowerCase()===it.where.toLowerCase()) return false;
+    var arr=projStore(), p=findProj(arr,it.pid), l=findList(p,it.lid); if(!l) return false;
+    var dest=csProjectNamed(arr,to), now=Date.now();
+    p.lists=p.lists.filter(function(x){ return x.id!==l.id; }); dest.lists.unshift(l); dest.updatedAt=now;
+    if(!p.lists.length) arr=arr.filter(function(x){ return x.id!==p.id; });
+    if(it.lid===curListId){ curProjId=dest.id; U.proj=dest.name; document.getElementById('s-proj').value=dest.name; save(); renderAll(); }
+    projSave(arr); renderListChips(); renderProjectCount(); linkProjectToClient(dest, arr);
+  },
+  download:function(it){ var p=findProj(projStore(),it.pid), l=findList(p,it.lid); if(l) MyFiles.download(p.name+' - '+l.name, 'cutsheet', { project:p.name, list:l.name, data:l.data }); },
+  remove:function(it){
+    var arr=projStore(), p=findProj(arr,it.pid), l=findList(p,it.lid); if(!l) return null;
+    var pcopy=JSON.parse(JSON.stringify(p)), lcopy=JSON.parse(JSON.stringify(l)), idx=p.lists.indexOf(l);
+    p.lists.splice(idx,1); if(it.lid===curListId) curListId=null;
+    if(!p.lists.length){ arr=arr.filter(function(x){ return x.id!==p.id; }); if(curProjId===p.id) curProjId=null; }
+    projSave(arr); save(); renderListChips(); renderProjectCount();
+    return function(){
+      var a2=projStore(), p2=findProj(a2,pcopy.id);
+      if(!p2) a2.unshift(pcopy); else if(!findList(p2,lcopy.id)) p2.lists.splice(Math.min(idx,p2.lists.length),0,lcopy);
+      projSave(a2); renderListChips(); renderProjectCount();
+    };
+  }
+});
+function csImport(o){
+  if(o.tool!=='cutsheet' || !o.data || !o.data.data) throw new Error('That file is from another tool, not the Cut Sheet.');
+  var arr=projStore(), dest=csProjectNamed(arr, o.data.project||'Loose cut lists'), now=Date.now();
+  var l={ id:'l'+now, name:o.data.list||o.name||'Cut list', savedAt:now, data:o.data.data };
+  dest.lists.unshift(l); dest.updatedAt=now; projSave(arr);
+  loadList(dest.id, l.id); ToolBar.toast('Opened "'+l.name+'" in '+dest.name+'.');
+}
+// My files on Home links here as #project=<id> (or #list=<project>|<list>): open that project's newest list.
+// Tried on load and again once the account's projects have synced in (they may only live on another device).
+var csLinkDone=false;
+function csDeepLink(){
+  var m=location.hash.match(/^#(project|list)=(.+)$/); if(csLinkDone || !m) return;
+  var v=decodeURIComponent(m[2]), pid=m[1]==='project'?v:v.split('|')[0], lid=m[1]==='list'?v.split('|')[1]:null;
+  var p=findProj(projStore(),pid); if(!p || !p.lists.length) return;
+  if(!lid || !findList(p,lid)) lid=p.lists.slice().sort(function(a,b){ return (b.savedAt||0)-(a.savedAt||0); })[0].id;
+  csLinkDone=true; loadList(pid,lid); history.replaceState(null,'',location.pathname+location.search);
+}
 function openLibrary(){ renderLibrary(); document.getElementById('projPage').style.display=''; document.body.style.overflow='hidden'; }
 function closeLibrary(){ document.getElementById('projPage').style.display='none'; document.body.style.overflow=''; }
 
@@ -2038,6 +2104,7 @@ function clearAll(){
   if(bar) bar.style.display='flex';
   fetchSession();   // async: adopt the member's own logo & number if signed in
   takeSmartHandoff();
+  csDeepLink();
 })();
 // Parts passed on from the Smart Generator (experimental, smart-generator.html). Read once, then removed.
 // Never overwrites the open list silently: a list with parts is saved (or the user is asked) by newList() first.

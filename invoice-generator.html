@@ -500,7 +500,8 @@
 </div>
 
 <script src="js/concierge.js?v=20261113b"></script>
-<script src="js/tool-bar.js?v=20261124"></script>
+<script src="js/tool-bar.js?v=20261124b"></script>
+<script src="js/my-files.js?v=20261123b"></script>
 <script src="js/tool-settings.js?v=20261124"></script>
 <script>
 /* ============================================================
@@ -1067,7 +1068,35 @@ function saveInvoice(){
   setList(list);
   toast('Saved · '+ (snap.number||'invoice'));
 }
-if(window.ToolBar) ToolBar.files({ screen: function(){ openLib(); } });   // Files = My invoices (2026-11-24)
+// The shared Files panel (js/tool-bar.js, 2026-11-24): open, duplicate, download, upload and delete (with Undo) saved
+// documents without leaving the page. Same storage as My invoices (this device + account sync).
+function invName(e){ var c=(e.client||'').split(/\n/)[0]; return docLabel(e.docType)+' '+(e.number||'')+(c?' · '+c:''); }
+if(window.ToolBar) ToolBar.files({
+  title:'Invoices, quotes and receipts', noun:'document', member:true,
+  current:function(){ return INV && INV.savedId ? invName(INV) : ''; },
+  more:[['New', function(){ newInvoice(); }]],
+  list:function(){ return getList().map(function(e){ return { id:e.savedId, name:invName(e), where:e.project||'', updated:new Date(e.savedAt||0).toISOString() }; }); },
+  open:function(it){ loadInvoice(it.id); window.scrollTo(0,0); },
+  save:function(){ saveInvoice(); },
+  upload:function(){ ToolBar.pickFile(function(f){ MyFiles.readUpload(f).then(function(o){
+    if(o.tool!=='invoice' || !o.data) throw new Error('That file is from another tool, not Invoices.');
+    INV=JSON.parse(JSON.stringify(o.data)); INV.savedId=null; if(!INV.currency) INV.currency='GH₵';
+    persist(); syncForm(); renderItems(); renderDoc(); syncBalance(); toast('Opened "'+o.name+'". Press Save to keep it.');
+  }).catch(function(e){ alert(e.message || 'Could not open that file.'); }); }); },
+  duplicate:function(it){ dupInvoice(it.id); saveInvoice(); },
+  download:function(it){ var e=getList().find(function(x){ return x.savedId===it.id; }); if(e) MyFiles.download(invName(e), 'invoice', e.data); },
+  remove:function(it){
+    var all=getList(), e=all.find(function(x){ return x.savedId===it.id; }); if(!e) return null;
+    setList(all.filter(function(x){ return x.savedId!==it.id; }));
+    return function(){ var l=getList(); if(!l.some(function(x){ return x.savedId===e.savedId; })){ l.unshift(e); setList(l); } };
+  }
+});
+// My files on Home links here as #invoice=<savedId or number>: open it once the account's list has synced in
+function invDeepLink(){
+  var m=location.hash.match(/^#invoice=(.+)$/); if(!m) return;
+  var v=decodeURIComponent(m[1]), e=getList().find(function(x){ return x.savedId===v || x.number===v; });
+  if(e){ loadInvoice(e.savedId); history.replaceState(null,'',location.pathname+location.search); }
+}
 function openLib(){ renderLib(); document.getElementById('libOverlay').classList.add('on'); }
 function closeLib(){ document.getElementById('libOverlay').classList.remove('on'); }
 function renderLib(){
@@ -1378,6 +1407,7 @@ async function boot(){
   checkHandoff();  // a quote pushed from the Pricing tool → seed a new draft
   // pull the account blob, merge, keep it in sync; then lay the shared business details on top
   Promise.resolve(cloudSync()).catch(function(){}).then(function(){
+    invDeepLink();
     if(window.ToolSettings) window.ToolSettings.loadBusiness().then(function(b){ applySharedBusiness(b); });
   });
   if(window.ToolSettings) window.ToolSettings.seedBusiness=function(){ var o={}; BIZ_KEYS.forEach(function(k){ o[k]=SETTINGS[k]||''; }); return o; };

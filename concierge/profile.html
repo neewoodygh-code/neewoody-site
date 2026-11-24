@@ -407,7 +407,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
 </div>
 <script src="../js/concierge.js?v=20261113b"></script>
 <script src="../js/my-files.js?v=20261123b"></script>
-<script src="../js/whats-new.js?v=20261124g"></script>
+<script src="../js/whats-new.js?v=20261124h"></script>
 <script>
 (function () {
   'use strict';
@@ -748,6 +748,9 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
   // managed here; the older tools (cutlist, Cut Sheet, Job Pricing, invoices) keep their own storage and are only listed.
   var TOOL = { smart: 'Smart Generator', cutlist: 'Cutlist', cutsheet: 'Cut Sheet', quote: 'Job Pricing', invoice: 'Invoice' };
   var OPEN = { cutlist: '/cutlist.html', cutsheet: '/cut-sheet.html', quote: '/carpenter-pricing.html', invoice: '/invoice-generator.html' };
+  // each tool opens the exact item from these (2026-11-24): #cutlist=<id>, #project=<id>, #quote=<id>, #invoice=<savedId>
+  var DEEP = { cutlist: 'cutlist', cutsheet: 'project', quote: 'quote', invoice: 'invoice' };
+  function openHref(r) { return OPEN[r.tool] + (r.ref && DEEP[r.tool] ? '#' + DEEP[r.tool] + '=' + encodeURIComponent(r.ref) : ''); }
   var OPENIN = { cutlist: 'the Cutlist', cutsheet: 'the Cut Sheet', quote: 'Job Pricing', invoice: 'Invoices' };
   var fState = { files: [], clients: [] };
   function fdate(v) {
@@ -821,7 +824,7 @@ header.top{ background:var(--navy); color:var(--cream); padding:1.1rem 1.5rem;
     function row(r, withPath) {
       var f = r.file, path = [r.folder || 'No client', r.job].filter(Boolean).join(' › ');
       return '<div class="frow"><span class="ftool' + (f ? '' : ' old') + '">' + E(TOOL[r.tool] || r.tool) + '</span>' +
-        '<span class="fmain"><a class="fname" href="' + (f ? '/smart-generator.html#file=' + f.id : OPEN[r.tool]) + '">' + E(r.name) + '</a>' +
+        '<span class="fmain"><a class="fname" href="' + (f ? '/smart-generator.html#file=' + f.id : openHref(r)) + '">' + E(r.name) + '</a>' +
         (withPath ? '<span class="fpath">' + E(path) + (f ? '' : ', opens in ' + E(OPENIN[r.tool])) + '</span>' : (f ? '' : '<span class="fpath">Opens in ' + E(OPENIN[r.tool]) + '</span>')) + '</span>' +
         '<span class="fdate">' + E(fdate(r.date)) + '</span>' +
         (f ? '<details class="fmore"><summary aria-label="More for ' + E(r.name) + '">More</summary><div>' +

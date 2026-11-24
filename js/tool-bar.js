@@ -65,7 +65,12 @@
     member: member,
     files: function (a) { adapter = a; },
     openFiles: function () { openFiles(); },
-    toast: function (text, undo) { showToast(text, undo); }
+    toast: function (text, undo) { showToast(text, undo); },
+    // pick a .nwd.json file from the device and hand it to cb (used by every tool's Upload)
+    pickFile: function (cb) {
+      var i = h('input', { type: 'file', accept: '.json,application/json', hidden: '' }); document.body.appendChild(i);
+      i.onchange = function () { var f = i.files[0]; i.remove(); if (f) cb(f); }; i.click();
+    }
   };
 
   function build() {
@@ -119,6 +124,7 @@
     function add(label, fn, go) { var b = h('button', { type: 'button', class: go ? 'go' : '' }, esc(label)); b.onclick = fn; a.appendChild(b); }
     if (adapter.save) add('Save', function () { dlg.close(); Promise.resolve(adapter.save()).then(function () { }); }, true);
     if (adapter.upload) add('Upload a file', function () { dlg.close(); adapter.upload(); });
+    (adapter.more || []).forEach(function (m) { add(m[0], function () { dlg.close(); m[1](); }); });
     dlg.querySelector('#fp-title').textContent = adapter.title || 'Files';
     var c = adapter.current && adapter.current();
     curEl.textContent = c ? 'Open now: ' + c : '';

@@ -90,7 +90,8 @@
 </header>
 <div id="root"></div>
 <script src="js/tool-settings.js?v=20261124"></script>
-<script src="js/tool-bar.js?v=20261124"></script>
+<script src="js/tool-bar.js?v=20261124b"></script>
+<script src="js/my-files.js?v=20261123b"></script>
 <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"></script>
@@ -2291,6 +2292,10 @@ function App() {
       if (!res.ok) return; // carpFetch already redirected on 401
       const h = takeHandoff();
       if (h) { history.replaceState(null, '', location.pathname); fromHandoff(h, res.quotes, res.member); return; }
+      // My files on Home links here as #quote=<id or reference>: open that quote
+      const qm = location.hash.match(/^#quote=(.+)$/);
+      const hit = qm && res.quotes.find(q => q.id === decodeURIComponent(qm[1]) || q.refId === decodeURIComponent(qm[1]));
+      if (hit) { history.replaceState(null, '', location.pathname); setActiveId(hit.id); setScreen('editor'); return; }
       // Always land on the Dashboard — even first time in. It now explains
       // what's left to set up (via a welcome checklist) instead of forcing a
       // settings form on someone before they understand why they're there.
@@ -2319,8 +2324,32 @@ function App() {
     if (window.ToolSettings) window.ToolSettings.local('Overhead costs, tools and letterhead options →', () => setScreen('settings'));
     return () => window.removeEventListener('nw-settings', onShared);
   }, []);
-  // the tool bar's Files button opens the quotes dashboard (2026-11-24)
-  useEffect(() => { if (window.ToolBar) ToolBar.files({ screen: () => { setScreen(s => (s === 'loading' || s === 'login') ? s : 'dashboard'); window.scrollTo(0, 0); } }); }, []);
+  // The shared Files panel (js/tool-bar.js, 2026-11-24): the quotes, without leaving the quote you are in.
+  // live.current always holds this render's state and actions, so the panel never works on a stale list.
+  const live = useRef({});
+  useEffect(() => {
+    if (!window.ToolBar) return;
+    const L = () => live.current;
+    ToolBar.files({
+      title: 'My quotes', noun: 'quote', member: true,
+      current: () => { const q = L().screen === 'editor' && L().quotes.find(x => x.id === L().activeId); return q ? (q.item || 'Untitled item') : ''; },
+      more: [['All quotes (dashboard)', () => { setScreen('dashboard'); window.scrollTo(0, 0); }], ['New quote', () => L().createNew()]],
+      list: () => Promise.resolve(L().quotes.map(q => ({ id: q.id, name: q.item || 'Untitled item', where: [q.client, q.refId].filter(Boolean).join(' · '), updated: q.updatedAt || q.createdAt || '', q }))),
+      open: it => { L().openQuote(it.id); window.scrollTo(0, 0); },
+      rename: (it, name) => L().renameQuote(it.id, name),
+      duplicate: it => L().duplicateQuotes([it.id]),
+      move: it => { const n = prompt('Move "' + it.name + '" to which client? Type the client\'s name.', it.q.client || ''); if (n == null || !n.trim()) return false; return L().moveQuotes([it.id], n.trim()); },
+      download: it => { if (window.MyFiles) MyFiles.download((it.q.refId ? it.q.refId + ' ' : '') + it.name, 'quote', it.q); },
+      upload: () => ToolBar.pickFile(f => MyFiles.readUpload(f).then(o => {
+        if (o.tool !== 'quote' || !o.data) throw new Error('That file is from another tool, not Job Pricing.');
+        L().importQuote(o.data);
+      }).catch(e => alert(e.message || 'Could not open that file.'))),
+      remove: it => {
+        const q = L().quotes.find(x => x.id === it.id); if (!q) return null;
+        return L().saveQuotes(L().quotes.filter(x => x.id !== it.id)).then(() => () => L().saveQuotes(L().quotes.some(x => x.id === q.id) ? L().quotes : [...L().quotes, q]));
+      },
+    });
+  }, []);
   useEffect(() => { if (screen === 'dashboard' && location.hash === '#settings-overhead') { history.replaceState(null, '', location.pathname); setScreen('settings'); } }, [screen]);
 
   // `client` is optional — {id, name} to start the quote already linked to a
@@ -2394,6 +2423,13 @@ function App() {
     });
     return saveQuotes(out);
   };
+  // a quote from a downloaded file becomes a new quote with the next reference
+  const importQuote = data => {
+    let n = Math.max(0, ...quotes.map(q => parseInt((q.refId||'').split('-').pop()) || 0)) + 1;
+    const q = { ...JSON.parse(JSON.stringify(data)), id: uid(), refId: `${refPrefix}-${String(n).padStart(3,'0')}`, createdAt: nowISO(), updatedAt: nowISO() };
+    return saveQuotes([...quotes, q]).then(() => { setActiveId(q.id); setScreen('editor'); });
+  };
+  live.current = { quotes, screen, activeId, createNew, openQuote, renameQuote, duplicateQuotes, moveQuotes, saveQuotes, importQuote };
   const deleteQuotes = ids => {
     const before = quotes;
     const n = ids.length;

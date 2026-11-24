@@ -975,7 +975,7 @@ body.has-price-bar { padding-bottom: 4.2rem; }
 
 <script src="js/concierge.js?v=20261113b"></script>
 <script src="js/my-files.js?v=20261123b"></script>
-<script src="js/tool-bar.js?v=20261124"></script>
+<script src="js/tool-bar.js?v=20261124b"></script>
 <script>
 /* Inside Carpentry Concierge the way "home" is the Concierge, not the Neewoody site (owner 2026-11-17):
    members go to their member area, everyone else to the Concierge front page. Only the NW logo leads to neewoodygh.com. */
@@ -2311,6 +2311,8 @@ function takePlannerHandoff(){
   setTimeout(function(){ generate(); }, 50);
 }
 takePlannerHandoff();
+// My files on Home links here as #cutlist=<id>: open that saved cut list
+(function(){ var m=location.hash.match(/^#cutlist=(\d+)$/); if(m && memberLoggedIn()){ loadCutlist(+m[1]); history.replaceState(null,'',location.pathname+location.search); } })();
 
 </script>
 <script>
