@@ -14,7 +14,14 @@
    No owner figures here: the defaults are the same generic examples Job Pricing uses. */
 (function () {
   'use strict';
-  var API = 'https://concierge-api.neewoodygh.workers.dev/api';
+  // Scroll wheel over a number box you are typing in used to change the number (owner 2026-11-24:
+  // scrolling the page quietly lowered sizes on the cut sheet). Leave the box instead: the page
+  // scrolls and the number stays. This file loads on every member tool page, so it fixes them all.
+  document.addEventListener('wheel', function (e) {
+    var el = e.target;
+    if (el && el.tagName === 'INPUT' && el.type === 'number' && el === document.activeElement) el.blur();
+  }, { passive: true });
+  var API ='https://concierge-api.neewoodygh.workers.dev/api';
   try { API = localStorage.getItem('nwd-api-override') || API; } catch (e) {}
   function token() { try { return localStorage.getItem('nwd-concierge-token') || ''; } catch (e) { return ''; } }
   function alive() {
