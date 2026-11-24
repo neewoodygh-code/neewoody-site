@@ -247,6 +247,7 @@
     if (/chest .*side/.test(n)) return p.a >= p.b ? E(0, 1, 0, 0) : E(1, 0, 0, 0); // front edge = the chest height
     if (n.indexOf('drawer box front') !== -1 || n.indexOf('drawer box back') !== -1 || n.indexOf('front/back') !== -1) return E(1, 1, 0, 1);
     if (n.indexOf('drawer box side') !== -1) return E(1, 0, 0, 0);
+    if (n.indexOf('vertical back rail') !== -1) return E(0, 1, 0, 0);          // L corner back rails: the inner long edge shows (owner 2026-11-24)
     if (n.indexOf('drawer base') !== -1 || n.indexOf('back panel') !== -1 || p.tag === 'frame') return E(0, 0, 0, 0);
     if (n.indexOf('side panel') !== -1 || p.tag === 'panel') return E(1, 0, 1, 1);
     if (n.indexOf('top panel') !== -1 || n.indexOf('bottom panel') !== -1 || n.indexOf('divider') !== -1) return E(0, 1, 0, 0);
@@ -264,7 +265,7 @@
    * Backs are screwed on from the back (applied side panels get +5 mm to cover them); the sink unit has no back.
    * Handles (owner 2026-11-21: a choice per kitchen): K.handle 'jprofile' = every door and drawer front is shortened by
    * the profile height (base: profile on top;
-   * wall: on the bottom). L corner units: top/bottom/shelves are one piece routed out of a blank.
+   * wall: on the bottom). L corner units: top/bottom/shelves are one piece routed out of a rectangle blank; 4 vertical back rails (200 wide: one at each leg end, two making an L in the back corner) instead of horizontal back rails.
    * Toe kick: bought in 3 m lengths (one long board per run), set back 80; it is hardware, not on the cut list.
    * Spec: { type:'kitchen', worktop:900, room:{w}, runs:[{name, wall:'back'|'left'|'right', at, depth, kind:'base'|'wall',
    *   bottom, height, units:[...]}], shop }. Unit types: 'base' (drawers:[h top to bottom] or doors:n), 'sink',
@@ -282,7 +283,7 @@
    *    are back to back pairs (u.name and u.name2) with bottom-rolling sliding doors (owner).
    *  - laundry: a base run with carcTop (top of the carcass under the board) and units with frontTop (doors stop
    *    under the worktop lip); run.items = bought items (welded frame, moisture-resistant board). */
-  var KSHOP = { handle: 'jprofile', sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3,
+  var KSHOP = { cornerPost: 200, handle: 'jprofile', sinkRail: 60, legH: 100, edgeDrop: 40, jH: 35, rail: 80, toeSet: 80, toeLen: 3000, wallShelfSet: 20, baseShelfSet: 50, panelExtra: 5, backThick: 3,
     board: '4x8', tallTop: 2700, bandH: 100, slideTrack: 15, slideOverlap: 30, ovenW: 560, ovenH: 600,
     // owner 2026-11-23: drawer boxes sit lower than their fronts; Accra sliding tracks (flat bottom, bigger top) need the
     // carcass set back by the track depth; pulls go at hand height; island top panel = the quartz less its doubled edge
@@ -578,10 +579,12 @@
         // L pieces: one blank each, routed; the return part is drawn but not cut separately
         // one rectangle the size of the L (owner 2026-11-24: the rectangle, not a square); the L is cut out in the workshop
         var bL = R(Lb - t - bt), bR = R(Lr - t - bt), blank = [Math.max(bL, bR), Math.min(bL, bR)];
-        function Lpiece(nm, y, note) {
-          var o = putM(nm + lbl, 'carcass', '', x0 + bt, y, 0, Lb - t - bt, t, dC, ['x', 'z'], note);
+        // ins: shelves stop t short of the backs in the drawing (they are notched round the vertical back rails)
+        function Lpiece(nm, y, note, ins) {
+          ins = ins || 0;
+          var o = putM(nm + lbl, 'carcass', '', x0 + bt + ins, y, 0, Lb - t - bt - ins, t, dC - ins, ['x', 'z'], note);
           o.cut = blank;
-          putM(nm + ' (return part)' + lbl, 'carcass', 'Lpart', x0 + bt, y, zR0 + bt + t, dR, t, -zR0 - bt - t, null, '');
+          putM(nm + ' (return part)' + lbl, 'carcass', 'Lpart', x0 + bt + ins, y, zR0 + bt + t, dR - ins, t, -zR0 - bt - t, null, '');
         }
         Lpiece('L Bottom, routed', y0, 'shop cuts a ' + blank[0] + ' x ' + blank[1] + ' rectangle; cut the L out of it in the workshop, inner corner out (back leg ' + R(dC) + ' deep, return ' + R(dR) + ' deep); band the two inner front edges by hand');
         if (base) {
@@ -594,11 +597,14 @@
         } else {
           Lpiece('L Top, routed', y1 - t, 'same blank as the bottom');
         }
-        for (var i = 1; i <= (u.shelves || 0); i++) Lpiece('L Shelf, routed', y0 + t + i * (Hh - 2 * t) / ((u.shelves || 0) + 1) - t / 2, 'routed L, fixed (one piece)');
-        putM('Back Rail, upright top' + lbl, 'frame', '', x0 + bt, y1 - t - K.rail - (base ? t : 0), dC - t, Lb - t - bt, K.rail, t, ['x', 'y'], 'screw through to the wall');
-        putM('Back Rail, upright bottom' + lbl, 'frame', '', x0 + bt, y0 + t, dC - t, Lb - t - bt, K.rail, t, ['x', 'y']);
-        putM('Back Rail, upright top (return)' + lbl, 'frame', '', x0 + bt, y1 - t - K.rail - (base ? t : 0), zR0 + bt + t, t, K.rail, dC - t - zR0 - bt - t, ['z', 'y']);
-        putM('Back Rail, upright bottom (return)' + lbl, 'frame', '', x0 + bt, y0 + t, zR0 + bt + t, t, K.rail, dC - t - zR0 - bt - t, ['z', 'y']);
+        for (var i = 1; i <= (u.shelves || 0); i++) Lpiece('L Shelf, routed', y0 + t + i * (Hh - 2 * t) / ((u.shelves || 0) + 1) - t / 2, 'routed L, fixed (one piece); notch it round the 4 vertical back rails', t);
+        // 4 VERTICAL back rails (owner 2026-11-24), between the bottom and the top panel / top rails: one at the back
+        // of each leg's end, and two making an L in the back corner. They square the L and are screwed to the wall.
+        var vH = Hh - 2 * t, vW = K.cornerPost, vn = 'Vertical Back Rail' + lbl, vnote = 'screw through to the wall';
+        putM(vn, 'frame', '', x0 + Lb - t - vW, y0 + t, dC - t, vW, vH, t, ['y', 'x'], 'at the end of the back leg; ' + vnote);
+        putM(vn, 'frame', '', x0 + bt, y0 + t, dC - t, vW, vH, t, ['y', 'x'], 'back corner, along the back leg; ' + vnote);
+        putM(vn, 'frame', '', x0 + bt, y0 + t, dC - t - vW, t, vH, vW, ['y', 'z'], 'back corner, along the return (makes the L with the one beside it); ' + vnote);
+        putM(vn, 'frame', '', x0 + bt, y0 + t, zR0 + bt + t, t, vH, vW, ['y', 'z'], 'at the end of the return; ' + vnote);
         putM('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, dC, Lb, Hh, bt, ['x', 'y']);
         putM('Back Panel, return (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, zR0, bt, Hh, dC - zR0, ['z', 'y']);
         // bi-fold pair across the inside corner
