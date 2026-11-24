@@ -1357,6 +1357,19 @@ if(window.ToolBar) ToolBar.files({
 });
 function csImport(o){
   if(o.tool!=='cutsheet' || !o.data || !o.data.data) throw new Error('That file is from another tool, not the Cut Sheet.');
+  // add it to the list that is open (owner 2026-11-24: merge drawer parts into the matte and gloss sheets), or open it on its own
+  var add=o.data.data, inc=(add.parts||[]).filter(function(p){ return !isEmptyPart(p); });
+  if(hasContent() && inc.length && confirm('Add the '+inc.length+' rows from "'+(o.data.list||o.name)+'" to the cut list you have open'+(printLabel()?' ('+printLabel()+')':'')+'?\n\nCancel opens it as a cut list of its own instead.')){
+    parts=parts.filter(function(p){ return !isEmptyPart(p); });
+    inc.forEach(function(p){
+      var id=uid(), e=(add.ebState||{})[p.id]||{};
+      parts.push({ id:id, name:String(p.name||''), L:+p.L||0, W:+p.W||0, qty:Math.max(1,+p.qty||1), code:String(p.code||'') });
+      ebState[id]={ t:e.t||0, r:e.r||0, b:e.b||0, l:e.l||0, gflip:!!e.gflip };
+    });
+    renderParts(); renderAll(); save(); persistCurrentList();
+    ToolBar.toast(curListId ? 'Added '+inc.length+' rows to this cut list (saved).' : 'Added '+inc.length+' rows. Press Save to keep them.');
+    return;
+  }
   var arr=projStore(), dest=csProjectNamed(arr, o.data.project||'Loose cut lists'), now=Date.now();
   var l={ id:'l'+now, name:o.data.list||o.name||'Cut list', savedAt:now, data:o.data.data };
   dest.lists.unshift(l); dest.updatedAt=now; projSave(arr);
