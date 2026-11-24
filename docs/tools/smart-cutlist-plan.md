@@ -209,3 +209,7 @@ Each step ships on its own and is useful without the next one.
 - Name on the member tools page: "Smart generator" (owner liked it) or "Smart cut list"?
 - Should the Construction standard also become an Academy series? It's the knowledge members can't get anywhere else.
 - Member-first per the tools rule (the wardrobe cutlist stays free). Does the AI part need a usage cap beyond membership?
+
+## Trained on the owner's own cut sheets (2026-11-24)
+
+The owner cut Amina's kitchen by hand on the Cut Sheet; the differences from the generator were listed and he asked for the engine to be trained on them, leaving faces shortened by the J-profile setting. Now standard in `KSHOP` (all editable): `sinkRail` 80 (trimmed on site), `panelExtra` 7, `kEdge` 2.5 / `kGap` 5, `adjFull`, `tallBase: 'plinth'`, `panelJoint: 'board'`, `shelfWhole`, `cubbyRebate`, `fillScribe` 20 / `fillSupport` 80, base L corners with a full L top, kitchen banding by `p.kit`. Island `run.frame`: `islandDrawerD` 580, `frameGap` 350, `slideInD` 91, `slideInTrack` 20, `slideInOverlap` 96. Amina's spec in `scripts/test-kitchen-prampram.mjs` (FULL) and `smart-generator.html#prampram` match his build (tall panels both sides, scribe allowance A 45 and K 75, A's lower box 1500, right-wall cabinets 1360 with an end panel, F upper end panel). Left as they were: D's hob rails (his own rule), cubby divider depth (stops at the back rail), island frame length 1660 vs his 1664.

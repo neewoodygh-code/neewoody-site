@@ -39,8 +39,10 @@ export const SPEC = {
       { type: 'wall', name: 'E upper 2', w: 575, doors: 1, shelves: 3, fixed: 1 },
       { type: 'filler', name: 'over E|F', w: 18 },
       { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
+      { type: 'panel', name: 'F upper end', h: 1320 },                             // owner's sheet: up past the cabinet to the ceiling, scribed
     ] },
-    { name: 'Right wall, wall cabinets', wall: 'right', at: 800, off: OFF, depth: 280, kind: 'wall', bottom: 1335, height: 1365, ceilingFiller: 100, units: [
+    { name: 'Right wall, wall cabinets', wall: 'right', at: 782, off: OFF, depth: 280, kind: 'wall', bottom: 1335, height: 1360, ceilingFiller: 100, units: [
+      { type: 'panel', name: 'G upper end', h: 1490 },                             // owner's sheet: the open end by the empty corner, to the ceiling
       { type: 'wall', name: 'G upper', w: 400, doors: 1, shelves: 3, fixed: 1 },
       { type: 'wall', name: 'H upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
       { type: 'wall', name: 'I upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
@@ -54,19 +56,24 @@ export const SPEC = {
 // with Accra sliding doors). Run with --full. A's insides follow the appliances (owner 2026-11-23): oven 595 high in a
 // 600 niche; the freestanding microwave (275 high, 374 deep) in a 400 space; the island where Amina drew it: top 1200 x 2000
 // from x 1500 and z 1600, base 800 deep centred under it, 300 overhang at the window end.
-export const FULL = { ...SPEC, tallTop: 2700, runs: [
+// Trained on the owner's own cut sheets (2026-11-24): tall units on a built-in plinth with a panel on both sides
+// (scribe allowance A 45, K 75), A's lower box 1500 (microwave space 528) as on his sheet, Temax undermount runners,
+// and the island on a frame: drawer unit 764 facing the end, B1/B2 391 deep back to back on one 18 mm back.
+export const FULL = { ...SPEC, tallTop: 2700, kshop: { runner: 'under' }, runs: [
   ...SPEC.runs.map(r => r.name !== 'Right wall, base' ? r : { ...r, units: [...r.units,
+    { type: 'panel', name: 'J|K', h: 2700, extraD: 75 },
     { type: 'tall', name: 'K', w: 800, fold: true, zones: [
       { k: 'drawer', h: 300, n: 1 }, { k: 'drawer', h: 300, n: 2 }, { k: 'drawer', h: 200, n: 3 },
       { k: 'cubby', h: 300, rows: 2, cols: 3 }, { k: 'split' }, { k: 'shelves', h: 0, n: 4 }] },
-    { type: 'panel', name: 'K end', h: 2700, extraD: 12 }] }),
+    { type: 'panel', name: 'K end', h: 2700, extraD: 75 }] }),
   { name: 'Left wall, tall', wall: 'left', at: 1012, off: OFF, depth: 580, kind: 'base', units: [
-    { type: 'tall', name: 'A', w: 600, zones: [
-      { k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 400 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
-    { type: 'panel', name: 'A end', h: 2700 }] },
-  { name: 'Island', kind: 'island', x: 1700, z: 1600, axis: 'z', depth: 800, top: 1100, topW: 1200, ohStart: 0, ohEnd: 300, units: [
-    { type: 'base', name: 'Island A', w: 600, drawers: [150, 200, 250, 300] },
-    { type: 'slide', name: 'B1', name2: 'B2', w: 1100, shelves: 1 }] },
+    { type: 'panel', name: 'B|A', h: 2700, extraD: 45 },
+    { type: 'tall', name: 'A', w: 600, note: 'lower box 1500 on the plinth as on the owner\'s sheet: the microwave space is 528 high', zones: [
+      { k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 528 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
+    { type: 'panel', name: 'A end', h: 2700, extraD: 45 }] },
+  { name: 'Island', kind: 'island', frame: true, x: 1700, z: 1600, axis: 'z', depth: 800, top: 1100, topW: 1200, ohStart: 0, ohEnd: 300, units: [
+    { type: 'base', name: 'Island A', w: 764, drawers: [150, 200, 250, 300] },
+    { type: 'slide', name: 'B1', name2: 'B2', w: 1080, shelves: 1 }] },
 ] };
 
 // The laundry (owner's brief 2026-11-18): 127 wide, 180 long. Width side: floating quartz on a welded frame over

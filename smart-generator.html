@@ -352,7 +352,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261124c"></script>
+<script src="js/smart/engine.js?v=20261124d"></script>
 <script src="js/smart/price.js?v=20261123b"></script>
 <script src="js/pricing-handoff.js?v=20261123"></script>
 <script src="js/cutlist-3d.js?v=20261123"></script>
@@ -683,7 +683,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   var KOK = !!SmartEngine.KSHOP;
   var KPREFS = 'nwd-smart-kprefs', KSTATE = 'nwd-smart-kitchen', MODE = 'nwd-smart-mode', K0 = SmartEngine.KSHOP || {};
   var KCONS = { 'k-thick': SH.thick, 'k-bthick': K0.backThick, 'k-leg': K0.legH, 'k-jh': K0.jH, 'k-rail': K0.rail, 'k-srail': K0.sinkRail,
-    'k-edge': SH.edgeClear, 'k-dgap': SH.doorGap, 'k-run': SH.runGap,
+    'k-edge': K0.kEdge != null ? K0.kEdge : SH.edgeClear, 'k-dgap': K0.kGap != null ? K0.kGap : SH.doorGap, 'k-run': SH.runGap,
     'k-ddrop': K0.drawerDrop, 'k-dmin': K0.drawerMin, 'k-reach': K0.reach, 'k-sld': K0.slideD, 'k-runner': K0.runner || 'side', 'k-umside': K0.umSide, 'k-umded': K0.umDeduct, 'k-umrec': K0.umRecess, 'k-umshort': K0.umShort, 'k-slb': K0.slideBot, 'k-slt': K0.slideTop };
   var KGROUPS = { carcass: 'Carcass', frame: 'Rails', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', panel: 'Side panels and fillers' };
   var UTYPES = { base: 'Base unit', sink: 'Sink unit', wall: 'Wall unit', blind: 'Blind corner', cornerL: 'L corner (special)', tall: 'Tall unit', slide: 'Sliding doors, back to back', panel: 'Side panel', filler: 'Filler', gap: 'Gap' };
@@ -826,8 +826,10 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         { type: 'wall', name: 'E upper 1', w: 575, doors: 1, shelves: 3, fixed: 1 },
         { type: 'wall', name: 'E upper 2', w: 575, doors: 1, shelves: 3, fixed: 1 },
         { type: 'filler', name: 'over E|F', w: 18 },
-        { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 3, fixed: 1 } ] },
-      { name: 'Right wall, wall cabinets', wall: 'right', at: 800, off: 12, depth: 280, kind: 'wall', bottom: 1335, height: 1365, ceilingFiller: 100, units: [
+        { type: 'wall', name: 'F upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
+        { type: 'panel', name: 'F upper end', h: 1320 } ] },
+      { name: 'Right wall, wall cabinets', wall: 'right', at: 782, off: 12, depth: 280, kind: 'wall', bottom: 1335, height: 1360, ceilingFiller: 100, units: [
+        { type: 'panel', name: 'G upper end', h: 1490 },
         { type: 'wall', name: 'G upper', w: 400, doors: 1, shelves: 3, fixed: 1 },
         { type: 'wall', name: 'H upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
         { type: 'wall', name: 'I upper', w: 600, doors: 1, shelves: 3, fixed: 1 },
@@ -842,13 +844,14 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   };
   // the U example plus the tall units, the pantry and the island (scripts/test-kitchen-prampram.mjs --full)
   EX.prampram = JSON.parse(JSON.stringify(EX.prampramU)); EX.prampram.tallTop = 2700; EX.full = EX.prampram;
-  EX.full.runs[1].units.push({ type: 'tall', name: 'K', w: 800, fold: true, zones: [{ k: 'drawer', h: 300, n: 1 }, { k: 'drawer', h: 300, n: 2 }, { k: 'drawer', h: 200, n: 3 },
-    { k: 'cubby', h: 300, rows: 2, cols: 3 }, { k: 'split' }, { k: 'shelves', h: 0, n: 4 }] }, { type: 'panel', name: 'K end', h: 2700, extraD: 12 });
+  EX.full.runs[1].units.push({ type: 'panel', name: 'J|K', h: 2700, extraD: 75 }, { type: 'tall', name: 'K', w: 800, fold: true, zones: [{ k: 'drawer', h: 300, n: 1 }, { k: 'drawer', h: 300, n: 2 }, { k: 'drawer', h: 200, n: 3 },
+    { k: 'cubby', h: 300, rows: 2, cols: 3 }, { k: 'split' }, { k: 'shelves', h: 0, n: 4 }] }, { type: 'panel', name: 'K end', h: 2700, extraD: 75 });
   EX.full.runs.splice(2, 0, { name: 'Left wall, tall', wall: 'left', at: 1012, off: 12, depth: 580, kind: 'base', units: [
-    { type: 'tall', name: 'A', w: 600, zones: [{ k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 400 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
-    { type: 'panel', name: 'A end', h: 2700 }] },
-    { name: 'Island', kind: 'island', x: 1700, z: 1600, axis: 'z', depth: 800, top: 1100, topW: 1200, ohStart: 0, ohEnd: 300, units: [
-      { type: 'base', name: 'Island A', w: 600, drawers: [150, 200, 250, 300] }, { type: 'slide', name: 'B1', name2: 'B2', w: 1100, shelves: 1 }] });
+    { type: 'panel', name: 'B|A', h: 2700, extraD: 45 },
+    { type: 'tall', name: 'A', w: 600, note: 'lower box 1500 on the plinth as on the owner\'s sheet: the microwave space is 528 high', zones: [{ k: 'drawer', h: 300 }, { k: 'oven', h: 600 }, { k: 'micro', h: 528 }, { k: 'split' }, { k: 'shelves', h: 0, n: 2 }] },
+    { type: 'panel', name: 'A end', h: 2700, extraD: 45 }] },
+    { name: 'Island', kind: 'island', frame: true, x: 1700, z: 1600, axis: 'z', depth: 800, top: 1100, topW: 1200, ohStart: 0, ohEnd: 300, units: [
+      { type: 'base', name: 'Island A', w: 764, drawers: [150, 200, 250, 300] }, { type: 'slide', name: 'B1', name2: 'B2', w: 1080, shelves: 1 }] });
   function uiUnit(u) {
     return { type: u.type, name: u.name || '', w: u.w || 0, front: u.drawers ? 'drawers' : 'doors', drawers: (u.drawers || [140, 320, 320]).join(', '),
       doors: u.doors || 1, shelves: u.shelves || 0, fixed: u.fixed || 0, hobD: u.hob ? u.hob.d : 0,
@@ -862,7 +865,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     return { worktop: sp.worktop, handle: sp.handle || 'bar', roomW: sp.room.w, board: sp.board || '4x8', tallTop: sp.tallTop || 2700, runs: sp.runs.map(function (r) {
       return { name: r.name, wall: r.wall || 'back', kind: r.kind || 'base', at: r.at || 0, off: r.off || 0, depth: r.depth,
         bottom: r.bottom || 1500, height: r.height || 720, ceilingFiller: r.ceilingFiller || 0, carcTop: r.carcTop || 0,
-        x: r.x || 0, z: r.z || 0, axis: r.axis || 'z', top: r.top || 1100, topW: r.topW || 0, ohStart: r.ohStart || 0, ohEnd: r.ohEnd || 0, items: (r.items || []).join('; '), units: r.units.map(uiUnit) };
+        x: r.x || 0, z: r.z || 0, axis: r.axis || 'z', frame: !!r.frame, top: r.top || 1100, topW: r.topW || 0, ohStart: r.ohStart || 0, ohEnd: r.ohEnd || 0, items: (r.items || []).join('; '), units: r.units.map(uiUnit) };
     }) };
   }
   function newUnit(type) {
@@ -913,7 +916,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
         }) };
         if (r.kind === 'wall') { o.bottom = r.bottom; o.height = r.height; o.ceilingFiller = r.ceilingFiller; }
         if (r.kind === 'base' && r.carcTop > 0) o.carcTop = r.carcTop;
-        if (r.kind === 'island') { o.x = r.x; o.z = r.z; o.axis = r.axis; o.top = r.top; o.ohStart = r.ohStart; o.ohEnd = r.ohEnd; if (r.topW > 0) o.topW = r.topW; delete o.wall; }
+        if (r.kind === 'island') { if (r.frame) o.frame = true; o.x = r.x; o.z = r.z; o.axis = r.axis; o.top = r.top; o.ohStart = r.ohStart; o.ohEnd = r.ohEnd; if (r.topW > 0) o.topW = r.topW; delete o.wall; }
         if (r.items) o.items = String(r.items).split(';').map(function (x) { return x.trim(); }).filter(Boolean);
         return o;
       }) };
@@ -1017,7 +1020,8 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       var isl = r.kind === 'island';
       h += '<div class="row3">' + sf(ri, null, 'kind', 'Cabinets', [['base', 'Base'], ['wall', 'Wall'], ['island', 'Island']], r.kind) + (isl ? sf(ri, null, 'axis', 'Runs', [['z', 'Out from the back wall'], ['x', 'Along the back wall']], r.axis) : sf(ri, null, 'wall', 'Wall', [['back', 'Back'], ['left', 'Left'], ['right', 'Right']], r.wall)) + nf(ri, null, 'depth', 'Depth', r.depth) + '</div>';
       if (isl) h += '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'x', 'From the left wall', r.x) + nf(ri, null, 'z', 'From the back wall', r.z) + nf(ri, null, 'top', 'Underside of the top', r.top) + '</div>' +
-        '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'topW', 'Top width (0 = flush)', r.topW) + nf(ri, null, 'ohStart', 'Overhang at the start', r.ohStart) + nf(ri, null, 'ohEnd', 'Overhang at the end', r.ohEnd) + '</div>';
+        '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'topW', 'Top width (0 = flush)', r.topW) + nf(ri, null, 'ohStart', 'Overhang at the start', r.ohStart) + nf(ri, null, 'ohEnd', 'Overhang at the end', r.ohEnd) + '</div>' +
+        '<div class="row3" style="margin-top:.6rem">' + sf(ri, null, 'frame', 'Built', [['0', 'On legs, with a top panel'], ['1', 'On a frame (base and band frames)']], r.frame ? '1' : '0', 'full') + '</div>';
       else h += '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'at', 'Starts at', r.at) + nf(ri, null, 'off', 'Off the wall', r.off) + (wallRun ? nf(ri, null, 'bottom', 'Bottom at', r.bottom) : nf(ri, null, 'carcTop', 'Carcass top (0 = worktop)', r.carcTop)) + '</div>';
       if (r.kind === 'base') h += '<div style="margin-top:.6rem">' + tf(ri, null, 'items', 'Bought items for this run (separate with ;)', r.items, 'full') + '</div>';
       if (wallRun) h += '<div class="row3" style="margin-top:.6rem">' + nf(ri, null, 'height', 'Height', r.height) + nf(ri, null, 'ceilingFiller', 'Ceiling filler', r.ceilingFiller) + '</div>';
@@ -1036,7 +1040,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       r.units[+ui] = nu; kSave(); drawRuns(); run(); return;
     }
     if (k === 'doors' || (k === 'w' && t.tagName === 'SELECT')) v = +v;
-    if (k === 'carousel') v = v === '1';
+    if (k === 'carousel' || k === 'frame') v = v === '1';
     if (k === 'kind' && v !== r.kind) {        // selects fire input before change, so do this on whichever comes first
       r.units = r.units.map(function (x) { return RUN_TYPES[v].indexOf(x.type) !== -1 ? x : Object.assign(newUnit(v === 'island' ? 'base' : v), { name: x.name, w: x.w }); });
       if (v === 'wall' && r.depth > 400) r.depth = 300;
@@ -1080,6 +1084,10 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     var p = {}; try { p = JSON.parse(get(KPREFS) || '{}') || {}; } catch (e) {}
     // 42 was the old default (Blum's figure for 16 mm sides); with 18 mm sides the Temax sheet gives 46 (2026-11-24)
     if (String(p['k-umded']) === '42' && String(p['k-umside'] || 18) === '18') delete p['k-umded'];
+    // 2 and 2 were the old kitchen door clearances (the wardrobe's); the kitchen standard is now 2.5 and 5 (2026-11-24)
+    if (String(p['k-edge']) === '2' && String(p['k-dgap']) === '2') { delete p['k-edge']; delete p['k-dgap']; }
+    // the old default sink rail was 60; the owner cuts 80 and trims on site (2026-11-24)
+    if (String(p['k-srail']) === '60') delete p['k-srail'];
     Object.keys(KCONS).forEach(function (id) {
       $(id).value = p[id] != null ? p[id] : KCONS[id];
       $(id).addEventListener('input', run); $(id).addEventListener('change', function () { kSaveCons(); run(); });
