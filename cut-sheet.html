@@ -87,6 +87,10 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .console h2{font-family:var(--font-body);font-size:1rem;font-weight:700;color:var(--navy)}
 .console h3{font-family:var(--mono);font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--clr-muted);margin:1rem 0 .5rem}
 .console .con-acts{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1rem}
+.print-pick{margin-top:.7rem;padding:.6rem .7rem;border:1px solid var(--clr-border,#ddd3c4);border-radius:8px;background:#fff;font-size:.84rem}
+.print-pick .pp-t{font-weight:700;margin-bottom:.3rem}.print-pick label{display:flex;align-items:center;gap:.45rem;padding:.25rem 0;cursor:pointer}
+.print-pick input{width:18px;height:18px;accent-color:var(--navy,#1f2f58)}.print-pick .pp-n{font-size:.76rem;color:var(--clr-muted);margin-top:.25rem}
+.grp-skip .grp-hd{opacity:.55}.grp-skip .grp-hd .grp-code::after{content:' · not printing';font-weight:400}
 .console .con-hint{font-size:.74rem;color:var(--clr-muted);margin-top:.5rem;line-height:1.45}
 .conbar{display:none}
 @media(max-width:1199px){
@@ -421,6 +425,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   /* Each board colour starts on a fresh page (first group flows at the top). */
   .grp{break-before:page;page-break-before:always}
   .grp-first{break-before:auto!important;page-break-before:auto!important}
+  .grp-skip{display:none!important}
   /* Multi-list print (My projects → Print all / Print selected): each cut list
      after the first starts on a fresh page; its own thead prints from there. */
   .ml-sheet + .ml-sheet{break-before:page;page-break-before:always}
@@ -697,12 +702,13 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   <aside class="console" id="csConsole" aria-labelledby="conTitle">
     <h2 id="conTitle">Use this sheet</h2>
     <div class="con-acts">
-      <button class="btn-print" onclick="window.print()">
+      <button class="btn-print" onclick="printSheet()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 2a1 1 0 00-1 1v4H4a2 2 0 00-2 2v7a2 2 0 002 2h1v2a1 1 0 001 1h12a1 1 0 001-1v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V3a1 1 0 00-1-1H6zm1 2h10v3H7V4zm-3 5h16v7h-1v-2a1 1 0 00-1-1H6a1 1 0 00-1 1v2H4V9zm3 6h10v4H7v-4z"/></svg>
         Print / Save PDF
       </button>
       <button class="btn-print btn-price" onclick="priceJob()" title="Opens a new quote in Job Pricing with these boards and edge band (Carpentry Concierge members)">Price this job</button>
     </div>
+    <div class="print-pick" id="printPick" hidden></div>
     <p class="con-hint">Each page carries your logo and number, and each colour prints on its own page.</p>
     <h3>Boards needed</h3>
     <div class="bsum" id="bsum"></div>
@@ -720,7 +726,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 </div>
 
 <div class="conbar" role="group" aria-label="Use this sheet">
-  <button type="button" class="btn-print" onclick="window.print()">Print / Save PDF</button>
+  <button type="button" class="btn-print" onclick="printSheet()">Print / Save PDF</button>
   <button type="button" class="btn-print btn-price" id="cbMore">More options</button>
 </div>
 <script>
@@ -752,7 +758,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
     </div>
     <div class="qg-bar-r">
       <span class="qg-count" id="qgCount"></span>
-      <button class="qg-print" onclick="window.print()">&#9106; Print / Save PDF</button>
+      <button class="qg-print" onclick="printSheet()">&#9106; Print / Save PDF</button>
     </div>
   </div>
   <div class="qg-scroll">
@@ -1446,7 +1452,7 @@ function printSelected(){
 // state is changed. Each cut list keeps the same box-sheet layout as a single print.
 function printLists(refs){
   var arr=projStore();
-  var _U=U, _parts=parts, _eb=ebState, _seq=seq;   // stash working state
+  var _U=U, _parts=parts, _eb=ebState, _seq=seq, _skip=printSkip; printSkip={};   // stash working state (print every board of every list)
   var tables='';
   refs.forEach(function(r){
     var proj=findProj(arr,r.projId), list=findList(proj,r.listId);
@@ -1461,7 +1467,7 @@ function printLists(refs){
     if(!gs.length) return;   // skip an empty list
     tables+='<div class="ml-sheet">'+buildSheetTable(gs)+'</div>';
   });
-  U=_U; parts=_parts; ebState=_eb; seq=_seq;         // restore working state
+  U=_U; parts=_parts; ebState=_eb; seq=_seq; printSkip=_skip;   // restore working state
   if(!tables){ alert('Nothing to print — the selected cut list(s) have no parts.'); return; }
   var out=document.getElementById('sheetOut');
   var keep=out.innerHTML;
@@ -1999,7 +2005,8 @@ function priceJob(){
 function buildPrintHead(gs){
   var logo=resolveLogoSrc();
   var d=new Date(), date=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
-  var code=(U.code||'').trim() || (gs&&gs[0]?gs[0].code:'—');
+  var pg=(gs||[]).filter(function(g){ return !printSkip[g.code]; });   // the boards being printed
+  var code=pg.length>1 ? pg.map(function(g){ return g.code; }).join(' · ') : (pg[0] ? pg[0].code : ((U.code||'').trim() || '—'));
   var lbl = U.projShow ? printLabel() : '';
   return '<div class="ph2">'+
     (logo?'<img class="ph2-logo" src="'+logo+'" alt="" onerror="this.style.display=\'none\'">':'')+
@@ -2027,6 +2034,7 @@ function buildSheetTable(gs){
       '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
     '</div>';
   var pn=0;  // running part number → box fallback label when unnamed (quick-grid mode)
+  var firstPrinted=-1; gs.forEach(function(g, gi){ if(firstPrinted<0 && !printSkip[g.code]) firstPrinted=gi; });
   gs.forEach(function(g, gi){
     var items=[], bandMM=0; g.parts.forEach(function(p){
       var eb=ebState[p.id]||{}; var gflip=!!eb.gflip;
@@ -2037,7 +2045,7 @@ function buildSheetTable(gs){
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var pcs=items.length;
     var bandM=bandMM/1000;
-    body+='<div class="grp'+(gi===0?' grp-first':'')+'">'+
+    body+='<div class="grp'+(gi===firstPrinted?' grp-first':'')+(printSkip[g.code]?' grp-skip':'')+'" data-code="'+esc(g.code)+'">'+
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
       '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm'+(bandM>0?' · <b>'+bandM.toFixed(1)+' m</b> edge band':'')+'</span></div>'+
       '<div class="eb-grid">';
@@ -2058,8 +2066,28 @@ function renderSheet(gs){
   }
   out.innerHTML=buildSheetTable(gs);
 }
+// Print only some boards (owner 2026-11-24: one machine shop cuts the matte carcasses, another the gloss faces).
+// The tick boxes show when a sheet has more than one board; unticked boards stay on screen but are left out of print.
+var printSkip={};
+function renderPrintPick(gs){
+  var el=document.getElementById('printPick'); if(!el) return;
+  Object.keys(printSkip).forEach(function(c){ if(!gs.some(function(g){ return g.code===c; })) delete printSkip[c]; });
+  if(gs.length<2){ el.hidden=true; el.innerHTML=''; return; }
+  var n=gs.filter(function(g){ return !printSkip[g.code]; }).length;
+  el.hidden=false;
+  el.innerHTML='<div class="pp-t">Boards to print</div>'+gs.map(function(g){
+    return '<label><input type="checkbox" data-code="'+esc(g.code)+'"'+(printSkip[g.code]?'':' checked')+' onchange="togglePrintCode(this)"> '+esc(g.code)+'</label>';
+  }).join('')+'<div class="pp-n">'+(n===gs.length?'All '+n+' boards print, each on its own page.':n+' of '+gs.length+' boards will print.')+'</div>';
+}
+function togglePrintCode(cb){ var c=cb.getAttribute('data-code'); if(cb.checked) delete printSkip[c]; else printSkip[c]=1; renderAll(); }
+function printSheet(){
+  var gs=groups();
+  if(gs.length && gs.every(function(g){ return printSkip[g.code]; })){ alert('Tick at least one board to print.'); return; }
+  window.print();
+}
 function renderAll(){
   var gs=groups();
+  renderPrintPick(gs);
   renderSummary(gs);
   renderSheet(gs);   // renderSheet builds the repeating print header (thead) from current branding
   updateSetupSum();
