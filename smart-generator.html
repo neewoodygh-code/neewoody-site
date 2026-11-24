@@ -236,7 +236,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
               <div class="f"><label for="k-slb">Sliding: bottom track</label><input id="k-slb" type="number"></div>
               <div class="f"><label for="k-slt">Sliding: top track</label><input id="k-slt" type="number"></div>
             </div>
-            <p class="hint">Remembered on this device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Temax sheet for 18 mm sides (Ghana has no 16 mm laminate board; Blum takes 16 at most): the box outside is the opening less 10 (5 each side), so the inside is the opening less 46; the bottom raised 13 between the sides; the back full height, notched 30 &times; 13 at both bottom corners with the hook holes 11 up and 7 in from each side; the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
+            <p class="hint">Saved with the kitchen: when you save it to My files or download it, these settings go with it and it opens the same on any device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Temax sheet for 18 mm sides (Ghana has no 16 mm laminate board; Blum takes 16 at most): the box outside is the opening less 10 (5 each side), so the inside is the opening less 46; the bottom raised 13 between the sides; the back full height, notched 30 &times; 13 at both bottom corners with the hook holes 11 up and 7 in from each side; the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
             <button type="button" class="mini" id="k-reset" style="margin-top:.6rem">Reset to standard</button>
           </details>
         </div>
@@ -281,7 +281,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
             <div class="f"><label for="c-tks">Toe kick set back</label><input id="c-tks" type="number" value="60"></div>
           </div>
           <div class="f" style="margin-top:.7rem"><label for="c-sub">Subframe</label><select id="c-sub"><option value="built">Built in: sides to the floor, gridwork between them</option><option value="separate">Separate plinth under box carcasses</option></select></div>
-          <p class="hint">Remembered on this device. Sizes in mm. Set back 0 = toe kick flush with the front.</p>
+          <p class="hint">Saved with the design when you save it to My files or download it. Sizes in mm. Set back 0 = toe kick flush with the front.</p>
           <button type="button" class="mini" id="c-reset" style="margin-top:.6rem">Reset to standard</button>
         </details>
       </div>
@@ -426,12 +426,13 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   });
   ['w', 'h', 'd', 'units'].forEach(function (id) { $(id).addEventListener('input', run); $(id).addEventListener('change', run); });
 
-  // construction settings, remembered on this device
+  // construction settings: the working copy is on this device; they go into every saved or downloaded design (curCons)
   function loadCons() {
     var p = {}; try { p = JSON.parse(get(PREFS) || '{}') || {}; } catch (e) {}
     Object.keys(CONS).forEach(function (id) { $(id).value = p[id] != null ? p[id] : CONS[id]; });
   }
-  function saveCons() { var p = {}; Object.keys(CONS).forEach(function (id) { p[id] = $(id).value; }); put(PREFS, JSON.stringify(p)); }
+  function curCons() { var p = {}; Object.keys(CONS).forEach(function (id) { p[id] = $(id).value; }); return p; }
+  function saveCons() { put(PREFS, JSON.stringify(curCons())); }
   Object.keys(CONS).forEach(function (id) { $(id).addEventListener('change', function () { saveCons(); run(); }); $(id).addEventListener('input', run); });
   $('c-reset').onclick = function () { Object.keys(CONS).forEach(function (id) { $(id).value = CONS[id]; }); saveCons(); run(); };
 
@@ -610,16 +611,18 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   var curFile = null, fileClients = [];
   function design() {
     return mode === 'kitchen' ? { mode: 'kitchen', design: JSON.parse(JSON.stringify(KS)) }
-      : { mode: 'wardrobe', design: { w: num('w', 2400), h: num('h', 2100), d: num('d', 580), units: +$('units').value, secs: JSON.parse(JSON.stringify(secs)) } };
+      : { mode: 'wardrobe', design: { w: num('w', 2400), h: num('h', 2100), d: num('d', 580), units: +$('units').value, secs: JSON.parse(JSON.stringify(secs)), cons: curCons() } };
   }
   function applyDesign(dd) {
     if (!dd || !dd.design) throw new Error('This file has no design in it.');
     if (dd.mode === 'kitchen') {
       if (!KOK) throw new Error('Refresh the page to get the kitchen part of the generator, then open the file again.');
-      KS = dd.design; kSave(); kTop(); drawRuns(); setMode('kitchen');
+      KS = dd.design; kTakeCons(); kTop(); drawRuns(); setMode('kitchen');
     } else {
       var w = dd.design; $('w').value = w.w; $('h').value = w.h; $('d').value = w.d; $('units').value = String(w.units);
-      secs = w.secs; $('nsec').value = String(secs.length); drawSecs(); setMode('wardrobe');
+      secs = w.secs; $('nsec').value = String(secs.length); drawSecs();
+      if (w.cons) { Object.keys(CONS).forEach(function (id) { if (w.cons[id] != null) $(id).value = w.cons[id]; }); saveCons(); }   // the settings it was drawn with
+      setMode('wardrobe');
     }
     run();
   }
@@ -804,7 +807,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     // Not linked on the page (non-standard, one client's job): the Prampram kitchen and laundry, opened by the owner
     // with #prampram / #prampram-laundry. They are also the engine tests (scripts/test-kitchen-prampram.mjs).
     // the engine's first real test job (scripts/test-kitchen-prampram.mjs), without the tall unit, pantry and island
-    prampramU: { worktop: 900, handle: 'jprofile', room: { w: 4010 }, runs: [
+    prampramU: { worktop: 900, handle: 'jprofile', room: { w: 4010 }, cons: { 'k-runner': 'under' }, runs: [
       { name: 'Back wall, base', wall: 'back', at: 12, depth: 580, kind: 'base', units: [
         { type: 'cornerL', name: 'B', w: 800, r: 1000, returnDepth: 580, side: 'left', carousel: true, note: 'carousel behind bi-fold doors; check its size against the 800 leg' },
         { type: 'panel', name: 'B|C' },
@@ -862,7 +865,8 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
       h: u.h || 0, extraD: u.extraD || 0, face: u.face || 'a', frontTop: u.frontTop || 0 };
   }
   function fromEngine(sp) {
-    return { worktop: sp.worktop, handle: sp.handle || 'bar', roomW: sp.room.w, board: sp.board || '4x8', tallTop: sp.tallTop || 2700, runs: sp.runs.map(function (r) {
+    var cons = sp.cons ? Object.assign(kCurCons(), sp.cons) : null;
+    return { cons: cons, worktop: sp.worktop, handle: sp.handle || 'bar', roomW: sp.room.w, board: sp.board || '4x8', tallTop: sp.tallTop || 2700, runs: sp.runs.map(function (r) {
       return { name: r.name, wall: r.wall || 'back', kind: r.kind || 'base', at: r.at || 0, off: r.off || 0, depth: r.depth,
         bottom: r.bottom || 1500, height: r.height || 720, ceilingFiller: r.ceilingFiller || 0, carcTop: r.carcTop || 0,
         x: r.x || 0, z: r.z || 0, axis: r.axis || 'z', frame: !!r.frame, top: r.top || 1100, topW: r.topW || 0, ohStart: r.ohStart || 0, ohEnd: r.ohEnd || 0, items: (r.items || []).join('; '), units: r.units.map(uiUnit) };
@@ -1071,7 +1075,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   document.querySelectorAll('[data-load]').forEach(function (b) {
     b.onclick = function () {
       if (!confirm('Replace the kitchen you have here with this one?')) return;
-      KS = fromEngine(EX[b.dataset.load]); kSave(); kTop(); drawRuns(); run();
+      KS = fromEngine(EX[b.dataset.load]); kTakeCons(); kTop(); drawRuns(); run();
     };
   });
   function kTop() { $('k-wt').value = KS.worktop; $('k-room').value = KS.roomW; $('k-handle').value = KS.handle || 'bar'; $('k-board').value = KS.board || '4x8'; $('k-tall').value = KS.tallTop || 2700; }
@@ -1079,9 +1083,18 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   $('k-board').addEventListener('change', function () { KS.board = this.value; kSave(); run(); });
   $('k-tall').addEventListener('input', function () { KS.tallTop = parseFloat(this.value) || 0; kSave(); run(); });
   [['k-wt', 'worktop'], ['k-room', 'roomW']].forEach(function (a) { $(a[0]).addEventListener('input', function () { KS[a[1]] = parseFloat(this.value) || 0; kSave(); run(); }); });
-  function kSaveCons() { var p = {}; Object.keys(KCONS).forEach(function (id) { p[id] = $(id).value; }); put(KPREFS, JSON.stringify(p)); }
+  // Construction settings belong to the design (owner 2026-11-24: "settings should be universal to the engine, not the
+  // device; casual users wouldn't know"): they are kept in KS.cons, so a saved or downloaded kitchen opens with the
+  // settings it was drawn with on any device. Starter examples keep the settings you have; Reset goes back to standard.
+  function kCurCons() { var p = {}; Object.keys(KCONS).forEach(function (id) { p[id] = $(id).value; }); return p; }
+  function kApplyCons(c) { Object.keys(KCONS).forEach(function (id) { $(id).value = c && c[id] != null ? c[id] : KCONS[id]; }); }
+  function kTakeCons(sp) {   // after KS changes: use the design's own settings, or give it the ones on screen
+    if (KS.cons) kApplyCons(KS.cons); else KS.cons = kCurCons();
+    kSave();
+  }
+  function kSaveCons() { KS.cons = kCurCons(); kSave(); }
   function kInit() {
-    var p = {}; try { p = JSON.parse(get(KPREFS) || '{}') || {}; } catch (e) {}
+    var p = {}; try { p = JSON.parse(get(KPREFS) || '{}') || {}; } catch (e) {}   // settings kept on the device before 2026-11-24
     // 42 was the old default (Blum's figure for 16 mm sides); with 18 mm sides the Temax sheet gives 46 (2026-11-24)
     if (String(p['k-umded']) === '42' && String(p['k-umside'] || 18) === '18') delete p['k-umded'];
     // 2 and 2 were the old kitchen door clearances (the wardrobe's); the kitchen standard is now 2.5 and 5 (2026-11-24)
@@ -1095,6 +1108,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
     $('k-reset').onclick = function () { Object.keys(KCONS).forEach(function (id) { $(id).value = KCONS[id]; }); kSaveCons(); run(); };
     try { KS = JSON.parse(get(KSTATE) || 'null'); } catch (e) { KS = null; }
     if (!KS || !KS.runs) KS = fromEngine(EX.straight);
+    kTakeCons();
     kTop(); drawRuns();
   }
   function setMode(m) {
@@ -1110,7 +1124,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   if (KOK) {
     kInit();
     var own = { '#prampram': 'prampram', '#prampram-laundry': 'prampramLaundry' }[location.hash];   // the owner's job, not linked
-    if (own) { KS = fromEngine(EX[own]); kSave(); kTop(); drawRuns(); }
+    if (own) { KS = fromEngine(EX[own]); kTakeCons(); kTop(); drawRuns(); }
     var fileHash = location.hash.match(/^#file=(\d+)$/);   // opened from My files on the profile page
     setMode(own || location.hash === '#kitchen' ? 'kitchen' : (location.hash === '#wardrobe' ? 'wardrobe' : get(MODE)));
     if (fileHash) openFile(+fileHash[1]);
