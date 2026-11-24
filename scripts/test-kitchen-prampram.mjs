@@ -83,7 +83,8 @@ export const LAUNDRY = { type: 'kitchen', worktop: 950, room: { w: 1270 }, runs:
   { name: 'Laundry, worktop frame', wall: 'back', at: 0, depth: 350, kind: 'base', carcTop: 874, units: [{ type: 'gap', w: 1270 }],
     items: ['Welded 1.5" angle frame, Hammerite black (laundry worktop)', 'Moisture-resistant board 18 mm under the slab (cut to the frame)'] },
   { name: 'Laundry, length side', wall: 'left', at: 1000, depth: 350, kind: 'base', carcTop: 874, units: [
-    { type: 'base', name: 'Laundry cabinet', w: 800, doors: 2, frontTop: 874 }] },
+    { type: 'base', name: 'Laundry cabinet', w: 800, doors: 2, shelves: 1, frontTop: 874 },
+    { type: 'panel', name: 'Laundry cabinet end' }] },                          // owner 2026-11-24: the open end gets an applied panel
   { name: 'Laundry, wall cabinets', wall: 'back', at: 0, depth: 300, kind: 'wall', bottom: 1500, height: 1200, ceilingFiller: 100, units: [
     { type: 'filler', name: 'left filler', w: 60 }, { type: 'wall', name: 'L1', w: 575, doors: 1, shelves: 3, fixed: 1 },
     { type: 'wall', name: 'L2', w: 575, doors: 1, shelves: 3, fixed: 1 }, { type: 'filler', name: 'right filler', w: 60 }] },

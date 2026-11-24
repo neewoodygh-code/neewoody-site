@@ -503,7 +503,7 @@
             var jy = K.panelJoint === 'box' ? (tallJoint || R(ph / 2)) : BD[0] - 40;
             put('End Panel, tall, lower piece' + lbl, 'panel', '', x, 0, -DT, t, jy, pd, ['y', 'z'], 'floor to ' + R(jy) + ', joined there to the upper piece; ' + pnote);
             put('End Panel, tall, upper piece' + lbl, 'panel', '', x, jy, -DT, t, ph - jy, pd, ['y', 'z'], R(jy) + ' to ' + ph + '; ' + pnote);
-          } else put((u.h ? (base ? 'End Panel, tall' : 'End Panel') : 'Side Panel between units') + lbl, 'panel', '', x, 0, -DT, t, ph, pd, ['y', 'z'],
+          } else put((u.h ? (base ? 'End Panel, tall' : 'End Panel') : (ui === 0 || ui === run.units.length - 1 ? 'End Panel' : 'Side Panel between units')) + lbl, 'panel', '', x, 0, -DT, t, ph, pd, ['y', 'z'],
             (u.h ? (base ? 'floor to ' + ph : ph + ' long: runs up past the cabinet to cover the ceiling filler; scribe the top to the ceiling') : 'floor to the carcass top') + '; ' + pnote);
           if (!base) boxes[boxes.length - 1].y = yBot;
           x += t; frontLen += t; return;
