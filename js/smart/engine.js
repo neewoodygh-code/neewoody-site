@@ -309,6 +309,9 @@
     //  island frame  (run.frame) carcasses on a 100 grid frame, a 100 frame on top under the quartz with gloss
     //                band covers, a drawer unit facing the end between two gloss side panels, sliding units
     //                391 deep back to back on one 18 mm back with inset doors
+    //  cornerBack false  L corners have no 3 mm back: the 4 vertical back rails are the back (L blanks 982 x 782)
+    //  spareRails true   one spare rail cut for a hob unit and a mid stiffening rail for each tall unit, fitted if needed
+    cornerBack: false, spareRails: true,
     kEdge: 2.5, kGap: 5, adjFull: true, tallBase: 'plinth', panelJoint: 'board', shelfWhole: true, cubbyRebate: true,
     fillScribe: 20, fillSupport: 80, islandDrawerD: 580, frameGap: 350, slideInD: 91, slideInTrack: 20, slideInOverlap: 96,
     // drawer runners (owner 2026-11-23: "drawer box logic will switch according to drawer type"): 'side' = side mount
@@ -528,6 +531,7 @@
           put('Top Rail, upright front (hob)' + lbl, 'frame', '', x + t, yTop - K.rail, 0, inW, K.rail, t, ['x', 'y'], 'stood on edge under the hob');
           put('Back Rail, upright top (hob)' + lbl, 'frame', '', x + t, yTop - K.rail, dC - t, inW, K.rail, t, ['x', 'y'], 'raised to the top; no flat back rail under the hob');
           put('Back Rail, upright bottom' + lbl, 'frame', '', x + t, yBot + t, dC - t, inW, K.rail, t, ['x', 'y']);
+          if (K.spareRails) extra.push({ name: 'Spare Rail' + lbl, tag: 'frame', kit: 1, a: R(inW), b: K.rail, qty: 1, note: 'contingency: one more rail for the hob unit, fitted only if it needs stiffening' });
           if (!run.frame) tally('Cabinet legs ' + K.legH / 10 + ' cm', w > 800 ? 6 : 4);
         } else if (base && !SI) {
           var rw = u.type === 'sink' ? K.sinkRail : K.rail, rn = u.type === 'sink' && K.sinkRail >= K.rail ? 'cut ' + rw + ' like the other rails; trim on site to clear the sink' : '';
@@ -643,6 +647,7 @@
 
       // L corner: back leg (u.w along the run) and return (u.r along the side wall, u.returnDepth deep)
       function cornerL(u, un) {
+        var bt = K.cornerBack ? K.backThick : 0;   // owner 2026-11-24: no back on an L corner, the vertical rails are its back
         var lbl = ' (' + un + ')', Lb = u.w, Lr = u.r, dR = u.returnDepth || dC, side = u.side || 'left';
         var M = function (xx, ww) { return side === 'left' ? xx : x + Lb - (xx - x) - ww; };   // mirror inside the unit
         var x0 = x, zR0 = Dr - Lr;                               // return runs from z = Dr - Lr (into the room) to the wall
@@ -678,8 +683,10 @@
         putM(vn, 'frame', '', x0 + bt, y0 + t, dC - t, vW, vH, t, ['y', 'x'], 'back corner, along the back leg; ' + vnote);
         putM(vn, 'frame', '', x0 + bt, y0 + t, dC - t - vW, t, vH, vW, ['y', 'z'], 'back corner, along the return (makes the L with the one beside it); ' + vnote);
         putM(vn, 'frame', '', x0 + bt, y0 + t, zR0 + bt + t, t, vH, vW, ['y', 'z'], 'at the end of the return; ' + vnote);
-        putM('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, dC, Lb, Hh, bt, ['x', 'y']);
-        putM('Back Panel, return (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, zR0, bt, Hh, dC - zR0, ['z', 'y']);
+        if (bt) {
+          putM('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, dC, Lb, Hh, bt, ['x', 'y']);
+          putM('Back Panel, return (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x0, y0, zR0, bt, Hh, dC - zR0, ['z', 'y']);
+        }
         // bi-fold pair across the inside corner
         var fY = y0 + s.botGap + (base ? 0 : J), fH = R(Hh - s.botGap - s.topGap - J);
         var aW = R(-zR0 - bt - ec), bW = R(Lb - bt - dR - DT - gap - ec);
@@ -845,7 +852,8 @@
           }
         });
         if (K.tallBase !== 'plinth') tally('Cabinet legs ' + K.legH / 10 + ' cm', w > 800 ? 6 : 4);
-        if (CF > 0) ceilingFiller('over ' + un, w + 2 * t, CF);   // the same ceiling gap as the wall cabinets, across the unit and its panels
+        if (CF > 0) ceilingFiller('over ' + un, w + 2 * t, CF);
+        if (K.spareRails) extra.push({ name: 'Mid Stiffening Rail' + lbl, tag: 'frame', kit: 1, a: R(inW), b: K.rail, qty: 1, note: 'spare: fit it across the back at mid height only if the box needs stiffening' });   // the same ceiling gap as the wall cabinets, across the unit and its panels
         if (u.note) warn.push(un + ': ' + u.note);
       }
 
@@ -887,7 +895,8 @@
     // ceiling fillers (scribed on site) over every wall run: parts only, not placed in 3D
     spec.runs.forEach(function (run) {
       if ((run.kind || 'base') === 'base' || !run.ceilingFiller) return;
-      ceilingFiller(run.name, run.units.reduce(function (a, u) { return a + (u.type === 'gap' ? 0 : (u.type === 'panel' ? t : u.w)); }, 0), run.ceilingFiller);
+      // an L corner's fronts run along both legs: back leg less the return's depth, plus the return less this run's depth
+      ceilingFiller(run.name, run.units.reduce(function (a, u) { return a + (u.type === 'gap' ? 0 : u.type === 'panel' ? t : u.type === 'cornerL' ? u.w + u.r - (u.returnDepth || run.depth) - run.depth : u.w); }, 0), run.ceilingFiller);
     });
     // every cut part must fit the chosen board
     cutList(boxes).concat(extra).forEach(function (p) {
