@@ -294,8 +294,12 @@
     // undermount, Blum TANDEM/MOVENTO rules (Knape & Vogt the same; Temax sells 16 and 18 mm side versions): inside
     // width = opening - 42, sides 16 mm max, bottom raised 13 from the bottom edge of the sides, back sits on the
     // bottom, box length = nominal runner length - 10, about 14 mm under the box and 7 over it
+    // TEMAX sheet for 18 mm sides (owner sent it 2026-11-24): box OUTSIDE = opening - 10 (5 each side), so the inside
+    // = opening - 46 (Blum's 42 is for 16 mm sides: the same 5 mm a side). Back full height, both bottom corners
+    // notched 30 wide x 12-13 high for the tracks, hook holes 5-6 mm, 11 up and 7 in from each side's inner face;
+    // bottom raised 12-13 between the sides. Rails 5 back from the cabinet front (overlay fronts).
     runner: 'side', umSide: 18,   // owner: 18 mm sides only, Ghana has no 16 mm laminate board
-    umDeduct: 42, umRecess: 13, umShort: 10, umBelow: 14, umAbove: 7 };
+    umDeduct: 46, umRecess: 13, umShort: 10, umBelow: 14, umAbove: 7 };
   var UNDER = [600, 550, 500, 450, 400, 350, 300, 270, 250];   // undermount nominal lengths   // blind corners (owner 2026-11-23): the run that meets a blind unit starts with an 80 mm filler
   var BOARDS = { '4x8': [2440, 1220], '4x9': [2745, 1220], '6x9': [2745, 1830] };
   function boardOf(K) { return BOARDS[K.board] || BOARDS['4x8']; }
@@ -365,13 +369,13 @@
           var st = K.umSide, inW2 = R(ow - K.umDeduct), W2 = inW2 + 2 * st, L2 = NL - K.umShort, bx2 = ox + (ow - W2) / 2;
           var by2 = by + (K.umBelow - 5), H2 = R(boxH - (K.umBelow - 5) - (K.umAbove - 5)), bt2 = t, rec = K.umRecess;
           var nt = st !== t ? ' (' + st + ' mm board)' : '';
-          put('Drawer Box Front/Back' + nt + lbl, 'drawer', '', bx2, by2, z0, W2, H2, st, ['x', 'y'], 'full box width; inside width ' + inW2 + ' = opening ' + R(ow) + ' - ' + K.umDeduct + '; drill the front for the locking devices');
-          put('Drawer Box Back, on the bottom' + nt + lbl, 'drawer', '', bx2, by2 + rec + bt2, z0 + L2 - st, W2, H2 - rec - bt2, st, ['x', 'y'], 'sits on the drawer bottom; notch and drill for the runner hooks as the runner sheet shows');
+          put('Drawer Box Front' + nt + lbl, 'drawer', '', bx2, by2, z0, W2, H2, st, ['x', 'y'], 'full box width; inside width ' + inW2 + ' = opening ' + R(ow) + ' - ' + K.umDeduct + '; locking devices screw under the front corners');
+          put('Drawer Box Back' + nt + lbl, 'drawer', '', bx2, by2, z0 + L2 - st, W2, H2, st, ['x', 'y'], 'full height: notch both bottom corners 30 wide x ' + rec + ' high for the tracks; drill the hook holes (5-6 mm) 11 up and 7 in from the inner face of each side');
           put('Drawer Box Side' + nt + lbl, 'drawer', '', bx2, by2, z0 + st, st, H2, L2 - 2 * st, ['z', 'y'], 'between the front and back');
           put('Drawer Box Side' + nt + lbl, 'drawer', '', bx2 + W2 - st, by2, z0 + st, st, H2, L2 - 2 * st, ['z', 'y']);
-          put('Drawer Bottom, raised' + lbl, 'drawer', '', bx2 + st, by2 + rec, z0 + st, inW2, bt2, L2 - st, ['x', 'z'], 'between the sides, ' + rec + ' up from their bottom edge; the runner runs underneath');
+          put('Drawer Bottom, raised' + lbl, 'drawer', '', bx2 + st, by2 + rec, z0 + st, inW2, bt2, L2 - 2 * st, ['x', 'z'], 'between the sides, ' + rec + ' up from their bottom edge; the runner runs underneath');
           tally('Undermount runners ' + NL + ' mm (pair, with locking devices)', 1);
-          if (st > 16) warn.push('Undermount drawers: ' + st + ' mm sides need runners made for ' + st + ' mm sides (Blum takes 16 mm at most; Temax makes 18 mm versions).');
+          if (st > 16) warn.push('Undermount drawers: ' + st + ' mm sides need runners made for ' + st + ' mm sides (Blum takes 16 mm at most; Temax makes 18 mm versions: box outside = opening - 10).');
           return;
         }
         var runner = RUNNERS.filter(function (L) { return L <= inner - 10; })[0] || R(inner - 10), bw = R(ow - s.runGap), bx = ox + (ow - bw) / 2;

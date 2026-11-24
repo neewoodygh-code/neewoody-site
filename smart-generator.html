@@ -236,7 +236,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
               <div class="f"><label for="k-slb">Sliding: bottom track</label><input id="k-slb" type="number"></div>
               <div class="f"><label for="k-slt">Sliding: top track</label><input id="k-slt" type="number"></div>
             </div>
-            <p class="hint">Remembered on this device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Blum rule (Knape &amp; Vogt the same): inside width = the opening less 42, 18 mm sides as standard here (Ghana has no 16 mm laminate board, so use runners made for 18 mm sides, as Temax makes; Blum takes 16 at most), the bottom raised 13 between the sides, the back sitting on the bottom, the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
+            <p class="hint">Remembered on this device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Temax sheet for 18 mm sides (Ghana has no 16 mm laminate board; Blum takes 16 at most): the box outside is the opening less 10 (5 each side), so the inside is the opening less 46; the bottom raised 13 between the sides; the back full height, notched 30 &times; 13 at both bottom corners with the hook holes 11 up and 7 in from each side; the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
             <button type="button" class="mini" id="k-reset" style="margin-top:.6rem">Reset to standard</button>
           </details>
         </div>
@@ -352,7 +352,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261124b"></script>
+<script src="js/smart/engine.js?v=20261124c"></script>
 <script src="js/smart/price.js?v=20261123b"></script>
 <script src="js/pricing-handoff.js?v=20261123"></script>
 <script src="js/cutlist-3d.js?v=20261123"></script>
@@ -1078,6 +1078,8 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   function kSaveCons() { var p = {}; Object.keys(KCONS).forEach(function (id) { p[id] = $(id).value; }); put(KPREFS, JSON.stringify(p)); }
   function kInit() {
     var p = {}; try { p = JSON.parse(get(KPREFS) || '{}') || {}; } catch (e) {}
+    // 42 was the old default (Blum's figure for 16 mm sides); with 18 mm sides the Temax sheet gives 46 (2026-11-24)
+    if (String(p['k-umded']) === '42' && String(p['k-umside'] || 18) === '18') delete p['k-umded'];
     Object.keys(KCONS).forEach(function (id) {
       $(id).value = p[id] != null ? p[id] : KCONS[id];
       $(id).addEventListener('input', run); $(id).addEventListener('change', function () { kSaveCons(); run(); });
