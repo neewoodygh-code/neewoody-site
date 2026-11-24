@@ -576,13 +576,14 @@
         putM('Side Panel, end' + lbl, 'carcass', '', x0 + Lb - t, y0, 0, t, Hh, dC, ['y', 'z']);
         putM('Side Panel, return end' + lbl, 'carcass', '', x0 + bt, y0, zR0 + bt, dR, Hh, t, ['y', 'x']);
         // L pieces: one blank each, routed; the return part is drawn but not cut separately
-        var bs = R(Math.max(Lb, Lr) - t - bt), blank = [bs, bs];   // machine shops cut squares; the L is cut out in the workshop (owner)
+        // one rectangle the size of the L (owner 2026-11-24: the rectangle, not a square); the L is cut out in the workshop
+        var bL = R(Lb - t - bt), bR = R(Lr - t - bt), blank = [Math.max(bL, bR), Math.min(bL, bR)];
         function Lpiece(nm, y, note) {
           var o = putM(nm + lbl, 'carcass', '', x0 + bt, y, 0, Lb - t - bt, t, dC, ['x', 'z'], note);
           o.cut = blank;
           putM(nm + ' (return part)' + lbl, 'carcass', 'Lpart', x0 + bt, y, zR0 + bt + t, dR, t, -zR0 - bt - t, null, '');
         }
-        Lpiece('L Bottom, routed', y0, 'shop cuts a ' + bs + ' square; cut the L out of it in the workshop: legs ' + R(Lb - t - bt) + ' x ' + R(Lr - t - bt) + ', inner corner out (back leg ' + R(dC) + ' deep, return ' + R(dR) + ' deep); band the two inner front edges by hand');
+        Lpiece('L Bottom, routed', y0, 'shop cuts a ' + blank[0] + ' x ' + blank[1] + ' rectangle; cut the L out of it in the workshop, inner corner out (back leg ' + R(dC) + ' deep, return ' + R(dR) + ' deep); band the two inner front edges by hand');
         if (base) {
           putM('Top Rail, flat front' + lbl, 'frame', '', x0 + bt + dR, y1 - t, 0, Lb - t - bt - dR, t, K.rail, ['x', 'z']);
           putM('Top Rail, flat front (return)' + lbl, 'frame', '', x0 + bt + dR - K.rail, y1 - t, zR0 + bt + t, K.rail, t, -zR0 - bt - t, ['z', 'x']);
