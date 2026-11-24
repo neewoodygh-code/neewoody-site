@@ -222,6 +222,8 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
               <div class="f"><label for="k-reach">Highest pull (reach)</label><input id="k-reach" type="number"></div>
             </div>
             <div class="row3" style="margin-top:.7rem">
+              <div class="f"><label for="k-cboard">Board for the carcasses (inside)</label><input id="k-cboard" type="text" maxlength="30"></div>
+              <div class="f"><label for="k-fboard">Board for doors, faces and panels</label><input id="k-fboard" type="text" maxlength="30"></div>
               <div class="f"><label for="k-runner">Drawer runners</label><select id="k-runner"><option value="side">Side mount</option><option value="under">Undermount (concealed)</option></select></div>
               <div class="f"><label for="k-umside">Undermount: drawer sides</label><input id="k-umside" type="number"></div>
               <div class="f"><label for="k-umded">Undermount: opening less</label><input id="k-umded" type="number"></div>
@@ -236,7 +238,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
               <div class="f"><label for="k-slb">Sliding: bottom track</label><input id="k-slb" type="number"></div>
               <div class="f"><label for="k-slt">Sliding: top track</label><input id="k-slt" type="number"></div>
             </div>
-            <p class="hint">Saved with the kitchen: when you save it to My files or download it, these settings go with it and it opens the same on any device. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Temax sheet for 18 mm sides (Ghana has no 16 mm laminate board; Blum takes 16 at most): the box outside is the opening less 10 (5 each side), so the inside is the opening less 46; the bottom raised 13 between the sides; the back full height, notched 30 &times; 13 at both bottom corners with the hook holes 11 up and 7 in from each side; the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
+            <p class="hint">Saved with the kitchen: when you save it to My files or download it, these settings go with it and it opens the same on any device. The two board names split what goes to the Cut Sheet: carcass parts, rails, shelves and drawer boxes on the first; doors, drawer faces, end and side panels and fillers on the second; the thin backs on their own. Give both the same name if the whole job is one board. The J-profile height is used only when the handles are J-profile. Backs are screwed on; the sink unit has none. Drawer boxes are cut lower than their fronts. Side-mount boxes are the opening less the runner gap, with the base underneath. Undermount boxes follow the Temax sheet for 18 mm sides (Ghana has no 16 mm laminate board; Blum takes 16 at most): the box outside is the opening less 10 (5 each side), so the inside is the opening less 46; the bottom raised 13 between the sides; the back full height, notched 30 &times; 13 at both bottom corners with the hook holes 11 up and 7 in from each side; the box 10 shorter than the runner. Check your runner's own sheet. A J-profile goes on the top edge while that is within reach, otherwise on the bottom edge. Sliding doors run on a flat track below and a bigger track above, inside the depth the carcass is set back by; the side panels stay full depth.</p>
             <button type="button" class="mini" id="k-reset" style="margin-top:.6rem">Reset to standard</button>
           </details>
         </div>
@@ -355,7 +357,7 @@ table.cl tr.grp td { font-weight: 600; background: var(--bone); color: var(--wal
 })();
 document.getElementById('footer-year').textContent = new Date().getFullYear();
 </script>
-<script src="js/smart/engine.js?v=20261124f"></script>
+<script src="js/smart/engine.js?v=20261124g"></script>
 <script src="js/smart/price.js?v=20261123b"></script>
 <script src="js/pricing-handoff.js?v=20261123"></script>
 <script src="js/cutlist-3d.js?v=20261123"></script>
@@ -527,10 +529,12 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   // ("Back Rail / Top Rail"), without the unit names. The cut list on this page stays per unit for assembly.
   // Thin back panels get their own board code, so the Cut Sheet packs them on their own sheets and prints them on their
   // own page (before, they were packed into the 18 mm boards and inflated the count).
-  function groupForShop(rows, backCode) {
+  // codeOf(p): the board a part is cut from; kitchens split matte / gloss / back (owner 2026-11-24), so one Send gives the
+  // Cut Sheet a page per board. Wardrobes keep one board plus the backs.
+  function groupForShop(rows, backCode, codeOf) {
     var map = {}, out = [];
     rows.forEach(function (p) {
-      var e = p.eb || {}, code = /back panel/i.test(p.name) ? backCode : '';
+      var e = p.eb || {}, code = codeOf ? codeOf(p) : (/back panel/i.test(p.name) ? backCode : '');
       var k = code + ':' + p.L + 'x' + p.W + ':' + [e.t, e.r, e.b, e.l].map(function (x) { return x || 0; }).join('');
       var kind = String(p.name).replace(/\s*\([^()]*\)/g, '').split(',')[0].trim();
       if (!map[k]) { map[k] = { name: '', kinds: [], L: p.L, W: p.W, qty: 0, eb: p.eb, code: code }; out.push(map[k]); }
@@ -543,7 +547,9 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   $('toSheet').onclick = function () {
     if (!last || !acked()) return;
     var sp = last.spec, bt = (last.kit && sp.kshop && sp.kshop.backThick) || (sp.shop && sp.shop.backThick) || 3;
-    var rows = groupForShop(last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop) }; }), bt + ' mm back panel');
+    var backCode = bt + ' mm back panel', cb = ($('k-cboard').value || '').trim(), fb = ($('k-fboard').value || '').trim();
+    var codeOf = last.kit && SmartEngine.finishOf ? function (r) { return r.fin === 'back' ? backCode : r.fin === 'gloss' ? fb : cb; } : null;
+    var rows = groupForShop(last.r.parts.map(function (p) { return { name: p.name, L: Math.max(p.a, p.b), W: Math.min(p.a, p.b), qty: p.qty, eb: SmartEngine.edges(p, sp.shop), fin: SmartEngine.finishOf ? SmartEngine.finishOf(p) : '' }; }), backCode, codeOf);
     var nm = last.kit ? 'Kitchen, worktop ' + sp.worktop + ' (Smart Generator, check sizes)' : 'Wardrobe ' + sp.w + 'x' + sp.h + 'x' + sp.d + ' (Smart Generator, check sizes)';
     var ok = put(HANDOFF, JSON.stringify({ from: 'smart-generator', at: Date.now(), name: nm, parts: rows, thick: sp.shop.thick }));
     if (!ok) { alert('Could not pass the list on: this browser is blocking storage.'); return; }
@@ -718,7 +724,7 @@ document.getElementById('footer-year').textContent = new Date().getFullYear();
   var KPREFS = 'nwd-smart-kprefs', KSTATE = 'nwd-smart-kitchen', MODE = 'nwd-smart-mode', K0 = SmartEngine.KSHOP || {};
   var KCONS = { 'k-thick': SH.thick, 'k-bthick': K0.backThick, 'k-leg': K0.legH, 'k-jh': K0.jH, 'k-rail': K0.rail, 'k-srail': K0.sinkRail,
     'k-edge': K0.kEdge != null ? K0.kEdge : SH.edgeClear, 'k-dgap': K0.kGap != null ? K0.kGap : SH.doorGap, 'k-run': SH.runGap,
-    'k-ddrop': K0.drawerDrop, 'k-dmin': K0.drawerMin, 'k-reach': K0.reach, 'k-sld': K0.slideD, 'k-runner': K0.runner || 'side', 'k-umside': K0.umSide, 'k-umded': K0.umDeduct, 'k-umrec': K0.umRecess, 'k-umshort': K0.umShort, 'k-slb': K0.slideBot, 'k-slt': K0.slideTop };
+    'k-cboard': 'Matte', 'k-fboard': 'Gloss', 'k-ddrop': K0.drawerDrop, 'k-dmin': K0.drawerMin, 'k-reach': K0.reach, 'k-sld': K0.slideD, 'k-runner': K0.runner || 'side', 'k-umside': K0.umSide, 'k-umded': K0.umDeduct, 'k-umrec': K0.umRecess, 'k-umshort': K0.umShort, 'k-slb': K0.slideBot, 'k-slt': K0.slideTop };
   var KGROUPS = { carcass: 'Carcass', frame: 'Rails', shelf: 'Shelves', door: 'Doors', drawer: 'Drawers', panel: 'Side panels and fillers' };
   var UTYPES = { base: 'Base unit', sink: 'Sink unit', wall: 'Wall unit', blind: 'Blind corner', cornerL: 'L corner (special)', tall: 'Tall unit', slide: 'Sliding doors, back to back', panel: 'Side panel', filler: 'Filler', gap: 'Gap' };
   var RUN_TYPES = { base: ['base', 'sink', 'blind', 'tall', 'cornerL', 'panel', 'filler', 'gap'], wall: ['wall', 'blind', 'cornerL', 'panel', 'filler', 'gap'], island: ['base', 'slide', 'gap'] };

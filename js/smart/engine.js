@@ -199,7 +199,7 @@
     boxes.forEach(function (b) {
       if (!b.cut) return;
       var key = b.name + '|' + b.cut[0] + 'x' + b.cut[1];
-      if (!rows[key]) { rows[key] = { name: b.name, tag: b.tag, a: b.cut[0], b: b.cut[1], qty: 0, note: b.note, kit: b.kit }; out.push(rows[key]); }
+      if (!rows[key]) { rows[key] = { name: b.name, tag: b.tag, a: b.cut[0], b: b.cut[1], qty: 0, note: b.note, kit: b.kit, finish: b.finish }; out.push(rows[key]); }
       rows[key].qty++;
       if (!rows[key].note && b.note) rows[key].note = b.note;
     });
@@ -551,7 +551,7 @@
         else if (run.noBack) { /* its back is the next unit's side */ }
         else if (u.type !== 'sink') put('Back Panel (screwed on, ' + bt + 'mm)' + lbl, 'carcass', 'back', x, yBot, dC, w, H, bt, ['x', 'y']);
         else warn.push(un + ': sink unit, no back panel (open for the pipes)');
-        if (SI) boxes.filter(function (b) { return b.run === run.name && /^Side Panel/.test(b.name); }).forEach(function (b) { b.note = 'gloss: the sliding doors show it'; });
+        if (SI) boxes.filter(function (b) { return b.run === run.name && /^Side Panel/.test(b.name); }).forEach(function (b) { b.note = 'gloss: the sliding doors show it'; b.finish = 'gloss'; });
         if (run.sidePanels) {   // owner's island drawer unit: gloss panels on both sides, 20 past the carcass so the faces sit between them
           put('Island Side Panel' + lbl, 'panel', '', x - t, yBot, -20, t, H, dC + 20, ['y', 'z'], 'gloss; 20 past the carcass front so the drawer faces sit between the two panels');
           put('Island Side Panel' + lbl, 'panel', '', x + w, yBot, -20, t, H, dC + 20, ['y', 'z']);
@@ -915,6 +915,16 @@
     return { boxes: m.boxes, parts: cutList(m.boxes), clashes: clashes(m.boxes), warnings: m.warnings };
   }
 
-  var api = { SHOP: SHOP, KSHOP: KSHOP, BOARDS: BOARDS, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
+  // Which board a kitchen part is cut from (owner 2026-11-24, the colour split): 'gloss' = what shows (doors, drawer faces,
+  // panels, fillers, covers, and parts marked gloss), 'back' = the thin backs, 'matte' = everything inside.
+  function finishOf(p) {
+    if (p.finish) return p.finish;
+    var n = String(p.name).toLowerCase();
+    if (n.indexOf('back panel') !== -1) return 'back';
+    if (p.tag === 'door' || p.tag === 'panel' || n.indexOf('drawer front') !== -1) return 'gloss';
+    return 'matte';
+  }
+
+  var api = { finishOf: finishOf, SHOP: SHOP, KSHOP: KSHOP, BOARDS: BOARDS, build: build, cutList: cutList, clashes: clashes, forViewer: forViewer, edges: edges };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SmartEngine = api;
 })(typeof window !== 'undefined' ? window : this);
