@@ -401,6 +401,7 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
 .cut-table{width:100%;border-collapse:collapse}
 .cut-table .cut-td{padding:0}
 .cut-thead{display:none}
+.sheet-head-print{display:none}
 @page{size:A4;margin:12mm 10mm 12mm}
 @media print{
   body>*:not(main){display:none!important}
@@ -423,9 +424,9 @@ body{background:var(--clr-bg);font-family:var(--font-body);color:var(--clr-dark)
   .ph2-right{margin-left:auto;text-align:right;font-family:'Roboto Mono',monospace;font-size:7.5pt;color:#333;line-height:1.4}
   .ph2-right b{color:#1f2f58}
   /* Each board colour starts on a fresh page (first group flows at the top). */
-  .grp{break-before:page;page-break-before:always}
-  .grp-first{break-before:auto!important;page-break-before:auto!important}
+  .cut-break{break-before:page;page-break-before:always}
   .grp-skip{display:none!important}
+  .sheet-head-screen{display:none!important}.sheet-head-print{display:block!important}
   /* Multi-list print (My projects → Print all / Print selected): each cut list
      after the first starts on a fresh page; its own thead prints from there. */
   .ml-sheet + .ml-sheet{break-before:page;page-break-before:always}
@@ -2027,12 +2028,15 @@ function buildSheetTable(gs){
   var allowRot = U.grain==='0'||U.grain===0;
   var BL=U.bl,BW=U.bw,kerf=U.kerf;
   var projLbl = (U.projShow && printLabel()) ? ' <span style="color:var(--clr-accent-dk)">· '+esc(printLabel())+'</span>' : '';
-  var body='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
+  var head='<div class="sheet-topbar"><span class="t">Cut Sheet'+projLbl+'</span><span style="font-family:var(--mono);font-size:.64rem;color:var(--clr-muted)">'+U.thick+'mm · board '+BL+'×'+BW+'</span></div>'+
     '<div class="sheet-legend">'+
       '<span>'+legTick+' <b>1 tick</b> = band this edge</span>'+
       '<span>'+legDbl+' <b>3 ticks</b> = double board, then band</span>'+
       '<span>'+legGrain+' <b>grain</b> runs along the length</span>'+
     '</div>';
+  // Each board is its own table, so its printed header (repeated on every page) names that board only
+  // (owner 2026-11-24: a gloss page must never say Matte). The title and legend print once, above the first board printed.
+  var out='<div class="sheet-head-screen">'+head+'</div>', body;
   var pn=0;  // running part number → box fallback label when unnamed (quick-grid mode)
   var firstPrinted=-1; gs.forEach(function(g, gi){ if(firstPrinted<0 && !printSkip[g.code]) firstPrinted=gi; });
   gs.forEach(function(g, gi){
@@ -2045,17 +2049,17 @@ function buildSheetTable(gs){
     var pk=packBoards(items,BL,BW,kerf,allowRot);
     var pcs=items.length;
     var bandM=bandMM/1000;
-    body+='<div class="grp'+(gi===firstPrinted?' grp-first':'')+(printSkip[g.code]?' grp-skip':'')+'" data-code="'+esc(g.code)+'">'+
+    body='<div class="grp" data-code="'+esc(g.code)+'">'+
       '<div class="grp-hd"><span class="grp-code">'+esc(g.code)+'</span>'+
       '<span class="grp-meta"><b>'+pk.count+'</b> board'+(pk.count!==1?'s':'')+' · <b>'+pcs+'</b> pcs · '+U.thick+'mm'+(bandM>0?' · <b>'+bandM.toFixed(1)+' m</b> edge band':'')+'</span></div>'+
       '<div class="eb-grid">';
     g.parts.forEach(function(p){ body+=partBox(p, '#'+(++pn)); });
     body+='</div></div>';
+    // the thead repeats on every printed page (with reserved space), so nothing overlaps the header; hidden on screen
+    out+='<table class="cut-table'+(gi===firstPrinted?' cut-first':' cut-break')+(printSkip[g.code]?' grp-skip':'')+'"><thead class="cut-thead"><tr><th>'+buildPrintHead([g])+'</th></tr></thead>'+
+      '<tbody><tr><td class="cut-td">'+(gi===firstPrinted?'<div class="sheet-head-print">'+head+'</div>':'')+body+'</td></tr></tbody></table>';
   });
-  // Wrap in a table: the thead repeats on every printed page (with reserved space),
-  // so nothing overlaps the header. thead is hidden on screen (preview shows topbar).
-  return '<table class="cut-table"><thead class="cut-thead"><tr><th>'+buildPrintHead(gs)+'</th></tr></thead>'+
-    '<tbody><tr><td class="cut-td">'+body+'</td></tr></tbody></table>';
+  return out;
 }
 function renderSheet(gs){
   var out=document.getElementById('sheetOut');
