@@ -64,7 +64,7 @@ export default {
       { badge: 'Corporate office', place: 'Office kitchen, Labone', img: P + 'labone-office-kitchen/labone-office-kitchen-2.jpg', alt: 'Black wall cabinets, tall unit and sink run, Labone office kitchen', href: '/kitchens#work' },
       { badge: 'Pantry', place: 'Tall pantry cupboards, Bortianor', img: P + 'bortianor/bortianor-pantry.jpg', alt: 'Pantry with tall dark woodgrain cupboards and open shelves', href: '/projects/bortianor' },
       { badge: 'TV wall', place: 'Bedroom TV wall, Bortianor', img: P + 'bortianor/bortianor-master-tv-wall.jpg', alt: 'TV wall in stone-look panels with a walnut-grain cabinet', href: '/tv-units' },
-      { badge: 'Solid hardwood', place: 'Slab dining table', img: P + 'slab-dining-table/slab-dining-table-1.jpg', alt: 'Long solid hardwood slab dining table in a dining room', href: '/dining-living#work' },
+      { badge: 'Solid Hyedua', place: 'Live-edge table, Roman Ridge', img: P + 'roman-ridge-live-edge/live-edge-table-room.jpg', alt: 'Live-edge Hyedua dining table, Roman Ridge, Accra', href: '/dining-living#work' },
       { badge: 'Solid teak', place: 'A whole retreat, Sage Centre', img: P + 'sage-centre/sage-gallery-8.jpg', alt: 'Teak bookcase at the Sage Centre, Wli', href: '/projects/sage-centre' },
     ] },
     { kind: 'faq', title: 'Questions developers ask.', items: [
