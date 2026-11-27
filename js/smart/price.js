@@ -123,20 +123,21 @@
     return { lines: lines, total: total, unpriced: unpriced, boards: pk.count, oversize: pk.oversize, bandM: bandM };
   }
 
-  // "We make and install it" price range: the wardrobe estimator's formula (moved here 2026-11-20 so the
-  // estimator page and the planner share it). Base prices are Neewoody's cost model at the Basic Build tier.
+  // "We make and install it" price range for the wardrobe estimator page. Since 2026-11-27 it starts from
+  // the same per-metre rate the website shows (src/prices.js, wardrobe.from: keep PER_M in step with it),
+  // with a 1.2 m minimum for the fixed set-up and fitting time. The range runs from that price up to +20%.
   var EST = {
-    BASE: { small: 12000, medium: 15500, large: 23000, xlarge: 34000 }, SPREAD: 0.12, H: 2400, D: 600,
+    PER_M: 9000, MIN_W: 1200, SPREAD: 0.20, H: 2400, D: 600,
     TYPE: { hinged: 1.00, sliding: 1.15, open: 0.82 }, DOORS: { 2: 1.00, 3: 1.00, 4: 1.00, 5: 1.05, 6: 1.10 },
     INTERIOR: { basic: 0.90, standard: 1.00, premium: 1.20 }, FINISH: { laminate: 1.00, painted: 1.10, veneer: 1.20, gloss: 1.25 },
     LOCATION: { central: 1.00, outer: 1.08, outside: null }
   };
   function estimate(i) {
     if (i.location === 'outside') return null;
-    var w = i.widthMm, base = w < 1500 ? EST.BASE.small : w < 2500 ? EST.BASE.medium : w < 3500 ? EST.BASE.large : EST.BASE.xlarge;
-    base *= i.heightMm / EST.H; base *= i.depthMm / EST.D;
+    var base = EST.PER_M * Math.max(i.widthMm, EST.MIN_W) / 1000;
+    base *= Math.max(i.heightMm, EST.H) / EST.H; base *= Math.max(i.depthMm, EST.D) / EST.D;
     var mid = base * EST.TYPE[i.type] * (EST.DOORS[i.doors] || (i.doors > 6 ? 1.10 : 1.00)) * EST.INTERIOR[i.interior] * EST.FINISH[i.finish] * EST.LOCATION[i.location];
-    return { low: Math.round(mid * (1 - EST.SPREAD) / 500) * 500, high: Math.round(mid * (1 + EST.SPREAD) / 500) * 500 };
+    return { low: Math.round(mid / 500) * 500, high: Math.round(mid * (1 + EST.SPREAD) / 500) * 500 };
   }
 
   root.WardrobePrice = { PRICES: P, EST: EST, materials: materials, packCount: packCount, estimate: estimate };

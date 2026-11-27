@@ -1,4 +1,5 @@
 // Everything the Kitchens page says, in page order. Layout: src/layouts/ProductPage.astro.
+import { PRICES, ghs } from '../prices.js';
 const P = 'images/projects/';
 export default {
   slug: 'kitchens',
@@ -61,6 +62,7 @@ export default {
       ['Glass and open shelving', 'Aluminium-framed glass cabinets, open shelving runs, and display sections to break up closed cabinetry.'],
       ['Full kitchen fit-outs', 'Design to installation, with every unit, run and detail handled in-house by one team.'],
     ] },
+    { kind: 'prices', title: 'What a kitchen costs.', text: 'Our prices for kitchen units in laminate, by the metre of run. Add up your base and wall units, then any tall units.', items: ['kitchenBase', 'kitchenWall', 'kitchenTall'] },
     { kind: 'gallery', id: 'work', title: 'More kitchens we have built', items: [
       { badge: 'With an island', place: 'Kitchen, Dansoman', img: P + 'dansoman-kitchen/dansoman-kitchen-layout.jpg', alt: 'Large kitchen with central island in cherry-effect laminate, Dansoman, Accra' },
       // Video pilot 2026-11-17: clips trimmed from the owner's library (Video Studio/site-clips/kitchens), each with a cover still
@@ -95,6 +97,7 @@ export default {
       link: ['/projects/nadia-dome', 'View the full commission'] },
     { kind: 'review', quote: 'For your kitchen, wardrobes, TV and all the hardwood works, call him. He’s the best. Seeing is believing.', who: 'Kelly Carl', role: 'Google Local Guide with 53 reviews' },
     { kind: 'faq', title: 'Common questions about custom kitchens.', items: [
+      ['How much does a fitted kitchen cost in Accra?', `Base units start from ${ghs(PRICES.kitchenBase.from)} per metre and wall units from ${ghs(PRICES.kitchenWall.from)} per metre in laminate, made, delivered and installed; tall larders and fridge housings from ${ghs(PRICES.kitchenTall.from)} each. A 3 m run of base and wall units starts at about ${ghs((PRICES.kitchenBase.from + PRICES.kitchenWall.from) * 3)}, before the worktop. We confirm your price after we measure.`],
       ['How long does a kitchen fit-out take?', "A typical kitchen fit-out takes 4 to 8 weeks from order confirmation to installation, covering design, build and installation. Smaller jobs (a few replacement units) can be faster. We'll confirm your timeline at the quote stage."],
       ['Do you supply the countertop too?', 'We supply and fit timber and MDF worktops. For stone, granite, or quartz countertops, we can coordinate with your supplier so everything aligns correctly, or recommend a specialist if needed.'],
       ['Can you work around my existing appliances?', "Yes. We measure your appliances and build precise housings around them. If you're getting new appliances, share the model numbers and dimensions early so we can plan the layout accordingly."],

@@ -1,5 +1,6 @@
 // Everything the wardrobes page says, in page order. Edit words here; layout lives in
 // src/layouts/ProductPage.astro and src/components/page/.
+import { PRICES, ghs } from '../prices.js';
 export default {
   "slug": "wardrobes",
   "path": "/wardrobes",
@@ -94,6 +95,7 @@ export default {
         ]
       ]
     },
+    { "kind": "prices", "title": "What a wardrobe costs.", "text": "Our price for a fitted wardrobe in laminate, by the metre of width. Sliding doors, lighting and special finishes add to it.", "items": ["wardrobe"], "link": ["/wardrobe-estimator", "Work out your wardrobe in the price estimator"] },
     {
       "kind": "gallery",
       "title": "Wardrobes we have built",
@@ -263,6 +265,10 @@ export default {
       "kind": "faq",
       "title": "Common questions about custom wardrobes.",
       "items": [
+        [
+          "How much does a built-in wardrobe cost in Accra?",
+          `Our fitted wardrobes start from ${ghs(PRICES.wardrobe.from)} ${PRICES.wardrobe.unit} in laminate, made, delivered and installed, so a 2.4 m wardrobe starts at about ${ghs(PRICES.wardrobe.from * 2.4)}. Sliding doors, lighting and special finishes add to that. We confirm your price after we measure.`
+        ],
         [
           "How long does it take to build and install a wardrobe?",
           "Most wardrobes take between 5 and 15 working days from deposit to installation, depending on size and complexity. We'll give you a specific timeline when we quote."

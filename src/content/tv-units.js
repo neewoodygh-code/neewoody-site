@@ -1,4 +1,5 @@
 // Everything the TV units page says, in page order. Layout: src/layouts/ProductPage.astro.
+import { PRICES, ghs } from '../prices.js';
 const P = 'images/projects/';
 const BOR = '/projects/bortianor';
 export default {
@@ -40,6 +41,7 @@ export default {
       ['Media consoles and sideboards', 'A lower console with drawers, open equipment bays, and a clean top surface. Works in living rooms and bedrooms alike, and doubles as a display surface.'],
       ['Alcove and recessed builds', 'If your room has an alcove or a recess in the wall, we build a unit that fills it exactly, with no visible side gaps, no awkward overhang. Fully integrated.'],
     ] },
+    { kind: 'prices', title: 'What a TV unit costs.', text: 'Our price for a TV wall unit in laminate, by the metre of width. Wall panelling, lighting and stone add to it.', items: ['tv'] },
     { kind: 'details', title: 'Built to handle everything in your living room.', items: [
       ['Cable management', 'Routed from screen to decoder to wall socket, hidden inside the unit from the start.'],
       ['The right viewing height', 'We calculate the correct screen height based on your seating arrangement and screen size. No neck strain, no awkward tilt.'],
@@ -99,6 +101,7 @@ export default {
       ] },
     { kind: 'statement', text: "A TV unit built to your wall hides the cables, holds your equipment, and centres the screen at exactly the right height. When it's done right, the technology disappears into the room." },
     { kind: 'faq', title: 'Common questions about custom TV units.', items: [
+      ['How much does a custom TV unit cost in Accra?', `Our TV wall units start from ${ghs(PRICES.tv.from)} ${PRICES.tv.unit} in laminate, made, delivered and installed, so a 2 m unit starts at about ${ghs(PRICES.tv.from * 2)}. Full feature walls, lighting and stone add to that. We confirm your price after we measure.`],
       ['How long does it take to build a custom TV unit?', "Most TV units take 2 to 4 weeks from order confirmation to installation. Larger feature wall builds may take up to 6 weeks. We'll give you a realistic timeline when we confirm your order. We'd rather under-promise and deliver early than the reverse."],
       ['Do you handle cable management as part of the build?', "Yes. We plan the cable routes at the design stage. We route cables through the structure of the unit so they're completely hidden. If your wall needs conduit run before the unit is installed, we can advise on that too."],
       ['Can I choose the finish and colour?', "Completely. We work in PVC wrap laminates (hundreds of finishes: wood grain, solid colour, matte, gloss), painted MDF, or veneer. If you want to match an existing wardrobe or kitchen, bring a photo and we'll find the closest match."],

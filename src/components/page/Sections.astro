@@ -4,6 +4,7 @@
 // related (a short row of links to other pages).
 import { Picture } from 'astro:assets';
 import { img } from '../../photos.js';
+import { PRICES, UPDATED, ghs } from '../../prices.js';
 const { kind, d } = Astro.props;
 const items = (kind === 'types' || kind === 'details')
   ? await Promise.all(d.items.map(async ([name, text, photo, alt]: string[]) => ({ name, text, alt, src: photo ? await img(photo) : null })))
@@ -35,6 +36,24 @@ const items = (kind === 'types' || kind === 'details')
         </li>
       ))}
     </ul>
+  </section>
+)}
+
+{kind === 'prices' && (
+  <section class="prices-sec" id={d.id || 'prices'} data-nav="light" aria-labelledby="prices-h">
+    <div class="types-head rv">
+      <h2 id="prices-h" class="display">{d.title}</h2>
+      {d.text && <p>{d.text}</p>}
+    </div>
+    <ul class="prices-list rv">
+      {d.items.map((k: string) => PRICES[k as keyof typeof PRICES]).map((p) => (
+        <li>
+          <div><h3>{p.name}</h3><p>{p.note}</p></div>
+          <p class="p-from">from <b>{ghs(p.from)}</b> {p.unit}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="prices-foot">Laminate, made, delivered in Accra and installed. Prices updated {UPDATED}; we confirm yours after we measure, and site visits in Accra are free.{d.link && <Fragment> <a class="ulink" href={d.link[0]}>{d.link[1]}</a></Fragment>}</p>
   </section>
 )}
 
