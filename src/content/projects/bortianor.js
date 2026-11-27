@@ -69,6 +69,11 @@ export default {
           "alt": "Kitchen island and the sink run with dark veined worktops",
           "cap": "Island and sink run"
         }
+      ],
+      "extra": [
+        { "img": "images/projects/bortianor/bortianor-kitchen-tall.jpg", "alt": "Tall walnut-grain units with built-in ovens beside a double-door fridge" },
+        { "img": "images/projects/bortianor/bortianor-video-kitchen.jpg", "video": "images/projects/bortianor/bortianor-video-kitchen.mp4", "alt": "Video: the finished kitchen" },
+        { "img": "images/projects/bortianor/bortianor-video-kitchen-drawers.jpg", "video": "images/projects/bortianor/bortianor-video-kitchen-drawers.mp4", "alt": "Video: the deep island drawers opening" }
       ]
     },
     {
@@ -94,6 +99,9 @@ export default {
           "alt": "Dark wood gentleman’s bar with open shelves above the counter",
           "cap": "Gentleman’s bar"
         }
+      ],
+      "extra": [
+        { "img": "images/projects/bortianor/bortianor-video-living.jpg", "video": "images/projects/bortianor/bortianor-video-living.mp4", "alt": "Video: the living room TV wall and the bar" }
       ]
     },
     {
@@ -120,6 +128,9 @@ export default {
           "alt": "The master bedroom with the TV wall and the lit wardrobe beyond",
           "cap": "The two together"
         }
+      ],
+      "extra": [
+        { "img": "images/projects/bortianor/bortianor-video-wardrobe-lights.jpg", "video": "images/projects/bortianor/bortianor-video-wardrobe-lights.mp4", "alt": "Video: the lit shelves inside the glass-front wardrobe" }
       ]
     },
     {

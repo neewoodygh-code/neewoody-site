@@ -9,6 +9,9 @@ export const PRICES = {
   kitchenBase: { name: 'Kitchen base units', from: 5800, unit: 'per metre', note: 'On adjustable legs, with doors and drawers. Worktop priced separately.' },
   kitchenWall: { name: 'Kitchen wall units', from: 4000, unit: 'per metre', note: 'Doors and shelves.' },
   kitchenTall: { name: 'Tall larder or fridge housing', from: 5250, unit: 'each', note: '60 cm wide, full height.' },
+  dresser: { name: 'Dresser', from: 8450, unit: 'per metre of width', note: 'Laminate chest of drawers about 80 cm high and 45 cm deep. Mirror not included.' },
+  doorHardwood: { name: 'Hardwood door', from: 6000, unit: 'each', note: 'Solid hardwood door, frame and architrave, supplied and installed. Locks and handles not included.' },
+  doorFlush: { name: 'Flush door', from: 5500, unit: 'each', note: 'Flush door, frame and architrave, supplied and installed. Locks and handles not included.' },
   tv: { name: 'TV wall unit', from: 6750, unit: 'per metre of width', note: 'Floating cabinet with drawers, a panel behind the TV with a hidden cable channel, shelves.' },
 };
 

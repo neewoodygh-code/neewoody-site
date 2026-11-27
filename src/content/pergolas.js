@@ -83,9 +83,10 @@ export default {
           vid('mile7-pergola', 'mile7-pergola-video', 'Video: walking across the terrace under the pergola, Mile 7'),
         ] },
       { badge: 'Shop front', place: 'Shop-front canopy, Adabraka', caption: 'A timber canopy with a roof along the front of a shop.',
-        img: P + 'pergolas/pergolas-video-adabraka-canopy.jpg', alt: 'Timber canopy along a shop front, Adabraka',
+        img: P + 'pergolas/adabraka-canopy-1.jpg', alt: 'Timber canopy along a shop front, Adabraka',
         more: ['A timber canopy along the front of a shop in Adabraka, with roofing sheets over the rafters and a lamp on the corner post.'],
         photos: [
+          { img: P + 'pergolas/adabraka-canopy-1.jpg', alt: 'Timber canopy with posts and rafters along a shop front, Adabraka' },
           vid('pergolas', 'pergolas-video-adabraka-frame', 'Video: putting up the frame of the canopy, Adabraka'),
           vid('pergolas', 'pergolas-video-adabraka-canopy', 'Video: the finished canopy along the shop front, Adabraka'),
         ] },

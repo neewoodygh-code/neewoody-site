@@ -89,7 +89,12 @@ export default {
           { img: P + 'kukurantumi-kitchen/kukurantumi-video-wide.jpg', video: P + 'kukurantumi-kitchen/kukurantumi-video-wide.mp4', alt: 'Video: the whole kitchen from the doorway' },
           { img: P + 'kukurantumi-kitchen/kukurantumi-kitchen-detail.jpg', alt: 'Kukurantumi kitchen, hob, drawers and fridge housing' },
         ] },
-      { badge: 'Corporate office', place: 'Office kitchen, Labone', img: P + 'labone-office-kitchen/labone-office-kitchen.jpg', alt: 'Office kitchen with black units and a white worktop, Labone' },
+      { badge: 'Corporate office', place: 'Office kitchen, Labone', img: P + 'labone-office-kitchen/labone-office-kitchen.jpg', alt: 'Office kitchen with black units and a white worktop, Labone',
+        photos: [
+          { img: P + 'labone-office-kitchen/labone-office-kitchen.jpg', alt: 'Office kitchen with black units and a white worktop, Labone' },
+          { img: P + 'labone-office-kitchen/labone-office-kitchen-2.jpg', alt: 'Black wall cabinets, tall unit and sink run, Labone office kitchen' },
+          { img: P + 'labone-office-kitchen/labone-office-kitchen-video.jpg', video: P + 'labone-office-kitchen/labone-office-kitchen-video.mp4', alt: 'Video: walking through the office kitchen, Labone' },
+        ] },
     ] },
     { kind: 'feature', img: P + 'nadia-dome/nadia-kitchenette-3.jpg', alt: 'Compact kitchenette in russet laminate with dark stone-effect countertop, Dome, Accra',
       label: 'Dome, Accra, 2025', title: 'Studio kitchenette, Nadia Dome',

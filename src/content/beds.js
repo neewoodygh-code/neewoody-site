@@ -45,6 +45,15 @@ export default {
       { badge: 'Solid walnut', place: 'King-size walnut bed, Dansoman', img: P + 'dansoman-walnut-bed/walnut-bed-finished.jpg', alt: 'King-size walnut bed with panelled head and foot boards, Dansoman' },
       { badge: 'Built strong, with wide ledges to sit on', place: 'Floating platform bed, Dansoman', img: P + 'dansoman-floating-bed/floating-bed-finished.jpg', alt: 'Dark floating platform bed with wide ledges and an upholstered headboard, Dansoman' },
       { badge: 'Five deep drawers', place: 'Chest of drawers', img: P + 'chest-of-drawers/chest-closed.jpg', alt: 'Five-drawer chest in a warm woodgrain finish' },
+      { badge: 'Laminate, 2026', place: 'Tall chest of drawers', img: P + 'tall-chest/tall-chest-1.jpg', alt: 'Tall laminate chest of drawers in a warm woodgrain finish',
+        more: ['A tall chest of drawers in a warm woodgrain laminate, with deep drawers that run the full depth of the carcass and plain bar handles.'],
+        photos: [
+          { img: P + 'tall-chest/tall-chest-1.jpg', alt: 'Tall laminate chest of drawers, front' },
+          { img: P + 'tall-chest/tall-chest-2.jpg', alt: 'Tall chest of drawers with the drawers pulled out' },
+          { img: P + 'tall-chest/tall-chest-3.jpg', alt: 'Tall chest of drawers, angle view' },
+          { img: P + 'tall-chest/tall-chest-4.jpg', alt: 'Tall chest of drawers with the two lower drawers open' },
+          { img: P + 'tall-chest/tall-chest-video.jpg', video: P + 'tall-chest/tall-chest-video.mp4', alt: 'Video: opening the drawers of the tall chest' },
+        ] },
       { badge: 'Solid wood', place: 'Four-poster bed, Ridge', img: P + 'ridge-fourposter/ridge-fourposter-overview.jpg', alt: 'Custom solid wood four-poster bed with slatted headboard, installed at a private residence in Ridge, Accra' },
       { badge: 'Storage bed', place: 'Storage bed with upper cabinet, Golf Hills', img: P + 'golf-hills-bed/golf-hills-bed-overview.jpg', alt: 'Custom storage bed with under-bed drawers and wall-mounted upper cabinet, Golf Hills, Accra',
         photos: [
